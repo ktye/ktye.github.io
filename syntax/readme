@@ -5,8 +5,3 @@
 # https://github.com/llelf/kiss
 # https://github.com/kparc/kprs
 # https://github.com/ktye/i
-
-# update (k.wasm with github.com/ktye/i/_/w)
-w < /c/k/i/k.w > k.wasm
-date "+%Y.%m.%d" > h
-awk '/^\\/{x=1;next}{if(x)print}' /c/k/i/k.w >> h

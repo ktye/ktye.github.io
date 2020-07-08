@@ -1,4 +1,4 @@
-2020.07.07
+2020.07.08
 01234567   xt:x>>29       xn:x&536870911 (-1+1<<29)
 Fcifzsld   xt~0(function) x<256(basic) x<128(dyadic)
 4148x444   xn~2(derived)  adv  verb

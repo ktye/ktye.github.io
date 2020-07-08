@@ -3,7 +3,7 @@ var K
 
 (async () => {
  const cons = document.getElementById('console');
- var help = ""; fetch('h').then(r=>{return r.text()}).then(s=>{help=s})
+ var help = ""; fetch('../h').then(r=>{return r.text()}).then(s=>{help=s})
 
  // k.wasm module
  var O = function(s) {codeEditor.replaceRange(s, {line:codeEditor.lineCount()})}
