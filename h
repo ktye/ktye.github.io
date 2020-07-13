@@ -1,9 +1,9 @@
-2020.07.08
+2020.07.13
 01234567   xt:x>>29       xn:x&536870911 (-1+1<<29)
 Fcifzsld   xt~0(function) x<256(basic) x<128(dyadic)
 4148x444   xn~2(derived)  adv  verb
-	   xn~3(proj)     verb argv empty-index
-	   xn~4(lambda)   str  tree args arity
+           xn~3(proj)     verb argv empty-index
+           xn~4(lambda)   str  tree args arity
 
 +  add abx                 abs:+z              memory
 -  sub neg                                     0..  7   type sizes   0 1 4 8 16 4 4 0
@@ -20,14 +20,14 @@ Fcifzsld   xt~0(function) x<256(basic) x<128(dyadic)
 ^  exc asc                                   156..159   
 $  str cst   sc cs                           160..255   char map az|AZ|NM|VB|AD|TE
 #  rsh cnt   take                            256.....   buckets/heap
-_  drp flr   drop          re:_z            
+_  drp flr   drop          re:_z
 ?  fnd unq   fnd fnx                         (:;`x;y)          assign      x:y
 @  atx typ                 z:abs@ang  z@ang  (+;(`x;a;b;c);y)  assign(m/i) s[a;b;c]+:y
-.  cal val                 im:. z            (;a;b;c)   (*128) sequence    a;b;c      ::x(last) 
-                                             ((/;+);1 2 3)     adverbs     +/1 2 3  :[x;y](dex)                 
-+'x  ech(168)      x+'y  ecd(40)        x'y  bin            b:A/x  x:A\b  qr:A\0   x:qr\b  (fz)    
-+/x  ovr(251),fxp  x+/y  ecr(123),n/whl x/y  mod,mmul(L)?     
-+\x  scn(219),fxp  x+\y  ecl(91),n/whl  x\y  y%x,solve(L)?  \(help)  \\(exit) \d(dump) \w(k.ws)
+.  cal val                 im:. z            (;a;b;c)   (*128) sequence    a;b;c      ::x(last)
+                                             ((/;+);1 2 3)     adverbs     +/1 2 3  :[x;y](dex)
++'x  ech(168)      x+'y  ecd(40)        x'y  bin
++/x  ovr(251),fxp  x+/y  ecr(123),n/whl x/y  mod
++\x  scn(219),fxp  x+\y  ecl(91),n/whl  x\y  y%x            \(help)  \\(exit) \d(dump) \w(k.ws)
 +':x ecp(169)      x+':y epi(41)        x':y win?           \c(clear console)       
 +/:x ?(253)        x+/:y ovi(125)       x/:y join           \L100 F  (loop F[ui] with delay ms)
 +\:x ?(221)        x+\:y sci(93)        x\:y split          \e(edit)  \eFILE  \e`VAR (ESC quit) 
