@@ -1,6 +1,7 @@
 /listbox-ui example application
 /run as: http://ktye.github.io/example
 
+path:,`
 tags:{"List Dict Text Monad Nilad | About"}
 drop:{}
 
@@ -18,8 +19,7 @@ application source: ktye.github.io/example.k
 listbox source    : ktye.github.io/listbox.html
 "
 
-
-disp:{k: 'k;ke: 'k';((k;{x};ke;ke;ke;ke;tochar';tdict)@@x)x}
+disp:{ \(`path;path);k: 'k;ke: 'k';((k;{x};ke;ke;ke;ke;tochar';tdict)@@x)x}
 /disp:   {t:@x;(_10)/:$[t~6;tochar'x;t~7;tabdict x; 'kx]}
 rpad:   {y#x,(y-#x)#" "}
 tdict:{k:$!x;pad:rpad[;|/#'k]; ((pad'k),'"|"),' 'k'.x}
