@@ -1,102 +1,109 @@
-<head><meta charset="utf-8"><title>k.w</title></head>
+<head><meta charset="utf-8"><title>listbox</title></head>
 <link rel='icon' type'image/png' href="k32.png">
-<link rel="stylesheet" href="codemirror/codemirror.min.css">
 <style>
- html,body{height:100%;margin:0;padding:0;overflow:hidden;display:flex;flex-flow:column;}
- #tags{flex: 0 1 auto;background:#ffffea;font-family:monospace;border:none;border-bottom:1px solid black;}
- #list{flex: 1 1 auto;background:#ffffea;font-family:monospace;border:none;}
- #canv{flex: 1 1 auto;background:#777777;display:none;}
- .CodeMirror{flex: 1 1 auto;background:#ffffea;display:none;}
+ html,body{min-height:100vh;margin:0;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+ #tags{flex: 0 1 auto;background:#ffffea;font-family:monospace;font-size:100%;border:none;border-bottom:1px solid black;}
+ #list{flex: 1 1 auto;background:#ffffea;font-family:monospace;font-size:100%;border:none;}
+ #area{flex: 1 1 auto;background:#ffffea;font-family:monospace;font-size:100%;display:none;margin:0;border:1px solid blue;}
+ #canv{width:0;height:0;}#dl{display:none;}
 </style>
-<input    id="tags"/>
+<input    id="tags" >
+<canvas   id="canv" ></canvas>
 <select   id="list" multiple></select>
 <textarea id="area" wrap="off" spellcheck="false"></textarea>
-<canvas   id="canv"/>
-<a        id="save"/>
-<script src="codemirror/jquery.min.js"></script>
-<script src="codemirror/codemirror.min.js"></script>
+<a        id="dl"></a>
 <script>
-var edit=CodeMirror.fromTextArea(area,{})
-var ediv=edit.getWrapperElement()
-function display(x){[list,canv,ediv].forEach(i=>i.style.display="none");x.style.display="block";if(x==ediv)edit.refresh()}
+function ge(x){return document.getElementById(x)}
+function display(x,e){[list,area].forEach(i=>i.style.display="none");x.style.display="block"}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 
-var path=[""]
 var hist=[""];function addhist(x){if(!hist.includes(x))hist.unshift(x)};function gethist(x){if(x)hist.unshift(hist.pop());else hist.push(hist.shift());tags.value=hist[0]}
 tags.onkeydown = function(e){var k=e.which;
  if(k==13){var s=tags.value.substring(tags.selectionStart,tags.selectionEnd);
   if(s.length==0){s=tags.value;addhist(s);tags.value=""};
   if(s.length==0)return start()
-  EO(" "+s+"\n"+execute(s))
+  EO(" "+s+"\n"+repl(s))
  }
- if(k==38){gethist(true)}if(k==40){gethist(false)} }
-tags.ondblclick = function(e){exec(tags.value.substring(tags.selectionStart,tags.selectionEnd).trim())}
+ if(k==38){gethist(false)}if(k==40){gethist(true)} }
+tags.ondblclick = function(e,s){s=tags.value.substring(tags.selectionStart,tags.selectionEnd).trim();return(s=="ok")?ok(area.value):exec(s)}
 canv.tabIndex=100;canv.onkeydown=function(e){if(e.which==27)display(list)}
 
+var prog=decodeURIComponent(window.location.hash.substr(1));var pos=prog.lastIndexOf(".");var ws=prog.substr(0,pos<0?prog.length:pos)+".ws"
+document.body.onkeydown = function(e){if(e.which==27){back()}}
+list.onkeydown    = function(e){if(e.which==13){pd(e);push()}}
+list.ondblclick   = function(e){pd(e);push()}
+// save.onclick      = function(e,b){b=new Blob([K.C.slice(0,1<<K.U[32])],{type:"application/octet-stream"});dl.href=URL.createObjectURL(b);dl.download=ws;dl.click()}
+
 function start(){
- var t=1<<K.I[32];var f=0;var s=8;var u;for(var i=4;i<32;i++){s=2*s;for(var u=K.I[i];u!=0;u=K.I[u>>>2])f+=s}
+ var t=1<<K.U[32];var f=0;var s=8;var u;for(var i=4;i<32;i++){s=2*s;for(var u=K.U[i];u!=0;u=K.U[u>>>2])f+=s}
  EO(ver+" "+String(t-f)+"/"+String(t)) // used/total
 }
-function load(s){fetch(s).then(r=>{return r.text()}).then(s=>{EO(execute(strip(s)));stag()})}
-function strip(s){return s.split("\n\\")[0]}
-var prog=decodeURIComponent(window.location.hash.substr(1))
+function load(s){document.title=s;fetch(s).then(r=>{return r.text()}).then(s=>{EO(repl(stripDoc(s)));tag()})}
+function stripDoc(s){return s.split("\n\\")[0]}
 
 // k.wasm module
-var ver = "k.w "
-var hlp = ""; fetch('h').then(r=>{return r.text()}).then(s=>{hlp=s;ver+=s.split("\n")[0];EO(ver)})
-var src = ""; fetch('s').then(r=>{return r.text()}).then(s=>{src=s})
-var EO = function(s) {edit.doc.setValue(s);display(ediv)}
-var draw = function(w,h,p) { console.log("draw: nyi") }
-var grow = function(x) {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cur){var a=(1<<x)-cur;K.exports.mem.grow(a>>>16); msl()};return x}
-var printc = function(x,y){O(su(K.C.slice(x,x+y))+"\n")}
-var msl = function(){var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
-var nn, tp, dx, mk, sc, val, kst, lup, atx, lcat, bak
-WebAssembly.instantiateStreaming(fetch('k.wasm'), { "ext": {"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }).then(r=>{
+var ver   = "k.w "
+var hlp   = ""; fetch('h').then(r=>{return r.text()}).then(s=>{hlp=s;ver+=s.split("\n")[0];EO(ver)})
+var src   = ""; fetch('s').then(r=>{return r.text()}).then(s=>{src=s})
+var draw  = function(w,h,p){return drw(w,h,p)}
+var ctx   = canv.getContext('2d')
+var grow  = function(x)    {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cur){var a=(1<<x)-cur;K.exports.mem.grow(a>>>16); msl()};return x}
+var printc= function(x,y)  {EO(su(K.C.slice(x,x+y))+"\n")}
+var msl   = function()     {var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
+var nn, tp, dx, mk, sc, val, kst, bak
+WebAssembly.instantiateStreaming(fetch('k.wasm'),{"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }).then(r=>{
  K=r.instance;msl();K.exports.ini(16);bak=K.C.slice(0)
- nn=K.exports.nn;tp=K.exports.tp;dx=K.exports.dx;mk=K.exports.mk;sc=K.exports.sc;val=K.exports.val;kst=K.exports.kst;lup=K.exports.lup;atx=K.exports.atx;lcat=K.exports.lcat
- if(prog.length>0)load(prog)
+ nn=K.exports.nn;tp=K.exports.tp;dx=K.exports.dx;rx=K.exports.rx;mk=K.exports.mk;sc=K.exports.sc;val=K.exports.val;kst=K.exports.kst
+ EO(repl(listbox));if(prog.length>0)load(prog)
 });
 
-function execute(x) {var t=x.trim();if(t.length==0)return;if(t==="\\")return hlp;x=ktry(x);return (x<0)?"!":sk(kst(x))}
-function us(s) { return new TextEncoder("utf-8").encode(s) }
-function su(u) { return (u.length) ? new TextDecoder("utf-8").decode(u) : "" }
-function sk(x) { if(tp(x)!=1){dx(x);return""};var n=nn(x);dx(x);return su(K.C.slice(8+x, 8+x+n))}
-function lk(s) { return lup(sc(cstr(s)),0) }
-function cstr(s) { var u=us(s);var x=mk(1,u.length);K.C.set(u,8+x);return x }
-function ktry(s) {
- try     {var x = val(cstr(s)); bak = K.C.slice(0, 1<<K.U[32]);return x}
+function us(s  ){return new TextEncoder("utf-8").encode(s)}
+function su(u  ){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function sk(x  ){if(x<0)return"!";if(tp(x)!=1){dx(x);return""};var n=nn(x);dx(x);return su(K.C.slice(8+x, 8+x+n))}
+function cu(u  ){var x=mk(1,u.length);K.C.set(u,8+x);return x}
+function sy(s  ){return sc(cu(us(s)))}
+function lo(x,n){n=x.length;var l=mk(6,n);for(var i=0;i<n;i++)K.U[2+i+(l>>>2)]=x[i];return l}
+function Rx(x  ){rx(x);return x}
+function ktry(s){
+ try     {var x=val(cu(us(s))); bak=K.C.slice(0, 1<<K.U[32]);return x}
  catch(e){console.log(e);K.C.set(bak);return -1}}
-function trycall(f,x){try{var x=atx(f,x);bak=K.C.slice(0, 1<<K.U[32]);return x}catch{K.C.set(bak);return 0}}
 
-// Exec tag(word) on double click:
-// - lookup global var, if:
-//  - value: disp value
-//  - func: call f[path] (nilad/monad)
-function exec(s){if(s.length==0)return;var x=lk(s);if(!x){EO("!"+s);return};disp(call(x));path=[s];stag()}
-function stag(){tags.value=sk(trycall(lk("tags"),kpath()))}
-function call(x){if(tp(x))return x;return trycall(x,kpath())}
-function kpath(){var x=mk(6,0);for(var i=0;i<path.length;i++)x=lcat(x,kj(path[i]));return x}
-function disp(x){var x=(trycall(lk("disp"),x));if(tp(x)==1)EO(sk(x));else{LO(x);dx(x)}}
-function LO(x){setList(jk(x))}
-// if(s=="draw"){display(draw)}
-// if(s=="list"){display(list)}
-// if(s=="edit"){display(ediv)}
+function repl(x,t){t=x.trim();if(t.length==0)return;if(t==="\\")return hlp;x=ktry(x);return (x<0)?"!":sk(tp(x)==1?x:kst(x))} // press enter on the tag bar
+function exec(x  ){disp(ktry("exec`"+x));tag()}                                                                              // double-click a word in the tag bar
+function push(x  ){disp(ktry("push "+sel()));tag()}                                                                          // double click on list entry or press enter(multiple selections)
+function back(x  ){disp(ktry("back[]"));canv.style.height=0;tag()}                                                           // go backwards(upwards) one level on ESC key
+function disp(x,t){if(x<=0)return EO((x<0)?"!":"");t=tp(x);if(t==1)EO(sk(x));if(t==6)LO(x)}                                  // display result in a listbox or the editor
+function ok(x,r){r=ktry("ok@"+x);if(r==0)back();else disp(r)}                                                                // "ok" clicked when editing a variable
 
+function jk(x,r,p){if(tp(x)!=6)return (tp(x)==1)?sk(x):"!!";r=[];p=(8+x)>>>2;for(var i=0;i<nn(x);i++)r.push(sk(Rx(K.U[p+i])));dx(x);return r} // jk expects "abc" or ("abc";"def")
+function EO(s){area.value=s;display(area)}
+function LO(x){x=jk(x);clr();for(var i=0;i<x.length;i++){var o=document.createElement("option");o.text=x[i];o.innerHTML=nbsp(o.innerHTML);list.add(o)};display(list)}
+function nbsp(x){return x.split(" ").join("&nbsp;")}
+function clr(n){n=list.options.length;for(var i=n-1;i>=0;i--)list.options[i]=null;}
+function sel(s){s=Array.from(list.selectedOptions).map(v=>v.index).join(" ");return(s=="")?"()":s}
+function tag(r){tags.value=sk(ktry("tag path"))}
 
-function kj(x){if(typeof x==="string")return sc(cstr(x));
- if(typeof x==="number"){var r=mk(2,1);K.I[2+(r>>>2)]=x;return r};
- if(typeof x==="object"){var r=mk(2,x.length);for(var i=0;i<x.length;i++)K.I[2+i+(r>>>2)]=kj(x[i]);return r}
- return 0;}
-function jk(x){
- var n=nn(x);var r=[];var atom=function(x){return(x.length==1)?x[0]:x}
- switch(tp(x)){
- case 1:  r=su(K.C.slice(8+x,8+x+n));                           break
- case 6:  x=(8+x)>>>2;for(var i=0;i<n;i++)r.push(jk(K.I[x+i])); break
- default: r="unknown?"+tp(x)
- };       return r
-}
+// drop file (replace *.ws, exec *.k, or call drop[name;bytes])
+window.ondragover=function(e){pd(e)}
+window.ondrop    =function(e){pd(e);if(e.dataTransfer.items){for(var i=0;i<e.dataTransfer.items.length;i++){if(e.dataTransfer.items[i].kind=='file'){var file=e.dataTransfer.items[i].getAsFile();addfile(file)}}}else for(vari=0;i<e.dataTransfer.files.length;i++)addfile(e.dataTransfer.files[i])}
+function addfile(x){var r = new FileReader();r.onload=function(){var u=new Uint8Array(r.result)
+       if(x.name.endsWith(".ws")){var s=K.U[32];while((1<<s)<u.length)s++;grow(s);K.C.set(u);bak=K.C.slice(0,1<<K.U[32]);EO("↑"+x.name)}
+  else if(x.name.endsWith(".k" )){EO("."+x.name+"\n"+repl(stripDoc(su(u))))}
+  else{disp(val(lo([sy("drop"),lo([sy(x.name)]),cu(u)])))} //may not fail
+ };r.readAsArrayBuffer(x)}
+ 
+function drw(w,h,x){imgSize(w,h)
+ if(tp(x)==2){           //blit pixels
+  var p=8+x;var u=new Uint8ClampedArray(K.C.slice(p,p+4*w*h));var d=new ImageData(u,w,h)
+  for(var i=3;i<d.data.length;i+=4)d.data[i]=255;ctx.putImageData(d,0,0)
+ }else if(tp(x)==7){     //canvas api calls
+  x=(8+x)>>>2;var k=K.I[x];var v=K.I[1+x];
+  for(var i=0;i<nn(k);i++){rx(k);rx(v);var s=jk(cs(atx(k,mki(i))));var a=jk(atx(v,mki(i)));if(typeof(ctx[s])==="function")ctx[s](...a);else ctx[s]=a}}}
+function imgSize(w,h){canv.style.width=w;canv.style.height=h;canv.width=w;canv.height=h}
 
-function clrList() {var n=list.options.length;for(var i=n-1;i>=0;i--)list.options[i]=null;}
-function setList(x){clrList();for(var i=0;i<x.length;i++){var o=document.createElement("option");o.text=x[i];list.add(o)};display(list)}
-
+ 
+var listbox = `
+"todo: copy header of example.k here"
+`
+function logg(x){console.log(x);return x}
 </script><body></body></html>

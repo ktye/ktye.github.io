@@ -1,4 +1,4 @@
-2020.08.01
+2020.08.25
 01234567   xt:x>>29      xt~0(function)  x<256(basic) x<128(dyadic)
 Fcifzsld   xn:x&^7<<29   xn~2(derived)   adv  verb
 4148x444                 xn~3(proj)      verb argv empty-index             
