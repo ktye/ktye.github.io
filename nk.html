@@ -1,0 +1,69 @@
+<head><meta charset="utf-8"><title>w</title></head>
+<link rel='icon' type'image/png' href="k32.png">
+<style>
+ html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}
+ .term{width:100%;height:45%;background:black;color:white}
+ #iline{width:100%}
+</style>
+<body>
+<input    id="iline" autofocus></input><br>
+<textarea id="nterm" class="term" wrap="off" readonly spellcheck="false"></textarea><br>
+<textarea id="kterm" class="term" wrap="off" readonly spellcheck="false"></textarea><br>
+<script>
+var iline = document.getElementById("iline")
+var nterm = document.getElementById("nterm")
+var kterm = document.getElementById("kterm")
+iline.onchange = function(e) {
+ var s = iline.value
+ KO(" "+s+"\n");NO(" "+s+"\n");
+ var s = ktry(s)
+ if(s.length) s += "\n"
+ s = KO(s)
+ S = iline.value
+ N.rep()
+ iline.value="";iline.placeholder=""
+}
+iline.placeholder = "+/1 2 3"
+iline.value = ""
+nterm.value = "ngn/k\n"
+kterm.value = "ktye/k\n"
+
+function KO(s){kterm.value += s;kterm.scrollTo(0,kterm.scrollHeight)}
+function NO(s){nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function cu(u){var x=mk(1,u.length);K.C.set(u,8+x);return x}
+function sk(x){var n=nn(x);var s=su(K.C.slice(x+8,x+8+n));dx(x);return s}
+
+// ktye wasm module
+var K
+var draw  = function(w,h,p){}
+var grow  = function(x)    {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cur){var a=(1<<x)-cur;K.exports.mem.grow(a>>>16); msl()};return x}
+var printc= function(x,y)  {KO(su(K.C.slice(x,x+y)))}
+var msl   = function()     {var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
+var nn, tp, dx, mk, sc, val, kst, bak
+WebAssembly.instantiateStreaming(fetch('k.wasm'),{"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }).then(r=>{
+ K=r.instance;msl();K.exports.ini(16);bak=K.C.slice(0)
+ nn=K.exports.nn;tp=K.exports.tp;dx=K.exports.dx;rx=K.exports.rx;mk=K.exports.mk;sc=K.exports.sc;val=K.exports.val;kst=K.exports.kst
+});
+function ktry(s){
+ try     {var x=sk(kst(val(cu(us(s))))); bak=K.C.slice(0, 1<<K.U[32]);return x}
+ catch(e){K.C.set(bak);return "!\n"}}
+
+// ngn wasm module
+var N
+var S = ""
+var te = new TextEncoder('utf-8')
+var td = new TextDecoder('utf-8')
+var NM, H
+function read(_,a,n){let s=S+'\n';S='';return te.encodeInto(s,NM.subarray(a,a+n)).written}
+function write(_,a,n){NO(td.decode(NM.subarray(a,a+n)));return n}
+function mmap(_,n){H+=n;if(H>NM.length){N.memory.grow((H-NM.length-1>>>16)+1);uM()}return H-n}
+function O(){return 0}
+WebAssembly.instantiateStreaming(fetch('ngn.wasm'),{env:{read,write,mmap,munmap:O,exit:O,hop:O,hcl:O,now:O,u0c:O,u1c:O,cmd:O,v0c:O,v1c:O,frk:O}})
+ .then(x=>{N=x.instance.exports;NM=new Uint8Array(N.memory.buffer);H=N.__heap_base;N.init()})
+
+</script>
+</body>
+</html>
+
