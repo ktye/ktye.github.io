@@ -2,8 +2,8 @@
 <link rel='icon' type'image/png' href="k32.png">
 <style>
  html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}table{position:absolute;width:100%;height:100%;border-collapse:collapse;}td{width:50%;}
- .term{width:100%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
- textarea:focus{color:white;}
+ textarea{top:0;left:0;width:100%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
+ textarea:focus{color:white;}.hold{background:#666666}
 </style>
 <body>
 <table><tr>
@@ -19,26 +19,29 @@ var kterm = document.getElementById("kterm")
 var oterm = document.getElementById("oterm")
 var sterm = document.getElementById("sterm")
 var terms = [nterm, kterm, oterm, sterm]
-kd = function(e){var N="\n";var t=e.srcElement;if(e.which===13){pd(e);
- let s=t.value,p=t.selectionStart,q=t.selectionEnd
- if(p===q){p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1}else{t.value+=s.slice(p,q)}
- S=s.slice(p,q);exec(S,t)}
+function kd(e){var N="\n";var t=e.srcElement;
+ if(e.which===27){pd(e);if(t.hold){t.className="";t.selectionStart=t.hold;t.hold=0}else{t.hold=t.selectionStart;t.className="hold"}}
+ if(e.which===13&&!t.hold){pd(e);let s=t.value,p=t.selectionStart,q=t.selectionEnd;if(p===q){p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1}else{t.value+=s.slice(p,q)}S=s.slice(p,q);exec(S,t)}
 }
-for(var i=0;i<terms.length;i++) terms[i].onkeydown = kd;
+function dbl(e){var t=e.srcElement;t.full=!t.full;t.style.position=t.full?"absolute":""}
+function out(t,s){return function(s){t.value+=s;t.scrollTo(0,t.scrollHeight)}}
+for(var i=0;i<terms.length;i++){var t=terms[i];t.onkeydown=kd;t.ondblclick=dbl;t.O=out(t);t.hold=0}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function exec(s,t) {s=s.trim();
+ terms=t.full?[t]:[nterm,kterm,oterm,sterm]
  if(s=="clear"){nterm.value=kterm.value=oterm.value=sterm.value=" ";return}
  if((s=="\\")||(s=="\\h")){for(var i=0;i<terms.length;i++){var t=terms[i];t.value+="\n"+t.help+"\n ";t.scrollTo(0,t.scrollHeight)};return}
- for(var i=0;i<terms.length;i++){if(t!=terms[i])terms[i].value+=s}
- var o = ktry(s); KO(o.length?"\n"+o+"\n ":"\n ");
- NO("\n");S=S.replaceAll("\n",";");N.rep();NO(" ")
- OO("\n");okrep(s)
- SO(srep(s))
+ for(var i=0;i<terms.length;i++){if(t!=terms[i])terms[i].value+=s;terms[i].exec(s)}
 }
 nterm.value = "ngn\n "
 kterm.value = "ktye\n "
 oterm.value = "oK\n "
 sterm.value = "nyi\n "
+
+nterm.exec = function(s){nterm.value+="\n";S=S.replaceAll("\n",";");N.rep();nterm.O(" ")}
+kterm.exec = function(s){var s=ktry(s);kterm.O(s.length?"\n"+s+"\n ":"\n ")}
+oterm.exec = function(s){oterm.value+="\n";try{s=format(run(parse(s),env));s=s.length?s+"\n ":s}catch(e){s=e.message+"\n"}oterm.O(s)}
+sterm.exec = function(s){sterm.O("\nnyi\n ")}
 
 function KO(s){kterm.value += s;kterm.scrollTo(0,kterm.scrollHeight)}
 function NO(s){nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
@@ -79,10 +82,6 @@ WebAssembly.instantiateStreaming(fetch('ngn.wasm'),{env:{read,write,mmap,munmap:
  
 // ok
 var env = baseEnv()
-function okrep(s){try{var s=format(run(parse(s),env));OO(s.length?s+"\n ":s);}catch(e){OO(e.message)+"\n"}}
-
-// nyi
-function srep(s) { return "\nnyi\n " }
 
 kterm.help = ""; fetch('h').then(r=>{return r.text()}).then(s=>{kterm.help=s})
 
