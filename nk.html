@@ -1,47 +1,49 @@
 <head><meta charset="utf-8"><title>w</title></head>
 <link rel='icon' type'image/png' href="k32.png">
 <style>
- html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}table{width:100%;height:100%;border-collapse:collapse;}td{width:50%;height:50%;}tr{height:50%}
- .term{width:100%;height:100%;background:black;color:white;border:none;}
- #iline{width:100%}
+ html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}table{position:absolute;width:100%;height:100%;border-collapse:collapse;}td{width:50%;}
+ .term{width:100%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
+ textarea:focus{color:white;}
 </style>
 <body>
-<input    id="iline" autofocus></input><br>
 <table><tr>
-<td><textarea id="nterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td>
-<td><textarea id="kterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td></tr><tr>
-<td><textarea id="oterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td>
-<td><textarea id="sterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td>
+<td><textarea id="nterm" class="term" wrap="off" spellcheck="false"></textarea></td>
+<td><textarea id="kterm" class="term" wrap="off" spellcheck="false"></textarea></td></tr><tr>
+<td><textarea id="oterm" class="term" wrap="off" spellcheck="false"></textarea></td>
+<td><textarea id="sterm" class="term" wrap="off" spellcheck="false"></textarea></td>
 </tr></table>
 <script src="oK.js"></script>
 <script>
-var iline = document.getElementById("iline")
 var nterm = document.getElementById("nterm")
 var kterm = document.getElementById("kterm")
 var oterm = document.getElementById("oterm")
 var sterm = document.getElementById("sterm")
-iline.onchange = function(e) {
- var s = iline.value
- if(s=="clear"){iline.value=nterm.value=kterm.value=oterm.value=sterm.value="";return}
- KO(" "+s+"\n");NO(" "+s+"\n");OO(" "+s+"\n");
- var s = ktry(s)
- if(s.length) s += "\n"
- s = KO(s)
- S = iline.value
- N.rep()
- okrep(iline.value)
- iline.value="";iline.placeholder=""
+var terms = [nterm, kterm, oterm, sterm]
+kd = function(e){var N="\n";var t=e.srcElement;if(e.which===13){pd(e);
+ let s=t.value,p=t.selectionStart,q=t.selectionEnd
+ if(p===q){p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1}else{t.value+=s.slice(p,q)}
+ S=s.slice(p,q);exec(S,t)}
 }
-iline.placeholder = "+/1 2 3"
-iline.value = ""
-nterm.value = "ngn/k\n"
-kterm.value = "ktye/k\n"
-oterm.value = "oK\n"
-sterm.value = "nyi"
+for(var i=0;i<terms.length;i++) terms[i].onkeydown = kd;
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function exec(s,t) {s=s.trim();
+ if(s=="clear"){nterm.value=kterm.value=oterm.value=sterm.value=" ";return}
+ if((s=="\\")||(s=="\\h")){for(var i=0;i<terms.length;i++){var t=terms[i];t.value+="\n"+t.help+"\n ";t.scrollTo(0,t.scrollHeight)};return}
+ for(var i=0;i<terms.length;i++){if(t!=terms[i])terms[i].value+=s}
+ var o = ktry(s); KO(o.length?"\n"+o+"\n ":"\n ");
+ NO("\n");S=S.replaceAll("\n",";");N.rep();NO(" ")
+ OO("\n");okrep(s)
+ SO(srep(s))
+}
+nterm.value = "ngn\n "
+kterm.value = "ktye\n "
+oterm.value = "oK\n "
+sterm.value = "nyi\n "
 
 function KO(s){kterm.value += s;kterm.scrollTo(0,kterm.scrollHeight)}
 function NO(s){nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
 function OO(s){oterm.value += s;oterm.scrollTo(0,oterm.scrollHeight)}
+function SO(s){sterm.value += s;sterm.scrollTo(0,sterm.scrollHeight)}
 function us(s){return new TextEncoder("utf-8").encode(s)}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function cu(u){var x=mk(1,u.length);K.C.set(u,8+x);return x}
@@ -77,7 +79,66 @@ WebAssembly.instantiateStreaming(fetch('ngn.wasm'),{env:{read,write,mmap,munmap:
  
 // ok
 var env = baseEnv()
-function okrep(s){try{OO(format(run(parse(s),env))+"\n");}catch(e){OO(e.message)+"\n"}}
+function okrep(s){try{var s=format(run(parse(s),env));OO(s.length?s+"\n ":s);}catch(e){OO(e.message)+"\n"}}
+
+// nyi
+function srep(s) { return "\nnyi\n " }
+
+kterm.help = ""; fetch('h').then(r=>{return r.text()}).then(s=>{kterm.help=s})
+
+nterm.help = [": assign   RETURN     ' each|slide|bin",
+   "+ add      transpose  / fold|join |dec  /      comment",
+   "- subtract negate     \\ scan|split|enc  \\      exit",
+   "* multiply first     ': eachprior       \\t:n x time",
+   "% divide   sqrt      /: eachright       \\l a.k load",
+   "! mod|dict enum|key  \\: eachleft        \\w     workspace",
+   "& min|and  where                        \\cmd   system",
+   "| max|or   reverse                      a \\b   trace",
+   "< less     asc       0: lines i/o",
+   "> more     desc      1: bytes i/o          !n enum",
+   "= equal    group                           !N odometer",
+   "~ match    not                            n?x draw",
+   ", concat   enlist                        -n?x deal",
+   "^ fill|w/o null?                           =n unitmatrix",
+   "# reshape  length                        `p@s parse",
+   "_ drop|cut floor                         `k@x fmt",
+   "$ cast     string    $[c;t;f] COND       `j?s json",
+   "? find|rnd uniq                          `t[] time",
+   "@ apply(1) type      @[x;i;[f;]y] amend  `e[] printerror",
+   ". apply(n) eval      .[x;i;[f;]y] drill  `x@(argv;in) fork"].join("\n")
+   
+oterm.help = `oK has atom, list (2;\`c), dict \`a\`b!(2;\`c) and func {[x;y]x+y}
+20 primitives/verbs, 6 operators/adverbs and 3 system functions
+
+Verb       (unary)    Adverb             Noun         (null)
+: gets                '  each            name  \`a\`b    \`
++ plus      flip      /  over|join       char  "ab"    " "
+- minus     negate    \\  scan|split      num   2 .3    0N(nan) 0w(inf)
+* times     first     ': eachprior       hex   0x2a2b
+% divide    sqrt      /: eachright       bool  01000b
+! mod|map   enum|key  \\: eachleft
+& min|and   where
+| max|or    reverse   System             list (2;3.4;\`ab)
+< less      asc       0: url r/w(line)   dict \`a\`b!(2;\`c)
+> more      desc      1: json r/w        view f::32+1.8*c
+= equal     group     5: printable form  func {[c]32+1.8*c}
+~ match     not
+, concat    enlist
+^ except    null                           \\t x   time
+# take|rsh  count                          \\e     editor
+_ drop|cut  floor                          \\r run editor
+$ cast|sum  string    $[c;t;f]     COND    \\v variables
+? find|rnd  distinct  ?[x;I;[f;]y] insert  \\f functions
+@ at        type      @[x;i;[f;]y] amend   \\c clear log
+. dot       eval|val  .[x;i;[f;]y] dmend   \\u make url
+
+A manual of the oK language is available with more details:
+    https://github.com/JohnEarnest/ok/blob/gh-pages/docs/Manual.md
+A more general introduction to array programming is also provided:
+    https://github.com/JohnEarnest/ok/blob/gh-pages/docs/Programming.md
+`
+
+sterm.help = "nyi"
 
 </script>
 </body>
