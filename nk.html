@@ -1,35 +1,47 @@
 <head><meta charset="utf-8"><title>w</title></head>
 <link rel='icon' type'image/png' href="k32.png">
 <style>
- html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}
- .term{width:100%;height:45%;background:black;color:white}
+ html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}table{width:100%;height:100%;border-collapse:collapse;}td{width:50%;height:50%;}tr{height:50%}
+ .term{width:100%;height:100%;background:black;color:white;border:none;}
  #iline{width:100%}
 </style>
 <body>
 <input    id="iline" autofocus></input><br>
-<textarea id="nterm" class="term" wrap="off" readonly spellcheck="false"></textarea><br>
-<textarea id="kterm" class="term" wrap="off" readonly spellcheck="false"></textarea><br>
+<table><tr>
+<td><textarea id="nterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td>
+<td><textarea id="kterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td></tr><tr>
+<td><textarea id="oterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td>
+<td><textarea id="sterm" class="term" wrap="off" readonly spellcheck="false"></textarea></td>
+</tr></table>
+<script src="oK.js"></script>
 <script>
 var iline = document.getElementById("iline")
 var nterm = document.getElementById("nterm")
 var kterm = document.getElementById("kterm")
+var oterm = document.getElementById("oterm")
+var sterm = document.getElementById("sterm")
 iline.onchange = function(e) {
  var s = iline.value
- KO(" "+s+"\n");NO(" "+s+"\n");
+ if(s=="clear"){iline.value=nterm.value=kterm.value=oterm.value=sterm.value="";return}
+ KO(" "+s+"\n");NO(" "+s+"\n");OO(" "+s+"\n");
  var s = ktry(s)
  if(s.length) s += "\n"
  s = KO(s)
  S = iline.value
  N.rep()
+ okrep(iline.value)
  iline.value="";iline.placeholder=""
 }
 iline.placeholder = "+/1 2 3"
 iline.value = ""
 nterm.value = "ngn/k\n"
 kterm.value = "ktye/k\n"
+oterm.value = "oK\n"
+sterm.value = "nyi"
 
 function KO(s){kterm.value += s;kterm.scrollTo(0,kterm.scrollHeight)}
 function NO(s){nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
+function OO(s){oterm.value += s;oterm.scrollTo(0,oterm.scrollHeight)}
 function us(s){return new TextEncoder("utf-8").encode(s)}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function cu(u){var x=mk(1,u.length);K.C.set(u,8+x);return x}
@@ -62,6 +74,10 @@ function mmap(_,n){H+=n;if(H>NM.length){N.memory.grow((H-NM.length-1>>>16)+1);uM
 function O(){return 0}
 WebAssembly.instantiateStreaming(fetch('ngn.wasm'),{env:{read,write,mmap,munmap:O,exit:O,hop:O,hcl:O,now:O,u0c:O,u1c:O,cmd:O,v0c:O,v1c:O,frk:O}})
  .then(x=>{N=x.instance.exports;NM=new Uint8Array(N.memory.buffer);H=N.__heap_base;N.init()})
+ 
+// ok
+var env = baseEnv()
+function okrep(s){try{OO(format(run(parse(s),env))+"\n");}catch(e){OO(e.message)+"\n"}}
 
 </script>
 </body>
