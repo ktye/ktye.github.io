@@ -31,20 +31,20 @@ function exec(s,t) {s=s.trim();
  terms=t.full?[t]:[nterm,kterm,oterm,sterm]
  if(s=="clear"){nterm.value=kterm.value=oterm.value=sterm.value=" ";return}
  if((s=="\\")||(s=="\\h")){for(var i=0;i<terms.length;i++){var t=terms[i];t.value+="\n"+t.help+"\n ";t.scrollTo(0,t.scrollHeight)};return}
- for(var i=0;i<terms.length;i++){if(t!=terms[i])terms[i].value+=s;terms[i].exec(s)}
+ for(var i=0;i<terms.length;i++){if((t!=terms[i])||(t.selectionEnd!=t.value.length))terms[i].value+=s;terms[i].exec(s)}
 }
 nterm.value = "ngn\n "
 kterm.value = "ktye\n "
 oterm.value = "oK\n "
 sterm.value = "nyi\n "
 
-nterm.exec = function(s){nterm.value+="\n";S=S.replaceAll("\n",";");N.rep();nterm.O(" ")}
+nterm.exec = function(s){nterm.value+="\n";S=s.replaceAll("\n",";");N.rep();nterm.O(" ")}
 kterm.exec = function(s){var s=ktry(s);kterm.O(s.length?"\n"+s+"\n ":"\n ")}
 oterm.exec = function(s){oterm.value+="\n";try{s=format(run(parse(s),env));s=s.length?s+"\n ":s}catch(e){s=e.message+"\n"}oterm.O(s)}
 sterm.exec = function(s){sterm.O("\nnyi\n ")}
 
 function KO(s){kterm.value += s;kterm.scrollTo(0,kterm.scrollHeight)}
-function NO(s){nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
+function NO(s){console.log("nterm>"+s+"<");nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
 function OO(s){oterm.value += s;oterm.scrollTo(0,oterm.scrollHeight)}
 function SO(s){sterm.value += s;sterm.scrollTo(0,sterm.scrollHeight)}
 function us(s){return new TextEncoder("utf-8").encode(s)}
