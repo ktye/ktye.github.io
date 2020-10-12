@@ -1,0 +1,47 @@
+
+	Kilo LISP, A kilo byte-sized LISP system
+	Nils M Holm, 2019, 2020
+
+	In the public domain or, where the concept of the public
+	domain does not apply, distributed under the CC0 License
+	(https://creativecommons.org/publicdomain/zero/1.0/)
+
+	Kilo LISP is a small interpreter and REPL for purely symbolic
+	LISP. Its source consists of 25K bytes of comprehensible
+	code (20KB C + 5KB LISP) and it runs in 64K bytes of memory.
+	There is also a version for CP/M that is written in T3X and
+	runs in 48K bytes of memory. Despite its small size Kilo LISP
+	offers:
+
+	- lexical scoping
+	- tail call elimination
+	- macros
+	- quasiquotation
+	- variable-argument functions
+	- constant-space garbage collection
+	- image files
+	- keyboard interrupt handling
+
+	The code should compile with any C89 (K&R2/ANSI/ISO) C compiler.
+	It even compiles with Turbo C 2.0 or SubC (http://t3x.org/subc/)
+	and with K&R (pre-ANSI) C when using unproto. The CP/M version
+	requires T3X/Z version 13 or later. The interpreter does not use
+	any stdio functions and compiles to a static executable of
+
+	29K bytes using SubC on FreeBSD x86-64
+	22K bytes using T3X/Z on CP/M (Z80)
+	13K bytes using Turbo C on DOS (8086)
+	11K bytes using Mark Williams C on Coherent 3.2 (80286)
+	512K bytes using GCC on FreeBSD x86-64 (LOL)
+
+	Depending on the amount of memory you can spare, you may want
+	to adjust the NNODES variable in kl.c. 1 node = 5 bytes. A
+	reasonable minimum is 8192 nodes (when compiling to a single-
+	segment 16-bit file). This is also the default. The maximum is
+	32760 nodes. The default and the maximum on CP/M is 4096.
+
+	Language-wise, Kilo LISP is a LISP-1 using tail recursion to
+	implement iteration. It is a bit like Scheme, but using more
+	LISPy syntax and function names (NIL, T, LABELS, NCONC, ...)
+	See the manual (klisp.txt) for details.
+
