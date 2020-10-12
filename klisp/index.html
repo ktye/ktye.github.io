@@ -1,0 +1,46 @@
+<head><meta charset="utf-8"><title>klisp</title></head>
+<style>
+ html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}table{position:absolute;width:100%;height:100%;border-collapse:collapse;}td{width:50%;}
+ textarea{top:0;left:0;width:100%;height:100%;background:black;color:#00ff00;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}.hold{background:#666666}
+</style>
+<body>
+<textarea id="term" class="term" wrap="off" spellcheck="false"></textarea>
+<script>
+var term = document.getElementById("term")
+term.onkeydown = function(e){var N="\n";var t=e.srcElement;
+ if(e.which===27){pd(e);if(t.hold){t.className="";t.selectionStart=t.hold;t.hold=0}else{t.hold=t.selectionStart;t.className="hold"}}
+ if(e.which===13&&!t.hold){pd(e);let s=t.value,p=t.selectionStart,q=t.selectionEnd;if(p===q){p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1}else{t.value+=s.slice(p,q)}S=s.slice(p,q);exec(S,t)}
+}
+term.O = function(s){term.value+=s;term.scrollTo(0,term.scrollHeight)}
+term.hold = 0
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function exec(s,t) {s=s.trim(); t.exec(s) }
+term.value = "* "
+term.exec = function(s){
+	S = s.startsWith("* ") ? s.slice(2) : s
+	term.value += "\n"
+	L.exports.rep();
+	term.O("* ")
+}
+
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+
+
+// klisp wasm module
+var L, M
+var S = ""
+var te = new TextEncoder('utf-8')
+var td = new TextDecoder('utf-8')
+function read(fd,a,n){if(fd>0)trap(); let s=S;S='';return te.encodeInto(s,M.subarray(a,a+n)).written}
+function write(fd,a,n){if(fd!=1)trap(); var s = td.decode(M.subarray(a,a+n));term.O(s);return n}
+function trap(){ term.O("trap\n"); throw new WebAssembly.RuntimeError("trap") }
+function open(p,o){trap();return -1}
+function creat(x,y){trap();return -1}
+function close(x){trap();return -1}
+WebAssembly.instantiateStreaming(fetch('kl.wasm'),{env:{read:read,write:write,trap:trap,open:open,creat:creat,close:close}})
+ .then(x=>{L=x.instance;M=new Uint8Array(L.exports.memory.buffer);L.exports.init()})
+
+</script>
+</body>
+</html>
