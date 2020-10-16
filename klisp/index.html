@@ -17,30 +17,60 @@ function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function exec(s,t) {s=s.trim(); t.exec(s) }
 term.value = "* "
 term.exec = function(s){
-	S = s.startsWith("* ") ? s.slice(2) : s
+	S = te.encode(s.startsWith("* ") ? s.slice(2) : s)
 	term.value += "\n"
 	L.exports.rep();
 	term.O("* ")
 }
 
-function us(s){return new TextEncoder("utf-8").encode(s)}
-function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+
+// load binary image "klisp"
+var B
+function load(f) {
+	var req = new XMLHttpRequest();
+	req.open("GET", f, true);
+	req.responseType = "arraybuffer";
+	req.onload = function(e) {
+	var arrayBuffer = req.response;
+		if (arrayBuffer) {
+			B = new Uint8Array(arrayBuffer);
+			L.exports.fasload(0);
+		}
+	}
+	req.send(null);
+}
 
 
 // klisp wasm module
-var L, M
-var S = ""
+var L, M, B
+var S = new Uint8Array
 var te = new TextEncoder('utf-8')
 var td = new TextDecoder('utf-8')
-function read(fd,a,n){if(fd>0)trap(); let s=S;S='';return te.encodeInto(s,M.subarray(a,a+n)).written}
+function read(fd,a,n){
+	var s
+	if(fd==3) {
+		console.log("read from B", B.length)
+		s = B.slice(0,n)
+		B = B.slice(n)
+	} else if (fd==0) {
+		console.log("read from S", S.length)
+		s = S.slice(0,n)
+		S = S.slice(n)
+	} else {
+		trap();
+	}
+	M.set(s,a)
+	return s.length
+}
 function write(fd,a,n){if(fd!=1)trap(); var s = td.decode(M.subarray(a,a+n));term.O(s);return n}
 function trap(){ term.O("trap\n"); throw new WebAssembly.RuntimeError("trap") }
-function open(p,o){trap();return -1}
+function open(p,o){console.log("open");return 3}
 function creat(x,y){trap();return -1}
-function close(x){trap();return -1}
+function close(x){console.log("close");return 0}
 WebAssembly.instantiateStreaming(fetch('kl.wasm'),{env:{read:read,write:write,trap:trap,open:open,creat:creat,close:close}})
- .then(x=>{L=x.instance;M=new Uint8Array(L.exports.memory.buffer);L.exports.init()})
+ .then(x=>{L=x.instance;M=new Uint8Array(L.exports.memory.buffer);L.exports.init();load("klisp")})
 
 </script>
 </body>
 </html>
+

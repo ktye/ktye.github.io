@@ -8,7 +8,7 @@ kl:	kl.c
 	$(CC) $(CFLAGS) -o kl kl.c
 
 kl.wasm: kl.c
-	/c/local/LLVM/bin/clang --target=wasm32 -Dwasm -Oz -Wl,--no-entry,--export=init,--export=rep,--export=memory,--allow-undefined -nostdlib kl.c -o klc.wasm
+	/c/local/LLVM/bin/clang --target=wasm32 -Dwasm -Oz -Wl,--no-entry,--export=init,--export=rep,--export=fasload,--export=memory,--allow-undefined -nostdlib kl.c -o klc.wasm
 	/c/local/binaryen/wasm-opt -Oz klc.wasm -o kl.wasm
 
 klisp:	kl klsrc
