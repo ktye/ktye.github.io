@@ -1,0 +1,45 @@
+<head><meta charset="utf-8"><title>w</title></head>
+<link rel='icon' type'image/png' href="k32.png">
+</head>
+<style>#cnv{width:100%;height:100%}</style>
+<body><canvas id="cnv"></canvas>
+<script>
+var cnv = document.getElementById("cnv");cnv.tabIndex = 1000;cnv.focus()
+var ctx = cnv.getContext('2d');
+
+var u, w, h
+function ui(x, y){rx(u);frame(atx(u,(y===undefined)?mkc(x):cat(mki(x),mki(y))))}
+function mouse(e){ui(e.clientX,e.clientY)}
+function key( e ){pd(e);var k=e.key;var c=e.keyCode;e=((k.length==1)?k.charCodeAt(0):(c==13)?10:0);if(e)ui(e)}
+function size(  ){w=cnv.clientWidth;h=cnv.clientHeight;cnv.width=w;cnv.height=h}
+function init(  ){u=val(sc(cu(us("ui"))));cnv.onmousedown=mouse;cnv.onkeydown=key;size();ui(w,h);}
+function frame(x){var p=8+x;var u=new Uint8ClampedArray(K.C.slice(p,p+4*w*h));var d=new ImageData(u,w)
+ for(var i=3;i<d.data.length;i+=4)d.data[i]=255;ctx.putImageData(d,0,0);dx(x)}
+
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function cu(u){var x=mk(1,u.length);K.C.set(u,8+x);return x}
+
+function load(s){fetch(s).then(r=>{return r.text()}).then(s=>init(dx(val(cu(us(strip(s)))))))};function strip(s){return s.split("\n\\")[0]}
+
+var K
+var draw  = function(w,h,p){}
+var grow  = function(x)    {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cur){var a=(1<<x)-cur;K.exports.mem.grow(a>>>16); msl()};return x}
+var printc= function(x,y)  {L(su(K.C.slice(x,x+y)))}
+var msl   = function()     {var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
+var atx, mk, mki, mkc, cat, sc, val, rx, dx, bak
+WebAssembly.instantiateStreaming(fetch('k.wasm'),{"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }).then(r=>{
+ K=r.instance;msl();K.exports.ini(16);bak=K.C.slice(0);var e=K.exports;atx=e.atx;mk=e.mk;mki=e.mki;mkc=e.mkc;cat=e.cat;sc=e.sc;val=e.val;rx=e.rx;dx=e.dx;load(window.location.hash.slice(1))});
+function ktry(s){
+ try     {var x=sk(kst(val(cu(us(s))))); bak=K.C.slice(0, 1<<K.U[32]);return x}
+ catch(e){K.C.set(bak);return "!\n"}}
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function L(x){console.log(x);return x}
+
+</script>
+</body>
+</html>
+
+
+
