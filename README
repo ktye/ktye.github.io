@@ -4,6 +4,7 @@
 cp  /c/k/i/_/w/k.html                           index.html
 cp  /c/k/i/_/listbox/listbox                    listbox.html  
 cp  /c/k/i/_/k/*.k                              .
+cp  /c/k/i/w.k                                  .
 w < /c/k/i/k.w                                > k.wasm
 cp  /c/k/ngn/k/k.wasm                           ngn.wasm
 date "+%Y.%m.%d"                              > h

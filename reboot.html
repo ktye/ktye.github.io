@@ -1,0 +1,90 @@
+<head><meta charset="utf-8"><title>w</title></head>
+<link rel='icon' type'image/png' href="k32.png">
+<style>
+ html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;}table{position:absolute;width:100%;height:100%;border-collapse:collapse;}td{width:50%;}
+ textarea{top:0;left:0;width:100%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
+ textarea:focus{color:white;}.hold{background:#666666}
+</style>
+<body>
+<textarea id="term" class="term" wrap="off" spellcheck="false"></textarea>
+
+<script>
+var term = document.getElementById("term")
+function kd(e){var N="\n";var t=e.srcElement;
+ if(e.which===27){pd(e);if(t.hold){t.className="";t.selectionStart=t.hold;t.hold=0}else{t.hold=t.selectionStart;t.className="hold"}}
+ if(e.which===13&&!t.hold){pd(e);let s=t.value,p=t.selectionStart,q=t.selectionEnd;if(p===q){p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1}else{t.value+=s.slice(p,q)}S=s.slice(p,q);exec(S,t)}
+}
+function dbl(e){var t=e.srcElement;t.full=!t.full;t.style.position=t.full?"absolute":""}
+function out(t,s){return function(s){t.value+=s;t.scrollTo(0,t.scrollHeight)}}
+term.onkeydown=kd;term.ondblclick=dbl;term.O=out(term);term.hold=0
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function exec(s,t) {s=s.trim();
+ if(s=="\\c"){term.value=" ";return}
+ if(s.startsWith("\\l")){load(s.slice(2).trim());return}
+ if(s.startsWith("\\j")){highjump(s.slice(2).trim());return}
+ if((s=="\\")||(s=="\\h")){term.value+="\n"+term.help+"\n ";term.scrollTo(0,t.scrollHeight);return}
+ term.exec(s)}
+ 
+term.value = "ktye/fosbury\n "
+
+term.exec = function(s){var s=ktry(s);term.O(s.length?"\n"+s+"\n ":"\n ")}
+
+function KO(s){term.value += s;term.scrollTo(0,term.scrollHeight)}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function cu(u){var x=mk(1,u.length);K.C.set(u,8+x);return x}
+function sk(x){var n=nn(x);var s=su(K.C.slice(x+8,x+8+n));dx(x);return s}
+function sy(s){return sc(cu(us(s)))}
+
+var fname
+function load(s){fname=s;
+ if(s.endsWith(".k"))fetch(s).then(r=>{return r.text()}).then(s=>term.exec(strip(s)))             // e.g. \l m.k
+ else fetch(s).then(r=>{return r.text()}).then(s=>{dx(asn(sy(fname),cu(us(s))));KO("\n ")}) // e.g. \l s
+}
+function strip(s){return s.split("\n\\")[0]}
+
+// ktye wasm module
+var K
+var draw  = function(w,h,p){}
+var grow  = function(x)    {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cur){var a=(1<<x)-cur;K.exports.mem.grow(a>>>16); msl()};return x}
+var printc= function(x,y)  {KO(su(K.C.slice(x,x+y)))}
+var msl   = function()     {var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
+var env = {"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }
+var nn, tp, dx, mk, sc, val, kst, asn, lup, bak
+function kinit(r){
+ K=r.instance;msl();K.exports.ini(16);bak=K.C.slice(0);var e=K.exports
+ nn=e.nn;tp=e.tp;dx=e.dx;rx=e.rx;mk=e.mk;sc=e.sc;val=e.val;kst=e.kst;asn=e.asn;lup=e.lup
+}
+function ktry(s){
+ try     {var x=sk(kst(val(cu(us(s))))); bak=K.C.slice(0, 1<<K.U[32]);return x}
+ catch(e){K.C.set(bak);return "!\n"}}
+ 
+WebAssembly.instantiateStreaming(fetch('k.wasm'),env).then(r=>kinit(r))
+
+function highjump(s){
+ var x=lup(sy(s));var n=nn(x);var b=K.C.slice(x+8,x+8+n)
+ WebAssembly.compile(b).then(r=>r.instantiate(r,env).then(r=>kinit(r)))
+}
+
+term.help = `Load the wasm byte code that is currently running. Let's store it in b.
+ \l k.wasm
+ b:.`"k.wasm"
+ #b
+
+Reboot replaces the running instance.
+ \j b
+
+Load the source of the k interpreter from the server and store it in a variable
+ \\l s
+Now load the w compiler
+ \\l w.k
+Compile the wasm module
+ b:wasm compile s
+..
+`
+ 
+function L(x){console.log(x);return x}
+</script>
+</body>
+</html>
+
