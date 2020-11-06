@@ -21,11 +21,11 @@ function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function exec(s,t) {s=s.trim();
  if(s=="\\c"){term.value=" ";return}
  if(s.startsWith("\\l")){load(s.slice(2).trim());return}
- if(s.startsWith("\\j")){highjump(s.slice(2).trim());return}
+ if(s.startsWith("\\reboot")){highjump(s.slice(7).trim());return}
  if((s=="\\")||(s=="\\h")){term.value+="\n"+term.help+"\n ";term.scrollTo(0,t.scrollHeight);return}
  term.exec(s)}
  
-term.value = "ktye/fosbury\n "
+term.value = "ktye/fosbury  [enter \\ for instructions]\n "
 
 term.exec = function(s){var s=ktry(s);term.O(s.length?"\n"+s+"\n ":"\n ")}
 
@@ -38,8 +38,8 @@ function sy(s){return sc(cu(us(s)))}
 
 var fname
 function load(s){fname=s;
- if(s.endsWith(".k"))fetch(s).then(r=>{return r.text()}).then(s=>term.exec(strip(s)))             // e.g. \l m.k
- else fetch(s).then(r=>{return r.text()}).then(s=>{dx(asn(sy(fname),cu(us(s))));KO("\n ")}) // e.g. \l s
+ if(s.endsWith(".k"))fetch(s).then(r=>{return r.text()}).then(s=>term.exec(strip(s)))          // e.g. \l m.k
+ else fetch(s).then(r=>{return r.arrayBuffer()}).then(b=>{dx(asn(sy(fname),cu(new Uint8Array(b))));KO("\n ")}) // e.g. \l s
 }
 function strip(s){return s.split("\n\\")[0]}
 
@@ -63,24 +63,35 @@ WebAssembly.instantiateStreaming(fetch('k.wasm'),env).then(r=>kinit(r))
 
 function highjump(s){
  var x=lup(sy(s));var n=nn(x);var b=K.C.slice(x+8,x+8+n)
- WebAssembly.compile(b).then(r=>r.instantiate(r,env).then(r=>kinit(r)))
+ WebAssembly.instantiate(b,env).then(r=>kinit(r))
 }
 
-term.help = `Load the wasm byte code that is currently running. Let's store it in b.
- \l k.wasm
- b:.`"k.wasm"
+term.help = `A "reboot" replaces the running wasm instance with a new binary.
+We start by loading the binary we are currently running from the server.
+ \\l k.wasm
+ b:.\`"k.wasm"
  #b
 
-Reboot replaces the running instance.
- \j b
+k.wasm is stored in k's variable b. Let's jump to it:
+ \\reboot b
+ 
+We have a new instance. b should not exist anymore within k.
 
-Load the source of the k interpreter from the server and store it in a variable
+
+
+
+Let's compile k.wasm from it's source (which is the file "s" on the server).
+We also need the w compiler.
  \\l s
-Now load the w compiler
  \\l w.k
-Compile the wasm module
+To prove the point, we redefine integer addition:
+ s: "adi.V:III{z::(I x)-I y}"/: "adi.V:III{z::(I x)+I y}"\\: s
  b:wasm compile s
-..
+(nobody promised it would be fast)
+
+Reboot and test:
+ \\reboot b
+ 1+2
 `
  
 function L(x){console.log(x);return x}

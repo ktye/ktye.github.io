@@ -11,12 +11,15 @@ hex:  {,/{"0123456789abcdef"@,/(x%16;16/x)}'0+x}  /hex"alpha"
 unhex:{,/{+/_16 1*"0123456789abcdef"?x}'(,/(2\#x;2))#x}
 bits: {2/128 64 32 16 8 4 2 1\x}
 
+rle:  {(x i;,/1_-':(i:&1,1_~,/=':x),#x)} /rle"aabbb" /("ab";2 3)
+
 tab:    {t:@x; \(_10)/:$[t~6;tochar'x;t~7;tabdict x; 'kx];}         /matrix output
 rpad:   {y#x,(y-#x)#" "}                        /rpad["alpha";10]
 tabdict:{k:$!x;pad:rpad[;|/#'k]; ((pad'k),'"|"),' 'k'.x}
 tochar: {$[1~@x;x; 'kx]}
 
-zip:{[f;l]f./:&l} / e.g. zip[f3;(x;y;z)] x y z:lists, does not extend
+zip:{[f;l]f./:&l}       /e.g. zip[f3;(x;y;z)] x y z:lists, does not extend
+compose:{[f;x]x{y x}/f} /e.g. f:({-x};{_x};..)
 
 std:`kst`hex`zip!(kst;hex;zip)
 
