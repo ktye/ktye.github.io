@@ -44,7 +44,7 @@ oterm.exec = function(s){oterm.value+="\n";try{s=format(run(parse(s),env));s=s.l
 sterm.exec = function(s){sterm.O("\nnyi\n ")}
 
 function KO(s){kterm.value += s;kterm.scrollTo(0,kterm.scrollHeight)}
-function NO(s){console.log("nterm>"+s+"<");nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
+function NO(s){nterm.value += s;nterm.scrollTo(0,nterm.scrollHeight)}
 function OO(s){oterm.value += s;oterm.scrollTo(0,oterm.scrollHeight)}
 function SO(s){sterm.value += s;sterm.scrollTo(0,sterm.scrollHeight)}
 function us(s){return new TextEncoder("utf-8").encode(s)}
@@ -59,7 +59,7 @@ var grow  = function(x)    {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cu
 var printc= function(x,y)  {KO(su(K.C.slice(x,x+y)))}
 var msl   = function()     {var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
 var nn, tp, dx, mk, sc, val, kst, bak
-WebAssembly.instantiateStreaming(fetch('k.wasm'),{"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }).then(r=>{
+fetch('k.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,{"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} })).then(r=>{
  K=r.instance;msl();K.exports.ini(16);bak=K.C.slice(0)
  nn=K.exports.nn;tp=K.exports.tp;dx=K.exports.dx;rx=K.exports.rx;mk=K.exports.mk;sc=K.exports.sc;val=K.exports.val;kst=K.exports.kst
 });
@@ -77,7 +77,7 @@ function read(_,a,n){let s=S+'\n';S='';return te.encodeInto(s,NM.subarray(a,a+n)
 function write(_,a,n){NO(td.decode(NM.subarray(a,a+n)));return n}
 function mmap(_,n){H+=n;if(H>NM.length){N.memory.grow((H-NM.length-1>>>16)+1);uM()}return H-n}
 function O(){return 0}
-WebAssembly.instantiateStreaming(fetch('ngn.wasm'),{env:{read,write,mmap,munmap:O,exit:O,hop:O,hcl:O,now:O,u0c:O,u1c:O,cmd:O,v0c:O,v1c:O,frk:O}})
+fetch('ngn.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,{env:{read,write,mmap,munmap:O,exit:O,hop:O,hcl:O,now:O,u0c:O,u1c:O,cmd:O,v0c:O,v1c:O,frk:O}}))
  .then(x=>{N=x.instance.exports;NM=new Uint8Array(N.memory.buffer);H=N.__heap_base;N.init()})
  
 // ok

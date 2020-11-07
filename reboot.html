@@ -59,7 +59,7 @@ function ktry(s){
  try     {var x=sk(kst(val(cu(us(s))))); bak=K.C.slice(0, 1<<K.U[32]);return x}
  catch(e){K.C.set(bak);return "!\n"}}
  
-WebAssembly.instantiateStreaming(fetch('k.wasm'),env).then(r=>kinit(r))
+fetch('k.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>kinit(r))
 
 function highjump(s){
  var x=lup(sy(s));var n=nn(x);var b=K.C.slice(x+8,x+8+n)
@@ -71,6 +71,7 @@ We start by loading the binary we are currently running from the server.
  \\l k.wasm
  b:.\`"k.wasm"
  #b
+(click on a line and hit Enter to execute it)
 
 k.wasm is stored in k's variable b. Let's jump to it:
  \\reboot b
@@ -90,6 +91,7 @@ To prove the point, we redefine integer addition:
 (nobody promised it would be fast)
 
 Reboot and test:
+ 1+2
  \\reboot b
  1+2
 `
