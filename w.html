@@ -1,0 +1,101 @@
+<head><meta charset="utf-8"><title>w</title></head>
+<link rel='icon' type'image/png' href="k32.png">
+<style>
+ html,body,textarea,input,select{margin:0;padding:0;overflow:hidden;font-family:monospace;background:#efefef;}table{position:absolute;width:100%;height:100%;border-collapse:collapse;}td{width:50%;}
+ textarea{top:0;left:0;width:100%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
+ textarea:focus{color:white;}
+ .r{float:right;}#dl{display:none;}
+</style>
+
+
+<table><tr>
+<td><textarea id="iterm" class="term" wrap="off" spellcheck="false"></textarea></td>
+<td><textarea id="oterm" class="term" wrap="off" spellcheck="false"></textarea></td></tr><tr style="height:30px">
+<td>
+ <select id="exmpl"></select>
+ <select id="targt" class="r">
+  <option         >AST</option>
+  <option selected>wasm</option>
+ </select></td><td>
+ <button id="compl">compile</button>
+ <button class="r" id="dlbut">download</button></td>
+</tr></table>
+<a id="dl"></a>
+
+<script>
+var iterm = document.getElementById("iterm")
+var oterm = document.getElementById("oterm")
+var exmpl = document.getElementById("exmpl")
+var compl = document.getElementById("compl")
+var dlbut = document.getElementById("dlbut")
+var targt = document.getElementById("targt")
+function KO(s){oterm.value += s;oterm.scrollTo(0,oterm.scrollHeight)}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function cu(u){var x=mk(1,u.length);K.C.set(u,8+x);return x}
+function sk(x){var n=nn(x);var s=su(K.C.slice(x+8,x+8+n));dx(x);return s}
+function sy(s){return sc(cu(us(s)))}
+
+// ktye wasm module
+var K
+var draw  = function(w,h,p){}
+var grow  = function(x)    {var cur=K.exports.mem.buffer.byteLength;if((1<<x)>cur){var a=(1<<x)-cur;K.exports.mem.grow(a>>>16); msl()};return x}
+var printc= function(x,y)  {KO(su(K.C.slice(x,x+y)))}
+var msl   = function()     {var b=K.exports.mem.buffer;K.C=new Uint8Array(b);K.U=new Uint32Array(b);K.I=new Int32Array(b);K.F=new Float64Array(b)}
+var env = {"ext":{"sin":Math.sin,"cos":Math.cos,"exp":Math.exp,"log":Math.log,"atan2":Math.atan2,"hypot":Math.hypot,"draw":draw,"grow":grow,"printc":printc} }
+var nn, tp, dx, mk, sc, val, kst, asn, atx, lup, bak
+function kinit(r,f){
+ K=r.instance;msl();K.exports.ini(16);bak=K.C.slice(0);var e=K.exports
+ nn=e.nn;tp=e.tp;dx=e.dx;rx=e.rx;mk=e.mk;sc=e.sc;val=e.val;kst=e.kst;asn=e.asn;atx=e.atx;lup=e.lup;
+ if(f!=undefined)f()
+}
+function ktry(s){
+ try     {var x=sk(kst(val(cu(us(s))))); bak=K.C.slice(0, 1<<K.U[32]);return x}
+ catch(e){K.C.set(bak);return "!\n"}}
+
+
+
+var w
+function strip(s){return s.split("\n\\")[0]}
+fetch("w.k").then(r=>{return r.text()}).then(s=>w=us(strip(s)))
+
+var b
+fetch('k.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(b=r,env)).then(r=>kinit(r))
+
+var dl = document.getElementById("dl")
+function run(){
+ dx(val(cu(w)))
+ try{
+  dx(atx(lup(sy("compile")),cu(us(iterm.value))))
+  var r = atx(lup(sy(targt.value)),mk(1,0))
+  oterm.value=""
+  o=K.C.slice(r+8,r+8+nn(r));if(targt.value=="AST"){oterm.value=su(o)} else hexdump(o);
+  var y = new Blob([o], {type:"application/octet-stream"})
+  dl.href = URL.createObjectURL(y)
+  dl.download = "o." + targt.value
+  dlbut.disabled = false
+ }catch(e){
+  oterm.value = "! " + e.toString()
+ }
+}
+
+function hexdump(u){var o=function(s){oterm.value+=s};for(var i=0;i<u.length;i++){(i%32==0)?o("\n"):(i%4==0)?o(" "):0;o(u[i].toString(16).padStart(2,'0'))}o("\n")}
+
+var examples = {"x+y":"f:I:II{x+y}","+/!n":"sum:I:I{r:0;x/r+:i;r}"}
+function initex(){Object.keys(examples).forEach(s=>{var o=document.createElement("option");o.text=s;exmpl.add(o)})}
+fetch('s').then(r=>r.text()).then(r=>{examples["k.w"]=r;initex()})
+
+//Object.keys(pages).forEach((page) => console.log(page));
+
+exmpl.onchange = function(e){iterm.value=examples[e.target.value];oterm.value=""}
+dlbut.onclick  = function(e){dl.click()}
+compl.onclick  = function(e){oterm.value="compiling..."; WebAssembly.instantiate(b,env).then(r=>kinit(r,run))}
+
+
+iterm.placeholder="in(w)";oterm.placeholder="out"
+iterm.value=examples["x+y"];oterm.value=""
+dl.disabled=true
+</script>
+</body>
+</html>
+
