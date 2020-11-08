@@ -81,7 +81,13 @@ function run(){
 
 function hexdump(u){var o=function(s){oterm.value+=s};for(var i=0;i<u.length;i++){(i%32==0)?o("\n"):(i%4==0)?o(" "):0;o(u[i].toString(16).padStart(2,'0'))}o("\n")}
 
-var examples = {"x+y":"f:I:II{x+y}","+/!n":"sum:I:I{r:0;x/r+:i;r}"}
+
+var macro = `v1:{xt:tp x;xn:nn x;xp:8+x}v2:{v1;yt:tp y;yn:nn y;yp:8+y}
+nn:I:I{(x<256)? :1;536870911&I x}
+tp:I:I{(x<256)? :0;(I x)>>29}
+f:I:II{v2;xp+yp}`
+
+var examples = {"x+y":"f:I:II{x+y}","+/!n":"sum:I:I{r:0;x/r+:i;r}","macro":macro}
 function initex(){Object.keys(examples).forEach(s=>{var o=document.createElement("option");o.text=s;exmpl.add(o)})}
 fetch('s').then(r=>r.text()).then(r=>{examples["k.w"]=r;initex()})
 
