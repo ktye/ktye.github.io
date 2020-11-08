@@ -66,10 +66,12 @@ var dl = document.getElementById("dl")
 function run(){
  dx(val(cu(w)))
  try{
+  var t0 = performance.now()
   dx(atx(lup(sy("compile")),cu(us(iterm.value))))
   var r = atx(lup(sy(targt.value)),mk(1,0))
-  oterm.value=""
-  o=K.C.slice(r+8,r+8+nn(r));if(targt.value=="AST"){oterm.value=su(o)} else hexdump(o);
+  var t1 = performance.now()
+  oterm.value=(t1-t0) + " ms\n"
+  o=K.C.slice(r+8,r+8+nn(r));if(targt.value=="AST"){oterm.value+=su(o)} else hexdump(o);
   var y = new Blob([o], {type:"application/octet-stream"})
   dl.href = URL.createObjectURL(y)
   dl.download = "o." + targt.value
