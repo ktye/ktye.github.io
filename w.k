@@ -44,7 +44,7 @@ icl:{(((`icl;u 1;(u:*x)2),$[`seq~*w:*v;1_w;,w]);(v:ex x 1)1)}             /(`icl
 
 
 /typify ast, parse constants
-type:{l:((#t)#`x`y`z`x3`x4`x5`x6`x7)!t:argt x;a:typ ast x;locl,:x!l;a}
+type:{l:((#t)#`x`y`z`x3`x4`x5`x6`x7)!t:argt x;a:dce typ ast x;locl,:x!(*a)_l;a 1}
 typ:{(tp(*x))x}                                                                      /typed ast:
 tp :`con!{$["0x"~2#x 1;(`F`con;-3$unhex 2_x 1);|/"."=s:x 1;(`F`con;&s);(`I`con;&s)]} /(`I`con;3)  (`F`con;3.14)  constant
 tp,:`cal!{(,(rtyp s),`cal),(s:`$x 1),typ'2_x}                                        /(`I`cal;`f;x;y;..)         function call
@@ -63,6 +63,13 @@ tnlp:{$[`I`sym~*a:typ x 2;0;loca`n!`I];loca`i!`I;(`V`op2;"/";a;typ x 3)}
 vo2:{$[|/(`$'" "\:"? :: /")=`$o:x 1;((,`V`op2),1_x);x]} /force void rtyp
 iif:{$[`C~x;`I;x]}
 unhex:{,/{+/_16 1*"0123456789abcdef"?x}'(,/(2\#x;2))#x}
+
+/dce (e.g. v1/v2 macros)
+dce :{(s;elim[x;s:(flas x)^fsym x])}
+flas:{$[(`I`op2;":")~2#x;?,/(x 2)1,flas x 3;6~@x;?,/flas'x;0#`]}             /find local assign
+fsym:{$[`I`sym~*x;(x 1);(`I`op2;":")~2#x;fsym x 3;6~@x;?,/fsym'x;0#`]}       /find symbols, ignore asn
+elim:{$[~#y;x;~`seq~1_*x;x;x@&~|/,/'{(`I`op2;":";(`I`sym;y))~3#x}\:/:[x;y]]} /!
+
 
 /pretty-print (typed)ast
 AST:{f:{i:,/(+\o:"("=x)-+\")"=x;l:0,i@&o;(_10)/:(l#'" "),'(0,&o)_x}; ,/{($x),":",(f@ 'ky),_10}'[!tast;.tast]}
@@ -122,4 +129,5 @@ wop1 :(syms"I~ I* F- F+ F_ F% I: F:"                )!0x45679a999c9f0f0f
 wop2 :(syms"I+ I- I* I% I%' I\ I\' I% I| I^ I<< I>>")!0x6a6b6c6e6d706f7172737476
 wop2,:(syms"I< I<' I> I>' I<= I<=' I>= I>=' I~ I&"  )!0x49484b4a4d4c4f4e4671
 wop2,:(syms"F+ F- F* F% F< F> F<= F>= F~"           )!0xa0a1a2a36364656661
+
 
