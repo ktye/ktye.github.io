@@ -1,0 +1,371 @@
+<head><meta charset="utf-8"><title>j</title></head>
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABSSURBVDhPY/wPBAwUACYozcDAyAjBhACaOoQBZAKCBjACbQNhXID2LgCFMb5wHgJeIARoYwAhfyMD2nqBGFdgNQA93slKB7AEhE8zCFCYnRkYAOS/HR/UGSYjAAAAAElFTkSuQmCC'>
+<style>
+ html{font-family:monospace}
+ pre{background:#ffffea}
+ textarea{background:black;color:white;width:100%;resize:none;overflow-y:hidden}
+ ul{position:fixed;top:0;right:10}
+ img{float:right}
+ th{text-align:left;}
+</style>
+<script>
+function ge(x){return document.getElementById(x)}
+function toggle(id,e){e=ge(id);e.style.display=(e.style.display=='block')?'none':'block'}
+
+</script>
+<body>
+<pre id="ref">
+j stack language          parse                      list operators                      
+                            (comment)                  #     length/non-list: -1         
+32-bit type system          abc   symbol (max 6)       ,     cat                         
+  ..000 list[quotation]     123   int (max 31 bit)    []i@   index                       
+  ....1 int  x&gt;&gt;1           [..]  list/quote          [a]i v$store       [a]&#34;#v$ (append)
+  ...10 symbol x&gt;&gt;2                                                                      
+  ..100 operator x&gt;&gt;3     numeric operators (dyadic) assign/quote/exec                   
+heap memory                  +-*/% arith               [p][a]: assign [p] to symbol a    
+  0     total memory(log)    &lt;=&gt;   compare             a       lookup symbol a and exec  
+  1     stack                                          [p].    exec                      
+  2     stack(swap)                                                                      
+  3     key/val list      stack operators            control                             
+  4..32 free list           ~&#34;_|  swap dup pop roll    c[t][e]?      (if c then t else e)
+  33... data(buckets)          !  print stack          }  pop/push to swap stack         
+unused &#39;\^`;              canvas draw [arg][func]&amp;     {  pop/push from swap stack       
+</pre>
+<h1 id="src">j.w source of the wasm module</h1> <span style='color:blue' onclick="toggle('jw')">(show/hide)</span><br/>
+<pre id='jw' style='display:none'>
+stk:V:I{}draw:V:II{}
+
+j:I:I{(~I 0)? :ii x;(1~lu 110)?((41~x)?110 as 0;rz);(40~x)?(110 as 1;rz);                       /p
+ n:lu 114;(47&lt;x)?(58&gt;x)?(x-:48;(~x|n)?(pc 1;rz);n*:10;n+:x;114 as n;rz);n?(pc 1|n&lt;&lt;1;114 as 0); /a
+ y:lu 118;(96&lt;x)?(123&gt;x)?(y*:32;y+:x-96;118 as y;rz);y?(pc 2|y&lt;&lt;2;118 as 0);                    /r
+ $[33&gt;x;(10~x)?(exe x;pu mk 0; :1);91~x;pu mk 0;93~x;pc lp;pc 4|(x-33)&lt;&lt;3];0}                   /sexe
+
+ii.I:I{0::x;p:128;i:7;(i&lt;x)?/((4*i)::p;p*:2;i+:1);4::mk sz;8::mk sz;(4+I 4)::0;(4+I 8)::0;pu mk 0;12::mk 0;110 as 0;114 as 0;118 as 0;x}
+bk.I:I{r:32-*7+4*x;(r&lt;4)? :4;r}rx.I:I{xl?(x::1+I x);x}nn.I:I{I 4+x}nx:{(nn x)}xl:{(~x&amp;7)}rz:{ :0}sz:{126}
+dx.V:I{x?xl?(r:(I x)-1;x::r;(~r)?(n:I x+4;p:x+8;n/(dx I p;p+:4);fr x))}fr.V:I{p:4*bk I 4+x;x::I p;p::x}
+mk.I:I{t:bk x;i:4*t;m:4*I 0;(~I i)?/((i&gt;=&#39;m)?!;i+:4);a:I i;i::I a;k:i-4;(k&gt;=4*t)?/(u:a+1&lt;&lt;k&gt;&gt;2;u::I k;k::u;k-:4);a::1;(a+4)::x;a}
+sw.I:I{s:I 4;4::I 8;8::s;x}pp.I:I{t:po;x:sw x;pu t;x}
+
+lc.I:II{n:nx;(1~I x)?((bk 1+n)~bk n)?((8+x+4*n)::y;(4+x)::1+n; :x);r:mk 1+n;(cp(x;r;n))::y;dx x;r}
+cp.I:III{x+:8;y+:8;z/(y::rx I x;x+:4;y+:4);y}pc.V:I{pu lp lc x}
+pl.I:I{4+x+4*nx}fi.I:I{(~nx)?!;r:rx I x+8;dx x;r}us.I:I{(1~I x)? :x;n:nx;r:mk n;n:cp(x;r;n);dx x;r}
+ip:{(ipop x)}ipop.I:I{x:po;(~x&amp;1)?!;r:x&gt;&gt;1;(0&gt;&#39;x)?r|:2147483648;r}lp:{(lpop x)}lpop.I:I{x:po;(7&amp;x)?!;x}
+pi.V:I{pu 1+2*x}ln.I:I{p:fn x;(~p)?!;rx I p}pu.V:I{s:I 4;n:nn s;(n~sz)?!;(4+s)::1+n;(pl s)::x}px:{pu x}
+fn.I:I{s:I 12;n:(nn s)&gt;&gt;1;p:s+8;n/((x~I p)? :4+p;p+:8);0}lu.I:I{p:fn x;(~p)?!;I p}
+ps.I:I{s:I 12;p:fn x;(~p)?(s:s lc x;s:s lc 1;p:pl s);12::s;p}as.V:II{(ps x)::y}
+po:{(pop x)}pop.I:I{x:I 4;n:nx;(~n)?!;r:I x+4*1+n;(4+x)::n-1;r}
+
+exe.V:I{x:lp;p:x+8;l:x;nx?l:pl x;(p&lt;=l)?/(c:I p;$[2~c&amp;3;(pu rx lu c;exe x);~4~c&amp;7;pu rx c;740~c;x:sw pp x;724~c;x:pp sw x;(V.c&gt;&gt;3)(x)];p+:4);dx x}
+add.V:I{pi ip+ip}sub.V:I{pi(-ip)+ip}mul.V:I{pi ip*ip}div.V:I{swp x;pi ip%ip}
+mod.V:I{swp x;pi I?ip\&#39;ip}lti.V:I{pi ip&gt;&#39;ip}eql.V:I{pi ip~ip}gti.V:I{pi ip&lt;&#39;ip}
+dup.V:I{x:po;pu rx x;px}drp.V:I{dx po}swp.V:I{x:po;y:po;px;pu y}rol.V:I{x:po;y:po;z:po;px;pu z;pu y}
+cnt.V:I{x:po;r:-1;xl?r:1+2*nx;dx x;pu r}atx.V:I{i:ip;l:lp;((i&lt;0)+i&gt;=&#39;nn l)?!;pu rx I 8+l+4*i;dx l}
+amd.V:I{v:po;i:ip;a:us lp;n:nn a;$[i~n;a:a lc v;(i&lt;&#39;0)+i&gt;&#39;n;!;(ap:8+a+4*i;x:rx I ap;ap::v)];pu a}
+cat.V:I{y:po;x:po;(7&amp;x)?x:(mk 0)lc x;$[7&amp;y;x:x lc y;(yp:y+8;(nn y)/(x:x lc rx I yp;yp+:4);dx y)];px}
+asn.V:I{y:fi lp;(~2~y&amp;3)?!;v:po;(v&amp;7)?(v:(mk 0)lc v);p:ps y;dx I p;p::v}
+ife.V:I{e:po;t:po;$[~ip;(dx t;pu e);(dx e;pu t)];exe x}drw.V:I{y:lp;x:lp;x draw y;dx x;dx y}
+0:{stk;dup;cnt;amd;mod;drw;xxx;xxx;xxx;mul;add;cat;sub;exe;div}25:{asn;xxx;lti;eql;gti;ife;atx}62:{drp}91:{rol;xxx;swp}
+</pre>
+<code>w < j.w > j.wasm(2576 byte)</code>
+<h1 id="arithmetics">arithmetics</h1>
+ <p>basic arithmetics is defined on integers<br>
+
+<textarea rows="7" name='arithmetics'>1 2+        (3)
+1 2-        (-1)
+2 3*        (6)
+6 2/        (3)
+6 4/        (1)     (integer division)
+6 4%        (2)     (modulo)
+01-         (-1)    (negative numbers)
+</textarea>
+<br/>
+comparison<br>
+
+<textarea rows="4" name='arithmetics'>3 3=        (1)
+1 2<        (1)
+1 2>        (0)
+01-0<       (1)
+</textarea>
+<br/>
+<h1 id="stack-operators">stack-operators</h1>
+ <p>
+<textarea rows="5" name='stack-operators'>1 2~        (2 1)   (swap/exchange)
+1"          (1 1)   (duplicate)
+1 2_        (1)     (pop/drop)
+1 2 3|      (3 1 2) (roll)
+[1+]"__     ()
+</textarea>
+<br/>
+<h1 id="catenate">catenate</h1>
+ <p>catenate, append, cons, enlist<br>
+
+<textarea rows="5" name='catenate'>1 2,            ([1 2])         (make a list from two atoms)
+1[2],           ([1 2])         (x gets enlisted if atom)
+[1 2]3,         ([1 2 3])       (append atom y to list x)
+[1][2 3],       ([1 2 3])       (two lists are merged)
+[][1 2],        ([1 2])         (this does not enlist)
+</textarea>
+<br/>
+set list index<br>
+
+<textarea rows="3" name='catenate'>[1 2 3]0 5$     ([5 2 3])       (set list at index 0 to 5)
+[1 2 3]3 5$     ([1 2 3 5])     (amend to # appends)
+[1 3 2]#        (3)             (count/length)
+</textarea>
+<br/>
+enlist and cat<br>
+
+<textarea rows="4" name='catenate'>[[]~0~$][enlist]:    ()
+[1 2]enlist          ([[1 2]])
+[enlist,][cat]:      ()
+[1 2][3 4]cat        ([1 2 [3 4]])   (cat appends y as a single element)
+</textarea>
+<br/>
+<h1 id="branch">branch</h1>
+ <p>
+<textarea rows="5" name='branch'>1[2 3+][4 5+]?            (5) (? expects an integer as a boolean)
+0[2 3+][4 5+]?            (9)
+[}}.{{?][ifte]:           ()  (ifte is similar but expects a quotation)
+1 1[=][2][3]ifte          (2)
+1 5[=][2][3]ifte          (3)
+</textarea>
+<br/>
+if<br>
+
+<textarea rows="6" name='branch'>[[]?][if]:                ()  (if has no then clause)
+2 1[2+]if                 (4)
+2 0[3*]if                 (2)
+[}.{[]?][iff]:            ()  (iff expects a quotation)
+2 1 1[<][2+]iff           (2)
+2 1 2[<][3*]iff           (6)
+</textarea>
+<br/>
+<h1 id="loop">loop</h1>
+ <p>while<br>
+
+<textarea rows="4" name='loop'>[}"}.{{"|}cat{cat[while],[]?][while]:  () ([C][D]while "while C do D)
+5["][1-]while                          (0)
+[}"1-}{{"|}cat{cat[times],[]?][times]: () (n[P]times do P n times)
+1 4[2*]times                           (16)
+</textarea>
+<br/>
+<h1 id="recursion">recursion</h1>
+ <p>tail recursion: exec P. if true, exec T, else exec R recurse<br>
+
+<textarea rows="2" name='recursion'>[}}"}.{{"|{"}|}cat{cat{cat[tailrc],?][tailrc]: ()  ([P][T][R]tailrc)
+1["5=][10*][1+]tailrc                          (50)
+</textarea>
+<br/>
+<h1 id="array">array</h1>
+ <p>
+<textarea rows="8" name='array'>[[]~["][1-"},{]while_][ntil]:   () (til n downwards)
+5 ntil                          ([4 3 2 1 0])
+[}[]["#]{,[<],["#,]while][til]: ()  (n til)
+5 til                           ([0 1 2 3 4])
+[0@][first]:                    ()
+[1 2 3]first                    (1)
+["#1-@][last]:                  ()
+[1 2 3]last                     (3)
+</textarea>
+<br/>
+<h1 id="each">each</h1>
+ <p>each/map: apply f to each element of A<br>
+
+<textarea rows="4" name='each'>["}#~"}#<{{||][balt]:                                 () (a b -- a b ba<)
+[balt["|#~"|~@|}|~"}.~"#||${~{~eachs][|__]?][eachs]:  ()
+[~[]eachs][each]:                                     () ([A][f]each)
+[1 2 3][0~-]each                                      ([-1 -2 -3])
+</textarea>
+<br/>
+dyadic each<br>
+
+<textarea rows="3" name='each'>[balt["}#~"}~"|@|~"}~@|~"}.{~{~{~{"#||$eachds][}___{]?][eachds]:  ()
+[|[]eachds][eachd]:                                               () ([A][B][f]eachd)
+[3 2 1][4 5 6][-]eachd                                            ([-1 -3 -5])
+</textarea>
+<br/>
+each right<br>
+
+<textarea rows="3" name='each'>[balt["}#~"}~@~"}~||"}.{~{~{~{~,eachrs][}___{]?][eachrs]: ()
+[|[]eachrs][eachr]:                                       () (A[B][f]eachr)
+1[1 2 3][+]eachr                                          ([2 3 4])
+</textarea>
+<br/>
+each left<br>
+
+<textarea rows="2" name='each'>[[~]~,|~[]eachrs][eachl]:  ()
+[1 2 3]1[-]eachl           ([0 1 2])
+</textarea>
+<br/>
+at/index<br>
+
+<textarea rows="2" name='each'>[[@]eachr][at]: ()
+[2 7 8 9][0 2]at ([2 8])
+</textarea>
+<br/>
+take/drop/reverse<br>
+
+<textarea rows="5" name='each'>[til at][take]:                    ()
+[3 5 0 2]3take                     ([3 5 0])
+["#ntil at][rev]:                  ()
+[~"#ntil~|"#||-take rev at][drop]: ()
+[3 2 1 0 5]2drop                   ([1 0 5])
+</textarea>
+<br/>
+<h1 id="extend">extend</h1>
+ <p>atomic extension, vectorize<br>
+
+<textarea rows="11" name='extend'>[}"#0<2*}~"#0<}~{{+[[eachd][eachr][eachl][.]]~@{~.][atomx]: () ([f]atomx)
+[[+]atomx][add]:                                            ()
+[[-]atomx][sub]:                                            ()
+[[*]atomx][mul]:                                            ()
+[[/]atomx][div]:                                            ()
+[[<]atomx][lt]:                                             ()
+[[>]atomx][gt]:                                             ()
+[[=]atomx][eq]:                                             ()
+[[=0=]atomx][neq]:                                          ()
+[0eq][not]:                                                 ()
+1[2 3 4]add                                                 ([3 4 5])
+</textarea>
+<br/>
+<h1 id="canvas api">canvas api</h1>
+ <p>
+<textarea rows="42" name='canvas api'>[[97 114 99]&][arc]:                                                                   () (arc: [x y r sa ea]arc)
+[[97 114 99 84 111]&][arcto]:                                                          () (arcTo: [xa ya xb yb r]arcto)
+[[98 101 103 105 110 80 97 116 104]&][bpath]:                                          () (beginPath: []bpath)
+[[98 101 122 105 101 114 67 117 114 118 101 84 111]&][bezito]:                         () (bezierCurveTo: [cxa cya cxb cyb x y]bezito)
+[[99 108 101 97 114 82 101 99 116]&][crect]:                                           () (clearRect: [x y w h]crect)
+[[99 108 105 112]&][clip]:                                                             () (clip: []clip)
+[[99 108 111 115 101 80 97 116 104]&][cpath]:                                          () (closePath: []cpath)
+[[99 114 101 97 116 101 76 105 110 101 97 114 71 114 97 100 105 101 110 116]&][lingrd]:() (createLinearGradient: [xa ya xb yb]lingrd)
+[[99 114 101 97 116 101 82 97 100 105 97 108 71 114 97 100 105 101 110 116]&][radgrd]: () (createRadialGradient: [xa ya ra xb yb rb]radgrd)
+[[101 108 108 105 112 115 101]&][ellips]:                                              () (ellipse: [x y rx ry rot sa ea]ellips)
+[[102 105 108 108]&][fill]:                                                            () (fill: []fill)
+[[102 105 108 108 82 101 99 116]&][frect]:                                             () (fillRect: [x y w h]frect)
+[[102 105 108 108 83 116 121 108 101]&][fstyle]:                                       () (fillStyle: [color|gradient]fstyle)
+[[102 105 108 108 84 101 120 116]&][ftext]:                                            () (fillText: [s x y]ftext)
+[[102 111 110 116]&][font]:                                                            () (font: [name]font)
+[[108 105 110 101 67 97 112]&][lcap]:                                                  () (lineCap: [butt|round|square]lcap)
+[[108 105 110 101 68 97 115 104 79 102 102 115 101 116]&][ldoff]:                      () (lineDashOffset: [i]ldoff)
+[[108 105 110 101 74 111 105 110]&][ljoin]:                                            () (lineJoin: [bevel|round|miter]ljoin)
+[[108 105 110 101 116 111]&][lineto]:                                                  () (lineto: [x y]lineto)
+[[108 105 110 101 87 105 100 116 104]&][lwidth]:                                       () (lineWidth: [i]lwidth)
+[[109 111 118 101 84 111]&][moveto]:                                                   () (moveTo: [x y]moveto)
+[[113 117 97 100 114 97 116 105 99 67 117 114 118 101 84 111]&][qcto]:                 () (quadraticCurveTo: [cx cy x y]qcto)
+[[114 101 99 116]&][rect]:                                                             () (rect: [x y w h]rect)
+[[114 101 115 101 116 84 114 97 110 115 102 111 114 109]&][rstra]:                     () (resetTransform: []rstra)
+[[114 101 115 116 111 114 101]&][rstore]:                                              () (restore: []rstore)
+[[114 111 116 97 116 101]&][rotate]:                                                   () (rotate: [a]rotate)
+[[115 97 118 101]&][save]:                                                             () (save: []save)
+[[115 99 97 108 101]&][scale]:                                                         () (scale: [x y]scale)
+[[115 101 116 76 105 110 101 68 97 115 104]&][sldash]:                                 () (setLineDash: [segments]sldash)
+[[115 101 116 84 114 97 110 115 102 111 114 109]&][setra]:                             () (setTransform: [a b c d e f]setra)
+[[115 104 97 100 111 119 66 108 117 114]&][shblur]:                                    () (shadowBlur: [i]shblur)
+[[115 104 97 100 111 119 67 111 108 111 114]&][shcol]:                                 () (shadowColor: [c]shcol)
+[[115 104 97 100 111 119 79 102 102 115 101 116 88]&][shoffx]:                         () (shadowOffsetX: [i]shoffx)
+[[115 104 97 100 111 119 79 102 102 115 101 116 89]&][shoffy]:                         () (shadowOffsetY: [i]shoffy)
+[[115 116 114 111 107 101]&][stroke]:                                                  () (stroke: []stroke)
+[[115 116 114 111 107 101 82 101 99 116]&][srect]:                                     () (strokeRect: [x y w h]srect)
+[[115 116 114 111 107 101 83 116 121 108 101]&][sstyle]:                               () (strokeStyle: [color|gradient]sstyle)
+[[115 116 114 111 107 101 84 101 120 116]&][stext]:                                    () (strokeText: [s x y]stext)
+[[116 101 120 116 65 108 105 103 110]&][talign]:                                       () (textAlign: [left|right|center|start|end]talign)
+[[116 101 120 116 66 97 115 101 108 105 110 101]&][tbline]:                            () (textBaseline: [b]tbline)
+[[116 114 97 110 115 102 111 114 109]&][transf]:                                       () (transform: [a b c d e f]transf)
+[[116 114 97 110 115 108 97 116 101]&][transl]:                                        () (translate: [x y]transl)
+</textarea>
+<br/>
+<h1 id='definitions'>definitions</h1>
+<table><tr><th>symbol</th><th>quotation</th></tr>
+<tr><td id='enlist'>enlist</td><td>[]~0~$</tr>
+<tr><td id='cat'>cat</td><td>enlist,</tr>
+<tr><td id='ifte'>ifte</td><td>}}.{{?</tr>
+<tr><td id='if'>if</td><td>[]?</tr>
+<tr><td id='iff'>iff</td><td>}.{[]?</tr>
+<tr><td id='while'>while</td><td>}&#34;}.{{&#34;|}cat{cat[while],[]?</tr>
+<tr><td id='times'>times</td><td>}&#34;1-}{{&#34;|}cat{cat[times],[]?</tr>
+<tr><td id='tailrc'>tailrc</td><td>}}&#34;}.{{&#34;|{&#34;}|}cat{cat{cat[tailrc],?</tr>
+<tr><td id='ntil'>ntil</td><td>[]~[&#34;][1-&#34;},{]while_</tr>
+<tr><td id='til'>til</td><td>}[][&#34;#]{,[&lt;],[&#34;#,]while</tr>
+<tr><td id='first'>first</td><td>0@</tr>
+<tr><td id='last'>last</td><td>&#34;#1-@</tr>
+<tr><td id='balt'>balt</td><td>&#34;}#~&#34;}#&lt;{{||</tr>
+<tr><td id='eachs'>eachs</td><td>balt[&#34;|#~&#34;|~@|}|~&#34;}.~&#34;#||${~{~eachs][|__]?</tr>
+<tr><td id='each'>each</td><td>~[]eachs</tr>
+<tr><td id='eachds'>eachds</td><td>balt[&#34;}#~&#34;}~&#34;|@|~&#34;}~@|~&#34;}.{~{~{~{&#34;#||$eachds][}___{]?</tr>
+<tr><td id='eachd'>eachd</td><td>|[]eachds</tr>
+<tr><td id='eachrs'>eachrs</td><td>balt[&#34;}#~&#34;}~@~&#34;}~||&#34;}.{~{~{~{~,eachrs][}___{]?</tr>
+<tr><td id='eachr'>eachr</td><td>|[]eachrs</tr>
+<tr><td id='eachl'>eachl</td><td>[~]~,|~[]eachrs</tr>
+<tr><td id='at'>at</td><td>[@]eachr</tr>
+<tr><td id='take'>take</td><td>til at</tr>
+<tr><td id='rev'>rev</td><td>&#34;#ntil at</tr>
+<tr><td id='drop'>drop</td><td>~&#34;#ntil~|&#34;#||-take rev at</tr>
+<tr><td id='atomx'>atomx</td><td>}&#34;#0&lt;2*}~&#34;#0&lt;}~{{+[[eachd][eachr][eachl][.]]~@{~.</tr>
+<tr><td id='add'>add</td><td>[+]atomx</tr>
+<tr><td id='sub'>sub</td><td>[-]atomx</tr>
+<tr><td id='mul'>mul</td><td>[*]atomx</tr>
+<tr><td id='div'>div</td><td>[/]atomx</tr>
+<tr><td id='lt'>lt</td><td>[&lt;]atomx</tr>
+<tr><td id='gt'>gt</td><td>[&gt;]atomx</tr>
+<tr><td id='eq'>eq</td><td>[=]atomx</tr>
+<tr><td id='neq'>neq</td><td>[=0=]atomx</tr>
+<tr><td id='not'>not</td><td>0eq</tr>
+<tr><td id='arc'>arc</td><td>[97 114 99]&amp;</tr>
+<tr><td id='arcto'>arcto</td><td>[97 114 99 84 111]&amp;</tr>
+<tr><td id='bpath'>bpath</td><td>[98 101 103 105 110 80 97 116 104]&amp;</tr>
+<tr><td id='bezito'>bezito</td><td>[98 101 122 105 101 114 67 117 114 118 101 84 111]&amp;</tr>
+<tr><td id='crect'>crect</td><td>[99 108 101 97 114 82 101 99 116]&amp;</tr>
+<tr><td id='clip'>clip</td><td>[99 108 105 112]&amp;</tr>
+<tr><td id='cpath'>cpath</td><td>[99 108 111 115 101 80 97 116 104]&amp;</tr>
+<tr><td id='lingrd'>lingrd</td><td>[99 114 101 97 116 101 76 105 110 101 97 114 71 114 97 100 105 101 110 116]&amp;</tr>
+<tr><td id='radgrd'>radgrd</td><td>[99 114 101 97 116 101 82 97 100 105 97 108 71 114 97 100 105 101 110 116]&amp;</tr>
+<tr><td id='ellips'>ellips</td><td>[101 108 108 105 112 115 101]&amp;</tr>
+<tr><td id='fill'>fill</td><td>[102 105 108 108]&amp;</tr>
+<tr><td id='frect'>frect</td><td>[102 105 108 108 82 101 99 116]&amp;</tr>
+<tr><td id='fstyle'>fstyle</td><td>[102 105 108 108 83 116 121 108 101]&amp;</tr>
+<tr><td id='ftext'>ftext</td><td>[102 105 108 108 84 101 120 116]&amp;</tr>
+<tr><td id='font'>font</td><td>[102 111 110 116]&amp;</tr>
+<tr><td id='lcap'>lcap</td><td>[108 105 110 101 67 97 112]&amp;</tr>
+<tr><td id='ldoff'>ldoff</td><td>[108 105 110 101 68 97 115 104 79 102 102 115 101 116]&amp;</tr>
+<tr><td id='ljoin'>ljoin</td><td>[108 105 110 101 74 111 105 110]&amp;</tr>
+<tr><td id='lineto'>lineto</td><td>[108 105 110 101 116 111]&amp;</tr>
+<tr><td id='lwidth'>lwidth</td><td>[108 105 110 101 87 105 100 116 104]&amp;</tr>
+<tr><td id='moveto'>moveto</td><td>[109 111 118 101 84 111]&amp;</tr>
+<tr><td id='qcto'>qcto</td><td>[113 117 97 100 114 97 116 105 99 67 117 114 118 101 84 111]&amp;</tr>
+<tr><td id='rect'>rect</td><td>[114 101 99 116]&amp;</tr>
+<tr><td id='rstra'>rstra</td><td>[114 101 115 101 116 84 114 97 110 115 102 111 114 109]&amp;</tr>
+<tr><td id='rstore'>rstore</td><td>[114 101 115 116 111 114 101]&amp;</tr>
+<tr><td id='rotate'>rotate</td><td>[114 111 116 97 116 101]&amp;</tr>
+<tr><td id='save'>save</td><td>[115 97 118 101]&amp;</tr>
+<tr><td id='scale'>scale</td><td>[115 99 97 108 101]&amp;</tr>
+<tr><td id='sldash'>sldash</td><td>[115 101 116 76 105 110 101 68 97 115 104]&amp;</tr>
+<tr><td id='setra'>setra</td><td>[115 101 116 84 114 97 110 115 102 111 114 109]&amp;</tr>
+<tr><td id='shblur'>shblur</td><td>[115 104 97 100 111 119 66 108 117 114]&amp;</tr>
+<tr><td id='shcol'>shcol</td><td>[115 104 97 100 111 119 67 111 108 111 114]&amp;</tr>
+<tr><td id='shoffx'>shoffx</td><td>[115 104 97 100 111 119 79 102 102 115 101 116 88]&amp;</tr>
+<tr><td id='shoffy'>shoffy</td><td>[115 104 97 100 111 119 79 102 102 115 101 116 89]&amp;</tr>
+<tr><td id='stroke'>stroke</td><td>[115 116 114 111 107 101]&amp;</tr>
+<tr><td id='srect'>srect</td><td>[115 116 114 111 107 101 82 101 99 116]&amp;</tr>
+<tr><td id='sstyle'>sstyle</td><td>[115 116 114 111 107 101 83 116 121 108 101]&amp;</tr>
+<tr><td id='stext'>stext</td><td>[115 116 114 111 107 101 84 101 120 116]&amp;</tr>
+<tr><td id='talign'>talign</td><td>[116 101 120 116 65 108 105 103 110]&amp;</tr>
+<tr><td id='tbline'>tbline</td><td>[116 101 120 116 66 97 115 101 108 105 110 101]&amp;</tr>
+<tr><td id='transf'>transf</td><td>[116 114 97 110 115 102 111 114 109]&amp;</tr>
+<tr><td id='transl'>transl</td><td>[116 114 97 110 115 108 97 116 101]&amp;</tr>
+<ul>
+<li><a href="#ref">ref</a></li>
+<li><a href="#src">src</a></li>
+<li><a href="#arithmetics">arithmetics</a></li>
+<li><a href="#stack-operators">stack-operators</a></li>
+<li><a href="#catenate">catenate</a></li>
+<li><a href="#branch">branch</a></li>
+<li><a href="#loop">loop</a></li>
+<li><a href="#recursion">recursion</a></li>
+<li><a href="#array">array</a></li>
+<li><a href="#each">each</a></li>
+<li><a href="#extend">extend</a></li>
+<li><a href="#canvas api">canvas api</a></li>
+<li><a href="#definitions">definitions</a></li>
+</ul>
+
+</body></html>
