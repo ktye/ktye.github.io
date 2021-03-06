@@ -199,8 +199,8 @@ each left<br>
 <br/>
 at/index<br>
 
-<textarea rows="2" name='each'>[[@]eachr][at]: ()
-[2 7 8 9][0 2]at ([2 8])
+<textarea rows="2" name='each'>[[@]eachr][at]:            ()
+[2 7 8 9][0 2]at           ([2 8])
 </textarea>
 <br/>
 take/drop/reverse<br>
@@ -212,6 +212,12 @@ take/drop/reverse<br>
 [3 2 1 0 5]2drop                   ([1 0 5])
 </textarea>
 <br/>
+amend multiple<br>
+
+<textarea rows="2" name='each'>[~"#["1 drop}first ~"}${{~amend][__]?][amend]: ()
+[1 2 3 4][0 3][7 8 9]amend                     ([[7 8 9] 2 3 [7 8 9]])
+</textarea>
+<br/>
 over/fold, over initial<br>
 
 <textarea rows="5" name='each'>["#}~"}~{{<["}~"1+}@~"}.{{{overs][___]?][overs]: ()
@@ -219,6 +225,12 @@ over/fold, over initial<br>
 1[1 2 3][+]overi                                 (7)
 [}"first~1drop{overi][over]:                     ()
 [1 2 3][+]over                                   (6)
+</textarea>
+<br/>
+where<br>
+
+<textarea rows="2" name='each'>[[]~0~ [~"}~[,][_]?{1+]overi_][where]: ()
+[0 1 1 0 1]where                       ([1 2 4])
 </textarea>
 <br/>
 <h1 id="extend">extend</h1>
@@ -241,15 +253,15 @@ over/fold, over initial<br>
  <p>
 <textarea rows="42" name='canvas api'>[[97 114 99]&][arc]:                                                                   () (arc: [x y r sa ea]arc)
 [[97 114 99 84 111]&][arcto]:                                                          () (arcTo: [xa ya xb yb r]arcto)
-[[98 101 103 105 110 80 97 116 104]&][bpath]:                                          () (beginPath: []bpath)
+[[][98 101 103 105 110 80 97 116 104]&][bpath]:                                        () (beginPath: bpath)
 [[98 101 122 105 101 114 67 117 114 118 101 84 111]&][bezito]:                         () (bezierCurveTo: [cxa cya cxb cyb x y]bezito)
 [[99 108 101 97 114 82 101 99 116]&][crect]:                                           () (clearRect: [x y w h]crect)
-[[99 108 105 112]&][clip]:                                                             () (clip: []clip)
-[[99 108 111 115 101 80 97 116 104]&][cpath]:                                          () (closePath: []cpath)
+[[][99 108 105 112]&][clip]:                                                           () (clip: clip)
+[[][99 108 111 115 101 80 97 116 104]&][cpath]:                                        () (closePath: cpath)
 [[99 114 101 97 116 101 76 105 110 101 97 114 71 114 97 100 105 101 110 116]&][lingrd]:() (createLinearGradient: [xa ya xb yb]lingrd)
 [[99 114 101 97 116 101 82 97 100 105 97 108 71 114 97 100 105 101 110 116]&][radgrd]: () (createRadialGradient: [xa ya ra xb yb rb]radgrd)
 [[101 108 108 105 112 115 101]&][ellips]:                                              () (ellipse: [x y rx ry rot sa ea]ellips)
-[[102 105 108 108]&][fill]:                                                            () (fill: []fill)
+[[][102 105 108 108]&][fill]:                                                          () (fill: fill)
 [[102 105 108 108 82 101 99 116]&][frect]:                                             () (fillRect: [x y w h]frect)
 [[102 105 108 108 83 116 121 108 101]&][fstyle]:                                       () (fillStyle: [color|gradient]fstyle)
 [[102 105 108 108 84 101 120 116]&][ftext]:                                            () (fillText: [s x y]ftext)
@@ -257,15 +269,15 @@ over/fold, over initial<br>
 [[108 105 110 101 67 97 112]&][lcap]:                                                  () (lineCap: [butt|round|square]lcap)
 [[108 105 110 101 68 97 115 104 79 102 102 115 101 116]&][ldoff]:                      () (lineDashOffset: [i]ldoff)
 [[108 105 110 101 74 111 105 110]&][ljoin]:                                            () (lineJoin: [bevel|round|miter]ljoin)
-[[108 105 110 101 116 111]&][lineto]:                                                  () (lineto: [x y]lineto)
+[[108 105 110 101 84 111]&][lineto]:                                                   () (lineTo: [x y]lineto)
 [[108 105 110 101 87 105 100 116 104]&][lwidth]:                                       () (lineWidth: [i]lwidth)
 [[109 111 118 101 84 111]&][moveto]:                                                   () (moveTo: [x y]moveto)
 [[113 117 97 100 114 97 116 105 99 67 117 114 118 101 84 111]&][qcto]:                 () (quadraticCurveTo: [cx cy x y]qcto)
 [[114 101 99 116]&][rect]:                                                             () (rect: [x y w h]rect)
-[[114 101 115 101 116 84 114 97 110 115 102 111 114 109]&][rstra]:                     () (resetTransform: []rstra)
-[[114 101 115 116 111 114 101]&][rstore]:                                              () (restore: []rstore)
+[[][114 101 115 101 116 84 114 97 110 115 102 111 114 109]&][rstra]:                   () (resetTransform: rstra)
+[[][114 101 115 116 111 114 101]&][rstore]:                                            () (restore: rstore)
 [[114 111 116 97 116 101]&][rotate]:                                                   () (rotate: [a]rotate)
-[[115 97 118 101]&][save]:                                                             () (save: []save)
+[[][115 97 118 101]&][save]:                                                           () (save: save)
 [[115 99 97 108 101]&][scale]:                                                         () (scale: [x y]scale)
 [[115 101 116 76 105 110 101 68 97 115 104]&][sldash]:                                 () (setLineDash: [segments]sldash)
 [[115 101 116 84 114 97 110 115 102 111 114 109]&][setra]:                             () (setTransform: [a b c d e f]setra)
@@ -273,7 +285,7 @@ over/fold, over initial<br>
 [[115 104 97 100 111 119 67 111 108 111 114]&][shcol]:                                 () (shadowColor: [c]shcol)
 [[115 104 97 100 111 119 79 102 102 115 101 116 88]&][shoffx]:                         () (shadowOffsetX: [i]shoffx)
 [[115 104 97 100 111 119 79 102 102 115 101 116 89]&][shoffy]:                         () (shadowOffsetY: [i]shoffy)
-[[115 116 114 111 107 101]&][stroke]:                                                  () (stroke: []stroke)
+[[][115 116 114 111 107 101]&][stroke]:                                                () (stroke: stroke)
 [[115 116 114 111 107 101 82 101 99 116]&][srect]:                                     () (strokeRect: [x y w h]srect)
 [[115 116 114 111 107 101 83 116 121 108 101]&][sstyle]:                               () (strokeStyle: [color|gradient]sstyle)
 [[115 116 114 111 107 101 84 101 120 116]&][stext]:                                    () (strokeText: [s x y]stext)
@@ -309,9 +321,11 @@ over/fold, over initial<br>
 <tr><td id='take'>take</td><td>til at</tr>
 <tr><td id='rev'>rev</td><td>&#34;#ntil at</tr>
 <tr><td id='drop'>drop</td><td>~&#34;#ntil~|&#34;#||-take rev at</tr>
+<tr><td id='amend'>amend</td><td>~&#34;#[&#34;1 drop}first ~&#34;}${{~amend][__]?</tr>
 <tr><td id='overs'>overs</td><td>&#34;#}~&#34;}~{{&lt;[&#34;}~&#34;1+}@~&#34;}.{{{overs][___]?</tr>
 <tr><td id='overi'>overi</td><td>~0~overs</tr>
 <tr><td id='over'>over</td><td>}&#34;first~1drop{overi</tr>
+<tr><td id='where'>where</td><td>[]~0~ [~&#34;}~[,][_]?{1+]overi_</tr>
 <tr><td id='atomx'>atomx</td><td>}&#34;#0&lt;2*}~&#34;#0&lt;}~{{+[[eachd][eachr][eachl][.]]~@{~.</tr>
 <tr><td id='add'>add</td><td>[+]atomx</tr>
 <tr><td id='sub'>sub</td><td>[-]atomx</tr>
@@ -324,15 +338,15 @@ over/fold, over initial<br>
 <tr><td id='not'>not</td><td>0eq</tr>
 <tr><td id='arc'>arc</td><td>[97 114 99]&amp;</tr>
 <tr><td id='arcto'>arcto</td><td>[97 114 99 84 111]&amp;</tr>
-<tr><td id='bpath'>bpath</td><td>[98 101 103 105 110 80 97 116 104]&amp;</tr>
+<tr><td id='bpath'>bpath</td><td>[][98 101 103 105 110 80 97 116 104]&amp;</tr>
 <tr><td id='bezito'>bezito</td><td>[98 101 122 105 101 114 67 117 114 118 101 84 111]&amp;</tr>
 <tr><td id='crect'>crect</td><td>[99 108 101 97 114 82 101 99 116]&amp;</tr>
-<tr><td id='clip'>clip</td><td>[99 108 105 112]&amp;</tr>
-<tr><td id='cpath'>cpath</td><td>[99 108 111 115 101 80 97 116 104]&amp;</tr>
+<tr><td id='clip'>clip</td><td>[][99 108 105 112]&amp;</tr>
+<tr><td id='cpath'>cpath</td><td>[][99 108 111 115 101 80 97 116 104]&amp;</tr>
 <tr><td id='lingrd'>lingrd</td><td>[99 114 101 97 116 101 76 105 110 101 97 114 71 114 97 100 105 101 110 116]&amp;</tr>
 <tr><td id='radgrd'>radgrd</td><td>[99 114 101 97 116 101 82 97 100 105 97 108 71 114 97 100 105 101 110 116]&amp;</tr>
 <tr><td id='ellips'>ellips</td><td>[101 108 108 105 112 115 101]&amp;</tr>
-<tr><td id='fill'>fill</td><td>[102 105 108 108]&amp;</tr>
+<tr><td id='fill'>fill</td><td>[][102 105 108 108]&amp;</tr>
 <tr><td id='frect'>frect</td><td>[102 105 108 108 82 101 99 116]&amp;</tr>
 <tr><td id='fstyle'>fstyle</td><td>[102 105 108 108 83 116 121 108 101]&amp;</tr>
 <tr><td id='ftext'>ftext</td><td>[102 105 108 108 84 101 120 116]&amp;</tr>
@@ -340,15 +354,15 @@ over/fold, over initial<br>
 <tr><td id='lcap'>lcap</td><td>[108 105 110 101 67 97 112]&amp;</tr>
 <tr><td id='ldoff'>ldoff</td><td>[108 105 110 101 68 97 115 104 79 102 102 115 101 116]&amp;</tr>
 <tr><td id='ljoin'>ljoin</td><td>[108 105 110 101 74 111 105 110]&amp;</tr>
-<tr><td id='lineto'>lineto</td><td>[108 105 110 101 116 111]&amp;</tr>
+<tr><td id='lineto'>lineto</td><td>[108 105 110 101 84 111]&amp;</tr>
 <tr><td id='lwidth'>lwidth</td><td>[108 105 110 101 87 105 100 116 104]&amp;</tr>
 <tr><td id='moveto'>moveto</td><td>[109 111 118 101 84 111]&amp;</tr>
 <tr><td id='qcto'>qcto</td><td>[113 117 97 100 114 97 116 105 99 67 117 114 118 101 84 111]&amp;</tr>
 <tr><td id='rect'>rect</td><td>[114 101 99 116]&amp;</tr>
-<tr><td id='rstra'>rstra</td><td>[114 101 115 101 116 84 114 97 110 115 102 111 114 109]&amp;</tr>
-<tr><td id='rstore'>rstore</td><td>[114 101 115 116 111 114 101]&amp;</tr>
+<tr><td id='rstra'>rstra</td><td>[][114 101 115 101 116 84 114 97 110 115 102 111 114 109]&amp;</tr>
+<tr><td id='rstore'>rstore</td><td>[][114 101 115 116 111 114 101]&amp;</tr>
 <tr><td id='rotate'>rotate</td><td>[114 111 116 97 116 101]&amp;</tr>
-<tr><td id='save'>save</td><td>[115 97 118 101]&amp;</tr>
+<tr><td id='save'>save</td><td>[][115 97 118 101]&amp;</tr>
 <tr><td id='scale'>scale</td><td>[115 99 97 108 101]&amp;</tr>
 <tr><td id='sldash'>sldash</td><td>[115 101 116 76 105 110 101 68 97 115 104]&amp;</tr>
 <tr><td id='setra'>setra</td><td>[115 101 116 84 114 97 110 115 102 111 114 109]&amp;</tr>
@@ -356,7 +370,7 @@ over/fold, over initial<br>
 <tr><td id='shcol'>shcol</td><td>[115 104 97 100 111 119 67 111 108 111 114]&amp;</tr>
 <tr><td id='shoffx'>shoffx</td><td>[115 104 97 100 111 119 79 102 102 115 101 116 88]&amp;</tr>
 <tr><td id='shoffy'>shoffy</td><td>[115 104 97 100 111 119 79 102 102 115 101 116 89]&amp;</tr>
-<tr><td id='stroke'>stroke</td><td>[115 116 114 111 107 101]&amp;</tr>
+<tr><td id='stroke'>stroke</td><td>[][115 116 114 111 107 101]&amp;</tr>
 <tr><td id='srect'>srect</td><td>[115 116 114 111 107 101 82 101 99 116]&amp;</tr>
 <tr><td id='sstyle'>sstyle</td><td>[115 116 114 111 107 101 83 116 121 108 101]&amp;</tr>
 <tr><td id='stext'>stext</td><td>[115 116 114 111 107 101 84 101 120 116]&amp;</tr>
@@ -367,7 +381,9 @@ over/fold, over initial<br>
 </table>
 <h1 id='examples'>examples</h1>
 <p>
-<a href="https://ktye.github.io/js.html#eJyLNjEwUABhIyA2BGIQNDYziOWK5lKIjk0qSCzJ4FJQMnEw0TapU1FKzcnJLCgGyRSXFOVnp3LFRqcVJeamxloBAG5mE5E=">ellipse</a>
+<a href="/js.html#eJyLNjEwUABhIyA2BGIQNDYziOWKTipILMlQUDJxMNE2qVNRSs3JySwoViguKcrPTo2NTitKzE2NtQIA6qoR2Q==">ellipse</a>
+<a href="/js.html#eJx1j8EKwjAMhu99irCjdpBuVGGvEnKos8Nht0oX5s1ntzIUD90tf778fxJCaBBZkpuXAJeHkxshIE9x9RLhCajDOH/KRVK8e0XbTAsI7Qm5dwIu9TCMITBdo3CnUJECIAPf3KzMsSJ+6RTFic867zCItYZfks7mDZxt7peAxR3Q7DlyF0qgsboMLO6AfK0ugApNffj7jGlIbvLcvQGyg1bT">roll</a>
+<a href="/js.html#eJxFjs1Ow0AMhO9+ihEnqlK6ragQHBCnXNo3sHxwWreJSHZhu+rPpc+OE0BoZMn6xmP7ftPGncVer5bn67RtUGH2hmpazVzTakLEvAgIUrLGY8dD27XRShK+yKu7WD4HyaloMWH9QXj5R7UjZ3LjB0kny63wvtMyDgYsELD8Le/FzcG5C/aFc2PZsIf2FncYQ3wYthGvAp5Wf09R/amlwfhb7ydKIgJfoKiFPH8Y5ORdTLdNfiQ6lpw+7Bvl1Uvo">koch</a>
 <p>
 <ul>
 <li><a href="#ref">ref</a></li>
