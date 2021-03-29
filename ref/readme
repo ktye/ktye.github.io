@@ -1,0 +1,1 @@
+go run gen.go < ref > ref.html
