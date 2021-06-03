@@ -1,0 +1,191 @@
+<html><body>
+<style>
+.a { display:none; background:#999 }
+pre{ margin:0 }
+</style>
+<script>
+function toggle(x) {
+	var e = document.getElementById("a"+x)
+	e.style.display = (e.style.display=="block") ? "none" : "block"
+	console.log("toggle!")
+}
+</script>
+
+<pre onclick="toggle(0)">: SET      RETURN    &#39;  each|slide|bin</pre>
+<pre class="a" id="a0">::  self      ::12 -&gt; 12
+ :  right     1 :2 -&gt; 2
+</pre>
+<pre onclick="toggle(1)">+ add      flip      /  fold|join |dec</pre>
+<pre class="a" id="a1"> +x flip      +(&#34;ab&#34;;&#34;cd&#34;) -&gt; (&#34;ac&#34;;&#34;bd&#34;)
+N+N add       1 2+3 -&gt; 4 5
+</pre>
+<pre onclick="toggle(2)">- subtract negate    \  scan|split|enc</pre>
+<pre class="a" id="a2"> -N negate    - 1 2 -&gt; -1 -2
+N-N subtract  1-2 3 -&gt; -1 -2
+</pre>
+<pre onclick="toggle(3)">* multiply first     &#39;: eachprior</pre>
+<pre class="a" id="a3"> *x first     *`a`b -&gt; `a   *(0 1;&#34;cd&#34;) -&gt; 0 1
+N*N multiply  1 2*3 4 -&gt; 3 8
+</pre>
+<pre onclick="toggle(4)">% divide   sqrt      /: eachright</pre>
+<pre class="a" id="a4"> %N sqrt      %25 -&gt; 5.0   %-1 -&gt; 0n
+N%N divide    4 3%2 -&gt; 2 1   4 3%2.0 -&gt; 2.0 1.5
+</pre>
+<pre onclick="toggle(5)">! mod|dict enum|key  \: eachleft</pre>
+<pre class="a" id="a5"> !i enum      !3 -&gt; 0 1 2   !-3 -&gt; -3 -2 -1
+ !I odometer  !2 3 -&gt; (0 0 0 1 1 1;0 1 2 0 1 2)
+ !d keys      !`a`b!0 1 -&gt; `a`b
+ !S ns keys   a.b.c:1;a.b.d:2;!`a`b -&gt; ``c`d
+x!y dict      `a`b!1 2 -&gt; `a`b!1 2
+i!I div       -10!1234 567 -&gt; 123 56
+i!I mod       10!1234 567 -&gt; 4 7
+</pre>
+<pre onclick="toggle(6)">&amp; min|and  where</pre>
+<pre class="a" id="a6"> &amp;I where     &amp;3 -&gt; 0 0 0   &amp;1 0 1 4 2 -&gt; 0 2 3 3 3 3 4 4
+ &amp;x deepwhere &amp;(0 1 0;1 0 0;1 1 1) -&gt; (0 1 2 2 2;1 0 0 1 2)
+N&amp;N min/and   2&amp;-1 3 -&gt; -1 2   0 0 1 1&amp;0 1 0 1 -&gt; 0 0 0 1
+</pre>
+<pre onclick="toggle(7)">| max|or   reverse</pre>
+<pre class="a" id="a7"> |x reverse   |&#34;abc&#34; -&gt; &#34;cba&#34;   |12 -&gt; 12
+N|N max/or    2|-1 3 -&gt; 2 3   0 0 1 1|0 1 0 1 -&gt; 0 1 1 1
+</pre>
+<pre onclick="toggle(8)">&lt; less     ascend    0: lines i/o</pre>
+<pre class="a" id="a8"> &lt;X ascend    &lt;&#34;abacus&#34; -&gt; 0 2 1 3 5 4
+ &lt;s open      fd:&lt;`&#34;/path/to/file.txt&#34;
+N&lt;N less      0 2&lt;1 -&gt; 1 0
+</pre>
+<pre onclick="toggle(9)">&gt; more     descend   1: bytes i/o</pre>
+<pre class="a" id="a9"> &gt;X descend   &gt;&#34;abacus&#34; -&gt; 4 5 3 1 0 2
+N&gt;N more      0 1&gt;0 2 -&gt; 0 0
+ &gt;i close     &gt;fd
+</pre>
+<pre onclick="toggle(10)">= equal    group</pre>
+<pre class="a" id="a10"> =X group     =&#34;abracadabra&#34; -&gt; &#34;abrcd&#34;!(0 3 5 7 10;1 8;2 9;,4;,6)
+ =i unitmat   =3 -&gt; (1 0 0;0 1 0;0 0 1)
+N=N equal     0 1 2=0 1 3 -&gt; 1 1 0
+</pre>
+<pre onclick="toggle(11)">~ match    not</pre>
+<pre class="a" id="a11"> ~x not       ~(0 2;``a;&#34;a \0&#34;;::;{}) -&gt; (1 0;1 0;0 0 1;1;0)
+x~y match     2 3~2 3 -&gt; 1   &#34;4&#34;~4 -&gt; 0   0~0.0 -&gt; 0
+</pre>
+<pre onclick="toggle(12)">, concat   enlist</pre>
+<pre class="a" id="a12"> ,x enlist    ,0 -&gt; ,0   ,0 1 -&gt; ,0 1   ,`a!1 -&gt; +(,`a)!,,1
+x,y concat    0,1 2 -&gt; 0 1 2  &#34;a&#34;,1 -&gt; (&#34;a&#34;;1)
+</pre>
+<pre onclick="toggle(13)">^ without  null</pre>
+<pre class="a" id="a13"> ^x null      ^(&#34; a&#34;;0 1 0N;``a;0.0 0n) -&gt; (1 0;0 0 1;1 0;0 1)
+a^y fill      1^0 0N 2 3 0N -&gt; 0 1 2 3 1   &#34;b&#34;^&#34; &#34; -&gt; &#34;b&#34;
+X^y without   &#34;abracadabra&#34;^&#34;bc&#34; -&gt; &#34;araadara&#34;
+</pre>
+<pre onclick="toggle(14)"># reshape  length</pre>
+<pre class="a" id="a14"> #x length    #&#34;abc&#34; -&gt; 3   #4 -&gt; 1   #`a`b`c!0 1 0 -&gt; 3
+I#y reshape   2 3#` -&gt; (```;```)   3#2 -&gt; 2 2 2
+f#y filter    {x&gt;1}#0 2 1 3 5 4 -&gt; 2 3 5 4
+</pre>
+<pre onclick="toggle(15)">_ drop|cut floor filter</pre>
+<pre class="a" id="a15"> _n floor     _12.34 -12.34 -&gt; 12 -13
+ _c lowercase _&#34;Ab&#34; -&gt; &#34;ab&#34;
+x_y drop      2_&#34;abcde&#34; -&gt; &#34;cde&#34;   `b_`a`b`c!0 1 2 -&gt; `a`c!0 2
+x_i delete    &#34;abcde&#34;_2 -&gt; &#34;abde&#34;
+f_y filterout {x&gt;1}_0 2 1 3 5 4 -&gt; 0 1
+</pre>
+<pre onclick="toggle(16)">$ cast     string    $[c;t;f] COND</pre>
+<pre class="a" id="a16"> $x string    $(12;&#34;ab&#34;;`cd;+) -&gt; (&#34;12&#34;;(,&#34;a&#34;;,&#34;b&#34;);&#34;cd&#34;;,&#34;+&#34;)
+s$y cast      `c$97 -&gt; &#34;a&#34;   `d$1 -&gt; 1.0   `$&#34;a&#34; -&gt; `a
+s$y int       `I$&#34;-12&#34; -&gt; -12
+</pre>
+<pre onclick="toggle(17)">? find|rnd uniq</pre>
+<pre class="a" id="a17"> ?x uniq      ?&#34;abacus&#34; -&gt; &#34;abcus&#34;
+X?y find      &#34;abcde&#34;?&#34;bfe&#34; -&gt; 1 0N 4
+i?x roll      3?1000 -&gt; 11 398 293   1?0 -&gt; ,-8164324247243690787
+i?x deal      -3?1000 -&gt; 11 398 293 /guaranteed distinct
+</pre>
+<pre onclick="toggle(18)">@ apply(1) type      @[x;i;[f;]y] amend</pre>
+<pre class="a" id="a18"> @x type      @1 -&gt; `b   @&#34;ab&#34; -&gt; `C   @() -&gt; `A   @(@) -&gt; `v
+x@y apply(1)  {x+1}@2 -&gt; 3   &#34;abc&#34;@1 -&gt; &#34;b&#34;   (`a`b!0 1)@`b -&gt; 1
+
+@[x;y;f]   amend @[&#34;ABC&#34;;1;_:] -&gt; &#34;AbC&#34;   @[2 3;1;{-x}] -&gt; 2 -3
+@[x;y;F;z] amend @[&#34;abc&#34;;1;:;&#34;x&#34;] -&gt; &#34;axc&#34;   @[2 3;0;+;4] -&gt; 6 3
+</pre>
+<pre onclick="toggle(19)">. apply(n) eval      .[x;i;[f;]y] drill</pre>
+<pre class="a" id="a19"> .S get       a:1;.`a -&gt; 1   b.c:2;.`b`c -&gt; 2
+ .C eval      .&#34;1+2&#34; -&gt; 3
+ .d values    .`a`b!0 1 -&gt; 0 1
+x.y apply(n)  {x*y+1}. 2 3 -&gt; 8   (`a`b`c;`d`e`f). 1 0 -&gt; `d
+.[x;y;f]   drill .[(&#34;AB&#34;;&#34;CD&#34;);1 0;_:] -&gt; (&#34;AB&#34;;&#34;cD&#34;)
+.[x;y;F;z] drill .[(&#34;ab&#34;;&#34;cd&#34;);1 0;:;&#34;x&#34;] -&gt; (&#34;ab&#34;;&#34;xd&#34;)
+.[f;y;f]   try   .[+;1 2;&#34;E:&#34;,] -&gt; 3   .[+;1,`2;&#34;E:&#34;,] -&gt; &#34;E:typ&#34;
+</pre>
+<pre onclick="toggle(20)">I/O verbs</pre>
+<pre class="a" id="a20">  0:x read  lines
+x 0:y write lines
+  1:x read  bytes
+x 1:y write bytes
+   &lt;s open          fd:&lt;`&#34;file.txt&#34;
+   &gt;i close         &gt;fd
+
+x can be a file descriptor (int) or symbol or string such as
+ &#34;file.txt&#34;
+ &#34;/path/to/file&#34;
+ &#34;host:port&#34;
+ &#34;:port&#34;         /host defaults to 127.0.0.1
+</pre>
+<pre onclick="toggle(21)">Adverbs:   &#39; / \ &#39;: /: \:</pre>
+<pre class="a" id="a21">  f&#39;x  each1     #&#39;(&#34;abc&#34;;3 4 5 6) -&gt; 3 4
+x F&#39;y  each2     2 3#&#39;&#34;ab&#34; -&gt; (&#34;aa&#34;;&#34;bbb&#34;)
+  i&#39;x  window    3&#39;&#34;abcdef&#34; -&gt; (&#34;abc&#34;;&#34;bcd&#34;;&#34;cde&#34;;&#34;def&#34;)
+  X&#39;x  bin       1 3 5 7 9&#39;:8 9 0 -&gt; 3 4 -1
+  F/x  fold      +/1 2 3 -&gt; 6
+  F\x  scan      +\1 2 3 -&gt; 1 3 6
+x F/y  seeded /  10+/1 2 3 -&gt; 16
+y F\x  seeded \  10+\1 2 3 -&gt; 11 13 16
+  f/x  converge  {1+1.0%x}/1 -&gt; 1.618033988749895
+  f\x  c-scan    (-2!)\100 -&gt; 100 50 25 12 6 3 1 0
+i f/x  n-times   5(2*)/1 -&gt; 32
+i f\x  n-scan    5(2*)\1 -&gt; 1 2 4 8 16 32
+f f/x  while     (1&lt;){$[2!x;1+3*x;-2!x]}/3 -&gt; 1
+f f\x  w-scan    (1&lt;){$[2!x;1+3*x;-2!x]}\3 -&gt; 3 10 5 16 8 4 2 1
+  C/X  join      &#34;ra&#34;/(&#34;ab&#34;;&#34;cadab&#34;;&#34;&#34;) -&gt; &#34;abracadabra&#34;
+  C\C  split     &#34;ra&#34;\&#34;abracadabra&#34; -&gt; (&#34;ab&#34;;&#34;cadab&#34;;&#34;&#34;)
+  I/I  decode    24 60 60/1 2 3 -&gt; 3723   2/1 1 0 1 -&gt; 13
+  I\I  encode    24 60 60\3723 -&gt; 1 2 3   2\13 -&gt; 1 1 0 1
+  F&#39;:x eachprior -&#39;:12 13 11 17 14 -&gt; 12 1 -2 6 -3
+x F&#39;:y seeded &#39;: 10-&#39;:12 13 11 17 14 -&gt; 2 1 -2 6 -3
+x F/:y eachright 1 2*/:3 4 -&gt; (3 6;4 8)
+x F\:y eachleft  1 2*\:3 4 -&gt; (3 4;6 8)
+</pre>
+<pre onclick="toggle(22)">Types: ACBHILDSMmcbhildsopqruvw</pre>
+<pre class="a" id="a22">list atom
+ `A        generic list   ()   ,&#34;ab&#34;   (0;`1;&#34;2&#34;;{3};%)
+ `C   `c   char    8bit   &#34;a&#34;   0x62   &#34;b\0\&#34;\n\r\t&#34;
+ `B   `b   byte    8bit   -128 127
+ `H   `h   short  16bit   -32768 32787
+ `I   `i   int    32bit   -2147483648 2147483647
+ `L   `l   long   64bit   0N 9223372036854775807
+ `D   `d   double 64bit   -0w -0.0 0.0 0w 1.2e308 0n
+ `S   `s   symbol         `   `a   `&#34;file.txt&#34;   `b`cd`&#34;ef&#34;
+ `M   `m   table&amp;dict     +`a`b!(0 1;&#34;23&#34;)   (0#`)!()
+      `o   lambda         {1+x*y#z}  {[a;b]+/*/2#,a,b}
+      `p   projection     1+   {z}[0;1]   @[;i;;]
+      `q   composition    *|:   {1+x*y}@
+      `r   derived verb   +/   2\   {y,x}&#39;:
+      `u   monadic verb   +:   0::
+      `v   dyadic  verb   +   0:
+      `w   adverb         &#39;   /:
+</pre>
+<pre onclick="toggle(23)">Special symbols: `@ `?</pre>
+<pre class="a" id="a23">   `@x serialize    ` 7 8 9 -&gt; 0x020300000000000000070809
+   `?C deserialize  `?0x020300000000000000070809 -&gt; 7 8 9
+  `j?C parse json   `j?&#34;{\&#34;a\&#34;:1,\&#34;b\&#34;:[true,\&#34;c\&#34;]}&#34; -&gt; `a`b!(1.0;(1;,&#34;c&#34;))
+  `k@x pretty-print `k(&#34;ab&#34;;2 3) -&gt; &#34;(\&#34;ab\&#34;;2 3)&#34;
+  `p@C parse k
+`hex@C hexadecimal  `hex&#34;ab&#34; -&gt; &#34;6162&#34;
+`sin@N trigonometry `sin 12.34 -&gt; 0.22444212919135995
+  `x@x fork-exec    `x((&#34;/bin/wc&#34;;&#34;-l&#34;);&#34;a\nbc\nd\n&#34;) -&gt; &#34;3\n&#34;
+  `t[] current time (milliseconds)
+`err@C throw error
+ `md5@C `sha1@C `sha256@C `sha3@C             hash
+ `aes@(key;plaintext) `aes?(key;ciphertext)   encrypt/decrypt (ECB mode only)
+</pre>
+<pre onclick="toggle(24)">grammar:  E:E;e|e e:nve|te| t:n|v v:tA|V n:t[E]|(E)|{E}|N</pre>
+</body></html>
