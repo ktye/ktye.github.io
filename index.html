@@ -1,22 +1,59 @@
-<head><meta charset="utf-8"><title>k</title></head>
+<head><meta charset="utf-8"><title>.</title></head>
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="stylesheet" href="codemirror/codemirror.min.css">
+
 <style>
  html,body,textarea{margin:0;padding:0;overflow:hidden;font-family:monospace;}
- textarea{top:0;left:0;width:100%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
- textarea:focus{color:white;}.hold{background:#666666}
+ #term{position:absolute;top:0;right:0;width:50%;height:100%;background:black;color:#cccccc;border:none;resize:none;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}::-webkit-scrollbar{width:0;height:0;}
+ #term:focus{color:white;}.hold{background:#666666}
+ .codemirror{position:absolute;top:0;left:0;width:50%;height:100%;border:none;resize:none;background:#ffffea}
+ #runb{position:absolute;top:0;right:50%;font-family:monospace;z-Index:10}
 </style>
+<script src="codemirror/jquery.min.js"></script>
+<script src="codemirror/codemirror.min.js"></script>
+
 <body>
+<textarea id="edit"></textarea>
 <textarea id="term" class="term" wrap="off" spellcheck="false"></textarea>
+<button id="runb" onclick="run()">run</button>
 <script>
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function hash(){return decodeURIComponent(window.location.hash.substr(1))}
+
+var ed = CodeMirror.fromTextArea(edit, {"lineNumbers":false,"tabSize":8,"indentUnit":8,"indentWithTabs":true,"smartIndent":true})
+ed.setValue(hash()); if(hash()==="")fetch('readme').then(r=>{return r.text()}).then(r=>ed.setValue(r))
+
+// search selected: middle-button(all), right(next) (bug: mouseup(chrome), ff ok)
+document.addEventListener('contextmenu',function(e){e.preventDefault()})
+ed.on('mousedown', function(cm, e) {
+ if     (e.button==2 && (ed.getSelection().length>0)){search(ed.getSelection(),false);pd(e)}
+ else if(e.button==1 && (ed.getSelection().length>0)){search(ed.getSelection(),true );pd(e)}
+})
+function indexAll(a, s) { var r = [], i = -1; while ((i = a.indexOf(s, i+1)) != -1){ r.push(i); }; return r; }
+function search(t, all){
+ var v = ed.getValue()
+ var p = ed.getCursor()
+ if(all) {
+  var n = indexAll(v,t)
+  for(var i=0; i<n.length; i++) ed.addSelection(ed.posFromIndex(n[i]), ed.posFromIndex(n[i]+t.length), {"scroll":true})
+ } else {
+  var c = ed.indexFromPos(ed.getCursor())
+  c = (p.sticky == "after") ? c+t.length : c
+  var n = v.indexOf(t, c)
+  if (n == -1) { n = v.indexOf(t, 0) }
+  ed.setSelection(ed.posFromIndex(n), ed.posFromIndex(n+t.length), {"scroll":true})
+ }
+}
+
 
 var term = ge("term")
 window.addEventListener('unhandledrejection', function(e) {term.value+=String(e.reason)})
 function ge(x){return document.getElementById(x)}
-function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function banner(x){term.value = "ktye/k "+x.byteLength+"b\n ";return x}
 
 
-var K, C, U
+var K, C, U, bak
 function us(s){return new TextEncoder("utf-8").encode(s)}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function lo(x){return Number(BigInt.asUintN(32,x))}
@@ -27,9 +64,15 @@ function sk(x){var xp=lo(x);return su(C.slice(xp,xp+K.nn(x)))}
 var env={wasi_unstable:{ 
 // l32:function(x){console.log(x);return x},
 // l64:function(x){console.log(BigInt.asUintN(64,x));return x},
+ args_get: function(a,b){return 0},
+ args_sizes_get: function(a,b){return 0},
  proc_exit:function(x){console.log("exit", x)},
  fd_read:  function(a,b,c,d){console.log("read",a,b,c,d);return 0},
- fd_write: function(fd,p,nio,nw){var x=U[p>>>2]; var n=U[(4+p)>>>2];term.O(su(C.slice(x,x+n)));return 0}
+ fd_write: function(fd,p,nio,nw){msl();var x=U[p>>>2]; var n=U[(4+p)>>>2];term.O(su(C.slice(x,x+n)));return 0},
+ fd_seek:  function(fd,o,w,r){return 0},
+ fd_close: function(fd){return 0},
+ path_open:function(fd,dirflags,path,pathlen,oflags,baserights,inheritrights,fdflags,res){return 0},
+ clock_time_get:function(a,b,p){msl();J[p>>>3]=BigInt.asIntN(64, BigInt(Math.floor(1e6*performance.now())));return 0}
 }}
 
 
@@ -37,33 +80,76 @@ var env={wasi_unstable:{
 fetch('k.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(banner(r),env)).then(r=>{
  K=r.instance.exports
  K.kinit()
- C=new Uint8Array(K.memory.buffer)
- U=new Uint32Array(K.memory.buffer)
+ ksave()
+ gettest()
 })
 
-
-
-function ktry(s){
- try { s=K.Val(ks(s));return (s==0)?"":sk(K.Kst(s)) }
- catch(e){console.log(e);return ""}
+function settest(){runb.value="test";runb.innerText="test"}
+function gettest(){
+ if(hash()==="test")
+  fetch('k.t').then(r=>{return r.text()}).then(r=>{ed.setValue(r);settest()})
 }
+
+var bak
+function msl() {
+ C=new Uint8Array(K.memory.buffer)
+ U=new Uint32Array(K.memory.buffer)
+ J=new BigInt64Array(K.memory.buffer)}
+function ksave(){ msl();bak=C.slice(0,1<<U[32]) }
+
+function ktry(s) { 
+ try      { if(typeof(s)==="function"){s()}else{K.repl(ks(s))}; ksave();return 0}
+ catch(e) { console.log(e); C.set(bak); return K.Srcp() }}
+// function ktry(s) { K.repl(ks(s)); return 0 } //unprotected
 
 
 function kd(e){var N="\n";var t=e.srcElement;
  if(e.which===27){pd(e);if(t.hold){t.className="";t.selectionStart=t.hold;t.hold=0}else{t.hold=t.selectionStart;t.className="hold"}}
- if(e.which===13&&!t.hold){pd(e);let s=t.value,p=t.selectionStart,q=t.selectionEnd;if(p===q){p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1}else{t.value+=s.slice(p,q)}S=s.slice(p,q);exec(S,t)}
+ if(e.which===13&&!t.hold){pd(e);let s=t.value,p=t.selectionStart,q=t.selectionEnd;
+  if(p===q){
+   p=s.slice(0,p).lastIndexOf(N)+1;q+=s.slice(q).indexOf(N)+1;t.value+=(q==t.value.length)?"":s.slice(1+p,q-1)
+  }else{t.value+=s.slice(p,q)} S=s.slice(p,q);exec(S,t)}
 }
 function out(t,s){return function(s){t.value+=s;t.scrollTo(0,t.scrollHeight)}}
 function exec(s,t) {s=s.trim();var t0=0;var t1=0
- if(s=="\\c"){t.value=" ";return}
+ if(s=="\\c"){t.value="ktye/k";t.exec(s)}
  if((s=="\\")||(s=="\\h")){t.value+="\n"+t.help+"\n ";t.scrollTo(0,t.scrollHeight);return}
- if(s.startsWith("\\t")){s=s.slice(2);t0=performance.now()}
+ //if(s.startsWith("\\t")){s=s.slice(2);t0=performance.now()}
  t.exec(s);t1=performance.now();if(t0!=0){term.O((t1-t0)+"ms\n ")}
 }
 term.onkeydown=kd
 term.O=out(term)
-term.exec = function(s){term.value+="\n";var s=ktry(s);term.O(s.length?s+"\n ":" ")}
+term.exec = function(s){term.value+="\n";ktry(s);term.O(" ")}
 term.help = "...\n"
+
+function run(){
+ if(runb.value=="test"){test(ed.getValue());return}               //after drop file.t
+ else if(runb.value!=""){assign(runb.value,ed.getValue());return} //after drop data file
+ var s=ed.getValue();window.location.hash=encodeURIComponent(s);term.value="";
+ var p = ktry(s); if(p!=0){ ed.setSelection(ed.posFromIndex(p), ed.posFromIndex(p+1), {"scroll":true})}
+}
+function assign(x,y){
+ ktry(function(){K.dx(K.Asn(K.sc(ks(x)),ks(y)))})
+ runb.value="";runb.innerText="run";ed.setValue("")
+}
+function test(x){
+  ktry(function(){K.test(ks(x),0);runb.value="";runb.innerText="run";ed.setValue("ok")})
+}
+
+
+// drop file (execute *.k, or store in variable)
+window.ondragover=function(e){pd(e)}
+window.ondrop=function(e){pd(e);if (e.dataTransfer.items){for (var i=0;i<e.dataTransfer.items.length;i++){if(e.dataTransfer.items[i].kind=='file'){var file=e.dataTransfer.items[i].getAsFile();addfile(file)}}}else for(vari=0;i<e.dataTransfer.files.length;i++)addfile(e.dataTransfer.files[i])}
+function addfile(x){
+ var r = new FileReader()
+ r.onload = function(){
+  var u = new Uint8Array(r.result)
+  ed.setValue(su(u))
+  if(x.name.endsWith(".t")) settest()
+  else if(x.name.endsWith(".k")==false){runb.value=x.name;runb.innerText=x.name+":"}
+ }
+ r.readAsArrayBuffer(x)
+}
 
 </script>
 </body></html>
