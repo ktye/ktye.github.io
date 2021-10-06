@@ -27,7 +27,7 @@
 <div id="_box">
  <div id="_edt"></div>
  <textarea id="_con" wrap="off" spellcheck="false"></textarea>
- <div id="_uid""><pre id="_uihelp"></pre></div>
+ <div id="_uid""><pre id="_uihelp"></pre><canvas id="_icv" style="border:1px solid red"></canvas></div>
 </div>
 <footer class="_ftr"><button class="_fbt" id="_bed">edit</button><button class="_fbt" id="_bcn">console</button><button class="_fbt" id="_brn">run</button><button class="_fbt" id="_bui">ui</button></footer>
 <a id="_dl" style:"display:none"></a>
@@ -37,7 +37,7 @@ function hide(x){x.style.display="none"}function unhide(x){x.style.display="bloc
 var runb=ge("_brn");var bui=ge("_bui")
 var edit=ge("_edt");ge("_bed").onclick=function(e){showtab(edit);hide(bui);unhide(runb)}
 var term=ge("_con");ge("_bcn").onclick=function(e){showtab(term);hide(runb);unhide(bui)}
-var udiv=ge("_uid");ge("_brn").onclick=function(e){run()};ge("_bui").onclick=function(e){showtab(udiv)}
+var udiv=ge("_uid");ge("_brn").onclick=function(e){run()};ge("_bui").onclick=function(e){ui()}
 var runb=ge("_brn");
 function showtab(x){hide(term);hide(edit);hide(udiv);unhide(x)}
 
@@ -87,6 +87,8 @@ function ku(u){msl();var x=K.mk(18,u.length);C.set(u,lo(x));return x}
 function ks(s){return ku(us(s))}
 function sk(x){msl();var t=K.tp(x);x=(4==t)?x=K.cs(x):(18==t)?x:K.Kst(x);var xp=lo(x);var r=su(C.slice(xp,xp+K.nn(x)));K.dx(x);return r}
 function la(a){msl();var r=K.mk(23,a.length);for(var i=0;i<a.length;i++)J[i+(lo(r)>>>3)]=a[i];return r}
+function lup(s){return K.Val(K.sc(ks(s)))}
+function asn(s,x){K.dx(K.Asn(K.sc(ks(s)),x))}
 
 var filename="" 
 function path_open(fd,dirflags,path,pathlen,oflags,baserights,inheritrights,fdflags,res){
@@ -117,6 +119,8 @@ function download(name,u){
 fetch('k.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(banner(r),env)).then(r=>{
  K=r.instance.exports
  K.kinit()
+ asn("WIDTH",K.Ki(window.innerWidth));asn("HEIGHT",K.Ki(window.innerHeight-40));
+ var z=ge("_icv").getContext('2d');z.font="20px monospace";asn("FH",K.Ki(20));asn("FW",K.Ki(z.measureText("M").width))
  ksave()
 })
 
@@ -192,42 +196,111 @@ ge("_uihelp").textContent=`/ui-example:
 variables are bound to html elements with the same id, value contain their type.
 
  html-element k-type
- input        bcifzBCIFZ
- checkbox     b
- table        DT
- listbox      LDT
- textarea     CL
- pre          (2d-display)
- button       l  (niladic)
- canvas       ID (I:pixels, D:2d-api-calls)
+ input        bcifzBCIFZ   <input id='X'/>
+ checkbox     b            <input type='checkbox' id='X'/>
+ table        DT           <table id='X'/>
+ select       BCFIZL       <select id='X' data-options='o'/>    selection assigns X
+ listbox      LDT          <select id='X' data-index='i'/>      selection assigns i (single/multiple)
+ textarea     CL           <textarea id='X'/>
+ pre          (2d-display) <pre id='X'/>
+ button       l  (niladic) <button id='X'/>
+ canvas       ID (I:pixels, D:2d-api-calls) <canvas id='X' data-click='c' data-zoom='z'/>  c,z: callbacks
  default      k-string
+
+/vector graphics
+d:\`fillStyle\`fillRect!("green";10 20 50 60)
+ui:"<canvas width=300 height=200 id='d'></canvas>"
+ 
+s:{(-/x*x;2*/x)}
+m:{+/x*x}
+C:(3*!85),(255+768*!85),(65535+196608*!86)
+W:600;H:400
+O:0 -.5
+S:2*2 3.
+f:{ 
+ d:S*((y;x)-n%2.)%n:(H;W)
+ O::O+d
+ S::S%2
+ c:|(O-S%2)+S*(!n)%0.+n
+ X::C@+/(.001*!255)<\\:m(c+s@)10/0 0}
+X:f[W%2;H%2]
+ui:"<canvas width=",($W)," height=",($H)," data-click='f' id='X'/>"
 `
 
 function ui(){var u=K.Val(K.Ku(BigInt(26997)));if(u==0)return;clr(udiv);ktry(function(){showui(u,udiv)})}
 function clr(p){while(p.firstChild)p.removeChild(p.firstChild)}
-function showui(x,p){var e=p;if(K.tp(x)!=18){K.dx(x);return};p.insertAdjacentHTML("beforeend",sk(x));glueAll(udiv);showtab(udiv)}
-function glueAll(p){var nodes=p.childNodes;
- for(var i=0;i<nodes.length;i++){var c=nodes[i];if(c){glue(c);var cn=c.childNodes;var n=cn.length;for(var j=0;j<n;j++)glueAll(cn[j])}}}
-function glue(e){if(e.id===undefined)return;var s=K.sc(ks(e.id));var x=K.Val(s);if(lo(s)==0)return;var t=tstr(K.tp(x))
+function showui(x,p){var e=p;/*if(K.tp(x)==19){return framebuffer(x)};*/if(K.tp(x)!=18){x=K.Atx(K.Val(K.sc(ks(".html"))),x)};p.insertAdjacentHTML("beforeend",sk(x));glueAll(udiv);showtab(udiv)}
+function glueAll(p){var nodes=p.childNodes;if(nodes.length==0)glue(p);for(var i=0;i<nodes.length;i++){glueAll(nodes[i])}}
+function glue(e){if(e.id===undefined)return; console.log("glue",e.id,e); var s=K.sc(ks(e.id));var x=K.Val(s);if(lo(s)==0)return;var t=tstr(K.tp(x))
  switch(e.nodeName){
- case "INPUT":  glueInput(e,s,x,t); break;
- case "CANVAS": glueCanvas(e,s,x,t); break;
- case "BUTTON": glueButton(e,s,x,t); break;
+ case "INPUT":    glueInput(e,s,x,t); break;
+ case "CANVAS":   glueCanvas(e,s,x,t); break;
+ case "BUTTON":   glueButton(e,s,x,t); break;
+ case "PRE":      e.textContent=lstr(x);break;
+ case "SELECT":   glueSelect(e,s,x,t);break;
+ case "TABLE":    glueTable(e,s,x,t);break;
+ case "TEXTAREA": glueTextarea(e,s,x,t);break;
  default:e.textContent = kstr(x)}}
  
-function glueInput(e,s,x,t){
+function glueInput(e,s,x,t){if(e.type=="checkbox"){glueCheckbox(e,s,x,t);return}
  switch(t){
  case"b":case"c":case"i":case"f":case"z":case"B":case"C":case"I":case"F":case"Z":
   e.onchange=function(){var v=e.value;var r=update(e,s,t,v);e.style.backgroundColor=r?"white":"orange";if(r)e.value=v;return r}
   e.value=kstr(x);break
  default: e.value="type "+t+"?";K.dx(x)}}
 
+function glueCheckbox(e,s,x,t){if(t!="b")return;e.checked=lo(x)!=0;e.onchange=function(){K.dx(K.Asn(s,K.Kb(e.checked?1:0)))}}
+
 function glueCanvas(e,s,x,t){var z=e.getContext('2d');var w=e.width;var h=e.height;
- if(t=="I"){var d=new ImageData(new Uint8ClampedArray(C.slice(lo(x),lo(x)+4*K.nn(x))),w,h);for(var i=3;i<d.data.length;i+=4)d.data[i]=255;z.putImageData(d,0,0)}
- else K.dx(x)}
+ if(t=="I"){x=K.alpha(x);var d=z.createImageData(w,h);d.data.set(C.slice(lo(x),lo(x)+4*K.nn(x)));z.putImageData(d,0,0)}
+ else if(t=="D"){var [k,x]=K.spl2(x);var n=K.nn(k);for(var i=0;i<n;i++){
+  var s=sk(K.ati(K.rx(k),i));var a=jk(K.ati(K.rx(x),i));
+  console.log(s,a)
+  if(typeof(z[s])==="function")z[s](...a);else z[s]=a}
+ }else{K.dx(x);return}
+ if(e.dataset.click){e.ondblclick=function(ev){var f=lup(e.dataset.click);if(lo(f)==0)return;K.dx(K.Cal(f,K.l2(K.Ki(ev.offsetX),K.Ki(ev.offsetY))));ui()}}
+ if(e.dataset.zoom){
+  var zoom=false; var bg=z.getImageData(0,0,e.width,e.height)
+  var zs=function(ev){e.onmousemove=zm;zoom=[ev.clientX,ev.clientY,0,0];e.style.cursor="crosshair"}
+  var zm=function(ev){if(zoom!==false){zoom=[zoom[0],zoom[1],ev.clientX-zoom[0],ev.clientY-zoom[1]];z.putImageData(bg,0,0);z.beginPath();z.rect(...zoom);z.strokeStyle='red';z.stroke()}}
+  var ze=function(ev){z.putImageData(bg,0,0);e.style.cursor="";if(Math.abs(zoom[2])< 5||Math.abs(zoom[3])<5){zoom=false;return}
+   console.log("zoom",zoom);
+   var f=lup(e.dataset.zoom);if(lo(f)!=0){K.dx(K.Cal(f,K.l1(K.Cat(K.Cat(K.Ki(zoom[0]),K.Ki(zoom[1])),K.Cat(K.Ki(zoom[0]+zoom[2]),K.Ki(zoom[1]+zoom[3]))))));ui()}
+   zoom=false;e.onmousemove=null}
+  e.onmousedown=zs;e.onmouseup=ze}}
+
 
 function glueButton(e,s,x,t){if(t!="l")return;e.onclick=function(){ktry(function(){K.Cal(x,K.mk(23,0)); ui()})}}
 
+function glueSelect(e,s,x,t){if(e.dataset.options){glueCombo(e,s,x,t)}else{glueListbox(e,s,x,t)}}
+
+function glueCombo(e,s,x,t){var o=lup(e.dataset.options);if(o==0){K.dx(x);return}
+ var n=K.nn(o);for(var i=0;i<n;i++){var oe=ce("option");var oi=K.Atx(K.rx(o),K.Ki(i));oe.selected=(K.match(oi,x)==1);oe.innerText=kstr(oi);e.appendChild(oe)}
+ K.dx(o);K.dx(x);e.onchange=function(){K.dx(K.Asn(s,K.Atx(lup(e.dataset.options),K.Ki(e.selectedIndex))))}}
+
+function glueListbox(e,s,x,t){var y=lup(e.dataset.index);if(x==0||y==0){K.dx(x);K.dx(y);return};
+ var n=K.nn(x);if(e.size==0)e.size=n;e.multiple=K.tp(y)==19;if(t=="T"){x=K.Drp(K.Atx(K.sc(ks("l")),x), K.Ki(1))};
+ for(var i=0;i<n;i++){var o=ce("option");o.innerText=kstr(K.Atx(K.rx(x),K.Ki(i)));o.selected=e.multiple?lo(K.In(K.Ki(i),K.rx(y)))==1:lo(y)==i;e.appendChild(o)}
+ var selectedIndexes=function(){var o=e.selectedOptions;var r=K.mk(3+16,o.length);for(var i=0;i<o.length;i++)K.sti(r,i,K.Ki(o[i].index));return r}
+ K.dx(x);K.dx(y);e.onchange=function(){var si=e.dataset.index;if(e.multiple){asn(si,selectedIndexes())}else{
+ asn(si,K.Ki(e.selectedIndex))}}}
+ 
+function glueTable(e,s,x,t){if(t!="T"){K.dx(x);return};var n=K.nn(x);var [k,x]=K.spl2(x);var m=K.nn(k);
+ var tr=ce("tr");var th=ce("th");th.textContent="#";tr.appendChild(th);var h=[];var ti=[];var ts=K.Ech(BigInt(19),K.l1(K.rx(x)));
+ for(var i=0;i<m;i++){var th=ce("th");h[i]=sk(K.ati(K.rx(k),i));ti[i]=sk(K.ati(K.rx(ts),i)).toLowerCase();th.textContent=h[i];tr.appendChild(th)};e.appendChild(tr);K.dx(k);K.dx(ts)
+ for(var j=0;j<n;j++){var tr=ce("tr");var td=ce("td");td.textContent=j;tr.appendChild(td);
+  for(var i=0;i<m;i++){var td=ce("td");td.textContent=sk(K.ati(K.ati(K.rx(x),i),j));td.dataset.i=i;td.dataset.j=j;td.v=td.textContent
+   td.ondblclick=function(ev){
+    var td=ev.target;var tr=td.parentNode;
+    var restore=function(s,ed){td.textContent=s;tr.insertBefore(td,ed);tr.removeChild(ed)}
+    var c=td.textContent;var ed=ce("input");ed.dataset.i=td.dataset.i;ed.dataset.j=td.dataset.j;ed.dataset.v=c;ed.value=c;tr.insertBefore(ed,td);tr.removeChild(td)
+    ed.onchange=function(ev){var ed=ev.target;var rs=ed.value;var i=Number(ed.dataset.i);var j=Number(ed.dataset.j); var r=update(ed,[s,K.sc(ks(h[i])),K.Ki(j)],ti[i],ed.value);if(r){restore(rs,ed)}else{ed.style.backgroundColor="orange"};return r}
+    ed.onkeydown=function(ev){if(ev.keyCode!=27)return;var ed=ev.target;var rs=ed.value;restore(ed.dataset.v,ed)}
+  }
+   tr.appendChild(td)
+  };e.appendChild(tr)};K.dx(x)}
+
+function glueTextarea(e,s,x,t){if(t=="L"){x=K.join(K.Kc(10),x)}else if(t!="C"){K.dx(x);return};e.value=sk(x);e.onchange=function(){x=ks(e.value);K.dx(K.Asn(s,t=="L"?K.split(K.Kc(10),x):x))}}
 
 function update(e,path,t,s){ // ui-assign callback
  var x=K.Cst(K.sc(ks(t=="s"?"":t)), ks(s)) // x:t$s or `$s
@@ -238,142 +311,40 @@ function update(e,path,t,s){ // ui-assign callback
 function kstr(x){var t=K.tp(x);if(t==2)return String.fromCharCode(lo(x));if(t==18||t==4)return sk(x);if(t>16&&t<23){
  var n=K.nn(x);if(n==0){K.dx(x);return ""}else if(n==1){x=K.Fst(x)}};return sk(K.Kst(x))}
 
+function lstr(x){return sk(K.join(K.Kc(10),K.Atx(K.sc(ks("l")),x)))}
 function tstr(t){const T="vbcisfzldtcdpl000BCISFZLDT";return T[t]}
 
-/* (generate html elements from a k-list)
-   //  x:1   /variable with type
-   // ui:`x  /ui references variables (double-binding)
-   // ui:("label";`x)   /add a label
-   // ui:`x`y`z         /container of 3 widgets (default: row direction)
-   // ui:("v";`x;`y;`z) /container with vertical layout (flexDirection:"column")
-   // ui:("c";`x;vec)   /combobox, vec is a list of options (vector type of x)
-   // ui:("l";`x;`sel)  /listbox x maybe list/vector/dict/table; sel atom(single-select) vector(multi-select)
-   // ui:("e";`x)       /textarea
-function showui(x,p){var e=p;var ver=false
- var t=K.tp(x);if(t< 16){x=K.Enl(x);t+=16}
- else          if(t==18||t==24){x=K.Enl(x);t=23} //char/dict
- var n=K.nn(x);if((n>1)&&t==23){var h=K.Fst(K.rx(x));if(K.tp(h)==2){
-  switch(lo(h)){
-  case  99: display(showCombo(K.ndrop(1,x)),p,x);      return  // ("c";`x;options)
-  case 101: display(showEditor(K.Las(x)),p,x);         return  // ("e";`x)
-  case 103: display(showCanvas(K.Las(x),300,200),p,x); return  // ("g";d) ("g";d;[w h (nyi)])
-  case 108: display(showListbox(K.ndrop(1,x)),p,x);    return  // ("l";`x;`sel)
-  case 118: ver=true; x=K.ndrop(1,x); n--; break               // ("v";...)
-  }}else{K.dx(h)}}
- if(n>1){e=ce("div");e.style.display="flex";e.style.flexDirection=ver?"column":"row"}
- for(var i=0;i<n;i++){var xi=K.ati(K.rx(x),i);t=K.tp(xi)
-  switch(t){
-  case  4: show(e,xi);               break // symbol (variable-binding)
-  case 18: showText(e,sk(K.rx(xi))); break // char   (text node)
-  case 24: showCustom(e,K.rx(xi));   break // dict   (custom element)
-  default: showui(K.rx(xi),e);       break // list   (nested row/column)
-  }K.dx(xi)};K.dx(x)
- display(e,p,x)}
-function display(e,p,x){if(e!=p&&e!=undefined)p.appendChild(e);ide.style.display=x?"none":block;uid.style.display=x?"block":"none"}
-
-
-function show(p,s){var x=lookup(s);var e;var t=K.tp(x)
- if(t==13 && typeof(s)!=="object"){ //lambda (button)
-  e=ce("button");e.textContent=pathname(s)
-  e.onclick=function(){ktry(function(){K.Cal(K.Val(s),K.mk(23,0)); ui()})}
-  K.dx(x);p.appendChild(e)
- }else if(t>0&&t<23){
-  e=ce("input");e.className=tstr(t);e.title=pathname(s)+"("+tstr(t)+")"
-  var get=function(e){return e.value}; var set=function(e,s){e.value=s}
-  if(t==1){ e.type="checkbox";get=function(e){return e.checked?"1b":"0b"}; set=function(e,s){e.checked=s=="1b"}; }
-  set(e,kstr(x))
-  e.onchange=function(){var v=get(e);var r=update(e,s,tstr(t),v);if(r)e.value=v;return r}
-  p.appendChild(e)
- }else if(t==24){ // dict
-  var k=K.x0(lo(x));var v=K.x1(lo(x));K.dx(x);var n=K.nn(k);if(K.tp(k)!=20){K.dx(k);K.dx(v);return} // only `s!..
-  var te=ce("table");
-  for(var i=0;i<n;i++){var ki=K.ati(K.rx(k),i);
-   var tr=ce("tr");var th=ce("th");th.innerText=sk(ki);tr.appendChild(th);
-   var td=ce("td");show(td,pushpath(s,ki),K.ati(K.rx(v),i));tr.appendChild(td);te.appendChild(tr)}
-  p.appendChild(te);K.dx(k);K.dx(v)
- }else if(t==25) showTable(p,x,s); else K.dx(x)}
-
-function showTable(p,x,s){var ta=ce("table");var n=K.nn(x);var [k,x]=K.spl2(x);var m=K.nn(k);var ks=[]
- var tr=ce("tr");for(var i=0;i<m;i++){var th=ce("th");ks[i]=K.ati(K.rx(k),i);th.textContent=sk(ks[i]);
-  th.onclick=function(evt){selectColumn(ta,evt.target,evt.target.classList.toggle("sel"))}
-  tr.appendChild(th)};ta.appendChild(tr);K.dx(k)
- for(var j=0;j<n;j++){
-  var tr=ce("tr");for(var i=0;i<m;i++){var xi=K.x0(lo(x)+8*i);var ki=K.ati(K.rx(k),i);
-   var td=ce("td");td.textContent=sk(K.ati(xi,j));
-   td.ondblclick=cellUpdate(ta,s,ks[i],tr,j,i);
-   td.onclick=function(evt){evt.target.classList.toggle("sel")}
-   tr.appendChild(td)
-  };ta.appendChild(tr)
- };p.appendChild(ta)}
-
-function showText(p,s){var e=ce("span");e.textContent=s;p.appendChild(e)}
-function showEditor(x){var s=x;x=K.Val(x);var e=ce("textarea");e.value=sk(K.rx(x));e.onchange=function(){K.dx(K.Asn(s,ks(e.value)))};K.dx(x);return e}
-
-function showCombo(x){var s=K.Fst(K.rx(x));if(K.tp(s)!=4){K.dx(x);K.dx(s);return} //(`s;options)
- var o=K.ati(K.rx(x),1);K.dx(x);x=K.Val(s);var t=K.tp(x);x=kstr(x);
- var e=ce("select");e.className=tstr(t);e.onchange=function(){update(e,s,tstr(t),e.value)};var n=K.nn(o)
- for(var i=0;i<n;i++){var oe=ce("option");oe.className=tstr(t);var si=kstr(K.ati(K.rx(o),i));oe.selected=si==x;oe.value=si;oe.innerText=si;e.appendChild(oe)}
- K.dx(o);return e}
- 
-function showListbox(x){var s=K.Las(K.rx(x));var x=K.Fst(x);if(K.tp(x)!=4||K.tp(s)!=4){K.dx(x);K.dx(s);return} //(`s;`sel)
- var ss=s;var s=K.Val(s);var xs=x;x=K.Val(x);var t=K.tp(x);if(t==24){s=K.Fnd(K.Til(K.rx(x)),s)};var multi=K.tp(s)>16
- x=K.Lst(x);var n=K.nn(x);var e=ce("select");e.multiple=multi;if(!multi)e.size=n
- e.onchange=function(){var i=multi?selectedIndexes(e):K.Ki(e.selectedIndex);K.dx(K.Asn(ss,(t==24)?K.Atx(K.Til(K.Val(xs)),i):i))}
- for(var i=0;i<n;i++){var oe=ce("option");var si=kstr(K.ati(K.rx(x),i));oe.selected=inSelection(i,s,t);oe.value=si;oe.innerText=si;e.appendChild(oe)}
- K.dx(x);return e}
-
-function inSelection(i,sel,t){if(K.tp(sel)==3){return (i-((t==25)?1:0))==lo(sel)}else{return lo(K.in(K.Ki(i),sel,3))!=0}}
-function selectedIndexes(e)  {var o=e.selectedOptions;var r=K.mk(3+16,o.length);for(var i=0;i<o.length;i++)K.sti(r,i,K.Ki(o[i].index));return r}
-
-function showCanvas(x,w,h){x=K.Val(x);var c=ce("canvas");c.width=w;c.height=h;c.style="border:1px solid red";var z=c.getContext('2d');
- if(K.tp(x)==19){var d=new ImageData(new Uint8ClampedArray(C.slice(lo(x),lo(x)+4*K.nn(x))),w,h);for(var i=3;i<d.data.length;i+=4)d.data[i]=255;z.putImageData(d,0,0)}
- else{var [k,x]=K.spl2(x);var n=K.nn(k);for(var i=0;i<n;i++){
-  var s=sk(K.ati(K.rx(k),i));var a=jk(K.ati(K.rx(x),i))
-  if(typeof(z[s])==="function")z[s](...a);else z[s]=a       }}return c}
-  
-
-function jk(x,t,n,p){t=K.tp(x);if(t>16)n=K.nn(x);p=lo(x);switch(t){
+function jk(x,t,n,p){msl();t=K.tp(x);if(t>16)n=K.nn(x);p=lo(x);switch(t){
  case  1: return p==1
  case  3: return p
  case  4: return sk(x)
  case  5: return F[p>>>3]
  case 18: return sk(x)
  case 19: var r=[];for(var i=0;i<n;i++) r.push(lo(K.ati(K.rx(x),i))); K.dx(x);return r
- case 21: var r=[];for(var i=0;i<n;i++) r.push(F[(p>>>3)+8*i]);       K.dx(x);return r
+ case 21: var r=[];for(var i=0;i<n;i++) r.push(F[(p>>>3)+i]);         K.dx(x);return r
  case 23: var r=[];for(var i=0;i<n;i++){r.push(jk(K.ati(K.rx(x),i)))};K.dx(x);return r
 }}
- 
-function showCustom(p,x){var [k,x]=K.spl2(x);if(20!=K.tp(k)){K.dx(x);K.dx(k);return};var n=K.nn(k)
- var a={};for(var i=0;i<n;i++){var v=K.ati(K.rx(x),i);var t=K.tp(v);a[sk(K.ati(K.rx(k),i))]=(t==18||t==4)?sk(v):sk(K.Kst(v))}
- K.dx(k);K.dx(x);n=a[""];if(n==undefined){return};delete a[""];
- var e=ce(n);for(let k in a)e[k]=a[k];p.appendChild(e)}
 
-function lookup(s){ //symbol or path: [symbol;symbol;..]
- if(typeof s=="object"){ var r=K.Val(s[0]);s=s.slice(1);for(var i=0;i<s.length;i++)r=K.Atx(r,s[i]); return r }
- else return K.Val(s) }
-
-function pathname(s)   { return (typeof s=="object") ? s.map(x=>sk(x)).join(".") : sk(s) }
-function pushpath(s,a) { return (typeof s=="object") ? s.concat(a) : [s,a] }
-
-function cellUpdate(ta,s,ki,tr,j,i){
- return function(){unselect(ta,i)
- var td=tr.childNodes[i];var t=td.textContent;td.textContent="";  show(td,pushpath(pushpath(s,ki),K.Ki(j)))
- var e=td.firstChild;
- var totext=function(){var t=e.value;td.removeChild(e);td.textContent=t}
- var f=e.onchange;e.onchange=function(){if(f()){totext();extendToSel(pushpath(s,ki),ta,j,i)}}
- e.onkeydown=function(evt){if(evt.key=="Escape"&&e.validity.valid)totext()}}}
-
-function extendToSel(s,ta,row,col){
- var idx=[];var r=ta.children;for(var i=1;i<r.length;i++){var c=r[i].children;if(c[col].className=="sel")idx.push(i-1)}
- var c=lookup(s);var v=lookup(pushpath(s,K.Ki(row)));var t=kstr(K.rx(v))
- for(var i=0;i<idx.length;i++){c=K.sti(c,idx[i],K.rx(v));r[1+idx[i]].children[col].innerText=t}
- K.dx(K.Asn(s[0], K.Dmd(K.Val(s[0]),la(s.slice(1)),BigInt(1),c)))}
-
-function unselect(ta,j){var r=ta.children;for(var i=0;i<r.length;i++){var c=r[i].children;for(var k=0;k<c.length;k++)if(k!=j)c[k].className=""}}
-
-function selectColumn(ta,th,v){
- function colidx(){var c=ta.firstChild.children;for(var i=0;i<c.length;i++)if(c[i]==th)return i}
- var j=colidx();var r=ta.children;for(var i=0;i<r.length;i++){var c=r[i].children[j].className=v?"sel":""}}
+/*
+function framebuffer(x){if(K.nn(x)!=2){K.dx(x);return};
+ var c=ce("canvas");c.id="_fb";c.width=lo(K.ati(K.rx(x),0));c.height=lo(K.ati(K.rx(x),1));c.tabIndex=1; //triggers keydown
+ ge("_uid").appendChild(c)
+ var z=c.getContext("2d");z.fillStyle='grey';z.fillRect(0,0,c.width,c.height);
+ var m=K.Val(K.sc(ks("click")));var k=K.Val(K.sc(ks("key")));var f=K.Val(K.sc(ks("frame")))
+ if(m!=0)c.addEventListener("click",function(e){K.dx(K.Cal(K.rx(m),K.l2(K.Ki(e.offsetX),K.Ki(e.offsetY))))},true);
+ if(k!=0)c.addEventListener("keydown",function(e){K.dx(K.Cal(K.rx(k),K.l1(K.Ki((e.key.length==1)?e.key.charCodeAt():e.keyCode))))},true)
+ if(f!=0){
+  var loop=function(t){
+   var x=K.alpha(K.Cal(K.rx(f),K.l1(K.Kf(t))));
+   var d = new ImageData(new Uint8ClampedArray(K.memory.buffer, lo(x), 4*c.width*c.height), c.width, c.height)
+   z.putImageData(d,0,0)
+   K.dx(x)
+   window.requestAnimationFrame(loop)
+  }
+  window.requestAnimationFrame(loop)
+ }
+ showtab(udiv)
+}
 */
 
 </script>
