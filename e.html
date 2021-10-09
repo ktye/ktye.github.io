@@ -1,0 +1,52 @@
+<head><meta charset="utf-8"><title>.</title></head>
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="stylesheet" href="codemirror/codemirror.min.css">
+<style>
+ html{font-family:monospace;}
+ .codemirror{height:100%;border:none;resize:none}
+</style>
+
+<script src="codemirror/jquery.min.js"></script>
+<script src="codemirror/codemirror.min.js"></script>
+<script src="codemirror/matchbrackets.js"></script>
+
+<body>
+<div id="_edt" class="cm.fat-cursor"></div>
+<script>
+
+var ed = CodeMirror(_edt, {"dark":true,"lineNumbers":false,"tabSize":8,"indentUnit":8,"indentWithTabs":true,"smartIndent":true,"matchBrackets":true,"extraKeys":{"Enter": enter}})
+ed.setValue("ktye/k\n ")
+
+function fatCursor(x){
+ if(x)CodeMirror.addClass(ed.getWrapperElement(),"cm-fat-cursor")
+ else CodeMirror.rmClass (ed.getWrapperElement(),"cm-fat-cursor")
+}
+
+function atEOF(){var c=ed.getCursor();var l=ed.lastLine();return ((c.line==l)&&(ed.getLine(l).length==c.ch)&&(ed.getSelection().length==0))}
+ed.on("cursorActivity", function(e){ fatCursor(atEOF()) })
+
+var editor=false
+var cons=""
+function enter(){if(atEOF()){var l=ed.getLine(ed.lastLine())
+ if(!editor){
+  if(l==" \\e"){
+   editor = true
+   cons = ed.getValue() + "\n"
+   ed.setValue("\\")
+   ed.setCursor({line:0,ch:1})
+  } else exec(ed.getLine(ed.lastLine()))
+ }else if(l=="\\") {
+  editor = false
+  ed.setValue(cons)
+  ed.setCursor(ed.lineCount(),0)
+ }else return CodeMirror.Pass}else return CodeMirror.Pass}
+
+function exec(s) {
+ var l=ed.lastLine()
+ ed.markText({line:l,ch:0},{line:l,ch:Infinity},{css:"color: darkred"})
+ ed.replaceRange("\n", {line:l})
+ ed.replaceRange(">"+s+"\n ", {line:Infinity})}
+
+
+</script>
+</body></html>
