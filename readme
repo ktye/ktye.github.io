@@ -1,5 +1,6 @@
 src:   github.com/ktye/i                            (public domain)
-jit:   wavm run --mount-root . k.wat [args]  (github.com/WAVM/WAVM)
+jit:   wavm run --enable multi-memory --enable exception-handling 
+                --mount-root . k.wat [args]  (github.com/WAVM/WAVM)
 build: go install ktye.github.com/wg/cmd/wg  (compile wasm from go)
        wg . > k.wat         (wat2wasm: github.com/WebAssembly/wabt)
        wat2wasm --enable-bulk-memory --enable-simd k.wat  -o k.wasm
@@ -12,9 +13,9 @@ repl:  \\(exit) \t1000 expr(bench) \m(totalmem) \c(clear+checkrefs)
 
 + flp add       '  ech  bin   x y' lin     b bool     1b    110b   
 - neg sub       /  rdc  mod   f n/ ndo     c char     "x"   "ab"        
-* fst mul       \  scn  div                i int      2     1 2         
-% sqr div       ': ecp  in                 s symbol   `a    ``c`d       
-! til wer       /: ecr  split   f/:fix     f float    2.    1. 2.    
+* fst mul       \  scn  div   x//y dec     i int      2     1 2         
+% sqr div       ': ecp  in    y\\x enc     s symbol   `a    ``c`d       
+! til key       /: ecr  split   f/:fix     f float    2.    1. 2.    
 & wer min       \: ecl  join    f\:fix     z complex  1a    1a20 2a     
 | rev max       while[c;a;b;..]            L list     (1;2 3)      
 < asc les       $[a;b;...]      cond       D dict     `a`b!1 2
@@ -32,5 +33,5 @@ $ str cst       c:<`file(read)             v:  0..63   monadic
                                              256       drop
 abs sin cos exp log any find fill            320/384   jmp, jmp-ifz
 imag conj angle qr ej avg var std            448..     quoted verb
-abs find fill imag conj angle log dot solve               (dyadic)
+qr solve dot plot hist (unpack) csv
 rand: ?n(uniform) ?-n(normal) ?z(binormal) n?n(with) -n?n(w/o) n?L
