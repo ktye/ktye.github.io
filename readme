@@ -1,11 +1,11 @@
-src:   github.com/ktye/i                            (public domain)
-jit:   wavm run --enable multi-memory --enable exception-handling 
+src:   github.com/ktye/i          6#k               (public domain)
+jit:   wavm run --enable multi-memory   --enable exception-handling 
                 --mount-root . k.wat [args]  (github.com/WAVM/WAVM)
 build: go install ktye.github.com/wg/cmd/wg  (compile wasm from go)
        wg . > k.wat         (wat2wasm: github.com/WebAssembly/wabt)
        wat2wasm --enable-bulk-memory --enable-simd k.wat  -o k.wasm
 online:ktye.github.io  (wasm needs multi-value/bulk-memory/simd128)
-
+c/extend: +/k.c                           (header-library "ktye.h")
 args:     data file.k file.t                  (assign/execute/test)
 web:      drop file assigns                      `file<c (download)
 
@@ -24,7 +24,7 @@ repl:  \\(exit) \t1000 expr(bench) \m(totalmem) \c(clear+checkrefs)
 ~ not mtc       {a+b}.d         env        c comp     1+/*%  
 , enl cat       k?t             group      d derived  +/
 ^ srt cut       k!t             key        l lambda   {x+y}
-# cnt tak       t,d t,t t,'t(h) join
+# cnt tak       t,d t,t t,'t(h) join       x native   c-extension
 _ flr drp       t{a>5}          where     exec: t~`v: push
 $ str cst       c:<`file(read)             v:  0..63   monadic
 ? unq fnd       `file<c(write)                64..127  dyadic
