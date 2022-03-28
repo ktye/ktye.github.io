@@ -164,7 +164,6 @@ K.kinit = function(ext){
   
   if(init !== undefined)init()
   K.save()
-  
  })
  
 }
