@@ -19,6 +19,8 @@
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function ge(x){return document.getElementById(x)}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+
 
 var src=ge("src");var tty=ge("tty")
 
@@ -28,16 +30,20 @@ tty.onkeypress=function(e){
   let v=tty.value; let i=v.lastIndexOf("\n");
   let s=((i<0)?v:v.slice(i)).trim()
   if(!s.length)return
-  try{ tty.value += "\n"+ev(s)+"\n " } catch(e) {  tty.value += "\n?\n " }
+  tty.value+="\n";E(s);tty.value+="\n "
   tty.scrollTop=tty.scrollHeight;
  }
 }
 tty.focus()
 
 var J,M
+function m(x){ let r=M+x;M+=x;return r }
 function u( ){ return new Uint8Array(J.memory.buffer) }
 function n(x){ u().slice(x).indexOf(0) }
+function p(x){ console.log("printf",x); O(u().slice(x,N(x))); return 0}
 function O(u){ tty.value += su(u) }
+function A(s){ let x=us(s);let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;return r}
+function E(s){ J.j(A(s)) }
 /* j.wasm expects these imports:
  (type (;0;) (func (param i32) (result i32)))
  (type (;1;) (func (param i32 i32) (result i32)))
@@ -45,9 +51,9 @@ function O(u){ tty.value += su(u) }
  (import "env" "printf" (func $printf (type 1)))
  (import "env" "strlen" (func $strlen (type 0))) */
 let env={env:{
- printf:function(x,y){console.log("printf",x,y); O(u().slice(x,N(x))); return 0},
- malloc:function(x){let r=M+x;M+=x;return r},
- strlen:function(x){return n(x)}
+ printf:function(x,y){return p(x)},
+ malloc:m,
+ strlen:n,
 }}
 
 fetch('j.c').then(r=>r.text()).then(r=>src.value=r)
