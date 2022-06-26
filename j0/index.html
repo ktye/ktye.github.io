@@ -1,47 +1,46 @@
-<html><head><meta charset="utf-8"><title>j0</title></head>
-<!--link rel=icon href='data:;base64,iVBO...'-->
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>j0</title>
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAHdSURBVDhPnZJPSFRRFMavFhGIm6ioDCOypata1SKDRMhVi2rXJiwikIlpMauiKF0lSgS6sNSicGGgTgwYCcIsjCxyJt68mWmc9L0R9DWlM/jnWc6vY3OTiHil3+Zy73fPj3PPdxUeiswtcN+w6E9aDCUnGUxM8sSc4oFp0Ra36RyN4gkIzixQGc6yf8jmaAJOTcGRj3Dgpc2Ovjhn2ge8AalsntanIbkYpGQcSiKg+tLsqW/kXlc/odGIN+CXzPlFmr7AsaQAghkuPxvWjuz16ikzt8ydz3B6QgoGbBp6R7Tz34AlbjpQt1lATAD+GTghA9w04IItCUgSavAfgPzKd1YLBb0rKja/RO0nOBTzADjuNzrSDjfmoCbh0vw2pR0wpINqSWDnBw+AbyJPu0TVNgt7DTGep8ktLv/0DOmgStovi8p5cPrvgMNRl4Mm7BpfRbUMs7v2inaKM6iWAZavddCbxN8T0s5vgONvsqixAur1CqrpBZmsvEXrleVwchq2hvOo648Jv5dhaK0DLPltZY/GJKYMpe+gIf6V1tQsHZkcAXnavhEH5evhfOMtXVHUOmBNphnnbKCZiot32XLtIdv83Wz3d1F67jZVdZe46gtgGAau6+qKPwAbF/wAGUyExJuqh14AAAAASUVORK5CYII='>
 <style>
  html{font-family:monospace}
  body{overflow:hidden}
- textarea{width:50%;height:100%;resize:none}
- .right{float:right}
+ textarea{position:absolute;top:0px;left:0px;width:50vw;height:100vh;overflow:auto;margin:0px;padding:5px;resize:none}
+ .right{left:50vw;float:right}
 </style>
+</head>
 
 <body>
-<div>
- <textarea class="left"  id="src" readonly></textarea>
- <textarea class="right" id="tty" placeholder="~5"></textarea>
-</div>
+<textarea class="left"  id="src" readonly></textarea>
+<textarea class="right" id="tty"         ></textarea>
 
 <script>
 
 
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function ge(x){return document.getElementById(x)}
-function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function su(u){console.log("su",u); return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function us(s){return new TextEncoder("utf-8").encode(s)}
 
 
 var src=ge("src");var tty=ge("tty")
 
-tty.value = "~5\n "
+tty.value = ""
 tty.onkeypress=function(e){
- if(("Enter"==e.key)&&(0<tty.value.length)){ pd(e);
+ if(("Enter"==e.key)&&(0<tty.value.length)){pd(e);
   let v=tty.value; let i=v.lastIndexOf("\n");
   let s=((i<0)?v:v.slice(i)).trim()
   if(!s.length)return
-  tty.value+="\n";E(s);tty.value+="\n "
-  tty.scrollTop=tty.scrollHeight;
- }
-}
+  E(s); tty.scrollTop=tty.scrollHeight;
+}}
 tty.focus()
 
 var J,M
-function m(x){ let r=M+x;M+=x;return r }
+function m(x){ M+=x;return M-x; }
 function u( ){ return new Uint8Array(J.memory.buffer) }
-function n(x){ u().slice(x).indexOf(0) }
-function p(x){ console.log("printf",x); O(u().slice(x,N(x))); return 0}
-function O(u){ tty.value += su(u) }
+function n(x){ let r=u().slice(x).indexOf(0);return r }
+function p(x){ O(u().slice(x,x+n(x)));return 0        }
+function d(x){ tty.value+=String(u()[x])+" "          } // printf("%d ",x)  x is on the c stack
+function O(u){ tty.value+=su(u) }
 function A(s){ let x=us(s);let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;return r}
 function E(s){ J.j(A(s)) }
 /* j.wasm expects these imports:
@@ -51,17 +50,15 @@ function E(s){ J.j(A(s)) }
  (import "env" "printf" (func $printf (type 1)))
  (import "env" "strlen" (func $strlen (type 0))) */
 let env={env:{
- printf:function(x,y){return p(x)},
+ printf:function(x,y){y?d(y):p(x);},
  malloc:m,
  strlen:n,
 }}
 
-fetch('j.c').then(r=>r.text()).then(r=>src.value=r)
+fetch('j.c'   ).then(r=>r.text()).then(r=>src.value=r)
 fetch('j.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
  J=r.instance.exports
- M=J.__heap_base
- //K.kinit();reset()
- //...
+ M=J.__heap_base.value
 })
 
 </script></body></html>
