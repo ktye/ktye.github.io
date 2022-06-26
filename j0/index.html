@@ -18,7 +18,7 @@
 
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function ge(x){return document.getElementById(x)}
-function su(u){console.log("su",u); return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function us(s){return new TextEncoder("utf-8").encode(s)}
 
 
@@ -35,12 +35,12 @@ tty.onkeypress=function(e){
 tty.focus()
 
 var J,M
-function m(x){ M+=x;return M-x; }
+function m(x){ M+=x;return M-x;                       }
 function u( ){ return new Uint8Array(J.memory.buffer) }
-function n(x){ let r=u().slice(x).indexOf(0);return r }
+function n(x){ return u().slice(x).indexOf(0)         }
 function p(x){ O(u().slice(x,x+n(x)));return 0        }
 function d(x){ tty.value+=String(u()[x])+" "          } // printf("%d ",x)  x is on the c stack
-function O(u){ tty.value+=su(u) }
+function O(u){ tty.value+=su(u)                       }
 function A(s){ let x=us(s);let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;return r}
 function E(s){ J.j(A(s)) }
 /* j.wasm expects these imports:
@@ -50,7 +50,7 @@ function E(s){ J.j(A(s)) }
  (import "env" "printf" (func $printf (type 1)))
  (import "env" "strlen" (func $strlen (type 0))) */
 let env={env:{
- printf:function(x,y){y?d(y):p(x);},
+ printf:function(x,y){return y?d(y):p(x)},
  malloc:m,
  strlen:n,
 }}
