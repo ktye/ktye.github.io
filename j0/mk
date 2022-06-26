@@ -1,0 +1,8 @@
+set -e
+set -x
+
+cc=/c/local/LLVM/bin/clang
+ww=/c/local/wabt/wasm2wat
+
+$cc --target=wasm32 --no-standard-libraries -Wl,--export=j,--allow-undefined -Wl,--no-entry -o j.wasm j.c
+$ww j.wasm > j.wat

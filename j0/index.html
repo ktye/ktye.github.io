@@ -1,0 +1,61 @@
+<html><head><meta charset="utf-8"><title>j0</title></head>
+<!--link rel=icon href='data:;base64,iVBO...'-->
+<style>
+ html{font-family:monospace}
+ body{overflow:hidden}
+ textarea{width:50%;height:100%;resize:none}
+ .right{float:right}
+</style>
+
+<body>
+<div>
+ <textarea class="left"  id="src" readonly></textarea>
+ <textarea class="right" id="tty" placeholder="~5"></textarea>
+</div>
+
+<script>
+
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function ge(x){return document.getElementById(x)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+
+var src=ge("src");var tty=ge("tty")
+
+tty.value = "~5\n "
+tty.onkeypress=function(e){
+ if(("Enter"==e.key)&&(0<tty.value.length)){ pd(e);
+  let v=tty.value; let i=v.lastIndexOf("\n");
+  let s=((i<0)?v:v.slice(i)).trim()
+  if(!s.length)return
+  try{ tty.value += "\n"+ev(s)+"\n " } catch(e) {  tty.value += "\n?\n " }
+  tty.scrollTop=tty.scrollHeight;
+ }
+}
+tty.focus()
+
+var J,M
+function u( ){ return new Uint8Array(J.memory.buffer) }
+function n(x){ u().slice(x).indexOf(0) }
+function O(u){ tty.value += su(u) }
+/* j.wasm expects these imports:
+ (type (;0;) (func (param i32) (result i32)))
+ (type (;1;) (func (param i32 i32) (result i32)))
+ (import "env" "malloc" (func $malloc (type 0)))
+ (import "env" "printf" (func $printf (type 1)))
+ (import "env" "strlen" (func $strlen (type 0))) */
+let env={env:{
+ printf:function(x,y){console.log("printf",x,y); O(u().slice(x,N(x))); return 0},
+ malloc:function(x){let r=M+x;M+=x;return r},
+ strlen:function(x){return n(x)}
+}}
+
+fetch('j.c').then(r=>r.text()).then(r=>src.value=r)
+fetch('j.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+ J=r.instance.exports
+ M=J.__heap_base
+ //K.kinit();reset()
+ //...
+})
+
+</script></body></html>
