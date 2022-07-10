@@ -1,0 +1,1965 @@
+﻿<html>
+<head><meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>APL\?</title>
+<!--link href="jdoc.css" rel=stylesheet-->
+</head>
+
+<body>
+
+<br>
+
+<table width=520 align=center><tr><td>
+
+<p align=center><font size=+2>APL\?</font><br><br>
+<b>Roger K.W. Hui<br>
+Kenneth E. Iverson<br>
+E.E. McDonnell<br>
+Arthur T. Whitney</b></p>
+
+<br><hr>
+
+
+
+<a name="intro"></a>
+<p>This paper describes a version of APL based upon the dictionary
+<acronym title="Iverson, K.E., 
+A Dictionary of APL, APL Quote-Quad, 
+Volume 18, Number 1, 
+September 1987, pp 5-40.">[1]</acronym>, 
+but significantly simplified and enhanced, and directly usable
+on any machine that provides ASCII characters. It also describes
+salient features of a C implementation that has been tested on
+several machines, and is available as freeware. There have been
+four primary motivations for this work:</p>
+
+<table>
+<tr><td valign=top>1.</td><td>&nbsp;</td><td>
+To provide an APL system for use in teaching mathematics
+and related topics that is modern, free, and transportable.
+ </td></tr>
+<tr><td valign=top>2.</td><td>&nbsp;</td><td>
+To devise a spelling scheme based on the ASCII alphabet that
+preserves the major advantages of the one-letter words based
+on the special alphabet commonly used in APL.
+ </td></tr>
+<tr><td valign=top>3.</td><td>&nbsp;</td><td>
+To exploit the advantages of breaking from the strict conformance
+with earlier APL that is normally obligatory in commercial
+systems.
+ </td></tr>
+<tr><td valign=top>4.</td><td>&nbsp;</td><td>
+To explore an unusual style of C programming that makes
+heavy use of preprocessing facilities.
+ </td></tr>
+</table>
+
+<p>Examples of the use of the language in a variety of topics are
+provided in an appendix.</p>
+
+<p>We are indebted to a number of colleagues for advice and help:
+Anthony Howe, David Steinbrook, Bob Bernecky, Mark Czerwinski,
+L.J. Dickey, Jiri Dvorak, James Hui, 
+Eric Iverson, Paul Jackson, and Roland Pesch.</p>
+
+
+
+<br><a name="a"></a>
+<p><b>A. Orthography</b></p>
+
+<p>At the time of the first implementation of APL, the then-new
+IBM Selectric typewriter with its changeable type element offered
+a welcome escape from the limitations of the existing printers,
+which provided only a few symbols beyond a one-case alphabet,
+punctuation, and the decimal digits. The Selectric was exploited
+by designing an alphabet that provided single-character spelling
+of all words in the language (except for the literal names used for
+variables).</p>
+
+<p>This spelling scheme offered several advantages, due to the fact
+that the words were:</p>
+
+<table>
+<tr><td valign=top>1.</td><td>&nbsp;</td><td>
+<i>Mnemonic</i>, using the shapes of symbols 
+to suggest the functions
+denoted, as in up- and down-arrows 
+for the functions <i>take</i> and <i>drop</i>.
+</td></tr>
+<tr><td valign=top>2.</td><td>&nbsp;</td><td>
+<i>Universal</i>, in avoiding mnemonic devices rooted in particular
+natural languages.
+</td></tr>
+<tr><td valign=top>3.</td><td>&nbsp;</td><td>
+<i>Disjoint</i> from the literals used in variable names, so as
+to a) avoid the introduction of <i>reserved</i> words, b) improve
+readability, and c) obviate required spaces around words, 
+as in<tt> a|b </tt>instead of<tt> a mod b</tt>&nbsp;.
+</td></tr>
+</table>
+
+<p>However, special alphabets pose serious display problems, and it
+is desirable to have a spelling scheme based on a widely available
+computer alphabet. We have here attempted to design a spelling
+scheme based on the ASCII alphabet that retains the advantages
+cited above for the older spelling scheme.</p>
+
+<p>Words are spelled with one character or with two, the last of which
+is a period or a colon; words are formed by scanning from right
+to left, each colon or period (not in a number) combining with the
+character to its left to form a word. Any number of spaces may
+be used between words, but spaces are not required, except that
+in a number, a space or zero must precede a decimal point that is
+not preceded by a digit or negative sign.</p>
+
+<p>The spelling scheme is shown 
+in the language summary of Table 1, 
+a study of which should clarify the application 
+of the following guides used in its design:</p>
+
+<table>
+<tr><td valign=top>1.</td><td>&nbsp;</td><td>
+Adopt mathematical symbols 
+(such as<tt> + - < > ! *</tt>&nbsp;),<tt> </tt>
+and symbols whose shape or usage somehow 
+suggest the mathematical notions, 
+as in the number sign<tt> # </tt>for number of items
+(in an argument, or selected in replication), 
+and De Morgan&rsquo;s use of<tt> ^ </tt>for power 
+<acronym title="Cajori, Florian, 
+A History of Mathematical Notations, 
+The Open Court Publishing Co., 1928, 
+Volume I, Paragraph 313. ">[2]</acronym>.
+ </td></tr>
+<tr><td valign=top>2.</td><td>&nbsp;</td><td>
+Use single characters for other primitives whose use should
+become common, as in<tt> & @ ; " _ </tt>and<tt> \ </tt>
+for composition, upon and defer, 
+link, rank and under, negative sign, and scan
+and outer product.
+ </td></tr>
+<tr><td valign=top>3.</td><td>&nbsp;</td><td>
+Use a dot or colon with a common mathematical character
+that suggests the function, as in<tt> <. </tt>
+and<tt> >. </tt>for min and max,
+and in<tt> =. </tt>and<tt> =: </tt>for local and global assignment.
+ </td></tr>
+<tr><td valign=top>4.</td><td>&nbsp;</td><td>
+Use a dot with a letter that suggests 
+a mathematical symbol or definition, 
+as in<tt> o. </tt>for the family 
+of circular functions, in<tt> e. </tt>
+for membership 
+(because epsilon is used for it in mathematics),
+in<tt> i. </tt>for integers, 
+and in<tt> x. </tt>and<tt> y. </tt>for arguments 
+(because of the analogous use of<tt> x </tt>
+and<tt> y </tt>in mathematics).
+ </td></tr>
+<tr><td valign=top>5.</td><td>&nbsp;</td><td>
+Use related strings for related functions, 
+as in<tt> ^ </tt>for exponential,<tt> ^. </tt>
+for its inverse (natural log), and<tt> ^: </tt>
+for root and square root; 
+in<tt> #. </tt>for base value, 
+and<tt> #: </tt>for its inverse; 
+in<tt> + </tt>and<tt> * </tt>for <i>plus</i> and <i>times</i>, 
+and<tt> +. </tt>and<tt> *. </tt>
+for <i>or</i> and <i>and</i> 
+(their analogs in logic); 
+and in<tt> @ </tt>for a conjunction that permutes axes,
+and<tt> @. </tt>and<tt> @: </tt>for other permutations.
+ </td></tr>
+<tr><td valign=top>6.</td><td>&nbsp;</td><td>
+Adopt mnemonic aids such as the three cases 
+of<tt> $ </tt>(which suggests an S) 
+for Shape, Sequence list, and Self-reference; 
+and<tt> .. </tt>for the <i>Dot</i> or <i>Inner</i> product. 
+This adoption of the double dot obviates 
+the spaces previously needed around the dot in some cases.
+ </td></tr>
+</table>
+
+<p>Anyone who is familiar with earlier spelling of APL words, 
+or who is using earlier APL literature, 
+may find it helpful to pronounce
+them in the traditionat way, 
+as in <i>iota</i> for<tt> i.</tt>&nbsp;.</p>
+
+<p>The function<tt> /. </tt>cuts its 
+list argument into words according to
+rules appropriate to an APL sentence, 
+Thus,<tt> /.&nbsp;'+/3&nbsp;4&nbsp;5*i.3' </tt>
+yields the boxed list<tt> + </tt>and<tt> / </tt>
+and<tt> 3&nbsp;4&nbsp;5 </tt>and<tt> * </tt>
+and<tt> i. </tt>and<tt> 3</tt>&nbsp;.</p>
+
+<table border=1 cellspacing=0 cellpadding=10 align=center><tr><td>
+<table>
+<tr><td>&nbsp;</td><td>&nbsp; &nbsp;</td>
+ <td>&nbsp;</td><td>&nbsp;</td>
+ <td align=center><b><font size=+2>.</font></b></td><td>&nbsp;</td>
+ <td align=center><b><font size=+2>:</font></b></td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>=</tt></td>   <td>&nbsp;</td><td>NubClassify ; Equal</td>  <td>&nbsp;</td><td>Is (Local)</td>       <td>&nbsp;</td><td>Is (Global)</td></tr>
+<tr><td><tt>&lt;</tt></td><td>&nbsp;</td><td>Box ; LessThan</td>       <td>&nbsp;</td><td>Floor ; Minimum</td>  <td>&nbsp;</td><td>Decrement ; LeOrEq</td></tr>
+<tr><td><tt>&gt;</tt></td><td>&nbsp;</td><td>Open ; GreaterThan</td>   <td>&nbsp;</td><td>Ceiling ; Maximum</td><td>&nbsp;</td><td>Increment ; GtOrEq</td></tr>
+<tr><td><tt>_</tt></td>   <td>&nbsp;</td><td>NegativeSign/Infinity</td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>+</tt></td>   <td>&nbsp;</td><td>Conjugate ; Plus</td>     <td>&nbsp;</td><td>; GCD (Or)</td>       <td>&nbsp;</td><td>; Nor</td></tr>
+<tr><td><tt>*</tt></td>   <td>&nbsp;</td><td>Signum ; Times</td>       <td>&nbsp;</td><td>; LCM (And)</td>      <td>&nbsp;</td><td>; Nand</td></tr>
+<tr><td><tt>-</tt></td>   <td>&nbsp;</td><td>Negate ; Minus</td>       <td>&nbsp;</td><td>Reverse ; Rotate</td> <td>&nbsp;</td><td>; Match</td></tr>
+<tr><td><tt>%</tt></td>   <td>&nbsp;</td><td>Reciprocal ; Divide</td>  <td>&nbsp;</td><td>MatrixInv ; MDiv </td><td>&nbsp;</td> </tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>^</tt></td>   <td>&nbsp;</td><td>Exponential ; Power</td>  <td>&nbsp;</td><td>Natural Log ; Log</td><td>&nbsp;</td><td>Square Root ; Root</td></tr>
+<tr><td><tt>$</tt></td>   <td>&nbsp;</td><td>ShapeOf ; Shape</td>      <td>&nbsp;</td><td>SequenceList</td>     <td>&nbsp;</td><td>SelfReference</td></tr>
+<tr><td><tt>~</tt></td>   <td>&nbsp;</td><td>Both ; Cross</td>         <td>&nbsp;</td><td>Not (1-) ; Less</td>  <td>&nbsp;</td><td>Nubsieve ; NotEqual</td></tr>
+<tr><td><tt>|</tt></td>   <td>&nbsp;</td><td>Magnitude ; Residue</td>  <td>&nbsp;</td><td></td>                 <td>&nbsp;</td><td>Custom</td> </tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>.</tt></td>   <td>&nbsp;</td><td>NOT USABLE</td>           <td>&nbsp;</td><td>Det ; DotProd</td></tr>
+<tr><td><tt>:</tt></td>   <td>&nbsp;</td><td>NOT USABLE</td>           <td>&nbsp;</td><td>Companion</td>        <td>&nbsp;</td><td>Definition</td></tr>
+<tr><td><tt>,</tt></td>   <td>&nbsp;</td><td>Ravel ; ChainItems</td>   <td>&nbsp;</td><td></td>                 <td>&nbsp;</td><td>Itemize ; Laminate</td></tr>
+<tr><td><tt>;</tt></td>   <td>&nbsp;</td><td>Table ; Link (+Box)</td>  <td>&nbsp;</td><td>BoxItems ; Link</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>#</tt></td>   <td>&nbsp;</td><td>Tally ; Copy</td>         <td>&nbsp;</td><td>Base2 ; Base</td>     <td>&nbsp;</td><td>Antibase2 ; Antibase</td></tr>
+<tr><td><tt>@</tt></td>   <td>&nbsp;</td><td>Atop-At</td>              <td>&nbsp;</td><td>Dir-Cyc ; Permute</td><td>&nbsp;</td><td>AtomPermute</td></tr>
+<tr><td><tt>/</tt></td>   <td>&nbsp;</td><td>Insert ; x Way Insert</td><td>&nbsp;</td><td>Words</td>            <td>&nbsp;</td><td>GradeUp ; Sort</td></tr>
+<tr><td><tt>\</tt></td>   <td>&nbsp;</td><td>Scan ; OuterProduct</td>  <td>&nbsp;</td><td>Transpose</td>        <td>&nbsp;</td><td>GradeDown ; Sort</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>{</tt></td>   <td>&nbsp;</td><td>Catalog ; From</td>       <td>&nbsp;</td><td>Nub ; Take</td>       <td>&nbsp;</td><td>Right (Dev)</td></tr>
+<tr><td><tt>}</tt></td>   <td>&nbsp;</td><td>Merge</td>                <td>&nbsp;</td><td>Raze ; Drop</td>      <td>&nbsp;</td><td>Left (Lev)</td></tr>
+<tr><td><tt>"</tt></td>   <td>&nbsp;</td><td>ConstCutRankUnder</td>    <td>&nbsp;</td><td>Execute ; Execute</td><td>&nbsp;</td><td>Format ; Format</td></tr>
+<tr><td><tt>&</tt></td>   <td>&nbsp;</td><td>Composition-With</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>!</tt></td>   <td>&nbsp;</td><td>Factorial ; OutOf</td></tr>
+<tr><td><tt>?</tt></td>   <td>&nbsp;</td><td>Roll ; Deal</td></tr>
+<tr><td><tt>(</tt></td>   <td>&nbsp;</td><td>Open Parenthesis</td></tr>
+<tr><td><tt>)</tt></td>   <td>&nbsp;</td><td>ClosePar-Label-Cmd</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td><tt>a</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>Alphabet</td></tr>
+<tr><td><tt>e</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>; Epsilon (Member)</td></tr>
+<tr><td><tt>i</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>Integers ; IndexOf</td></tr>
+<tr><td><tt>o</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>PiTimes ; Circular</td></tr>
+<tr><td><tt>x</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>First Argument</td></tr>
+<tr><td><tt>y</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>Last Argument</td></tr>
+<tr><td><tt>E</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>; MemberOfInterval</td></tr>
+<tr><td><tt>X</tt></td>   <td>&nbsp;</td><td>&nbsp;</td>               <td>&nbsp;</td><td>External (Foreign)</td></tr>
+</table>
+
+<p align=center>Table 1: Language Summary</p>
+</td></tr></table>
+
+
+<br><a name="b"></a>
+<p><b>B. Major Cells, Replicate, Reshape, and Outer Product</b></p>
+
+<p>Because of the importance of major cells, 
+we will adopt the terms
+<i>item</i> and <i>atom</i> 
+for the major cells and the scalars. 
+We will also adopt the symbol<tt> # </tt>
+for the <i>item count</i>, or <i>tally</i>;<tt> #b </tt>
+is<tt> 1 </tt>if<tt> b </tt>is an atom, 
+and is otherwise equal to<tt> 0{$ b</tt>&nbsp;.</p>
+
+<p>The dyadic case<tt> n#b </tt>is similar 
+to the replicate function previously
+provided (for historical reasons) 
+by the derived function<tt> n/</tt>&nbsp;;<tt> </tt> 
+the successive atoms of<tt> n </tt>specify 
+the number of repetitions of successive
+items of<tt> b </tt>to be selected. 
+The reshape<tt> </tt>(<tt>$</tt>)<tt> </tt>
+is also redefined to apply to items rather than atoms; 
+the old behaviour is obtained
+by ravelling the right argument.</p>
+
+<p>Catenation of the items of<tt> A </tt>and<tt> B </tt>
+by the expression<tt> A </tt>comma-bar<tt> B </tt>
+is more useful than the catenation of<tt> 1</tt>-cells 
+provided by the comma; 
+in particular, the catenation of<tt> 1</tt>-cells 
+can be provided by comma-bar of rank<tt> 1</tt>&nbsp;.<tt> </tt> 
+Consequently, we will use the comma
+for catenation of items (that is, catenation along the leading axis),
+and drop the symbol comma-bar. 
+For similar reasons, the<tt> / </tt>
+and<tt> \ </tt>will be adopted for the meanings that were assigned 
+to<tt> /</tt>-bar and<tt> \</tt>-bar,<tt> </tt>
+and the latter pair of symbols will be dropped.</p>
+
+<p>The table function (previously provided by the monadic case of
+the comma-bar) will be provided by the semi-colon, its dyadic
+use being assigned to the link function. 
+Thus,<tt> a;b </tt>is defined 
+by<tt> (&lt;a),b</tt>&nbsp;,<tt>  </tt>
+with the right argument<tt> b </tt>automatically boxed 
+if it is open.</p>
+
+<p>The expression jot.f for outer product 
+uses (for historical reasons)
+a conjunction where an adverb would serve. 
+We will adopt the
+dyadic case of<tt> f\ </tt>for this purpose, 
+and the jot and the notation jot.f will be dropped.</p>
+
+
+
+<br><a name="c"></a>
+<p><b>C. User-Defined Verbs, Adverbs, and Conjunctions</b></p>
+
+<p>The conjunction denoted in the dictionary by the inverted Greek
+Delta will be denoted by the double colon, and the right-arrow 
+and<tt> $ </tt>used to denote the sequence control 
+and self-reference will be
+replaced by<tt> $. </tt>and<tt> $:</tt>&nbsp;.<tt> </tt>
+The forms<tt> m::d </tt>and<tt> 1::a </tt>and<tt> 2::a </tt>
+will be otherwise adopted.</p>
+
+<p>As in the dictionary, assignment provides dynamic localization; 
+for example, the first execution of<tt> a=.g a </tt>
+in a function<tt> f </tt>
+applies<tt> g </tt>to the global value 
+of<tt> a</tt>&nbsp;,<tt> </tt>
+but produces a local copy. 
+Unlike the dictionary definition, 
+the Iocalization is strict, so that a local copy
+is not available to user-defined functions 
+that are invoked in<tt> f</tt>&nbsp;.<tt> </tt>
+Global assignment is provided by the copula<tt> =:</tt>&nbsp;.</p>
+
+<p>Strict localization provides significant advantages over the heritable
+localization of earlier APL,
+and is now practicable because of
+the ease of passing parameters in boxed arguments. 
+Direct detinitions are easily provided by a simple cover 
+function employing the 
+forms<tt> m::'' </tt>and<tt> ''::d</tt>&nbsp;.</p>
+
+
+
+<br><a name="d"></a>
+<p><b>D. From, Iota, and Base</b></p>
+
+<p>The monadic case of<tt> i. </tt>
+is defined like monadic iota, 
+but extended to list arguments as 
+follows:<tt> i.s </tt>
+is<tt> (|s)$+\0,(*/|s)$1</tt>&nbsp;,<tt> </tt>but
+reversed along each axis for which 
+the corresponding element of<tt> s </tt>is negative; 
+the result for an empty argument is 
+the scalar<tt> 0</tt>&nbsp;.<tt> </tt>
+For example:</p>
+
+<pre>
+   i. 2 3       i. 2 _3       i. ''1       i. -4
+0 1 2        2 1 0         0            3 2 1 0
+3 4 5        5 4 3
+</pre>
+
+<p>A new monadic case of base-value is defined 
+as the base-<tt>2 </tt>value;
+that is,<tt> #.v </tt>
+is equivalent to<tt> 2#.v</tt>&nbsp;.<tt> </tt>
+An infinite rank monadic case
+of anti-base is defined as<tt> (n$2)#:a</tt>&nbsp;,<tt> </tt>
+where<tt> n </tt>is the maximum
+of the minimum lengths required 
+to represent the (integer) atoms of<tt> a</tt>&nbsp;.</p>
+
+
+
+<br><a name="e"></a>
+<p><b>E. Permutations</b></p>
+
+<p>The words<tt> \. </tt>and<tt> -. </tt>
+will be used for transposition and for
+leading-axis reverse and rotale, 
+the lines in the spelling indicating
+the axes involved, 
+as they did in the old symbols for these functions.
+Other permutations (modelled upon, and replacing, 
+Those in the dictionary called <i>cycle</i>, <i>mix</i>, 
+and <i>mix index</i>
+will be represented
+by<tt> @. </tt>and<tt> @:</tt>&nbsp;.</p>
+
+<p><b>Standard Direct and Cycle Representations</b>. 
+If<tt> p </tt>is a permutation
+of the atoms of<tt> i.n</tt>&nbsp;<tt> </tt>
+then<tt> p </tt>is said 
+to be a <i>permutation vector</i> 
+of order<tt> n</tt>&nbsp;,<tt> </tt>
+and if<tt> n=#b</tt>&nbsp;,<tt> </tt> 
+then<tt> p{b </tt>is a permutation of the
+items of<tt> b</tt>&nbsp;.</p>
+
+<p>The expression<tt> @.p </tt>
+yields a list of boxed lists of the atoms 
+of<tt> i.#p </tt>called the <i>srandard cycle</i> 
+represenlation of<tt> p</tt>&nbsp;.<tt> </tt>
+If (as in the example in the 
+dictionary)<tt> p=.&nbsp;4&nbsp;5&nbsp;2&nbsp;1&nbsp;0&nbsp;3</tt>&nbsp;,<tt> </tt>
+then<tt> @.p </tt>
+yields<tt> 2;4&nbsp;0;&nbsp;5&nbsp;3&nbsp;1 </tt>
+because the permutation<tt> p </tt>moves 
+to position<tt> 2 </tt>the item<tt> 2</tt>&nbsp;,<tt> </tt>
+to<tt> 4 </tt>the item<tt> 0</tt>&nbsp;,<tt> </tt>
+to<tt> 0 </tt>the item<tt> 4</tt>&nbsp;,<tt> </tt> 
+to<tt> 5 </tt>the item<tt> 3</tt>&nbsp;,<tt> </tt> 
+to<tt> 3 </tt>the item<tt> 1</tt>&nbsp;,<tt> </tt> 
+and 
+to<tt> 1 </tt>the item<tt> 5</tt>&nbsp;.<tt> </tt>
+The monad<tt> @. </tt>is self-inverse;
+when applied to a standard cycle representation it produces the
+corresponding <i>direct</i> representation.</p>
+
+<p>A given permutation could be represented by cycles in a variety
+of ways, and the standard form is made unique by the following
+restrictions:</p>
+
+<blockquote>The cycles are disjoint and exhaustive 
+(that is, the atoms of the boxed elements 
+together form a permutation vector); 
+each boxed cycle begins with its largest element 
+(possible because any rotation 
+of a single cycle represents the same permutation);
+and the boxed cycles are arranged 
+in ascending order on their leading elements 
+(possible because the cycles are disjoint).</blockquote>
+
+<p><b>Non-Standard Representations</b>. 
+If<tt> d </tt>and<tt> c </tt>are direct and cycle
+representations of order<tt> #b</tt>&nbsp;,<tt> </tt>
+then<tt> d@.b </tt>and<tt> c@.b </tt>
+produce the corresponding permutations 
+of the items of<tt> b</tt>&nbsp;.<tt> </tt>
+More generally, since the item count of<tt> b </tt>
+determines the order of the permutation,
+the arguments<tt> d </tt>and<tt> c </tt>
+may be non-standard in ways to be defined.
+In particular, elements belonging 
+to<tt> (i.2*#b)-#b </tt>are permitted,
+and are treated as their residues modulo<tt> #b</tt>&nbsp;.</p>
+
+<p>If<tt> q </tt>is not boxed, 
+and if the elements of<tt> (#b)|q </tt>are distinct, 
+then<tt> q@.b </tt>is equivalent 
+to<tt> d@. b</tt>&nbsp;,<tt> </tt>
+where<tt> d </tt>is the standard form of<tt> q </tt>
+given by<tt> a=.((i.n)~.n|q),n|q</tt>&nbsp;,<tt> </tt>
+where<tt> n </tt>is<tt> #b</tt>&nbsp;.<tt> </tt>
+In other words, positions occurring 
+in<tt> q </tt>are moved to the tail end.</p>
+
+<p>If<tt> q </tt>is boxed, 
+then the elements of<tt> (#b)|>j{q </tt>
+must be distinct for each<tt> j</tt>&nbsp;,<tt> </tt>
+and the boxes are applied in succession. 
+For example,<tt> (2&nbsp;1;3&nbsp;0&nbsp;1)@.i.5 </tt>
+is equivalent 
+to<tt> (<2&nbsp;1)@.(<3&nbsp;0&nbsp;1)@.i.5</tt>&nbsp;,<tt> </tt>
+and the result of either is the standard direct 
+permutation<tt> 1&nbsp;2&nbsp;3&nbsp;0&nbsp;4</tt>&nbsp;.</p>
+
+<p><b>Atomic Representation</b>. 
+If<tt> T </tt>is the table of all<tt> !n </tt>permutations
+of order<tt> n </tt>arranged in lexical order 
+(that is,<tt> /:T </tt>
+is<tt> i.!#T</tt>&nbsp;),<tt> </tt>
+then<tt> k </tt>is said to be 
+the atomic representation 
+of the permutation<tt> k{T</tt>&nbsp;.<tt> </tt>
+Moreover,<tt> k@:b </tt>permutes items 
+of<tt> b </tt>by the permutation 
+of order<tt> #b </tt>whose atomic representation 
+is<tt> (!#b)|k</tt>&nbsp;.<tt> </tt>
+For example,<tt> 1@:b </tt>
+transposes the last two items 
+of<tt> b</tt>&nbsp;,<tt> </tt>
+and<tt> _1@:b </tt>reverses the items,
+and<tt> 3@:b </tt>and<tt> 4@:b </tt>
+rotate the last three items 
+of<tt> b</tt>&nbsp;.<tt> </tt>
+Finally,<tt> (i.!n)@:i.n  </tt>
+produces the ordered table of all permutations 
+of order<tt> n</tt>&nbsp;,<tt> </tt>
+as does the <i>fork</i> 
+<acronym title="McDonnell, E.E., and K.E. Iverson,
+Phrasal Forms, APL Quote-Quad, 
+Volume 19, Number 4, August 1989, pp 197-199.">[3]</acronym>
+used in the expression<tt> (i.&!@:i.)&nbsp;n</tt>.</p>
+
+<p>The transformation between direct 
+and cycle representations provided
+by the monad<tt> @. </tt>is extended 
+to non-negative non-standard
+cases by treating any argument<tt> q </tt>
+as a representation of a permutation
+of order<tt> l+>./}.q</tt>&nbsp;.<tt> </tt>
+Similarly, the monad<tt> @: </tt>applied to
+any cycle or direct permutation 
+yields its atomic representation.
+For example,<tt> @:0&nbsp;3&nbsp;2&nbsp;1 </tt>
+is<tt> 5</tt>&nbsp;,<tt> </tt>
+as are<tt> @:3&nbsp;2&nbsp;1 </tt>
+and<tt> @:0;2;3&nbsp;1 </tt>
+and<tt> @:<3&nbsp;1</tt>&nbsp;.</p>
+
+
+
+<br><a name="f"></a>
+<p><b>F. Transpositions and Sections</b></p>
+
+<p>The symbol<tt> @ </tt>will replace the<i> hoof</i>, 
+with the noun cases of the
+conjunction (<i>Defer</i> and <i>Prefer</i>) modified 
+so that<tt> v@n </tt>defers axes<tt> n </tt>
+of the right argument before 
+applying<tt> v</tt>&nbsp;,<tt> </tt>
+and<tt> n@v </tt>defers axes of the left. 
+Consequently, the expression<tt> a nO@v@n1 b </tt>defers
+axes of both arguments before 
+applying<tt> v</tt>&nbsp;.<tt> </tt> 
+The monadic cases of<tt> v@n </tt>
+and<tt> n@v </tt>are identical.</p>
+
+<p>If the number of elements of<tt> n </tt>
+equals the rank of<tt> v</tt>&nbsp;,<tt> </tt>
+then<tt> v@n </tt>applies<tt> v </tt>
+to the cells selected by the axes specified 
+by the atoms of<tt> n</tt>&nbsp;,<tt> </tt>
+and<tt> v@n </tt>can therefore be said 
+to apply<tt> v </tt>
+<i>at</i><tt> n</tt>,&nbsp;<tt> </tt>
+as suggested by the name 
+of the symbol<tt> @</tt>&nbsp;.</p>
+
+<p>Because<tt> {: </tt>is an identity function, 
+transposition alone can be
+obtained by using<tt> {:@n</tt>&nbsp;.</p>
+
+<p>A boxed argument<tt> n </tt>provides sectioning, 
+grouping the axes specified
+by a single box into a single result axis. 
+For example, if<tt> b </tt>
+has the shape<tt> i.&nbsp;6 </tt>
+and<tt> n=.2;4&nbsp;1;0</tt>&nbsp;,<tt> </tt>
+then the shape of<tt> {:@n&nbsp;b </tt>
+is<tt> 3&nbsp;5&nbsp;2&nbsp;1&nbsp;0</tt>&nbsp;.</p>
+
+
+
+<br><a name="g"></a>
+<p><b>G. Format</b></p>
+
+<p>The dyadic case of format<tt> </tt>(<tt>":</tt>)<tt> </tt>
+is defined with both ranks<tt> 1</tt>&nbsp;,<tt> </tt>and
+with each element<tt> e </tt>
+of the left argument controlling the representation
+of the corresponding element of the right argument as
+follows:</p>
+
+<blockquote>
+<p><tt>w=.<.|e </tt>specifies the total width allocated; 
+if this space is inadequate, 
+the entire space is filled with asterisks.</p>
+
+<p><tt>d=.<.lO*(|e)-w </tt>
+specifies the number of digits following
+the decimal point 
+(which is itself included only if<tt> d </tt>is not zero).</p>
+
+<p>Any negative sign is placed just before the leading digit.</p>
+
+<p>If<tt> e>:0</tt>&nbsp;,<tt> </tt>
+the result is right-justified in the space<tt> w</tt>&nbsp;.</p>
+
+<p>If<tt> e&lt;0</tt>&nbsp;,<tt> </tt>
+the result is pm in exponential form 
+(with one digit before the decimal point) 
+and is left-justified except for two fixed
+spaces reserved on the left 
+(including the one for a possible negative sign).</p>
+</blockquote>
+
+<p>The monadic rank of<tt> ": </tt>is infinite, 
+and the result is equivalent
+to the application of the dyadic definition with a left argument
+chosen to provide a minimum of one space between columns.
+Default output is equivalent to the use of the monadic case.</p>
+
+
+
+<br><a name="h"></a>
+<p><b>H. External Communication</b></p>
+
+<p>Communication with the keyboard, screen, 
+and operating system files is provided by the 
+conjunction<tt> X.</tt>&nbsp;,<tt> </tt>
+whose many arguments
+provide considerable flexibility.</p>
+
+
+
+<br><a name="i"></a>
+<p><b>I. Some Implications for Teaching</b></p>
+
+<p>The mere introduction of lists, scan, 
+and outer product allows a
+wealth of interesting explorations, 
+as in<tt> +\a=.0&nbsp;1&nbsp;2&nbsp;3&nbsp;4&nbsp;5 </tt>
+for the triangular numbers, 
+in<tt> +\1+a+a </tt>to see 
+that the odd numbers sum to squares, 
+and in various outer products 
+such as<tt> a+\a </tt>
+and<tt> a*\a </tt>to see 
+<i>addition</i>, <i>multiplication</i>, 
+<i>remainder</i>, <i>divisibility</i> and other tables, 
+including the binomial coefficients 
+(Pascal&rsquo;s Triangle)
+provided by<tt> a!\a</tt>&nbsp;.</p>
+
+<p>Lists are easily explained 
+as the use of collective nouns, 
+and the scan is easily explained as an adverb. 
+Unfortunately, the simple and important notion 
+of a function table required, 
+in traditional APL, not just a further use of an adverb, 
+but the use of a conjunction 
+whose first argument could only be explained 
+as an historical anomaly. 
+The present use of an adverb for outer product 
+avoids this difficulty.</p>
+
+<p>Expressions such as<tt> pr=.+% </tt>
+provide a simple introduction of the
+notion of function definition 
+(and of the <i>hook</i>
+<acronym title="McDonnell, E.E., and K.E. Iverson,
+Phrasal Forms, APL Quote-Quad, Volume 19, Number 4, 
+August 1989, pp 197-199.">[3]</acronym>), 
+and expressions
+such as<tt> pr\1&nbsp;2&nbsp;2&nbsp;2&nbsp;2&nbsp;2&nbsp;2 </tt>
+and<tt> pr\3&nbsp;7&nbsp;15&nbsp;1 </tt>show
+interesting uses of such a defined function in producing successive
+approximations to interesting quantitites.</p>
+
+<p>Expressions such as<tt> sum=.+/ </tt>
+and<tt> sqrt=.^&0.5 </tt>
+and<tt> log=.10&^. </tt>
+and<tt> neq=.-.@= </tt>provide simple 
+and interesting uses of
+adverbs and conjunctions. 
+Moreover, the general form of definition
+provided by the<tt> :: </tt>conjunction 
+permits a simple introduction
+to the use of iteration and recursion.</p>
+
+<p>The generally useful notions of classification 
+can be introduced by
+using the outer product<tt> a<:\b </tt>
+in expressions for producing barcharts and graphs, 
+and can be explored further using the 
+expression<tt> #:i.2^n </tt>
+to produce the complete classification table 
+of order<tt> n</tt>&nbsp;.<tt> </tt>
+Thus if<tt> CCT=.#:i.2^#v=.2&nbsp;3&nbsp;5</tt>,&nbsp;<tt> </tt>
+then<tt> v+..*CCT </tt>
+and<tt> v*..^CCT </tt>
+produce the sums and products over 
+all subsets of<tt> v</tt>&nbsp;.</p>
+
+<p>In a more specialized area, 
+the functions<tt> @. </tt>and<tt> @: </tt>provide
+powerful facilities for the discussion of permutations. 
+Thus,<tt> (i.!4)@:i.4 </tt>displays a complete table 
+of permutations, and an expression 
+such as<tt> @.&nbsp;4&nbsp;3&nbsp;0&nbsp;1&nbsp;2 </tt>
+can provide an introduction
+to cycles and to the use 
+of the LCM<tt> </tt>(<tt>*.</tt>)<tt> </tt>
+of their lengths
+to determine the power of a permutation. 
+For examples in further topics, 
+see the appendix.</p>
+
+
+
+<br><a name="j"></a>
+<p><b>J. The C Implementation</b></p>
+
+<p>The system is implemented in C, 
+because it is an adequate language
+available on a wide variety of machines. 
+The implementation is guided by two principles: 
+clarity, and exploitation of underlying facilities. 
+Efficiency is not a main objective.</p>
+
+<p>Clarity does not mean the micro (and relatively insignificant)
+clarity of individual C statements, but the macro clarity of being
+close to the APL or mathematical definitions. The C code is
+written to be understandable by an APL-knowledgeable reader.</p>
+
+<p>Facilities already available in the environment 
+are exploited: for memory management, 
+the C library functions<tt> malloc() </tt>
+and<tt> free() </tt>are used,
+the underlying virtual memory facilities being presumed
+to be adequate; 
+for session management, the system reads from
+standard input and writes to standard output. 
+This, together with the ASCIl spelling, 
+makes it possible to use any of several
+widely-available session managers, 
+such as EMACS or SunView/OpenLook.</p>
+
+<p><b>Organization</b>. 
+The system is organized along the lines suggested
+by the dictionary, in particular, 
+by the parser 
+<acronym title="Iverson, K.E., A Dictionary of APL, 
+APL Quote-Quad, Volume 18, Number 1, September 1987, 
+pp 5-40. ">[1, p. 381]</acronym>. 
+The parsing rules are expressed in C as follows:</p>
+
+<pre>
+#define RHS  (NOUN+VERB+ADV+CONJ)
+#define EDGE (MARK+ASGN+LPAR)
+
+static struct {I c[4];AF f;I b,e;)cases[] = {
+
+ EDGE+ADV+VERB,     VERB,     NOUN, ANY,      verb,1, 2,
+ CONJ,              NOUN,     VERB, NOUN,     verb,2, 3,
+ EDGEtADV+VERB+NOUN,NOUN,     VERB, NOUN,     verb,1, 3,
+ EDGEtADV+VERB+NOUN,NOUN+VERB,ADV,  ANY,      adv, 1, 2,
+ EDGEtADV+VERB+NOUN,NOUN+VERB,CONJ, NOUN+VERB,conj,1, 3,
+ EDGEtADV+VERB+NOUN,VERB,     VERB, VERB,     form,1, 3,
+ EDGE,              VERB,     VERB, ANY,      form,1, 2,
+ NAME,              ASGN,     RHS,  ANY,      is,  0, 2,
+ LPAR,              RHS,      RPAR, ANY,      punc,0, 2,
+ ANY,               ANY,      ANY,  ANY,      move,0,-1,
+
+};
+</pre>
+
+<p>A sentence to be parsed is placed on a left stack, 
+and as execution proceeds words are moved 
+from the tail of the left stack 
+to the front of a right stack. 
+When the first four words of the right stack
+match a pattern (columns 0 to 3 of the table), 
+the corresponding action (4) is triggered 
+and applied to the indicated words (5, 6),
+with the result replacing these words.</p>
+
+<p><b>Data Structures</b>. 
+The fundamental data structure is the APL array,
+that is, the C structure:</p>
+
+<pre>
+typedef long I;
+typedef struct (I t,c,n,r,s[1];)*A;
+</pre>
+
+<table>
+<tr><td><tt>t</tt></td><td>&nbsp;</td><td>type</td></tr>
+<tr><td><tt>c</tt></td><td>&nbsp;</td><td>reference count</td></tr>
+<tr><td><tt>n</tt></td><td>&nbsp;</td><td>number of atoms in the ravelled array</td></tr>
+<tr><td><tt>r</tt></td><td>&nbsp;</td><td>rank</td></tr>
+<tr><td><tt>s</tt></td><td>&nbsp;</td><td>shape list</td></tr>
+<tr><td><tt>v</tt></td><td>&nbsp;</td><td>atoms of the ravelled array (immediately following<tt> s</tt>)</td></tr>
+</table>
+
+<p>All objects, whether numeric, literal, or boxed, 
+whether noun, verb, adverb, conjunction, or punctuation, 
+are represented by this structure. 
+Most C functions in the system accept APL arrays as
+arguments and return them as results.</p>
+
+<p><b>Definitions and macros</b>. 
+Extensive use is made of C preprocessor
+definitions and macros; to augment the expressive power of C.
+to enforce uniformity, and to increase readability. Example: An
+&ldquo;APL function&rdquo; is a function 
+which accepts one or two APL array arguments, 
+and returns an APL array result. 
+The macros<tt> F1 </tt>and<tt> F2 </tt>
+encapsulate this convention:</p>
+
+<pre>
+#define F1(f) A f (w,self)A w,self:
+#define F2(f) A f (a,w,self)A a,w,self;
+</pre>
+
+<p>(<tt>self </tt>is a pointer to function parts&mdash;rank, 
+inverse, etc.)</p>
+
+<p>A compact but readable programming style results from using
+such definitions. The implementation of<tt>  ,:y </tt>
+(<i>itemize</i>) and<tt>  x,:y </tt>
+(<i>laminate</i>) are cases in point:</p>
+
+<p>Itemize:<tt> ,:y </tt>adds a single unit axis to<tt> y</tt>&nbsp;,<tt> </tt>
+making the shape<tt> 1,$y</tt>&nbsp;.</p>
+
+<pre>
+ Fl(lamin1){R reshape(over(one,shape(w)),ravel(w));}
+</pre>
+
+<p>Laminate: If the shapes of<tt> x </tt>and<tt> y </tt>are equal, 
+then<tt> x,:y </tt>is defined by<tt> (,:x),(,:y)</tt>&nbsp;.<tt> </tt> 
+If one is an atom<tt> a</tt>&nbsp;,<tt> </tt>it is first replaced 
+by<tt> s$a</tt>&nbsp;,<tt> </tt>where<tt> s </tt>
+is the shape of the other.</p>
+
+<pre>
+ F2(lamin2){R over(a,reshape(over(one,shape(AR(w)?w:a)),
+     ravel(w)));}
+</pre>
+
+<p><b>Statistics</b>. Analysis of the C implementation 
+as it stands on 1990&nbsp;2&nbsp;22 yields the following statistics. 
+(Header files and variables without functions are excluded.)
+
+<table>
+<tr><td>C Fns           </td><td>&nbsp;</td><td align=right><tt>240&nbsp;&nbsp; </tt></td><td>&nbsp; &nbsp; &nbsp;</td><td>Lines</td><td>&nbsp;</td><td align=right><tt>1345&nbsp;&nbsp; </tt></td></tr>
+<tr><td>Lines           </td><td>&nbsp;</td><td align=right><tt>1345&nbsp;&nbsp;</tt></td><td>&nbsp;</td><td>+/ Line lengths    </td><td>&nbsp;</td><td align=right><tt>44722&nbsp;&nbsp;</tt></td></tr>
+<tr><td>Average lines/fn</td><td>&nbsp;</td><td align=right><tt>5.6             </tt></td><td>&nbsp;</td><td>Average chars/line </td><td>&nbsp;</td><td align=right><tt>33.3             </tt></td></tr>
+<tr><td>Min             </td><td>&nbsp;</td><td align=right><tt>1&nbsp;&nbsp;   </tt></td><td>&nbsp;</td><td>Min                </td><td>&nbsp;</td><td align=right><tt>1&nbsp;&nbsp;    </tt></td></tr>
+<tr><td>Max             </td><td>&nbsp;</td><td align=right><tt>40&nbsp;&nbsp;  </tt></td><td>&nbsp;</td><td>Max                </td><td>&nbsp;</td><td align=right><tt>89&nbsp;&nbsp;   </tt></td></tr>
+<tr><td>Median          </td><td>&nbsp;</td><td align=right><tt>1&nbsp;&nbsp;   </tt></td><td>&nbsp;</td><td>Median             </td><td>&nbsp;</td><td align=right><tt>32&nbsp;&nbsp;   </tt></td></tr>
+<tr><td>One-liners      </td><td>&nbsp;</td><td align=right><tt>125&nbsp;&nbsp; </tt></td><td>&nbsp;</td><td>One-character lines</td><td>&nbsp;</td><td align=right><tt>91&nbsp;&nbsp;   </tt></td></tr>
+</table>
+
+<p>181 of the 240 functions are APL functions.</p>
+
+Therefore, the implementation consists of a large number of short
+functions, having short lines, with a well-defined uniform interface.
+These are characteristic of an APL programming style.</p>
+
+
+
+<br><a name="ref"></a>
+<p><b>References</b></p>
+
+<table>
+<tr><td valign=top>1.</td><td>&nbsp;</td><td>
+Iverson, K.E., 
+<a target=_parent href="http://www.jsoftware.com/papers/APLDictionary.htm">A Dictionary of APL</a>, 
+<i>APL Quote-Quad</i>, Volume 18, Number 1,
+September 1987, pp 5-40.
+ </td></tr>
+<tr><td valign=top>2.</td><td>&nbsp;</td><td>
+Cajori, Florian, <i>A History of Mathematical Notations</i>, 
+The Open Court Publishing Co., 1928, Volume I, Paragraph 313.
+ </td></tr>
+<tr><td valign=top>3.</td><td>&nbsp;</td><td>
+McDonnell, E.E., and K.E. Iverson,
+<a target=_parent href="http://www.jsoftware.com/papers/fork.htm">Phrasal Forms</a>, 
+<i>APL Quote-Quad</i>, Volume 19, Number 4, August 1989, pp 197-199.
+ </td></tr>
+</table>
+<br>
+
+
+
+<br><a name="x"></a>
+<p><b>Appendix</b></p>
+
+<p>The forty-five frames in the following appendix 
+show examples of use of the system in a variety of topics. 
+All were actually executed on the system in March 1990.</p>
+<br>
+</td></tr></table>
+
+
+<table border=1 cellspacing=0 cellpadding=6 align=center>
+<tr><td valign=top><pre>                       ALPHABET A<a name="xa"></a>
+  $ a.
+256
+  j=. a. i. 'aA'
+97 65
+  j +\ i. 9
+97 98 99 100 101 102 103 104 105
+65 66 67  68  69  70  71  72  73
+  (j+\i.30){a.
+abcdefghijklmnopqrstuvwxyz{|}~
+ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^
+  a.{~j+\i.30
+abcdefghijklmnopqrstuvwxyz{|}~
+ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^
+  3 + 125 * 6 % 100
+10.5
+  i. 2 5
+0 1 2 3 4
+5 6 7 8 9
+  *\~ 0j1 _1 0j_1 1
+  _1 0j_1    1  0j1
+0j_1    1  0j1   _1
+   1  0j1   _1 0j_1
+ 0j1   _1 0j_1    1</pre></td>
+<td valign=top><pre>                       SPELLING B<a name="xb"></a>
+  sentence=. 'index=. a.i.''aA'''
+
+  /.sentence
+┌─────┬──┬──┬──┬────┐
+│index│=.│a.│i.│'aA'│
+└─────┴──┴──┴──┴────┘
+
+  $ /.sentence
+5
+  >/.sentence
+index
+=.   
+a.   
+i.   
+'aA' 
+
+  ". sentence
+97 65
+
+  ". 'abc =. 3 1 4 2'
+3 1 4 2
+  abc
+3 1 4 2</pre></td>
+<td valign=top><pre>                        GRAMMAR C<a name="xc"></a>
+  fahrenheit =. 50
+  (fahrenheit - 32) * 5 % 9
+10
+  prices =. 3 1 4 2
+  orders =. 2 0 2 1
+  orders * prices
+6 0 8 2
+  +/ orders * prices
+16
+  +\ 1 2 3 4 5
+1 3 6 10 15
+  2 3 * \ 1 2 3 4 5
+2 4 6  8 10
+3 6 9 12 15
+  decr=. - & 1
+  decr _1 0 1 2 3 
+_2 _1 0 1 2
+         PARTS OF SPEECH
+  50 fahrenheit  Nouns/Pronouns
+  + - * % decr   Verbs/Proverbs
+  / \            Adverbs
+  &              Conjunctions
+  =.             Verb-to-be
+  ( )            Punctuation</pre></td></tr>
+
+<tr><td valign=top><pre>                        TABLES Da<a name="xd"></a>
+   prices =. 3 1 4 2
+   orders =. 2 0 2 1
+
+   prices * orders
+6 0 8 2
+   prices *\ orders
+6 0 6 3
+2 0 2 1
+8 0 8 4
+4 0 4 2
+
+   to read a table,
+   border it by its
+   arguments:
+
+     * | 2 0 2 1
+     -----------
+     3 | 6 0 6 3
+     1 | 2 0 2 1
+     4 | 8 0 8 4
+     2 | 4 0 4 2</pre></td>
+<td valign=top><pre>                        TABLES Db
+  n=. 0 1 2 3
+  n +\ n
+0 1 2 3
+1 2 3 4
+2 3 4 5
+3 4 5 6
+
+  *\ ~ n
+0 0 0 0
+0 1 2 3
+0 2 4 6
+0 3 6 9
+
+  ^\ ~ i. 4
+1 0 0  0
+1 1 1  1
+1 2 4  8
+1 3 9 27
+  +.\~ 0 1
+0 1
+1 1
+  +:\~ 0 1
+1 0
+0 0
+</pre></td>
+<td valign=top><pre>                        TABLES Dc
+  |\ ~ 1+i.5
+0 0 0 0 0
+1 0 1 0 1
+1 2 0 1 2
+1 2 3 0 1
+1 2 3 4 0
+
+  +/ 0= |\ ~ j=. 1+i.15
+1 2 2 3 2 4 2 4 3 4 2 6 2 4 4
+  2=+/0=|\ ~ j
+0 1 1 0 1 0 1 0 0 0 1 0 1 0 0
+  (2=+/0=|/~ j) # j
+2 3 5 7 11 13
+   
+  =\~i. 4
+1 0 0 0
+0 1 0 0
+0 0 1 0
+0 0 0 1
+  <:\~i. 4
+1 1 1 1
+0 1 1 1
+0 0 1 1
+0 0 0 1</pre></td></tr>
+
+<tr><td valign=top><pre>                        TABLES Dd
+   text=. ' i sing of olaf '
+   text=. text,'glad and big'
+
+   alph=. ' abcdefghijklmno'
+   alph=. alph,'pqrstuvwxyz'
+
+   '01'{~10{.alph=/text
+1010000100100001000010001000
+0000000000000100001001000000
+0000000000000000000000000100
+0000000000000000000000000000
+0000000000000000000100010000
+0000000000000000000000000000
+0000000001000010000000000000
+0000001000000000100000000001
+0000000000000000000000000000
+0100100000000000000000000010
+
+   2 13$+/"1 alph=/text
+7 3 1 0 2 0 2 3 0 3 0 0 2
+0 2 2 0 0 0 1 0 0 0 0 0 0</pre></td>
+<td valign=top><pre>                CLASSIFICATION Ea<a name="xe"></a>
+  x=. 1 2 3 4 5 6 7
+  y=. (x-3) * (x-5)
+  y
+8 3 0 _1 0 3 8
+   
+  range=. m-i. 1+(m=. >./y)-<./y
+  range
+8 7 6 5 4 3 2 1 0 _1
+   
+  bc=. range <:\ y
+  bc
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 1 0 0 0 1 1
+1 1 0 0 0 1 1
+1 1 0 0 0 1 1
+1 1 1 0 1 1 1
+1 1 1 1 1 1 1</pre></td>
+<td valign=top><pre>                CLASSIFICATION Eb
+  x=. 1 2 3 4 5 6 7
+  y=. (x-3) * (x-5)
+  y
+8 3 0 _1 0 3 8
+   
+  range=. m-i. >:(m=. >./y)-<./y
+  range
+8 7 6 5 4 3 2 1 0 _1
+
+  bc=. range <:\ y
+  bc { ' *'
+*     *
+*     *
+*     *
+*     *
+*     *
+**   **
+**   **
+**   **
+*** ***
+*******
+   
+  <\ 0 0 0 1 0 1 1 0 1
+0 0 0 1 0 0 0 0 0</pre></td></tr>
+
+<tr><td valign=top><pre>        CLASSIFICATION: graphs Ec</a>
+  bc
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 0 0 0 0 0 1
+1 1 0 0 0 1 1
+1 1 0 0 0 1 1
+1 1 0 0 0 1 1
+1 1 1 0 1 1 1
+1 1 1 1 1 1 1
+  <\ bc
+1 0 0 0 0 0 1
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 1 0 0 0 1 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 1 0 1 0 0
+0 0 0 1 0 0 0
+</pre></td>
+<td valign=top><pre>        CLASSIFICATION: graphs Ed
+  <\ bc
+1 0 0 0 0 0 1
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 1 0 0 0 1 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 1 0 1 0 0
+0 0 0 1 0 0 0
+
+  ' *' {~ <\bc
+*     *
+       
+       
+       
+       
+ *   * 
+       
+       
+  * *  
+   *   
+</pre></td>
+<td valign=top><pre> CLASSIFICATION +,* on subsets Ee
+
+  a=. 0 0 0 0 1 1 1 1
+  b=. 0 0 1 1 0 0 1 1
+  c=. 0 1 0 1 0 1 0 1
+   
+  act=. a,b,,:c
+  act
+0 0 0 0 1 1 1 1
+0 0 1 1 0 0 1 1
+0 1 0 1 0 1 0 1
+
+  2 3 5 +..* act
+0 5 3 8 2 7 5 10
+  2 3 5 *..^ act
+1 5 3 15 2 10 6 30
+
+  +/act
+0 1 1 2 1 2 2 3
+
+  {:c2=.(2=+/act)#"1 act
+0 1 1
+1 0 1
+1 1 0
+  2 3 5 >. .. * c2
+5 5 3
+</td></tr>
+
+<tr><td valign=top><pre>   CLASSIFICATION dot products Ef
+
+       2 3 5 | 0 5 3 8 2 7 5 10
+       4 2 1 | 0 1 2 3 4 5 6 7
+       ------|-----------------
+             | 0 0 0 0 1 1 1 1
+             | 0 0 1 1 0 0 1 1
+             | 0 1 0 1 0 1 0 1
+
+  row0 =. 2 3 5 }: col5=. 1 0 1
+
+  row0 * col5
+2 0 5
+  +/ row0 * col5
+7
+
+  row0 +..* act
+0 5 3 8 2 7 5 10
+  row0 *..^ act
+1 5 3 15 2 10 6 30
+   
+  row0 ^ col5
+2 1 5
+  */ row0 ^ col5
+10</pre></td>
+<td valign=top><pre>               STRUCTURES: box Fa<a name="xf"></a>
+  text
+ i sing of olaf glad and big
+  -. text
+gib dna dalg falo fo gnis i 
+  < 'glad'
+┌────┐
+│glad│
+└────┘
+  u=. (<'glad'),(<'and'),<'big'
+  u
+┌────┬───┬───┐
+│glad│and│big│
+└────┴───┴───┘
+  -. u
+┌───┬───┬────┐
+│big│and│glad│
+└───┴───┴────┘
+  # u
+3
+  'glad';'and';'big'
+┌────┬───┬───┐
+│glad│and│big│
+└────┴───┴───┘</pre></td>
+<td valign=top><pre>              STRUCTURES: each Fb
+
+  text
+ i sing of olaf glad and big
+   
+  words=. /. text
+   
+  words
+┌─┬────┬──┬────┬────┬───┬───┐
+│i│sing│of│olaf│glad│and│big│
+└─┴────┴──┴────┴────┴───┴───┘
+
+  1 0 2 3 { words
+┌────┬─┬──┬────┐
+│sing│i│of│olaf│
+└────┴─┴──┴────┘
+   -. " > 1 0 2 3 { words
+┌────┬─┬──┬────┐
+│gnis│i│fo│falo│
+└────┴─┴──┴────┘
+   
+   _1"< text
+┌─┬────┬──┬────┬────┬───┬───┐
+│i│sing│of│olaf│glad│and│big│
+└─┴────┴──┴────┴────┴───┴───┘</pre></td></tr>
+
+<tr><td valign=top><pre>              STRUCTURES: open Fc
+
+  words
+┌─┬────┬──┬────┬────┬───┬───┐
+│i│sing│of│olaf│glad│and│big│
+└─┴────┴──┴────┴────┴───┴───┘
+   
+  tt=. > words
+  tt
+i   
+sing
+of  
+olaf
+glad
+and 
+big 
+
+   $ tt
+7 4</pre></td>
+<td valign=top><pre>              PROGRAMS: simple Ga<a name="xg"></a>
+  root=. 'y. ^ %2'::'y. ^ %x.'
+  root 64
+8
+  3 root 64
+4
+  rPr=. '% y.'::'x. + % y.'
+  3 rPr 4
+3.25
+  rPr / 1 2 2 2 2 2 2
+1.4142
+  rPr \ 1 2 2 2 2
+1 1.5 1.4 1.41667 1.41379
+  rPr \ 3 7 15
+3 3.14286 3.14151
+  triple=. '3*y.'::''
+  triple i.5
+0 3 6 9 12
+  3 triple 6
+domain error
+  tr=. '3*y.'::*
+  tr i. 5
+0 3 6 9 12
+  3 5 7 tr i. 3
+0 5 14</pre></td>
+<td valign=top><pre>         PROGRAMS: conditional Gb
+  p=. '$.=. 1+y.<0'
+  q=. 'y. ^ %2'
+  r=. '''DOMAIN ERROR'''
+
+  conditional=. (p;q;r)::''
+
+  conditional -49
+DOMAIN ERROR
+   
+  conditional 49
+7
+
+  tozero=. (p;'y.-1';'y.+1')::''
+
+  tozero 3
+2
+  tozero _3
+_2
+  tozero "0 (_2 _1 0 1 2 3)
+_1 0 _1 0 1 2</pre></td></tr>
+
+<tr><td valign=top><pre>           PROGRAMS: iterative Gc
+  a=. 'r=. 1 }: $.=. y. # 1'
+  b=. 'r=. r * 1+ # $.'
+   
+  factorial=: (a;b)::''
+  factorial 5
+120
+  factorial"0 i. 6
+1 1 2 6 24 120
+   
+  >a;b
+r=. 1 }: $.=. y. # 1
+r=. r * 1+ # $.     
+  c=. 'r=. (0,r) + (r,0)'
+  binomials=. (a;c)::''
+  binomials 4
+1 4 6 4 1
+  fib=. (a;'r=.r,,+/(_2){.r')::''
+  fib 10
+1 1 2 3 5 8 13 21 34 55 89
+  d=. 'r=.1 }: $.=. x. # 1'
+  e=. 'r=. (r*1+y.=.y.-1)%1+#$.'
+  outof=. ''::(d;e)
+  3 outof 5
+10</pre></td>
+<td valign=top><pre>           PROGRAMS: recursive Gd
+  a=. '$.=. 2-0=y.' ; '1'
+  b=. 'y. * $: y.-1'
+  factorial=. (a,&lt;b)::''
+  factorial 5
+120
+   
+  d=. '(r,0)+0,r=. $:y.-1'
+  binomial=. (a,&lt;d)::''
+  binomial 4
+1 4 6 4 1
+   
+  f=. 'r,+/(_2){.r=. $: y.-1'
+  fibonacci=. (a,&lt;f)::''
+  fibonacci 10
+1 1 2 3 5 8 13 21 34 55 89
+   
+  g=. '$.=. 2-0=x.' ; '1'
+  h=. 'y.x.%~x.$:&<:y.'
+  outof=. ''::(g,&lt;h)
+  outof"0\~i. 4
+1 1 1 1
+0 1 2 3
+0 0 1 3
+0 0 0 1</pre></td>
+<td valign=top><pre>           PROGRAMS: recursive Ge
+   a=.'$.=.1+0&lt;n=.x.-1'
+   b=.',:2{.y.'
+   c=.'(n$:0 2 1{y.),(1$:y.),'
+   hanoi=.''::(a;b;c,'n$:-.y.')
+
+   2 hanoi 'ABC'
+AC
+AB
+CB
+   \. 4 hanoi 0 1 2
+0 0 2 0 1 1 0 0 2 2 1 2 0 0 2
+2 1 1 2 0 2 2 1 1 0 0 1 2 1 1
+
+   \. 'ABC'{~ 4 hanoi 0 1 2
+AACABBAACCBCAAC
+CBBCACCBBAABCBB
+   
+   c=. 'r=.0#$.=.y.#1+n=.0'
+   d=.'r=.r,(n=.1+n),r'
+   h=.(c;d)::''
+   h 4
+1 2 1 3 1 2 1 4 1 2 1 3 1 2 1
+   h 3
+1 2 1 3 1 2 1 </pre></td></tr>
+
+<tr><td valign=top><pre>           PROGRAMS: recursive Gf
+  {: a=. 3 3$'abcdefghi'
+abc
+def
+ghi
+  (f=.f~."1 0 f=.i.&#) a
+1 2
+0 2
+0 1
+  <"2 (minors=.f { 1&}."1) a
+┌──┬──┬──┐
+│ef│bc│bc│
+│hi│hi│ef│
+└──┴──┴──┘
+ p=.'$=.1+1=#y.' }: r=.'0{,y.'
+ q=.'(0{"1 y.)-..*$:"2 minors y.'
+  {:b=.?3 3$9
+1 6 4
+4 1 0
+6 6 8
+   (det=.(p;q;r)::'') b
+   det b
+_112
+ s=.'(0{"1 y.)+..*$:"2 minors y.'
+  (permanent=.(p;s;r)::'') b
+320</pre></td>
+<td valign=top><pre>             GEOMETRY: 2-space Ha<a name="xh"></a>
+  length=. '^:+/y.^2'::''
+  length 12 5
+13
+  {: tri=. ? 2 3 $ 9
+3 4 7
+0 0 4
+  1 -."1 tri
+4 7 3
+0 4 0
+  {: lsides=.length tri-1-."1 tri
+1 5 5.65685
+  {: semiper=. 2 %~ +/lsides
+5.82843
+  area=. ^:*/semiper-0,lsides
+  area
+2
+  tri,1
+3 4 7
+0 0 4
+1 1 1
+
+  2 %~ det tri,1
+2</pre></td>
+<td valign=top><pre>             GEOMETRY: 3-space Hb
+  tri,1
+3 4 7
+0 0 4
+1 1 1
+  2%~ det tri,1   
+2
+  2%~ det 1 0 2 {"1 tri,1
+_2
+  {: tetrahedron=. 0,"1 =\~ i.3
+0 1 0 0
+0 0 1 0
+0 0 0 1
+   
+  volume=. det&(,&1) % !&#
+  volume tetrahedron
+_0.166667
+   
+  {: tet=. ? 3 4 $ 9
+6 0 3 0
+3 6 5 8
+7 4 0 5
+  volume tet
+11.5</pre></td></tr>
+
+<tr><td valign=top><pre>             CONNECTIONS: arcs Ia<a name="xi"></a>
+
+  arcs=. ? 22 2 $ 8 8
+  8{.arcs
+1 6
+3 4
+1 0
+5 5
+7 3
+4 6
+0 0
+4 5
+
+  \. n=. arcs{nodes=. 'abcdefgh'
+bdbfheaeaafheffgacgchg
+geafdgafddegadhcffhbff
+   
+  6{. barcs=. <"1 n
+┌──┬──┬──┬──┬──┬──┐
+│bg│de│ba│ff│hd│eg│
+└──┴──┴──┴──┴──┴──┘
+  15 {. ,arcs
+1 6 3 4 1 0 5 5 7 3 4 6 0 0 4</pre></td>
+<td valign=top><pre>     CONNECTIONS: conn. matrix Ib
+
+  '01234567' {~ |: arcs
+1315740400574556026276
+6405360533460372557155
+  b=. '(i.,~x.)e.'
+  cmFarcs=. ''::(b,'y.+..*x.,1')
+
+  cm=. 8 cmFarcs arcs
+  cm
+1 0 0 1 0 1 0 0
+1 0 0 0 0 0 1 0
+0 1 0 0 0 1 0 0
+0 0 0 0 1 0 0 0
+1 0 0 0 0 1 1 0
+0 0 0 1 1 1 0 1
+0 0 1 0 0 1 0 1
+0 0 0 1 0 1 1 0
+
+  +/cm
+3 1 1 3 2 6 3 2
+  +/+/cm
+21</pre></td>
+<td valign=top><pre>           CONNECTIONS: family Ic
+  cm
+1 0 0 1 0 1 0 0
+1 0 0 0 0 0 1 0
+0 1 0 0 0 1 0 0
+0 0 0 0 1 0 0 0
+1 0 0 0 0 1 1 0
+0 0 0 1 1 1 0 1
+0 0 1 0 0 1 0 1
+0 0 0 1 0 1 1 0
+
+  points=. 1 0 0 0 0 0 0 1
+
+  points +. .. *. cm
+1 0 0 1 0 1 1 0
+
+  points+.points+. .. *. cm
+1 0 0 1 0 1 1 1
+
+  immfam=. ''::'x.+.x.+...*.y.'
+  points immfam cm
+1 0 0 1 0 1 1 1
+  fam=. ''::'immfam&y...(#y.)x.'
+  points fam cm
+1 1 1 1 1 1 1 1</pre></td></tr>
+
+<tr><td valign=top><pre>          CONNECTIONS: closure Id
+  {: cm2=. 0=?8 8 $ 5
+1 0 0 0 0 0 0 0
+0 0 1 0 0 0 1 0
+0 0 0 0 0 0 1 0
+1 0 0 0 0 0 0 0
+1 0 0 0 1 1 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+0 0 1 1 0 0 1 0
+   
+  points=. 1 0 0 0 0 0 0 1
+  points fam cm2
+1 0 1 1 0 0 1 1
+   
+  cm2 fam cm2
+1 0 0 0 0 0 0 0
+0 0 1 0 0 0 1 0
+0 0 0 0 0 0 1 0
+1 0 0 0 0 0 0 0
+1 0 0 0 1 1 0 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+1 0 1 1 0 0 1 0</pre></td>
+<td valign=top><pre>        CONNECTIONS: adjacency Ie
+  a=. 0 0 0 0 1 1 1 1
+  b=. 0 0 1 1 0 0 1 1
+  c=. 0 1 0 1 0 1 0 1
+  $d=. a,b,:c
+3 8
+  adj=. '1=y. +..~: \. y.'::''
+  {. e=. adj \. d
+0 1 1 0 1 0 0 0
+1 0 0 1 0 1 0 0
+1 0 0 1 0 0 1 0
+0 1 1 0 0 0 0 1
+1 0 0 0 0 1 1 0
+0 1 0 0 1 0 0 1
+0 0 1 0 1 0 0 1
+0 0 0 1 0 1 1 0
+   e{' *'
+ ** *   
+*  * *  
+*  *  * 
+ **    *
+*    ** 
+ *  *  *
+  * *  *
+   * ** </pre></td>
+<td valign=top><pre>                      SORTING: Ja<a name="xj"></a>
+
+t=. 'i sing of olaf glad and big'
+  {: tt=. > /. t
+i   
+sing
+of  
+olaf
+glad
+and 
+big 
+
+  /: tt
+5 6 4 0 2 3 1
+
+ tt /: tt
+and 
+big 
+glad
+i   
+of  
+olaf
+sing</pre></td></tr>
+
+<tr><td valign=top><pre> SYMBOLICS: reduction and scan Ka<a name="xk"></a>
+  o=.'(' }: c=.')' }: s=.'-'
+  minus=: ''::'o,x.,c,s,y.'
+  'a' minus 'b'
+(a)-b
+  list=.'defg'
+  minus / list
+(d)-(e)-(f)-g
+  minus\list
+d            
+(d)-e        
+(d)-(e)-f    
+(d)-(e)-(f)-g
+  d,e,f,g=.<:f=.<:e=.<:d=.4
+4 3 2 1
+  ". minus / list
+2
+  ". minus \ list
+4 1 3 2
+  times=. ''::'o,x.,c,''*'',y.'
+  list times"0 -. list
+(d)*g
+(e)*f
+(f)*e
+(g)*d</pre></td>
+<td valign=top><pre>         COMPOSITIONS: and (&) La<a name="xl"></a>
+  ^&2 c=. 1+i.4
+1 4 9 16
+  2&^ c
+2 4 8 16
+  pow=. ^&2::^
+  pow c pow c
+1 16 729 65536
+  c +&% c
+2 1 0.666667 0.5
+  tr=. 3&*::*
+  db=. 2&*::*
+  c tr & db c
+4 16 36 64
+  c db & tr c
+9 36 81 144
+  c +&^. c
+0 1.38629 2.19722 2.77259
+  ^ c+&^. c
+1 4 9 16
+  db & tr \~ c
+ 9 18  27  36
+18 36  54  72
+27 54  81 108
+36 72 108 144</pre></td>
+<td valign=top><pre>        COMPOSITIONS: atop (@) Lb
+  c |@- / c=. 1+i.4
+0 1 2 3
+1 0 1 2
+2 1 0 1
+3 2 1 0
+   
+  db=. 2&*::*
+  tr=. 3&*::*
+   
+  db @ tr \ ~ c
+2  4  6  8
+4  8 12 16
+6 12 18 24
+8 16 24 32
+  db & tr \ ~ c
+ 9 18  27  36
+18 36  54  72
+27 54  81 108
+36 72 108 144</pre></td></tr>
+
+<tr><td valign=top><pre>       COMPOSITIONS: under (") Lc
+  +.\ a=. 0 0 1 0 1 1 0 0 0
+0 0 1 1 1 1 1 1 1
+  +.\ -.a
+0 0 0 1 1 1 1 1 1
+  -. +./ -. a
+1 1 1 1 1 1 0 0 0
+  +.\"-. a
+1 1 1 1 1 1 0 0 0
+  b=. 1 2 3 4 }: c=. 3 4 5 6
+  b +&^. c
+1.09861 2.07944 2.70805 3.17805
+  ^ b+&^. c
+3 8 15 24
+  b +"^. c
+3 8 15 24
+  {:text=. 'i';'sing';'of';'olaf'
+┌─┬────┬──┬────┐
+│i│sing│of│olaf│
+└─┴────┴──┴────┘
+  -."> text
+┌─┬────┬──┬────┐
+│i│gnis│fo│falo│
+└─┴────┴──┴────┘</pre></td>
+<td valign=top><pre>    COMPOSITIONS: fork (f g h) Ld
+  c(+ * -)d=.-.c=. i. 4
+_9 _3 3 9                 g
+  q=.+*-                 / \
+  c q \ c               f   h
+0 _1 _4 _9             /\   /\
+1  0 _3 _8            x  y x  y
+4  3  0 _5
+9  8  5  0                g
+  q c                    / \
+0 _1 _4 _9              f   h
+  r=. -,+               |   |
+  c r d                 y   y
+_3 3
+_1 3
+ 1 3
+ 3 3
+  db=. 2&*::*
+  tr=. 3&*::*
+  (db+tr) c
+0 5 10 15
+  (db*tr) c
+0 6 24 54
+  (db*db+tr) c
+0 10 40 90</pre></td>
+<td valign=top><pre>      COMPOSITIONS: hook (g h) Le
+  a=.5 6 7 8
+  b=.1 2 3 4              g
+  (*>:) b                / \
+2 6 12 20               x   h
+  a (*>:) b                  \
+10 18 28 40                   y
+                          g
+  a (*>:)\ b             / \
+10 15 20 25             y   h
+12 18 24 30                  \
+14 21 28 35                   y
+16 24 32 40
+  (+%)/ 1 2 2 2 2 2 2 2
+1.41422
+  (+%)\ 1 2 2 2 2
+1 1.5 1.4 1.41667 1.41379
+  (+%)\ 3 7 15
+3 3.14286 3.14151
+  (+%)\ 1 1 1 1 1
+1 2 1.5 1.66667 1.6
+  (-%)\ 1 2 2 2 2 2
+1 0.5 0.333333 0.25 0.2 0.166667
+  *~ (+%)/ 1 , 12 $ 1 2
+3</pre></td></tr>
+
+<tr><td valign=top><pre>        FUNCTIONAL PROGRAMMING Ma<a name="xm"></a>
+   bc=. 0&, + ,&0
+   bc 1
+1 1
+   bc bc 1
+1 2 1
+   bc bc bc 1
+1 3 3 1
+   q=. '$.=.1,y.#2'
+   r=. 'f=. {:' ; 'f=. x.&f'
+   power=. 2::(q;r)
+   bc power 3 (1)
+1 3 3 1
+   bc .. 3 (1)
+1 3 3 1
+   c3=. (0&, + ,&0) .. 3
+   c3 1
+1 3 3 1
+   2&* .. 3"0 i.5
+0 8 16 24 32
+   2&+ .. 3"0 i.5
+6 7 8 9 10
+   g=. *~::-
+   5 g g 4
+_11</pre></td>
+<td valign=top><pre>            SETS: propositions Na<a name="xn"></a>
+  {: a=. 2%~ i. 11
+0 0.5 1 1.5 2 2.5 3 3.5 4 4.5 5
+  (2&<: *. <&5) a
+0 0 0 0 1 1 1 1 1 1 0
+  ((2&<: *. <&5) a) # a
+2 2.5 3 3.5 4 4.5
+  ((2&<: *. <&5) # {:) a
+2 2.5 3 3.5 4 4.5
+  ({: #~ 2&<: *. <&5) a
+2 2.5 3 3.5 4 4.5
+  int=. = <.
+  int a
+1 0 1 0 1 0 1 0 1 0 1
+  ((2&<: *. int) a) # a
+2 3 4 5
+  ({: #~ 2&<: *. int) a
+2 3 4 5
+  (#~ 2&<: *. int) a
+2 3 4 5</pre></td>
+<td valign=top><pre>               SETS: relations Nb
+  i=.i.8  }:  p=. 2 3 5 7 11
+  belongsto=. +./"1 @ (=/)
+  i belongsto p
+0 0 1 1 0 1 0 1
+  e=. belongsto
+  p e i
+1 1 1 1 0
+  c=. ~.@v=. e&'aeiou'
+  alph=.  'abcdefghijklmno'
+  alph=. alph,'pqrstuvwxyz'
+  (v alph)#alph
+aeiou
+  (#~ c) alph
+bcdfghjklmnpqrstvwxyz</pre></td></tr>
+
+<tr><td valign=top><pre>             SETS: union, etc. Nc
+  (even=. 0&=&(2&|))a=. i. 16
+1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0
+  prime=.'2=+/0=y.|~1+i.y.'::''"0
+  prime a
+0 0 1 1 0 1 0 1 0 0 0 1 0 1 0 0
+  (prime a) # a
+2 3 5 7 11 13
+  a#~(prime*.even)a   [SET INTER-
+2                        SECTION]
+  a#~(prime>even)a    [SET
+3 5 7 11 13           DIFFERENCE]
+  triple=.0&=@(3&|)
+  q=. even+.triple    [SET UNION]
+  (q a) # a
+0 2 3 4 6 8 9 10 12 14 15
+  r=. prime +. even *. triple
+  (r a) # a
+0 2 3 5 6 7 11 12 13</pre></td>
+<td valign=top><pre>         FAMILIES OF FUNCTIONS Oa<a name="xo"></a>
+  x=.1 2 3 4 5 6 7
+  x^2
+1 4 9 16 25 36 49
+  x^3
+1 8 27 64 125 216 343
+  (4*x^2) + (_3*x^3)
+1 _8 _45 _128 _275 _504 _833
+
+  2 3 ^~\ x
+1 4  9 16  25  36  49
+1 8 27 64 125 216 343
+  4 _3 +..* 2 3 ^~\x
+1 _8 _45 _128 _275 _504 _833
+
+   
+   e=. 0 1 2 3 4
+   vandermonde=. e ^~\ x
+   vandermonde
+1  1  1   1   1    1    1
+1  2  3   4   5    6    7
+1  4  9  16  25   36   49
+1  8 27  64 125  216  343
+1 16 81 256 625 1296 2401</pre></td>
+<td valign=top><pre>         FAMILIES OF FUNCTIONS Ob
+   c=. 4 2 _3 2 1
+   vandermonde
+1  1  1   1   1    1    1
+1  2  3   4   5    6    7
+1  4  9  16  25   36   49
+1  8 27  64 125  216  343
+1 16 81 256 625 1296 2401
+   c+..*vandermonde
+6 28 118 348 814 1636 2958
+   
+   poly=. ''::'x.+..*\.y.^/i.#x.'
+   c poly x
+6 28 118 348 814 1636 2958</pre></td></tr>
+
+<tr><td valign=top><pre>          INVERSES AND DUALITY Pa<a name="xp"></a>
+  cFf=.   '(y.-32) * 5%9'::''
+  fFc=. '32 + (y. * 9%5)'::''
+  dc=. 40 -~ 20 * i. 8
+  fFc dc
+_40 _4 32 68 104 140 176 212
+  cFf fFc dc
+_40 _20 0 20 40 60 80 100
+  % % 1 2 3
+1 2 3
+  log =.   '10 ^.y.'::''
+  invlog=. '10 ^ y.'::''
+  log y=. 24 4 75 7
+1.38021 0.60206 1.87506 0.845098
+  +/ log y
+4.70243
+  invlog +/ log y
+50400</pre></td>
+<td valign=top><pre>          INVERSES AND DUALITY Pb
+  r=. 2 3 4  }:  s=. 2 4 5
+  invlog (log r) + (log s)
+4 12 20
+  r * s
+4 12 20
+   
+  ^ (^.r) + (^.s)
+4 12 20
+  r +"^. s
+4 12 20
+   
+  r +"% s
+1 1.71429 2.22222
+  % (%r) + (%s)
+1 1.71429 2.22222
+   
+  +"% / r
+0.923077
+  % +/ % r
+0.923077</pre></td>
+<td valign=top><pre>          INVERSES AND DUALITY Pc
+  f=. +&3
+  g=. -&3
+
+  {: x=. i. 4
+0 1 2 3
+
+  f x
+3 4 5 6
+
+  !f x
+6 24 120 720
+
+  g!f x
+3 21 117 717
+
+  !"f x
+3 21 117 717
+
+  !"(+&3) x
+3 21 117 717
+
+  !"(*&2) x
+0.5 1 12 360</pre></td></tr>
+
+</table>
+
+
+
+<table width=520 align=center><tr><td>
+
+<br><hr>
+<p><font size=-1>
+First appeared in the APL90 Conference Proceedings,
+APL Quote-Quad, Volume 20, Number 4, July 1990.
+</font></p>
+
+<table>
+<tr><td><font size="-1">created: &nbsp;</font></td><td><font size="-1">2009-04-06 12:20</font></td></tr>
+<tr><td><font size="-1">updated:</font></td><td><font size="-1">2016-11-16 11:15</font></td></tr>
+</table>
+
+
+
+
+</td></tr></table>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</body>
+</html>
