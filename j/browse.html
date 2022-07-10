@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>jsrc</title>
+<link rel=icon href='j.png'>
+<style>
+ html{font-family:monospace;font-size:16px}
+ body{display:flex;flex-direction:row;padding:0;margin:0}
+ textarea{margin:0px;padding:5px;resize:none;}
+ .left{width:50%;height:100vh;display:flex;flex-direction:column}
+ .right{width:50%;height100vh;}
+ .top{height:30vh;}
+ .bot{height:70vh;}
+ .link{color:blue}
+ #grp{width:99%}
+ #lst{list-style-type:none;margin:0;padding:0;overflow:scroll}
+ #edt{font-family:monospace;font-size:16px;line-height:20px}
+</style>
+</head>
+
+<body>
+<div class="left">
+ <div class="top">
+  <table id="tab"></table>
+  <input id="grp" placeholder="grep"></input>
+  <hr/>
+ </div>
+ <ul id="lst" class="bot"><li>
+</div>
+<textarea class="right" id="edt" spellcheck="false"></textarea>
+
+<script>
+function ge(x){ return document.getElementById(x) }
+function ce(x){ return document.createElement(x) }
+
+let tab=ge("tab")
+let edt=ge("edt")
+let grp=ge("grp")
+let lst=ge("lst")
+let src
+
+function ld(x){ document.title="j"+x;x="src"+x+".json";fetch(x).then(r=>r.json()).then(r=>st(r)) }
+function st(x){ src=x; let k=Object.keys(x); let m=12;
+ let r=ce("tr")
+ for(let i=0;i<k.length;i++){
+  if(r.childElementCount==m){tab.appendChild(r);r=ce("tr")}
+  let d=ce("td"); d.textContent=k[i]; d.classList.add("link")
+  let s=x[k[i]].join("\n");  d.onclick=function(){edt.value=s}
+  r.appendChild(d)
+ }
+ tab.appendChild(r)
+}
+function gr(x){ cl(lst); if(x.length==0)return; let k=Object.keys(src);
+ for(let i=0;i<k.length;i++){
+  let lines=src[k[i]]
+  for(let l=0;l<lines.length;l++){
+   if(lines[l].indexOf(x)>=0){
+    let li=ce("li")
+    let sp=ce("span")
+    sp.style.color="blue"
+    sp.innerText=k[i]+":"+String(1+l)+":"
+    let f=k[i]; let ll=l; sp.onclick=function(){fl(f,ll)}
+    li.appendChild(sp)
+    li.appendChild(document.createTextNode(lines[l]))
+    lst.appendChild(li)
+   }
+  }
+ }
+}
+function cl(x){while(x.firstChild)x.removeChild(x.firstChild)}
+function fl(f,l){let y=src[f]
+ let x=[]
+ for(let i=0;i<y.length;i++){
+  x.push( (String(1+i)+":  ").padStart(4) + y[i] )
+ }
+ edt.value=x.join("\n")
+ edt.scrollTop=20*l
+}
+grp.onchange=function(e){gr(e.target.value)}
+ld(document.location.hash.slice(1))
+</script></body></html>

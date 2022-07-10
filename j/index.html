@@ -1,13 +1,55 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8"><title>J</title></head>
-<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABSSURBVDhPY/wPBAwUACYozcDAyAjBhACaOoQBZAKCBjACbQNhXID2LgCFMb5wHgJeIARoYwAhfyMD2nqBGFdgNQA93slKB7AEhE8zCFCYnRkYAOS/HR/UGSYjAAAAAElFTkSuQmCC'>
+<link rel=icon href='j.png'>
 <style>
  html{font-family:monospace}
+ #screen{position:absolute;z-index:10;left:0px;top:0px;width:100vw;height:100vh;flex-flow:row wrap}
+ .hidden{display:none}
+ .cons{flex-grow:1;resize:none;min-width:40vw}
 </style>
 <body>
-<ul>
-<li><a href="j00/index.html">Incunabulum&nbsp;&nbsp;1989&nbsp;&nbsp;8 27</a></li>
-<li><a href="j90/index.html">APL\? APL90, 1990&nbsp;&nbsp;8&nbsp;&nbsp;9</a></li>
-<li><a href="j62/index.html">Version 6.2, 1992 12 20</a></li>
-</ul>
+
+<div id="page">
+ <h1>j versions</h1>
+ <ul>
+ <li><a href="j00/index.html">Incunabulum&nbsp;&nbsp;1989&nbsp;&nbsp;8 27</a> <a href="browse.html#00">src</a></li>
+ <li><a href="j90/index.html">APL\? APL90, 1990&nbsp;&nbsp;8&nbsp;&nbsp;9</a></li>
+ <li><a href="j62/index.html">Version 6.2, 1992 12 20</a> <a href="browse.html#62">src</a></li>
+ </ul>
+ <h1>compare</h1>
+ <fieldset id="cmp">
+  <div><input type="checkbox" id="j00" ><label for="j00">Incunabulum</label></div>
+  <div><input type="checkbox" id="j90" ><label for="j90">APL\?</label></div>
+  <div><input type="checkbox" id="j62" ><label for="j62">j62</label></div>
+  <button onclick="run()">run</button>
+ </fieldset>
+</div>
+<div id="screen" class="hidden">
+</div>
+
+<script>
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function run(){
+ let v=document.getElementsByTagName("input")
+ let x=[]
+ for(let i=0;i<v.length;i++)if(v[i].checked)x.push(v[i].id)
+ ge("page").classList.toggle("hidden")
+ let s=ge("screen"); s.classList.toggle("hidden")
+ s.style.display="flex"
+ for(let i=0;i<x.length;i++)s.appendChild(con(x[i]))
+ console.log(x)
+}
+function con(x){
+ let t=ce("textarea")
+ t.classList.add("cons")
+ t.title=x
+ t.value=x
+ return t
+}
+</script>
+
+
+
+
 </body></html>
