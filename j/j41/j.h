@@ -36,6 +36,8 @@
 #define	SYS			SYS_IBMRS6000
 #elif defined(vax)
 #define	SYS			SYS_VAX
+#else
+#define SYS			SYS_386IX
 #endif
 
 #define LINKJ                   0
