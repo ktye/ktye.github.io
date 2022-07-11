@@ -79,7 +79,7 @@ extern A        df2();
 extern A        dgrade1();
 extern A        dgrade2();
 extern A        divide();
-extern A        diff();
+static A        diff(); /*ktye*/
 extern A        dot();
 extern A        drep();
 extern A        drop();
@@ -137,7 +137,7 @@ extern C        immloop();
 extern A        increm();
 extern A        indexof();
 extern D        inf;
-extern A        intg();
+static A        intg(); /*ktye*/
 extern A        inv();
 extern A        iota();
 extern I        i0();

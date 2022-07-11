@@ -1,0 +1,15 @@
+set -e
+set -x
+
+if [ "$1" = "wasm" ]; then
+	echo wasm nyi
+	false
+fi
+
+rm -f *.o
+for c in *.c; do
+	gcc -c -std=c89 $c
+done
+
+gcc -o j62 a.o ai.o ap.o au.o c.o cc.o cd.o cf.o cg.o cp.o cr.o ct.o cx.o f.o i.o io.o j.o k.o m.o p.o pc.o pv.o r.o rl.o rt.o s.o t.o ta.o u.o ut.o v.o ve.o vg.o vi.o vm.o vp.o vs.o vx.o vz.o w.o wn.o x.o xa.o xf.o xl.o vh.o vb.o xs.o -lm
+rm -f *.o
