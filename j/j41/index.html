@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>j41</title>
+<link rel=icon href='../j.png'>
+<style>
+ html{font-family:monospace}
+ body{overflow:hidden}
+ textarea{position:absolute;top:0px;left:0px;width:100vw;height:100vh;overflow:auto;margin:0px;padding:5px;resize:none}
+</style>
+</head>
+
+<body>
+<textarea id="tty"></textarea>
+
+<script>
+
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function ge(x){return document.getElementById(x)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+
+
+var src=ge("src");var tty=ge("tty")
+
+tty.value = ""
+tty.onkeypress=function(e){
+ if(("Enter"==e.key)&&(0<tty.value.length)){pd(e);
+  let v=tty.value; let i=v.lastIndexOf("\n");
+  let s=((i<0)?v:v.slice(i)).trim()
+  if(!s.length)return
+  E(s); tty.scrollTop=tty.scrollHeight;
+}}
+tty.focus()
+
+function write(f,s){
+ console.log("write",f,s)
+ if(f==1) tty.value+=s
+ else     console.log("write to file ", f, ":", s)
+}
+function strtoln(u){let i=0;
+ for(;i<30;i++)if(u[i]<48||u[i]>57)break
+ console.log("strltoln",i)
+ return i
+}
+function strtodn(u){let i=0;
+ for(;i<30;i++)if((u[i]!=46)&&(u[i]!=101)&&(u[i]<48||u[i]>57))break
+ console.log("strltodn",i)
+ return i
+}
+
+var J,M
+function m(x){ M+=x;return M-x;                        }
+function u( ){ return new Uint8Array(J.memory.buffer)  }
+function i( ){ return new Uint32Array(J.memory.buffer) }
+function n(x){ return u().slice(x).indexOf(0)          }
+function s(x){ return su(u().slice(x,x+n(x)))          }
+function O(u){ tty.value+=su(u)                        }
+function A(s){ }
+function E(s){ let x=us(s);let n=x.length;let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0; console.log("repl",r,n); J.repl(r,1+n); }
+let env={env:{
+ sprintf:function(x,y,z){console.log("sprintf...");return 0;},
+ exp:Math.exp,
+ fclose:function(x){return 0;},
+ fputc:function(x,y){console.log("fputc",x,y);write(y,String.fromCharCode(x));return x;},
+ fgets:function(x,y,z){console.log("fgets",x,y,z);return 0;},
+ fputs:function(x,y){console.log("fputs",x,y); write(y,s(x));return 0;},
+ fwrite:function(a,b,c,d){console.log("fwrite",a,b,c,d);write(d,su(u().slice(x,x+b*c)));return c;},
+ free:function(x){},
+ malloc:m,
+ strtol:function(x,y,z){console.log("strtol",x,y,z);let b=u();let n=strtoln(b.slice(x));b[y]=x+n;return Number(su(b.slice(x,x+n)))},
+ strtod:function(x,y,z){console.log("strtod",x,y,z);let b=u();let n=strtodn(b.slice(x));let j=i();j[y/4]=x+n;let r=Number(su(b.slice(x,x+n)));console.log("strtod",r);return r;},
+ fmod:function(x,y){return Number((x-(Math.floor(x/y)*y)).toPrecision(8));},
+ cos:Math.cos,
+ sin:Math.sin,
+ log:Math.log,
+ atan2:Math.atan2,
+ cosh:Math.cosh,
+ sinh:Math.sinh,
+ jstime:function(x){let d=new Date();let i=new Uint32Array(J.memory.buffer);i[x]=d.getFullYear();x[1+i]=d.getMonth();x[2+i]=d.getDay();x[3+i]=d.getHours();x[4+i]=d.getMinutes();x[5+i]=d.getSeconds();},
+ sleep:function(x){console.log("sleep");return 0;},
+ fseek:function(x,y,z){console.log("fseek nyi");return 0;},
+ ftell:function(x){console.log("ftell nyi");return 0;},
+ rewind:function(x){console.log("rewind nyi");return 0;},
+ unlink:function(x){console.log("unlink");return 0;},
+ fopen:function(x,y){console.log("fopen");return 0;},
+ fread:function(a,b,c,d){console.log("fread nyi");return 0;}
+}}
+
+fetch('j41.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+ J=r.instance.exports
+ M=J.__heap_base.value
+ J.wasminit()
+})
+
+</script></body></html>

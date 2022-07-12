@@ -29,13 +29,17 @@ static A initevm(v,i,s)A*v;S i;C*s;{C x[256];
 static A initevm(v,i,s)A*v;S i;C*s;{R v[i]=cstr(s);}
 #endif
 
+#ifndef WASM
 static void sigflpe(k)int k;{jsignal(EVDOMAIN); signal(SIGFPE,sigflpe);}
+#endif
 
 C jinit2(argc,argv)int argc;C**argv;{A*v;C b=1,*s;D*d;S t;
  tssbase=CLOCK;
  infile=stdin; outfile=0; jstf->act=JFPROF;
 #if !(SYS & SYS_ARCHIMEDES)
+#ifndef WASM
  b=isatty(fileno(stdin));
+#endif
 #endif
 #if (!LINKJ && SYS & SYS_SESM)
  sesm=b;
@@ -60,7 +64,7 @@ C jinit2(argc,argv)int argc;C**argv;{A*v;C b=1,*s;D*d;S t;
  qct=1.0; DO(44, qct  *=0.5;);
  qfuzz=qct;
  memcpy(&inf,XINF,(size_t)sizeof(D));
- memcpy(&nan,XNAN,(size_t)sizeof(D));
+ memcpy(&naN,XNAN,(size_t)sizeof(D));
  GA(qevm,BOX,1+NEVM,1,0); v=(A*)AV(qevm);
  RZ(initevm(v,EVBREAK  ,"break"            ));
  RZ(initevm(v,EVDEFN   ,"defn error"       ));
@@ -85,7 +89,9 @@ C jinit2(argc,argv)int argc;C**argv;{A*v;C b=1,*s;D*d;S t;
 #if (SYS & SYS_PC+SYS_PC386)
  t=EM_ZERODIVIDE+EM_INVALID; _control87(t,t);
 #else
+#ifndef WASM
  signal(SIGFPE,sigflpe);
+#endif
 #endif
  if(b&&!LINKJ){
   jouts("J 4.2   Copyright (c) 1990-1992, Iverson Software Inc.  All Rights Reserved.");

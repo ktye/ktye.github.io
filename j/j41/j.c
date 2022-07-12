@@ -20,7 +20,7 @@ I bytes,maxbytes,tbase= -NTSTACK,totbytes,ttop=NTSTACK;
 B errsee=!LINKJ;
 D inf;
 C jerr;
-D nan;
+D naN;
 C obuf[NOBUF],tostdout=1; FILE*infile,*outfile;
 A qevm;
 D qfuzz;
@@ -47,6 +47,16 @@ C immloop(){A x=mtv;I old=tbase+ttop;
    jerr=0;
    tpop(old);
 }}
+
+#ifdef WASM
+void wasminit(){jinit2(0,0)}
+void repl(s,n)C*s;I n;{A x;I old=tbase+ttop;
+ x=str(n,s);
+ if(jerr)x=mtv; else{maxbytes=bytes; immex(x);}
+ jerr=0;
+ tpop(old);
+}
+#endif
 
 
 #if !LINKJ

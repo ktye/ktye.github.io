@@ -77,7 +77,7 @@ F1(words){A t,*x,z;C*s;I k,n,*y;
 
 
 static D num(q,s)I q;C*s;{C c,*t;D z;
- if('-'==*s&&3>q){if(1==q)R inf; c=*(1+s); if(c=='-')R-inf; if(c=='.')R nan;}
+ if('-'==*s&&3>q){if(1==q)R inf; c=*(1+s); if(c=='-')R-inf; if(c=='.')R naN;}
  z=strtod(s,&t); ASSERT(q&&t==q+s,EVILNUM); R z;
 }
 

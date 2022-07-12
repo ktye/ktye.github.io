@@ -101,6 +101,11 @@ B appf(){C a;
 
 #else
 
+#ifdef WASM
+static C appf1(act,w)C act;A w;{R 0;}
+B appf(){R 0;}
+#else
+
 static C appf1(act,w)C act;A w;{
  RZ(w);
  if(act==JFSAVE)save1(w);
@@ -118,5 +123,6 @@ B appf(){C a;
  }
  R a;
 }
+#endif
 
 #endif

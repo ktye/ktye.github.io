@@ -33,7 +33,9 @@ F1(joff){
 
 void jouts(s)C*s;{if(outfile)fputc(COUT,outfile); jputs(s);}
 
+#ifndef WASM
 static void sigint(k)int k;{++jbrk; signal(SIGINT,sigint);}
+#endif
 
 
 /* --------------------- Special Session Manager ------------------------- */
@@ -139,7 +141,11 @@ void prompt(s)C*s;{jputs(s);}
 
 void sesmexit(){}
 
+#ifdef WASM
+C sesminit(){R 1;}
+#else
 C sesminit(){signal(SIGINT,sigint); R 1;}
+#endif
 
 C*wr(n,v)I n;C*v;{I k=0;
  if(tostdout)while(n>k&&!jerr)k+=fwrite(v+k,sizeof(C),(size_t)(n-k),stdout);

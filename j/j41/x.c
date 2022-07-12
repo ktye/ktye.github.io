@@ -61,6 +61,14 @@ static DF1(srx){PREF1(srx); ASSERT(BOX&AT(w),EVDOMAIN); R srep(ope(w),symbrd(onm
 
 static DF1(trx){PREF1(trx); ASSERT(BOX&AT(w),EVDOMAIN); R trep(ope(w),symbrd(onm(w)));}
 
+#ifdef WASM
+static DF1(ts){A z;I*x;
+ RZ(w);
+ GA(z,INT,6,1,0); x=AV(z);
+ jstime(x);
+ R z;
+}
+#else
 static DF1(ts){A z;I*x;struct tm*t;time_t now;
  RZ(w);
  time(&now); t=localtime(&now);
@@ -73,6 +81,7 @@ static DF1(ts){A z;I*x;struct tm*t;time_t now;
  x[5]=t->tm_sec;
  R z;
 }
+#endif
 
 static DF1(tss){R scf(CLOCK-tssbase);}
 

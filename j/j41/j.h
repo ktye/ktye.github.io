@@ -60,7 +60,7 @@
 #define __NO_INLINE__           1
 #endif
 
-#if (SYS & SYS_UNIX)
+#if (SYS & SYS_UNIX) && !WASM
 #include <memory.h>
 #include <sys/types.h>
 #endif
@@ -71,16 +71,19 @@
 #include <stdlib.h>
 #endif
 
-#include <errno.h>
+#ifndef WASM
 #include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#else
+#include "wa.h"
+#endif
+
 #include "jc.h"
 #include "jt.h"
 #include "je.h"
-
 
 #if (SYS & SYS_LILENDIAN)
 #define XINF            "\000\000\000\000\000\000\360\177"
