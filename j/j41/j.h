@@ -40,7 +40,11 @@
 #define SYS			SYS_386IX
 #endif
 
+#ifdef WASM
+#define LINKJ                   1
+#else
 #define LINKJ                   0
+#endif
 /* #define WATERLOO                1 */
 
 #define SYS_ANSILIB             (SYS_AMIGA + SYS_ARCHIMEDES + \

@@ -110,7 +110,8 @@ A rank2ex(a,w,fs,lr,rr,f2)A a,w,fs;I lr,rr;AF f2;{PROLOG;A*x,ya,yw,yz,z;
    for(j=0;j<m;j++){
     mv(at,acn,AV(ya),u); u+=ak;
     mv(wt,wcn,AV(yw),v); v+=wk;
-    RZ(*x++=f2(ya,yw,fs));
+    if((VAV(fs)->f!=0)||(VAV(fs)->g!=0)){ RZ(*x++=f2(ya,yw,fs)); }/*ktye, see au.c DF1 comments */
+    else{ RZ(*x++=f2(ya,yw)); }
    }
    b?(u=av):(v=wv);
   }

@@ -78,9 +78,6 @@ I i0(w)A w;{RZ(w=vi(w)); ASSERT(!AR(w),EVRANK); R*AV(w);}
 void jsignal(e)int e;{if(jerr)R; jerr=e;}
 #else
 void jsignal(e)int e;{A t=*(e+(A*)AV(qevm));
-
-__builtin_unreachable(); /* ktye: interupts wasm for debugging */
-
  if(jerr)R;
  jerr=e;
  if(errsee){jouts(AV(t)); jputc(CNL);}

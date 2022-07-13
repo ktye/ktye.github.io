@@ -38,7 +38,15 @@ extern I        ttop;
 static I old;
 
 
+#ifdef WASM
+C jinit(){
+ C c=jinit2(0,0L); old=tbase+ttop;
+ fputs("J 4.2   Copyright (c) 1990-1992, Iverson Software Inc.  All Rights Reserved.\n\n",1);
+ R c;
+}
+#else
 C jinit(){C c=jinit2(0,0L); old=tbase+ttop; R c;}
+#endif
 
 A jx(s)C*s;{A t,*x;
  jerr=0; maxbytes=bytes;

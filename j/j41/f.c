@@ -137,7 +137,6 @@ static F1(thbox){PROLOG;A z;
  EPILOG(z);
 }
 
-
 F1(thorn1){
  RZ(w);
  if(!AN(w)){A z;C b=BOX==AT(w);I r=MAX(2*b,AR(w));

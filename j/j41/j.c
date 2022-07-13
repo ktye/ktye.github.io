@@ -48,17 +48,6 @@ C immloop(){A x=mtv;I old=tbase+ttop;
    tpop(old);
 }}
 
-#ifdef WASM
-void wasminit(){jinit2(0,0)}
-void repl(s,n)C*s;I n;{A x;I old=tbase+ttop;
- x=str(n,s);
- if(jerr)x=mtv; else{maxbytes=bytes; immex(x);}
- jerr=0;
- tpop(old);
-}
-#endif
-
-
 #if !LINKJ
 int main(argc,argv)int argc;C**argv;{if(jinit2(argc,argv))immloop();}
 #endif

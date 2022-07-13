@@ -259,6 +259,9 @@ static DF1(evms){A t,*y;
 C jc(k,f1,f2)I k;AF*f1,*f2;{R 0;}
 #endif
 
+#ifdef WASM
+F2(foreign){ASSERT(0,EVDOMAIN);}
+#else
 
 F2(foreign){I p,q;
  p=i0(a); q=i0(w);
@@ -331,3 +334,4 @@ F2(foreign){I p,q;
  }
  ASSERT(0,EVDOMAIN);
 }
+#endif /* !WASM */
