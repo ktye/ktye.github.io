@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>APL\iv</title>
+</head>
+
+<body>
+<input    id="in"></input>
+<textarea id="ta"></textarea>
+<script type="module">
+
+import { iv } from './iv.js'
+
+function ge(x){return document.getElementById(x)}
+let inp = ge("in")
+let tty = ge("ta")
+
+tty.value = "APL\\iv\n      "
+
+iv.ini(function(s){tty.value+=s})
+
+inp.onchange=function(e){ iv.evl(inp.value) }
+
+
+</script>
+</body>
+
+</html>

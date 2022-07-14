@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>j0</title>
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<style>
+ html{font-family:monospace}
+ body{margin:0;padding:0;overflow:hidden}
+ optgroup{font-style:normal;white-space:pre}
+ option{font-family:monospace;white-space:pre}
+ #sel{position:absolute;left:0px;top:0px;z-index:10;background:white;border:1px solid;font-family:monospace;white-space:pre}
+ .left{position:absolute;left:0px;width:50vw;height:calc(100vh - 10px);top:10px;overflow:auto}
+ .right{position:absolute;left:50vw;width:50vw;height:100vh}
+ textarea{overflow:hidden;margin:0px;padding:0px;resize:none}
+</style>
+</head>
+
+<body>
+  <select id="sel" autocomplete="off">
+   <optgroup label="APL">
+    <option value="apl360">APL\360     (1966) 60k</option>
+    <option value="iv"    >APL\iv      (2020) 6M</option>
+   </optgroup>
+   <optgroup label="j">
+    <option value="j0"    >Incunabulum (1989)   6k</option>
+    <option value="j41"   >j41         (1992) 108k</option>
+    <option value="jstack">jstack      (2021)   2k</option>
+   </optgroup>
+   <optgroup label="k">
+    <option value="ok"    >oK           (2021)  40k</option>
+    <option value="kw"    >ktye/k.w     (2020)  20k</option>
+    <option value="ngn"   >ngn/k        (2022) 160k</option>
+    <option value="k" selected="selected">ktye/k       (2022)  60k</option>
+   </optgroup>
+  </select>
+  <div id="main">
+   <div      class="left"  id="dec" ></div>
+   <textarea class="right" id="tty" ></textarea>
+  </div>
+ </div>
+</div>
+
+<script type="module">
+
+import { apl360 } from './apl360.js'
+import { iv     } from './iv.js'
+import { j0     } from './j0.js'
+import { j41    } from './j41.js'
+import { jstack } from './jstack.js'
+import { ok     } from './ok.js'
+import { kw     } from './kw.js'
+import { ngn    } from './ngn.js'
+import { k      } from './k.js'
+
+// todo: k2(tinygo), k7, k9, ngn/k
+
+window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function ge(x){return document.getElementById(x)}
+
+var sel=ge("sel")
+var dec=ge("dec")
+var tty=ge("tty")
+
+sel.onchange=function(e){swtch(e.target.value)}
+//sel.value = k
+
+
+tty.value = ""
+tty.onkeypress=function(e){
+ if(("Enter"==e.key)&&(0<tty.value.length)){pd(e);
+  let v=tty.value; let i=v.lastIndexOf("\n");
+  let s=((i<0)?v:v.slice(i)).trim()
+  if(!s.length)return
+  evl(s); tty.scrollTop=tty.scrollHeight;
+}}
+tty.focus()
+
+function out(s){tty.value+=s}
+
+var evl
+
+function swtch(s){
+ document.title=s
+ while(dec.firstChild)dec.removeChild(dec.lastChild)
+ tty.value=""
+
+ switch(s){
+ case "iv":         iv.ini(dec,out);evl=    iv.evl; break;
+ case "apl360": apl360.ini(dec,out);evl=apl360.evl; break
+ case "j0":         j0.ini(dec,out);evl=    j0.evl; break;
+ case "j41":       j41.ini(dec,out);evl=   j41.evl; break;
+ case "jstack": jstack.ini(dec,out);evl=jstack.evl; break;
+ case "ok":         ok.ini(dec,out);evl=    ok.evl; break;
+ case "kw":         kw.ini(dec,out);evl=    kw.evl; break;
+ case "ngn":       ngn.ini(dec,out);evl=   ngn.evl; break;
+ case "k":           k.ini(dec,out);evl=     k.evl; break;
+ default:                console.log("unknown system", s);
+ }
+}
+
+swtch("k")
+
+</script></body></html>
