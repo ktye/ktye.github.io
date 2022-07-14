@@ -1,0 +1,78 @@
+: idn dex  ! til key  0: rdl wrl  0 null      10 abs        20 med       130 ... in      140 mvg avg
++ flp add  ~ not mch  1: nil nil  1           11 plo plot   21 vri       131 ... within  141 pct med
+- neg sub  , enl cat  2: nil nil  2 las last  12 ima imag   22 prm       132 bin         142 cov var
+* fst mul  ^ srt ept  3: nil nil  3 sqr sqrt  13 phi phase  23 rnd rand  133 ... like    144 rol rand
+% inv div  # cnt tak  4: nil nil  4 sin       14 cnj conj                134              '  ech ecd
+& wer min  _ flr drp  5: nil nil  5 cos       15 cnd cond                135 lgn log      /  ovr ovi
+| rev max  $ str cst  6: nil nil  6 dev       16 zxp expi                136 pow exp      \  scn sci
+< asc les  ? unq fnd  7: nil nil  7 log       17 dia diag                137              ': ecp epi
+> dst mor  @ tip atx  8: lun lud  8 exp       18 avg                     138 mkz cmplx    /: jon ecr
+= grp eql  . val cal  9: nil drw  9           19 med                     139 fns find     \: spl ecl
+
+k7+
+ complex(type z): 1i2, 1a30, cmplx, expi, real, imag, phase, conj, rand 3i(binormal)
+ matrix: x/y(mul), A\B(solve), A\0(qr), A\1(inv), diag A, diag v, norm, cond
+ stat: x med (pct/erf/cum), dev z (principal axis), x var, var z (cov), x avg (cum/win/exp)
+k7-
+ 32bit, time/duration, crypto, network, multithread
+ 
+Type/memory system
+32-bit system, buddy allocater with 8 byte headers
+types (cifzsla01234) byte8, int32, float64, complex128, symbol64, list32, dict64, funcs
+space for 15 types
+8 byte header:
+  4 bits type p>>28
+ 28 bits vector size, atom: p&0x0fffffff == 0x0fffffff
+ free block: type is 0:     p&0xf0000000 == 0
+ bucket type is stored only in free blocks at p (uint32 value)
+ 32 bits (p+1) are refcount for used blocks or pointer to next free
+
+Initial memory (64kB, 1kB reserved)
+ p[0]        block header
+ p[1]        rng state
+ p[2]        total allocated memory log2 (initial 64k, max 4G) uint32
+ p[3]        version(date)
+ followed by free list:
+ p[4..31]    points to free block of bucket size n = 4..31
+ byte[136…168] symbols :+-*%&|<>=!~,^#_$?@.0123456789'/\
+ byte[169…177] type names _cifzn.a
+ p[47]       0x2f srcp(position within srcc)
+ p[48]       0x30 points to global(ktree) keys (S)
+ p[49]       0x31 points to global(ktree) values (L)
+ p[50]       0x32 points to local keys (S)
+ p[51]       0x33 points to local values (L)
+ p[52]       0x34 points to stab(symbol table, L of C)
+ p[53]       0x35 points to asci chars (#256)
+ p[54]       0x36 symbolic compilation
+ p[55]       0x37 srcc(points to src chars)
+	     
+Function codes
+ primitives :+-*%&|<>=!~,^#_$?@. (their ascii value, dyadic +128)
+ ioverbs 0123456789 ('0'..'9', dyadic +128)
+ operators '/\ (ascii+128) ': /: \: (ascii '/\)
+ derived functions each/over/scan/each-prior/each-right/each-left: ascii ([{)]}, +128
+ builtins 2-30 130-158 
+
+Functions have type V0,V1,V2,..V0+7
+ basic functions and builtins have values < 256 and are not stored in the memory system
+ lambda functions: marked with length 0
+  x+2 string form C
+  x+3 (arg list;parse tree;compiled code)
+ projection: length 2
+  x+2 function
+  x+3 full argument list with holes (N)
+ composition: length 3, type V1 or V2
+  x+2, x+3: point to verbs
+ derived verbs, e.g. evaluating (/;+) are atoms
+  x+2 derived function code
+  x+3 points to the function operand
+ expressions (:e) have type V0 with length 2
+  x+2 string form C
+  x+3 (parse tree;compiled code)
+ call will adjust the valence if a derived function has two arguments
+ 
+Symbols are interned in the char array at m.k[stab]
+ symbol values are 256+index into this array (which is append only)
+ values < 256 are single char symbols and represent their ascii value
+ the 0 value is the empty symbol
+

@@ -3,4 +3,5 @@ set -x
 
 tg=/c/local/tinygo/bin/tinygo
 
-$tg build -o k.wasm -target wasm k.go
+export WASMOPT=/c/local/binaryen/wasm-opt.exe
+$tg build -o k.wasm -target wasm -opt=z k.go

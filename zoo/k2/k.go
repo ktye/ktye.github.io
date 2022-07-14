@@ -404,6 +404,8 @@ func bk(t, n k) k {
 	}
 	return buk(sz + 8) // complex values have an additional 8 byte padding after the header (does not change bucket type)
 }
+
+//export mk
 func mk(t, n k) k { // make type t of len n (-1:atom)
 	bt := bk(t, n)
 	fb, a := k(0), k(0)
@@ -812,7 +814,6 @@ func flp(x k) (r k) { // +x
 				if nn := m.k[m.k[2+i+v]] & atom; i == 0 {
 					ln = nn
 				} else if nn != ln || nn == atom {
-					println(nn, ln)
 					panic("size")
 				}
 			}
@@ -4511,14 +4512,17 @@ func lud(x, y k) (r k) { // x 8:y (inspect)
 	return dex(x, y)
 }
 func deb(x k) (r k) { // 9:x (println) (also drw)
+/*
 	r = kst(inc(x))
 	t, n := typ(r)
 	if t != C {
 		return dex(r, x)
 	}
 	p := ptr(r, C)
-	println(string(m.c[p : p+n]))
+	//println(string(m.c[p : p+n]))
 	return dex(r, x)
+*/
+	return x
 }
 func lod(x k) (r k) {
 	dec(asn(mks(".f"), inc(x), 0))
@@ -4571,6 +4575,8 @@ func trm(x k) (r k) { // trim 1st char and additional spaces
 	}
 	return drop(p, x)
 }
+
+//export evp
 func evp(x k) { // parse-eval-print
 	t, n := typ(x)
 	if t != C {
@@ -7913,3 +7919,55 @@ var l8t = [256]c{
 	0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
 	0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08, 0x08,
 }
+
+
+func main() { }
+
+//export nullpointer
+func nullpointer() *byte { return &m.c[0] }
+
+//export kinit
+func kinit(){
+	ini(make([]f, 1<<13))
+	//tab1['1'] = red
+	tab1['q'] = exi
+	tab2['1'] = wrt
+}
+
+func grw(c k) {
+	if 2*len(m.f) <= cap(m.f) {
+		m.f = m.f[:2*len(m.f)]
+	} else {
+		x := make([]f, 2*len(m.f), c/4)
+		copy(x, m.f)
+		m.f = x
+	}
+}
+func red(x k) (r k) { panic("nyi"); return x }
+func exi(x k) (r k) { panic("nyi"); return x }
+/*
+func red(x k) (r k) { // 1:x
+	var a [1024]c // don't write longer lines than this
+	b := a[:]
+	if n, err := syscall.Read(syscall.Stdin, b); err != nil {
+		panic(err)
+	} else if n > 1 {
+		return dex(x, mkb(b[:n-1]))
+	} else if n == 1 {
+		return dex(x, mk(C, 0))
+	} else {
+		exi(0)
+	}
+	return 0
+}
+*/
+func wrt(x, y k) (r k) { // x 1:y
+	t, n := typ(y)
+	if t != C || n == atom {
+		panic("type")
+	}
+	p := 8 + y<<2
+	print(s(m.c[p : p+n]))
+	return dex(y, x)
+}
+
