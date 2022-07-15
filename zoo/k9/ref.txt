@@ -1,4 +1,4 @@
-kparc.com/k (shakti 2.0)
+shakti 2.0
 
 *ffi:"./a.so"5:`a!"fiFI"                                                     
 python:  from k import k;k('+',2,3)                                          
@@ -33,3 +33,5 @@ select A by B from T where C; update A from T; delete from T where C
 count first last min max sum dot avg var [dev med mode ..]                   
                                                                              
 /comment \trace [:return 'signal if do while]
+
+online: kparc.com/k

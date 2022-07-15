@@ -30,6 +30,7 @@
     <option value="k2"    >ktye/k2      (2020) 800k</option>
     <option value="kw"    >ktye/k.w     (2020)  20k</option>
     <option value="ngn"   >ngn/k        (2022) 160k</option>
+    <option value="k7"    >k7           (2019)   1M</option>
     <option value="k9"    >k9           (2021)   1M</option>
     <option value="k" selected="selected">ktye/k       (2022)  60k</option>
    </optgroup>
@@ -56,11 +57,12 @@ import { ok     } from './ok.js'
 import { k2     } from './k2.js'
 import { kw     } from './kw.js'
 import { ngn    } from './ngn.js'
+import { k7     } from './k7.js'
 import { k9     } from './k9.js'
 import { k      } from './k.js'
 import { bqn    } from './bqn.js'
 
-// todo: k7, k9
+// todo: k7
 
 window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
 
@@ -106,6 +108,7 @@ function swtch(s){
  case "k2":         k2.ini(dec,out);evl=    k2.evl; break;
  case "kw":         kw.ini(dec,out);evl=    kw.evl; break;
  case "ngn":       ngn.ini(dec,out);evl=   ngn.evl; break;
+ case "k7":         k7.ini(dec,out);evl=    k7.evl; break;
  case "k9":         k9.ini(dec,out);evl=    k9.evl; break;
  case "k":           k.ini(dec,out);evl=     k.evl; break;
  case "bqn":       bqn.ini(dec,out);evl=   bqn.evl; break;

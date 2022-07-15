@@ -1,0 +1,34 @@
+Verb                       Adverb                Noun              Type
+:  assign                  '  each      n bar    char  " ab"       `c
++  add         flip        /  over      n div    name  ``a`b       `n
+-  subtract    negate      \  scan      n mod    int   Ø 0 2       `i
+*  multiply    first       ': eachprior peach    float ø 2.3 π ∞   `f
+%  divideby    inverse     /: eachright sv|join  date 2019-06-28   `D .z.D
+&  min|and     where       \: eachleft  vs|split time 12:34:56.789 `t .z.t
+|  max|or      reverse
+<  less        up          I/O (0:i close)       list (2;3.4;`c)   `.
+>  more        down        0: read/write line    dict ``b!(2;`c)   `a
+=  equal       group       1: read/write byte    tabl +`a!1 2 3    `A
+~  match       not         2: read/write data    expr :32+9*f%5    `0
+!  key         enum                              func {(+/x)%#x}   `1
+,  catenate    enlist
+^  except      asc
+#  take(f#)    count       #[t;c;b[;a]] select   \l f.k  load       \h help
+_  drop(f_)    floor       _[t;c;b[;a]] update   \t[:n]x milli/time \l log
+?  find        unique      ?[x;i;f[;y]] splice   \u[:n]x micro/trace
+@  index       type        @[x;i;f[;y]] amend    \v [d] vars        \f [d] fns
+.  apply       value       .[x;i;f[;y]] dmend    \lf file \lc char  \ll line
+$  cast|pad    string      $[c;t;f]     cond     \cd [d] get[set]   \gr x file
+
+util: in within bin like find freq prm cmb
+math: sqrt sin cos abs [n]log [n]exp [n]rand
+aggr: count first last min max sum avg var dev med
+tabl: [f]asc [f]dsc [f]key [select|update]A by B from T where C
+syns: count first last sum min max asc
+
+datetime:YMDHRSTUV+duration:ymdhrstuv; .z.D+.z.t day:7\ mth:12\ bar:5'
+`year`month`date`hour`minute`second`millisecond`microsecond`nanosecond
+
+if[c;..];while[c;..]
+
+online: kparc.io/kc
