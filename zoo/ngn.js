@@ -1,54 +1,39 @@
 
-/*
-
-'use strict' // ngn/k, (c) 2019-2021 ngn, GNU AGPLv3 - https://codeberg.org/ngn/k/blob/master/LICENSE
-const{min,max}=Math,{now}=Date,U8=x=>new Uint8Array(x),doc=document,
-T1=new TextEncoder,t1=x=>T1.encode(x),
-T0=new TextDecoder,t0=x=>T0.decode(x)
-
-let app,heap,inp='',
-M=(p,n)=>U8(app.memory.buffer).subarray(p,p+n),
-g1=p=>new DataView(app.memory.buffer).getUint8(p),
-gb=p=>{let q=p;while(g1(q))q++;return M(p,q-p)},
-gs=p=>t0(gb(p)),
-s4=(p,x)=>new DataView(app.memory.buffer).setUint32(p,x,1),
-S4=(p,a)=>a.forEach((x,i)=>s4(p+4*i,x)),
-ma=n=>{heap+=n;let m=app.memory,l=m.buffer.byteLength;heap>l&&m.grow((heap-l-1>>>16)+1);return heap-n},
-msn=s=>{s=t1(s);let p=ma(s.length);M(p,s.length).set(s);return[p,s.length]},
-ms=s=>msn(s)[0],
-wa=_=>kw.then(),
-env={sin:Math.sin,cos:Math.cos,log:Math.log,exp:Math.exp,
- js_in:(a,n)=>{const s=inp;inp='';return T1.encodeInto(s,M(a,n)).written},
- js_out:(a,n)=>(ap(t0(M(a,n))),n),
- js_log:a=>console.log(t0(gb(a))),
- js_time:(a,b)=>{const t=now();s4(a,t/1000);s4(b,t%1000*1000)},
- js_exit:x=>{throw Error(`exit(${x})`)},
- js_alloc:n=>{const p=4096,r=heap%p;r&&ma(p-r);return ma(n)},
- js_eval:(a,m,r,n)=>T1.encodeInto(''+eval(t0(M(a,m))),M(r,n)).written}
-*/
-
-
-M=(p,n)=>U8(app.memory.buffer).subarray(p,p+n),
-
-let env={sin:Math.sin,cos:Math.cos,log:Math.log,exp:Math.exp,
- js_in:(a,n)=>{const s=inp;inp='';return T1.encodeInto(s,M(a,n)).written},
- js_out:(a,n)=>(ap(t0(M(a,n))),n),
- js_log:a=>console.log(t0(gb(a))),
- js_time:(a,b)=>{const t=now();s4(a,t/1000);s4(b,t%1000*1000)},
- js_exit:x=>{throw Error(`exit(${x})`)},
- js_alloc:n=>{const p=4096,r=heap%p;r&&ma(p-r);return ma(n)},
- js_eval:(a,m,r,n)=>T1.encodeInto(''+eval(t0(M(a,m))),M(r,n)).written}
-
+let K,heap,inp
+let T1=new TextEncoder,t1=x=>T1.encode(x)
+let T0=new TextDecoder,t0=x=>T0.decode(x)
+let U8=x=>new Uint8Array(x)
+let M=(p,n)=>U8(K.memory.buffer).subarray(p,p+n)
 let O
+
+function ma(n){heap+=n;let m=K.memory,l=m.buffer.byteLength;heap>l&&m.grow((heap-l-1>>>16)+1);return heap-n}
+
 function ini(left,o){O=o
- fetch("./ngn/k.wasm").then(x=>x.arrayBuffer()).then(x=>WebAssembly.instantiate(x,{env})).then(x=>{
-  app=x.instance.exports;heap=app.__heap_base
-  let p=ms('kw\0repl.k\0'),argv=ma(16);S4(argv,[p,p+3,0,0]);app.kinit();app.kargs(1,argv);
-  app.rep()
+ fetch("./ngn/ref.txt").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent=r;left.appendChild(p)});
+ 
+
+ let env={env:{sin:Math.sin,cos:Math.cos,log:Math.log,exp:Math.exp,
+  js_in:(a,n)=>{const s=inp;inp="";console.log("s?",s);let w=T1.encodeInto(s,M(a,n)).written;console.log(w);return w},
+  js_out:(a,n)=>{O(t0(M(a,n)))},
+  js_log:a=>console.log(t0(gb(a))),
+  js_time:(a,b)=>{ return 0 },
+  js_exit:x=>{ console.log("exit",x); },
+  js_alloc:n=>{ const p=4096,r=heap%p;r&&ma(p-r);return ma(n) },
+  js_eval:(a,m,r,n)=>{ console.log("jseval",a,m,r,n); },
+ }}
+
+ fetch('./ngn/k.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+  K=r.instance.exports
+  heap=K.__heap_base
+  K.kinit()
+  O("ngn/k, (c) 2019-2022 ngn, GNU AGPLv3.\n ")
  })
 }
 
-function evl(s){
+function evl(s){inp=s+"\n"
+ O("\n")
+ K.rep()
+ O(" ")
 }
 
 let ngn={ini:ini,evl:evl}

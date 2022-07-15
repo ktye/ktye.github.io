@@ -28,7 +28,7 @@
     <option value="ok"    >oK           (2021)  40k</option>
     <option value="k2"    >ktye/k2      (2020) 800k</option>
     <option value="kw"    >ktye/k.w     (2020)  20k</option>
-    <!--option value="ngn"   >ngn/k        (2022) 160k</option-->
+    <option value="ngn"   >ngn/k        (2022) 160k</option>
     <option value="k" selected="selected">ktye/k       (2022)  60k</option>
    </optgroup>
   </select>
@@ -49,10 +49,10 @@ import { jstack } from './jstack.js'
 import { ok     } from './ok.js'
 import { k2     } from './k2.js'
 import { kw     } from './kw.js'
-//import { ngn    } from './ngn.js'
+import { ngn    } from './ngn.js'
 import { k      } from './k.js'
 
-// todo: k2(tinygo), k7, k9, ngn/k
+// todo: k7, k9, ngn/k
 
 window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
 
@@ -82,7 +82,7 @@ function out(s){tty.value+=s}
 var evl
 
 function swtch(s){
- document.title=s
+ document.title=s; sel.value=s
  while(dec.firstChild)dec.removeChild(dec.lastChild)
  tty.value=""
 
@@ -101,6 +101,8 @@ function swtch(s){
  }
 }
 
-swtch("k")
+let h=window.location.hash
+swtch((h.length>0)?h.slice(1):"k")
+
 
 </script></body></html>
