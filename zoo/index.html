@@ -31,6 +31,9 @@
     <option value="ngn"   >ngn/k        (2022) 160k</option>
     <option value="k" selected="selected">ktye/k       (2022)  60k</option>
    </optgroup>
+   <optgroup label="BQN">
+    <option value="bqn"   >bqn.js       (2022) 150k</option>
+   </optgroup>
   </select>
   <div id="main">
    <div      class="left"  id="dec" ></div>
@@ -51,8 +54,9 @@ import { k2     } from './k2.js'
 import { kw     } from './kw.js'
 import { ngn    } from './ngn.js'
 import { k      } from './k.js'
+import { bqn    } from './bqn.js'
 
-// todo: k7, k9, ngn/k
+// todo: k7, k9
 
 window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
 
@@ -97,6 +101,7 @@ function swtch(s){
  case "kw":         kw.ini(dec,out);evl=    kw.evl; break;
  case "ngn":       ngn.ini(dec,out);evl=   ngn.evl; break;
  case "k":           k.ini(dec,out);evl=     k.evl; break;
+ case "bqn":       bqn.ini(dec,out);evl=   bqn.evl; break;
  default:                console.log("unknown system", s);
  }
 }
