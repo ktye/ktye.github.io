@@ -1,3 +1,4 @@
+BQN: mlochbaum.github.io/BQN
 | syntax | name             | usage
 |   {    | begin block      |  {𝕩+2}
 |   }    | end block        |

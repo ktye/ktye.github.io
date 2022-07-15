@@ -21,6 +21,7 @@
    </optgroup>
    <optgroup label="j">
     <option value="j0"    >Incunabulum (1989)   6k</option>
+    <option value="j90"   >APL\?       (1990)     </option>
     <option value="j41"   >j41         (1992) 108k</option>
     <option value="jstack">jstack      (2021)   2k</option>
    </optgroup>
@@ -47,6 +48,7 @@
 import { apl360 } from './apl360.js'
 import { iv     } from './iv.js'
 import { j0     } from './j0.js'
+import { j90    } from './j90.js'
 import { j41    } from './j41.js'
 import { jstack } from './jstack.js'
 import { ok     } from './ok.js'
@@ -87,6 +89,7 @@ var evl
 
 function swtch(s){
  document.title=s; sel.value=s
+ dec.style.overflow="auto" //j90 hides it
  while(dec.firstChild)dec.removeChild(dec.lastChild)
  tty.value=""
 
@@ -94,6 +97,7 @@ function swtch(s){
  case "iv":         iv.ini(dec,out);evl=    iv.evl; break;
  case "apl360": apl360.ini(dec,out);evl=apl360.evl; break
  case "j0":         j0.ini(dec,out);evl=    j0.evl; break;
+ case "j90":       j90.ini(dec,out);evl=   j90.evl; break;
  case "j41":       j41.ini(dec,out);evl=   j41.evl; break;
  case "jstack": jstack.ini(dec,out);evl=jstack.evl; break;
  case "ok":         ok.ini(dec,out);evl=    ok.evl; break;
