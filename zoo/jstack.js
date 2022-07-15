@@ -93,6 +93,6 @@ function evl(s){
  O("\n ")
 }
 
-let jstack={ini:ini,evl:evl}
+let jstack={ini:ini,evl:evl,src:""}
 
 export { jstack }

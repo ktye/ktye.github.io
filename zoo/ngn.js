@@ -36,6 +36,6 @@ function evl(s){inp=s+"\n"
  O(" ")
 }
 
-let ngn={ini:ini,evl:evl}
+let ngn={ini:ini,evl:evl,src:'ngn.json'}
 
 export { ngn }

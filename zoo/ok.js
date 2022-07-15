@@ -49,6 +49,6 @@ function evl(s){
  O(r)
 }
 
-let ok={ini:ini,evl:evl}
+let ok={ini:ini,evl:evl,src:'ok/oK.js'}
 
 export { ok }

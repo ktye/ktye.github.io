@@ -23336,7 +23336,7 @@ function evl(str){
  O("\n ")
 }
 
-let k7={ini:ini,evl:evl}
+let k7={ini:ini,evl:evl,src:""}
 
 export { k7 }
 

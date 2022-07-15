@@ -33,6 +33,6 @@ function evl(s){
  O(" ")
 }
 
-let j0={ini:ini,evl:evl}
+let j0={ini:ini,evl:evl,src:"../j/j00/j.c"}
 
 export { j0 }

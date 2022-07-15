@@ -7,9 +7,11 @@
  optgroup{font-style:normal;white-space:pre}
  option{font-family:monospace;white-space:pre}
  #sel{position:absolute;left:0px;top:0px;z-index:10;background:white;border:1px solid;font-family:monospace;white-space:pre}
- .left{position:absolute;left:0px;width:50vw;height:calc(100vh - 10px);top:10px;overflow:auto}
+ button:active{transform:translateY(1px);}
+ #src{position:absolute;top:0px;right:calc(50vw + 5px);z-index:10;}
+ .left{position:absolute;left:0px;width:50vw;height:calc(100vh - 20px);top:20px;overflow:auto}
  .right{position:absolute;left:50vw;width:50vw;height:100vh}
- textarea{overflow:hidden;margin:0px;padding:0px;resize:none}
+ textarea{overflow:hidden;margin:0px;padding:0px;resize:none;outline:0px;border:none;border-left:1px solid}
 </style>
 </head>
 
@@ -38,6 +40,7 @@
     <option value="bqn"   >bqn.js       (2022) 150k</option>
    </optgroup>
   </select>
+  <a id="src" href="browse.html#k.json">src</a>
   <div id="main">
    <div      class="left"  id="dec" ></div>
    <textarea class="right" id="tty" ></textarea>
@@ -72,6 +75,7 @@ function ge(x){return document.getElementById(x)}
 var sel=ge("sel")
 var dec=ge("dec")
 var tty=ge("tty")
+var src=ge("src")
 
 sel.onchange=function(e){swtch(e.target.value)}
 //sel.value = k
@@ -97,23 +101,26 @@ function swtch(s){
  while(dec.firstChild)dec.removeChild(dec.lastChild)
  tty.value=""
 
+ let sys
  switch(s){
- case "iv":         iv.ini(dec,out);evl=    iv.evl; break;
- case "apl360": apl360.ini(dec,out);evl=apl360.evl; break
- case "j0":         j0.ini(dec,out);evl=    j0.evl; break;
- case "j90":       j90.ini(dec,out);evl=   j90.evl; break;
- case "j41":       j41.ini(dec,out);evl=   j41.evl; break;
- case "jstack": jstack.ini(dec,out);evl=jstack.evl; break;
- case "ok":         ok.ini(dec,out);evl=    ok.evl; break;
- case "k2":         k2.ini(dec,out);evl=    k2.evl; break;
- case "kw":         kw.ini(dec,out);evl=    kw.evl; break;
- case "ngn":       ngn.ini(dec,out);evl=   ngn.evl; break;
- case "k7":         k7.ini(dec,out);evl=    k7.evl; break;
- case "k9":         k9.ini(dec,out);evl=    k9.evl; break;
- case "k":           k.ini(dec,out);evl=     k.evl; break;
- case "bqn":       bqn.ini(dec,out);evl=   bqn.evl; break;
- default:                console.log("unknown system", s);
+ case "iv":     sys=iv     ;break
+ case "apl360": sys=apl360 ;break
+ case "j0":     sys=j0     ;break
+ case "j90":    sys=j90    ;break
+ case "j41":    sys=j41    ;break
+ case "jstack": sys=jstack ;break
+ case "ok":     sys=ok     ;break
+ case "k2":     sys=k2     ;break
+ case "kw":     sys=kw     ;break
+ case "ngn":    sys=ngn    ;break
+ case "k7":     sys=k7     ;break
+ case "k9":     sys=k9     ;break
+ case "k":      sys=k      ;break
+ case "bqn":    sys=bqn    ;break
+ default:console.log("unknown system", s); sys=k
  }
+ sys.ini(dec,out);evl=sys.evl
+ src.href="browse.html#"+s+":"+sys.src
 }
 
 let h=window.location.hash

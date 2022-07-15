@@ -15,6 +15,6 @@ function evl(s){
  O("\n  ")
 }
 
-let bqn={ini:ini,evl:evl}
+let bqn={ini:ini,evl:evl,src:"./bqn/bqn.js"}
 
 export { bqn }

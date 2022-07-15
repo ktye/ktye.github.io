@@ -579,6 +579,7 @@ function evl(s){ iv.O("\n");iv.O(ivEval(s));iv.O("      "); }
 
 iv.ini = ini
 iv.evl = evl
+iv.src = 'iv.json'
 
 export { iv }
 

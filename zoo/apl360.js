@@ -24,6 +24,6 @@ function evl(s){
  O("      ")
 }
 
-let apl360={ini:ini,evl:evl}
+let apl360={ini:ini,evl:evl,src:"../apl.k"}
 
 export { apl360 }

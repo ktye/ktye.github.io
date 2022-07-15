@@ -569,7 +569,7 @@ function evl(s){
  O(" ")
 }
 
-let k2 = {ini:ini,evl:evl}
+let k2 = {ini:ini,evl:evl,src:"./k2/k.go"}
 
 export { k2 }
 

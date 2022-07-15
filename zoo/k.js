@@ -22,6 +22,6 @@ function evl(s){
  O(" ")
 }
 
-let k={ini:ini,evl:evl}
+let k={ini:ini,evl:evl,src:'k.json'}
 
 export { k }

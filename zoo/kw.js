@@ -36,6 +36,6 @@ function evl(s){
  O((r.length>0)?r+"\n ":" ")
 }
 
-let kw={ini:ini,evl:evl}
+let kw={ini:ini,evl:evl,src:"./kw/k.w"}
 
 export { kw }
