@@ -169,4 +169,3 @@ K.kinit = function(ext,kw){
 }
 
 export { K }
-window.K = K // for browser console

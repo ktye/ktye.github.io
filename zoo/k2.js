@@ -571,7 +571,5 @@ function evl(s){
 
 let k2 = {ini:ini,evl:evl}
 
-window.wasm=wasm
-
 export { k2 }
 

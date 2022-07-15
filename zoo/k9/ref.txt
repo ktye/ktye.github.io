@@ -1,0 +1,35 @@
+kparc.com/k (shakti 2.0)
+
+*ffi:"./a.so"5:`a!"fiFI"                                                     
+python:  from k import k;k('+',2,3)                                          
+nodejs: k=require('k').k;k('+',2,3)                                          
+                                                                             
+$k [-p 1024] a.k                                                             
+                                                                             
+verb                   adverb                  noun                    \l a.k
+: x         y          f' each                 char " ab"              \t:n x
++ flip      plus    [x]f/ over      c/ join    name ``ab               \u:n x
+- minus     minus   [x]f\ scan      c\ splt    int  2 3                \v    
+* first     times   [y]f':eachprior            flt  2 3.4 0w 0n        \w    
+%           divide     f/:eachright g/:over    date 2021.06.28   .z.d        
+& where     min/and    f\:eachleft  g\:scan    time 12:34:56.789 .z.t        
+| reverse   max/or                                                           
+< asc       less       i/o (*enterprise)       class                         
+> desc      more       0: r/w line             list (2;3.4;`c)               
+= group     equal      1: r/w char             dict [n:`b;i:2]               
+~ not       match     *2: r/w data             func {[a;b]a+b}               
+! key       key       *3: k-ipc set            expr :a+b                     
+, enlist    cat       *4: https get                                          
+^ sort   [f]cut       *5: ffi:`f!"ifsIF"                                     
+# count  [f]take                                                             
+_ floor  [f]drop                                                             
+$ string    parse      $[b;t;f] cond                                         
+? unique    find                               limit {[p8]l8;g32;c128}       
+@ type   [f]at         @[x;i;f[;y]] amend      table [[]n:`b`c;i:2 3]        
+. value  [f]dot        .[x;i;f[;y]] dmend     utable  [[n:`b`c]i:2 3]        
+                                                                             
+sqrt sqr exp log sin cos div mod bar in                                      
+select A by B from T where C; update A from T; delete from T where C         
+count first last min max sum dot avg var [dev med mode ..]                   
+                                                                             
+/comment \trace [:return 'signal if do while]
