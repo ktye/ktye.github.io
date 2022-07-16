@@ -29,6 +29,7 @@ function ini(left,o){O=o
 }
 
 function evl(s){
+ O("\n")
  J.j(A(s))
  O(" ")
 }
