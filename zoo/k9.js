@@ -53,6 +53,7 @@ function atof(x,y,z){
 }
 
 function ini(left,o){O=o
+ fetch("./k9/ref.txt").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent=r;left.appendChild(p)}); 
  
  let env={a:{ //k9.wasm import object
    p: function(){console.log("p ___sys_chdir,")},
