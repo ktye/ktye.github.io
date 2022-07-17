@@ -19,6 +19,7 @@
   <select id="sel" autocomplete="off">
    <optgroup label="APL">
     <option value="apl360">APL\360     (1966) 60k</option>
+    <option value="ngnapl">ngn/apl     (2018) 50k</option>
     <option value="iv"    >APL\iv      (2020) 6M</option>
    </optgroup>
    <optgroup label="j">
@@ -52,6 +53,7 @@
 
 import { apl360 } from './apl360.js'
 import { iv     } from './iv.js'
+import { ngnapl } from './ngnapl.js'
 import { j0     } from './j0.js'
 import { j90    } from './j90.js'
 import { j41    } from './j41.js'
@@ -105,6 +107,7 @@ function swtch(s){
  switch(s){
  case "iv":     sys=iv     ;break
  case "apl360": sys=apl360 ;break
+ case "ngnapl": sys=ngnapl ;break
  case "j0":     sys=j0     ;break
  case "j90":    sys=j90    ;break
  case "j41":    sys=j41    ;break

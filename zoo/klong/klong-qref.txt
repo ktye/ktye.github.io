@@ -1,0 +1,299 @@
+
+	================================================================
+	|              KLONG  **  A SIMPLE ARRAY LANGUAGE              |
+	================================================================
+
+	                        Quick Reference
+	                        By Nils M Holm
+                             n m h @ t 3 x . o r g
+
+	----------------------------------------------------------------
+	LEXEMES
+	----------------------------------------------------------------
+
+	[a-zA-Z\.][a-zA-Z0-9\.]*         Symbol
+	[!$%&*+,-\./;<=>?@\\^_|~]        Operator
+	-?[0-9]+                         Integer *
+	-?[0-9]+\.[0-9]+                 Real    *
+	-?[0-9]+(\.[0-9]+)?e[+-]?[0-9]+  Real    *
+	0b[01]+                          Binary Integer
+	0o[0-7]+                         Octal Integer
+	0x[0-9a-fA-F]+                   Hexa-Decimal Integer
+	0c.                              Character
+	".*"                             String, "" includes "
+	\\~ \\*                          two-character Operator
+	:Operator                        two-character Operator
+	:String                          Comment
+	:Symbol                          quoted Symbol
+	:Number                          Number
+	:Character                       Character
+
+	* Note: -1 parses as - 1, but [-1] parses as [ -1 ].
+
+	----------------------------------------------------------------
+	SYNTAX
+	----------------------------------------------------------------
+
+	# Program
+	p := e
+	   | e ';' p
+
+	# Expression 
+	e := x
+	   | x d e
+
+	# Factor
+	x := C
+	   | V a
+	   | f
+	   | f a
+	   | m e
+	   | '(' e ')'
+	   | c
+	   | L
+	   | D
+
+	# Lexeme Class
+	C := I   # integer
+	   | H   # character
+	   | R   # real number
+	   | S   # string
+	   | V   # variable (symbol)
+	   | Y   # (quoted) symbol
+
+	# Conditional
+	c := ':[' ( e ';' e ':|' )* e ';' e ';' e ']'
+
+	# Monad
+	m := O A*   # O = operator, A = adverb
+	   | f A+
+	   | V A+
+
+	# Dyad
+	d := O A*
+	   | f A*
+	   | V A*
+
+	# Function
+	f := '{' p '}'
+	   | '{' p '}' P
+	   | V P
+
+	# Projected Arguments
+	P := '(' ';' e ')'
+	   | '(' e ';' ')'
+	   | '(' ';' e ';' e ')'
+	   | '(' e ';' ';' e ')'
+	   | '(' e ';' e ';' ')'
+	   | '(' ';' ';' e ')'
+	   | '(' ';' e ';' ')'
+	   | '(' e ';' ';' ')'
+
+	# Argument list
+	a := '(' ')'
+	   | '(' e ')'
+	   | '(' e ';' e ')'
+	   | '(' e ':' e ';' e ')'
+
+	# List
+	L := '[' (C|L)* ']'
+
+	# Dictionary
+	D := ':{' t* '}'
+
+	# Tuple
+	t := '[' (C|L) (C|L) ']'
+
+	----------------------------------------------------------------
+	VALUES
+	----------------------------------------------------------------
+
+	Self-quoting:
+	Integer, Real, Character, String, List, Dictionary, Symbols in
+	Lists, Functions.
+
+	Variables evaluate to their values.
+
+	----------------------------------------------------------------
+	VERBS
+	----------------------------------------------------------------
+
+	- monadic operators; +x
+	- dyadic operators;  x+y
+	- nilads;            f()       {1}()
+	- monads;            f(1)      {x}(1)
+	- dyads;             f(1;2)    {x+y}(1;2)      1f2    1{x+y}2
+	- triads;            f(1;2;3)  {x+y+z}(1;2;3)
+	- projection         f(;1)(2)  {x+y}(;1)(2)    1{x+y+z}(;;2)3
+
+	Function variables: "x", "y", "z". These are read-only.
+
+	{1}      nilad
+	{x}      monad
+	{x+y}    dyad
+	{x+y*z}  triad
+	{z}      triad (ignoring x and y)
+
+	Local Variables (initially undefined, dynamically scoped):
+
+	{[variables];program}
+
+	----------------------------------------------------------------
+	PROJECTION
+	----------------------------------------------------------------
+
+	Projection  Equals
+	f(;2)       {f(x;2)}
+	f(1;)       {f(1;x)}
+	g(1;2;)     {g(1;2;x)}
+	g(1;;3)     {g(1;x;3)}
+	g(;2;3)     {g(x;2;3)}
+	g(1;;)      {g(1;x;y)}
+	g(;2;)      {g(x;2;y)}
+	g(;;3)      {g(x;y;3)}
+
+	----------------------------------------------------------------
+	ATOMIC OPERATORS
+	----------------------------------------------------------------
+
+	Operators that expect atomic (non-List) arguments traverse
+	Lists automatically:
+
+	a-[b c d]        =  (a-b),(a-c),(a-d)
+	[b c d]-a        =  (b-a),(c-a),(d-a)
+	[a b c]-[d e f]  =  (a-d),(b-e),(c-f)
+	-[a b c]         =  (-a),(-b),(-c)
+	[5 [6] 7]-4      =  [1 [2] 3]
+
+	----------------------------------------------------------------
+	CONDITIONALS
+	----------------------------------------------------------------
+
+	:[a;b;c]            =  if a then b else c
+	:[a;b:|c;d;e]       =  :[a;b;:[c;d;e]]
+	:[a;b:|c;d:|e;f;g]  =  :[a;b;:[c;d;:[e;f;g]]
+	...
+
+	:[0;:yes;:no]   -->  :no
+	:[[];:yes;:no]  -->  :no
+	:["";:yes;:no]  -->  :no
+	:[x;:yes;:no]   -->  :yes  :" for all other x"
+
+	----------------------------------------------------------------
+	ADVERBS
+	----------------------------------------------------------------
+
+	Each                 f'a   f(a1),...,f(aN)
+	Each2              a f'b   f(a1;b1),...,f(aN;bN)
+	Each-Left          a f:\b  f(a;b1),...,f(a;bN)
+	Each-Right         a f:/b  f(b1;a),...,f(bN;a)
+	Each-Pair            f:'b  f(a1;a2),...,f(aN-1;aN)
+	Over                 f/a   f(...f(f(a1;a2);a3)...;aN)
+	Over-Neutral       a f/b   f(...f(f(a;b1);b2)...;bN)
+	Converge             f:~a  while ~a=f(a) do a::f(a); return a
+	While              a f:~b  while a(b) do b::f(b); return b
+	Iterate            a f:*b  do b::f(b) a times; return b
+	Scan-Over            f\a   |                                   |
+	Scan-Over-Neutral  a f\b   |  The Scan-* adverbs are like      |
+	Scan-Converging      f\~a  |  their counterparts, but collect  |
+	Scan-While         a f\~a  |  intermediate results and return  |
+	Scan-Iterating     a f\*a  |  them in a list                   |
+
+	----------------------------------------------------------------
+	OPERATORS
+	----------------------------------------------------------------
+
+	a:=b  Amend            a$b   Format2          ~a    Not
+	a:-b  Amend-in-Depth   >a    Grade-Down       a+b   Plus
+	@a    Atom             <a    Grade-Up         a^b   Power
+	:#a   Char             =a    Group            ?a    Range
+	a:_b  Cut              a@b   Index/Apply      %a    Reciprocal
+	a::b  Define           a:@b  Index-in-Depth   a:^b  Reshape
+	a%b   Divide           a:%b  Integer-Divide   a!b   Remainder
+	a_b   Drop             a,b   Join             |a    Reverse
+	!a    Enumerate        a<b   Less             a:+b  Rotate
+	a=b   Equal            ,a    List             ^a    Shape
+	&a    Expand/Where     a~b   Match            #a    Size
+	a?b   Find             a|b   Max/Or           a:#b  Split
+	*a    First            a&b   Min/And          a#b   Take
+	_a    Floor            a-b   Minus            a*b   Times
+	a:$b  Form             a>b   More             +a    Transpose
+	$a    Format           -a    Negate           :_a   Undefined
+
+	----------------------------------------------------------------
+	FUNCTIONS
+	----------------------------------------------------------------
+
+	Names starting with "." are reserved for system use.
+
+	.ac(a)  Append-Channel   .oc(a)   Output-Channel
+	.cc(a)  Close-Channel    .p(a)    Print
+	.d(a)   Display          .pc()    Process-Clock
+	.df(a)  Delete-File      .r()     Read
+	.E(a)   Evaluate         .rl()    Read-Line
+	.fc(a)  From-Channel     .rn()    Random
+	.fl()   Flush            .rs(a)   Read-String
+	.ic(a)  Input-Channel    .sys(a)  System
+	.l(a)   Load             .tc(a)   To-Channel
+	.mi(a)  More-Input       .w(a)    Write
+	                         .x(a)    Exit
+
+	----------------------------------------------------------------
+	VARIABLES
+	----------------------------------------------------------------
+
+	.a       Arguments      command line arguments
+	.cin     Input-Channel  standard input channel
+	.cout    Output-Channel standard output channel
+	.cerr    Error-Channel  standard error/log channel
+	.cols    Columns        number of columns on the screen (80)
+	.e       Epsilon        smallest precise real number
+	.edit    Editor         truth value enabling line editing
+	.f       Function       current function
+	.fastpow Fast-Power     truth value enabling fast x^y operator
+	.h       Host           host operating system
+	it       It             last result (interactive mode)
+
+	----------------------------------------------------------------
+	BLOCK COMMENTS
+	----------------------------------------------------------------
+
+	A block comment starts with
+
+	.comment("delimiter")
+
+	and ends with a line starting with the text given in .comment.
+	The delimiter line is ignored. Block comments do not nest.
+
+	----------------------------------------------------------------
+	MODULE STRUCTURE
+	----------------------------------------------------------------
+
+	.l("external")
+	.module(:name)
+	:"... definitions ..."
+	.module(0)
+
+	----------------------------------------------------------------
+	INTERACTION
+	----------------------------------------------------------------
+
+	]!  Shell command
+	]h  Help
+	]i  Inventory
+	]l  Load
+	]q  Exit
+	]t  Transcript
+
+	----------------------------------------------------------------
+	LINE EDITING (where available)
+	----------------------------------------------------------------
+
+	[control-A]  beginning of line    [control-F]  right (forward)
+	[control-B]  left (backward)      [control-H]  backspace      
+	[control-C]  abort input          [control-N]  next line      
+	[control-D]  delete / exit        [control-P]  previous line  
+	[control-E]  end of line          [control-U]  delete line    
+
+	================================================================
+
