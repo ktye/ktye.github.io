@@ -21,6 +21,7 @@
     <option value="apl360">APL\360     (1966) 60k</option>
     <option value="ngnapl">ngn/apl     (2018) 50k</option>
     <option value="iv"    >APL\iv      (2020) 6M</option>
+    <option value="bqn"   >bqn.js       (2022) 150k</option>
    </optgroup>
    <optgroup label="j">
     <option value="j0"    >Incunabulum (1989)   6k</option>
@@ -32,13 +33,12 @@
     <option value="ok"    >oK           (2021)  40k</option>
     <option value="k2"    >ktye/k2      (2020) 800k</option>
     <option value="kw"    >ktye/k.w     (2020)  20k</option>
+    <option value="klong" >klong        (2020) 160k</option>
     <option value="ngn"   >ngn/k        (2022) 160k</option>
     <option value="k7"    >k7           (2019)   1M</option>
     <option value="k9"    >k9           (2021) 160k</option>
     <option value="k" selected="selected">ktye/k       (2022)  60k</option>
    </optgroup>
-   <optgroup label="BQN">
-    <option value="bqn"   >bqn.js       (2022) 150k</option>
    </optgroup>
   </select>
   <a id="src" href="browse.html#k.json">src</a>
@@ -61,13 +61,12 @@ import { jstack } from './jstack.js'
 import { ok     } from './ok.js'
 import { k2     } from './k2.js'
 import { kw     } from './kw.js'
+import { klong  } from './klong.js'
 import { ngn    } from './ngn.js'
 import { k7     } from './k7.js'
 import { k9     } from './k9.js'
 import { k      } from './k.js'
 import { bqn    } from './bqn.js'
-
-// todo: k7
 
 window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
 
@@ -115,6 +114,7 @@ function swtch(s){
  case "ok":     sys=ok     ;break
  case "k2":     sys=k2     ;break
  case "kw":     sys=kw     ;break
+ case "klong":  sys=klong  ;break
  case "ngn":    sys=ngn    ;break
  case "k7":     sys=k7     ;break
  case "k9":     sys=k9     ;break

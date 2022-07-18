@@ -1,7 +1,7 @@
 CFLAGS=	-g -Wall -pedantic -O3
 CC=	cc $(CFLAGS)
-V=	20211014
-R=	20220315
+V=	20200401
+R=	20200403
 
 # Compile-time options
 # SAFE = disable the .sys() function and the ]i and ]! meta commands
@@ -29,6 +29,9 @@ kg.o:	kg.c s9core.h s9import.h
 
 s9core.o:	s9core.c s9core.h s9import.h
 	$(CC) -o s9core.o -c s9core.c
+
+kg.wasm:	s9core.c s9core.h wasm.c wasm.h kg.c
+	clang -Dwasm -Wfatal-errors -Wno-builtin-requires-header -Oz --target=wasm32 -mbulk-memory --no-standard-libraries -Wl,--export=__heap_base,--export=kginit,--export=rep,--export=load_image_file,--allow-undefined -Wl,--no-entry -o kg.wasm s9core.c wasm.c kg.c
 
 test:	kg test.kg
 	./kg -n test.kg

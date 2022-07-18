@@ -1,0 +1,41 @@
+CHANGES
+- ifdef wasm in s9core.c kg.c
+
+- new Makefile entry kg.wasm
+  clang version 14
+  $ clang -Dwasm -Wfatal-errors -Wno-builtin-requires-header 
+    -Oz --target=wasm32 
+    -mbulk-memory    #this uses bulk memory instructions for memcpy
+    --no-standard-libraries 
+
+    # set explicit exports for __heap_base (see https://surma.dev/things/c-to-webassembly/)
+    # --allow-undefined: everything undefined will be imported and needs to be written in js
+    -Wl,--export=__heap_base,--export=kginit,--export=rep,--allow-undefined 
+    -Wl,--no-entry -o kg.wasm s9core.c wasm.c kg.c
+
+   use wabt (github.com/WebAssembly/wabt): wasm2wat kg.wasm > kg.wat
+   to inspect imports (close to the header) and exports (at the end).
+
+- get rid of sprintf
+  most sprintf's are replaced with strcat and strcati (catenate int)
+
+- wasm.c are some stdlib replacements
+
+- remaining functions implemented in js are:
+  fgetc, fwrite, putc, ungetc, fread, fopen, feof, malloc, 
+  remove, clock, rand
+
+- a virtual file system is written in js
+
+- malloc currently is a simple bump allocator that is not good enough to load the image.
+  i suspect the reallocations for Car, Cdr, Tag use too much memory if it is not freed.
+ 
+- js module is ../klong.js used by ../index.html
+
+
+TODO
+- update to current klong version 
+- better malloc, maybe a bucket allocator
+- plot using canvas api, maybe translate ps to canvas calls
+
+

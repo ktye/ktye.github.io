@@ -12,61 +12,6 @@
 #include "s9import.h"
 #include "s9ext.h"
 
-#ifdef WASM
-void bye(int x){}
-int abs(int x){return (x<0)?-x:x; }
-long int labs(long int x){return (x<0)?-x:x;}
-int isdigit(int c){ return c>='0'&&c<='9'; }
-/*
-int memcmp(const void *vl, const void *vr, size_t n){
- const unsigned char *l=vl, *r=vr;
- for (; n && *l == *r; n--, l++, r++);
- return n ? *l-*r : 0;
-}
-int strcmp(const char *l, const char *r){
- for (; *l==*r && *l; l++, r++);
- return *(unsigned char *)l - *(unsigned char *)r;
-}
-void *memchr(const void *src, int c, size_t n){
- const unsigned char *s = src;
- c = (unsigned char)c;
- for (; n && *s != c; s++, n--);
- return n ? (void *)s : 0;
-}
-size_t strlen(const char *s){
- const char *a = s;
- for (; *s; s++);
- return s-a;
-}
-char *strchr(const char *s, int c){
- do{ if(*s == c){return (char*)s;} }while(*s++); return 0;
-}
-char *strcpy(char *d, const char *s){int i;
- for(i=0;;i++){d[i]=s[i];if(s[i]==0)break;}
- return d;
-}
-size_t strspn(const char *s1, const char *s2){
- const char *s = s1;
- const char *c;
- while(*s1){
-  for (c = s2; *c; c++){
-   if (*s1==*c)break;
-  }
-  if (*c=='\0')break;
-  s1++;
- }
- return s1-s;
-}
-int clock(void){ return 0; }
-void exit(int x){ }
-int system(char *s){ return 1; }
-*/
-void *realloc(void *ptr, size_t n){
- void *r=malloc(n);
- memcpy(r,ptr,n); 
- return r;
-}
-#endif
 
 /*
  * Global state
@@ -112,10 +57,8 @@ static int	Printer_count,
 
 static int	IO_error;
 
-#ifndef WASM
 FILE		*Ports[S9_MAX_PORTS];
 static char	Port_flags[S9_MAX_PORTS];
-#endif
 
 int		Input_port,
 		Output_port,
@@ -306,11 +249,11 @@ void s9_get_counters(s9_counter **nc, s9_counter **cc, s9_counter **vc,
  * Raw I/O
  */
 
-#ifdef WASM
-int s9_inport_open_p(void) { return 1; }
-int s9_outport_open_p(void) { return 1; }
-#else
 int s9_inport_open_p(void) {
+#ifdef wasm
+	if(Input_port == 0)
+		return 1;
+#endif
 	return Ports[Input_port] != NULL;
 }
 
@@ -436,20 +379,16 @@ int s9_io_status(void) {
 void s9_io_reset(void) {
 	IO_error = 0;
 }
-#endif
 
 /*
  * Error Handling
  */
 
 void s9_fatal(char *msg) {
-#ifdef WASM
-	wprint("S9core: fatal error: ");
-	wprint(msg);
-#else
-	fprintf(stderr, "S9core: fatal error: ");
-	fprintf(stderr, "%s\n", msg);
-#endif
+	const char *s = "S9core: fatal error: ";
+	fwrite(s, 1, strlen(s), stderr);
+	fwrite(msg, 1, strlen(msg), stderr);
+	putc('\n', stderr);
 	bye(1);
 }
 
@@ -575,10 +514,8 @@ static void mark(cell n) {
 			}
 		}
 		else if (Tag[n] & S9_ATOM_TAG) {	/* S0 --> S2 */
-#ifndef WASM
 			if (input_port_p(n) || output_port_p(n))
 				Port_flags[port_no(n)] |= S9_USED_TAG;
-#endif
 			p = cdr(n);
 			cdr(n) = parent;
 			/*Tag[n] &= ~S9_STATE_TAG;*/
@@ -604,7 +541,6 @@ int s9_gc(void) {
 
 	if (Run_stats)
 		s9_count(&Collections);
-#ifndef WASM
 	for (i=0; i<S9_MAX_PORTS; i++) {
 		if (Port_flags[i] & S9_LOCK_TAG)
 			Port_flags[i] |= S9_USED_TAG;
@@ -613,7 +549,6 @@ int s9_gc(void) {
 		else
 			Port_flags[i] &= ~S9_USED_TAG;
 	}
-#endif
 	if (GC_stack && *GC_stack != NIL) {
 		sk = string_len(*GC_stack);
 		string_len(*GC_stack) = (1 + *GC_stkptr) * sizeof(cell);
@@ -640,13 +575,13 @@ int s9_gc(void) {
 			Tag[i] &= ~S9_MARK_TAG;
 		}
 	}
-#ifndef WASM
 	for (i=0; i<S9_MAX_PORTS; i++) {
 		if (!(Port_flags[i] & S9_USED_TAG) && Ports[i] != NULL) {
 			fclose(Ports[i]);
 			Ports[i] = NULL;
 		}
 	}
+#ifndef wasm
 	if (Verbose_GC > 1) {
 		sprintf(buf, "GC: %d nodes reclaimed", k);
 		s9_prints(buf); nl();
@@ -692,7 +627,7 @@ cell s9_cons3(cell pcar, cell pcdr, int ptag) {
 			}
 			else {
 				new_cons_segment();
-#ifndef WASM
+#ifndef wasm
 				if (Verbose_GC) {
 					sprintf(buf,
 						"GC: new segment,"
@@ -703,7 +638,7 @@ cell s9_cons3(cell pcar, cell pcdr, int ptag) {
 					s9_prints(buf); nl();
 					s9_flush();
 				}
-#endif
+#endif				
 				s9_gc();
 			}
 		}
@@ -756,7 +691,7 @@ int s9_gcv(void) {
 		from += k;
 	}
 	k = Free_vecs - to;
-#ifndef WASM
+#ifndef wasm
 	if (Verbose_GC > 1) {
 		sprintf(buf, "GC: gcv: %d cells reclaimed", k);
 		s9_prints(buf); nl();
@@ -795,7 +730,7 @@ cell s9_new_vec(cell type, int size) {
 			else {
 				new_vec_segment();
 				s9_gcv();
-#ifndef WASM
+#ifndef wasm				
 				if (Verbose_GC) {
 					sprintf(buf,
 						"GC: new_vec: new segment,"
@@ -1062,7 +997,6 @@ cell s9_make_primitive(S9_PRIM *p) {
 	return n;
 }
 
-#ifndef WASM
 cell s9_make_port(int portno, cell type) {
 	cell	n;
 	int	pf;
@@ -1074,7 +1008,6 @@ cell s9_make_port(int portno, cell type) {
 	Port_flags[portno] = pf;
 	return n;
 }
-#endif
 
 cell s9_string_to_symbol(cell x) {
 	cell	y, n, k;
@@ -2696,7 +2629,6 @@ cell s9_real_to_string(cell x, int mode) {
  * I/O
  */
 
-#ifndef WASM
 void s9_close_port(int port) {
 	if (port < 0 || port >= S9_MAX_PORTS)
 		return;
@@ -2799,33 +2731,40 @@ int s9_unlock_port(int port) {
 	Port_flags[port] &= ~S9_LOCK_TAG;
 	return 0;
 }
-#endif
 
 /*
  * Primitives
  */
 
 static char *expected(int n, cell who, char *what) {
-#ifdef WASM
-	return "arg type error";
-#else
 	static char	msg[100];
+	char            num[32];
+	char            *s;
 	S9_PRIM		*p;
+
 	p = &Primitives[cadr(who)];
-	sprintf(msg, "%s: expected %s in argument #%d", p->name, what, n);
+	// sprintf(msg, "%s: expected %s in argument #%d", p->name, what, n);
+	msg[0] = '\0';
+	s = strcat(msg, p->name);
+	s = strcat(s, ": expected ");
+	s = strcat(s, what);
+	s = strcat(s, " in argument #");
+	itoa(n, num, 10);
+	s = strcat(s, num);
 	return msg;
-#endif
 }
 
 static char *wrongargs(char *name, char *what) {
-#ifdef WASM
-	return "arg error";
-#else
 	static char	buf[100];
+	char            *s;
 
-	sprintf(buf, "%s: too %s arguments", name, what);
+	// sprintf(buf, "%s: too %s arguments", name, what);
+	buf[0] = '\0';
+	s = strcat(buf, name);
+	s = strcat(s, ": too ");
+	s = strcat(s, name);
+	s = strcat(s, " arguments");
 	return buf;
-#endif
 }
 
 char *s9_typecheck(cell f) {
@@ -2914,7 +2853,6 @@ cell s9_apply_prim(cell f) {
  * Image I/O
  */
 
-#ifndef WASM
 struct magic {
 	char	id[16];			/* "magic#"	*/
 	char	version[8];		/* "yyyymmdd"	*/
@@ -3105,7 +3043,6 @@ char *s9_load_image(char *path, char *magic) {
 	fclose(f);
 	return NULL;
 }
-#endif
 
 /*
  * Initialization
@@ -3167,7 +3104,6 @@ void s9_init(cell **extroots, cell *stack, int *stkptr) {
 	GC_ext_roots = extroots;
 	GC_stack = stack;
 	GC_stkptr = stkptr;
-#ifndef WASM
 	for (i=2; i<S9_MAX_PORTS; i++)
 		Ports[i] = NULL;
 	Ports[0] = stdin;
@@ -3176,7 +3112,6 @@ void s9_init(cell **extroots, cell *stack, int *stkptr) {
 	Port_flags[0] = S9_LOCK_TAG;
 	Port_flags[1] = S9_LOCK_TAG;
 	Port_flags[2] = S9_LOCK_TAG;
-#endif
 	Input_port = 0;
 	Output_port = 1;
 	Error_port = 2;
@@ -3217,13 +3152,11 @@ void s9_init(cell **extroots, cell *stack, int *stkptr) {
 void s9_fini() {
 	int	i;
 
-#ifndef WASM
 	for (i=2; i<S9_MAX_PORTS; i++) {
 		if (Ports[i] != NULL)
 			fclose(Ports[i]);
 		Ports[i] = NULL;
 	}
-#endif
 	if (Car) free(Car);
 	if (Cdr) free(Cdr);
 	if (Tag) free(Tag);

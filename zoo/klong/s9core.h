@@ -9,29 +9,6 @@
 
 #define S9_VERSION "20190402"
 
-#ifdef WASM
-#define NULL 0
-#define EOF -1
-#define INT_MAX 2147483647
-#define INT_MIN -2147483647
-#define size_t unsigned long
-extern void wprint(char *);
-extern void *malloc(size_t);
-extern void free(void *);
-extern long atol(char *);
-#define memcpy __builtin_memcpy
-#define memset __builtin_memset
-#define memmove __builtin_memmove
-#define strcat __builtin_strcat
-#define strcmp __builtin_strcmp
-#define strcpy __builtin_strcpy
-#define strncpy __builtin_strncpy
-#define strlen __builtin_strlen
-#define strchr __builtin_strchr
-void bye(int);
-#endif
-
-
 /*
  * Ugly prelude to deal with some system-dependent stuff.
  */
@@ -83,8 +60,9 @@ void bye(int);
  #endif
 #endif
 
-#ifdef WASM
+#ifdef wasm
  #undef unix
+ #include "wasm.h"
 #endif
 
 #ifdef plan9
@@ -436,9 +414,7 @@ extern s9_cell	S9_zero,
 
 extern s9_cell	S9_epsilon;
 
-#ifndef WASM
 extern FILE	*S9_ports[];
-#endif
 
 extern int	S9_input_port,
 		S9_output_port,
