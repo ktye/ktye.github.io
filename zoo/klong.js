@@ -1,3 +1,4 @@
+import { fs } from './fs.js'
 
 var O,K,M,head
 
@@ -14,79 +15,7 @@ function write(f,u){
  else    fswrite(f,u)
 }
 
-let buf = new Uint8Array([])
-let bp = 0
-function setinput(s){s+=" ";bp=0;buf=us(s);buf[buf.length]=0; }
-
-
-let fs = {}
-fs.name = {"/dev/stdin":0,"/dev/stdout":1,"/dev/stderr":2,"./klong.image":3}
-fs.u    = [[],[],[],[]]
-fs.rp   = [0, 0, 0, 0 ]
-fs.wp   = [0, 0, 0, 0 ]
-function fsfind(x){for(let i=0;i<fs.name.length;i++){if(fs[i].name==x)return x};return -1}
-function fsopen(x,y){
- let file=s0(x);
- let mode=s0(y);
- console.log("fopen",file,mode)
- if(mode=="r"||mode=="rb"||mode=="a") {
-  let i=fs.name[file]
-  if(i===undefined) {console.log("not found");return 0}
-  if(mode=="a") fs.wp[i]=fs.u[i].length
-  else          fs.rp[i]=0
-  return i
- }
- if(mode=="w"){
-  let i=fs.name[file]
-  if(i===undefined){
-   i=fs.rp.length
-   fs.name[file]=i
-   fs.u.push(new Uint8Array([]))
-   fs.rp.push(0)
-   fs.wp.push(0)
-  }
-  return i
- }else console.error("fsopen unknown mode:", mode)
-}
-function fsgetc(fp){
- console.log("fsgetc",fp)
- let u=fs.u[fp]
- let p=fs.rp[fp]
- if(p==u.length) return -1
- let r=u[p];p++;fs.rp[fp]=p
- console.log("r=>",r)
- return r
-}
-function fseof(fp){ return fs.rp[fp]<fs.u[fp].length }
-function fswrite(fp,d){
- console.log("fswrite",fp,d)
- let u=fs.u[fp]
- let p=fs.wp[fp]
- if(p==0){
-  fs.u[fp]=d
-  fs.wp[fp]=d.length
- }else{
-  let r=new Uint8Array(p+d.length)
-  r.set(u.slice(0,p))
-  r.set(d,p)
-  fs.u[fp]=r
-  fs.wp[fp]=r.length
- }
- console.log("fswrite=>",fs.u[fp])
-}
-function fsread(dst,s,n,fp){
- console.log("fsread",dst,s,n,fp)
- let src=fs.u[fp]
- let p=fs.rp[fp]
- console.log("s*n",s*n)
- let x=src.slice(p,p+s*n)
- console.log("src", x)
- U().set(x,dst)
- console.log("wrote:",U().slice(dst,dst+s*n))
- console.log("return",n)
- return n
-}
-
+function setinput(s){s+=" ";let buf=us(s);buf[buf.length]=0; fs.setinput(buf) }
 
 function ini(left,out){O=out
   fetch("./klong/klong-qref.txt").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent="t3x.org/klong\n"+r;left.appendChild(p)});
@@ -116,15 +45,15 @@ function ini(left,out){O=out
   (import "env" "rand" (func $rand (type 5)))
 */
  let env={env:{
-  fgetc:   function(x){if(x!=0)return fsgetc(x);if(bp==buf.length)return -1;let r=buf[bp];bp++;return r},
-  fwrite:  function(a,b,c,d){write(d,U().slice(a,a+b*c));return c;},
-  fread:   fsread,
-  putc:    function(x,y){write(y,new Uint8Array([x]));return x;},
-  ungetc:  function(x,y){console.log("ungetc",x,y);if(x)console.error("ungetc not stdin");bp--},
-  fopen:   fsopen,
-  feof:    function(x){if(x)return fseof(x);return 0},
+  fgetc:   fs.getc,
+  fwrite:  fs.fwrite,
+  fread:   fs.fread,
+  putc:    fs.putc,
+  ungetc:  fs.ungetc,
+  fopen:   fs.fopen,
+  feof:    fs.feof,
+  remove:  fs.remove,
   malloc:  function(n){let r=head;head+=n;console.log("malloc",head,n,(head+n)/1024/1024,"MB");return r},
-  remove:  function(x){console.log("remove");return -1},
   clock:   function( ){return Date().now()},
   rand:    function( ){return Math.trunc(Math.random()*2147483647)},
  }}
@@ -135,6 +64,7 @@ function ini(left,out){O=out
   K.memory.grow(1024) // 1024*64kb => 64MB
   M=r.instance.exports.memory.buffer
   head=r.instance.exports.__heap_base
+  fs.init(U,O)
 
 /* this runs out of memory. maybe because of reallocations. we need a better malloc.
   fetch('./klong/klong.image').then(r=>r.arrayBuffer()).then(r=>{

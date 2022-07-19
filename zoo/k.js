@@ -1,17 +1,25 @@
-import { K } from '../k.js'
+import { K  } from '../k.js'
+import { fs } from './fs.js'
 
+
+function U(){ return new   Uint32Array(K._.memory.buffer) }
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 
 var O
+
+
+
 
 function ini(left,o){O=o
  fetch("../readme").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent=r;left.appendChild(p)});
 
  var ext={
   init: function( ){O("ktye/k\n ")},
-  read: function(x){return new Uint8Array(0)},
-  write:function(x,y){if(x===""){O(su(y))}},
+  read: fs.readfile,
+  write:fs.writefile,
  }
+
+ fs.init(U,O)
 
  K.kinit(ext,"../k.wasm")
 }
