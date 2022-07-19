@@ -12,6 +12,7 @@
 #define CLOCKS_PER_SEC 1000   /*js: Date.now()*/
 extern void wprint(char *);
 extern void *malloc(size_t);
+extern void *realloc(void *, size_t);
 extern void free(void *);
 //extern long atol(char *);
 int atoi(const char *s);
@@ -34,7 +35,6 @@ int fflush (FILE *);
 #define memset __builtin_memset
 #define memmove __builtin_memmove
 void bye(int);
-void *realloc(void *, size_t);
 long labs(long);
 int abs(int);
 #define isdigit(x) ((x) >= '0' && (x) <= '9')

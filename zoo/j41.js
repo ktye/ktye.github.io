@@ -1,3 +1,4 @@
+import allocator from './ma.js'
 
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
 function ge(x){return document.getElementById(x)}
@@ -14,8 +15,8 @@ function strtodn(u){let i=0;
 }
 function prompt(){O("    ")}
 
-var J,M
-function m(x){ let a=-(x%8);x+=(a<0)?8+a:0;M+=x;return M-x; } //todo: better malloc
+var J,M,ma
+//function m(x){ let a=-(x%8);x+=(a<0)?8+a:0;M+=x;return M-x; } //todo: better malloc
 function u( ){ return new Uint8Array(J.memory.buffer)       }
 function i( ){ return new Int32Array(J.memory.buffer)       }
 function n(x){ return u().slice(x).indexOf(0)               }
@@ -36,12 +37,12 @@ function SF(d,f,a){ //sprintf
 }
 let env={env:{
  sprintf:SF,
- fputc:function(x,y){write(y,String.fromCharCode(x));return x;},
- fputs:function(x,y){write(y,s(x));return 0;},
+ fputc: function(x,y){write(y,String.fromCharCode(x));return x;},
+ fputs: function(x,y){write(y,s(x));return 0;},
  fwrite:function(a,b,c,d){write(d,su(u().slice(a,a+b*c)));return c;},
- free:function(x){},
- malloc:m,
- fmod:function(x,y){return Number((x-(Math.floor(x/y)*y)).toPrecision(8));},
+ free:  function(x){return ma.free(x)},
+ malloc:function(x){return ma.malloc(x)}, //m,
+ fmod:  function(x,y){return Number((x-(Math.floor(x/y)*y)).toPrecision(8));},
  exp:Math.exp,
  sin:Math.sin,
  cos:Math.cos,
@@ -60,6 +61,7 @@ function ini(left,o){O=o
  fetch('../j/j41/j41.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   J=r.instance.exports
   M=J.__heap_base.value
+  ma=new allocator(M,J.memory)
   J.jinit()
   prompt()
  })
@@ -67,7 +69,7 @@ function ini(left,o){O=o
 
 function evl(s){
  O("\n")
- let x=us(s);let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;
+ let x=us(s);let r=ma.malloc(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;
  x=J.jx(r);
  J.jpr(x);prompt();
 }

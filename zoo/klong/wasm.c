@@ -62,13 +62,13 @@ size_t strspn(const char *s1, const char *s2){
 int clock(void){ return 0; }
 void exit(int x){ }
 int system(char *s){ return 1; }
-*/
 void *realloc(void *ptr, size_t n){
  void *r=malloc(n);
  memcpy(r,ptr,n); 
- // TODO: free
+ free(ptr);
  return r;
 }
+*/
 char *strcati(char *s, int i){
  char b[32];
  itoa(i, b, 10);

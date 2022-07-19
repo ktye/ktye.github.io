@@ -88,6 +88,7 @@ fs.feof=function(fp){
 }
 
 fs.putc=function(c,fp){
+ if(fp<3){O(String.fromCharCode(c)); return c}
  let name=fs.pointers[fp].name
  let d=fs.files[name]
  fs.files[name]=cat(fs.files[name],new Uint8Array([c]))
