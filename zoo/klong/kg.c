@@ -10,7 +10,7 @@
 #include "s9core.h"
 #include "s9import.h"
 
-#define VERSION		"20200403"
+#define VERSION		"20211014"
 
 #ifdef plan9
  #define handle_sigquit()
@@ -19,7 +19,6 @@
  #ifndef wasm
   #include <time.h>
   #include <signal.h>
- #else
   #ifdef EDIT
    #include <unistd.h>
    #include <termios.h>
@@ -292,7 +291,6 @@ static void printtrace(void) {
 static cell error(char *msg, cell arg) {
 	int	p = set_output_port(Error_port);
 	char	buf[100];
-	char    *s;
 
 	Incond = 0;
 	Infun = 0;
@@ -309,11 +307,7 @@ static cell error(char *msg, cell arg) {
 	prints("kg: error: ");
 	if (Loading != NIL) {
 		kg_write(car(Loading));
-		//sprintf(buf, ": %d: ", Line);
-		buf[0] = '\0';
-		s = strcat(buf, ": ");
-		s = strcati(s, Line);
-		s = strcat(s, ": ");
+		sprintf(buf, ": %d: ", Line);
 		prints(buf);
 	}
 	prints(msg);
@@ -413,10 +407,12 @@ static cell error(char *msg, cell arg) {
 				tcsetattr(0, TCSANOW, &t);
 				return NULL;
 			}
-			for (i=p; i<k-1; i++)
-				s[i] = s[i+1];
-			k--;
-			refresh(&s[p], k-p);
+			if (p < k) {
+				for (i=p; i<k-1; i++)
+					s[i] = s[i+1];
+				k--;
+				refresh(&s[p], k-p);
+			}
 		}
 		else if (('P'-'@' == c || 'N'-'@' == c) && Hnum > 0) {
 			if (p != 0 && p != k) {
@@ -660,7 +656,6 @@ static char *mklocal(char *s) {
 	cell	loc, p;
 	int	id;
 	char	b[TOKEN_LENGTH+1];
-	char    *q;
 
 	for (loc = Locnames; loc != NIL; loc = cdr(loc)) {
 		id = caar(loc);
@@ -668,12 +663,7 @@ static char *mklocal(char *s) {
 			strcpy(b, symbol_name(car(p)));
 			mkglobal(b);
 			if (!strcmp(s, b)) {
-				// sprintf(s, "%s`%d", b, id);
-				s[0] = '\0';
-				q = strcat(s, b);
-				q[0] = '`';
-				q++;
-				q = strcati(q, id);
+				sprintf(s, "%s`%d", b, id);
 				return s;
 			}
 		}
@@ -757,7 +747,6 @@ static cell read_char(void) {
 static cell read_xnum(int pre, int neg) {
 	char	digits[] = "0123456789abcdef";
 	char	buf[100];
-	char    *s;
 	cell	base, num;
 	int	c, p, nd;
 	int	radix;
@@ -786,12 +775,8 @@ static cell read_xnum(int pre, int neg) {
 			p++;
 		if (p >= radix) {
 			if (0 == nd) {
-				// sprintf(buf, "invalid digit in #%c number",
-				//	pre);
-				buf[0] = '\0';
-				s = strcat(buf, "invalid digid in #");
-				s = strcati(s, pre);
-				s = strcat(s, " number");
+				sprintf(buf, "invalid digit in #%c number",
+					pre);
 				unsave(2);
 				return error(buf, make_char(c));
 			}
@@ -806,10 +791,7 @@ static cell read_xnum(int pre, int neg) {
 	}
 	unsave(2);
 	if (!nd) {
-		// sprintf(buf, "digits expected after #%c", pre);
-		buf[0] = '\0';
-		s = strcat(buf, "digits expected after #");
-		s = strcati(s, pre);
+		sprintf(buf, "digits expected after #%c", pre);
 		return error(buf, VOID);
 	}
 	rejectc(c);
@@ -1176,15 +1158,7 @@ static cell kg_read(void) {
 static void write_char(cell x) {
 	char	b[4];
 
-	//sprintf(b, Display? "%c": "0c%c", (int) char_value(x));
-	if (Display)
-		itoa((int) char_value(x), b, 10);
-	else {
-		b[0] = '0';
-		b[1] = 'c';
-		itoa((int) char_value(x), b+2, 10);
-	}
-		
+	sprintf(b, Display? "%c": "0c%c", (int) char_value(x));
 	prints(b);
 }
 
@@ -1246,30 +1220,17 @@ static void write_dict(cell x) {
 
 static void write_chan(cell x) {
 	char	b[100];
-	char    *s;
 
-	//sprintf(b, ":%schan.%d",
-	//		input_port_p(x)? "in": "out",
-	//		(int) port_no(x));
-	
-	b[0] = ':';
-	b[1] = '\0';
-	s = strcat(b, (input_port_p(x)? "in": "out"));
-	s = strcat(s, "chan.");
-	s = strcati(s, (int) port_no(x));
-	
+	sprintf(b, ":%schan.%d",
+			input_port_p(x)? "in": "out",
+			(int) port_no(x));
 	prints(b);
 }
 
 static void write_primop(cell x) {
 	char	b[100];
-	char    *s;
 
-	// sprintf(b, ":primop-%d", (int) primop_slot(x));
-	
-	b[0] = '\0';
-	s = strcat(b, ":primop-");
-	s = strcati(s, (int) primop_slot(x));
+	sprintf(b, ":primop-%d", (int) primop_slot(x));
 	prints(b);
 }
 
@@ -2944,7 +2905,6 @@ static char	*N, B[100];
 
 static cell rec2(cell x, cell y) {
 	cell	n, p, q, new;
-	char    *s;
 
 	if (atom_p(x) && atom_p(y))
 		return (*F2)(x, y);
@@ -2964,10 +2924,7 @@ static cell rec2(cell x, cell y) {
 			n = cons(y, NIL);
 			n = cons(x, n);
 			unsave(1);
-			// sprintf(B, "%s: shape error", N);
-			B[0] = '\0';
-			s = strcat(B, N);
-			s = strcat(s, ": shape error");
+			sprintf(B, "%s: shape error", N);
 			return error(B, n);
 		}
 	}
@@ -3086,41 +3043,30 @@ static void unsave_vars(void) {
 static void unknown1(char *name) {
 	cell	n;
 	char	b[100];
-	char    *s;
 
 	n = cons(car(Dstack), NIL);
-	// sprintf(b, "%s: type error", name);
-	b[0] = '\0';
-	s = strcat(b, name);
-	s = strcat(s, ": type error");
+	sprintf(b, "%s: type error", name);
 	error(b, n);
 }
 
 static void unknown2(char *name) {
 	cell	n;
 	char	b[100];
-	char    *s;
 
 	n = cons(car(Dstack), NIL);
 	n = cons(cadr(Dstack), n);
-	// sprintf(b, "%s: type error", name);
-	b[0] = '\0';
-	s = strcat(b, name);
-	s = strcat(s, ": type error");
+	sprintf(b, "%s: type error", name);
 	error(b, n);
 }
 
 static void unknown3(char *name) {
 	cell	n;
 	char	b[100];
-	char    *s;
 
 	n = cons(car(Dstack), NIL);
 	n = cons(cadr(Dstack), n);
 	n = cons(caddr(Dstack), n);
-	// sprintf(b, "%s: type error", name);
-	s = strcat(b, name);
-	s = strcat(s, ": type error");
+	sprintf(b, "%s: type error", name);
 	error(b, n);
 }
 
@@ -4937,7 +4883,6 @@ static void sys_close(void) {
 static void sys_comment(void) {
 	cell	x;
 	char	msg[80];
-	char    *s;
 	int	sln, k;
 
 	ONE_ARG(".comment");
@@ -4949,13 +4894,8 @@ static void sys_comment(void) {
 		set_input_port(Prog_chan);
 		for (;;) {
 			if (kg_getline(Inbuf, TOKEN_LENGTH) == NULL) {
-				// sprintf(msg, "undelimited comment (line %d)", 
-				//	sln);
-				msg[0] = '\0';
-				s = strcat(msg, "undelemited comment (line ");
-				s = strcati(s, sln);
-				s[0] = ')';
-				s[1] = '\0';
+				sprintf(msg, "undelimited comment (line %d)", 
+					sln);
 				error(msg, VOID);
 				break;
 			}
@@ -6086,11 +6026,7 @@ static void expect(int c) {
 		Tok = token();
 	}
 	else {
-		// sprintf(b, "expected :%c, got", c);
-		b[0] = '\0';
-		strcat(b, "expected :");
-		b[0] = c;
-		b[1] = '\0';
+		sprintf(b, "expected :%c, got", c);
 		error(b, Tok);
 	}
 }
@@ -6423,7 +6359,6 @@ static cell expr(void) {
 static cell rename_locals(cell loc, int id) {
 	cell	n, a, nn;
 	char	b1[TOKEN_LENGTH], b2[TOKEN_LENGTH+1];
-	char    *s;
 
 	if (NIL == loc)
 		return NIL;
@@ -6432,13 +6367,7 @@ static cell rename_locals(cell loc, int id) {
 	while (loc != NIL) {
 		strcpy(b1, symbol_name(car(loc)));
 		mkglobal(b1);
-		// sprintf(b2, "%s`%d", b1, id);
-		b2[0] = '\0';
-		s = strcat(b2, b1);
-		s[0] = '`';
-		s++;
-		s = strcati(s, id);
-		
+		sprintf(b2, "%s`%d", b1, id);
 		nn = symbol_ref(b2);
 		car(n) = nn;
 		loc = cdr(loc);
@@ -6453,7 +6382,7 @@ static cell rename_locals(cell loc, int id) {
 }
 
 static cell prog(int fun) {
-	cell	p, ps, n, mfvs, locns;
+	cell	p, ps, n, mfvs, locns, new;
 	char	*s;
 	int	first = 1;
 
@@ -6471,7 +6400,8 @@ static cell prog(int fun) {
 				Mod_funvars = cons(cdr(p), Mod_funvars);
 			Locnames = cons(new_atom(Local_id, cdr(p)),
 					Locnames);
-			cdr(p) = rename_locals(cdr(p), Local_id++);
+			new = rename_locals(cdr(p), Local_id++);
+			cdr(p) = new;
 			car(ps) = p;
 		}
 		first = 0;
@@ -6518,12 +6448,15 @@ static cell parse(char *p) {
  */
 
 static void emit(cell p) {
+	cell	new;
+
 	save(p);
 	if (NIL == P) {
 		P = Prog = cons(p, NIL);
 	}
 	else {
-		cdr(P) = cons(p, NIL);
+		new = cons(p, NIL);
+		cdr(P) = new;
 		P = cdr(P);
 	}
 	unsave(1);
@@ -6913,9 +6846,9 @@ static void eval_arg(char *s, int echo) {
 	nl();
 }
 
-int rep() {
+int rep(void) {
 	cell	x;
-	
+
 	Prog_chan = 0;
 	reset_std_ports();
 	Dstack = NIL;
@@ -6946,7 +6879,6 @@ int rep() {
 	var_value(S_it) = car(Dstack);
 	return 1;
 }
-
 static void interpret(void) {
 	while(rep()) { }
 }
@@ -6962,10 +6894,7 @@ static void make_image_file(char *s) {
 	r = dump_image(s, magic);
 	if (NULL == r)
 		return;
-	// sprintf(errbuf, "kg: dump_image(): %s", r);
-	errbuf[0] = '\0';
-	r = strcat(errbuf, "kg: dump_image(): ");
-	r = strcat(r, r);
+	sprintf(errbuf, "kg: dump_image(): %s", r);
 	fatal(errbuf);
 }
 
@@ -6973,7 +6902,7 @@ static void load_image_file(void) {
 	char	magic[16];
 	char	kpbuf[TOKEN_LENGTH+1];
 	char	errbuf[128];
-	char	*r, *s, *kp;
+	char	*r, *kp;
 	FILE	*f;
 
 	memcpy(magic, "KLONGYYYYMMDD___", 16);
@@ -6985,23 +6914,14 @@ static void load_image_file(void) {
 	strcpy(kpbuf, kp);
 	kp = strtok(kpbuf, ":");
 	while (kp != NULL) {
-		// sprintf(Image_path, "%s/klong.image", kp);
-		Image_path[0] = '\0';
-		s = strcat(Image_path, kp);
-		s = strcat(s, "/klong.image");
+		sprintf(Image_path, "%s/klong.image", kp);
 		f = fopen(Image_path, "r");
 		if (f != NULL) {
 			r = load_image(Image_path, magic);
 			if (r != NULL) {
-				//fprintf(stderr, "kg: bad image file: %s\n",
-				//	Image_path);
-				fwrite("kg:bad image file: ", 1, 19, stderr);
-				fwrite(Image_path, 1, strlen(Image_path), stderr);
-				putc('\n', stderr);
-				//sprintf(errbuf, "load_image(): %s", r);
-				errbuf[0] = '\0';
-				s = strcat(errbuf, "load_image(): ");
-				s = strcat(s, r);
+				fprintf(stderr, "kg: bad image file: %s\n",
+					Image_path);
+				sprintf(errbuf, "load_image(): %s", r);
 				fatal(errbuf);
 			}
 		}
@@ -7185,18 +7105,16 @@ static void init(void) {
 	noted(NCONT);
  }
 #else
- #ifndef wasm
-  void keyboard_interrupt(int sig) {
- 	reset_std_ports();
- 	error("interrupted", VOID);
- 	Intr = 1;
- 	handle_sigint();
-  }
- 
-  void keyboard_quit(int sig) {
- 	fatal("quit signal received, exiting");
-  }
- #endif
+ void keyboard_interrupt(int sig) {
+	reset_std_ports();
+	error("interrupted", VOID);
+	Intr = 1;
+	handle_sigint();
+ }
+
+ void keyboard_quit(int sig) {
+	fatal("quit signal received, exiting");
+ }
 #endif
 
 static void usage(int x) {
@@ -7353,17 +7271,7 @@ static void klongopts(void) {
 	readopts(i, a, NULL, NULL);
 	free(k);
 }
-#endif
 
-#ifdef wasm
-void kginit(x){
- 	init();
-	if(x) load_image_file();
-	prints("        Klong ");
-	prints(VERSION);
-	nl();
-}
-#else
 int main(int argc, char **argv) {
 	int	i, loop, endargs;
 
@@ -7396,5 +7304,13 @@ int main(int argc, char **argv) {
 	if (!Quiet) prints("bye!\n");
 	bye(0);
 	return 0;
+}
+#else
+void kginit(x){
+ 	init();
+	if(x) load_image_file();
+	prints("        Klong ");
+	prints(VERSION);
+	nl();
 }
 #endif

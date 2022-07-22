@@ -26,6 +26,7 @@ fs.setinput=function(u){ fs.pointers[0]={u:u,p:0,name:"/dev/stdin"} }
 fs.fopen=function(x,y){
  let name=s0(x)
  let mode=s0(y)
+ console.log("fopen",name,mode)
  let d,fp
  switch(mode){
  case "a":
@@ -65,18 +66,22 @@ fs.fread=function(dst,s,n,fp){
 fs.getc=function(fp){
  let src=fs.pointers[fp].u
  let p  =fs.pointers[fp].p
- if(p>=src.length) return -1
+ if(p>src.length) { console.log("getc=>EOF", p); return -1 }
  let r=src[p]
  fs.pointers[fp].p++
+//console.log("getc",fp,p,src.length,"=>",r)
  return r
 }
 
-fs.ungetc=function(fp){
+fs.ungetc=function(c,fp){
+//console.log("ungetc",c,fp)
  let src=fs.pointers[fp].u
  let   p=fs.pointers[fp].p
- let r  = u[p]
- if(p>=0)fs.pointers[fp].p=1-p
- return r
+ if(p>=0){
+  fs.pointers[fp].p--
+  fs.pointers[fp][p]=c
+ }
+ return c
 }
 
 fs.fclose=function(fp){ fs.pointers[fp]=false }
@@ -84,7 +89,7 @@ fs.fclose=function(fp){ fs.pointers[fp]=false }
 fs.feof=function(fp){
  let src=fs.pointers[fp].u
  let   p=fs.pointers[fp].p
- return p<src.length
+ return p>=src.length
 }
 
 fs.putc=function(c,fp){

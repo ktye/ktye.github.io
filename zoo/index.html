@@ -92,7 +92,9 @@ tty.onkeypress=function(e){
 }}
 tty.focus()
 
-function out(s){tty.value+=s}
+function out(s){tty.value+=s;
+	tty.scrollTop=tty.scrollHeight;
+}
 
 var evl
 

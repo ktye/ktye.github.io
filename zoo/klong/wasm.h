@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #define SAFE
 #define NULL 0
 #define EOF -1
@@ -10,7 +11,6 @@
 #define stderr (FILE*)2
 #define clock_t unsigned long
 #define CLOCKS_PER_SEC 1000   /*js: Date.now()*/
-extern void wprint(char *);
 extern void *malloc(size_t);
 extern void *realloc(void *, size_t);
 extern void free(void *);
@@ -35,13 +35,14 @@ int fflush (FILE *);
 #define memset __builtin_memset
 #define memmove __builtin_memmove
 void bye(int);
+extern void exit(int);
 long labs(long);
 int abs(int);
-#define isdigit(x) ((x) >= '0' && (x) <= '9')
-#define isupper(x) ((x) >= 'A' && (x) <= 'Z')
-#define islower(x) ((x) >= 'Z' && (x) <= 'z')
-#define isalpha(x) (isupper(x)||islower(x))
-#define tolower(x) (isupper(x)?(x)+32:(x))
+int isdigit(int);
+int isupper(int);
+int islower(int);
+int isalpha(int);
+int tolower(int);
 int fclose(FILE*);
 void clearerr(FILE *);
 void itoa(int, char[], int);
@@ -56,3 +57,10 @@ int memcmp(const void *vl, const void *vr, size_t n);
 char *strcati(char *s, int);
 char *getenv(const char *);
 char *strtok(char *restrict str, const char *restrict delim);
+extern int sprintf(char *, const char *, ...);
+int printf(const char *, ...);
+int fprintf(FILE *, const char *, ...);
+extern int vfprintf(FILE *, const char *, va_list);
+char handle_sigint();
+char handle_sigquit();
+extern void trap();

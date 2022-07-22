@@ -1,11 +1,16 @@
 #include "wasm.h"
 
-void bye(int x){}
+void bye(int x){printf("exit %d\n", x); __builtin_unreachable(); }
 int abs(int x){return (x<0)?-x:x; }
 long int labs(long int x){return (x<0)?-x:x;}
 int fflush(FILE *f){ return 0; };
 int fclose(FILE *f){ return 0; };
 void clearerr(FILE *f){};
+int tolower(int x){return isupper(x)?32+x:x;}
+int isdigit(int x) { return x >= '0' && x <= '9'; }
+int isupper(int x) { return x >= 'A' && x <= 'Z'; }
+int islower(int x) { return x >= 'a' && x <= 'z'; }
+int isalpha(int x) { return isupper(x) || islower(x); }
 size_t strlen(const char *s){
  const char *a = s;
  for (; *s; s++);
@@ -26,14 +31,21 @@ int strncmp(const char *_l, const char *_r, size_t n) { //musl
  for (; *l && *r && n && *l == *r ; l++, r++, n--);
  return *l - *r;
 }
-char *strcpy(char *d, const char *s){int i;
- for(i=0;;i++){d[i]=s[i];if(s[i]==0)break;}
+char *strcpy(char *d, const char *s){
+ for(int i=0;;i++){d[i]=s[i];if(s[i]==0)break;}
  return d;
 }
 char *strncpy(char *dst, const char *src, size_t n){
- memset(dst, 0, n);
- memcpy(dst, src, strlen(src));
- return dst;
+	if((int)n<0) __builtin_trap();
+
+	for(int i=0;i<n;i++){
+		if(src[i]==0){
+			memset(dst+i, 0, n-i);
+			return dst;
+		}
+		dst[i]=src[i];
+	}
+	return dst;
 }
 char *strcat(char *restrict dest, const char *restrict src){
  strcpy(dest + strlen(dest), src);
@@ -136,4 +148,21 @@ cont:
 char *strtok(char *s, const char *delim){
 	static char *last;
 	return strtok_r(s, delim, &last);
+}
+
+int printf(const char *fmt, ...){
+ int r;
+ va_list ap;
+ va_start(ap, fmt);
+ r=vfprintf(stdout,fmt,ap);
+ va_end(ap);
+ return r;
+}
+int fprintf(FILE *f, const char *fmt, ...){
+ int r;
+ va_list ap;
+ va_start(ap, fmt);
+ r=vfprintf(f,fmt,ap);
+ va_end(ap);
+ return r;
 }

@@ -1,41 +1,52 @@
 CHANGES
-- ifdef wasm in s9core.c kg.c
 
-- new Makefile entry kg.wasm
-  clang version 14
-  $ clang -Dwasm -Wfatal-errors -Wno-builtin-requires-header 
-    -Oz --target=wasm32 
-    -mbulk-memory    #this uses bulk memory instructions for memcpy
-    --no-standard-libraries 
+- s9core.h: add wasm.h; undef unix because we don't read headers.
+	62a63,67
+	> #ifdef wasm
+	>  #undef unix
+	>  #include "wasm.h"
+	> #endif
+	> 
 
-    # set explicit exports for __heap_base (see https://surma.dev/things/c-to-webassembly/)
-    # --allow-undefined: everything undefined will be imported and needs to be written in js
-    -Wl,--export=__heap_base,--export=kginit,--export=rep,--allow-undefined 
-    -Wl,--no-entry -o kg.wasm s9core.c wasm.c kg.c
+- s9core.c: wasm.h defines FILE is int, input port is always open.
+	251a252,254
+	> #ifdef wasm
+	> 	return (Input_port == 0) || (Ports[Input_port] != NULL);
+	> #else
+	252a256
+	> #endif
 
-   use wabt (github.com/WebAssembly/wabt): wasm2wat kg.wasm > kg.wat
-   to inspect imports (close to the header) and exports (at the end).
+- kg.c:
+	- split interpret into while(rep())
+	- the new function rep() is called by wasm
+	- ifdef wasm/ifndef wasm:
+		- don't load time.h, signal.h
+		- no srand
+		- no readopts
+	- pair ifdef SAFE with else to disable the dead branch
+	- use kginit instead of main
 
-- get rid of sprintf
-  most sprintf's are replaced with strcat and strcati (catenate int)
+- Makefile: new entry: kg.wasm
+  all non-exported functions need to be defined in wasm and imported
+  Use wabt (github.com/WebAssembly/wabt): wasm2wat kg.wasm > kg.wat
+  to inspect imports (close to the header) and exports (at the end).
+
+	32a33,35
+	> kg.wasm:	s9core.c s9core.h wasm.c wasm.h kg.c
+	> 	clang -Dwasm -Wfatal-errors -Wno-builtin-requires-header -Oz --target=wasm32 -mbulk-memory --no-standard-libraries -Wl,--export=__heap_base,--export=kginit,--export=rep,--allow-undefined -Wl,--no-entry -o kg.wasm s9core.c wasm.c kg.c
+	> 
+
 
 - wasm.c are some stdlib replacements
 
-- remaining functions implemented in js are:
-  fgetc, fwrite, putc, ungetc, fread, fopen, feof, malloc, 
-  remove, clock, rand
+- remaining functions are implemented in js
 
-- a virtual file system is written in js
-
-- malloc currently is a simple bump allocator that is not good enough to load the image.
-  i suspect the reallocations for Car, Cdr, Tag use too much memory if it is not freed.
- 
 - js module is ../klong.js used by ../index.html
+  It uses two imports:
+  - ../fs.js virtual file system, share by all interpreters
+  - ../ma.js malloc replacement (bucket allocator)
 
-
-TODO
-- update to current klong version 
-- better malloc, maybe a bucket allocator
-- plot using canvas api, maybe translate ps to canvas calls
-
-
+STATUS:
+	- kginit(1) loads klong.image but fails with wrong file size
+	- .l("test.kg") fails at 758 (bisecting with .x(0))
+	  but the test run on their own, so probably unrelated

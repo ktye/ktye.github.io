@@ -12,7 +12,6 @@
 #include "s9import.h"
 #include "s9ext.h"
 
-
 /*
  * Global state
  */
@@ -251,10 +250,10 @@ void s9_get_counters(s9_counter **nc, s9_counter **cc, s9_counter **vc,
 
 int s9_inport_open_p(void) {
 #ifdef wasm
-	if(Input_port == 0)
-		return 1;
-#endif
+	return (Input_port == 0) || (Ports[Input_port] != NULL);
+#else
 	return Ports[Input_port] != NULL;
+#endif
 }
 
 int s9_outport_open_p(void) {
@@ -385,10 +384,8 @@ void s9_io_reset(void) {
  */
 
 void s9_fatal(char *msg) {
-	const char *s = "S9core: fatal error: ";
-	fwrite(s, 1, strlen(s), stderr);
-	fwrite(msg, 1, strlen(msg), stderr);
-	putc('\n', stderr);
+	fprintf(stderr, "S9core: fatal error: ");
+	fprintf(stderr, "%s\n", msg);
 	bye(1);
 }
 
@@ -581,13 +578,11 @@ int s9_gc(void) {
 			Ports[i] = NULL;
 		}
 	}
-#ifndef wasm
 	if (Verbose_GC > 1) {
 		sprintf(buf, "GC: %d nodes reclaimed", k);
 		s9_prints(buf); nl();
 		s9_flush();
 	}
-#endif
 	return k;
 }
 
@@ -627,7 +622,6 @@ cell s9_cons3(cell pcar, cell pcdr, int ptag) {
 			}
 			else {
 				new_cons_segment();
-#ifndef wasm
 				if (Verbose_GC) {
 					sprintf(buf,
 						"GC: new segment,"
@@ -638,7 +632,6 @@ cell s9_cons3(cell pcar, cell pcdr, int ptag) {
 					s9_prints(buf); nl();
 					s9_flush();
 				}
-#endif				
 				s9_gc();
 			}
 		}
@@ -691,13 +684,11 @@ int s9_gcv(void) {
 		from += k;
 	}
 	k = Free_vecs - to;
-#ifndef wasm
 	if (Verbose_GC > 1) {
 		sprintf(buf, "GC: gcv: %d cells reclaimed", k);
 		s9_prints(buf); nl();
 		s9_flush();
 	}
-#endif
 	Free_vecs = to;
 	return k;
 }
@@ -730,7 +721,6 @@ cell s9_new_vec(cell type, int size) {
 			else {
 				new_vec_segment();
 				s9_gcv();
-#ifndef wasm				
 				if (Verbose_GC) {
 					sprintf(buf,
 						"GC: new_vec: new segment,"
@@ -739,7 +729,6 @@ cell s9_new_vec(cell type, int size) {
 					s9_prints(buf); nl();
 					s9_flush();
 				}
-#endif
 			}
 		}
 	}
@@ -2738,32 +2727,17 @@ int s9_unlock_port(int port) {
 
 static char *expected(int n, cell who, char *what) {
 	static char	msg[100];
-	char            num[32];
-	char            *s;
 	S9_PRIM		*p;
 
 	p = &Primitives[cadr(who)];
-	// sprintf(msg, "%s: expected %s in argument #%d", p->name, what, n);
-	msg[0] = '\0';
-	s = strcat(msg, p->name);
-	s = strcat(s, ": expected ");
-	s = strcat(s, what);
-	s = strcat(s, " in argument #");
-	itoa(n, num, 10);
-	s = strcat(s, num);
+	sprintf(msg, "%s: expected %s in argument #%d", p->name, what, n);
 	return msg;
 }
 
 static char *wrongargs(char *name, char *what) {
 	static char	buf[100];
-	char            *s;
 
-	// sprintf(buf, "%s: too %s arguments", name, what);
-	buf[0] = '\0';
-	s = strcat(buf, name);
-	s = strcat(s, ": too ");
-	s = strcat(s, name);
-	s = strcat(s, " arguments");
+	sprintf(buf, "%s: too %s arguments", name, what);
 	return buf;
 }
 
