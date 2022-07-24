@@ -52,7 +52,6 @@ fs.fopen=function(x,y){
 }
 
 fs.fread=function(dst,s,n,fp){
-console.log("fread",s,n,fp)
  let src=fs.pointers[fp].u
  let p  =fs.pointers[fp].p
  if(p>=src.length) return -1
@@ -60,7 +59,7 @@ console.log("fread",s,n,fp)
  let nmemb=Math.floor(avail/s)
  if(nmemb<n)n=nmemb
  U().set(src.slice(p,p+s*n),dst)
- fs.pointers[p]+=s*n
+ fs.pointers[fp].p+=s*n
  return n
 }
 

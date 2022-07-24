@@ -76,17 +76,17 @@ function ini(left,out){O=out
   window.ma=ma
 
 
-/*
+
   K.kginit(0) // without image
   fetch('./klong/test.kg').then(r=>r.arrayBuffer()).then(r=>{fs.writefile("./test.kg",new Uint8Array(r))})
   // run tests with: .l("test.kg")
-*/
 
+/*
  fetch('./klong/klong.image').then(r=>r.arrayBuffer()).then(r=>{
    fs.writefile("./klong.image", new Uint8Array(r))
    K.kginit(1)
-   // fails with: load_image(): image cons pool too large
   })
+*/
 
  })
 }
