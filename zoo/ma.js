@@ -16,8 +16,9 @@ export default class allocator{
   for(let b=t;b<31;b++){
    r=this.bk[b]
    if(r!=0){
-    this.bk[b] = this.I[1+b]   //next
-    while(b>t){
+    this.bk[b] = this.I[1+r]   //next
+    while(t<b){
+console.log("t<b",t,b)
      b--
      this.I[r]=b
      this._free(r)
@@ -26,9 +27,10 @@ export default class allocator{
     }
    }
    if(r==0)r=this._grow(1<<t)
+   this.I=new Uint32Array(this.memory.buffer)
    this.I[r]=t
    let a=8+(r<<2)
-   console.log("malloc",n,"=>",a)
+   console.log("malloc",n,"=>",a,"..",a+(1<<t)-8,"t",t)
    return a
   }
  }
@@ -39,9 +41,11 @@ export default class allocator{
   let p=x>>>2
   let t=this.I[p-2]
   if(t<4||t>31)console.error("realloc",x,"unknown bucket type",t)
+  if(this.bucket(8+n)==t){console.log("keep");return x}
   let r=this.malloc(n)
   let u=new Uint8Array(this.memory.buffer)
-  u.set(r, u.slice(x,x+(1<<t)-8))
+  let l=(1<<t)-8 // old length
+  u.copyWithin(r,x,x+(n<l)?n:l)
   this.free(x)
   return r
  }
@@ -56,11 +60,13 @@ export default class allocator{
  }
  _free(x){
   let t=this.I[x]
+console.log("free", 8+(x<<2), "t", t)
   if(t<4||t>31) console.error("free: ", x, "illegal bucket type", t)
   this.I[1+x]=this.bk[t]  // pointer to next
   this.bk[t]=x
  }
  _grow(x){
+console.log("grow", x, "avail", this.total-this.head)
   let r
   if(x>this.total-this.head){
    let b=x>>>16
@@ -72,5 +78,21 @@ export default class allocator{
   r=this.head>>>2
   this.head+=x
   return r
+ }
+ stats(){
+  let I = new Uint32Array(this.memory.buffer)
+  let s1=function(bk,t){
+   let n=0
+   let p=bk[t]
+   while(p){
+    p=I[p]
+    n++
+   }
+   console.log("type",t,n,"*",1<<t,"=",n*(1<<t))
+   return n*(1<<t)
+  } 
+  let free=0
+  for(let t=0;t<this.bk.length;t++)free+=s1(this.bk,t)
+  console.log("free(in bk)", free)
  }
 }

@@ -52,6 +52,7 @@ fs.fopen=function(x,y){
 }
 
 fs.fread=function(dst,s,n,fp){
+console.log("fread",s,n,fp)
  let src=fs.pointers[fp].u
  let p  =fs.pointers[fp].p
  if(p>=src.length) return -1
@@ -59,14 +60,14 @@ fs.fread=function(dst,s,n,fp){
  let nmemb=Math.floor(avail/s)
  if(nmemb<n)n=nmemb
  U().set(src.slice(p,p+s*n),dst)
- fs.pointers[fp].p += s*n
+ fs.pointers[p]+=s*n
  return n
 }
 
 fs.getc=function(fp){
  let src=fs.pointers[fp].u
  let p  =fs.pointers[fp].p
- if(p>src.length) { console.log("getc=>EOF", p); return -1 }
+ if(p>=src.length) { console.log("getc=>EOF", fp, p); return -1 }
  let r=src[p]
  fs.pointers[fp].p++
 //console.log("getc",fp,p,src.length,"=>",r)
@@ -74,17 +75,17 @@ fs.getc=function(fp){
 }
 
 fs.ungetc=function(c,fp){
-//console.log("ungetc",c,fp)
  let src=fs.pointers[fp].u
  let   p=fs.pointers[fp].p
- if(p>=0){
+//console.log("ungetc",c,fp,p)
+ if(p>0){
   fs.pointers[fp].p--
   fs.pointers[fp][p]=c
  }
  return c
 }
 
-fs.fclose=function(fp){ fs.pointers[fp]=false }
+fs.fclose=function(fp){ console.log("fclose",fp); fs.pointers[fp]=false; return 0; }
 
 fs.feof=function(fp){
  let src=fs.pointers[fp].u
@@ -133,4 +134,5 @@ function cat(x,y){
  return r
 }
 
+window.fs = fs
 export { fs }

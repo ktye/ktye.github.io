@@ -1,14 +1,14 @@
 import { fs }    from './fs.js'
 import allocator from './ma.js'
 
-var O,K,M,ma
+var O,K,ma
 
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function us(s){return new TextEncoder("utf-8").encode(s)}
 function u0(s){let u=us(s);let r=new Uint8Array(1+u.length);r.set(u);r[u.length]=0;return r}
 function s0(x){let i=U().slice(x);return su(i.slice(0,i.indexOf(0)))}
-function U(  ){return new Uint8Array(M)}
-function I(  ){return new Int32Array(M)}
+function U(  ){return new Uint8Array(K.memory.buffer)}
+function I(  ){return new Int32Array(K.memory.buffer)}
 
 function sf(y,z){ // sprintf: supported %s %c %d
  let i=I(),j
@@ -52,6 +52,7 @@ function ini(left,out){O=out
   putc:    fs.putc,
   ungetc:  fs.ungetc,
   fopen:   fs.fopen,
+  fclose:  fs.fclose,
   feof:    fs.feof,
   remove:  fs.remove,
   trap:    function(   ){return K.trap()},
@@ -64,27 +65,29 @@ function ini(left,out){O=out
   sprintf: function(x,y,z){let r=u0(sf(y,z));U().set(r,x);return r-1}
  }}
 
- 
+
  fetch('./klong/kg.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports
   K.memory.grow(1024) // 1024*64kb => 64MB
-  M=r.instance.exports.memory.buffer
   ma=new allocator(K.__heap_base,K.memory)
   fs.init(U,O)
 
+  window.klong=K
+  window.ma=ma
 
+
+/*
   K.kginit(0) // without image
   fetch('./klong/test.kg').then(r=>r.arrayBuffer()).then(r=>{fs.writefile("./test.kg",new Uint8Array(r))})
   // run tests with: .l("test.kg")
+*/
 
-/*
  fetch('./klong/klong.image').then(r=>r.arrayBuffer()).then(r=>{
    fs.writefile("./klong.image", new Uint8Array(r))
    K.kginit(1)
-   // fails with: load_image(): wrong file size
+   // fails with: load_image(): image cons pool too large
   })
-*/
-  
+
  })
 }
 

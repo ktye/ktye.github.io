@@ -47,6 +47,8 @@ CHANGES
   - ../ma.js malloc replacement (bucket allocator)
 
 STATUS:
-	- kginit(1) loads klong.image but fails with wrong file size
+	- kginit(1) loads klong.image but fails with "image cons pool too large"
 	- .l("test.kg") fails at 758 (bisecting with .x(0))
 	  but the test run on their own, so probably unrelated
+
+- kg.c: load_image_file does fopen(.., "r"); but never closes, why?

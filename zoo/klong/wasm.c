@@ -4,7 +4,6 @@ void bye(int x){printf("exit %d\n", x); __builtin_unreachable(); }
 int abs(int x){return (x<0)?-x:x; }
 long int labs(long int x){return (x<0)?-x:x;}
 int fflush(FILE *f){ return 0; };
-int fclose(FILE *f){ return 0; };
 void clearerr(FILE *f){};
 int tolower(int x){return isupper(x)?32+x:x;}
 int isdigit(int x) { return x >= '0' && x <= '9'; }
