@@ -4,16 +4,15 @@ export default class allocator{
   this.base   = base   // __heap_base (wasm/clang)
   this.memory = memory // wasm memory object
   this.head   = base>>>2
-  this.total  = memory.buffer.byteLength
   this.I      = []     // Uint32Array
-  this.bk     = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  this.bk     = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
   if(4*this.head!=base){console.error("malloc: __heap_base is not a multiple of 4!")}
  }
  malloc(n){               // [bucket-type i32, next-pointer, data...]
   this.I=new Uint32Array(this.memory.buffer)
   let t=this.bucket(8+n)  
   let r
-  for(let b=t;b<31;b++){
+  for(let b=t;b<30;b++){
    r=this.bk[b]
    if(r!=0){
     this.bk[b] = this.I[1+r]   //next
@@ -40,7 +39,7 @@ export default class allocator{
   this.I=new Uint32Array(this.memory.buffer)
   let p=x>>>2
   let t=this.I[p-2]
-  if(t<4||t>31)console.error("realloc",x,"unknown bucket type",t)
+  if(t<4||t>30)console.error("realloc",x,"unknown bucket type",t)
   if(this.bucket(8+n)==t) return x;
   let r=this.malloc(n)
   let u=new Uint8Array(this.memory.buffer)
@@ -50,32 +49,29 @@ export default class allocator{
   return r
  }
  free(x){
-  this.I=new Uint32Array(this.memory.buffer)
-  this._free((x>>>2)-2)
-  return 0  
+  if(x!=0) this._free((x>>>2)-2)
  }
  bucket(n){
   let t=32-Math.clz32(7+n)
   return (t<4)?4:t
  }
  _free(x){
+  this.I=new Uint32Array(this.memory.buffer)
   let t=this.I[x]
 //console.log("free", 8+(x<<2), "t", t)
-  if(t<4||t>31) console.error("free: ", x, "illegal bucket type", t)
+  if(t<4||t>30) console.error("free: ", x, "illegal bucket type", t)
   this.I[1+x]=this.bk[t]  // pointer to next
   this.bk[t]=x
  }
  _grow(x){
 //console.log("grow", x, "avail", this.total-this.head)
-  let r
-  if(x>this.total-this.head){
+  if(x>this.memory.buffer.byteLength-this.head){
    let b=x>>>16
    if(x>64*1024*b)b++
    let g=this.memory.grow(b)
    console.log("grow by",b,"=>",g,"total",this.memory.buffer.byteLength)
-   this.total=this.memory.buffer.byteLength
   }
-  r=this.head>>>2
+  let r=this.head>>>2
   this.head+=x
   return r
  }
