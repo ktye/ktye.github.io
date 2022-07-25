@@ -46,8 +46,12 @@ CHANGES
   - ../fs.js virtual file system, share by all interpreters
   - ../ma.js malloc replacement (bucket allocator)
 
+- s9test:
+  - see file mk to compile s9.wasm and enable with s9test=true in klong.js
+
 STATUS:
-	- .l("test.kg") fails at line 420
+	- .l("test.kg") fails at different positions depending on compiler options:
+		- versions, stack-size, optimization level
 	  but the test run on their own, so probably unrelated
 
 - kg.c: load_image_file does fopen(.., "r"); but never closes, why?

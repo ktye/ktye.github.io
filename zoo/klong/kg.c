@@ -1278,8 +1278,12 @@ void kg_write(cell x) {
 		prints(":barrier");
 	else if (x == STRING_NIL)
 		prints(":stringnil");
-	else
+	else if (list_p(x)==0) {
+	        printf("unexpected type of %d\n", x);
+		bye(x);
+	} else {
 		write_list(x);
+	}
 }
 
 /*

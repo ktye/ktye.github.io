@@ -29,12 +29,12 @@ export default class allocator{
    this.I=new Uint32Array(this.memory.buffer)
    this.I[r]=t
    let a=8+(r<<2)
-//   console.log("malloc",n,"=>",a,"..",a+(1<<t)-8,"t",t)
+ console.log("malloc",n,"=>",a,"..",a+(1<<t)-8,"t",t)
    return a
   }
  }
  realloc(x,n){
-// console.log("realloc",x,n)
+ console.log("realloc",x,n)
   if(x==0)return this.malloc(n)
   this.I=new Uint32Array(this.memory.buffer)
   let p=x>>>2
@@ -58,7 +58,7 @@ export default class allocator{
  _free(x){
   this.I=new Uint32Array(this.memory.buffer)
   let t=this.I[x]
-//console.log("free", 8+(x<<2), "t", t)
+console.log("free", 8+(x<<2), "t", t)
   if(t<4||t>30) console.error("free: ", x, "illegal bucket type", t)
   this.I[1+x]=this.bk[t]  // pointer to next
   this.bk[t]=x

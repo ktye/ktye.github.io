@@ -35,7 +35,7 @@ fs.fopen=function(x,y){
   d=fs.files[name]
   if(d===undefined) return 0;
   fp=newfp()
-  fs.pointers[fp]={u:new Uint8Array(d),p:(mode=="a")?u.length:0,name:name}
+  fs.pointers[fp]={u:new Uint8Array(d),p:(mode=="a")?d.length:0,name:name}
   return fp
   break
  case "w":
@@ -58,6 +58,7 @@ fs.fread=function(dst,s,n,fp){
  let avail=src.length-p
  let nmemb=Math.floor(avail/s)
  if(nmemb<n)n=nmemb
+//console.log("fread to", dst)
  U().set(src.slice(p,p+s*n),dst)
  fs.pointers[fp].p+=s*n
  return n
@@ -79,12 +80,12 @@ fs.ungetc=function(c,fp){
 //console.log("ungetc",c,fp,p)
  if(p>0){
   fs.pointers[fp].p--
-  fs.pointers[fp][p]=c
+  fs.pointers[fp].u[p-1]=c
  }
  return c
 }
 
-fs.fclose=function(fp){ console.log("fclose",fp); fs.pointers[fp]=false; return 0; }
+fs.fclose=function(fp){ fs.pointers[fp]=false; return 0; }
 
 fs.feof=function(fp){
  let src=fs.pointers[fp].u

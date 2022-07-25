@@ -65,10 +65,10 @@ function ini(left,out){O=out
   sprintf: function(x,y,z){let r=u0(sf(y,z));U().set(r,x);return r-1}
  }}
 
-
- fetch('./klong/kg.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+ let s9test=false
+ fetch('./klong/'+(s9test?'s9.wasm':'kg.wasm')).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports
-  K.memory.grow(1024) // 1024*64kb => 64MB
+  //K.memory.grow(1024) // 1024*64kb => 64MB
   ma=new allocator(K.__heap_base,K.memory)
   fs.init(U,O)
 
@@ -76,18 +76,23 @@ function ini(left,out){O=out
   window.ma=ma
 
 
+  if(s9test){
+   console.log("s9test:",K.main(0,0))
+  }else{
 
-  K.kginit(0) // without image
-  fetch('./klong/test.kg').then(r=>r.arrayBuffer()).then(r=>{fs.writefile("./test.kg",new Uint8Array(r))})
-  // run tests with: .l("test.kg")
+   K.kginit(0) // without image
+   fetch('./klong/test.kg').then(r=>r.arrayBuffer()).then(r=>{fs.writefile("./test.kg",new Uint8Array(r))})
+   // run tests with: .l("test.kg")
+
 
 /*
- fetch('./klong/klong.image').then(r=>r.arrayBuffer()).then(r=>{
-   fs.writefile("./klong.image", new Uint8Array(r))
-   K.kginit(1)
-  })
+  fetch('./klong/klong.image').then(r=>r.arrayBuffer()).then(r=>{
+    fs.writefile("./klong.image", new Uint8Array(r))
+    K.kginit(1)
+   })
 */
 
+  }
  })
 }
 

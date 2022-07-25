@@ -2,9 +2,14 @@ set -e
 set -x
 
 #cc=/c/local/LLVM/bin/clang
-ww="/c/local/wabt/wasm2wat --enable-bulk-memory"
+ww=/c/local/wabt/wasm2wat
 
-#$cc -DWASM -Wfatal-errors -Oz --target=wasm32 -mbulk-memory --no-standard-libraries -Wl,--export=__heap_base,--export=jinit,--export=jx,--export=jpr,--allow-undefined -Wl,--no-entry -o kg.wasm s9core.c kg.c
 make kg.wasm
 $ww kg.wasm > kg.wat
 
+
+## build s9.wasm (s9core test)
+
+#clang -Dwasm -DTEST -Wfatal-errors -Wno-builtin-requires-header -Oz --target=wasm32 -mbulk-memory --no-standard-libraries -Wl,-z,stack-size=131072 -Wl,--export=__heap_base,--export=main,--allow-undefined -Wl,--no-entry -o s9.wasm s9core.c wasm.c
+#-Wl,-z,stack-size=131072
+#$ww s9.wasm > s9.wat
