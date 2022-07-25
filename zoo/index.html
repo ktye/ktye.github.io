@@ -39,9 +39,9 @@
     <option value="k9"    >k9           (2021) 160k</option>
     <option value="k" selected="selected">ktye/k       (2022)  60k</option>
    </optgroup>
-   </optgroup>
+    <option value="files" >files</option>
   </select>
-  <a id="src" href="browse.html#k.json">src</a>
+  <a id="src"   href="browse.html#k.json">src</a>
   <div id="main">
    <div      class="left"  id="dec" ></div>
    <textarea class="right" id="tty" ></textarea>
@@ -67,6 +67,8 @@ import { k7     } from './k7.js'
 import { k9     } from './k9.js'
 import { k      } from './k.js'
 import { bqn    } from './bqn.js'
+import { fs     } from './fs.js' 
+import { files  } from './files.js'
 
 window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
 
@@ -83,18 +85,36 @@ sel.onchange=function(e){swtch(e.target.value)}
 
 
 tty.value = ""
-tty.onkeypress=function(e){
+let keypress=function(e){
  if(("Enter"==e.key)&&(0<tty.value.length)){pd(e);
   let v=tty.value; let i=v.lastIndexOf("\n");
   let s=((i<0)?v:v.slice(i)).trim()
   if(!s.length)return
   evl(s); tty.scrollTop=tty.scrollHeight;
 }}
+tty.onkeypress=keypress
 tty.focus()
 
 function out(s){tty.value+=s;
 	tty.scrollTop=tty.scrollHeight;
 }
+
+
+// drop file in console (store in variable)
+window.ondragover=function(e){pd(e)}
+window.ondrop=function(e){pd(e);console.log("drop!");if(e.dataTransfer.items){for(let i=0;i<e.dataTransfer.items.length;i++){if(e.dataTransfer.items[i].kind=='file'){let file=e.dataTransfer.items[i].getAsFile();addfile(file)}}}else for(let i=0;i<e.dataTransfer.files.length;i++)addfile(e.dataTransfer.files[i])}
+function addfile(x){
+ let r=new FileReader()
+ r.onload=function(){
+  let u=new Uint8Array(r.result)
+  //if(x.name.endsWith(".k")){ O("\\l "+x.name+"\n"); ktry(u) }
+  //else{ K.KA(K.Ks(x.name),K.KC(u)); O(x.name+": "+u.length+"\n ") }
+  fs.writefile(x.name,u)
+  if(tty.drop)tty.drop(x.name,u)
+ }
+ r.readAsArrayBuffer(x)
+}
+
 
 var evl
 
@@ -103,6 +123,9 @@ function swtch(s){
  dec.style.overflow="auto" //j90 hides it
  while(dec.firstChild)dec.removeChild(dec.lastChild)
  tty.value=""
+ tty.onchange=undefined    //files overwrites it
+ tty.onkeypress=keypress   //
+ tty.drop=undefined        //auto-exec
 
  let sys
  switch(s){
@@ -122,6 +145,7 @@ function swtch(s){
  case "k9":     sys=k9     ;break
  case "k":      sys=k      ;break
  case "bqn":    sys=bqn    ;break
+ case "files":  sys=files  ;break
  default:console.log("unknown system", s); sys=k
  }
  sys.ini(dec,out);evl=sys.evl
