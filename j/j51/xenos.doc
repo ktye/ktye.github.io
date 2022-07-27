@@ -1,0 +1,471 @@
+Copyright (c) 1989 1990, Roger K.W. Hui & K.E. Iverson
+Copyright (c) 1990-1992, Iverson Software Inc.
+All Rights Reserved.
+
+
+Roger Hui
+1992 7 13
+
+
+The !: Conjunction:
+
+The !: conjunction currently takes integer scalar left and right
+arguments, and derives verbs.  (One exception:  5!:0 is an adverb.)
+These verbs behave like other verbs; in particular, they have intrinsic
+ranks, may be assigned names, and may serve as arguments to adverbs and
+conjunctions.  Where these verbs take names as arguments (file names,
+WS names, or object names), the names are always boxed, and the verb
+rank is 0.
+
+As with all other verbs, verbs derived from !: requires one or two
+arguments.  Some verbs have no "natural" arguments, but an argument
+must nevertheless be supplied (and will be ignored in execution).
+For example,
+     6!:0 ''
+  1991 6 6 10 50 23
+
+NYA means not yet available.
+
+
+0!:0      Host System Command
+  The string argument is forwarded to the host system for
+  execution, and the result is returned as a string with
+  embedded new-lines.  For example: 0!:0 'dir *.exe'
+
+0!:1      Spawn
+  0!:1 forwards its string argument to the host system for execution,
+  like 0!:0, but the output (if any) is ignored.  For example, 0!:1 can
+  be used to invoke the vi editor on UNIX systems.
+
+0!:2     Script
+
+0!:3     Silent Script
+  Script and Silent Script accept a boxed input file name as right
+  argument and an optional boxed output file name as left argument.
+  A boxed empty string right argument means "standard input", i.e.
+  the keyboard.  The input file consists of lines of J sentences and
+  other input lines, and is known as a "script".  The output file is
+  suitable for subsequent use as a script.  Script differs from Silent
+  Script in that it outputs to the "standard output" (the screen) as
+  well as to any output file.  Examples:
+
+  (<'sesslog') 0!:2 <''
+    Input obtained from the keyboard; output appended to file
+    "sesslog" and to the screen.
+
+  0!:3 <'\jscripts\asdf'
+    Input from file "\jscripts\asdf"; no output.  Input reverts
+    to the keyboard at the end of "\jscripts\asdf".
+
+  (<'outf') 0!:3 <'disk:folder:subfolder:inf'
+    Input obtained from "disk:folder:subfolder:inf"; output
+    appended to "outf".
+
+  0!:2 <''
+    Default.
+
+  If there is a file named "profile.js" in the current directory,
+  J will automatically execute 0!:2<'profile.js' at the start
+  of a session.
+
+0!:55     Terminate Session
+  0!:55 derives a verb which, when executed, terminates the session.
+
+1!:0      Directory  NYA
+
+1!:1      File Read
+  The argument is a boxed file name; the result is a string
+  of the file contents.  For example, 1!:1 <'dir\subdir\file.ext'
+  The file name follows the conventions of the host system.
+  The argument may also be the integer 1, meaning read from
+  the keyboard.
+
+1!:2      File Write
+  xyz 1!:2 <':folder1:folder2:file'  writes string xyz to the
+  specified file.  The right argument may also be the integer 2,
+  meaning write to the screen.
+
+1!:3      File Append
+  string 1!:3 <'disk:folder1:folder2:file'
+
+1!:4      File Size
+  1!:4 'dir/file1';'file2';'phile3'
+
+1!:11     Indexed File Read
+  The argument is a 2-element list of boxes: a file name and
+  a 2-element integer list of the index and length.  For example,
+  1!:11 'test';5 20  reads 20 bytes from file "test", starting
+  from position 5.  The index may be negative (the last byte of
+  the file is index _1).  The length may be elided, whence the
+  file is read from the index to the end of the file.
+
+1!:12     Indexed File Write
+  The right argument is a 2-element list of boxes: a file name
+  and an integer index.  For example,  xyz 1!:12 'test';14
+  writes (string) xyz to file "test", starting at position 14.
+  The index may be negative (the last byte of the file is index _1).
+  The positions to be written must already exist in the file (and the
+  file must already exist).
+
+1!:55     File Erase
+  1!:55 <'careful'
+
+2!:0      WS Name Class
+  The integer result is the name class (see 4!:0) of the object
+  named in the boxed left argument, in the workspace named in
+  the boxed right argument.  In the following example, the
+  result of the last sentence is 2 3 4.
+    wsnc =. 2!:0
+    save =. 2!:2
+    noun =. i.3 4
+    adv  =. /
+    save <'wsname'
+    ('noun'; 'save'; 'adv') wsnc <'wsname'
+
+2!:1      WS Name List
+  The sorted list of all names in the workspace named in the
+  boxed right argument.
+
+2!:2      WS Save
+  Monad.  Save all global definitions into the workspace named
+  in the boxed right argument.  The workspace is created if it
+  does not already exist (and is overwritten if it already exists).
+
+  Dyad.  Save the global definition of the object named in the
+  boxed left argument into the workspace named in the boxed
+  right argument.  If the object already exists in the saved
+  workspace, it is overwritten; other objects in the saved
+  workspace are unaltered.  The workspace is created if
+  it does not already exist.
+
+  Workspaces are currently in WSIS format (see 5!:3), but may
+  use a different format in future J versions.  The workspace
+  name follows the file naming rules of the host system.
+  It'd be a good idea to devise your own naming convention to
+  distinguish workspaces from other files.
+
+2!:3      WS PSave   NYA
+  "Protective" Save:  like Save, but the monad does not modify
+  an existing workspace, and the dyad does not overwrite
+  objects already in the saved workspace.
+
+2!:4      WS Copy
+  Copy the object named in the boxed left argument from the
+  saved workspace named in the boxed right argument, and define
+  it as a global object.  If the left argument is elided, all
+  objects in the saved workspace are copied.
+
+  Like all verbs, Copy applies to the argument cells in random
+  order, so that if an object is copied from more than one
+  workspace, the definition of the object could be from any of
+  the workspaces.
+
+2!:5      WS PCopy
+  "Protective" Copy:  like Copy, but does not overwrite objects
+  already defined.
+
+2!:55     WS Erase
+  Erase the object named in the boxed left argument, from the
+  workspace named in the boxed right argument.
+
+3!:0      Internal Type
+  The internal "type" of a noun, where
+  1  boolean
+  2  literal
+  4  integer
+  8  floating point
+  16 complex
+  32 boxed
+
+3!:1      Convert to   Internal Representation
+  A string of the internal representation of a noun.  The result
+  is machine-dependent and may change in future J versions.
+
+3!:2      Convert from Internal Representation
+  Inverse of 3!:1, but nouns of type "boxed" will not be created.
+
+4!:0      Name Class
+  The argument is a boxed name; the result is its class:
+  _1 other
+  0  undefined, but valid name
+  1  (not used)
+  2  noun
+  3  verb
+  4  adverb
+  5  conjunction
+
+4!:1      Name List
+  The argument is a subset of the integers from 2 to 5 (see 4!:0).
+  The result is a list of boxed names belonging to the class(es)
+  specified in the argument.  The optional left argument are initial
+  letters of the names of interest.
+
+4!:55     Erase
+  The object named in the boxed argument is erased.
+
+5!:0      Fix
+  5!:0 is an adverb which defines an object from its atomic or string
+  representations.  For example,
+
+     fx =. 5!:0
+     ar =. 5!:1
+     ((ar <'a') fx) -: a =. i. 3 4
+  1
+     plus =. +
+     $$ ar <'plus'
+  0
+     2 ((ar <'plus') fx) 4 5
+  6 7
+
+  If the argument is a boxed list of boxes, it is assumed to be
+  an atomic representation (a result of 5!:1).
+
+  If the argument is a string, it is assumed to be a catenation
+  of string representations (results of 5!:3).  The objects are
+  defined, names embedded in the representation are assigned
+  as a side effect, and the result of 5!:0 is the last
+  represented object.
+
+5!:1      Atomic Representation
+  The argument is a boxed name; the result is a boxed list of
+  two boxes uniquely representing the named object:
+
+  noun:         id  value
+  verb:         id  operator arguments
+  adverb:       id  operator arguments
+  conjunction:  id  operator arguments
+
+  If an object is uniquely identified by the id alone (for example
+  "a." or "+" or "/."), then the second field is elided, and the
+  atomic representation is the id alone.
+
+  Gerunds (results of the ` conjunction) are arrays of atomic
+  representations.  5!:0 defines an object from its atomic
+  representation.  Atomic representations are sometimes called
+  "canonical" or "boxed" representations.
+
+5!:2      Display Representation
+  The argument is a boxed name; the result is the display representation
+  of the named object.  5!:0 defines an object from its display
+  representation.  (Different objects can have the same display
+  representation, so 5!:0 is only a partial inverse.)
+     f =. +/ . *
+     f
+  +-----+-+-+
+  |+-+-+|.|*|
+  ||+|/|| | |
+  |+-+-+| | |
+  +-----+-+-+
+     each =. &. >
+     (5!:2 <'f') -: (, each '+/') ; each '.*'
+  1
+
+5!:3      String Representation
+  The argument is a boxed name; the result is a string of the WSIS
+  (Workspace Interchange Standard) representation of the named object.
+  (See APL Quote-Quad, 1977 12; and SATN 22, IPSA.)  5!:0 defines an
+  object from its string representation.  The result of 5!:3 is a string,
+  the catenation of the following parts:
+
+  length    Digits representing the length of the string
+            representation (excluding the length itself).
+
+  type      One or two letters denoting the type of object
+              c   literal (character) array
+              n   numeric array
+              xb  boxed array
+              xv  verb
+              xa  adverb
+              xc  conjunction
+            The string representation of a verb, adverb, or
+            conjunction is the string representation of its
+            opened atomic representation (the open of the
+            result computed by 5!:0).
+
+  name      The name of the object, or "-" if anonymous.
+
+  blank     A single blank.
+
+  rank      Digits representing the rank.
+
+  blank     A single blank.
+
+  shape     Digits and blanks representing the shape.  Each number in
+            the shape is terminated by a blank.
+
+  elements  The ravelled elements.  For a character or numeric
+            array, this is the display form of the ravelled
+            array; for a boxed array (hence for a verb, adverb,
+            or conjunction), the elements themselves are
+            recursively string representations.  5!:3 is subject
+            to the fit conjunction &:, i.e. 5!:3&:d has d digits
+            in the computed display form.
+
+  With the possible exception of elements of literal arrays, the
+  string representation contains only ASCII characters in the
+  range 32 to 126 inclusive.
+
+5!:4      Tree Representation
+  The argument is a boxed name; the result is a literal table of the
+  tree representation of the named object.  Box drawing characters
+  (9!:6 and 9!:7) are used to draw the connecting lines in a tree.
+  For example,
+     nub =. (i.@# = i.~) # ]
+     5!:4 <'nub'
+                      +- i.
+                +- @ -+- #
+           +----+- =
+           |    +- ~ --- i.
+   - nub --+- #
+           +- ]
+
+5!:5      Linear Representation
+  The argument is a boxed name; the result is a string which,
+  when interpreted, produces the named object.  For example,
+     nub =. (i.@# = i.~) # ]
+     5!:5 <'nub'
+  (i.@# = i.~) # ]
+     $5!:5 <'nub'
+  16
+     a=.o.i.3 4
+     5!:5 <'a'
+  3.14159265358979323*i.3 4
+
+6!:0      Time-Stamp
+  The current time as a 6-element list: year, month, day, hour,
+  minute, and second (including any fraction thereof).
+
+6!:1      Time since session start
+
+6!:2      Time required
+  The string right argument is executed the number of times specified
+  by the left argument (default: 1).  The execution results are discarded.
+  The result of 6!:2 is the average number of seconds required for the
+  execution.  For example:
+     time=.6!:2
+     time '+/i.10000'         NB. time to execute once
+     10 time '+/i.10000'      NB. time to execute, averaged over 10 times
+
+6!:3      Delay
+  (6!:3) 60 [ 'sleep for a minute'
+
+7!:0      Space currently in use
+
+7!:1      Space used since session start
+
+7!:2      Space required to execute an expression
+
+8!:0      (PC only) Query CGA mode
+  (8!:0 ''){'non-CGA mode'; 'CGA mode'
+
+8!:1      (PC only) Set   CGA mode
+  (8!:1) 0 [ 'set non-CGA mode'
+  (8!:1) 1 [ 'set CGA mode'
+
+8!:4      (PC only) Query screen attributes
+
+8!:5      (PC only) Set   screen attributes
+  The argument is a 4 by 2 matrix of integer values between 0 to
+  15 inclusive.  Attribute values conform to DOS conventions.
+    .---------------------------.
+    | input area  | input area  |
+    | background  | foreground  |
+    |-------------+-------------|
+    | output area | output area |
+    | background  | foreground  |
+    |-------------+-------------|
+    | cursor bar  | cursor bar  |
+    | background  | foreground  |
+    |-------------+-------------|
+    | status line | status line |
+    | background  | foreground  |
+    |_____________|_____________|
+
+8!:7      (PC only) Refresh screen
+  Redisplay the contents of the screen.
+
+8!:9      (PC only) Edit
+  8!:9 y invokes the editor on y, a string with lines delimited
+  by linefeeds (10{a.). Press F1 to get meanings of function keys.
+
+8!:16     (Macintosh only) Query font attributes
+
+8!:17     (Macintosh only) Set   font attributes
+  Font attributes are a 3-element integer list of the font number,
+  style, and size.  "Style" is the sum of one or more of the following
+  integers, where
+    1  Bold
+    2  Italic
+    4  Underline
+    8  Outline
+  Font attributes can also be set by the font dialog box, invoked
+  by the "Font ..." item under the "Edit" menu.
+
+8!:19     (Macintosh only) Print screen
+
+9!:0      Query random link
+
+9!:1      Set   random link.  Default: 16807
+
+9!:2      Query display representation
+
+9!:3      Set   display representation
+  The argument is an integer vector of one or more representations
+  to be used for default output of verbs, adverbs, and conjunctions.
+    1  atomic (gerundial)
+    2  display
+    3  string
+    4  tree
+    5  linear
+
+  For example:
+     nub =. (i.@# = i.~) # ]
+     nub
+  +-------------------+-+-+
+  |+--------+-+------+|#|]|
+  ||+--+-+-+|=|+--+-+|| | |
+  |||i.|@|#|| ||i.|~||| | |
+  ||+--+-+-+| |+--+-+|| | |
+  |+--------+-+------+| | |
+  +-------------------+-+-+
+     9!:3 (5 4)
+     nub
+  (i.@# = i.~) # ]
+		    +- i.
+	      +- @ -+- #
+	  +---+- =
+          |   +- ~ --- i.
+  - nub --+- #
+          +- ]
+
+9!:4      Query prompt
+
+9!:5      Set   prompt.  Default: '   '
+
+9!:6      Query box drawing characters
+
+9!:7      Set   box drawing characters
+  The argument is an 11-element string of  nw,ts,ne, te,cr,tw,
+  sw,tn,se, ns,ew  (northwest corner, tee south, northeast
+  corner; tee east, etc.)  Defaults:
+
+  [PC    ]  218 194 191  195 197 180  192 193 217  179 196 { a.
+  [Others]  '+++++++++|-'
+
+9!:8      Query error messages
+
+9!:9      Set   error messages
+  For example: Replace English messages (default) with French ones.
+
+10!:k     Link to C function
+  For LinkJ, 10!:k invokes the function jc(k,f1,f2).  You must modify
+  jc() to assign values to f1 and f2 appropriate to k.  See the
+  documentation on LinkJ for details.
+
+128!:0    QR decomposition
+  The QR decomposition of a complex matrix in the domain of %. .
+  The result is an Hermitian matrix and a square upper triangular
+  matrix, individually boxed.
+
+128!:1    Invert a square upper triangular matrix
+
