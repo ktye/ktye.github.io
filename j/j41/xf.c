@@ -38,11 +38,6 @@ DF1(hostne){ASSERT(0,EVDOMAIN);}
 
 #else
 
-#ifdef WASM
-DF1(host  ){ASSERT(0,EVDOMAIN);}
-DF1(hostne){ASSERT(0,EVDOMAIN);}
-#else
-
 DF1(host){A t,z;C*fname,*s;FILE*f;I n;
  PREF1(host);
  ASSERT(CHAR&AT(w),EVDOMAIN);
@@ -77,7 +72,6 @@ DF1(hostne){C*s;
  R mtv;
 }
 
-#endif
 #endif
 
 
@@ -182,9 +176,7 @@ A rd(f,j,n)FILE*f;I j,n;{A z;C*x;I p=0;size_t q=1;
  GA(z,CHAR,n,1,0); x=(C*)AV(z);
  if(0<=j)fseek(f,j,SEEK_SET);
  while(q&&n>p)p+=q=fread(p+x,sizeof(C),(size_t)(n-p),f);
-#ifndef WASM
  ASSERT(!ferror(f),EVFACE);
-#endif
  R z;
 }
 
@@ -193,8 +185,6 @@ A wa(f,j,w)FILE*f;I j;A w;{C*x;I n,p=0;size_t q=1;
  n=AN(w); x=(C*)AV(w);
  if(0<=j)fseek(f,j,SEEK_SET);
  while(q&&n>p)p+=q=fwrite(p+x,sizeof(C),(size_t)(n-p),f);
-#ifndef WASM
  ASSERT(!ferror(f),EVFACE);
-#endif
  R mtv;
 } /* Write or append string w to file f */

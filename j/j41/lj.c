@@ -13,9 +13,6 @@
 
 #include "lj.h"
 
-
-#if LINKJ
-
 #define MARK    8192L
 #define RPAR    2048L
 
@@ -38,15 +35,7 @@ extern I        ttop;
 static I old;
 
 
-#ifdef WASM
-C jinit(){
- C c=jinit2(0,0L); old=tbase+ttop;
- fputs("J 4.2   Copyright (c) 1990-1992, Iverson Software Inc.  All Rights Reserved.\n\n",1);
- R c;
-}
-#else
 C jinit(){C c=jinit2(0,0L); old=tbase+ttop; R c;}
-#endif
 
 A jx(s)C*s;{A t,*x;
  jerr=0; maxbytes=bytes;
@@ -61,6 +50,3 @@ A jma(t,n,r)I t,n,r;{R ga(t,n,r,0L);}
 C jfr(x)A x;{R fa(x)?1:0;}
 
 A jset(name,x)C*name;A x;{R symbis(onm(cstr(name)),x,global);}
-
-#endif
-

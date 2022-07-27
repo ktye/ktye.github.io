@@ -14,98 +14,62 @@
 #include "j.h"
 #include "io.h"
 
-#if (SYS & SYS_PC)
-#include <dos.h>
-static int cbrk;
-#endif
+static C          inbuf[2+NINPUT];
 
-
-static C inbuf[2+NINPUT];
-I        jbrk=0;
-
-
-F1(joff){
-#if (SYS & SYS_PC)
- setcbrk(cbrk);
-#endif
- if(outfile&&outfile!=stdout)fclose(outfile); sesmexit(); exit(0);
-}
+F1(joff){if(outfile&&outfile!=stdout)fclose(outfile); sesmexit(); exit(0);}
 
 void jouts(s)C*s;{if(outfile)fputc(COUT,outfile); jputs(s);}
-
-#ifndef WASM
-static void sigint(k)int k;{++jbrk; signal(SIGINT,sigint);}
-#endif
 
 
 /* --------------------- Special Session Manager ------------------------- */
 
 #if (!LINKJ && SYS & SYS_SESM)
 
-#define CINPRUPT "o\010u\010t"
-
-#if (SYS & SYS_PC386)
-C breaker(){if(sesm)jstpoll(); if(jbrk){jbrk=0; jsignal(EVBREAK);} R!jerr;}
-#else
-C breaker(){if(sesm)jstkiav(); if(jbrk){jbrk=0; jsignal(EVBREAK);} R!jerr;}
-#endif
+C breaker(){if(sesm)jstkiav(); R!jerr;}
 
 A jgets(){C c,*s=inbuf;I k=0,n;
- if(infile==stdin){if(sesm)jsti((SI)NINPUT,s); else RZ(fgets(s,NINPUT,stdin));}
+ if(infile==stdin){if(sesm)jsti(NINPUT,s); else RZ(fgets(s,NINPUT,stdin));}
  else{do RZ(fgets(s,NINPUT,infile))while(COUT==*s); k=strspn(s," ");}
- jbrk=0;
- n=strlen(s); if(n&&(c=*(s+n-1),CLF==c||CCR==c)){--n; *(s+n)=0;}
+ n=strlen(s); if(c=*(s+n-1),CLF==c||CCR==c){--n; *(s+n)=0;}
  if(infile!=stdin){jputs(k+s); jputc(CNL);}
  else if(outfile){fputs(k+s,outfile); fputc(CNL,outfile);}
- ASSERT(5!=n||memcmp(s,CINPRUPT,n),EVINPRUPT);
- if(n&&CCTRLD==*(s+n-1))joff(zero);
+ if(CCTRLD==*(s+n-1))joff();
  R str(n,s);
 }
 
 void jputc(c)C c;{
- if(tostdout){if(sesm)jsto((SI)MTYOUT,(SI)1,&c); else fputc(c,stdout);}
+ if(tostdout){if(sesm)jsto(MTYOUT,1,&c); else fputc(c,stdout);}
  if(outfile)fputc(c,outfile);
 }
 
 void jputs(s)C*s;{
- if(tostdout){if(sesm)jsto((SI)MTYOUT,(SI)strlen(s),s); else fputs(s,stdout);}
+ if(tostdout){if(sesm)jsto(MTYOUT,(int)strlen(s),s); else fputs(s,stdout);}
  if(outfile)fputs(s,outfile);
 }
 
 void prompt(s)C*s;{
- if(tostdout){if(sesm)jsto((SI)MTYOIN,(SI)strlen(s),s); else fputs(s,stdout);}
+ if(tostdout){if(sesm)jsto(MTYOIN,(int)strlen(s),s); else fputs(s,stdout);}
  if(outfile)fputs(s,outfile);
 }
 
 void sesmexit(){if(sesm)jststop();}
 
 C sesminit(){
- if(sesm){A t;I j,mask=0xfffffff0L;
-  struct{Ptr vlog;SI nlog;Ptr vinb;SI ninb;Ptr vfkd;SI nfkd;Ptr vedb;SI nedb;}in;
-#if (SYS & SYS_PC+SYS_PC386)
+ if(sesm){A t;I j,mask=0xfffffff0L;struct{I*vlog;S nlog;I*vinb;S ninb;I*vfkd;S nfkd;}in;
+#if (SYS & SYS_PCAT)
   /* The 15+ and &0xfffffff0 are because addresses must be segment aligned */
-  GA(t,CHAR,15+NLOG,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vlog=(Ptr)j; in.nlog=NLOG;
-  GA(t,CHAR,15+NINB,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vinb=(Ptr)j; in.ninb=NINB;
-  GA(t,CHAR,15+NFKD,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vfkd=(Ptr)j; in.nfkd=NFKD;
-  GA(t,CHAR,15+NEDB,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vedb=(Ptr)j; in.nedb=NEDB;
-  edbuf=in.vedb;
+  GA(t,CHAR,15+NLOG,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vlog=(I*)j; in.nlog=NLOG;
+  GA(t,CHAR,15+NINB,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vinb=(I*)j; in.ninb=NINB;
+  GA(t,CHAR,15+NFKD,1,0); j=(I)(15+(C*)AV(t)); j&=mask; in.vfkd=(I*)j; in.nfkd=NFKD;
 #endif
   jstinit((Ptr)&in);
  }
-#if (SYS & SYS_PC386)
- else jstsbrk();
-#else
- signal(SIGINT,sigint);
-#endif
-#if (SYS & SYS_PC)
- cbrk=getcbrk(); setcbrk(1);
-#endif
  R 1;
 }
 
 C*wr(n,v)I n;C*v;{I k=0,m;
  if(tostdout){
-  if(sesm)while(n>k&&!jerr){m=MIN(3000,n-k); jsto((SI)MTYOUT,(SI)m,v+k); k+=m;}
+  if(sesm)while(n>k&&!jerr){m=MIN(3000,n-k); jsto(MTYOUT,(int)m,v+k); k+=m;}
   else    while(n>k&&!jerr)k+=fwrite(v+k,sizeof(C),(size_t)(n-k),stdout);
  }
  if(outfile){
@@ -125,11 +89,10 @@ C breaker(){R!jerr;}
 A jgets(){C*s=inbuf;I k=0,n;
  if(infile==stdin)RZ(fgets(s,NINPUT,stdin))
  else{do RZ(fgets(s,NINPUT,infile))while(COUT==*s); k=strspn(s," ");}
- jbrk=0;
- n=strlen(s); if(n&&CNL==*(s+n-1)){--n; *(s+n)=0;}
+ n=strlen(s); if(CNL==*(s+n-1)){--n; *(s+n)=0;}
  if(infile!=stdin){jputs(k+s); jputc(CNL);}
  else if(outfile){fputs(k+s,outfile); fputc(CNL,outfile);}
- if(n&&CCTRLD==*(s+n-1))joff(zero);
+ if(CCTRLD==*(s+n-1))joff();
  R str(n,s);
 }
 
@@ -141,11 +104,7 @@ void prompt(s)C*s;{jputs(s);}
 
 void sesmexit(){}
 
-#ifdef WASM
 C sesminit(){R 1;}
-#else
-C sesminit(){signal(SIGINT,sigint); R 1;}
-#endif
 
 C*wr(n,v)I n;C*v;{I k=0;
  if(tostdout)while(n>k&&!jerr)k+=fwrite(v+k,sizeof(C),(size_t)(n-k),stdout);

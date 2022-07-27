@@ -12,8 +12,6 @@
 /* LinkJ:  Declarations and Definitions                                    */
 
 
-#define LINKJ 1
-
 typedef char B;
 typedef char C;
 typedef long I;
@@ -44,27 +42,26 @@ typedef A(*AF)();
 
  /* Event Codes */
 
-#define EVBREAK         1
-#define EVDEFN          2
-#define EVDOMAIN        3
-#define EVILNAME        4
-#define EVILNUM         5
-#define EVINDEX         6
-#define EVFACE          7
-#define EVINPRUPT       8
-#define EVLENGTH        9
-#define EVLIMIT         10
-#define EVNONCE         11
-#define EVNOTASGN       12
-#define EVOPENQ         13
-#define EVRANK          14
-#define EVSPELL         15
-#define EVSYNTAX        16
-#define EVSYSTEM        17
-#define EVVALUE         18
-#define EVWSFULL        19
+#define EVBREAK         1       /* break                                   */
+#define EVDEFN          2       /* defn error                              */
+#define EVDOMAIN        3       /* domain error                            */
+#define EVILNAME        4       /* ill-formed name                         */
+#define EVILNUM         5       /* ill-formed number                       */
+#define EVINDEX         6       /* index error                             */
+#define EVFACE          7       /* interface error                         */
+#define EVLENGTH        8       /* length error                            */
+#define EVLIMIT         9       /* limit error                             */
+#define EVNONCE         10      /* nonce error                             */
+#define EVNOTASGN       11      /* not reassignable                        */
+#define EVOPENQ         12      /* open quote                              */
+#define EVRANK          13      /* rank error                              */
+#define EVSPELL         14      /* spelling error                          */
+#define EVSYNTAX        15      /* syntax error                            */
+#define EVSYSTEM        16      /* system error                            */
+#define EVVALUE         17      /* value error                             */
+#define EVWSFULL        18      /* ws full                                 */
 
-#define NEVM            19      /* number of event codes                   */
+#define NEVM            18      /* number of event codes                   */
 
 
  /* Useful Definitions */
@@ -88,4 +85,3 @@ extern A jma();                 /* A jma(I,I,I);                           */
 extern A jpr();                 /* A jpr(A);                               */
 extern A jset();                /* A jset(C*,A);                           */
 extern A jx();                  /* A jx(C*);                               */
-

@@ -76,7 +76,7 @@ static C appf1(act,w)C act;A w;{A t;C*s;fileParam f;
   f.ioVRefNum=jstf->vol;
   f.ioFDirIndex=0;
   if('WKSP'==jstf->type){JSPR("\rws %s saved 1991-xx-xx xx:xx:xx\r",s); copy1(w);}
-  else{JSPR("\rscript %s saved 1991-xx-xx xx:xx:xx\r",s); script1(w,0L);}
+  else{JSPR("\rscript %s saved 1991-xx-xx xx:xx:xx\r",s); script1(w);}
 }}
 
 B appf(){C a;
@@ -101,15 +101,10 @@ B appf(){C a;
 
 #else
 
-#ifdef WASM
-static C appf1(act,w)C act;A w;{R 0;}
-B appf(){R 0;}
-#else
-
 static C appf1(act,w)C act;A w;{
  RZ(w);
  if(act==JFSAVE)save1(w);
- else if(act==JFOPEN)'W'==jstf->type ? copy1(w) : script1(w,0L);
+ else if(act==JFOPEN)'W'==jstf->type ? copy1(w) : script1(w);
 }
 
 B appf(){C a;
@@ -123,6 +118,5 @@ B appf(){C a;
  }
  R a;
 }
-#endif
 
 #endif

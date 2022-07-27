@@ -76,24 +76,53 @@ F1(words){A t,*x,z;C*s;I k,n,*y;
 }
 
 
-static D num(q,s)I q;C*s;{C c,*t;D z;
- if('-'==*s&&3>q){if(1==q)R inf; c=*(1+s); if(c=='-')R-inf; if(c=='.')R naN;}
- z=strtod(s,&t); ASSERT(q&&t==q+s,EVILNUM); R z;
+#if (SYS & SYS_AMIGA)
+
+static C*ndig(s)C*s;{while(*s&&C9==ctype[(UC)*s])++s; R s;}
+
+D strtod(s,p)C*s,**p;{C*t,*u,*v=s;
+ while(' '==*v)++v;
+ u=v+('-'==*v); t=ndig(u);
+ if(u!=t){t=ndig(t+('.'==*t)); if('e'==*t){++t; t+='-'==*t; t=ndig(u=t);}}
+ *p=u==t?s:t;
+ R atof(v);
 }
 
-A connum(n,s)I n;C*s;{PROLOG;A y,z;B b,p=1;C c,*t;D*u;I i,j=0,k,m=0,q,*x;Z*v;
- RZ(y=str(n,s)); s=t=(C*)AV(y);
- GA(y,INT,1+n,1,0); x=AV(y);
- DO(n, c=*t; *t++=c=CSIGN==c?'-':c==CTAB?' ':c; b=' '==c; if(p!=b)x[j++]=i; p=b;);
- if(j%2)x[j++]=n; m=j/2; b=!memchr(s,'j',n);
+#endif
+
+static C*coninf(s,t,v)C*s,*t;D*v;{C c,d;
+ while(' '==*s)++s;
+ ASSERT('-'==*s,EVILNUM);
+ c=*++s; if(' '==c||s==t){*v=inf; R s;}
+ d=*++s; if((' '==d||s==t)&&('-'==c||'.'==c)){*v='-'==c?-inf:nan; R s;}
+ ASSERT(0,EVILNUM);
+}
+
+A connum(n,s)I n;C*s;{PROLOG;A y,z;B b,p=1;C*ss,*t;D*u;I i,m=0;Z*v;
+ RZ(y=str(n,s)); s=t=(C*)AV(y); ss=n+s;
+ DO(n, if(CSIGN==*t)*t='-'; else if(CTAB==*t)*t=' '; b=' '==*t; m+=p>b; p=b; ++t;);
+ b=!memchr(s,'j',n);
  GA(z,b?FL:CMPX,m,1!=m,0); u=(D*)AV(z); v=(Z*)AV(z);
- if(b)DO(m, j=i+i; k=x[j]; RE(*u++=num(x[j+1]-k,k+s));)
- else for(i=0;i<m;++i){
-  j=i+i; k=x[j]; q=x[j+1]-k; t=memchr(k+s,'j',q);
-  RE(v->re=num(t?t-(k+s):q,k+s));
-  if(t)RE(v->im=num(q+k+s-(1+t),1+t)) else v->im=0;
-  ++v;
- }
+#if (SYS & SYS_NEXT)
+ if(b)DO(m, while(' '==*s)++s; *u++=strtod(t=s,&s); if(t==s)RZ(s=coninf(s,ss,u-1));)
+ else
+  for(i=0;i<m;++i){
+   while(' '==*s)++s;
+   v->im=0;    v->re=strtod(t=  s,&s); if(t==s)RZ(s=coninf(s,ss,&v->re));
+   while(t<s&&'j'!=*t)++t; s=t;
+   if('j'==*s){v->im=strtod(t=++s,&s); ASSERT(t!=s,EVILNUM);}
+   ++v;
+  }
+#else
+ if(b)DO(m, *u++=strtod(t=s,&s); if(t==s)RZ(s=coninf(s,ss,u-1));)
+ else
+  for(i=0;i<m;++i){
+   v->im=0;    v->re=strtod(t=  s,&s); if(t==s)RZ(s=coninf(s,ss,&v->re));
+   if('j'==*s){v->im=strtod(t=++s,&s); ASSERT(t!=s,EVILNUM);}
+   ++v;
+  }
+#endif
+ ASSERT(' '==*s||s==ss,EVILNUM);
  z=xcvt(z); EPILOG(z);
 }
 

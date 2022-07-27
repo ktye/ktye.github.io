@@ -13,7 +13,7 @@
 
 #include "j.h"
 
-#if (SYS & SYS_PC)
+#if (SYS & SYS_PCAT)
 #include <alloc.h>
 #define FREE            farfree
 #define MALLOC          (A)farmalloc
@@ -36,7 +36,7 @@ static F1(fr){
 }
 
 static A ma(m)I m;{A z;
-#if (SYS & SYS_PC)
+#if (SYS & SYS_PCAT)
  ASSERT(m<=NMEM,EVLIMIT);
 #endif
  z=MALLOC(m);

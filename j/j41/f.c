@@ -13,7 +13,7 @@
 
 #include "j.h"
 
-#if (SYS & SYS_PC386+SYS_386IX)
+#if (SYS & SYS_386IX)
 #define CPINF           'i'             /* printf result of _  */
 #define CPNAN           'n'             /* printf result of _. */
 #else
@@ -137,6 +137,7 @@ static F1(thbox){PROLOG;A z;
  EPILOG(z);
 }
 
+
 F1(thorn1){
  RZ(w);
  if(!AN(w)){A z;C b=BOX==AT(w);I r=MAX(2*b,AR(w));
@@ -189,7 +190,7 @@ static void c2j(wd,s,x)I wd;C*s,*x;{B b;C c,*q=s,*t=s;I k=0,m;
 static I pstr(p,e)C*p;D e;{D x,y;S d,w;
  w=x=fabs(0.1*tfloor(10*e));
  if(0<=e)sprintf(p, w?"%%%1.1ff":" %%%1.1ff", x);
- else{y=10*(x-w); d=tfloor(y)+!!(SYS&SYS_PC); sprintf(p," %%- %d.%de",w-1,d);}
+ else{y=10*(x-w); d=tfloor(y)+!!(SYS&SYS_PCAT); sprintf(p," %%- %d.%de",w-1,d);}
  R w;
 }
 

@@ -15,7 +15,7 @@
 #include "p.h"
 #include "a.h"
 
-#if (SYS & SYS_PC)
+#if (SYS & SYS_PCAT)
 #define NDEPTH          512
 #endif
 #ifndef NDEPTH

@@ -28,23 +28,15 @@ extern JF              *jstf;
 #define NLOG            16348           /* size of session log             */
 #define NINB            224             /* size of type-ahead buffer       */
 #define NFKD            5               /* size of fn key defn buffer      */
-#define NEDB            12000           /* size of edit buffer             */
 
-#if (SYS & SYS_PC+SYS_PC386)
-extern C*               edbuf;
+#if (SYS & SYS_PCAT)
+extern S                jstedit(S,S,C*);
 #endif
 
-#if (SYS & SYS_PC386)
-extern void             jstpoll(void);
-extern void             jstsbrk(void);  /* break handling for j /s         */
-#else
-extern void             jstkiav(void);
-#endif
-
-extern I                jbrk;           /* needed by session manager       */
-extern void             jsti(SI,C*);
+extern void             jsti(S,C*);
 extern void             jstinit(Ptr);
-extern void             jsto(SI,SI,C*);
+extern void             jstkiav(void);
+extern void             jsto(S,S,C*);
 extern void             jststop(void);
 
 #endif
@@ -59,9 +51,9 @@ extern void             jststop(void);
 /*  nlog: length of session log;       vlog: session log space             */
 /*  ninb: length of typeahead buffer;  vinb: typeahead buffer              */
 /*  nfkd: length of fnkey defn buffer; vfkd: fnkey defn buffer             */
-/* jstpoll(void)                                                           */
+/* jstkiav(void)                                                           */
 /*  "Keyboard input available?"; invoked by j periodically to pass control */
-/*  to sesm.                                                               */
+/*  to sesm (e.g. to implement typeahead).                                 */
 /* jsto(S code, S n, C*s)                                                  */
 /*  Output string s, length n.  code is MTYOUT (more output to follow) or  */
 /*  MTYOIN (last line of output, i.e. output is prompt)                    */

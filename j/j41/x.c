@@ -61,14 +61,6 @@ static DF1(srx){PREF1(srx); ASSERT(BOX&AT(w),EVDOMAIN); R srep(ope(w),symbrd(onm
 
 static DF1(trx){PREF1(trx); ASSERT(BOX&AT(w),EVDOMAIN); R trep(ope(w),symbrd(onm(w)));}
 
-#ifdef WASM
-static DF1(ts){A z;I*x;
- RZ(w);
- GA(z,INT,6,1,0); x=AV(z);
- jstime(x);
- R z;
-}
-#else
 static DF1(ts){A z;I*x;struct tm*t;time_t now;
  RZ(w);
  time(&now); t=localtime(&now);
@@ -81,7 +73,6 @@ static DF1(ts){A z;I*x;struct tm*t;time_t now;
  x[5]=t->tm_sec;
  R z;
 }
-#endif
 
 static DF1(tss){R scf(CLOCK-tssbase);}
 
@@ -109,7 +100,7 @@ static DF1(spit){I k;
 }
 
 
-#if (!LINKJ && SYS_SESM && SYS & SYS_PC+SYS_PC386)
+#if (!LINKJ && SYS_SESM && SYS & SYS_PCAT)
 
 static int      cgav;
 extern I        jstratts();
@@ -117,10 +108,9 @@ extern void     jstref();
 extern void     jstsatts();
 extern void     jstslow();
 
-static DF1(cgaq){ASSERT(sesm,EVDOMAIN); R sc((I)cgav);}
+static DF1(cgaq){R sc((I)cgav);}
 
 static DF1(cgas){
- ASSERT(sesm,EVDOMAIN);
  ASSERT(!AR(w),EVRANK);
  RZ(w=cvt(BOOL,w));
  jstslow(cgav=*(B*)AV(w));
@@ -129,7 +119,6 @@ static DF1(cgas){
 
 static DF1(colorq){A z;I k,*s,*x;UC t[4];
  RZ(w);
- ASSERT(sesm,EVDOMAIN);
  GA(z,INT,8,2,0); s=AS(z); *s=4; *++s=2;
  x=AV(z);
  k=jstratts(); memcpy(t,&k,4L); DO(4, *x++=t[i]/16; *x++=t[i]%16;);
@@ -137,43 +126,19 @@ static DF1(colorq){A z;I k,*s,*x;UC t[4];
 }
 
 static DF1(colors){I*x;UC c,t[4],*tv;
- ASSERT(sesm,EVDOMAIN);
  RZ(w=vi(w));
  ASSERT(2==AR(w),EVRANK);
  ASSERT(8==AN(w)&&4==*AS(w),EVLENGTH);
  x=AV(w);
  DO(8, ASSERT(0<=x[i]&&x[i]<16,EVDOMAIN););
- tv=t; DO(4, c=16**x++; c+=*x++; *tv++=c;); jstsatts(*(unsigned long*)t);
+ tv=t; DO(4, c=16**x++; c+=*x++; *tv++=c;); jstsatts(*(U I*)t);
  R mtv;
 }
 
-static DF1(refresh){ASSERT(sesm,EVDOMAIN); jstref(); R mtv;}
-
-
-#if (SYS & SYS_PC386)
-
-extern SI       jstedit(SI);
-
-static DF1(edit){PROLOG;A z;I k,n;
- RZ(w);
- ASSERT(sesm,EVDOMAIN);
- ASSERT(1>=AR(w),EVRANK);
- n=AN(w);
- ASSERT(!n||CHAR&AT(w),EVDOMAIN);
- ASSERT(n<=NEDB,EVLIMIT);
- memcpy(edbuf,AV(w),n);
- k=jstedit((SI)n);
- z=0>k?ca(w):str(k,edbuf);
- EPILOG(z);
-}
-
-#else
-
-extern SI       jstedit(SI,SI,C*);
+static DF1(refresh){jstref(); R mtv;}
 
 static DF1(edit){PROLOG;A t,z;C*s;I k,m,n;
  RZ(w);
- ASSERT(sesm,EVDOMAIN);
  ASSERT(1>=AR(w),EVRANK);
  n=AN(w);
  ASSERT(!n||CHAR&AT(w),EVDOMAIN);
@@ -186,7 +151,6 @@ static DF1(edit){PROLOG;A t,z;C*s;I k,m,n;
  EPILOG(z);
 }
 
-#endif
 #endif
 
 
@@ -259,9 +223,6 @@ static DF1(evms){A t,*y;
 C jc(k,f1,f2)I k;AF*f1,*f2;{R 0;}
 #endif
 
-#ifdef WASM
-F2(foreign){ASSERT(0,EVDOMAIN);}
-#else
 
 F2(foreign){I p,q;
  p=i0(a); q=i0(w);
@@ -304,7 +265,7 @@ F2(foreign){I p,q;
   case XC(7,0):   R CDERIV(CIBEAM, sp,      0L,       RMAXL,0L,   0L   );
   case XC(7,1):   R CDERIV(CIBEAM, sps,     0L,       RMAXL,0L,   0L   );
   case XC(7,2):   R CDERIV(CIBEAM, spit,    0L,       1L,   0L,   0L   );
-#if (!LINKJ && SYS_SESM && SYS & SYS_PC+SYS_PC386)
+#if (!LINKJ && SYS_SESM && SYS & SYS_PCAT)
   case XC(8,0):   R CDERIV(CIBEAM, cgaq,    0L,       RMAXL,0L,   0L   );
   case XC(8,1):   R CDERIV(CIBEAM, cgas,    0L,       RMAXL,0L,   0L   );
   case XC(8,4):   R CDERIV(CIBEAM, colorq,  0L,       RMAXL,0L,   0L   );
@@ -334,4 +295,3 @@ F2(foreign){I p,q;
  }
  ASSERT(0,EVDOMAIN);
 }
-#endif /* !WASM */

@@ -175,7 +175,7 @@ extern I        mr();
 extern A        mtv;
 extern void     mv();
 extern void     mv1();
-extern D        naN;            /* ktye: conflict with newer c */
+extern D        nan;
 extern A        nand();
 extern I        nc();
 extern A        ncx();
@@ -327,7 +327,5 @@ extern A        zero2();
 extern Z        zeroZ;
 
 #if (SYS & SYS_ATARIST+SYS_ATT3B1)
-#ifndef WASM
 extern int      memcmp();       /* C library fn                            */
-#endif
 #endif

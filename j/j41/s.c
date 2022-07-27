@@ -65,7 +65,7 @@ static F1(stdnm){C c,*s;I j,n,p,q;
 DF1(ex){A y;B b;
  PREF1(ex);
  ASSERT(BOX&AT(w),EVDOMAIN);
- RZ(y=stdnm(*(A*)AV(w)));
+ RZ(y=stdnm(*AV(w)));
  b=CESC2==lc(y);
  R !vnm(AN(y),AV(y)) ? zero : b ? (sex(y,global,b)?zero:one) :
    (local&&sex(y,local,b)||sex(y,global,b),one);

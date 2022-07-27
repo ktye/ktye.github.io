@@ -34,7 +34,7 @@
 #include "a.h"
 #include "x.h"
 
-#if (SYS & SYS_PC)
+#if (SYS & SYS_PCAT)
 #define NXIL            8000
 #else
 #define NXIL            32000
@@ -53,11 +53,7 @@ static A wq;
 static I wptr[4];
 static C wpfx[1+NWPFX] = "9pwsis 0 09n- 0 1   ";
 
-#ifdef WASM
-static F1(gnl){A loc=local,z; local=0; z=nl1(apv(4L,2L,1L),0); local=loc; R z;} /* ktye: nl1: type mismatch */
-#else
 static F1(gnl){A loc=local,z; local=0; z=nl1(apv(4L,2L,1L)); local=loc; R z;}
-#endif
 
 static F1(xil){I c,i,j=0,k,m,n,*v;
  RZ(w=grade2(w,w));

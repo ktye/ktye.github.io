@@ -34,26 +34,21 @@ typedef struct {AF f1,f2;A f,g,h;I mr,lr,rr;C id;} V;  /* verb value layout   */
 typedef void* Ptr;
 #endif
 
-#if (SYS & SYS_PC+SYS_MACINTOSH)        /* for use by the session manager  */
-typedef S SI;
-#else
-typedef I SI;
-#endif
 
-/* Layout of type A                                                        */
-/*                                                                         */
-/* t      Type.  One of the defined constants below.                       */
-/* c      Reference count.                                                 */
-/* n      Number of elements in the ravel of the array.                    */
-/* r      Rank.                                                            */
-/* AS(s)  Pointer to the first element of shape vector.                    */
-/* AV(a)  Pointer to the first array element.                              */
+ /* Layout of type A                                                    */
+ /*                                                                     */
+ /* t      Type.  One of the defined constants below.                   */
+ /* c      Reference count.                                             */
+ /* n      Number of elements in the ravel of the array.                */
+ /* r      Rank.                                                        */
+ /* s      Pointer to the first element of shape vector.                */
+ /* AV(a)  Pointer to the first array element.                          */
 
 #define AT(a)           ((a)->t)
 #define AC(a)           ((a)->c)
 #define AN(a)           ((a)->n)
 #define AR(a)           ((a)->r)
-#define AH              4L              /* # header words in A             */
+#define AH              4L              /* # header words in A          */
 #define AS(a)           ((a)->s)
 #define AV(a)           ((I*)(a)+AH+AR(a))  /* (AH+AR(a)+(I*)(a)) bombs SGI */
 #define VAV(f)          ((V*)AV(f))

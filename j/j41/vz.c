@@ -113,9 +113,11 @@ static D jtan2(y,x)D x,y;{R !y ? (0<=x?0.0:PI) : !x ? (0<=y?PI/2:-PI/2) : atan2(
 ZS1(zlog, if(ZEZ(v))zr=-inf; else{zr=log(hypoth(a,b)); zi=jtan2(b,a);})
 
 #else
-ZS1(zlog, zr=b?log(hypoth(a,b)):a==inf||a==-inf?inf:a?log(hypoth(a,b)):-inf;
-    zi=a||b?atan2(b,a):0;)
+
+ZS1(zlog, if(ZEZ(v))zr=-inf; else{zr=log(hypoth(a,b)); zi=atan2(b?b:0,a?a:0);})
+
 #endif
+
 
 ZF2(zpow){ZF2DECL;
  if(!(a||b||d)){z.re=0>c?inf:!c; z.im=0; R z;}
@@ -135,20 +137,12 @@ ZF1(zsqrt){D p,q,t;
 }
 
 
-/* See Abramowitz & Stegun, Handbook of Mathematical Functions,            */
-/*   National Bureau of Standards, 1964 6.                                 */
+/* See Abramowitz & Stegun, Handbook of Mathematical Functions,             */
+/*   National Bureau of Standards, 1964 6.                                  */
 
-static ZF1(zsin){ZF1DECL;
- zr=(a==inf||a==-inf?0:sin(a))*(b==inf||b==-inf?inf       :cosh(b));
- zi=(a==inf||a==-inf?0:cos(a))*(b==inf||b==-inf?inf*SGN(b):sinh(b));
- ZEPILOG;
-}  /* 4.3.55 */
+static ZS1(zsin, zr=sin(a)*cosh(b); zi= cos(a)*sinh(b);) /* 4.3.55 */
 
-static ZF1(zcos){ZF1DECL;
- zr= (a==inf||a==-inf?0:cos(a))*(b==inf||b==-inf?inf       :cosh(b));
- zi=-(a==inf||a==-inf?0:sin(a))*(b==inf||b==-inf?inf*SGN(b):sinh(b));
- ZEPILOG;
-}  /* 4.3.56 */
+static ZS1(zcos, zr=cos(a)*cosh(b); zi=-sin(a)*sinh(b);) /* 4.3.56 */
 
 static ZF1(ztan){R zdiv(zsin(v),zcos(v));}
 
@@ -156,21 +150,17 @@ static ZF1(zp4){R zsqrt(ztymes(zplus(v,zj),zminus(v,zj)));}
 
 static ZF1(zm4){R ztymes(zplus(v,z1),zsqrt(zdiv(zminus(v,z1),zplus(v,z1))));}
 
-static ZF1(zsinh){R ztymes(zmj,zsin(ztymes(zj,v)));}  /* 4.5.7 */
+static ZF1(zsinh){R ztymes(zmj,zsin(ztymes(zj,v)));}     /* 4.5.7  */
 
-static ZF1(zcosh){R zcos(ztymes(zj,v));}              /* 4.5.8 */
+static ZF1(zcosh){R zcos(ztymes(zj,v));}                 /* 4.5.8  */
 
-static ZF1(ztanh){R zdiv(zsinh(v),zcosh(v));}
+static ZF1(ztanh){R ztymes(zmj,ztan(ztymes(zj,v)));}     /* 4.5.9  */
 
 static ZF1(zp8){R zsqrt(ztymes(zplus(zj,v),zminus(zj,v)));}
 
 static ZF1(zasinh){if(0>v.re)R znegate(zasinh(znegate(v))); R zlog(zplus(v,zp4(v)));}
 
-static ZF1(zacosh){Z z;
- z=zlog(zplus(v,zm4(v)));
- if(0>=z.re){z.re=0; z.im=ABS(z.im);}
- R z;
-}
+static ZF1(zacosh){Z z=zlog(zplus(v,zm4(v))); if(0>=z.re){z.re=0; z.im=ABS(z.im);} R z;}
 
 static ZF1(zatanh){Z z05;
  z05.re=0.5; z05.im=0;
@@ -185,7 +175,7 @@ static ZF1(zatan){R ztymes(zmj,zatanh(ztymes(zj,v)));}   /* 4.4.22 */
 
 static ZF1(zarc){if(v.re||v.im)R ztymes(zmj,zlog(ztrend(v))); R zeroZ;}
 
-ZF2(zcir){D x=u.re;Z z;
+ZF2(zcir){D x=u.re;Z z; 
  z=zeroZ; /* Sun386i does not allow init of aggregate object */
  ZASSERT(!u.im&&-12<=x&&x<=12&&x==floor(x),EVDOMAIN);
  switch((int)x){

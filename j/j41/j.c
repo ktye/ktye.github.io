@@ -20,7 +20,7 @@ I bytes,maxbytes,tbase= -NTSTACK,totbytes,ttop=NTSTACK;
 B errsee=!LINKJ;
 D inf;
 C jerr;
-D naN;
+D nan;
 C obuf[NOBUF],tostdout=1; FILE*infile,*outfile;
 A qevm;
 D qfuzz;
@@ -30,8 +30,7 @@ B sesm;
 D tssbase;
 Z zeroZ={0,0};
 
-#if (SYS & SYS_PC+SYS_PC386)
-C*edbuf;
+#if (SYS & SYS_PCAT)
 U _stklen = 65535u;
 C qbx[11]={218,194,191, 195,197,180, 192,193,217, 179,196};
 #else
@@ -40,13 +39,14 @@ C qbx[11]={43,43,43,    43,43,43,    43,43,43,    124,45 };
 
 
 C immloop(){A x=mtv;I old=tbase+ttop;
- while(x)
+ do
   if(!appf()){
    prompt(qprompt); x=jgets();
-   if(jerr)x=mtv; else{maxbytes=bytes; immex(x);}
-   jerr=0;
+   maxbytes=bytes; immex(x); jerr=0;
    tpop(old);
-}}
+  } while(x);
+}
+
 
 #if !LINKJ
 int main(argc,argv)int argc;C**argv;{if(jinit2(argc,argv))immloop();}

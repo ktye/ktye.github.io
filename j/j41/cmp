@@ -1,0 +1,4 @@
+for file in *.h *.c; do
+	echo $file
+	diff $file ../../j41/$file
+done

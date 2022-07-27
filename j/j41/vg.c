@@ -14,9 +14,6 @@
 #include "j.h"
 #include "v.h"
 
-#ifdef WASM
-void qsort(void *a, size_t nel, size_t width, int (*comp)(void*, void*));
-#endif
 
 #define COMP(f,T,Tp)    int f(a,b)I*a,*b;{I q;T*x=(T*)*a,*y=(T*)*b;Tp p;  \
                          DO(compn,if(p=*x++-*y++)break;);                 \
