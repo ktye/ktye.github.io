@@ -56,9 +56,9 @@ let env={env:{
 
 
 function ini(left,o){O=o
- fetch("../j/j41/ref.txt").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent=r;left.appendChild(p)});
+ fetch("../j/j42/ref.txt").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent=r;left.appendChild(p)});
  
- fetch('../j/j41/j41.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+ fetch('../j/j42/j42.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   J=r.instance.exports
   M=J.__heap_base.value
   ma=new allocator(M,J.memory)
