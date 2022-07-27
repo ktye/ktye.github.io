@@ -1,27 +1,17 @@
 import { fs }    from './fs.js'
 
-let O,M,K,ss,oe,sa,s0,t0
+let O,M,K,ss,oe,sa,t0
 function U( ){ return new Uint8Array(M) }
 function I( ){ return new Uint32Array(M) }
 function F( ){ return new Float64Array(M) }
 
 function us(s){return new TextEncoder("utf-8").encode(s)}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function s0(x){let i=U().slice(x);return su(i.slice(0,i.indexOf(0)))}
 function lh(x,y){ return (new Float64Array((new Uint32Array([x, y])).buffer))[0] }
 function hl(x,y){ return lh(y,x) }
 function lo(x){ return (new Uint32Array((new Float64Array([x])).buffer))[0] }
 function hi(x){ return (new Uint32Array((new Float64Array([x])).buffer))[1] }
-
-function fd_write(f,iov,nio,nr){
-console.log("fd_write",f)
- if(nio!=1)console.log("nio!=1")
- let i=I();
- let ptr = i[iov>>2]
- let len = i[1+(iov>>2)]
- O(su(U().slice(ptr,ptr+len)))
- i[nr>>2]=len;
- return 0
-}
 
 function readConst(s,b){
  let a=[];let c;
@@ -54,14 +44,55 @@ function atof(x,y,z){
  return Number.parseFloat(su(u.slice(0,n)))
 }
 
+// k file io:
+// -read:  stat, open, mmap2, munmap
+// -write: unlink, open, ftruncate64, mmap2, munmap
+// -print: fd_write(wasi)
+
+let isread=false,filename="" // flags&args for open are equal for read&write, we use stat/unlink to select
 function mmap2(addr,len,prot,flags,fp,off){ // read file
- console.log("mmap2",addr,len,prot,flags,fp,off)
  let dst=K.D(len) //malloc
- if(0>fs.fread(dst,1,len,fp)) return -1
+ if(isread){ //also prot=1
+  if(0>fs.fread(dst,1,len,fp)) return -1
+  return dst
+ }
  return dst
 }
 function munmap(addr,len){
+ if(!isread){ // write on unmap
+  let u=new Uint8Array(len)
+  u.set(U().slice(addr,addr+len))
+  fs.writefile(filename,u)
+ }
  K.E(addr) //free
+ return 0
+}
+function open(path,flags,args){
+ let name=s0(path)
+ if(isread){
+  let r=fs.open_ra(name,false);
+  return (r==0)?-1:r
+ }
+ return fs.open_w(name)
+}
+function stat(path, buf){isread=true
+ let name=s0(path)
+ let n=fs.filesize(name)
+ if(n<0)return -1
+ let i=I()
+ let b=buf>>>2
+ i.fill(0, b, b+21)
+ i[3+b]=33279 //mode
+ i[10+b]=n;
+ return 0
+}
+function fd_write(f,iov,nio,nr){
+ if(nio!=1)console.log("nio!=1")
+ let i=I();
+ let ptr = i[iov>>2]
+ let len = i[1+(iov>>2)]
+ O(su(U().slice(ptr,ptr+len)))
+ i[nr>>2]=len;
  return 0
 }
 
@@ -71,15 +102,15 @@ function ini(left,o){O=o
  let env={a:{ //k9.wasm import object
    p: function(){console.log("p ___sys_chdir,")},
    w: function(){console.log("w ___sys_dup2,")},
-   o: function(){console.log("o ___sys_ftruncate64,")},
+   o: function(x,y){return 0},  //___sys_ftruncate64
    s: function(){console.log("s ___sys_getcwd,")},
    m: mmap2,   //___sys_mmap2
    n: munmap,  //___sys_munmap
-   f: fs.open, //___sys_open
+   f: open,    //___sys_open
    v: function(){console.log("v ___sys_pipe,")},
    k: function(){console.log("k ___sys_socketpair,")},
-   e: fs.stat,
-   q: function(){console.log("q ___sys_unlink,")},
+   e: stat,
+   q: function(x){isread=false;filename=s0(x);return 0},   //___sys_unlink (called before write)
    d: function(){console.log("d __exit,")},
    j: function(){console.log("j _clock_gettime,")},
    b: atof, //_emscripten_asm_const_double
@@ -93,7 +124,7 @@ function ini(left,o){O=o
    u: fd_write, //_fd_write
    i: function(){console.log("i _fork,")},
    a: function(x){t0=x},
-  }}
+  }}  
   //             wasm func
   // main        F (i32,i32)
   // setTempRet0 a (i32)
