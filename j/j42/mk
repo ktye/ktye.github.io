@@ -4,8 +4,8 @@ set -x
 cc=/c/local/LLVM/bin/clang
 ww="/c/local/wabt/wasm2wat --enable-bulk-memory"
 
-$cc -DWASM -Wfatal-errors -Oz --target=wasm32 -mbulk-memory --no-standard-libraries -Wl,--export=__heap_base,--export=jinit,--export=jx,--export=jpr,--allow-undefined -Wl,--no-entry -o j41.wasm *.c
-$ww j41.wasm > j41.wat
+$cc -DWASM -Wfatal-errors -Oz --target=wasm32 -mbulk-memory --no-standard-libraries -Wl,--export=__heap_base,--export=jinit,--export=jx,--export=jpr,--allow-undefined -Wl,--no-entry -o j42.wasm *.c
+$ww j42.wasm > j42.wat
 
 # CHANGES (ktye)
 # - ifdef WASM
