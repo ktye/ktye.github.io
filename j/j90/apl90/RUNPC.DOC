@@ -1,0 +1,66 @@
+
+J for the IBM PC:  Installation and Start-Up Procedure
+
+
+
+0. The distribution diskette contains the following files:
+
+j.exe                     Executable file
+readme.doc                Copyright notice
+status.doc                Implementation status
+runpc.doc                 This note
+tutorial.js               Script for running a tutorial
+tuta.js                   Needed by tutorial.js
+tutb.js                   Needed by tutorial.js
+
+
+1. Copy the diskette contents onto your hard disk:
+
+C:                        Change to hard disk drive C.
+mkdir \j                  Create a new directory called j.
+copy A:*.* \j             Copy from diskette drive A to directory j.
+
+Your PC may use different letters for the diskette drive and the hard
+disk drive.  Substitute for A: and C: as appropriate.
+
+
+2. To start J:
+
+cd C:\j                   Change to the j directory.
+j                         Invoke J.
+
+You should see the message
+
+   J Version xx  Copyright (c) 1990, Iverson Software Inc.
+
+and a 3-space prompt.  At this point, the system is ready to interpret
+APL sentences.
+
+
+3. A tutorial is available.  Within a J session, enter:
+
+)sscript 'tutorial.js'    Make the necessary definitions.
+tutorial ''               Start the tutorial.
+
+
+
+Copyright (c) 1990, Iverson Software Inc.
+
+J is a licensed product of Iverson Software Inc. (ISI).  Permission to copy
+this software without fee is granted provided (0) the copies are not made
+or distributed for direct commercial advantage, (1) this copyright notice
+is included, and (2) notice is given that copying is by permission of ISI.
+To copy otherwise requires the specific written permission of ISI.
+
+The software is distributed on an "as is" basis.  ISI disclaims all
+warranties, expressed or implied, including but not limited to implied
+warranties of merchantability and fitness for a particular purpose.
+
+Registered users receive a printed manual and notice of new releases.
+To order or register your copy, send $24 to:
+
+Iverson Software Inc.                 Iverson Software Inc.
+33 Major Street                       3512 Cameron Mills Road
+Toronto, Ontario, Canada  M5S 2K9     Alexandria, Virginia, USA  22305-1103
+(416) 925 6096                        (703) 548 1799
+

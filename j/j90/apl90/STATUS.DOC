@@ -1,0 +1,352 @@
+
+J Status
+
+Roger Hui
+1990 8 9
+
+
+
+Verbs:
+
+  =               classify              equal
+  <               box                   less than
+  <.              floor                 lesser of (min)
+  <:              decrement             less than or equal to
+  >               open                  greater than
+  >.              ceiling               greater of (max)
+  >:              increment             greater than or equal to
+  +               conjugate             plus
+  +.                                    or/gcd
+  +:                                    nor
+  *               signum                times
+  *.                                    and/lcm
+  *:                                    nand
+  -               negate                minus
+  -.              not                   less
+  -:                                    match
+  %               reciprocal            divide
+  %.              matrix inverse        matrix divide
+  %:              square root           root
+  ^               exponential           power
+  ^.              natural log           log
+  $               shape                 reshape
+  ~.              nub
+  ~:              nub sieve             not equal
+  |               magnitude             residue
+  |.              reverse               rotate
+  |:              transpose             transpose
+  ,               ravel                 append
+  ,.              raze
+  ,:              itemize               laminate
+  ;               table                 link
+  ;:              words
+  #               tally                 copy
+  #.              base-2 value          base value
+  #:              binary rep.           representation
+  @.              permute/cycle         permute
+  @:              atomic rep.           atom permute
+  /:              grade                 sort
+  \:              grade down            sort down
+  {               all                   from
+  {.              first                 take
+  {:              right                 right
+  }.              rest                  drop
+  }:              left                  left
+  ".              execute               execute
+  ":              format            NYA format
+  !               factorial             out of
+  ?               roll                  deal
+  E.                                NYA search
+  e.              raze in               in
+  i.              integers              index of
+  o.              pi times              circle
+
+
+Adverbs:
+
+  v~              both                  cross
+  v/              reduction             outer product
+  v/.             oblique               key
+  v\              prefix                infix
+  v\.             suffix                outfix
+  m}              merge                 merge
+  v}              merge                 merge
+
+
+Conjunctions:
+
+  u^:n            power                 fibonacci
+  u^:v            power                 fibonacci
+  u..v        NYA determinant           inner product
+  u:.v            obverse               obverse
+  m::n            defn                  defn
+  1::n            adverb                adverb
+  2::n            conjunction           conjunction
+  m::v            defn                  defn
+  u::n            defn                  defn
+  u::v            defn                  defn
+  v;.n            cut                   cut
+  u@v             atop                  atop
+  m"n             constant              constant
+  u"n             rank                  rank
+  u"v             under                 under
+  n&v             with
+  u&n             with
+  u&v             on                    on
+  u&.v            then                  then
+  u&:n            custom                custom
+
+
+Phrasal Forms:
+  (u v)           hook                  hook
+  (u v w)         fork                  fork
+
+
+Noun:
+  a.              alphabet
+
+
+Pronouns:
+  $.              suite
+  $:              self reference
+  x.              first  argument
+  y.              second argument
+
+
+Copulae:
+  =.              local  assignment
+  =:              global assignment
+
+
+
+The !: Conjunction:
+
+  0!:0      Host system command
+              The string argument is forwarded to the host system for
+              execution, and the result is returned as a string with
+              embedded new-lines.  e.g. 0!:0 'dir *.exe'
+
+  1!:0  NYA Directory
+
+  1!:1      File read
+              The argument is a boxed file name; the result is a string
+              of the file contents. e.g.  1!:1 <'dir\subdir\file.ext'
+              The file name follows the conventions of the host system.
+              The argument may also be the integer 1, which means
+              read from the keyboard.
+
+  1!:2      File write
+              xyz 1!:2 <'folder:folder:file'  writes xyz to the
+              specified file.  xyz 1!:2 (2) means write to the screen.
+
+  1!:3      File append
+              (string1;string2) 1!:3"> 'folder:folder:file1';'phile2'
+
+  1!:4      File size
+              1!:4 'dir/file1';'file2';'phile3'
+
+  1!:55     File erase
+              1!:55 <'careful'
+
+  3!:0      Storage type
+              The "storage" type of a noun, where
+              1  boolean
+              2  literal
+              4  integer
+              8  floating point
+              16 complex
+              32 boxed
+
+  3!:1      Convert to internal representation
+              A string of the internal representation of a noun.
+
+  3!:2  NYA Convert from internal representation
+
+  4!:0      Name class
+              The argument is a boxed name; the result is its class:
+              0  undefined (but valid name)
+              1  label
+              2  noun
+              3  verb
+              4  adverb
+              5  conjunction
+              6  other
+
+  4!:1      Name list
+              The argument is a subset of the integers from 1 to 5
+              (see 4!:0).  The result is a list of boxed names belonging
+              in the class(es) specified in the argument.  The optional
+              left argument specifies the initial letters of the names
+              of interest.
+
+  4!:55     Erase
+              The argument is a boxed name; the named object is erased.
+
+  5!:0  NYA Fix
+
+  5!:1  NYA Canonical representation
+
+  5!:2      Boxed representation
+              The argument is a boxed name of a verb, adverb, or
+              conjunction.  The result is a boxed list of a
+              representation of the named object.
+                f=.3&+^:_1
+                (5!:2 <'f') -: ,">'_3';'&';'+'
+
+  6!:0      Time-stamp
+              The current time as a 6-element list: year, month, day, hour,
+              minute, second (including any fraction thereof).
+
+  6!:1      Time since session start
+
+  6!:2      Time required to execute an expression
+              6!:2 '+/i.100'
+
+  6!:3      Delay
+              (6!:3) 60 }: 'sleep for a minute'
+
+  7!:0      Space currently in use
+
+  7!:1      Space used since session start
+
+  7!:2      Space required to execute an expression
+
+  8!:0  NYA Query random link
+
+  8!:1  NYA Set   random link
+
+  8!:2  NYA Query print width
+
+  8!:3  NYA Set   print width
+
+  8!:4  NYA Query immediate execution prompt
+
+  8!:5  NYA Set   immediate execution prompt
+
+  8!:6  NYA Query box drawing characters
+
+  8!:7  NYA Set   box drawing characters
+
+  8!:8  NYA Query session manager session log size (IBM PC only)
+
+  8!:9  NYA Set   session manager session log size (IBM PC only)
+
+  8!:10 NYA Query session manager function key buffer size (IBM PC only)
+
+  8!:11 NYA Set   session manager function key buffer size (IBM PC only)
+
+  8!:12 NYA Query session manager input buffer size (IBM PC only)
+
+  8!:13 NYA Set   session manager input buffer size (IBM PC only)
+
+  8!:14     Query session manager CGA mode (IBM PC only)
+	      (8!:14 ''){'non-CGA mode'; 'CGA mode'
+
+  8!:15     Set   session manager CGA mode (IBM PC only)
+	      (8!:15) 0 }: 'set non-CGA mode'
+	      (8!:15) 1 }: 'set CGA mode'
+
+  128!:0    QR decomposition
+              The QR decomposition of a complex matrix in the domain of %.
+              The result is an Hermitian matrix and an upper triangular
+              matrix, individually boxed.
+
+  128!:1    Invert square upper triangular matrix
+
+
+
+System Commands:
+
+  )box
+    Box-drawing characters used to display boxed arrays, an 11-element
+    integer vector of ASCII indices  nw,ts,ne, te,cr,tw, sw,tn,se, ns,ew
+    (northwest corner, tee south, northeast corner; tee east, etc.).
+
+    Default:  218 194 191  195 197 180  192 193 217  179 196  [IBM PC]
+               43  43  43   43  43  43   43  43  43  124  45  [Others]
+
+  )clear
+    NYA
+
+  )off
+    Terminate session.
+
+  )prompt
+    Prompt in immediate execution mode.  Default: '   '
+
+  )reset
+    NYA
+
+  )rl
+    Random link.  Default: 16807
+
+
+  )script
+  )sscript
+
+    )script and )sscript accept an input file name and an
+    optional output file name.  File names must be in quotes.
+    A dash (-) for the input file name means "standard input",
+    i.e. the keyboard.  The input file consists of lines of APL
+    expressions and other input lines, and is known as a "script".
+    The output file is suitable for use as a script.  System
+    commands in scripts are ignored.  )script differs from )sscript
+    in that it outputs to the "standard output" (the console)
+    as well as to the output file, if any.  Examples:
+
+    )script - 'sesslog'
+
+    Input obtained from keyboard; output appended to file "sesslog"
+    and to the console.
+
+    )sscript '\jscripts\asdf'
+
+    Input from file "\jscripts\asdf"; no output.  Input reverts
+    to the keyboard at the end of "\jscripts\asdf".
+
+    )sscript 'disk:folder:subfolder:inf' 'outf'
+
+    Input obtained from "disk:folder:subfolder:inf"; output appended
+    to "outf".
+
+    )script -
+
+    Default.
+
+
+  )si
+    NYA
+
+
+
+Machines:
+
+  AT&T 3B1
+  Apple Macintosh
+  IBM PC family: PC, XT, AT, 286, 386
+  IBM RISC/6000
+  MIPS R3000
+  NeXT
+  Philips P9070
+  Sun 3
+  Sun 386i
+  Sun 4 (SPARC)
+
+
+Future Work (Incomplete List):
+
+- Attention interrupt
+- Efficiency
+- Infinity
+- Line labels
+- Print width; scissored output
+- Profile script
+- SI stack
+- Symbol table full
+- Trace, e.g. display the paths taken by the parser
+- User interface
+- Windows
+
+
+NYA means not yet available.
+
