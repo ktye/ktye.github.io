@@ -74,6 +74,6 @@ function evl(s){
  J.jpr(x);prompt();
 }
 
-let j41={ini:ini,evl:evl,src:'../j/src41.json'}
+let j42={ini:ini,evl:evl,src:'../j/src42.json'}
 
-export { j41 }
+export { j42 }
