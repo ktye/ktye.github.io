@@ -35,7 +35,7 @@ function ini(left,o){O=o
  var ext={
   init: function( ){O("ktye/k\n ")},
   read: fs.readfile,
-  write:fs.writefile,
+  write:function(f,u){if(f==""){O(su(u))}else{fs.writefile(f,u)}},
  }
 
  fs.init(U,O)
