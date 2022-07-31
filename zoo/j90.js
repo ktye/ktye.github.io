@@ -12,9 +12,10 @@ function jlink(d){
 }
 var iframe
 function ready(){let p=iframe
- let d=p.contentDocument||p.contentWindow.document
+ let d=p.contentDocument //||p.contentWindow.document
  if(d.readyState=="complete"){
-  d.onkeyup=function(e){if(e.key=="Enter")jlink(d)}
+  let w=p.contentWindow
+  w.addEventListener("keyup",function(e){if(e.key=="Enter")jlink(w)})
   return
  } 
  window.setTimeout(ready,100)
