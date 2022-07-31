@@ -13,9 +13,7 @@ function jlink(d){
 var iframe
 function ready(){let p=iframe
  let d=p.contentDocument||p.contentWindow.document
- console.log(d.readyState)
  if(d.readyState=="complete"){
-  console.log("complete")
   d.onkeyup=function(e){if(e.key=="Enter")jlink(d)}
   return
  } 

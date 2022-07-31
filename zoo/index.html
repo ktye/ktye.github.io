@@ -119,9 +119,12 @@ function addfile(x){
 var evl
 
 function swtch(s){
+ let rmc=function(p){if(p)while(p.firstChild)p.removeChild(p.lastChild)}
+ let rm=function(p){if(p){rmc(p);p.parentElement.removeChild(p)}}
  document.title=s; sel.value=s
  dec.style.overflow="auto" //j90 hides it
- while(dec.firstChild)dec.removeChild(dec.lastChild)
+ rmc(dec)
+ rm(tty.nextElementSibling)//j90 adds elements
  tty.value=""
  tty.onchange=undefined    //files overwrites it
  tty.onkeypress=keypress   //
