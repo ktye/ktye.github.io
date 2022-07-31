@@ -1,0 +1,10 @@
+prepare dos:
+
+$wget -O jdos.img github.com/copy/images/raw/master/freedos722.img
+$mount -t msdos -o loop jdos.img /mnt
+[delete some files in /mnt]
+$cp ../apl90/* /mnt ; umount /mnt
+
+
+test in qemu:
+$qemu-system-i386 -fda jdos.img
