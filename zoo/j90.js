@@ -2,6 +2,18 @@ function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 
 var txt = "Roger Hui: <blockquote>The first release of the software was at APL90 in Copenhagen in August 1990, when J was made available as shareware to the Software Exchange. (You can still get this version from various archives.)</blockquote>It turned out to be not so simple.<p>Thank's to Martin Neitzel for the binary and @copy for the v86 emulator<p>You can select text in the APL\\? paper (e.g. from the examples at the end) then press enter to send it to the emulator"
+var pre = `j.exe                     Executable file
+readme.doc                Copyright notice
+status.doc                Implementation status
+runpc.doc                 This note
+tutorial.js               Script for running a tutorial
+tuta.js                   Needed by tutorial.js
+tutb.js                   Needed by tutorial.js
+
+)sscript 'tutorial.js'    Make the necessary definitions.
+tutorial ''               Start the tutorial.`
+
+
 
 // send marked text in APL\? pre elements to emulator on enter key.  
 // initialization needs to wait for APL\? iframe to be ready.
@@ -41,10 +53,13 @@ function ini(left,o){O=o
  let cn=ce("canvas")
  cn.style.display="none"
  sd.appendChild(cn)
- let an=document.createElement("div")
+ let an=ce("div")
  an.innerHTML=txt
  an.style.fontFamily="serif"
  sc.appendChild(an)
+ let pr=ce("pre")
+ pr.textContent=pre
+ sc.appendChild(pr)
  ge("tty").parentNode.append(sc)
  
 
@@ -61,6 +76,14 @@ function ini(left,o){O=o
    fda: { url: dos+"jdos.img", size: 737280 },
    autostart: true,
   })
+  document.onvisibilitychange=function(e){ //stromspartip
+   if(emulator)
+    if(document.visibilityState=="visible"){
+     if(emulator.is_running()==false)     emulator.run()
+    }else if(emulator.is_running()==true) emulator.stop()
+  }
+
+
  })
 
  
