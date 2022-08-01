@@ -1,7 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <head><meta http-equiv="content-type" content="text/html;charset=utf-8">
 <title>APL\?</title>
 <!--link href="jdoc.css" rel=stylesheet-->
+<style>
+ @font-face{font-family:'SAX2';src: url('SAX2.ttf');}
+ pre{font-family:'SAX2'}
+</style>
 </head>
 
 <body>
@@ -732,10 +736,10 @@ static struct {I c[4];AF f;I b,e;)cases[] = {
 
  EDGE+ADV+VERB,     VERB,     NOUN, ANY,      verb,1, 2,
  CONJ,              NOUN,     VERB, NOUN,     verb,2, 3,
- EDGEtADV+VERB+NOUN,NOUN,     VERB, NOUN,     verb,1, 3,
- EDGEtADV+VERB+NOUN,NOUN+VERB,ADV,  ANY,      adv, 1, 2,
- EDGEtADV+VERB+NOUN,NOUN+VERB,CONJ, NOUN+VERB,conj,1, 3,
- EDGEtADV+VERB+NOUN,VERB,     VERB, VERB,     form,1, 3,
+ EDGE+ADV+VERB+NOUN,NOUN,     VERB, NOUN,     verb,1, 3,
+ EDGE+ADV+VERB+NOUN,NOUN+VERB,ADV,  ANY,      adv, 1, 2,
+ EDGE+ADV+VERB+NOUN,NOUN+VERB,CONJ, NOUN+VERB,conj,1, 3,
+ EDGE+ADV+VERB+NOUN,VERB,     VERB, VERB,     form,1, 3,
  EDGE,              VERB,     VERB, ANY,      form,1, 2,
  NAME,              ASGN,     RHS,  ANY,      is,  0, 2,
  LPAR,              RHS,      RPAR, ANY,      punc,0, 2,
