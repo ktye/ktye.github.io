@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>.</title></head>
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEUAAAD/AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADO6msTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMklEQVQImWNQggIGJUEQJYiDocAEZTApQBgKTApMaAwGBpiIkhIqQwmmRkmBAYcVUAAAxeENSamjy/wAAAAASUVORK5CYII='>
+<link rel="stylesheet" href="codemirror/codemirror.min.css">
+<style>
+ html{font-family:monospace;background:lightgrey;}
+ .CodeMirror{height:100%!important;border:none;resize:none}
+</style>
+
+<script src="codemirror/jquery.min.js"></script>
+<script src="codemirror/codemirror.min.js"></script>
+<script src="codemirror/matchbrackets.js"></script>
+
+<body>
+<div id="edt" ></div>
+<a id="dl" style:"display:none"></a>
+
+<script>
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function ge(x){return document.getElementById(x)}
+let edt=ge("edt")
+let ed = CodeMirror(edt, {"dark":true,"lineNumbers":true,"dragDrop":false,"tabSize":8,"smartIndent":false,"matchBrackets":true})
+
+
+// search selected: middle-button(all), right(next) (bug: mouseup(chrome), ff ok)
+edt.addEventListener('contextmenu',function(e){console.log("click");pd(e);})
+ed.on('mousedown', function(cm, e) {
+ if     (e.button==2 && (ed.getSelection().length>0)){search(ed.getSelection(),false);pd(e)}
+ else if(e.button==1 && (ed.getSelection().length>0)){search(ed.getSelection(),true );pd(e)}
+})
+function indexAll(a, s) { let r = [], i = -1; while ((i = a.indexOf(s, i+1)) != -1){ r.push(i); }; return r; }
+function search(t, all){
+ let v=ed.getValue();let p=ed.getCursor();if(all){
+  let n=indexAll(v,t);for(let i=0; i<n.length; i++)ed.addSelection(ed.posFromIndex(n[i]),ed.posFromIndex(n[i]+t.length),{"scroll":true})
+ }else{
+  let c=ed.indexFromPos(ed.getCursor());c=(p.sticky=="after")?c+t.length:c
+  let n=v.indexOf(t,c);if(n==-1){n=v.indexOf(t,0)};ed.setSelection(ed.posFromIndex(n), ed.posFromIndex(n+t.length), {"scroll":true})}}
+
+window.addEventListener('unhandledrejection', function(e) {ed.setValue(String(e.reason))})
+
+
+// drop files
+window.ondragover=function(e){pd(e)}
+window.ondrop=function(e){pd(e);if (e.dataTransfer.items.length==1){
+  let it=e.dataTransfer.items[0]
+ if(it.kind=='file'){let file=it.getAsFile();addfile(file)}}
+}
+function addfile(x){
+ let r = new FileReader()
+ r.onload = function(){
+  ed.setValue(r.result)
+ }
+ r.readAsText(x)
+}
+
+// download on hash change
+function download(name,u){
+ let dl=ge("dl");let b=new Blob([u],{type:"application/octet-stream"})
+ dl.href=URL.createObjectURL(b);dl.download=name;dl.click()}
+
+document.location.hash="#nofile.txt"
+
+window.addEventListener('hashchange', function() {let h=document.location.hash
+ if(h.length>1&&h!="#nofile.txt")
+  download(h.slice(1), us(ed.getValue()))
+}, false);
+
+
+
+</script>
+</body>
+</html>
