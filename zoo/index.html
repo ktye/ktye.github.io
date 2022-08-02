@@ -8,7 +8,9 @@
  option{font-family:monospace;white-space:pre}
  #sel{position:absolute;left:0px;top:0px;z-index:10;background:white;border:1px solid;font-family:monospace;white-space:pre}
  button:active{transform:translateY(1px);}
- #src{position:absolute;top:0px;right:calc(50vw + 5px);z-index:10;}
+ #src{position:absolute;top:0px;right:calc(50vw + 1em);z-index:10;}
+ #edt{position:absolute;top:0px;right:calc(50vw + 5em);z-index:20;}
+ .hidden{display:none}
  .left{position:absolute;left:0px;width:50vw;height:calc(100vh - 20px);top:20px;overflow:auto}
  .right{position:absolute;left:50vw;width:50vw;height:100vh}
  textarea{overflow:hidden;margin:0px;padding:0px;resize:none;outline:0px;border:none;border-left:1px solid}
@@ -41,10 +43,12 @@
    </optgroup>
     <option value="files" >files</option>
   </select>
-  <a id="src"   href="browse.html#k.json">src</a>
+  <a id="src"  href="browse.html#k.json" target="_blank">src </a>
+  <a id="edt"  href="#"                                 >edit</a>
   <div id="main">
-   <div      class="left"  id="dec" ></div>
-   <textarea class="right" id="tty" ></textarea>
+   <div      class="left"         id="dec" ></div>
+   <textarea class="left hidden"  id="editor"></textarea>
+   <textarea class="right"        id="tty" ></textarea>
   </div>
  </div>
 </div>
@@ -79,20 +83,29 @@ var sel=ge("sel")
 var dec=ge("dec")
 var tty=ge("tty")
 var src=ge("src")
+var editor=ge("editor")
 
 sel.onchange=function(e){swtch(e.target.value)}
-//sel.value = k
+
+function toggled(){editor.classList.toggle("hidden");return false}; ge("edt").onclick=toggled
+editor.value = "/pressing enter sends marked text to the interpreter"
+editor.onkeydown=function(e){
+ if("Enter"==e.key){let a=editor.selectionStart,b=editor.selectionEnd;if(a>b)b=[a,a=b][0]
+  if(b-a){
+   tty.recv(editor.value.slice(a,b));return false
+}}}
 
 
 tty.value = ""
-let keypress=function(e){
+let keydown=function(e){
  if(("Enter"==e.key)&&(0<tty.value.length)){pd(e);
   let v=tty.value; let i=v.lastIndexOf("\n");
   let s=((i<0)?v:v.slice(i)).trim()
   if(!s.length)return
   evl(s); tty.scrollTop=tty.scrollHeight;
 }}
-tty.onkeypress=keypress
+tty.onkeydown=keydown
+tty.recv=function(s){s=s.trim();tty.value+=s;evl(s);tty.scrollTop=tty.scrollHeight;}
 tty.focus()
 
 function out(s){tty.value+=s;
@@ -127,7 +140,7 @@ function swtch(s){
  rm(tty.nextElementSibling)//j90 adds elements
  tty.value=""
  tty.onchange=undefined    //files overwrites it
- tty.onkeypress=keypress   //
+ tty.onkeydown=keydown     //
  tty.drop=undefined        //auto-exec
 
  let sys

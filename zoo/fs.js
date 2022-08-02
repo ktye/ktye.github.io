@@ -141,5 +141,4 @@ function cat(x,y){
  return r
 }
 
-window.fs = fs
 export { fs }

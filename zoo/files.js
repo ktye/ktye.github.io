@@ -1,3 +1,4 @@
+import { fs } from './fs.js'
 
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
@@ -8,7 +9,7 @@ function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 
 function ini(left,o){
  let tty=ge("tty")
- tty.onkeypress=undefined
+ tty.onkeydown=undefined
  let currentfile=""
  let editfile=function(e){if(currentfile.length)fs.writefile(currentfile,us(tty.value))}
  tty.onchange=editfile

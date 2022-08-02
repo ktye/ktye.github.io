@@ -20,7 +20,7 @@ tutorial ''               Start the tutorial.`
 var emulator
 function jlink(d){
  let s=d.getSelection().getRangeAt(0).toString()+"\n"
- for(let i=0;i<s.length;i++)emulator.keyboard_adapter.simulate_char(s[i])
+ evl(s)
 }
 var iframe
 function ready(){let p=iframe
@@ -90,9 +90,9 @@ function ini(left,o){O=o
  O("where was my apl90 floppy again?\n")
 }
 
-function evl(s){ 
+function evl(s){if(s.slice(-1)!=="\n")s=s+"\n"
+ for(let i=0;i<s.length;i++)emulator.keyboard_adapter.simulate_char(s[i])
 }
-
 
 let j90={ini:ini,evl:evl}
 

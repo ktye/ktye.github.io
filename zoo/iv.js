@@ -10,6 +10,9 @@ function ini(left,output){
 	fetch("iv/ref.txt").then(r=>r.text()).then(r=>{let p=document.createElement("pre");p.textContent=r;left.appendChild(p)});
 
 
+// this overwrites some globals. 
+// running APL\? after APL\iv fails because of this.
+
 (() => {
 	const enosys = () => {
 		const err = new Error("not implemented");
