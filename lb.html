@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>listbox</title></head>
+<style>
+ html,body{min-height:100vh;margin:0;padding:0;overflow:hidden;display:flex;flex-direction:column;}
+ #tags{flex: 0 1 auto;font-family:monospace;font-size:100%;border:none;border-bottom:1px solid black;/*display:flex;gap:0.5em*/}
+ #list{flex: 1 1 auto;font-family:monospace;font-size:100%;border:none;}
+ #area{flex: 1 1 auto;font-family:monospace;font-size:100%;display:none;margin:0;border:1px solid blue;}
+ #canv{width:0;height:0;}#dl{display:none;}
+</style>
+<body>
+<div      id="tags" contenteditable="true">+</div>
+<canvas   id="canv" ></canvas>
+<select   id="list" multiple></select>
+<textarea id="area" wrap="off" spellcheck="false"></textarea>
+<a        id="dl"></a>
+<script type="module">
+
+import { K } from './k.js'
+import { D } from './draw.js'
+
+var tags=ge("tags")
+var list=ge("list")
+var area=ge("area")
+var canv=ge("canv")
+
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function display(x){[list,area,canv].forEach(i=>i.style.display="none");x.style.display="block"}
+
+// editable tag bar, convert to links on enter
+tags.onkeydown=function(e){if(e.key=="Enter"){mktags();return false}}
+
+function mktags(){ //make tags after editing
+ let r=[];let ch=tags.childNodes
+ for(let i=0;i<ch.length;i++){let c=ch[i];let t=c.nodeType;
+  if(t==1&&c.nodeName=="A")r.push(c.innerText)
+  else if(t==3){let s=c.nodeValue.trim();
+   let v=s.split(" ");for(let j=0;j<v.length;j++){let s=v[j].trim();if(s.length&&s!="+")r.push(s)}
+ }}
+ stags(r)
+}
+function ktags(){ //update tags from k
+ let v=K.Kx(".",K.Ks("tags")); if(v==0)return
+ let l=K.LK(K.Kx("$",v))
+ let t=[]
+ for(let i=0;i<l.length;i++){t.push(K.CK(l[i]))}
+ stags(t)
+}
+function stags(v){ //create links from strings (todo assign)
+ removeAll(tags)
+ for(let i=0;i<v.length;i++){
+  tags.appendChild(mkln(v[i]))
+  tags.appendChild(document.createTextNode(" "))
+ }
+ tags.appendChild(document.createTextNode("+"))
+}
+
+function mkln(s){let a=ce("a");a.href="#";
+ a.innerText=s;a.contentEditable="false";
+ a.onclick=function(x){exec(s);return false}
+ return a
+}
+function removeAll(p){while(p.firstChild){p.removeChild(p.firstChild)}}
+
+
+var dot
+
+function exec(s){
+ let x=K.Kx(".",K.Ks(s))
+ if(x){
+  if(K.TK(x)!="-"){show(x);return}
+  let n=K.NK(x),a
+  switch(n){
+  case 0: a=K.KL([])                         ;break
+  case 1: a=K.KL([K.ref(dot)])               ;break
+  case 2: a=K.KL([K.ref(dot), K.KI(isel())]) ;break
+  default:
+   K.unref(x)
+   return
+  }
+  x=K.Kx(".",x,a)
+  ktags()
+  show(x)
+ }
+}
+
+function show(x){
+ if(x){
+  if(dot)K.unref(dot);
+  dot=K.ref(x)
+  if(K.TK(x)=="C"){area.value=K.CK(x); display(area); return }
+  let l=K.LK(K.Kx("`l@",x))
+  removeAll(list)
+  for(let i=0;i<l.length;i++){
+   let o=ce("option")
+   o.textContent=K.CK(l[i])
+   list.appendChild(o)
+  }
+  display(list)
+ }
+}
+
+
+area.onchange=function(e){ K.unref(dot); dot = K.KC(area.value) }
+
+
+function isel(s){return Array.from(list.selectedOptions).map(v=>v.index)} //[0,2,5]
+
+function O(s){console.log("k>",s)}
+var ext={
+ init:function(){fetch("lb.k").then(r=>r.text()).then(r=>{
+  let x=K.Kx(".",K.KC(r));ktags();show(x)
+ })},
+ read:function(file){return new Uint8Array(0)},
+ write:function(file,data){if(file==="")O(su(data))},
+}
+K.kinit(ext)
+
+</script>
+</body></html>
