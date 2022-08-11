@@ -18,12 +18,13 @@ function F(){ return new  Float64Array(_.memory.buffer) }
 
 // type/length
 K.TK = function(x){ 
- const t="-icisfF----------ICISFFLDT"; //like ../+/api
+ const t="0bcisfz---mdplx--BCISFZLDT";
  return t[_.tp(x)]
 }
 K.NK = function(x){ return _.nn(x) }
 
 // create k atoms
+K.Kb = function(x){ return _.Kb( x ? 1 : 0 ) }
 K.Kc = function(x){ return _.Kc( ("string"===typeof(x)) ? x.charCodeAt(0) : x ) }
 K.Ks = function(x){ return _.sc(K.KC(x)) }
 K.Ki = function(x){ return _.Ki(x) }
@@ -62,15 +63,20 @@ K.KL = function(x){
  return r
 }
 
+K.bK = function(x){ return lo(x) != 0 }
 K.cK = function(x){ return lo(x) << 24 >> 24 } // signed int8
 K.iK = function(x){ return lo(x) << 0 } // signed int32
-K.fK = function(x){ 
- let p=lo(x)>>>3;return dxr(x,F()[p])
-}
+K.sK = function(x){ return K.CK(_.cs(x)) }
+K.fK = function(x){ let p=lo(x)>>>3;return dxr(x,F()[p]) }
 
 K.BK = function(x){ return dxr(x, C().slice(lo(x),lo(x)+_.nn(x))) }
 K.CK = function(x){ return su(K.BK(x)) }
 K.IK = function(x){ let p=lo(x)>>>2;return dxr(x,I().slice(p,p+_.nn(x))) }
+K.SK = function(x){ let n=_.nn(x); let r=new Array(n); let p=lo(x)>>>2
+ let y=I().slice(p,p+n)
+ for(let i=0;i<n;i++)r[i]=K.CK(_.cs(K.Ki(y[i]))) 
+ return dxr(x,r)
+}
 K.FK = function(x){
  let t=_.tp(x); let n=(t==6) ? 2 : (t==22) ? 2*_.nn(x) : _.nn(x);
  let p=lo(x)>>>3;return dxr(x,F().slice(p,p+n))
@@ -89,6 +95,48 @@ K.KA   = function(sym,val){ K._.dx(K._.Asn(sym,val)) }
 K.ref  = function(x){return _.rx(x)}
 K.unref= function(x){       _.dx(x)}
 
+K.KJ=function(x){ //general js to k converter
+ if(Array.isArray(x)){
+  let r=Array(x.length)
+  for(let i=0;i<x.length;i++)r[i]=K.KJ(x[i])
+  return K.KL(r)
+ }
+ if(Number.isInteger(x))return K.Ki(x)
+ switch(typeof x){
+ case "number": return K.Kf(x)
+ case "string": return K.CK(x)
+ default: return BigInt(0);
+}}
+K.JK=function(x){
+ let t=_.tp(x)
+ let n=(t>16)?_.nn(x):1
+ switch(t){
+ case 1:  return K.bK(x);
+ case 2:  return K.cK(x);
+ case 3:  return K.iK(x);
+ case 4:  return K.sK(x);
+ case 5:  return K.fK(x);
+ //no z
+ case 17: return K.BK(x);
+ case 18: return K.CK(x);
+ case 19: return K.IK(x);
+ case 20: return K.SK(x);
+ case 21: return K.FK(x);
+ //no Z
+ case 23: let r=Array(n);for(let i=0;i<n;i++)r[i]=K.JK(_.Atx(_.rx(x),K.Ki(i)));return dxr(x,r)
+ //no D,T,and funcs
+ case 24: 
+  let l=K.LK(x)
+  if(20!=_.tp(l[0])){_.dx(l[0]);_.dx(l[1]);return null}
+  let keys=K.SK(l[0])
+  let vals=K.JK(l[1])
+  let d={}
+  for(let i=0;i<keys.length;i++)d[keys[i]]=vals[i]
+  return d
+ default: return dxr(x,null);
+ }
+}
+function jk(x){ return x.map(K.JK) }
 
 let bak   // save/restore back buffer
 K.save    = function(){ bak = new Uint8Array(K._.memory.buffer).slice(0, 1<<U()[32]) }
@@ -119,6 +167,15 @@ function k_read(file,nfile,dst){
 
 // js implementation for external k functions
 let xcal=[]
+K.JS = function(args,body){        //create anonymous js function
+ if(4==_.tp(args))args=K.Kx(",",args)
+ let a=K.SK(args),b=K.CK(body)
+ let F=Function(...a,b)
+ xcal.push(function(...xyz){return K.KJ(F.apply(null,jk(xyz)))})
+ let f=K._.l2(K.Kx(",", K.Ki(xcal.length-1)), K.KC("js{"+b+"}"))
+ I()[(lo(f)>>>2)-3]=a.length  //arity
+ return (BigInt(14)<<BigInt(59)) + BigInt(lo(BigInt(f)))
+}
 function register(name, idx, arity){ // this is similar to the c-api's KR(..) implementation in ../+/api
  // k representation of a native function: length-2 list, the arity is stored as the vector-length.
  //   c uses: (pointer;string) where the pointer is stored in an 8-byte char vector; string is the function name (used by $f).
@@ -129,6 +186,7 @@ function register(name, idx, arity){ // this is similar to the c-api's KR(..) im
  f = (BigInt(14)<<BigInt(59)) + BigInt(lo(BigInt(f))) // type tag xf(extern function) as upper bits
  K.KA(K.Ks(name), f)                                  // assign
 }
+
 
  
 // import object for k.wasm
