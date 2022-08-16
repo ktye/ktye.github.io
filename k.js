@@ -49,7 +49,7 @@ K.KI = function(x){
  return r
 }
 K.KF = function(x){
- x = (x.constructor===Float64Array) ? x : new Int32Array(x)
+ x = (x.constructor===Float64Array) ? x : new Float64Array(x)
  let r=_.mk(21,x.length)
  F().set(x,lo(r)>>>3)
  return r
@@ -104,7 +104,7 @@ K.KJ=function(x){ //general js to k converter
  if(Number.isInteger(x))return K.Ki(x)
  switch(typeof x){
  case "number": return K.Kf(x)
- case "string": return K.CK(x)
+ case "string": return K.KC(x)
  default: return BigInt(0);
 }}
 K.JK=function(x){
