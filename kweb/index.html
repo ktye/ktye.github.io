@@ -207,6 +207,8 @@ kweb.init("sep.k")
 
 <p><code>sep.k</code> only defines the table <code>t:+`abc`def!(|!10;?10)</code></p>
 
+<p>Nondefault <b>types</b> can be declared in html as <code>&lt;div id="abc" data-k-type="listbox" &hellip;></code></p>
+
 <p>An application can also be written in html/js without any of the <i>kweb</i> functionality and call <i>k</i> directly when needed.</p>
 
 <p><a href="map.html"><code>map.html</code></a> is an example application that uses the <a href="https://leafletjs.com">leaflet library</a> to show a slippery map from tiles.<br>
@@ -266,6 +268,13 @@ It recalculates the fit after every update.</p>
 <div class="example" id="plot.k"></div>
 
 <p>Plots are <b>interactive</b>: Zoom by drawing a rectangle with the mouse and doubleclick to show coordinates.</p>
+
+<h2 id="draw">draw</h2>
+
+<p>Plotting is built upon drawing.
+The draw commands provide a subset of the canvas api without transformations or scaling:</p>
+
+<div class="example" id="draw.k"></div>
 
 <h2 id="online">online application</h2>
 
