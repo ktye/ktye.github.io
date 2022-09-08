@@ -59,7 +59,7 @@ For each node, f cuts the number of children from the stack, calls the emitter b
 with arguments x:node id, and y the evaluated children in string form.
 The result is catenated to the stack.
 
-Ast transformations are done on the table before calling emit.
+Ast transformations are done on the table before calling flattening.
 The go backend does not need any transformations.
 
 
@@ -101,6 +101,6 @@ binary operator nodes
  add|sub|mul|div|mod|shr|shl	
  xor|neq|ant(andnot)|bnd|bor(&& ||)			     
  
-types: `i`u`j`k`f`C`I`F!(i32;u32;i64;u64;f64;i8x16;i32x4;f64x2)
+types: `i`u`j`k`f!(i32;u32;i64;u64;f64)
 
 go.k is working, wa.k is not fully implemented
