@@ -1,5 +1,6 @@
+/ ik transforms the IR (a k table) into an "i" program.
 / "i" is a low level input language with k syntax
-/  it can be parsed by k but not evaluated. IR is written from k byte code. the parser is for free.
+/  it can be parsed by k but not evaluated (see ki.k).
 / types
 /  `i`u`j`k`f:  i32 u32 i64 u64 f64
 / heap
@@ -12,12 +13,11 @@
 /  f:ii:{[]..; (a;b)}    multi-return
 / globals
 /  ai:3                  global var (mutable)
-/  bi::4                 const
+/  bi=4                  const
 / literals
 /  xi:1; yf:2.           int float parsed by k
 /  2 5                   (two int array) is int64 [high low]
-/  "-1.13585365213876817300e-11" precise float constants as strings
-/  (`u 6)<<`u 1          unsigned literals need explicit cast
+/  0x123...              precise float constants binary 64bit
 / cast
 /  `i x  `u x  ..
 / call
@@ -86,7 +86,7 @@ ikprg:{
  
 ikdat:{,/@["\\",/:256^`x@_!256;0+ikc;ikc:_("a"+!26),("A"+!26),("0"+!10),"~!@#$%^&*()_+{}[]|;:<>,./?"]x}
 ikmem:{y;""}
-ikcon:{($S x),"::",*y}
+ikcon:{($S x),"=",*y}
 ikvar:{($S x),":", *y}
 iktab:{y;(I x;S x)}
 iktbl:{"\n"/:{($x),":",y}'[(*x)i;,/'"`",''$(i:&~1=-':*x)^(x:+x)1]}
@@ -127,13 +127,8 @@ ikget:{y;$S x}
 ikGet:{y;$S x}
 ikjmp:{y;(,$[I x;"<";">"]),$[`~S x;"";($S x)]}
 
-ikflt:{$["."~*|s:(*&" "=c)#c:C 8+x+!24;s;"\"",s,"\""]}
-iklit:{y;i:I x;$[`f~t:S x;ikflt i
-                 `i~t;$[0N~i;"-2147483648";$i]
-                 `u~t;$[i<0;"0x",`x@|`c@,i;$i]
-		 $[i~0;,"0";(-1~h:*`i C 4+i+!4)&0>j:*`i C i+!4; $j; (h~0)&j>0; $j; hx8 i]]}
-iklit:{y;i:I x;$[`k~t;"`k ";""],$[`f~t:S x;ikflt i;`i~t;$i;`u~t;"`u ",$i
-               i~0;"0 0"; ($`i C 4+i+!4)," ",$`i C i+!4]}
+ikflt:{$[f~0.+_f:*`f@c:C x+!8;$f;"0x",`x@`c@,f]}
+iklit:{y;i:I x;$[`f~t:S x;ikflt i;t':`i`u;$i;i~0;"0 0";" "/:$`i C i+!8]}
 
 ikneg:{"-",*y}
 iknot:{(*y),"\ni32.eqz"}
