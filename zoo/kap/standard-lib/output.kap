@@ -1,0 +1,62 @@
+namespace("output")
+
+∇ isArray (v) {
+  (typeof v) ≡ 'array
+}
+
+∇ stringToGraphemes (s) {
+  {1 (↑⍴⍵) ⍴ ⍵} unicode:toGraphemes s
+}
+
+∇ wrapBox (strlist) {
+  w ← (⍴ strlist)[1]
+  top ← (⊂"┏") , (w ⍴ ⊂"━") , ⊂"┓"
+  bottom ← (⊂"┗") , (w ⍴ ⊂"━") , ⊂"┛"
+  {top,[0]⍵,[0]bottom} (⊂"┃") , strlist , ⊂"┃"
+}
+
+∇ dbg (title;data) {
+  io:println "=== begin:",title," ==="
+  io:println data
+  io:println "=== end:",title," ==="
+  data
+}
+
+∇ dbg1 (x) {
+  dbg ("Empty" ; x)
+}
+
+∇ render2d (v) {
+  v ← v
+
+  ⍝ The width of each column is the maximum width of any cell
+  colWidths ← ⌈/[0] {(⍴⍵)[1]}¨v
+  ⍝ Pad each cell to the correct width
+  xAligned ← ((⍴v) ⍴ colWidths) {((↑⍴⍵) (⍺-(⍴⍵)[1]) ⍴ (⊂" ")),⍵}¨ v
+
+  ⍝ Compute the height of each row in a similar way as the cols
+  rowHeights ← ⌈/[1] {↑⍴⍵}¨xAligned
+  ⍝ Pad each row so that they are all the same height
+  yAligned ← (⍉ (⌽ ⍴ xAligned) ⍴ rowHeights) {⍵ ,[0] ((⍺-↑⍴⍵) ((⍴⍵)[1])) ⍴ (⊂" ")}¨ xAligned
+
+  vSeparated ← {⍺,(⊂" "),⍵}/ yAligned
+
+  wrapBox ⊃ ,[0]/ vSeparated
+}
+
+∇ prettyPrintToChars (v) {
+  enclosed ← when {
+    (~isArray(v)) { stringToGraphemes ⍕v }
+    (×/,('char)=typeof¨v) { stringToGraphemes @",v,@" }
+    (1) { render2d prettyPrintToChars¨ v }
+  }
+  enclosed
+}
+
+∇ prettyPrint (v) {
+  result ← prettyPrintToChars v
+  io:println¨,/result
+  0
+}
+
+declare(:export prettyPrint)

@@ -23,7 +23,8 @@
     <option value="apl360">APL\360     (1966) 60k</option>
     <option value="ngnapl">ngn/apl     (2018) 50k</option>
     <option value="iv"    >APL\iv      (2020) 6M</option>
-    <option value="bqn"   >bqn.js       (2022) 150k</option>
+    <option value="bqn"   >BQN         (2022) 150k</option>
+    <option value="kap"   >KAP         (2022) 800k</option>
    </optgroup>
    <optgroup label="j">
     <option value="j0"    >Incunabulum (1989)   6k</option>
@@ -39,7 +40,7 @@
     <option value="ngn"   >ngn/k        (2022) 160k</option>
     <option value="k7"    >k7           (2019)   1M</option>
     <option value="k9"    >k9           (2021) 170k</option>
-    <option value="k" selected="selected">ktye/k       (2022)  56k</option>
+    <option value="k" selected="selected">ktye/k       (2022)  48k</option>
    </optgroup>
     <option value="files" >files</option>
   </select>
@@ -71,6 +72,7 @@ import { k7     } from './k7.js'
 import { k9     } from './k9.js'
 import { k      } from './k.js'
 import { bqn    } from './bqn.js'
+import { kap    } from './kap.js'
 import { fs     } from './fs.js' 
 import { files  } from './files.js'
 
@@ -161,6 +163,7 @@ function swtch(s){
  case "k9":     sys=k9     ;break
  case "k":      sys=k      ;break
  case "bqn":    sys=bqn    ;break
+ case "kap":    sys=kap    ;break
  case "files":  sys=files  ;break
  default:console.log("unknown system", s); sys=k
  }

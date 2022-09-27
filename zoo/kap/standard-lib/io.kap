@@ -1,0 +1,10 @@
+namespace("io")
+
+∇ println (v) {
+  v←v
+  print v
+  print unicode:fromCodepoints 10
+  v
+}
+
+declare(:export println)

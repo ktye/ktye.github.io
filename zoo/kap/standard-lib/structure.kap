@@ -1,0 +1,56 @@
+namespace("kap")
+
+defsyntax if (:value cond :nfunction thenStatement :optional (:constant else :nfunction elseStatement)) {
+  ⍞(((cond ≡ 1) ∨ ((1=≢cond) ∧ (↑cond) ≡ 1)) ⌷ (⍞((isLocallyBound 'elseStatement) ⌷ λ{λ{⍬}} λ{elseStatement}) ⍬) thenStatement) cond
+}
+
+declare(:export (if else))
+
+defsyntax while (:nexprfunction cond :nfunction body) {
+  if (⍞cond 0) {
+    ({ ⍞body 0 }⍣{ ~⍞cond 0 }) 0
+  } else {
+    ⍬
+  }
+}
+
+declare(:export while)
+
+defsyntax unwindProtect (:function statement :function handler) {
+  int:unwindProtect statement handler
+}
+
+declare(:export unwindProtect)
+
+defsyntaxsub whenInner (:nexprfunction cond :function thenStatement :optional (:special :newline)) {
+  cond thenStatement
+}
+
+defsyntax when (:special :openBrace :optional (:special :newline) :repeat (entryList whenInner) :special :closeBrace) {
+  i ← 0
+  n ← ↑⍴entryList
+  cont ← 1
+  res ← ⍬
+  while((i<n) ∧ cont) {
+    (cond fn) ← ↑entryList[i]
+    if(⍞cond ⍬) {
+      res ← ⍞fn ⍬
+      cont ← 0
+    }
+    i ← 1+i
+  }
+  res
+}
+
+declare(:export (when begin end))
+
+declare(:singleCharExported "⊇")
+
+∇ (A) ⊇ (B) {
+  if (~isLocallyBound 'A) {
+    →"Function requires left argument"
+  }
+  {(⊂⍵)⊃B}¨A
+}
+
+declare(:export ⊇)
