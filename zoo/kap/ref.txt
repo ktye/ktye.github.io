@@ -1,0 +1,88 @@
+KAP  https://codeberg.org/loke/array  https://kapdemo.dhsdevelopments.com
+
+Functions
+    Monadic      Dyadic
+ +  Complex      Conjugate
+ -  Negation     Subtraction
+ ×  Signum       Multiply
+ ÷  Reciprocal   Divide
+ |  Magnitude    Modulo
+ ⌈  Ceiling      Maximum
+ ⌊  Floor        Minimum
+ ⍟  Logarithm    BaseLogarithm
+ ⍳  Iota         IndexOf
+ ⍴  Shape        Reshape
+ ⊢  Self         Right
+ ⊣  Self         Left
+ =               Equals 
+ ≠               Not equals
+ <               Less than
+ >               Greater than
+ ≤               Less than or equal
+ ≥               Greater than or equal
+ ⌷               Index
+ ⊂  Encose       Partition
+ ⊃  Disclose     Pick
+ ∧               And/GCD
+ ∨               Or/LCM
+ ⍲               Nand 
+ ⍱               Nor
+ ~  Not          Without
+ ,  Ravel        Concatenate
+ ⍪  Table        ,[0]
+ ↑  First        Take
+ ↓  DropFirst    Drop
+ ?  Random       Draw
+ ⌽  Reverse      Rotate
+ ⊖  ReverseMajor RotateMajor
+ ⍉  Transpose    Reorder
+ ≡               Match
+ ≢  Size         NotMatch
+ ∊               Find
+ ⍷               FindMap
+ ⍋  GradeUp
+ ⍒  GradeDown
+ /               Select
+ ⌿               SelectFirst
+ ⍕  String
+ ⍎  Parse
+ ∪  Unique       UniqueBoth
+ ∩               Intersect
+ !  Factorial    Binomial
+
+Operators
+ /  Reduce
+ ⌿  ReduceFirst
+ ¨  Each
+ ⍨  Flip
+ ⍤  Rank
+ ∵  Bitwise
+ ∘  Compose
+ parallel
+
+Control
+ if (a) {
+     result
+ }
+ 
+ if (a) {
+    resultIfTrue
+ } else {
+    resultIfFalse
+ }
+ 
+ when {
+    (conditionA) { resultIfA }
+    (conditionB) { resultIfB }
+    (1)          { elseResult }
+ }
+ 
+ while (a) {
+    code
+ }
+ 
+ unwindProtect { mainCode } { unwind }
+ 
+ :foo → "test"  ⍝ throw
+ 
+ 
