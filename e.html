@@ -1,21 +1,28 @@
 <!DOCTYPE html>
-<head><meta charset="utf-8"><title>.</title></head>
+<head><meta charset="utf-8"><title>.</title>
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAAMFBMVEUAAAD/AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADO6msTAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAMklEQVQImWNQggIGJUEQJYiDocAEZTApQBgKTApMaAwGBpiIkhIqQwmmRkmBAYcVUAAAxeENSamjy/wAAAAASUVORK5CYII='>
+<link rel="manifest" href="/e.webmanifest">
 <link rel="stylesheet" href="codemirror/codemirror.min.css">
 <style>
  html{font-family:monospace;background:lightgrey;}
+ body{margin:0px}
  .CodeMirror{height:100%!important;border:none;resize:none}
+ #wrt{position:absolute;top:0px;right:0px;z-index:10;font-family:monospace;color:#123;background-color:#abc;font-size:12pt;}
 </style>
 
 <script src="codemirror/jquery.min.js"></script>
 <script src="codemirror/codemirror.min.js"></script>
 <script src="codemirror/matchbrackets.js"></script>
+</head>
 
 <body>
-<div id="edt" ></div>
+<div id="edt"></div>
+<button id="wrt" onclick='wrt(this)'>open</button>
 <a id="dl" style:"display:none"></a>
 
 <script>
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register("/e.sw.js")
 
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
@@ -42,33 +49,26 @@ function search(t, all){
 window.addEventListener('unhandledrejection', function(e) {ed.setValue(String(e.reason))})
 
 
-// drop files
-window.ondragover=function(e){pd(e)}
-window.ondrop=function(e){pd(e);if (e.dataTransfer.items.length==1){
-  let it=e.dataTransfer.items[0]
- if(it.kind=='file'){let file=it.getAsFile();addfile(file)}}
+let F
+async function wrt(x){
+ if(x.textContent=="open") fopen()
+ else                      fwrite()
 }
-function addfile(x){
- let r = new FileReader()
- r.onload = function(){
-  ed.setValue(r.result)
+async function fopen(x){
+ [F]=await window.showOpenFilePicker()
+ console.log(F)
+ if(F.kind==="file"){
+  const f=await F.getFile()
+  const t=await f.text()
+  ed.setValue(t)
+  ge("wrt").textContent="write"
  }
- r.readAsText(x)
 }
-
-// download on hash change
-function download(name,u){
- let dl=ge("dl");let b=new Blob([u],{type:"application/octet-stream"})
- dl.href=URL.createObjectURL(b);dl.download=name;dl.click()}
-
-document.location.hash="#nofile.txt"
-
-window.addEventListener('hashchange', function() {let h=document.location.hash
- if(h.length>1&&h!="#nofile.txt")
-  download(h.slice(1), us(ed.getValue()))
-}, false);
-
-
+async function fwrite(){
+ const w=await F.createWritable()
+ await w.write(ed.getValue())
+ await w.close()
+}
 
 </script>
 </body>
