@@ -7,10 +7,10 @@
 /  I x  U x  J x  K x  F x  read. x is byte address(not vector index) in linear memory
 /  I[x]:y ..                write. alignment is assumed, e.g. avoid I[1+2]:..
 / functions
-/  f:i:{[xi;yf]..}       f(name), i(return type), args&locals have type suffix in the name
+/  f[i]:{[xi;yf]..}      f(name), i(return type), args&locals have type suffix in the name
 /                        locals are not declared, they are detected by k on assignment, global: zi::..
-/  f:i:{[]..; :x; ..}    return x, automatic on last statement if f has a return value.
-/  f:ii:{[]..; (a;b)}    multi-return
+/  f[i]:{[]..; :x; ..}   return x, automatic on last statement if f has a return value.
+/  f[ii]:{[]..; (a;b)}   multi-return
 / globals
 /  ai:3                  global var (mutable)
 /  bi=4                  const
@@ -49,7 +49,6 @@
 / data
 /  0x1234..              first statements are data section(copied to initial memory at 0)
 / function table
-/  #100                  function table (for indirect calls) with 100 entries
 /  0:`a`b`c              table for indirect calls start-index:names
 /  50:`f`g ";"/:
 
@@ -76,13 +75,13 @@ ik:{[o]opts::o
 ikprg:{
  c:1_&P=0
  excl:!0
+ prog:"`",($S 0)," /program\n"
  fncs:"\n"/:y@&`fun=T c
  cons:$[#r:ikfmt@";"/:y@&`con=T c;"/constants\n",r;""]
  vars:$[#r:ikfmt@";"/:y@&`var=T c;"/globals\n",r;""]
  data:$[#D;"/data\n","\n"/:("0x",`x@)'-32^D,_&31;""]
- tabd:$[0>i:1+|/I c t:&`tab=T c;"";"/function table\n#",$i]
- tabl:iktbl y t
- "\n"/:(""~/:)_(data;tabd;tabl;cons;vars;"\n/functions\n",fncs)}
+ tabl:iktbl y t:&`tab=T c
+ "\n"/:(""~/:)_(prog;data;tabl;cons;vars;"\n/functions\n",fncs)}
  
 ikdat:{,/@["\\",/:256^`x@_!256;0+ikc;ikc:_("a"+!26),("A"+!26),("0"+!10),"~!@#$%^&*()_+{}[]|;:<>,./?"]x}
 ikmem:{y;""}
@@ -96,7 +95,7 @@ ikfun:{s:$S x
  locs:" "/:y@&`loc=T c
  body:    y@*&`ast=T c
  expo:$[I x;"(export \"",s,"\")";""]
- s,":",rets,":{[",args,"]",ikfmt body,"}"}
+ s,"[",rets,"]:{[",args,"]",ikfmt body,"}"}
  
  
 ikarg:{$[#y;$*y;""]}
