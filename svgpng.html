@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<head><title>svg from png</title></head>
+<body>
+
+svg size: <input type="number" id="pixels" value="512"><br/>
+open png: <input type="file" accept=".png" onchange='load(this)'>
+<img id="pngimg">
+<canvas id="cnv"></canvas><br/>
+<div id="out"></div>
+<a id="dl" style="display:none"></a>
+
+<script>
+let svgname="out.svg"
+function ge(x){return document.getElementById(x)}
+function load(x){
+ let f=x.files[0];
+ svgname=f.name.substring(0, f.name.indexOf('.png'))+".svg"
+ let r=new FileReader();
+ r.readAsArrayBuffer(f);
+ r.onload=function(){
+  const b=new Blob([r.result])
+  const u=URL.createObjectURL(b)
+  const m=ge("pngimg")
+  m.src=u
+  m.onload=function(){
+   let c=ge("cnv")
+   let ctx=c.getContext("2d")
+   c.width=m.width
+   c.height=m.height
+   var i=new Image()
+   i.onload=(function(c,ctx){
+    return function(){
+     ctx.drawImage(this,0,0)
+     let d=ctx.getImageData(0,0,c.width,c.height)
+     let s=svg(d.data,c.width,c.height,ge("pixels").value)
+     ge("out").innerHTML=s
+     ge("out").onclick=function(){download(s)}
+    }
+   })(c,ctx)
+   i.src=u
+  }
+ }
+}
+function download(s){
+ let dl=ge("dl");
+ console.log(dl);
+ let b=new Blob([s],{type:"image/svg+xml"});
+ dl.href=URL.createObjectURL(b);dl.download=svgname;dl.click()
+}
+
+function hx(b){return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function sm(c){
+ switch(c){
+ case "ff0000": return "f00"
+ case "00ff00": return "0f0"
+ case "0000ff": return "00f"
+ case "000000": return "000"
+ case "ffffff": return "fff"
+ default:       return c
+}}
+
+function svg(d,w,h,px){
+ let S=Math.floor(px/w)
+ let s='<svg height="'+px+'" width="'+px+'" xmlns="http://www.w3.org/2000/svg">\n'
+ let o=0
+ for(let j=0;j<h;j++){
+  for(let i=0;i<w;i++){
+   let h=sm(hx(d.slice(o,o+3)))
+   if(h!="fff")s+='<rect x="'+S*i+'" y="'+S*j+'" width="'+S+'" height="'+S+'" fill="#'+h+'"/>\n'
+   o+=4
+  }
+ }
+ return s+'</svg>\n'
+}
+
+</script>
+</body></html>
+
+
+
