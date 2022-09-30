@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<title>ktye/k</title>
+<style>body{font-family:monospace;white-space:pre}</style>
+
+<script>
+window.onkeydown=function(e){if(e.key=="Enter"){
+ e.preventDefault()
+ let b=document.body
+ let r=getSelection().getRangeAt(0)
+ let t=b.textContent.slice(0,r.endOffset)
+ b.textContent=t
+ let i=t.lastIndexOf("\n")
+ t=t.slice(i>0?i:0)
+
+ console.log("input", JSON.stringify(t))
+ b.textContent+="\nresponse\n "
+
+ let s=window.getSelection()
+ s.removeAllRanges()
+ let h=document.createRange()
+ h.selectNodeContents(b)
+ h.collapse(false)
+ s.addRange(h)
+ window.scrollTo(0,b.scrollHeight)
+}}
+</script>
+</head>
+
+<body contenteditable="true" spellcheck="false"></body></html>
