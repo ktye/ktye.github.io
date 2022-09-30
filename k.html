@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="manifest" href="/k.webmanifest">
 <title>ktye/k</title>
 <style>body{font-family:monospace;white-space:pre}</style>
 
-<script>
+<script type="module">
+import {K} from './k.js'
+
+if('serviceWorker'in navigator)navigator.serviceWorker.register("/k.sw.js")
+
+window.init=function(){
+ let b=document.body
+ let  ext={}
+ ext.init= function(){b.textContent="ktye/k "+K.n+"\n ";end()}
+ ext.read= function(){return newUint8Array(0)}
+ ext.write=function(f,x){if(f==="")b.textContent+=new TextDecoder("utf-8").decode(x)}
+ K.kinit(ext)}
+
+function krep(s){
+ if(s.startsWith(" "))s=s.slice(1)
+ if((s=="\\")||s=="\\h"){help();return}
+ try     {K._.repl(K.KC(s));K.save()}
+ catch(e){console.log(e);K.restore()}
+ document.body.textContent+=" ";end()}
+
 window.onkeydown=function(e){if(e.key=="Enter"){
  e.preventDefault()
  let b=document.body
@@ -12,20 +32,22 @@ window.onkeydown=function(e){if(e.key=="Enter"){
  let t=b.textContent.slice(0,r.endOffset)
  b.textContent=t
  let i=t.lastIndexOf("\n")
- t=t.slice(i>0?i:0)
+ t=t.slice(i>0?1+i:0)
+ b.textContent+="\n"
+ if(t.trim()!=""){krep(t)}}}
 
- console.log("input", JSON.stringify(t))
- b.textContent+="\nresponse\n "
-
+function end(){
+ let b=document.body
  let s=window.getSelection()
  s.removeAllRanges()
- let h=document.createRange()
- h.selectNodeContents(b)
- h.collapse(false)
- s.addRange(h)
+ let r=document.createRange()
+ r.selectNodeContents(b)
+ r.collapse(false)
+ s.addRange(r)
  window.scrollTo(0,b.scrollHeight)
-}}
+ b.focus()}
+
 </script>
 </head>
 
-<body contenteditable="true" spellcheck="false"></body></html>
+<body contenteditable="true" spellcheck="false" onload="window.init()"></body></html>

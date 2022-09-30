@@ -5,12 +5,10 @@ this.addEventListener("install", (event) => {
    .open("v1")
    .then((cache) =>
     cache.addAll([
-     "/apl.html",
+     "/k.html",
      "/k.js",
      "/k.wasm",
-     "/apl.woff2",
-     "/icon.svg",
-     "/div.png"
+     "/icon.svg"
     ])
    )
   )
@@ -24,9 +22,5 @@ self.addEventListener('fetch', function(event) {
  );
 });
 
-self.addEventListener("activate",event=>{
- console.log("Service worker activated");
-})
-self.addEventListener("beforeinstallprompt",event=>{
- console.log("Service worker before install");
-})
+self.addEventListener("activate",event=>{})
+self.addEventListener("beforeinstallprompt",event=>{})
