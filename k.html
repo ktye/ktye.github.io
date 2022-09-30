@@ -47,6 +47,8 @@ function end(){
  window.scrollTo(0,b.scrollHeight)
  b.focus()}
 
+function help(){fetch("readme").then(r=>r.text()).then(t=>{document.body.textContent+=t+" ";end()})}
+
 </script>
 </head>
 

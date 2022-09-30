@@ -8,6 +8,7 @@ this.addEventListener("install", (event) => {
      "/k.html",
      "/k.js",
      "/k.wasm",
+     "/readme",
      "/icon.svg"
     ])
    )
