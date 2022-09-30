@@ -14,7 +14,7 @@ window.init=function(){
  let b=document.body
  let  ext={}
  ext.init= function(){b.textContent="ktye/k "+K.n+"\n ";end()}
- ext.read= function(){return newUint8Array(0)}
+ ext.read= function(){return new Uint8Array(0)}
  ext.write=function(f,x){if(f==="")b.textContent+=new TextDecoder("utf-8").decode(x)}
  K.kinit(ext)}
 

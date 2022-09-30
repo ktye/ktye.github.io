@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="manifest" href="kde.webmanifest">
+<link rel="stylesheet" href="../codemirror/codemirror.min.css">
+<title>kde</title>
+
+<script src="../codemirror/jquery.min.js"></script>
+<script src="../codemirror/codemirror.min.js"></script>
+<script src="../codemirror/matchbrackets.js"></script>
+<script type="module" src="kde.js"></script>
+
+<style>
+ *{font-family:monospace}
+ body{margin:0}
+ #left{background-color:#f00; left:0;    width:50vw; height:100vh; top:0;    position:absolute}
+ #repl{background-color:#fff; left:50vw; width:50vw; height:50vh;  top:0;    position:absolute; margin:0; outline:0px; overflow:auto}
+ #brow{background-color:#eee; left:50vw; width:50vw; height:50vh;  top:50vh; position:absolute; overflow:auto;}
+ .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
+ #runb{border:1px solid black}
+ #wrtb{border:1px solid black; }
+ #newb{border:1px solid black; }
+ #rall{border:1px solid black; }
+ #odir{border:1px solid black; float:right}
+ #expl{display:grid;grid-template-columns:repeat(3,1fr);}
+ button:active{transform:translateY(1px)}
+ .file{ color:#00a}
+ .kfile{color:#a00}
+ .curfile{font-weight:bold}
+ .modified{text-decoration:underline}
+</style>
+</head>
+
+<body onload="window.init()">
+ <div id="left"></div>
+ <pre id="repl" contenteditable="true" spellcheck="false">k</pre>
+ <div id="brow">
+  <div id="bar">
+   <button id="runb">run</button>
+   <button id="wrtb" disabled>write</button>
+   <button id="newb" disabled>new</button>
+   <button id="rall" disabled>read all</button>
+   <button id="odir">opendir</button>
+  </div>
+  <div id="expl"></div>
+ </div>
+</body></html>
