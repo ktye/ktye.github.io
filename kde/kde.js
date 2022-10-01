@@ -25,7 +25,8 @@ window.onerror=function(m,s,l,c,e){err(s+m)}
 window.init=function(){
  left=ge("left")
  repl=ge("repl")
- ed = CodeMirror(left, {"dark":true,"lineNumbers":true,"dragDrop":false,"tabSize":1,"smartIndent":false,"matchBrackets":true})
+ ed = CodeMirror(left, {"mode":"k","lineNumbers":true,"dragDrop":false,"tabSize":1,"smartIndent":false,"matchBrackets":true})
+ ed.setOption("theme","k")
  ed.setValue("!3")
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
@@ -202,6 +203,8 @@ function end(){
  r.selectNodeContents(repl)
  r.collapse(false)
  s.addRange(r)
+ let m=K._.memory.buffer.byteLength>>>10
+ ge("memo").textContent=(m>1000)?((m>>>10)+"M"):m+"k"
  repl.scrollTo(0,repl.scrollHeight)
  repl.focus()
 }
