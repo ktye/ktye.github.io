@@ -1,9 +1,9 @@
-.cm-s-k span.cm-comment{color:green}
-.cm-s-k span.cm-string {color:darkred}
-.cm-s-k span.cm-variable{color:#d11}      /* `sym`"abc" */
-.cm-s-k span.cm-keyword{color:red}        /* (space)\   */
-.cm-s-k span.cm-level0{color:#000}        /* (;) for nesting level */
-.cm-s-k span.cm-level1{color:#888}
-.cm-s-k span.cm-level2{color:#0ab}
-.cm-s-k span.cm-cond{color:#0277bd}       /* $[cond;x;cond;..] */
-.cm-s-k span.cm-invalid{background:darkred;color:white}
+.cm-s-k span.cm-comment {color:green}
+.cm-s-k span.cm-string  {color:darkred}
+.cm-s-k span.cm-variable{color:#d11}       /* `sym`"abc" */
+.cm-s-k span.cm-keyword {color:red}        /* (space)\   */
+.cm-s-k span.cm-level0  {color:#000}       /* (;) for nesting level */
+.cm-s-k span.cm-level1  {color:#888}
+.cm-s-k span.cm-level2  {color:#0ab}
+.cm-s-k span.cm-cond    {color:#0277bd}    /* $[cond;x;cond;..] */
+.cm-s-k span.cm-invalid {background:darkred;color:white}

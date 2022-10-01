@@ -6,8 +6,11 @@ this.addEventListener("install", (event) => {
     cache.addAll([
      "/k.js",
      "/k.wasm",
+     "/kde/kwork.js",
      "/kde/index.html",
      "/kde/kde.js",
+     "/kde/k.mode.js",
+     "/kde/k.mode.css",
      "/icon.svg"
     ])
    )

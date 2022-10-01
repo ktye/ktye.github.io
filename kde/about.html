@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>kde</title>
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<style>
+ body{font-family:georgia,serif}
+ h2{border-top:1px solid black}
+ pre{margin-left:1em}
+</style>
+</head>
+
+<body>
+<h1>kde</h1>
+<i>i never use an ide, expect those i write myself</i>
+<p>
+<a href="index.html">kde</a> includes:
+<ul>
+ <li>editor with k syntax mode</li>
+ <li>k repl</li>
+ <li>file browser</li>
+ <li>buttons</li>
+ <li>todo: plot canvas, open source at error position, find definition, grep, debugger checkbox</li>
+</ul>
+it is a web application that can access the local file system if you permit.</br>
+it can be installed as a progressive web application to work offline, if you so wish.
+
+<h2>editor</h2>
+the editor is codemirror with bracket matching, block editing (alt-click-move-mouse), and k syntax mode that should catch errors early:
+<ul>
+ <li><code>"strings"</code> and </code>`symbols</code> are detected</li>
+ <li>non-matching brackets <code>(}</code> are marked as errors</li>
+ <li><code>({[;]})</code> are colored by 3 nesting levels</li>
+ <li><code>$[cond;a;cond;b]</code> marks conditions differently</li>
+ <li><code>$[c;a;c;b]</code> indicates an error for missing else</li>
+ <li><code>1+ \x</code> highlights debug backslash</li>
+ <li>source: <a href="k.mode.js">syntax parser</a>, <a href="k.mode.css">colors</a></li>
+</ul>
+
+clicking <code>run</code> restarts k and evaluates the program in the editor.</br>
+the same can be done with <code>shift-enter</code> or <code>shift-rightclick</code> in the editor.
+if some text is selected, these shortcuts only send the current selection to the repl, without restarting k.</p>
+
+<b>multiple files</b> are executed, if the editor starts with <code>/!</code></br>
+e.g. if the editor has the first line: <code>/!a.k b.k</code>, it executes <code>a.k</code> then <code>b.k</code> followed by the program in the editor.
+
+
+<h2>repl</h2>
+the repl is a <i>contenteditable</i> pre element.<br/>
+pressing return deletes everything after the current location and executes the current line.<p>
+
+k runs in a webworker in a separate thread as the ui.<br/>
+if k does not return directly, e.g. <code>(1+)/:1</code> it can be interrupted with the <code>int</code> button, which is enabled when k is busy.
+<code>int</code> terminates and restarts the webworker.
+all data in k memory is reset, but the filesystem in the ui is still loaded.
+
+<h2>browser</h2>
+
+by default you can edit and execute the contents of the editor.<br/>
+to load files from disk, you have to open a directory by button, or drop a directory in the window.
+the filesystemapi is not supported by all browsers and you need to grant access.<br>
+only one directory is supported, no subdirs.<p>
+
+click on a file to open it in the editor. it can be saved back to disk.</br>
+the browser highlights the open file(bold) and underlines it if modified,
+but does not track changes on disk.<p>
+
+k also has file system access within the directory that is loaded.<br/>
+<code>`file&lt;"bytes"</code> writes to disk and
+<code>x:&lt;`file</code> reads.<br/>
+<code>`$&lt;`"."</code> returns a list of all file names as symbols.<br/>
+to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br/>
+files are preloaded when clicking <code>load all</code> or when the file has been clicked on.
+k-files are always preloaded.
+
+</body>
+</html>
