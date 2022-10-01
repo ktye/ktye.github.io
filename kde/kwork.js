@@ -23,19 +23,31 @@ function kstart(d){let s=d.s
  let  ext={}
  ext.init= function(){
   if(("string"==typeof s)&&(s!="")){
+   t0=performance.now()
    K._.repl(K.KC(s))
   }
-  if(s=="")postMessage({m:"write",f:"",u:us("ktye/k "+K.n+"\n "),mem:memory()});
+  if(s=="")postMessage({m:"write",f:"",u:us("ktye/k "+K.n+"\n ")});
  }
  //ext.read=d.r
  ext.write=function(f,u){
-  postMessage({m:"write",f:f,u:u,mem:memory()})
+  postMessage({m:"write",f:f,u:u,mem:memory()+" "+dt()})
  }
  K.kinit(ext,"../k.wasm")
 }
 
+
 function repl(d){
+ t0=performance.now()
  try     {K._.repl(K.KC(d.s));K.save()}
  catch(e){console.log(e);  K.restore()}
  postMessage({m:"write",f:"",u:us(" ")})
 }
+
+let t0
+function dt(){
+  let ms=performance.now()-t0
+  if(ms>1000)return Math.floor(ms/1000)+"s"
+  if(ms<1)   return Math.floor(ms*1000)+"µs"
+  return Math.floor(ms)+"ms"
+}
+

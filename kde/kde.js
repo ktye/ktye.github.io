@@ -25,6 +25,7 @@ window.init=function(){
  ed.sp=false //.sp(span) ed.sp.h(handle)
  ed.on("change",modify)
  ed.on("change",function(){})
+ ge("expl").append(document.createTextNode("high resolution timer: "+crossOriginIsolated))
  kstart("")
 }
 
