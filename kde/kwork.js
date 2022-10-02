@@ -11,7 +11,7 @@ onmessage=function(e){
  }
 }
 onerror=function(e){
- console.log("kwork error",e)
+ console.log("kwork error",e.message,e)
 }
 
 function memory(){
@@ -24,7 +24,8 @@ function kstart(d){let s=d.s
  ext.init= function(){
   if(("string"==typeof s)&&(s!="")){
    t0=performance.now()
-   K._.repl(K.KC(s))
+   try     { K._.repl(K.KC(s)) }
+   catch(e){ indicate() }
   }
   if(s=="")postMessage({m:"write",f:"",u:us("ktye/k "+K.n+"\n ")});
  }
@@ -39,7 +40,7 @@ function kstart(d){let s=d.s
 function repl(d){
  t0=performance.now()
  try     {K._.repl(K.KC(d.s));K.save()}
- catch(e){console.log(e);  K.restore()}
+ catch(e){indicate(); K.restore()}
  postMessage({m:"write",f:"",u:us(" ")})
 }
 
@@ -49,5 +50,10 @@ function dt(){
   if(ms>1000)return Math.floor(ms/1000)+"s"
   if(ms<1)   return Math.floor(ms*1000)+"µs"
   return Math.floor(ms)+"ms"
+}
+
+function indicate(){
+ let p=K._.Srcp()
+ if(p)postMessage({"m":"indicate","p":p})
 }
 

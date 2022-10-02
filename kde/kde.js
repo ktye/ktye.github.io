@@ -25,12 +25,13 @@ window.init=function(){
   "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
  ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec})
  ed.on("contextmenu",function(_,e){pd(e)})
- ed.setValue("!3")
+ ed.setValue("!3\n1 2+`s\n4 5 6")
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
  ed.on("change",modify)
  ed.on("change",function(){})
- ge("expl").append(document.createTextNode("high resolution timer: "+crossOriginIsolated))
+ if(!crossOriginIsolated)ge("expl").append(document.createTextNode("no hr timer"))
+ fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
 }
 
@@ -87,16 +88,20 @@ function newspan(name,h){
  return s
 }
 
-function openfile(s,ex){ //span: .h(handle)
+function openfile(s,ex,p){ //span: .h(handle)
  s.classList.add("curfile")
- s.h.getFile().then(r=>r.arrayBuffer()).then(u=>{
+ let set=function(s,u){
   s.u=new Uint8Array(u)
   ed.setValue(su(s.u))
   ed.sp=s
   ed.modified=false
+  ed.setOption("mode", (s.textContent.endsWith(".k")&&ge("ksyn").checked) ? "k" : "")
+  if(p)showpos(p)
   ge("wrtb").disabled=false
   let a=ex.children;for(let i=0;i<a.length;i++)if(a[i]!=s)a[i].classList.remove("curfile","modified")
- })
+ }
+ if("(z.k)"==s.textContent){set(s,s.u);return}
+ s.h.getFile().then(r=>r.arrayBuffer()).then(u=>set(s,u))
 }
 
 ge("rall").onclick=function(){ //preload all files for k synchronous read
@@ -107,6 +112,16 @@ ge("rall").onclick=function(){ //preload all files for k synchronous read
 function preload(s){
  s.h.getFile().then(r=>r.arrayBuffer()).then(u=>{s.u=new Uint8Array(u)})
 }
+
+function findfile(name){
+ let ex=ge("expl")
+ let a=ex.children;for(let i=0;i<a.length;i++){let s=a[i].textContent
+  if(s==name)return a[i]
+ }
+ if(name=="(z.k)"){
+  let s=newspan(name,null)
+  s.u=us(zk);ex.appendChild(s);return s
+}}
 
 function readfile(name){ // from k(must be preloaded), or readdir: `$"\n"\:<`"."
  let ex=ge("expl")
@@ -170,21 +185,29 @@ window.ondrop=function(e){pd(e);
  err("only a directory can be dropped")
 }
 
+ge("ksyn").onchange=function(e){ed.setOption("mode",(e.target.checked)?"k":"")}
+
 function cats(files,s){
+ src={f:["(z.k)"],n:[zk?zk.length:0]}
  let k={}; let r=[]
- let a=ge("expl").children;for(let i=0;i<a.length;i++)k[a[i].textContent]=su(a[i].u)
- for(let i=0;i<files.length;i++){
-  if(!files[i]in k)throw(files[k]+" is missing")
-  r.push(k[files[i]])
- }
+ if(files.length){
+  let a=ge("expl").children;for(let i=0;i<a.length;i++)k[a[i].textContent]=su(a[i].u)
+  for(let i=0;i<files.length;i++){
+   if(!files[i]in k)throw(files[k]+" is missing")
+   let fi=files[i]; let si=k[fi]
+   src.f.push(fi);src.n.push(si.length)
+   r.push(si)
+ }}
  r.push(s)
+ src.f.push("(ed)");src.n.push(s.length)
  return r.join("\n")
 }
+let src={}
 
 function kstart(s){        //todo: read args from hash, e.g. #a.k,b.k,c.k
  intr.disabled=false
  repl.textContent=""
- if(s.startsWith("/!"))s=cats(s.slice(2,s.indexOf("\n")).split(" "),s)
+ s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
  kw.postMessage({m:"start",s:s})
 }
 ge("runb").onclick=function(){kstart(ed.getValue())}
@@ -211,9 +234,6 @@ function krep(s){
  if((s=="\\")||s=="\\h"){help();return}
  intr.disabled=false
  kw.postMessage({m:"repl",s:s})
- //try     {K._.repl(K.KC(s));K.save()}
- //catch(e){console.log(e);K.restore()}
- //repl.textContent+=" ";end()
 }
 
 function end(m){
@@ -225,8 +245,6 @@ function end(m){
  r.collapse(false)
  s.addRange(r)
  if(m!==undefined)ge("memo").textContent=m
- //let m=K._.memory.buffer.byteLength>>>10
- //ge("memo").textContent=(m>1000)?((m>>>10)+"M"):m+"k"
  repl.scrollTo(0,repl.scrollHeight)
  repl.focus()
 }
@@ -243,10 +261,11 @@ function newk(){
    if(d.f==""){O(su(d.u));end(d.mem)}
    else        writefile(d.f,d.u)
    break
+  case "indicate":indicate(d.p);break
   default: console.log("unknown from kwork:", e.data)
  }}
  kw.onerror=function(e){
-  console.log("err from kwork:",e)
+  console.log("err from kwork:",e.message,e.filename+":"+e.lineno, e)
  }
 }
 newk()
@@ -257,3 +276,24 @@ function interrupt(){
  kstart("")
 }
 
+let zk //built-in z.k source for error indication
+function indicate(p){
+ for(let i=0;i<src.n.length;i++){let ni=src.n[i]
+  if(p<ni){fileat(src.f[i],p-2);return}
+  p-=1+ni
+ }//otherwise: error in repl
+}
+function fileat(f,p){
+ if(f=="(ed)"){showpos(p);return}
+ let a=ce("a");
+ a.href=f+":"+p
+ a.textContent=f+":"+p
+ a.onclick=function(e){pd(e);openfile(findfile(f),ge("expl"),p)}
+ repl.appendChild(a)
+}
+function showpos(i){
+ let p=ed.posFromIndex(i)
+ ed.setSelection(p,{line:p.line,ch:1+p.ch})
+}
+
+window.ge=ge //for js console

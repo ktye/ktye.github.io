@@ -22,7 +22,9 @@
  #left{background-color:#f00; left:0;    width:50vw; height:100vh; top:0;    position:absolute}
  #repl{background-color:#fff; left:50vw; width:50vw; height:50vh;  top:0;    position:absolute; margin:0; outline:0px; overflow:auto}
  #brow{background-color:#efe; left:50vw; width:50vw; height:50vh;  top:50vh; position:absolute; overflow:auto;}
+ #bar{display:flex;flex-direction:row}
  .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
+ .CodeMirror-selected{background-color:#def;outline:1px solid}
  #runb,#wrtb{border:1px solid black}
  button{border:1px solid black;background-color:#fff}
  button:active{transform:translateY(1px)}
@@ -42,11 +44,14 @@
   <div id="bar">
    <button id="runb">run</button>
    <button id="wrtb" disabled>write</button>
-   <button id="newb" disabled>new</button>
-   <button id="rall" disabled>read all</button>
-   <button id="intr" disabled>int</button>
-   <span   id="memo" >0k</span>
-   <button id="odir">opendir</button>
+   <button id="newb" disabled title="create new file">new</button>
+   <button id="rall" disabled title="preload all files">rda</button>
+   <button id="intr" disabled title="interrupt k">int</button>
+   <input  id="ksyn" checked type="checkbox" title="syntax highlight">
+   <input  id="lint"         type="checkbox" title="static analysis">
+   <input  id="debg"         type="checkbox" title="debug">
+   <span   id="memo" style="flex-grow:1">0k</span>
+   <button id="odir" title="open working directory">open</button>
   </div>
   <div id="expl"></div>
  </div>

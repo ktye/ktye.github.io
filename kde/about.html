@@ -68,14 +68,14 @@ e.g. if the editor has the first line: <code>/!a.k b.k</code>, it executes <code
 
 <h2>repl</h2>
 the repl is a <i>contenteditable</i> pre element.<br/>
-pressing return deletes everything after the current location and executes the current line.<p>
+pressing <code>return</code> deletes everything after the current location and executes the current line.<p>
 
 k runs in a webworker in a separate thread as the ui.<br/>
 if k does not return directly, e.g. <code>(1+)/:1</code> it can be interrupted with the <code>int</code> button, which is enabled when k is busy.
 <code>int</code> terminates and restarts the webworker.
 all data in k memory is reset, but the filesystem in the ui is still loaded.
 
-<h2>browser</h2>
+<h2>file browser</h2>
 
 by default you can edit and execute the contents of the editor.<br/>
 to load files from disk, you have to open a directory by button, or drop a directory in the window.
@@ -91,10 +91,38 @@ k also has file system access within the directory that is loaded.<br/>
 <code>x:&lt;`file</code> reads.<br/>
 <code>`$&lt;`"."</code> returns a list of all file names as symbols.<br/>
 to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br/>
-files are preloaded when clicking <code>load all</code> or when the file has been clicked on.
+files are preloaded when clicking <code>rda</code> or when the file has been clicked on.
 k-files are always preloaded.
 
+<h2>error indicator</h2>
+when k detects an error with position, the position is an offset to the current source, a catenation of the executed files:
+<pre>
+"\n"/:(z.k       /built-in k.wasm
+       a.k;b.k   /by first line: /!a.k b.k
+       ed)       /editor value
+</pre>
+if the error is within the code shown in the editor, it is highlighted directly.
+otherwise a link is appended to the repl giving the user time to save the current file.<p>
+
+only the innermost error position is tracked by kvm which may be in the built-in <code>z.k</code> e.g. the formatter.<br/>
+for a complete stack trace, set the checkbox for the debugger.
+
 <h1>todo</h1>
+
+<h2>debugger</h2>
+<pre>
+a checkbox uses d.wasm instead of k.wasm
+d.wasm is a debug build that calls fpush and fpop (into js)
+for each function call in kvm.
+js then knows about the function arguments of the complete call stack
+and the source positions
+
+in the case of a error, a call stack is printed to the repl with links
+to the source files+positions.
+also the function arguments are present, type+length printed directly and
+assignable to x, as described in the repl extensions above.
+</pre>
+
 
 <h2>extended repl</h2>
 <pre>
@@ -108,35 +136,6 @@ values leak in interactive use, but are reset when clicking run
 (and maybe when deleting lines)
 </pre>
 
-
-<h2>error indicator</h2>
-<pre>
-when k detects an error with position, the position is an offset to the current source.
-the current source is 
-"\n"/:(z.k       /built-in k.wasm
-       a.k;b.k   /by first line: /!a.k b.k
-       ed)       /editor value
-if the error is in the editor source, it is shown directly (highlight+jump)
-if it is in a.k,b.k.. add a link to the repl to open the file+position in the repl
-that leaves time to save the current file.
-if it is in z.k, that could be shown in the repl as the readonly file "(z.k)"
-
-more details are present in debug
-</pre>
-
-<h2>debug</h2>
-<pre>
-a checkbox uses d.wasm instead of k.wasm
-d.wasm is a debug build that calls fpush and fpop (into js)
-for each function call in kvm.
-js then knows about the function arguments of the complete call stack
-and the source positions
-
-in the case of a error, a call stack is printed to the repl with links
-to the source files+positions.
-also the function arguments are present, type+length printed directly and
-assignable to x, as described in the repl extensions above.
-</pre>
 
 <h2>static analysis</h2>
 <pre>
