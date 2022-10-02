@@ -19,23 +19,19 @@
  "use strict";
 
  CodeMirror.defineMode("k",function(){
-  const alpha="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVXXYZ"
-  const numba="0123456789"
  
   let tokenString=function(t,s){
-   let p=t.peek()
-   for(let i=0;;i++){
-    if(t.eol())return "string"
-    if(p=="\\"){t.next();t.next();p=t.peek()}
-    if(i&&p=='"'){
-     t.next()
-     s.st=""
-     return "string"
-    }
-    t.next()
-    p=t.peek()
-   }
-  }
+   if(t.match(/^"([^\\"]|\\.)*"/))
+    s.st=""           //complete string
+   else if(t.match(/^"([^\\"]|\\.)*/))
+    t.skipToEnd()     //start of multiline string
+   else if(t.match(/^([^\\"]|\\.)*"/))
+    s.st=""          //end of multiline string
+   else
+    t.skipToEnd()    //within multiline string
+   return"string"
+  } 
+
   let tokenSymbol=function(t,s){
    t.next() //`
    let p=t.peek()
@@ -46,7 +42,7 @@
    }
    for(let i=0;;i++){
     if(t.eol())break
-    if(alpha.includes(p)||(i&&numba.includes(p))){
+    if(/[a-z]/i.test(p)||(i&&/\d/.test(p))){
      t.next();p=t.peek();continue 
     } 
     break
@@ -80,6 +76,9 @@
    default:  return false
    }
   }
+  let cndlen=function(t,s){
+   if(s.br.length&&"$"==s.br.at(-1))s.cn[-1+s.cn.length]++
+  }
  
   return {
    startState:function(){return{st:"", br:"", cn:[]}},
@@ -101,7 +100,7 @@
     let l=""
     while(1){
      if(p==null)break
-     if((l==" ")&&(p=="/" )){s.st="com";break}
+     if((l==" ")&&(p=="/" )){s.st="com";cndlen(t,s);break}
      if((l==" ")&&(p=="\\")){s.st="deb";break}
      if           (p=='"' ) {s.st="str";break}
      if           (p=='`' ) {s.st="sym";break}
@@ -118,7 +117,7 @@
      t.next()
      p=t.peek()
     }
-    if(t.eol()&&s.br.length&&"$"==s.br.at(-1))s.cn[-1+s.cn.length]++
+    if(t.eol())cndlen(t,s)
     if(s.cn.length&&0==s.cn[-1+s.cn.length]%2)return"cond"
     return"content"
    },
