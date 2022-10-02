@@ -26,7 +26,7 @@ window.init=function(){
   "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
  ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec})
  ed.on("contextmenu",function(_,e){pd(e)})
- ed.setValue("!3\n1 2+`s\n4 5 6")
+ ed.setValue(decodeURIComponent(window.location.hash.substr(1)))
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
  ed.on("change",modify)
@@ -226,7 +226,11 @@ function kstart(s){        //todo: read args from hash, e.g. #a.k,b.k,c.k
  s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
  kw.postMessage({m:"start",s:s})
 }
-ge("runb").onclick=function(){kstart(ed.getValue())}
+ge("runb").onclick=function(){
+ let s=ed.getValue()
+ location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
+ kstart(s)
+}
 ge("intr").onclick=interrupt
 ge("repl").onkeydown=function(e){if(e.key!="Enter")return
  pd(e)
