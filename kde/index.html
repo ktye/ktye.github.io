@@ -19,9 +19,13 @@
 <style>
  *{font-family:monospace}
  body{margin:0}
- #left{background-color:#f00; left:0;    width:50vw; height:100vh; top:0;    position:absolute}
- #repl{background-color:#fff; left:50vw; width:50vw; height:50vh;  top:0;    position:absolute; margin:0; outline:0px; overflow:auto}
- #brow{background-color:#efe; left:50vw; width:50vw; height:50vh;  top:50vh; position:absolute; overflow:auto;}
+ #left{background-color:#f00; position:absolute; left:0; top:0}
+ .left0{width:50vw;height:100vh;}
+ .left1{width:100vw;height:50vh;}
+ #repl{background-color:#fff; position:absolute; margin:0;outline:0px;overflow:auto}
+ .repl0{left:50vw; width:50vw; height:50vh; top:0;} 
+ .repl1{left:0; width:50vw; height:50vh; top:50vh;} 
+ #brow{background-color:#efe; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
  #bar{display:flex;flex-direction:row}
  .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
  .CodeMirror-selected{background-color:#def;outline:1px solid}
@@ -38,8 +42,8 @@
 </head>
 
 <body onload="window.init()">
- <div id="left"></div>
- <pre id="repl" contenteditable="true" spellcheck="false">k</pre>
+ <div id="left" class="left0"></div>
+ <pre id="repl" class="repl0" contenteditable="true" spellcheck="false">k</pre>
  <div id="brow">
   <div id="bar">
    <button id="runb">run</button>

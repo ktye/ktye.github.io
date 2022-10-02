@@ -13,6 +13,7 @@ function err(x){ge("repl").textContent+="\n"+x+"\n "}
 
 window.onerror=function(m,s,l,c,e){err(s+m)}
 
+
 window.init=function(){
  left=ge("left")
  repl=ge("repl")
@@ -186,6 +187,21 @@ window.ondrop=function(e){pd(e);
 }
 
 ge("ksyn").onchange=function(e){ed.setOption("mode",(e.target.checked)?"k":"")}
+
+
+//dbl-click on editor scrollbar to request more space
+let sbclick=0
+window.onmousedown=function(e){
+ let dbl=function(){
+  let t=performance.now(), r=(t-sbclick)<200
+  sbclick=t;return r}
+ let t=function(){ if(dbl()){
+  ge("left").classList.toggle("left0");ge("left").classList.toggle("left1")
+  ge("repl").classList.toggle("repl0");ge("repl").classList.toggle("repl1")
+ }}
+ if     (e.target.classList.contains("CodeMirror-hscrollbar"))t()
+ else if(e.target.classList.contains("CodeMirror-vscrollbar"))t()
+}
 
 function cats(files,s){
  src={f:["(z.k)"],n:[zk?zk.length:0]}
