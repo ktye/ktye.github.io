@@ -1,3 +1,4 @@
+
 if('serviceWorker'in navigator)navigator.serviceWorker.register("kde.sw.js")
 
 function ge(x){return document.getElementById(x)}
@@ -220,17 +221,19 @@ function cats(files,s){
 }
 let src={}
 
-function kstart(s){        //todo: read args from hash, e.g. #a.k,b.k,c.k
+function kstart(s,trc){
  intr.disabled=false
  repl.textContent=""
  s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
- kw.postMessage({m:"start",s:s})
+ kw.postMessage({m:"start",s:s,trc:trc})
 }
-ge("runb").onclick=function(){
+function clickrun(e){
  let s=ed.getValue()
  location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
- kstart(s)
+ kstart(s,e.target.textContent=="trc")
 }
+ge("runb").onclick=clickrun
+ge("trcb").onclick=clickrun
 ge("intr").onclick=interrupt
 ge("repl").onkeydown=function(e){if(e.key!="Enter")return
  pd(e)
@@ -281,7 +284,7 @@ function newk(){
    if(d.f==""){O(su(d.u));end(d.mem)}
    else        writefile(d.f,d.u)
    break
-  case "indicate":indicate(d.p);break
+  case "indicate":indicate(d.p,d.e,d.l,d.stack);break
   default: console.log("unknown from kwork:", e.data)
  }}
  kw.onerror=function(e){
@@ -297,23 +300,46 @@ function interrupt(){
 }
 
 let zk //built-in z.k source for error indication
-function indicate(p){
+function indicate(p,e,l,fstack){
+ if(e!=""){
+  let a=ce("a")
+  a.href=l;a.target="_blank";a.innerText=e
+  let d=ce("div");d.contentEditable=false;d.appendChild(a);repl.appendChild(d) //wrap to make it clickable
+ }
+ printstack(fstack)
+ filelink(p,true)
+/*
  for(let i=0;i<src.n.length;i++){let ni=src.n[i]
   if(p<ni){fileat(src.f[i],p-2);return}
   p-=1+ni
  }//otherwise: error in repl
+*/
 }
-function fileat(f,p){
- if(f=="(ed)"){showpos(p);return}
+function fileat(f,p,direct,text){
+ if(direct&&f=="(ed)"){showpos(p);return}
  let a=ce("a");
  a.href=f+":"+p
  a.textContent=f+":"+p
- a.onclick=function(e){pd(e);openfile(findfile(f),ge("expl"),p)}
+ if(f=="(ed)")a.onclick=function(e){pd(e);showpos(p)}
+ else         a.onclick=function(e){pd(e);openfile(findfile(f),ge("expl"),p)}
  repl.appendChild(a)
+ if(text)repl.appendChild(document.createTextNode(" "+text))
+ repl.appendChild(ce("br"))
+}
+function filelink(p,direct,text){
+ for(let i=0;i<src.n.length;i++){let ni=src.n[i]
+  if(p<ni){fileat(src.f[i],p-2,direct,text);return}
+  p-=1+ni
+ }
+ console.log("filelink:",p)
 }
 function showpos(i){
  let p=ed.posFromIndex(i)
  ed.setSelection(p,{line:p.line,ch:1+p.ch})
 }
+function printstack(fstack){for(let i=0;i<fstack.length;i++){
+ filelink(fstack[i].p,false,fstack[i].s)
+}}
+
 
 window.ge=ge //for js console
