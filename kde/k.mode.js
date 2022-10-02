@@ -70,7 +70,7 @@
     }
    }
    if(p==";"&&s.br.at(-1)=="$")s.cn[-1+s.cn.length]++
-   s.st="";return l
+   s.st=""; return l
   }
   let matchbr=function(x,y){
    switch(x){
@@ -121,7 +121,9 @@
     if(t.eol()&&s.br.length&&"$"==s.br.at(-1))s.cn[-1+s.cn.length]++
     if(s.cn.length&&0==s.cn[-1+s.cn.length]%2)return"cond"
     return"content"
-   }
+   },
+ 
+   fold:"brace-paren",
   }
  }) 
 });

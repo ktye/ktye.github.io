@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8"><title>kde</title>
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="stylesheet" href="k.mode.css">
+<link rel="stylesheet" href="../codemirror/codemirror.min.css">
+<link rel="stylesheet" href="../codemirror/foldgutter.css">
+<script src="../codemirror/jquery.min.js"></script>
+<script src="../codemirror/codemirror.min.js"></script>
+<script src="../codemirror/matchbrackets.js"></script>
+<script src="../codemirror/foldcode.js"></script>
+<script src="../codemirror/foldgutter.js"></script>
+<script src="../codemirror/brace-fold.js"></script>
+<script src="k.mode.js"></script>
 <style>
  body{font-family:georgia,serif}
  h2{border-top:1px solid black}
  pre{margin-left:1em}
+ .CodeMirror{background-color:#ffe;border:none;resize:none}
 </style>
 </head>
 
-<body>
+<body onload='build()'>
 <h1>kde</h1>
 <i>i never use an ide, except those i write myself</i>
 <p>
@@ -18,7 +29,6 @@
  <li>k repl</li>
  <li>file browser</li>
  <li>buttons</li>
- <li>todo: plot canvas, open source at error position, find definition, grep, debugger checkbox</li>
 </ul>
 it is a web application that can access the local file system if you permit.</br>
 it can be installed as a progressive web application to work offline, if you so wish.
@@ -34,6 +44,24 @@ the editor is codemirror with bracket matching, block editing (alt-click-move-mo
  <li><code>1+ \x</code> highlights debug backslash</li>
  <li>source: <a href="k.mode.js">syntax parser</a>, <a href="k.mode.css">colors</a></li>
 </ul>
+
+try:
+<textarea>
+fold:{
+1
+2
+3
+}
+/this is k
+func:{[x;y] \(x;y)  /trace
+ "st\n\"({"         /string
+ `"symbol"`a01`a`0n /symbols 
+ 1+$[x>0;x*x        /cond coloring
+     x&lt;0;y;x+y]}    /adding another case shows error
+     
+/unmatched braces
+)ORIGIN 1
+</textarea>
 
 clicking <code>run</code> restarts k and evaluates the program in the editor.</br>
 the same can be done with <code>shift-enter</code> or <code>shift-rightclick</code> in the editor.
@@ -70,6 +98,112 @@ k also has file system access within the directory that is loaded.<br/>
 to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br/>
 files are preloaded when clicking <code>load all</code> or when the file has been clicked on.
 k-files are always preloaded.
+
+<h1>todo</h1>
+
+<h2>extended repl</h2>
+<pre>
+in the interactive repl, kst should truncate to the current size.
+take a reference of each result.
+store the k reference in js associated with the repl line number.
+when hovering the line, let the gui:
+- assign the value to x(global)
+- serialize and store in x.bin
+values leak in interactive use, but are reset when clicking run
+(and maybe when deleting lines)
+</pre>
+
+
+<h2>error indicator</h2>
+<pre>
+when k detects an error with position, the position is an offset to the current source.
+the current source is 
+"\n"/:(z.k       /built-in k.wasm
+       a.k;b.k   /by first line: /!a.k b.k
+       ed)       /editor value
+if the error is in the editor source, it is shown directly (highlight+jump)
+if it is in a.k,b.k.. add a link to the repl to open the file+position in the repl
+that leaves time to save the current file.
+if it is in z.k, that could be shown in the repl as the readonly file "(z.k)"
+
+more details are present in debug
+</pre>
+
+<h2>debug</h2>
+<pre>
+a checkbox uses d.wasm instead of k.wasm
+d.wasm is a debug build that calls fpush and fpop (into js)
+for each function call in kvm.
+js then knows about the function arguments of the complete call stack
+and the source positions
+
+in the case of a error, a call stack is printed to the repl with links
+to the source files+positions.
+also the function arguments are present, type+length printed directly and
+assignable to x, as described in the repl extensions above.
+</pre>
+
+<h2>static analysis</h2>
+<pre>
+when clicking run, a linter pass is first executed:
+a new k is started that only parses all source.
+it returns the k-list (kvm instructions) to js which can analyse, e.g.:
+- parse error
+- misspelled variable: referencing a variable that isn't assigned anywhere
+- detecting use before assign for local variables
+- ... what else can be done? 
+if there are no errors, a new k is started that does the real work.
+if there are errors, they are shown as links:
+lint(parse):a.k:13:2
+</pre>
+
+<h2>find definition</h2>
+<pre>
+search the current editor all files referenced with a /!a.k b.k line
+for the definition of the selected text.
+that could be /^name:/
+</pre>
+
+<h2>grep</h2>
+<pre>
+search a word through all preloaded files.
+show the results in the repl as links file:line
+how? another button? type in the repl, mark and ...?
+</pre>
+
+<h2>ui layout</h2>
+<pre>
+the ui has 3 panels: editor, repl and browser.
+when any of these overflows it shows scrollbars.
+if the user single-clicks on a scrollbar that means:
+try to make it go away. rearrange the panels by whatever that means.
+</pre>
+
+<h2>plot canvas</h2>
+<pre>
+simple plot.js
+ plot F          plot `x`y!(!x;x)
+ plot(F;F;..)    plot `x`y(!'x;x) multiple lines
+ plot Z          polar
+ plot(Z;Z;..)    polar multiple datasets
+single canvas, autoscale, grid, click-to-point, zoom rectangle, no decoration
+</pre>
+
+<script>
+let ed
+function build(){
+ let l=document.querySelectorAll("textarea")
+ for(i=0;i<l.length;i++){
+  ed=CodeMirror.fromTextArea(l[i], {
+   "mode":"k","theme":"k",
+   "lineNumbers":true,"dragDrop":false,
+   "tabSize":1,"smartIndent":false,
+   "matchBrackets":true,
+   "foldGutter":true,
+   "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
+ }
+}
+</script>
 
 </body>
 </html>

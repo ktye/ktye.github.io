@@ -17,7 +17,12 @@ window.init=function(){
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")
- ed = CodeMirror(left, {"mode":"k","theme":"k","lineNumbers":true,"dragDrop":false,"tabSize":1,"smartIndent":false,"matchBrackets":true})
+ ed = CodeMirror(left, {
+  "mode":"k","theme":"k","lineNumbers":true,
+  "dragDrop":false,"tabSize":1,"smartIndent":false,
+  "matchBrackets":true,
+  "foldGutter":true,
+  "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
  ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec})
  ed.on("contextmenu",function(_,e){pd(e)})
  ed.setValue("!3")
