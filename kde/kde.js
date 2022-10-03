@@ -26,6 +26,7 @@ window.init=function(){
   "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
  ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec})
  ed.on("contextmenu",function(_,e){pd(e)})
+ ed.on("gutterClick",execline)
  ed.setValue(decodeURIComponent(window.location.hash.substr(1)))
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
@@ -49,9 +50,14 @@ function search(cm,pos){ //right click selected text in the editor
 }
 function exec(cm,pos){ //shift-enter or shift-rightclick, eval current selection or restart
  let s=cm.getSelection()
- if(s.length){repl.textContent+=s+"\n";krep(s);return}
+ if(s.length){repl.lastChild.textContent+=s+"\n";krep(s);return}
  kstart(cm.getValue())
 }
+function execline(ed,n,gutter){ //click on linenumber executes
+ if(gutter=="CodeMirror-linenumbers"){ //-foldgutter for folding
+  repl.lastChild.textContent+=ed.getLine(n)+"\n"
+  krep(ed.getLine(n))  
+}}
 
 function modify(){if(ed.modified)return
  ed.modified=true
@@ -203,6 +209,68 @@ window.onmousedown=function(e){
  else if(e.target.classList.contains("CodeMirror-vscrollbar"))t()
 }
 
+
+function clickrun(e){
+ let s=ed.getValue()
+ location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
+ kstart(s,e.target.textContent=="trc")
+}
+ge("runb").onclick=clickrun
+ge("trcb").onclick=clickrun
+ge("intr").onclick=interrupt
+
+
+//repl
+function O(s,k){if(s=="")return
+ let e=ce("span");
+ if("object"==typeof k){e.k=k;e.classList.add("kval");e.title=k.i}
+ e.contentEditable="true"
+ e.textContent=s
+ e.onkeydown=enterkey
+ repl.appendChild(e);
+}
+function pr(){
+ let e=ce("span")
+ e.textContent=repl.lastChild.textContent.endsWith("\n")?" ":"\n "
+ e.contentEditable=true
+ e.classList.add("kinput")
+ e.onkeydown=enterkey
+ repl.appendChild(e)
+ let c=window.getSelection() //go to end
+ c.removeAllRanges()
+ let r=document.createRange()
+ r.selectNodeContents(e)
+ r.collapse(false)
+ c.addRange(r)
+ repl.scrollTo(0,repl.scrollHeight)
+ e.focus()
+}
+function enterkey(e){if(e.key!="Enter")return
+ let t=e.target;let s=t.textContent;t.textContent+="\n"
+ s=s.startsWith(" ")?s.slice(1):s.startsWith("\n ")?s.slice(2):s
+ if(t.parentElement==repl){
+  if(repl.lastChild!=t)repl.lastChild.textContent=s
+  krep(s)
+ }
+ pd(e)
+}
+function consize(){let mono=ge("mono");return{
+  w:Math.floor(repl.clientWidth/mono.clientWidth),
+  h:Math.floor(repl.clientHeight/mono.clientHeight)}
+}
+
+
+function kstart(s,trc){
+ intr.disabled=false
+ repl.textContent=""
+ s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
+ kw.postMessage({m:"start",s:s,trc:trc,cons:consize()})
+}
+function krep(s){
+ if((s=="\\")||s=="\\h"){help();return}
+ intr.disabled=false
+ kw.postMessage({m:"repl",s:s,cons:consize()})
+}
 function cats(files,s){
  src={f:["(z.k)"],n:[zk?zk.length:0]}
  let k={}; let r=[]
@@ -220,86 +288,7 @@ function cats(files,s){
 }
 let src={}
 
-function kstart(s,trc){
- intr.disabled=false
- repl.textContent=""
- s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
- kw.postMessage({m:"start",s:s,trc:trc,cons:consize()})
-}
-function clickrun(e){
- let s=ed.getValue()
- location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
- kstart(s,e.target.textContent=="trc")
-}
-ge("runb").onclick=clickrun
-ge("trcb").onclick=clickrun
-ge("intr").onclick=interrupt
-
-/*
-ge("repl").onkeydown=function(e){if(e.key=="Enter"){
- pd(e)
- console.log("repl-enter",e)
-}}
-*/
-function enterkey(e){if(e.key!="Enter")return
- let t=e.target;let s=t.textContent
- s=s.endsWith("\n")?s.slice(0,-1):s
- if(t.parentElement==repl){
-  if(repl.lastChild!=t)repl.lastChild.textContent=s
-  krep(s)
- }
- pd(e)
-}
-
-function O(s,k){
- let e=ce("span");
- if("object"==typeof k){e.k=k;e.classList.add("kval");e.title=k.i}
- e.contentEditable="true"
- e.textContent=(repl.children.length?"\n":"")+s;
- e.onkeydown=enterkey
- repl.appendChild(e);
- e=ce("span")
- e.textContent=" "
- e.contentEditable=true
- e.classList.add("kinput")
- e.onkeydown=enterkey
- repl.appendChild(e)
- let c=window.getSelection() //go to end
- c.removeAllRanges()
- let r=document.createRange()
- r.selectNodeContents(e)
- r.collapse(false)
- c.addRange(r)
- repl.scrollTo(0,repl.scrollHeight)
- e.focus()
-}
-function consize(){let mono=ge("mono");return{
-  w:Math.floor(repl.clientWidth/mono.clientWidth),
-  h:Math.floor(repl.clientHeight/mono.clientHeight)}
-}
-
-
-function krep(s){
- if(s.startsWith(" "))s=s.slice(1)
- if((s=="\\")||s=="\\h"){help();return}
- intr.disabled=false
- kw.postMessage({m:"repl",s:s,cons:consize()})
-}
-
-function end(m){
- intr.disabled=true
- let s=window.getSelection()
- s.removeAllRanges()
- let r=document.createRange()
- r.selectNodeContents(repl)
- r.collapse(false)
- s.addRange(r)
- if(m!==undefined)ge("memo").textContent=m
- repl.scrollTo(0,repl.scrollHeight)
- repl.focus()
-}
-
-function help(){fetch("../readme").then(r=>r.text()).then(t=>{repl.textContent=t+" ";end()})}
+function help(){fetch("../readme").then(r=>r.text()).then(t=>O(t))}
  
 let kw
 function newk(){
@@ -307,11 +296,12 @@ function newk(){
  
  kw.onmessage=function(e){let d=e.data
   switch(d.m){
-  case "write":
+  case"write":
    if(d.f==""){O(d.s,d.k);if(d.mem!==undefined)ge("memo").textContent=d.mem}
    else        writefile(d.f,d.u)
    break
-  case "indicate":indicate(d.p,d.e,d.l,d.stack);break
+  case"prompt":pr();break
+  case"indicate":indicate(d.p,d.e,d.l,d.stack);break
   default: console.log("unknown from kwork:", e.data)
  }}
  kw.onerror=function(e){

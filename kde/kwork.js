@@ -29,7 +29,8 @@ function kstart(d){let s=d.s
    try     { krep(s)    }
    catch(e){ indicate() }
   }
-  if(s=="")postMessage({m:"write",f:"",s:"ktye/k "+K.n+"\n"});
+  if(s=="")postMessage({m:"write",f:"",s:"ktye/k "+K.n});
+  postMessage({m:"prompt"})
  }
  //ext.read=d.r
  ext.write=function(f,u){
@@ -46,7 +47,8 @@ function krep(s){
  let r
  if(s.startsWith(" ")) r=K.BK(K.Kx("`k@",K.ref(x))) //kst
  else r=K.BK(K.Kx("\"\\n\"/:`l@",K.ref(x)))
- postMessage({m:"write",f:"",s:su(r)+"\n",k:kinfo(x)})
+ postMessage({m:"write",f:"",s:su(r),k:kinfo(x)})
+ postMessage({m:"prompt"})
 }
 
 function kinfo(x){

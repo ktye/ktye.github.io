@@ -6,12 +6,23 @@ this.addEventListener("install", (event) => {
     cache.addAll([
      "/k.js",
      "/k.wasm",
+     "/d.wasm",
+     "/readme",
      "/kde/kwork.js",
      "/kde/index.html",
      "/kde/kde.js",
      "/kde/k.mode.js",
      "/kde/k.mode.css",
-     "/icon.svg"
+     "/kde/z.k",
+     "/codemirror/codemirror.min.css",
+     "/codemirror/foldgutter.css",
+     "/codemirror/jquery.min.js",
+     "/codemirror/codemirror.min.js",
+     "/codemirror/matchbrackets.js",
+     "/codemirror/foldcode.js",
+     "/codemirror/foldgutter.js",
+     "/codemirror/brace-fold.js",
+     "/kde/icon.svg"
     ])
    )
   )
