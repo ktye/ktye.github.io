@@ -25,6 +25,7 @@
  #repl{background-color:#fff; position:absolute; margin:0;outline:0px;overflow:auto}
  .repl0{left:50vw; width:50vw; height:50vh; top:0;} 
  .repl1{left:0; width:50vw; height:50vh; top:50vh;} 
+ [contenteditable]:focus{outline:0px solid transparent}
  #brow{background-color:#efe; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
  #bar{display:flex;flex-direction:row}
  .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
@@ -37,25 +38,28 @@
  .kfile{color:#a00}
  .curfile{font-weight:bold}
  .modified{text-decoration:underline}
+ .kval{color:darkred}
+ #mono{position:absolute;margin:0;outline:0px}
 </style>
 </head>
 
 <body onload="window.init()">
  <div id="left" class="left0"></div>
- <pre id="repl" class="repl0" contenteditable="true" spellcheck="false">k</pre>
+ <pre id="repl" class="repl0" spellcheck="false">k</pre>
  <div id="brow">
   <div id="bar">
    <button id="runb">run</button>
    <button id="trcb" title="trace/debug">trc</button>
-   <button id="wrtb" disabled>write</button>
-   <button id="newb" disabled title="create new file">new</button>
-   <button id="rall" disabled title="preload all files">rda</button>
+   <button id="wrtb" disabled title="write current file to disk">write</button>
+   <button id="newb" disabled title="create new file on disk">new</button>
    <button id="intr" disabled title="interrupt k">int</button>
    <input  id="ksyn" checked type="checkbox" title="syntax highlight">
    <input  id="lint"         type="checkbox" title="static analysis">
    <span   id="memo" style="flex-grow:1">0k</span>
+   <button id="rall" disabled title="preload all files">rda</button>
    <button id="odir" title="open working directory">open</button>
   </div>
   <div id="expl"></div>
  </div>
+ <pre id="mono">k</pre> <!-- to calculate font metrics -->
 </body></html>

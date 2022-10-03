@@ -15,23 +15,25 @@
  body{font-family:georgia,serif}
  h2{border-top:1px solid black}
  pre{margin-left:1em}
- .CodeMirror{background-color:#ffe;border:none;resize:none}
+ .CodeMirror{background-color:#ffe;border:none;resize:none;height:auto}
 </style>
 </head>
 
 <body onload='build()'>
 <h1>kde</h1>
-<i>i never use an ide, except those i write myself</i>
+<img src="icon.svg" style="height:1em" />
+<i>i never used an ide, except those i wrote myself</i>
 <p>
 <a href="index.html">kde</a> includes:
 <ul>
  <li>editor with k syntax mode</li>
- <li>k repl</li>
+ <li>repl</li>
  <li>file browser</li>
- <li>buttons</li>
+ <li>debugger</li>
 </ul>
 it is a web application that can access the local file system if you permit.</br>
 it can be installed as a progressive web application to work offline, if you so wish.
+
 
 <h2>editor</h2>
 the editor is codemirror with bracket matching, block editing (alt-click-move-mouse), and k syntax mode that should catch errors early:
@@ -39,7 +41,7 @@ the editor is codemirror with bracket matching, block editing (alt-click-move-mo
  <li><code>/comments</code> and <code>"strings"</code> are detected</li>
  <li><code>semicolons</code> are printed lighter</li>
  <li><code>$[cond;a;cond;b;else]</code> marks conditions differently</li>
- <li><code>$[cond;a;cond;b]</code>indicates an error for missing else</li>
+ <li><code>$[cond;a;cond;b]</code> indicates an error for missing else</li>
  <li><code>1+ \x</code> highlights debug backslash</li>
  <li>non-matching brackets <code>(}</code> are marked as errors</li>
  <li>source: <a href="k.mode.js">syntax parser</a>, <a href="k.mode.css">colors</a></li>
@@ -49,8 +51,7 @@ try:
 <textarea>
 /this is k
 func:{[x;y] \(x;y)  /trace
- "st\n\"({"         /string
- `"symbol"`a01`a`0n /symbols 
+ "st\n\"({"         /string dont's mess bracket matching
  1+$[x>0;x*x        /cond coloring
      x&lt;0;y;x+y]}    /add another case to see the error
      
@@ -58,7 +59,7 @@ func:{[x;y] \(x;y)  /trace
 )ORIGIN 1
 </textarea>
 
-clicking <code>run</code> restarts k and evaluates the program in the editor.</br>
+<p>clicking <code>run</code> restarts k and evaluates the program in the editor.</br>
 the same can be done with <code>shift-enter</code> or <code>shift-rightclick</code> in the editor.
 if some text is selected, these shortcuts only send the current selection to the repl, without restarting k.</p>
 
@@ -78,20 +79,20 @@ all data in k memory is reset, but the filesystem in the ui is still loaded.
 <h2>file browser</h2>
 
 by default you can edit and execute the contents of the editor.<br/>
-to load files from disk, you have to open a directory by button, or drop a directory in the window.
+to load files from disk, you have to open a directory by clicking <code>open</code>, or drop a directory in the window.
 the filesystemapi is not supported by all browsers and you need to grant access.<br>
 only one directory is supported, no subdirs.<p>
 
 click on a file to open it in the editor. it can be saved back to disk.</br>
-the browser highlights the open file(bold) and underlines it if modified,
-but does not track changes on disk.<p>
+the browser highlights the open file <b><code>bold</code></b> and <u><code>underlines</code></u> if modified,
+but does not track changes happening on disk.<p>
 
 k also has file system access within the directory that is loaded.<br/>
 <code>`file&lt;"bytes"</code> writes to disk and
 <code>x:&lt;`file</code> reads.<br/>
 <code>`$&lt;`"."</code> returns a list of all file names as symbols.<br/>
 to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br/>
-files are preloaded when clicking <code>rda</code> or when the file has been clicked on.
+files are preloaded when clicking <code>rda</code> or when the file has been opened in the editor.
 k-files are always preloaded.
 
 <h2>error indicator</h2>
@@ -104,8 +105,9 @@ when k detects an error with position, the position is an offset to the current 
 if the error is within the code shown in the editor, it is highlighted directly.
 otherwise a link is appended to the repl giving the user time to save the current file.<p>
 
-only the innermost error position is tracked by kvm which may be in the built-in <code>z.k</code> e.g. the formatter.<br/>
-for a complete stack trace, set the checkbox for the debugger.
+only the innermost error position is tracked by kvm.
+that may may be in the built-in <code>z.k</code> (e.g. the formatter), which may not be very informative.<br/>
+for a complete stack trace, use the debugger by clicking <code>trc</code>.
 
 <h1>todo</h1>
 

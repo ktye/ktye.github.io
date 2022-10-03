@@ -2,6 +2,7 @@
 import {K} from '../k.js'
 
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 
 onmessage=function(e){
  switch(e.data.m){
@@ -25,24 +26,43 @@ function kstart(d){let s=d.s
  ext.init= function(){
   if(("string"==typeof s)&&(s!="")){
    t0=performance.now()
-   try     { K._.repl(K.KC(s)) }
+   try     { krep(s)    }
    catch(e){ indicate() }
   }
-  if(s=="")postMessage({m:"write",f:"",u:us("ktye/k "+K.n+"\n ")});
+  if(s=="")postMessage({m:"write",f:"",s:"ktye/k "+K.n+"\n"});
  }
  //ext.read=d.r
  ext.write=function(f,u){
-  postMessage({m:"write",f:f,u:u,mem:memory()+" "+dt()})
+  postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt()})
  }
  K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
+}
+
+function krep(s){
+ let silencio=function(){postMessage({m:"write",f:"",s:" "});return null}
+ if((!s.length)||s.startsWith('\\')){return silencio()}
+ let x=K.Kx(".",K.KC(s))
+ if(x==0)return silencio()
+ let r
+ if(s.startsWith(" ")) r=K.BK(K.Kx("`k@",K.ref(x))) //kst
+ else r=K.BK(K.Kx("\"\\n\"/:`l@",K.ref(x)))
+ postMessage({m:"write",f:"",s:su(r)+"\n",k:kinfo(x)})
+}
+
+function kinfo(x){
+ let p=Number(BigInt.asUintN(32,x>>BigInt(32))&BigInt(0xffffff))
+ let i=K.TK(x)
+ if(i=="l")i="λ"
+ if("CIFZLDT".includes(i))i+=" #"+K.NK(x)
+ if(p)i+=" @"+p
+ return{k:x,i:i,p:p}
 }
 
 
 function repl(d){
  t0=performance.now()
- try     {K._.repl(K.KC(d.s));K.save()}
+ try     {krep(d.s);K.save()     }
  catch(e){indicate(); K.restore()}
- postMessage({m:"write",f:"",u:us(" ")})
 }
 
 let t0
