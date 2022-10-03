@@ -84,7 +84,7 @@ function newspan(name,h){
  s.textContent=name
  s.h=h
  let k=name.endsWith(".k")
- s.classList.add(k?"kfile":"file")
+ if(k)s.classList.add("kfile")
  s.onclick=function(){openfile(s,ex)}
  if(k)preload(s)
  return s

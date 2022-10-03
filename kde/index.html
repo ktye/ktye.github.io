@@ -28,12 +28,12 @@
  #brow{background-color:#efe; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
  #bar{display:flex;flex-direction:row}
  .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
- .CodeMirror-selected{background-color:#def;outline:1px solid}
+ .CodeMirror-selected{background-color:#def;outline:1px solid;outline-offset:-0.5px}
+ .CodeMirror-focused .CodeMirror-selected{background-color:#d7d4f0;outline:none}
  button{border:1px solid black;background-color:#fff}
  button:active{transform:translateY(1px)}
  #odir{float:right}
  #expl{margin-top:5px;display:grid;grid-template-columns:repeat(3,1fr);}
- .file{ color:#00a}
  .kfile{color:#a00}
  .curfile{font-weight:bold}
  .modified{text-decoration:underline}

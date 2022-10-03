@@ -36,12 +36,12 @@ it can be installed as a progressive web application to work offline, if you so 
 <h2>editor</h2>
 the editor is codemirror with bracket matching, block editing (alt-click-move-mouse), and k syntax mode that should catch errors early:
 <ul>
- <li><code>"strings"</code> and </code>`symbols</code> are detected</li>
- <li>non-matching brackets <code>(}</code> are marked as errors</li>
- <li><code>({[;]})</code> are colored by 3 nesting levels</li>
- <li><code>$[cond;a;cond;b]</code> marks conditions differently</li>
- <li><code>$[c;a;c;b]</code> indicates an error for missing else</li>
+ <li><code>/comments</code> and <code>"strings"</code> are detected</li>
+ <li><code>semicolons</code> are printed lighter</li>
+ <li><code>$[cond;a;cond;b;else]</code> marks conditions differently</li>
+ <li><code>$[cond;a;cond;b]</code>indicates an error for missing else</li>
  <li><code>1+ \x</code> highlights debug backslash</li>
+ <li>non-matching brackets <code>(}</code> are marked as errors</li>
  <li>source: <a href="k.mode.js">syntax parser</a>, <a href="k.mode.css">colors</a></li>
 </ul>
 
@@ -52,7 +52,7 @@ func:{[x;y] \(x;y)  /trace
  "st\n\"({"         /string
  `"symbol"`a01`a`0n /symbols 
  1+$[x>0;x*x        /cond coloring
-     x&lt;0;y;x+y]}    /adding another case shows error
+     x&lt;0;y;x+y]}    /add another case to see the error
      
 /unmatched braces
 )ORIGIN 1
