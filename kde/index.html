@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="k.mode.css">
 <link rel="stylesheet" href="../codemirror/codemirror.min.css">
 <link rel="stylesheet" href="../codemirror/foldgutter.css">
+<link rel="stylesheet" href="../codemirror/show-hint.css">
 <title>kde</title>
 
 <script src="../codemirror/jquery.min.js"></script>
@@ -13,6 +14,9 @@
 <script src="../codemirror/foldcode.js"></script>
 <script src="../codemirror/foldgutter.js"></script>
 <script src="../codemirror/brace-fold.js"></script>
+<script src="../codemirror/fullscreen.js"></script>
+<script src="../codemirror/show-hint.js"></script>
+<script src="complete.js"></script>
 <script src="k.mode.js"></script>
 <script type="module" src="kde.js"></script>
 
@@ -31,6 +35,7 @@
  .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
  .CodeMirror-selected{background-color:#def;outline:1px solid;outline-offset:-0.5px}
  .CodeMirror-focused .CodeMirror-selected{background-color:#d7d4f0;outline:none}
+ .CodeMirror-fullscreen{position:fixed;top:0;left:0;right:0;bottom:0;height:auto;z-index:9}
  button{border:1px solid black;background-color:#fff}
  button:active{transform:translateY(1px)}
  #odir{float:right}

@@ -18,23 +18,31 @@ window.init=function(){
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")
- ed = CodeMirror(left, {
-  "mode":"k","theme":"k","lineNumbers":true,
-  "dragDrop":false,"tabSize":1,"smartIndent":false,
+ CodeMirror.commands.autocomplete=function(cm){cm.showHint({hint:CodeMirror.hint.kcomplete})}
+ ed = CodeMirror(left,{
+  "lineNumbers":true,
+  "dragDrop":false,"tabSize":8,"smartIndent":false,
   "matchBrackets":true,
   "foldGutter":true,
   "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
- ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec})
  ed.on("contextmenu",function(_,e){pd(e)})
- ed.on("gutterClick",execline)
  ed.setValue(decodeURIComponent(window.location.hash.substr(1)))
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
  ed.on("change",modify)
  ed.on("change",function(){})
+ kmode(true)
  if(!crossOriginIsolated)ge("expl").append(document.createTextNode("no hr timer"))
  fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
+}
+function kmode(x){
+ console.log("kmode",x)
+ ed.setOption("mode",x?"k":"")  
+ ed.setOption("theme",x?"k":"")
+ if(x)ed.on("gutterClick",execline);else ed.off("gutterClick",execline)
+ if(x)ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec,'F11':function(cm){cm.setOption("fullScreen",!cm.getOption("fullScreen"))},"Tab":"autocomplete"})
+ else ed.setOption("extraKeys",{})
 }
 
 
@@ -102,7 +110,7 @@ function openfile(s,ex,p){ //span: .h(handle)
   ed.setValue(su(s.u))
   ed.sp=s
   ed.modified=false
-  ed.setOption("mode", (s.textContent.endsWith(".k")&&ge("ksyn").checked) ? "k" : "")
+  kmode(s.textContent.endsWith(".k")&&ge("ksyn").checked) 
   if(p)showpos(p)
   ge("wrtb").disabled=false
   let a=ex.children;for(let i=0;i<a.length;i++)if(a[i]!=s)a[i].classList.remove("curfile","modified")
@@ -192,10 +200,10 @@ window.ondrop=function(e){pd(e);
  err("only a directory can be dropped")
 }
 
-ge("ksyn").onchange=function(e){ed.setOption("mode",(e.target.checked)?"k":"")}
+ge("ksyn").onchange=function(e){kmode(e.target.checked)}
 
 
-//dbl-click on editor scrollbar to request more space
+//dbl-click on editor scrollbar to request more space, or F11 to toggle fullscreen, when editor is focused
 let sbclick=0
 window.onmousedown=function(e){
  let dbl=function(){
