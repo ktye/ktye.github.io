@@ -18,7 +18,6 @@ window.init=function(){
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")
- CodeMirror.commands.autocomplete=function(cm){cm.showHint({hint:CodeMirror.hint.kcomplete})}
  ed = CodeMirror(left,{
   "lineNumbers":true,
   "dragDrop":false,"tabSize":8,"smartIndent":false,
@@ -36,13 +35,49 @@ window.init=function(){
  fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
 }
+
+
 function kmode(x){
- console.log("kmode",x)
+ let ex=[] //words in a.k b.k if first line is /!a.k b.k
+ if(x){
+  let em={}
+  let s=ed.getValue()
+  s=(s.startsWith("/!"))?cats(s.slice(2,s.indexOf("\n")).split(" "),""):""
+  let re=/[a-zA-Z][\w]*/g
+  var a=s.match(re)
+  if(a)a.forEach(x=>{console.log("found:",x);em[x]=true})
+  ex=Object.keys(em)
+ }
+ //anyword-hint.js, todo: add words in /!a.k b.k
+ let WORD = /[\w$]+/, RANGE = 500;
+ let hnt=function(ed,o){
+  var w=o&&o.word||WORD;
+  var range=o&&o.range||RANGE;
+  var cur=ed.getCursor(),curLine=ed.getLine(cur.line);
+  var end=cur.ch,start=end;
+  while(start&&w.test(curLine.charAt(start-1)))--start;
+  var curWord=start!=end&&curLine.slice(start,end);
+  var li=o&&o.list||[],seen={};
+  var re=new RegExp(w.source,"g");
+  for(var d=-1;d<=1;d+=2){
+   var l=cur.line,endLine=Math.min(Math.max(l+d*range,ed.firstLine()),ed.lastLine())+d;
+   for(;l!=endLine;l+=d){
+    var text=ed.getLine(l),m;
+    while(m=re.exec(text)){
+     if(l==cur.line&&m[0]===curWord)continue;
+      if((!curWord||m[0].lastIndexOf(curWord,0)==0)&&!Object.prototype.hasOwnProperty.call(seen,m[0])){
+       seen[m[0]]=true;
+       li.push(m[0]);
+  }}}}
+  for(let i=0;i<ex.length;i++)if(ex[i].startsWith(curWord))li.push(ex[i])
+  return{list:li,from:CodeMirror.Pos(cur.line,start),to:CodeMirror.Pos(cur.line,end)};
+ }
  ed.setOption("mode",x?"k":"")  
  ed.setOption("theme",x?"k":"")
  if(x)ed.on("gutterClick",execline);else ed.off("gutterClick",execline)
  if(x)ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec,'F11':function(cm){cm.setOption("fullScreen",!cm.getOption("fullScreen"))},"Tab":"autocomplete"})
  else ed.setOption("extraKeys",{})
+ CodeMirror.commands.autocomplete=function(cm){cm.showHint({hint:hnt})}
 }
 
 
@@ -106,17 +141,20 @@ function newspan(name,h){
 function openfile(s,ex,p){ //span: .h(handle)
  s.classList.add("curfile")
  let set=function(s,u){
+  if(ed.sp)ed.sp.u=us(ed.getValue()) //store last file
+  ed.sp=false
   s.u=new Uint8Array(u)
   ed.setValue(su(s.u))
   ed.sp=s
   ed.modified=false
   kmode(s.textContent.endsWith(".k")&&ge("ksyn").checked) 
   if(p)showpos(p)
-  ge("wrtb").disabled=false
-  let a=ex.children;for(let i=0;i<a.length;i++)if(a[i]!=s)a[i].classList.remove("curfile","modified")
+  ge("putb").disabled=false
+  let a=ex.children;for(let i=0;i<a.length;i++)if(a[i]!=s)a[i].classList.remove("curfile")
  }
  if("(z.k)"==s.textContent){set(s,s.u);return}
- s.h.getFile().then(r=>r.arrayBuffer()).then(u=>set(s,u))
+ if("u"in s)set(s,s.u) //from cache
+ else s.h.getFile().then(r=>r.arrayBuffer()).then(u=>set(s,u))
 }
 
 ge("rall").onclick=function(){ //preload all files for k synchronous read
@@ -159,11 +197,12 @@ async function writefile(name,u){ //from k
  }else return 1
 }
 
-ge("wrtb").onclick=async function(){
+ge("putb").onclick=async function(){
  if(ed.sp!==false){
   const w=await ed.sp.h.createWritable()
   await w.write(ed.getValue())
   await w.close()
+  ed.sp.u=us(ed.getValue())
   ed.sp.classList.remove("modified")
   ed.modified=false
  }
@@ -272,6 +311,7 @@ function kstart(s,trc){
  intr.disabled=false
  repl.textContent=""
  s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
+ //console.log("cats",s)
  kw.postMessage({m:"start",s:s,trc:trc,cons:consize()})
 }
 function krep(s){
