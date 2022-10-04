@@ -35,7 +35,7 @@ window.init=function(){
  fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
 }
-
+function save(){if(ed.sp)ed.sp.u=us(ed.getValue())}
 
 function kmode(x){
  let ex=[] //words in a.k b.k if first line is /!a.k b.k
@@ -45,7 +45,7 @@ function kmode(x){
   s=(s.startsWith("/!"))?cats(s.slice(2,s.indexOf("\n")).split(" "),""):""
   let re=/[a-zA-Z][\w]*/g
   var a=s.match(re)
-  if(a)a.forEach(x=>{console.log("found:",x);em[x]=true})
+  if(a)a.forEach(x=>{em[x]=true})
   ex=Object.keys(em)
  }
  //anyword-hint.js, todo: add words in /!a.k b.k
@@ -101,11 +101,28 @@ function execline(ed,n,gutter){ //click on linenumber executes
   repl.lastChild.textContent+=ed.getLine(n)+"\n"
   krep(ed.getLine(n))  
 }}
-
 function modify(){if(ed.modified)return
  ed.modified=true
  if(ed.sp)ed.sp.classList.add("modified")
 }
+function grep(s){if(!s)return
+ ge(repl.lastChild.textContent+="\\grep "+s+" *\n")
+ let g=function(f,a){
+  let l=a.split("\n")
+  let p=0
+  for(let i=0;i<l.length;i++){
+   let j=l[i].indexOf(s)
+   if(j>=0){
+    let sp=ce("span");sp.textContent=l[i]
+    fileat(f,p+j,false,[sp])
+   }
+   p+=1+l[i].length
+  }
+ }
+ let a=ge("expl").children;for(let i=0;i<a.length;i++)if(a[i].u)g(a[i].textContent,su(a[i].u))
+ pr()
+}
+ge("grep").onkeydown=function(e){if(e.key=="Enter")grep(e.target.value)}
 
 //opendir by button click or dropping a directory (requires support&authorization)
 async function opendir(d){dir=d
@@ -141,7 +158,7 @@ function newspan(name,h){
 function openfile(s,ex,p){ //span: .h(handle)
  s.classList.add("curfile")
  let set=function(s,u){
-  if(ed.sp)ed.sp.u=us(ed.getValue()) //store last file
+  save()
   ed.sp=false
   s.u=new Uint8Array(u)
   ed.setValue(su(s.u))
@@ -259,6 +276,7 @@ window.onmousedown=function(e){
 
 function clickrun(e){
  let s=ed.getValue()
+ save()
  location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
  kstart(s,e.target.textContent=="trc")
 }
@@ -270,15 +288,26 @@ ge("intr").onclick=interrupt
 //repl
 function O(s,k){if(s=="")return
  let e=ce("span");
- if("object"==typeof k){e.k=k;e.classList.add("kval");e.title=k.i}
+ if("object"==typeof k){kval(e,k) /*e.k=k;e.classList.add("kval");e.title=k.i*/}
  e.contentEditable="true"
  e.textContent=s
  e.onkeydown=enterkey
  repl.appendChild(e);
 }
+function kval(sp,k){ //double-click:redisplay, right-click:assign to x
+ sp.k=k
+ sp.title=k.i
+ sp.classList.add("kval")
+ sp.ondblclick=function(e){
+  repl.lastChild.textContent+=e.target.textContent+"\n"
+  kw.postMessage({m:"kst",k:e.target.k.k})
+ }
+ sp.oncontextmenu=function(e){pd(e);kw.postMessage({m:"xgets",k:e.target.k.k})}
+}
 function pr(){
  let e=ce("span")
- e.textContent=repl.lastChild.textContent.endsWith("\n")?" ":"\n "
+ if(repl.children.length)e.textContent=repl.lastChild.textContent.endsWith("\n")?" ":"\n "
+ else e.textContent=" "
  e.contentEditable=true
  e.classList.add("kinput")
  e.onkeydown=enterkey
@@ -315,7 +344,8 @@ function kstart(s,trc){
  kw.postMessage({m:"start",s:s,trc:trc,cons:consize()})
 }
 function krep(s){
- if((s=="\\")||s=="\\h"){help();return}
+ if(s==""){rm(repl);pr();return}
+ if(s.startsWith("\\")){help();return}
  intr.disabled=false
  kw.postMessage({m:"repl",s:s,cons:consize()})
 }
@@ -324,6 +354,7 @@ function cats(files,s){
  let k={}; let r=[]
  if(files.length){
   let a=ge("expl").children;for(let i=0;i<a.length;i++)k[a[i].textContent]=su(a[i].u)
+  if(a.length==0)return s;
   for(let i=0;i<files.length;i++){
    if(!files[i]in k)throw(files[k]+" is missing")
    let fi=files[i]; let si=k[fi]
@@ -331,12 +362,12 @@ function cats(files,s){
    r.push(si)
  }}
  r.push(s)
- src.f.push("(ed)");src.n.push(s.length)
+ src.f.push((ed.sp===false)?"(ed)":ed.sp.textContent);src.n.push(s.length)
  return r.join("\n")
 }
 let src={}
 
-function help(){fetch("../readme").then(r=>r.text()).then(t=>O(t))}
+function help(){fetch("../readme").then(r=>r.text()).then(t=>{O(t);pr()})}
  
 let kw
 function newk(){
@@ -373,27 +404,22 @@ function indicate(p,e,l,fstack){
  }
  printstack(fstack)
  filelink(p,true)
-/*
- for(let i=0;i<src.n.length;i++){let ni=src.n[i]
-  if(p<ni){fileat(src.f[i],p-2);return}
-  p-=1+ni
- }//otherwise: error in repl
-*/
 }
-function fileat(f,p,direct,text){
+function fileat(f,p,direct,extra){
  if(direct&&f=="(ed)"){showpos(p);return}
  let a=ce("a");
  a.href=f+":"+p
- a.textContent=f+":"+p
+ a.textContent=(f+":"+p).padEnd(10)
  if(f=="(ed)")a.onclick=function(e){pd(e);showpos(p)}
  else         a.onclick=function(e){pd(e);openfile(findfile(f),ge("expl"),p)}
  repl.appendChild(a)
- if(text)repl.appendChild(document.createTextNode(" "+text))
- repl.appendChild(ce("br"))
+ console.log(extra)
+ if(extra!==undefined)for(let i=0;i<extra.length;i++)repl.appendChild(extra[i])
+ let e=ce("span");e.textContent="\n";repl.appendChild(e)
 }
-function filelink(p,direct,text){
+function filelink(p,direct,extra){
  for(let i=0;i<src.n.length;i++){let ni=src.n[i]
-  if(p<ni){fileat(src.f[i],p-2,direct,text);return}
+  if(p<ni){fileat(src.f[i],p-2,direct,extra);return}
   p-=1+ni
  }
  console.log("filelink:",p)
@@ -403,7 +429,18 @@ function showpos(i){
  ed.setSelection(p,{line:p.line,ch:1+p.ch})
 }
 function printstack(fstack){for(let i=0;i<fstack.length;i++){
- filelink(fstack[i].p,false,fstack[i].s)
+ let kx=fstack[i].k
+ let spn=function(s){let r=ce("span");r.textContent=s;return r}
+ let extra=[spn("(")]
+ for(let j=0;j<kx.length;j++){let kj=kx[j]
+  let e=ce("span")
+  kval(e,kj)
+  e.textContent=kj.s+((j==kx.length-1)?"":" ")
+  extra.push(e)
+ }
+ extra.push(spn(")"))
+ filelink(fstack[i].p,false,extra)
+
 }}
 
 window.ge=ge //for js console

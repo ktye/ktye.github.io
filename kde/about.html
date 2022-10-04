@@ -31,7 +31,7 @@
  <li>file browser</li>
  <li>debugger</li>
 </ul>
-it is a web application that can access the local file system if you permit.</br>
+it is a web application that can access the local file system if you permit.<br>
 it can be installed as a progressive web application to work offline, if you so wish.
 
 
@@ -59,39 +59,42 @@ func:{[x;y] \(x;y)  /trace
 )ORIGIN 1
 </textarea>
 
-<p>clicking <code>run</code> restarts k and evaluates the program in the editor.</br>
+<p>clicking <code>run</code> restarts k and evaluates the program in the editor.<br>
 the same can be done with <code>shift-enter</code> or <code>shift-rightclick</code> in the editor.
-if some text is selected, these shortcuts only send the current selection to the repl, without restarting k.</p>
+if some text is selected, these shortcuts only send the current selection to the repl, without restarting k.
+clicking an a line number executes that line only.</p>
 
-<b>multiple files</b> are executed, if the editor starts with <code>/!</code></br>
+<b>multiple files</b> are executed, if the editor starts with <code>/!</code><br>
 e.g. if the editor has the first line: <code>/!a.k b.k</code>, it executes <code>a.k</code> then <code>b.k</code> followed by the program in the editor.
 
 
 <h2>repl</h2>
-the repl is a <i>contenteditable</i> pre element.<br/>
-pressing <code>return</code> deletes everything after the current location and executes the current line.<p>
+the repl shows k output and remains active after running the program in the editor.<br>
+k output lines also keep a reference to the underlying k value.
+hovering over an output line displays it in red and shows the type information.
+double-clicking on it resends it to the input and right-clicking assigns it to <code>x</code>.<p>
 
-k runs in a webworker in a separate thread as the ui.<br/>
-if k does not return directly, e.g. <code>(1+)/:1</code> it can be interrupted with the <code>int</code> button, which is enabled when k is busy.
+k runs in a webworker in a separate thread as the ui.<br>
+if k does not return directly (e.g. <code>(1+)/:1</code>), it can be interrupted with the <code>int</code> button, which is enabled when k is busy.
 <code>int</code> terminates and restarts the webworker.
 all data in k memory is reset, but the filesystem in the ui is still loaded.
 
 <h2>file browser</h2>
 
-by default you can edit and execute the contents of the editor.<br/>
+by default you can edit and execute the contents of the editor.<br>
 to load files from disk, you have to open a directory by clicking <code>open</code>, or drop a directory in the window.
 the filesystemapi is not supported by all browsers and you need to grant access.<br>
 only one directory is supported, no subdirs.<p>
 
-click on a file to open it in the editor. <code>put</code> writes it back to disk.</br>
+click on a file to open it in the editor. <code>put</code> writes it back to disk.<br>
 the browser highlights the open file <b><code>bold</code></b> and <u><code>underlines</code></u> modified files that have not been written.
 it does not track changes happening on disk.<p>
 
-k also has file system access within the directory that is loaded.<br/>
+k also has file system access within the directory that is loaded.<br>
 <code>`file&lt;"bytes"</code> writes to disk and
-<code>x:&lt;`file</code> reads.<br/>
-<code>`$&lt;`"."</code> returns a list of all file names as symbols.<br/>
-to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br/>
+<code>x:&lt;`file</code> reads.<br>
+<code>`$&lt;`"."</code> returns a list of all file names as symbols.<br>
+to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br>
 files are preloaded when clicking <code>rda</code> or when the file has been opened in the editor.
 k-files are always preloaded.
 
@@ -106,38 +109,18 @@ if the error is within the code shown in the editor, it is highlighted directly.
 otherwise a link is appended to the repl giving the user time to save the current file.<p>
 
 only the innermost error position is tracked by kvm.
-that may may be in the built-in <code>z.k</code> (e.g. the formatter), which may not be very informative.<br/>
+that may may be in the built-in <code>z.k</code> (e.g. the formatter), which may not be very informative.<br>
 for a complete stack trace, use the debugger by clicking <code>trc</code>.
 
+<h2>trace/debug</h2>
+clicking <code>trc</code> instead of <code>run</code> uses <code>d.wasm</code> instead of <code>k.wasm</code>.
+it is a special build of k that traces each call in the virtual machine by calling js functions <code>fpush</code> and <code>fpop</code>.
+js stores all functions and their arguments on a stack that is present in case of a trap.<br>
+the repl shows an interactive stack trace with source positions:
+clicking on the file shows the source of the function call and double clicking on the k values prints the function or argument values in the repl.<br>
+the first line also shows the type and position of the error where it has been triggered in the source of the k interpreter.
+
 <h1>todo</h1>
-
-<h2>debugger</h2>
-<pre>
-clicking trc instead of run uses d.wasm instead of k.wasm
-d.wasm is a debug build that calls fpush and fpop (into js)
-for each function call in kvm.
-js then knows about the function arguments of the complete call stack
-and the source positions
-
-in the case of a error, a call stack is printed to the repl with links
-to the source files+positions.
-also the function arguments are present, type+length printed directly and
-assignable to x, as described in the repl extensions above.
-</pre>
-
-
-<h2>extended repl</h2>
-<pre>
-in the interactive repl, kst should truncate to the current size.
-take a reference of each result.
-store the k reference in js associated with the repl line number.
-when hovering the line, let the gui:
-- assign the value to x(global)
-- serialize and store in x.bin
-values leak in interactive use, but are reset when clicking run
-(and maybe when deleting lines)
-</pre>
-
 
 <h2>static analysis</h2>
 <pre>
