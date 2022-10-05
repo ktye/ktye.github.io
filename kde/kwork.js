@@ -31,8 +31,10 @@ function kstart(d){let s=d.s
    try     { krep(s)    }
    catch(e){ indicate() }
   }
-  if(s=="")postMessage({m:"write",f:"",s:"ktye/k "+K.n});
-  postMessage({m:"prompt"})
+  if(s==""){
+   postMessage({m:"write",f:"",s:"ktye/k "+K.n});
+   postMessage({m:"prompt"})
+  }
  }
  //ext.read=d.r
  ext.write=function(f,u){
@@ -100,6 +102,7 @@ function dt(){
 function indicate(){
  let p=K._.Srcp()
  if(p)postMessage({"m":"indicate","p":p,"e":(kerr.length)?kerr[0]:"","l":(kerr.length)?kerr[1]:"","stack":printstack()})
+ postMessage({m:"prompt"})
 }
 
 //debugger(d.wasm)

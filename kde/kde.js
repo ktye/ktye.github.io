@@ -48,8 +48,7 @@ function kmode(x){
   if(a)a.forEach(x=>{em[x]=true})
   ex=Object.keys(em)
  }
- //anyword-hint.js, todo: add words in /!a.k b.k
- let WORD = /[\w$]+/, RANGE = 500;
+ let WORD = /[\w$]+/, RANGE = 500; //from anyword-hint.js
  let hnt=function(ed,o){
   var w=o&&o.word||WORD;
   var range=o&&o.range||RANGE;
@@ -288,7 +287,7 @@ ge("intr").onclick=interrupt
 //repl
 function O(s,k){if(s=="")return
  let e=ce("span");
- if("object"==typeof k){kval(e,k) /*e.k=k;e.classList.add("kval");e.title=k.i*/}
+ if("object"==typeof k)kval(e,k)
  e.contentEditable="true"
  e.textContent=s
  e.onkeydown=enterkey
@@ -306,8 +305,7 @@ function kval(sp,k){ //double-click:redisplay, right-click:assign to x
 }
 function pr(){
  let e=ce("span")
- if(repl.children.length)e.textContent=repl.lastChild.textContent.endsWith("\n")?" ":"\n "
- else e.textContent=" "
+ e.textContent=(repl.children.length&&repl.lastChild.textContent.endsWith("\n"))?" ":"\n "
  e.contentEditable=true
  e.classList.add("kinput")
  e.onkeydown=enterkey
@@ -402,8 +400,8 @@ function indicate(p,e,l,fstack){
   a.href=l;a.target="_blank";a.innerText=e
   let d=ce("div");d.contentEditable=false;d.appendChild(a);repl.appendChild(d) //wrap to make it clickable
  }
- printstack(fstack)
- filelink(p,true)
+ if(fstack.length)printstack(fstack)
+ else filelink(p,true)
 }
 function fileat(f,p,direct,extra){
  if(direct&&f=="(ed)"){showpos(p);return}
@@ -413,7 +411,6 @@ function fileat(f,p,direct,extra){
  if(f=="(ed)")a.onclick=function(e){pd(e);showpos(p)}
  else         a.onclick=function(e){pd(e);openfile(findfile(f),ge("expl"),p)}
  repl.appendChild(a)
- console.log(extra)
  if(extra!==undefined)for(let i=0;i<extra.length;i++)repl.appendChild(extra[i])
  let e=ce("span");e.textContent="\n";repl.appendChild(e)
 }

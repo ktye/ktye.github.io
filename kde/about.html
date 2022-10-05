@@ -96,7 +96,11 @@ k also has file system access within the directory that is loaded.<br>
 <code>`$&lt;`"."</code> returns a list of all file names as symbols.<br>
 to read a file, it must be preloaded (k.wasm cannot work with asynchronous js apis).<br>
 files are preloaded when clicking <code>rda</code> or when the file has been opened in the editor.
-k-files are always preloaded.
+k-files are always preloaded.<p>
+
+entering text in the the input field of the file browser searches for the input text in all loaded files
+and prints links for all matches in the console (like grep but no regex).
+
 
 <h2>error indicator</h2>
 when k detects an error with position, the position is an offset to the current source, a catenation of the executed files:
