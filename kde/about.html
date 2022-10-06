@@ -101,6 +101,13 @@ k-files are always preloaded.<p>
 entering text in the the input field of the file browser searches for the input text in all loaded files
 and prints links for all matches in the console (like grep but no regex).
 
+<h2>feature switch</h2>
+there is one switch (the checkbox) that turns everything on or off:
+<ul>
+ <li>syntax highlight and editor shortcuts</li>
+ <li>static analysis</li>
+ <li>function call trace</li>
+</ul>
 
 <h2>error indicator</h2>
 when k detects an error with position, the position is an offset to the current source, a catenation of the executed files:
@@ -112,12 +119,12 @@ when k detects an error with position, the position is an offset to the current 
 if the error is within the code shown in the editor, it is highlighted directly.
 otherwise a link is appended to the repl giving the user time to save the current file.<p>
 
-only the innermost error position is tracked by kvm.
+by default only the innermost error position is tracked by kvm.
 that may may be in the built-in <code>z.k</code> (e.g. the formatter), which may not be very informative.<br>
-for a complete stack trace, use the debugger by clicking <code>trc</code>.
+for a complete stack trace, turn use the debugger by turning on the switch.
 
 <h2>trace/debug</h2>
-clicking <code>trc</code> instead of <code>run</code> uses <code>d.wasm</code> instead of <code>k.wasm</code>.
+with the switch turned on, <code>run</code> uses <code>d.wasm</code> instead of <code>k.wasm</code>.
 it is a special build of k that traces each call in the virtual machine by calling js functions <code>fpush</code> and <code>fpop</code>.
 js stores all functions and their arguments on a stack that is present in case of a trap.<br>
 the repl shows an interactive stack trace with source positions:

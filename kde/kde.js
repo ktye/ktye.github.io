@@ -110,13 +110,16 @@ function modify(){if(ed.modified)return
  ed.modified=true
  if(ed.sp)ed.sp.classList.add("modified")
 }
-function grep(s){if(!s)return
- ge(repl.lastChild.textContent+="\\grep "+s+" *\n")
+function grep(s,suffix){
+ repl.lastChild.textContent+="\\grep "+s+" *"+suffix+"\n"
  let g=function(f,a){
+  console.log(f,f.endsWith(suffix))
+  if((suffix!="")&&(!f.endsWith(suffix)))return
   let l=a.split("\n")
   let p=0
-  for(let i=0;i<l.length;i++){
-   let j=l[i].indexOf(s)
+  for(let i=0;i<l.length;i++){let j
+   if("string"===typeof s)j=l[i].indexOf(s)
+   else{let m=s.exec(l[i]);j=(m===null)?-1:m.index}
    if(j>=0){
     let sp=ce("span");sp.textContent=l[i]
     fileat(f,p+j,false,[sp])
@@ -127,7 +130,30 @@ function grep(s){if(!s)return
  let a=ge("expl").children;for(let i=0;i<a.length;i++)if(a[i].u)g(a[i].textContent,su(a[i].u))
  pr()
 }
-ge("grep").onkeydown=function(e){if(e.key=="Enter")grep(e.target.value)}
+function kdef(s){grep(new RegExp("^\\s*;?"+s+":"),".k")}
+function ffind(s){let r=[]
+ repl.lastChild.textContent+="\\find "+s+"*\n"
+ let a=ge("expl").children;for(let i=0;i<a.length;i++)if(a[i].textContent.startsWith(s)){
+  r.push(a[i])
+ }
+ return r
+}
+ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value
+ let st=function(s){s=s.trim();if(s=="")return ed.getSelection();return s}
+ if((s=="g")||s.startsWith("g ")||s.startsWith("g.")){s=s.slice(1)
+  let suffix=""
+  if(s.startsWith(".")){
+   let i=s.indexOf(" ")
+   if(i>0){suffix=s.slice(0,i);s=s.slice(1+i)}
+   else{suffix=s;s=""}
+  }
+  grep(st(s),suffix)
+ }else if(s.startsWith(":")){ kdef(st(s.slice(1).trim())) }
+ else {let r=ffind(s);console.log(r)
+  console.log(ed.sp)
+  if(1==r.length)openfile(r[0],ge("expl"))
+  for(let i=0;i<r.length;i++)fileat(r[i].textContent,0,1==r.length)
+}}}
 
 //opendir by button click or dropping a directory (requires support&authorization)
 async function opendir(d){dir=d
