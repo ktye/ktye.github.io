@@ -71,12 +71,18 @@ function kmode(x){
   for(let i=0;i<ex.length;i++)if(ex[i].startsWith(curWord))li.push(ex[i])
   return{list:li,from:CodeMirror.Pos(cur.line,start),to:CodeMirror.Pos(cur.line,end)};
  }
+ ed.setOption("lineNumbers",x)
  ed.setOption("mode",x?"k":"")  
  ed.setOption("theme",x?"k":"")
  if(x)ed.on("gutterClick",execline);else ed.off("gutterClick",execline)
  if(x)ed.setOption("extraKeys",{"RightClick":search,"Shift-RightClick":exec,"Shift-Enter":exec,'F11':function(cm){cm.setOption("fullScreen",!cm.getOption("fullScreen"))},"Tab":"autocomplete"})
  else ed.setOption("extraKeys",{})
  CodeMirror.commands.autocomplete=function(cm){cm.showHint({hint:hnt})}
+}
+ge("feat").onchange=function(e){let x=e.target.checked
+ kmode(x)
+ ge("repl").classList.toggle("k")
+ ge("brow").classList.toggle("k")
 }
 
 
@@ -163,7 +169,7 @@ function openfile(s,ex,p){ //span: .h(handle)
   ed.setValue(su(s.u))
   ed.sp=s
   ed.modified=false
-  kmode(s.textContent.endsWith(".k")&&ge("ksyn").checked) 
+  kmode(s.textContent.endsWith(".k")&&ge("feat").checked) 
   if(p)showpos(p)
   ge("putb").disabled=false
   let a=ex.children;for(let i=0;i<a.length;i++)if(a[i]!=s)a[i].classList.remove("curfile")
@@ -255,8 +261,6 @@ window.ondrop=function(e){pd(e);
  err("only a directory can be dropped")
 }
 
-ge("ksyn").onchange=function(e){kmode(e.target.checked)}
-
 
 //dbl-click on editor scrollbar to request more space, or F11 to toggle fullscreen, when editor is focused
 let sbclick=0
@@ -277,10 +281,9 @@ function clickrun(e){
  let s=ed.getValue()
  save()
  location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
- kstart(s,e.target.textContent=="trc")
+ kstart(s,ge("feat").checked)
 }
 ge("runb").onclick=clickrun
-ge("trcb").onclick=clickrun
 ge("intr").onclick=interrupt
 
 

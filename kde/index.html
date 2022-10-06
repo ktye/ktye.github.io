@@ -22,16 +22,18 @@
 <style>
  *{font-family:monospace}
  body{margin:0}
- #left{background-color:#f00; position:absolute; left:0; top:0}
+ #left{position:absolute; left:0; top:0}
  .left0{width:50vw;height:100vh;}
  .left1{width:100vw;height:50vh;}
- #repl{background-color:#fff; position:absolute; margin:0;outline:0px;overflow:auto}
+ #repl{box-sizing: border-box;border-left:1px solid black;;background-color:#fff; position:absolute; margin:0;outline:0px;overflow:auto}
  .repl0{left:50vw; width:50vw; height:50vh; top:0;} 
  .repl1{left:0; width:50vw; height:50vh; top:50vh;} 
+ #repl.k{border:none}
  [contenteditable]:focus{outline:0px solid transparent}
- #brow{background-color:#efe; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
+ #brow{box-sizing: border-box;border-left:1px solid black; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
+ #brow.k{background-color:#efe;border:none}
  #bar{display:flex;flex-direction:row}
- .CodeMirror{background-color:#ffe;height:100%!important;border:none;resize:none}
+ .CodeMirror{height:100%!important;border:none;resize:none}
  .CodeMirror-selected{background-color:#def;outline:1px solid;outline-offset:-0.5px}
  .CodeMirror-focused .CodeMirror-selected{background-color:#d7d4f0;outline:none}
  .CodeMirror-fullscreen{position:fixed;top:0;left:0;right:0;bottom:0;height:auto;z-index:9}
@@ -50,16 +52,14 @@
 
 <body onload="window.init()">
  <div id="left" class="left0"></div>
- <pre id="repl" class="repl0" spellcheck="false">k</pre>
- <div id="brow">
+ <pre id="repl" class="repl0 k" spellcheck="false">k</pre>
+ <div id="brow" class="k">
   <div id="bar">
    <button id="runb">run</button>
-   <button id="trcb" title="trace/debug">trc</button>
    <button id="putb" disabled title="write current file to disk">put</button>
    <button id="newb" disabled title="create new file on disk">new</button>
    <button id="intr" disabled title="interrupt k">int</button>
-   <input  id="ksyn" checked type="checkbox" title="syntax highlight">
-   <input  id="lint"         type="checkbox" title="static analysis">
+   <input  id="feat" checked type="checkbox" title="everything on/off">
    <input  id="grep"         type="text"     title="grep"/>
    <span   id="memo" style="flex-grow:1">0k</span>
    <button id="rall" disabled title="preload all files">rda</button>

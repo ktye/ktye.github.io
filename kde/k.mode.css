@@ -1,3 +1,4 @@
+.cm-s-k.CodeMirror{background-color:#ffe}
 .cm-s-k span.cm-comment  {color:green}
 .cm-s-k span.cm-string   {color:darkred}
 .cm-s-k span.cm-keyword  {color:red}        /* (space)\   */
