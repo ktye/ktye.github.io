@@ -69,10 +69,13 @@ e.g. if the editor has the first line: <code>/!a.k b.k</code>, it executes <code
 
 
 <h2>repl</h2>
-the repl shows k output and remains active after running the program in the editor.<br>
+<p>the repl shows k output and remains active after running the program in the editor.<br>
 k output lines also keep a reference to the underlying k value.
 hovering over an output line displays it in red and shows the type information.
-double-clicking on it resends it to the input and right-clicking assigns it to <code>x</code>.<p>
+double-clicking on it resends it to the input and right-clicking assigns it to <code>x</code>.</p>
+
+<p>text that is written by k with <code>`<"text"</code> or <code>x+ \y</code> keeps track of the stores the source location in the output.
+it is shown in red and double-clicking points the editor to the source where the write call originates.</p>
 
 k runs in a webworker in a separate thread as the ui.<br>
 if k does not return directly (e.g. <code>(1+)/:1</code>), it can be interrupted with the <code>int</code> button, which is enabled when k is busy.
@@ -100,6 +103,22 @@ k-files are always preloaded.<p>
 
 entering text in the the input field of the file browser searches for the input text in all loaded files
 and prints links for all matches in the console (like grep but no regex).
+
+<h2>search</h2>
+<p><b>search</b> in the editor by selecting text and right click to jump to the next occurance.</p>
+
+<p><b>find</b> files by entering a prefix in the input field above the browser.
+results are displayed with links in the repl. if a single file is found, it is opens in the editor.</p>
+
+<p><b>grep</b> in all loaded files with <code>g str</code> in the input field.
+matches are displayed in the repl.
+restrict the search to files with a specific extension, e.g. all k files by <code>g.k str</code>.
+the string is matched directly, not as a regular expression.</p>
+
+<p><b>definitions</b> of a variable in all k files are searched with <code>:varname</code>.
+all definitions show up in the repl as links.</p>
+
+<p>find, grep and definitions can also be executed without argument, in which case the currently selected text from the editor is used.</p>
 
 <h2>feature switch</h2>
 there is one switch (the checkbox) that turns everything on or off:

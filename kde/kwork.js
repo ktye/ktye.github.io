@@ -38,7 +38,17 @@ function kstart(d){let s=d.s
  }
  //ext.read=d.r
  ext.write=function(f,u){
-  postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt()})
+  let k
+  console.log("k??")
+  if(fstack.length>0){ //extract source position from last function call
+   let f=fstack[fstack.length-1]
+   console.log("f?",f)
+   let p=Number(BigInt.asUintN(32,f[0]>>BigInt(32))&BigInt(0xffffff))
+   console.log("p?",p)
+   k={p:p,t:"C",i:"out@"+p,k:0}
+  }
+  console.log("k?",k)
+  postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt(),k:k})
  }
  K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
 }
@@ -58,8 +68,10 @@ function kinfo(x,str){
  let p=Number(BigInt.asUintN(32,x>>BigInt(32))&BigInt(0xffffff))
  let t=K.TK(x)
  let i=t
+ console.log("kinfo",x,str,t,p)
  if(t=="l")t="λ"
  if("CIFZLDT".includes(t))i+="#"+K.NK(x)
+ if(p!=0)i+=" p="+p
 
  let r={k:x,i:i,p:p}
  if(str===true){

@@ -110,10 +110,12 @@ function modify(){if(ed.modified)return
  ed.modified=true
  if(ed.sp)ed.sp.classList.add("modified")
 }
-function grep(s,suffix){
+function grep(s,suffix,sn){
+ let c=ed.getCursor();ed.setSelection(c,c)
+ let sel=[]
  repl.lastChild.textContent+="\\grep "+s+" *"+suffix+"\n"
  let g=function(f,a){
-  console.log(f,f.endsWith(suffix))
+  let edfile=(("sp"in ed)&&ed.sp.textContent==f)
   if((suffix!="")&&(!f.endsWith(suffix)))return
   let l=a.split("\n")
   let p=0
@@ -123,14 +125,16 @@ function grep(s,suffix){
    if(j>=0){
     let sp=ce("span");sp.textContent=l[i]
     fileat(f,p+j,false,[sp])
+    if(edfile)sel.push({anchor:{line:i,ch:j},head:{line:i,ch:j+sn}})
    }
    p+=1+l[i].length
   }
+  if(edfile&&sel.length>0)ed.setSelections(sel)
  }
  let a=ge("expl").children;for(let i=0;i<a.length;i++)if(a[i].u)g(a[i].textContent,su(a[i].u))
  pr()
 }
-function kdef(s){grep(new RegExp("^\\s*;?"+s+":"),".k")}
+function kdef(s){grep(new RegExp("^\\s*;?"+s+":"),".k", s.length)}
 function ffind(s){let r=[]
  repl.lastChild.textContent+="\\find "+s+"*\n"
  let a=ge("expl").children;for(let i=0;i<a.length;i++)if(a[i].textContent.startsWith(s)){
@@ -147,10 +151,9 @@ ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value
    if(i>0){suffix=s.slice(0,i);s=s.slice(1+i)}
    else{suffix=s;s=""}
   }
-  grep(st(s),suffix)
+  s=st(s);grep(s,suffix,s.length)
  }else if(s.startsWith(":")){ kdef(st(s.slice(1).trim())) }
- else {let r=ffind(s);console.log(r)
-  console.log(ed.sp)
+ else {let r=ffind(s)
   if(1==r.length)openfile(r[0],ge("expl"))
   for(let i=0;i<r.length;i++)fileat(r[i].textContent,0,1==r.length)
 }}}
@@ -325,12 +328,19 @@ function O(s,k){if(s=="")return
 function kval(sp,k){ //double-click:redisplay, right-click:assign to x
  sp.k=k
  sp.title=k.i
- sp.classList.add("kval")
- sp.ondblclick=function(e){
-  repl.lastChild.textContent+=e.target.textContent+"\n"
-  kw.postMessage({m:"kst",k:e.target.k.k})
+ let o=sp.title.startsWith("out@")
+ sp.classList.add(o?"kout":"kval")
+ if(o){
+  sp.ondblclick=function(e){
+   filelink(k.p,true)
+  }
+ }else{
+  sp.ondblclick=function(e){
+   repl.lastChild.textContent+=e.target.textContent+"\n"
+   kw.postMessage({m:"kst",k:e.target.k.k})
+  }
+  sp.oncontextmenu=function(e){pd(e);kw.postMessage({m:"xgets",k:e.target.k.k})}
  }
- sp.oncontextmenu=function(e){pd(e);kw.postMessage({m:"xgets",k:e.target.k.k})}
 }
 function pr(){
  let e=ce("span")
@@ -367,7 +377,6 @@ function kstart(s,trc){
  intr.disabled=false
  repl.textContent=""
  s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
- //console.log("cats",s)
  kw.postMessage({m:"start",s:s,trc:trc,cons:consize()})
 }
 function krep(s){
@@ -448,7 +457,6 @@ function filelink(p,direct,extra){
   if(p<ni){fileat(src.f[i],p-2,direct,extra);return}
   p-=1+ni
  }
- console.log("filelink:",p)
 }
 function showpos(i){
  let p=ed.posFromIndex(i)
@@ -466,7 +474,6 @@ function printstack(fstack){for(let i=0;i<fstack.length;i++){
  }
  extra.push(spn(")"))
  filelink(fstack[i].p,false,extra)
-
 }}
 
 window.ge=ge //for js console
