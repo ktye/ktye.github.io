@@ -27,6 +27,19 @@ function kstart(d){let s=d.s
  let  ext={fpush:fpush,fpop:fpop,Trap:Trap}
  ext.init= function(){
   if(("string"==typeof s)&&(s!="")){
+   let ok=true
+   if(d.trc===true){
+    try{
+     K.save()
+     console.log("kasa?")
+     let l=K._.Atx(K.Ks("p"), K.KC(s))
+     ok=kasa(l)
+    }catch(e){ 
+     postMessage({m:"write",f:"",s:"kasa error\n"});
+     ok=false;indicate() 
+    }
+   }
+   if(!ok)return
    t0=performance.now()
    try     { krep(s)    }
    catch(e){ indicate() }
@@ -150,4 +163,36 @@ function printstack(){let r=[]
  }
  return r
 }
+
+function kasa(x){
+ let ok=true
+ 
+ let show=function(x,y){ok=false
+  let k=kinfo(y)
+  k.i="out@ "+k.i
+  postMessage({m:"write",f:"",s:x+"\n",k:k})
+ }
+ 
+ x=K.LK(x)
+ let typs=function(x){let t=[];for(let i=0;i<x.length;i++)t.push(K.TK(x[i]));return t}
+ 
+ let undef=function(x){ //undefined variables, todo test locals in lambdas
+  let s={}
+  let t=typs(x)
+  for(let i=0;i<x.length;i++){
+   if((i>0)&&(t[i]=="0")&&(lo(x[i])==20)&&t[i-1]=="s"){s[K.sK(x[i-1])]=x[i]}
+  }
+  for(let i=0;i<x.length;i++){
+   if((i>0)&&(t[i]=="0")&&(lo(x[i])==64)&&t[i-1]=="s"){s[K.sK(x[i-1])]=0}
+  }
+  let sym=Object.keys(s)
+  for(let i=0;i<sym.length;i++){
+   let u=s[sym[i]];if(u!=0)show("undefined "+sym[i], u)
+  }
+ }
+ undef(x)
+ return ok
+}
+
+
 
