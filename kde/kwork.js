@@ -1,6 +1,4 @@
 
-import {K} from '../k.js'
-
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 
@@ -22,6 +20,7 @@ function memory(){
  return (m>1000)?((m>>>10)+"M"):m+"k"
 }
 
+let K={}
 function kstart(d){let s=d.s
  fstack=[],kerr=[]
  let  ext={fpush:fpush,fpop:fpop,Trap:Trap}
@@ -29,15 +28,15 @@ function kstart(d){let s=d.s
   if(("string"==typeof s)&&(s!="")){
    let ok=true
    if(d.trc===true){
-    try{
+//    try{
      K.save()
-     let l=K._.Atx(K.Ks("p"), K.KC(s))
+    let l=K._.Atx(K.Ks("p"), K.KC(s))
      ok=kasa(l)
      K.restore()
-    }catch(e){ 
-     postMessage({m:"write",f:"",s:"kasa error\n"});
-     ok=false;indicate() 
-    }
+//    }catch(e){ 
+ //    postMessage({m:"write",f:"",s:"kasa error\n"});
+  //   ok=false;indicate() 
+   // }
    }
    if(!ok)return
    t0=performance.now()
@@ -217,4 +216,113 @@ function kasa(x){ // x:`p"program.."
  return ok
 }
 
+
+// k interface, from k.js but not as a module
+let _
+let usr_write
+let usr_read
+let filename="" 
+let filedata      // for fd_read
+let kenv={env:{ 
+ Exit: function( x){ console.log("exit", x) },
+ Args: function(  ){ console.log("args", x); return 0},
+ Arg: function(x,y){ console.log("args", x, y); return 0},
+ Read:  k_read,
+ Write: k_write,
+ ReadIn: function(x,y){ return 0 },
+ Native: function(x,y){ let i=I()[lo(x)>>>2]
+  K._.dx(x)
+  K._.dx(y)
+  console.log("k native call")
+ },
+}}
+
+function k_write(file,nfile,src,n){
+ let d = new Uint8Array(K._.memory.buffer, src,  n)
+ if(nfile==0){ usr_write("",       d); return 0; }
+ let filename = su(new Uint8Array(K._.memory.buffer, file, nfile))
+ return usr_write(filename, d)
+}
+
+let _rd
+function k_read(file,nfile,dst){
+ let filename = su(new Uint8Array(K._.memory.buffer, file, nfile))
+ if(dst == 0){
+  _rd=usr_read(filename)
+  return _rd.length
+ }
+ let m = new Uint8Array(K._.memory.buffer, dst, _rd.length)
+ m.set(_rd)
+ return 0
+}
+K.kinit = function(ext,kw){
+ usr_read  = ext.read;  delete ext.read  // file read  implementation for k: read(name)=>Uint8Array
+ usr_write = ext.write; delete ext.write // file write implementation for k: write(name,data_uint8array)
+
+ //d.wasm (debug build for ktye.github.io/kdb)
+ if('fpush'in ext){kenv.env.fpush=ext.fpush;delete ext.fpush}
+ if('fpop' in ext){kenv.env.fpop =ext.fpop; delete ext.fpop }
+ if('Trap' in ext){kenv.env.Trap =ext.Trap; delete ext.Trap }
+
+ function binsize(x){K.n=x.byteLength;return x}
+ fetch(kw).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(binsize(r),kenv)).then(r=>{
+  _=r.instance.exports
+  _.kinit()
+  K._=_
+  ext.init()
+  K.save()
+ })
+}
+K.TK = function(x){ 
+ const t="0-cisfz---mdplx---CISFZLDT";
+ return t[_.tp(x)]
+}
+K.NK = function(x){ return _.nn(x) }
+
+function dxr(x,r){_.dx(x);return r}
+function C(){ return new     Int8Array(_.memory.buffer) }
+function U(){ return new   Uint32Array(_.memory.buffer) }
+function J(){ return new BigInt64Array(_.memory.buffer) }
+function I(){ return new    Int32Array(_.memory.buffer) }
+function F(){ return new  Float64Array(_.memory.buffer) }
+K.KC = function(x){
+ if("string"===typeof(x))x=us(x);
+ let r=_.mk(18,x.length);
+ C().set(x,lo(r));return r
+}
+K.sK = function(x){ return K.CK(_.cs(x)) }
+K.Ks = function(x){ return _.sc(K.KC(x)) }
+K.Ki = function(x){ return _.Ki(x) }
+K.BK = function(x){ return dxr(x, C().slice(lo(x),lo(x)+_.nn(x))) } //bytes
+K.CK = function(x){ return su(K.BK(x)) }
+K.SK = function(x){ let n=_.nn(x); let r=new Array(n); let p=lo(x)>>>2
+ let y=I().slice(p,p+n)
+ for(let i=0;i<n;i++)r[i]=K.CK(_.cs(K.Ki(y[i]))) 
+ return dxr(x,r)
+}
+K.LK = function(x){
+ let n=(_.tp(x)==23) ? _.nn(x) : 2 // L vs D,T
+ let r=new Array(n); let p=lo(x)>>>3; let j=J()
+ for(let i=0;i<n;i++)r[i]=_.rx(j[p+i])
+ return dxr(x,r)
+}
+K.KL = function(x){
+ let n=x.length
+ let r=_.mk(23,n)
+ let j=J()
+ let p=lo(r)>>>3
+ for(let i=0;i<n;i++)j[i+p]=x[i]
+ return r
+}
+
+K.ref  = function(x){return _.rx(x)}
+K.Kx   = function(s,...args){ 
+ let c=1+":+-*%&|<>=~!,^#_$?@.".indexOf(s)
+ let f = ((s.length==1)&&(c>0)) ? BigInt(c) : _.Val(K.KC(s))
+ return (args.length>0) ? _.Cal(f,K.KL(args)) : f
+}
+K.KA   = function(sym,val){ K._.dx(K._.Asn(sym,val)) }
+let bak   // save/restore back buffer
+K.save    = function(){ bak = new Uint8Array(K._.memory.buffer).slice(0, 1<<U()[32]) }
+K.restore = function(){ let u=new Uint8Array(K._.memory.buffer).set(bak) }
 

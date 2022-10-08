@@ -14,6 +14,9 @@ function err(x){ge("repl").textContent+="\n"+x+"\n "}
 window.onerror=function(m,s,l,c,e){err(s+m)}
 
 
+let src={}
+let zk //built-in z.k source for error indication
+let kw
 window.init=function(){
  left=ge("left")
  repl=ge("repl")
@@ -402,13 +405,11 @@ function cats(files,s){
  src.f.push((ed.sp===false)?"(ed)":ed.sp.textContent);src.n.push(s.length)
  return r.join("\n")
 }
-let src={}
 
 function help(){fetch("../readme").then(r=>r.text()).then(t=>{O(t);pr()})}
  
-let kw
 function newk(){
- kw=new Worker("kwork.js", {type:"module",name:"kwork"})
+ kw=new Worker("kwork.js", {name:"kwork"})
  
  kw.onmessage=function(e){let d=e.data
   switch(d.m){
@@ -432,7 +433,6 @@ function interrupt(){
  kstart("")
 }
 
-let zk //built-in z.k source for error indication
 function indicate(p,e,l,fstack){
  if(e!=""){
   let a=ce("a")
@@ -477,4 +477,4 @@ function printstack(fstack){for(let i=0;i<fstack.length;i++){
  filelink(fstack[i].p,false,extra)
 }}
 
-window.ge=ge //for js console
+//window.ge=ge //for js console

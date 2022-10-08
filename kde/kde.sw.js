@@ -4,7 +4,6 @@ this.addEventListener("install", (event) => {
    .open("v1")
    .then((cache) =>
     cache.addAll([
-     "/k.js",
      "/k.wasm",
      "/d.wasm",
      "/readme",
