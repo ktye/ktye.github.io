@@ -31,9 +31,9 @@ function kstart(d){let s=d.s
    if(d.trc===true){
     try{
      K.save()
-     console.log("kasa?")
      let l=K._.Atx(K.Ks("p"), K.KC(s))
      ok=kasa(l)
+     K.restore()
     }catch(e){ 
      postMessage({m:"write",f:"",s:"kasa error\n"});
      ok=false;indicate() 
@@ -52,15 +52,11 @@ function kstart(d){let s=d.s
  //ext.read=d.r
  ext.write=function(f,u){
   let k
-  console.log("k??")
   if(fstack.length>0){ //extract source position from last function call
    let f=fstack[fstack.length-1]
-   console.log("f?",f)
    let p=Number(BigInt.asUintN(32,f[0]>>BigInt(32))&BigInt(0xffffff))
-   console.log("p?",p)
    k={p:p,t:"C",i:"out@"+p,k:0}
   }
-  console.log("k?",k)
   postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt(),k:k})
  }
  K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
@@ -81,7 +77,6 @@ function kinfo(x,str){
  let p=Number(BigInt.asUintN(32,x>>BigInt(32))&BigInt(0xffffff))
  let t=K.TK(x)
  let i=t
- console.log("kinfo",x,str,t,p)
  if(t=="l")t="λ"
  if("CIFZLDT".includes(t))i+="#"+K.NK(x)
  if(p!=0)i+=" p="+p
@@ -151,7 +146,6 @@ function printstack(){let r=[]
   let ki=[kinfo(f[0],true)]
 
   if(K.TK(f[1])=="L"){let n=K.NK(f[1])
-   console.log("L",n)
    if(n>5) ki.push(kinfo(f[1],true))
    else{
     let l=K.LK(f[1]);
@@ -164,7 +158,9 @@ function printstack(){let r=[]
  return r
 }
 
-function kasa(x){
+
+//static analysis
+function kasa(x){ // x:`p"program.."
  let ok=true
  
  let show=function(x,y){ok=false
@@ -175,24 +171,50 @@ function kasa(x){
  
  x=K.LK(x)
  let typs=function(x){let t=[];for(let i=0;i<x.length;i++)t.push(K.TK(x[i]));return t}
- 
- let undef=function(x){ //undefined variables, todo test locals in lambdas
+
+ let T=typs(x)
+ let G={} //global assigned variables
+ for(let i=0;i<x.length;i++)if((i>0)&&(T[i]=="0")&&(64==lo(x[i]))&&T[i-1]=="s")G[K.sK(x[i-1])]=true
+
+ //undefined variables
+ let undef=function(x,a){ //undefined variables
   let s={}
   let t=typs(x)
   for(let i=0;i<x.length;i++){
-   if((i>0)&&(t[i]=="0")&&(lo(x[i])==20)&&t[i-1]=="s"){s[K.sK(x[i-1])]=x[i]}
+   if((i>0)&&(t[i]=="0")&&(20==lo(x[i]))&&t[i-1]=="s"){
+    let c=K.sK(x[i-1])
+    s[c]=(G[c]===true)?0:x[i]
+   }
   }
-  for(let i=0;i<x.length;i++){
-   if((i>0)&&(t[i]=="0")&&(lo(x[i])==64)&&t[i-1]=="s"){s[K.sK(x[i-1])]=0}
-  }
+  for(let i=0;i<a.length;i++){s[a[i]]=0}
   let sym=Object.keys(s)
   for(let i=0;i<sym.length;i++){
    let u=s[sym[i]];if(u!=0)show("undefined "+sym[i], u)
   }
  }
- undef(x)
+ undef(x,[]) //undef in global context
+
+ //undef within lambdas
+ let l=[]
+ let lam=function(x){
+  let l=K.LK(K.Kx(".", K.ref(x))), a=K.SK(l[1]), n=lo(l[3])
+  return{k:x,c:K.LK(l[0]),a:a.slice(0,n),l:a.slice(n)}}
+ for(let i=0;i<x.length;i++)if(T[i]=="l")l.push(lam(x[i]))
+ for(let i=0;i<l.length;i++)undef(l[i].c,l[i].a)
+
+ //use of uninitialized local
+ let ubef=function(x,l){
+  let c={}
+  let t=typs(x)
+  for(let i=0;i<x.length;i++){
+   if((i>0)&&(t[i]=="0")&&(t[i-1]=="s")){
+    let s=K.sK(x[i-1])
+    if(!l.includes(s))continue
+    if(64==lo(x[i]))c[s]=true
+    else if(20==lo(x[i])&&c[s]!==true)show("uninitialized "+s,x[i])
+ }}}
+ for(let i=0;i<l.length;i++)ubef(l[i].c,l[i].l)
  return ok
 }
-
 
 

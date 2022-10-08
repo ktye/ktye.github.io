@@ -371,6 +371,7 @@ function consize(){let mono=ge("mono");return{
   w:Math.floor(repl.clientWidth/mono.clientWidth),
   h:Math.floor(repl.clientHeight/mono.clientHeight)}
 }
+ge("repl").onclick=function(e){if(repl==e.target)repl.lastChild.focus()}
 
 
 function kstart(s,trc){

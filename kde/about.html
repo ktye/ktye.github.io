@@ -150,44 +150,15 @@ the repl shows an interactive stack trace with source positions:
 clicking on the file shows the source of the function call and double clicking on the k values prints the function or argument values in the repl.<br>
 the first line also shows the type and position of the error where it has been triggered in the source of the k interpreter.
 
-<h1>todo</h1>
-
 <h2>static analysis</h2>
-<pre>
-when clicking run, a linter pass is first executed:
-a new k is started that only parses all source.
-it returns the k-list (kvm instructions) to js which can analyse, e.g.:
-- parse error
-- misspelled variable: referencing a variable that isn't assigned anywhere
-- detecting use before assign for local variables
-- ... what else can be done? 
-if there are no errors, a new k is started that does the real work.
-if there are errors, they are shown as links:
-lint(parse):a.k:13:2
-</pre>
+before running the program a static analysis check is done on the parsed input. it detects:
+<ul>
+ <li>misspelled variables, e.g. referenced variables that have not been assigned to</li>
+ <li>use of uninitialized locals</li>
+</ul>
+they are shown as errors in the console that can be double clicked to jump to the source location.
 
-<h2>find definition</h2>
-<pre>
-search the current editor all files referenced with a /!a.k b.k line
-for the definition of the selected text.
-that could be /^name:/
-</pre>
-
-<h2>grep</h2>
-<pre>
-search a word through all preloaded files.
-show the results in the repl as links file:line
-how? another button? type in the repl, mark and ...?
-</pre>
-
-<h2>ui layout</h2>
-<pre>
-the ui has 3 panels: editor, repl and browser.
-when any of these overflows it shows scrollbars.
-if the user single-clicks on a scrollbar that means:
-try to make it go away. rearrange the panels by whatever that means.
-</pre>
-
+<h1>todo</h1>
 <h2>plot canvas</h2>
 <pre>
 simple plot.js
