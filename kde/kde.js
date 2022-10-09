@@ -248,15 +248,21 @@ async function writefile(name,u){ //from k
   await w.write(u)
   await w.close()
   addfile(h)
- }else return 1
+ }else download(name,u)
+}
+function download(name,u){
+ var dl=ge("dl");var b=new Blob([u],{type:"application/octet-stream"})
+ dl.href=URL.createObjectURL(b);dl.download=name;dl.click()
 }
 
 ge("putb").onclick=async function(){
  if(ed.sp!==false){
-  const w=await ed.sp.h.createWritable()
-  await w.write(ed.getValue())
-  await w.close()
   ed.sp.u=us(ed.getValue())
+  if("h"in ed.sp){
+   const w=await ed.sp.h.createWritable()
+   await w.write(ed.getValue())
+   await w.close()
+  }else download(ed.sp.textContent,ed.sp.u)
   ed.sp.classList.remove("modified")
   ed.modified=false
  }
