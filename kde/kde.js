@@ -34,7 +34,6 @@ window.init=function(){
  ed.on("change",modify)
  ed.on("change",function(){})
  kmode(true)
- if(!crossOriginIsolated)ge("expl").append(document.createTextNode("no hr timer"))
  fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
 }
@@ -161,7 +160,7 @@ ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value
   for(let i=0;i<r.length;i++)fileat(r[i].textContent,0,1==r.length)
 }}}
 
-//opendir by button click or dropping a directory (requires support&authorization)
+//opendir by button click or dropping a directory
 async function opendir(d){dir=d
  ge("newb").disabled=false
  ge("rall").disabled=false
@@ -178,7 +177,10 @@ async function opendir(d){dir=d
  ge("odir").textContent="/"+dir.name
  if(ak!==false)openfile(ak,ex)
 }
-ge("odir").onclick=async function(){window.showDirectoryPicker().then(h=>opendir(h))}
+ge("odir").onclick=async function(){
+ if("showDirectoryPicker"in window)window.showDirectoryPicker().then(h=>opendir(h))
+ else err("directory access is not supported by your browser\ndrop files into the window instead")
+}
 
 function newspan(name,h){
  let s=ce("span")
@@ -217,7 +219,8 @@ ge("rall").onclick=function(){ //preload all files for k synchronous read
 }
 
 function preload(s){
- s.h.getFile().then(r=>r.arrayBuffer()).then(u=>{s.u=new Uint8Array(u)})
+ if("getFile"in s.h)
+  s.h.getFile().then(r=>r.arrayBuffer()).then(u=>{s.u=new Uint8Array(u)})
 }
 
 function findfile(name){
@@ -286,19 +289,16 @@ function addfile(h){
 
 window.ondragover=function(e){pd(e)}
 window.ondrop=function(e){pd(e);
- if(e.dataTransfer.items){
-  let d=e.dataTransfer.items
-  if((1==d.length)&&(d[0].kind=="file")){
-   d=d[0].getAsFileSystemHandle().then(h=>{
-    if(h.kind!="directory"){err("only a directory can be dropped");return}
-    opendir(h)
-   })
-   return
-  }
+ let l=e.dataTransfer.files
+ for(let i=0;i<l.length;i++){
+  let f=l.item(i);
+  f.arrayBuffer().then(u=>{
+   let sp=addfile({name:f.name})
+   delete sp.h
+   sp.u=u
+  }) 
  }
- err("only a directory can be dropped")
 }
-
 
 //dbl-click on editor scrollbar to request more space, or F11 to toggle fullscreen, when editor is focused
 let sbclick=0

@@ -84,14 +84,15 @@ all data in k memory is reset, but the filesystem in the ui is still loaded.
 
 <h2>file browser</h2>
 
-by default you can edit and execute the contents of the editor.<br>
-to load files from disk, you have to open a directory by clicking <code>open</code>, or drop a directory in the window.
-the filesystemapi is not supported by all browsers and you need to grant access.<br>
-only one directory is supported, no subdirs.<p>
+<p>by default you can edit and execute the contents of the editor.<br>
+to load files from disk, you can open a directory by clicking <code>dir</code>.
+only one directory is supported, no subdirs.<br>
+the filesystemapi is not supported by all browsers.<br>
+otherwise drop files or a directory in the window.</p>
 
-click on a file to open it in the editor. <code>put</code> writes it back to disk.<br>
+<p>click on a file to open it in the editor. <code>put</code> writes it back to disk or downloads.<br>
 the browser highlights the open file <b><code>bold</code></b> and <u><code>underlines</code></u> modified files that have not been written.
-it does not track changes happening on disk.<p>
+it does not track changes happening on disk.</p>
 
 k also has file system access within the directory that is loaded.<br>
 <code>`file&lt;"bytes"</code> writes to disk and
