@@ -17,6 +17,7 @@
 <script src="../codemirror/fullscreen.js"></script>
 <script src="../codemirror/show-hint.js"></script>
 <script src="k.mode.js"></script>
+<script src="plot.js"></script>
 
 <style>
  *{font-family:monospace}
@@ -28,6 +29,7 @@
  .repl0{left:50vw; width:50vw; height:50vh; top:0;} 
  .repl1{left:0; width:50vw; height:50vh; top:50vh;} 
  #repl.k{border:none}
+ #canv{position:absolute;z-index:-1}
  [contenteditable]:focus{outline:0px solid transparent}
  #brow{box-sizing: border-box;border-left:1px solid black; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
  #brow.k{background-color:#efe;border:none}
@@ -53,6 +55,7 @@
 <body onload="window.init()">
  <div id="left" class="left0"></div>
  <pre id="repl" class="repl0 k" spellcheck="false">k</pre>
+ <canvas id="canv" class="repl0"></canvas>
  <div id="brow" class="k">
   <div id="bar">
    <button id="runb">run</button>

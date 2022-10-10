@@ -309,6 +309,7 @@ window.onmousedown=function(e){
  let t=function(){ if(dbl()){
   ge("left").classList.toggle("left0");ge("left").classList.toggle("left1")
   ge("repl").classList.toggle("repl0");ge("repl").classList.toggle("repl1")
+  ge("canv").classList.toggle("repl0");ge("canv").classList.toggle("repl1")
  }}
  if     (e.target.classList.contains("CodeMirror-hscrollbar"))t()
  else if(e.target.classList.contains("CodeMirror-vscrollbar"))t()
@@ -348,7 +349,7 @@ function kval(sp,k){ //double-click:redisplay, right-click:assign to x
    repl.lastChild.textContent+=e.target.textContent+"\n"
    kw.postMessage({m:"kst",k:e.target.k.k})
   }
-  sp.oncontextmenu=function(e){pd(e);kw.postMessage({m:"xgets",k:e.target.k.k})}
+  sp.oncontextmenu=function(e){pd(e);kw.postMessage({m:"xgets",k:e.target.k.k});repl.lastChild.focus()}
  }
 }
 function pr(){
@@ -425,6 +426,7 @@ function newk(){
    break
   case"prompt":pr();break
   case"indicate":indicate(d.p,d.e,d.l,d.stack);break
+  case"plot":plot(d.t,d.l);break
   default: console.log("unknown from kwork:", e.data)
  }}
  kw.onerror=function(e){

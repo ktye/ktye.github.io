@@ -28,15 +28,15 @@ function kstart(d){let s=d.s
   if(("string"==typeof s)&&(s!="")){
    let ok=true
    if(d.trc===true){
-//    try{
+    try{
      K.save()
-    let l=K._.Atx(K.Ks("p"), K.KC(s))
+     let l=K._.Atx(K.Ks("p"), K.KC(s))
      ok=kasa(l)
      K.restore()
-//    }catch(e){ 
- //    postMessage({m:"write",f:"",s:"kasa error\n"});
-  //   ok=false;indicate() 
-   // }
+    }catch(e){
+     postMessage({m:"write",f:"",s:"kasa error\n"});
+     ok=false;indicate() 
+    }
    }
    if(!ok)return
    t0=performance.now()
@@ -172,7 +172,7 @@ function kasa(x){ // x:`p"program.."
  let typs=function(x){let t=[];for(let i=0;i<x.length;i++)t.push(K.TK(x[i]));return t}
 
  let T=typs(x)
- let G={} //global assigned variables
+ let G={plot:true} //global assigned variables
  for(let i=0;i<x.length;i++)if((i>0)&&(T[i]=="0")&&(64==lo(x[i]))&&T[i-1]=="s")G[K.sK(x[i-1])]=true
 
  //undefined variables
@@ -232,8 +232,7 @@ let kenv={env:{
  ReadIn: function(x,y){ return 0 },
  Native: function(x,y){ let i=I()[lo(x)>>>2]
   K._.dx(x)
-  K._.dx(y)
-  console.log("k native call")
+  return kplot(y)
  },
 }}
 
@@ -269,6 +268,7 @@ K.kinit = function(ext,kw){
   _=r.instance.exports
   _.kinit()
   K._=_
+  K.register("plot",0,1)
   ext.init()
   K.save()
  })
@@ -300,6 +300,12 @@ K.SK = function(x){ let n=_.nn(x); let r=new Array(n); let p=lo(x)>>>2
  for(let i=0;i<n;i++)r[i]=K.CK(_.cs(K.Ki(y[i]))) 
  return dxr(x,r)
 }
+K.fK = function(x){ let p=lo(x)>>>3;return dxr(x,F()[p]) }
+K.IK = function(x){ let p=lo(x)>>>2;return dxr(x,I().slice(p,p+_.nn(x))) }
+K.FK = function(x){
+ let t=_.tp(x); let n=(t==6) ? 2 : (t==22) ? 2*_.nn(x) : _.nn(x);
+ let p=lo(x)>>>3;return dxr(x,F().slice(p,p+n))
+}
 K.LK = function(x){
  let n=(_.tp(x)==23) ? _.nn(x) : 2 // L vs D,T
  let r=new Array(n); let p=lo(x)>>>3; let j=J()
@@ -325,4 +331,55 @@ K.KA   = function(sym,val){ K._.dx(K._.Asn(sym,val)) }
 let bak   // save/restore back buffer
 K.save    = function(){ bak = new Uint8Array(K._.memory.buffer).slice(0, 1<<U()[32]) }
 K.restore = function(){ let u=new Uint8Array(K._.memory.buffer).set(bak) }
+K.register= function(name, idx, arity){
+ let f = K._.l2(K.Kx(",", K.Ki(idx)), K.KC(name))
+ I()[(lo(f)>>>2)-3] = arity                           // length-field at offset -3*32bit
+ f = (BigInt(14)<<BigInt(59)) + BigInt(lo(BigInt(f))) // type tag xf(extern function) as upper bits
+ K.KA(K.Ks(name), f)                                  // assign
+}
 
+function kplot(x){x=K.Kx("*",x)
+ let t=K.TK(x)
+ switch(t){
+ case"I": x=K.Kx("1.,,0.+",x);break
+ case"F": x=K.Kx("1.,,",x);break
+ case"Z": x=K.Kx(",",x);break
+ }
+ t=K.TK(x)
+ if(t!="L")K._.trap(0)
+ let l=K.LK(x)
+ if(l.length==0)K._.trap(0)
+ let xt=K.TK(l[0])
+ if("Z"==xt){
+  for(let i=0;i<l.length;i++){
+   if("Z"!=K.TK(l[i]))K._.trap(0)
+   l[i]=K.FK(l[i])
+  }
+  postMessage({m:"plot",t:"polar",l:l})
+  return K.Ks("polar")
+ }
+ if(l.length!=2)indicate()
+ let vec=function(x){
+  let t=K.TK(x)
+  switch(t){
+  case"i":return[lo(x)]
+  case"f":return[K.fK(x)]
+  case"I":return K.IK(x)
+  case"F":return K.FK(x)
+  }
+  return K._.trap(0)
+ }
+ let lf=function(x){
+  let t=K.TK(x)
+  if(t=="L"){
+   let l=K.LK(x)
+   for(let i=0;i<l.length;i++)l[i]=vec(l[i])
+   return l
+  }
+  return [vec(x)]
+ }
+ l[0]=lf(l[0])
+ l[1]=lf(l[1])
+ postMessage({m:"plot",t:"xy",l:l})
+ return K.Ki(l[1].length)
+}
