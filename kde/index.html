@@ -30,6 +30,8 @@
  .repl1{left:0; width:50vw; height:50vh; top:50vh;} 
  #repl.k{border:none}
  #canv{position:absolute;z-index:-1}
+ .can1{left:0;top:0;width:100vw;height:100vh}
+ #legn{position:absolute;z-index:20;top:0;right:5px}
  [contenteditable]:focus{outline:0px solid transparent}
  #brow{box-sizing: border-box;border-left:1px solid black; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
  #brow.k{background-color:#efe;border:none}
@@ -56,6 +58,7 @@
  <div id="left" class="left0"></div>
  <pre id="repl" class="repl0 k" spellcheck="false">k</pre>
  <canvas id="canv" class="repl0"></canvas>
+ <span id="legn"></span>
  <div id="brow" class="k">
   <div id="bar">
    <button id="runb">run</button>

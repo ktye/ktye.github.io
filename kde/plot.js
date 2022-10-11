@@ -1,9 +1,13 @@
-function plot(t,x){
- let cnv=ge("canv");cnv.width=repl.clientWidth;cnv.height=repl.clientHeight
+function plot(t,x){ //click(show-xy) dblclick(toggle-fullscreen) right-click(close)
+ let cnv=ge("canv");cnv.width=cnv.clientWidth;cnv.height=cnv.clientHeight
  let c=cnv.getContext("2d")
+ c.fillStyle="#fff"
+ c.fillRect(0,0,cnv.width,cnv.height)
  if(t=="polar")polarplot(x,c,cnv.width,cnv.height)
  else xyplot(x,c,cnv.width,cnv.height)
  cnv.style.zIndex=10
+ cnv.oncontextmenu=function(e){pd(e);ge("legn").textContent="";cnv.style.zIndex=-1;repl.lastChild.focus()}
+ cnv.ondblclick=function(e){cnv.classList.toggle("can1");plot(t,x)}
 }
 function polarplot(x,c,w,h){
  let r=(w>h)?h/2:w/2
@@ -37,9 +41,49 @@ function polarplot(x,c,w,h){
   c.fillStyle=colornum(i)
   O(x[i])
  }
+ 
+ ge("canv").onclick=function(e){let x=e.offsetX,y=e.offsetY
+   let R=(x-w/2)/r,phi=Math.atan2((x-w/2)/r,(h/2-y)/r)/Math.PI*180
+   ge("legn").innerText="r: "+String(R)+"\nφ: "+String((phi<0)?360+phi:phi)
+  }
 }
 function xyplot(x,c,w,h){
- c.fillRect(0, 0, 100, 100);
+ let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity
+ for(let i=0;i<x.length;i++){
+  let m=Math.min(...x[i][0]);if(m<xmin)xmin=m
+      m=Math.max(...x[i][0]);if(m>xmax)xmax=m
+      m=Math.min(...x[i][1]);if(m<ymin)ymin=m
+      m=Math.max(...x[i][1]);if(m>ymax)ymax=m
+ }
+ if(false==(isFinite(xmin)&&isFinite(xmax)&&isFinite(ymin)&&isFinite(ymax)))return
+ let v=niceLimits(xmin,xmax);xmin=v[0];xmax=v[1]
+     v=niceLimits(ymin,ymax);ymin=v[0];ymax=v[1]
+ const xs=w/(xmax-xmin), ys=h/(ymax-ymin)
+ let xscale=function(x){return xs*(x-xmin)}
+ let yscale=function(x){return ys*(ymax-x)}
+ let X=niceTics(xmin,xmax)
+ let Y=niceTics(ymin,ymax)
+ 
+ c.beginPath()
+ c.lineWidth=1
+ c.strokeStyle="gray"
+ for(let i=0;i<X.length;i++){c.moveTo(xscale(X[i]),0);c.lineTo(xscale(X[i]),h);c.stroke()}
+ for(let i=0;i<Y.length;i++){c.moveTo(0,yscale(Y[i]));c.lineTo(w,yscale(Y[i]));c.stroke()}
+ 
+ c.lineWidth=2
+ for(let i=0;i<x.length;i++){let X=x[i][0],Y=x[i][1]
+  c.beginPath()
+  c.strokeStyle=colornum(i)
+  c.moveTo(xscale(X[0]),yscale(Y[0]))
+  for(let j=0;j<X.length;j++)c.lineTo(xscale(X[j]),yscale(Y[j]))
+  c.stroke()
+  
+  ge("canv").onclick=function(e){let x=e.offsetX,y=e.offsetY
+   let X=xmin+(x/w)*(xmax-xmin)
+   let Y=ymax-(y/h)*(ymax-ymin)
+   ge("legn").innerText="x: "+String(X)+"\ny: "+String(Y)
+  }
+ }
 }
 function colornum(i){
  const  c=["#003FFF","#03ED3A","#E8000B","#8A2BE2","#FFC400","#00D7FF"]

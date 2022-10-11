@@ -341,9 +341,9 @@ K.register= function(name, idx, arity){
 function kplot(x){x=K.Kx("*",x)
  let t=K.TK(x)
  switch(t){
- case"I": x=K.Kx("1.,,0.+",x);break
- case"F": x=K.Kx("1.,,",x);break
- case"Z": x=K.Kx(",",x);break
+ case"I":
+ case"F":
+ case"Z":x=K.Kx(",",x);break
  }
  t=K.TK(x)
  if(t!="L")K._.trap(0)
@@ -358,28 +358,30 @@ function kplot(x){x=K.Kx("*",x)
   postMessage({m:"plot",t:"polar",l:l})
   return K.Ks("polar")
  }
- if(l.length!=2)indicate()
+ 
  let vec=function(x){
   let t=K.TK(x)
   switch(t){
-  case"i":return[lo(x)]
-  case"f":return[K.fK(x)]
   case"I":return K.IK(x)
   case"F":return K.FK(x)
+  default:K._.trap(0)
   }
-  return K._.trap(0)
  }
- let lf=function(x){
-  let t=K.TK(x)
-  if(t=="L"){
-   let l=K.LK(x)
-   for(let i=0;i<l.length;i++)l[i]=vec(l[i])
-   return l
+ for(let i=0;i<l.length;i++){
+  let t=K.TK(l[i])
+  switch(t){
+  case "I": 
+  case "F": let v=vec(l[i]);l[i]=[K.IK(K.Kx("!",K.Ki(v.length))),v]; break
+  case "L":
+   l[i]=K.LK(l[i])
+   if(2!=l[i].length)K._.trap(0)
+   l[i][0]=vec(l[i][0])
+   l[i][1]=vec(l[i][1])
+   if(l[i][0].length!=l[i][1].length)K._.trap(0)
+   break
+  default: K._.trap(0)
   }
-  return [vec(x)]
  }
- l[0]=lf(l[0])
- l[1]=lf(l[1])
  postMessage({m:"plot",t:"xy",l:l})
- return K.Ki(l[1].length)
+ return K.Ki(l.length)
 }
