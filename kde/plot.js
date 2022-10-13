@@ -1,13 +1,34 @@
-function plot(t,x){ //click(show-xy) dblclick(toggle-fullscreen) right-click(close)
+function plot(t,x,axis){ //click(show-xy) dblclick(toggle-fullscreen) right-click(close)
  let cnv=ge("canv");cnv.width=cnv.clientWidth;cnv.height=cnv.clientHeight
  let c=cnv.getContext("2d")
  c.fillStyle="#fff"
  c.fillRect(0,0,cnv.width,cnv.height)
  if(t=="polar")polarplot(x,c,cnv.width,cnv.height)
- else xyplot(x,c,cnv.width,cnv.height)
+ else xyplot(x,c,cnv.width,cnv.height,axis)
  cnv.style.zIndex=10
+ cnv.zoom=false
+ 
+ cnv.bak=c.getImageData(0,0,cnv.width,cnv.height)
+ 
+ cnv.clearZoom=function(){c.clearRect(0,0,cnv.width,cnv.height);c.putImageData(cnv.bak,0,0) }
  cnv.oncontextmenu=function(e){pd(e);ge("legn").textContent="";cnv.style.zIndex=-1;repl.lastChild.focus()}
  cnv.ondblclick=function(e){cnv.classList.toggle("can1");plot(t,x)}
+ cnv.onmousedown=function(e){cnv.zoom=[e.offsetX, e.offsetY, 0, 0];cnv.style.cursor="crosshair"}
+ cnv.onmouseup=function(e){
+  cnv.clearZoom();
+  cnv.style.cursor=""
+  if(Math.abs(cnv.zoom[2])< 5||Math.abs(cnv.zoom[3])<5){cnv.zoom=false;return}
+  let xy0=cnv.coords(cnv.zoom[0],cnv.zoom[1])
+  let xy1=cnv.coords(e.offsetX,e.offsetY)
+  let axis=[Math.min(xy0[0],xy1[0]),Math.max(xy0[0],xy1[0]),Math.min(xy0[1],xy1[1]),Math.max(xy0[1],xy1[1])]
+  cnv.zoom=false
+  plot(t,x,axis)
+ }
+ cnv.onmousemove=function(e){
+  if(cnv.zoom!==false){
+  cnv.zoom=[cnv.zoom[0],cnv.zoom[1],e.offsetX-cnv.zoom[0],e.offsetY-cnv.zoom[1]]
+  cnv.clearZoom();c.beginPath();c.rect(...cnv.zoom);c.strokeStyle='red';c.stroke()
+ }}
 }
 function polarplot(x,c,w,h){
  let r=(w>h)?h/2:w/2
@@ -47,15 +68,18 @@ function polarplot(x,c,w,h){
    ge("legn").innerText="r: "+String(R)+"\nφ: "+String((phi<0)?360+phi:phi)
   }
 }
-function xyplot(x,c,w,h){
+function xyplot(x,c,w,h,axis){
  let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity
- for(let i=0;i<x.length;i++){
-  let m=Math.min(...x[i][0]);if(m<xmin)xmin=m
-      m=Math.max(...x[i][0]);if(m>xmax)xmax=m
-      m=Math.min(...x[i][1]);if(m<ymin)ymin=m
-      m=Math.max(...x[i][1]);if(m>ymax)ymax=m
+ if(axis!==undefined)[xmin,xmax,ymin,ymax]=axis
+ else{
+  for(let i=0;i<x.length;i++){
+   let m=Math.min(...x[i][0]);if(m<xmin)xmin=m
+       m=Math.max(...x[i][0]);if(m>xmax)xmax=m
+       m=Math.min(...x[i][1]);if(m<ymin)ymin=m
+       m=Math.max(...x[i][1]);if(m>ymax)ymax=m
+  }
+  if(false==(isFinite(xmin)&&isFinite(xmax)&&isFinite(ymin)&&isFinite(ymax)))return
  }
- if(false==(isFinite(xmin)&&isFinite(xmax)&&isFinite(ymin)&&isFinite(ymax)))return
  let v=niceLimits(xmin,xmax);xmin=v[0];xmax=v[1]
      v=niceLimits(ymin,ymax);ymin=v[0];ymax=v[1]
  const xs=w/(xmax-xmin), ys=h/(ymax-ymin)
@@ -77,12 +101,15 @@ function xyplot(x,c,w,h){
   c.moveTo(xscale(X[0]),yscale(Y[0]))
   for(let j=0;j<X.length;j++)c.lineTo(xscale(X[j]),yscale(Y[j]))
   c.stroke()
-  
+ 
+  let coords=function(x,y){return [xmin+(x/w)*(xmax-xmin), ymax-(y/h)*(ymax-ymin)]} // axis x,y from pixels
   ge("canv").onclick=function(e){let x=e.offsetX,y=e.offsetY
-   let X=xmin+(x/w)*(xmax-xmin)
-   let Y=ymax-(y/h)*(ymax-ymin)
+   let [X,Y]=coords(x,y)
+   //let X=xmin+(x/w)*(xmax-xmin)
+   //let Y=ymax-(y/h)*(ymax-ymin)
    ge("legn").innerText="x: "+String(X)+"\ny: "+String(Y)
   }
+  ge("canv").coords=coords
  }
 }
 function colornum(i){
