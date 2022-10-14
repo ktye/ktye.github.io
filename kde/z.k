@@ -26,13 +26,13 @@ $[`D~t;d[x;k;kt;T];`T~t;T[x;k];x~*x;,k x;k'x],dd}
 $[|/x':"\t\n\r"__!31;"0x",`x@x;q x]}
 `"kxy.":{
 a:{t:@x;x:$x;$[`c~t;`str x;`s~t;"`",x;x]}
-d:{[x;k]r:"!",k@.x;n:#!x;x:k@!x;$[(1~n)|(@.x)':`D`T;"(",x,")";x],r}
+d:{[x;k]r:"!",k@.x;n:#!x;x:k@!x;$[(n<2)|(@.x)':`D`T;"(",x,")";x],r}
 v:{[x;k;m;n]m*:(.`".kstm")t:@x; dd:("";"..")m<#x;x:(m&#x)#x
 x:$[`L~t;k'x;`C~t;x;$x]
 x:$[`C~t;`str x;`S~t;c,(c:"`")/:x;`L~t;$[1~n;*x;"(",(";"/:x),")"];" "/:x]
 (("";",")(1~n)),x,dd}
 t:@y;n:#y;k:`kxy x;m:x
-$[`T~t;"+",d[+y;k];n~0;(.`".kst0")@t;`D~t;d[y;k];y~*y;a y;v[y;k;m;n]]}
+$[`T~t;"+",d[+y;k];`D~t;d[y;k];n~0;(.`".kst0")@t;y~*y;a y;v[y;k;m;n]]}
 `".kst0":`C`I`S`F`Z`L!(c,c:_34;"!0";"0#`";"0#0.";"0#0a";"()")
 `".kstm":`C`I`S`F`Z`L!100 30 30 20 10 20
 `"k.":`kxy 1000000

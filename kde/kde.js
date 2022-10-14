@@ -144,7 +144,7 @@ function ffind(s){let r=[]
  }
  return r
 }
-ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value
+ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value;if(s.trim()=="")return
  let st=function(s){s=s.trim();if(s=="")return ed.getSelection();return s}
  if((s=="g")||s.startsWith("g ")||s.startsWith("g.")){s=s.slice(1)
   let suffix=""
@@ -388,7 +388,7 @@ function kstart(s,trc){
  intr.disabled=false
  repl.textContent=""
  s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
- kw.postMessage({m:"start",s:s,trc:trc,cons:consize()})
+ kw.postMessage({m:"start",s:s,trc:trc,cons:consize(),fs:readfs()})
 }
 function krep(s){
  if(s==""){rm(repl);pr();return}
@@ -411,6 +411,11 @@ function cats(files,s){
  r.push(s)
  src.f.push((ed.sp===false)?"(ed)":ed.sp.textContent);src.n.push(s.length)
  return r.join("\n")
+}
+function readfs(){
+ let fs={}
+ let a=ge("expl").children;for(let i=0;i<a.length;i++)if("u"in a[i])fs[a[i].textContent]=a[i].u
+ return fs
 }
 
 function help(){fetch("../readme").then(r=>r.text()).then(t=>{O(t);pr()})}

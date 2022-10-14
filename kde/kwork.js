@@ -21,7 +21,7 @@ function memory(){
 }
 
 let K={}
-function kstart(d){let s=d.s
+function kstart(d){let s=d.s,fs=d.fs
  fstack=[],kerr=[]
  let  ext={fpush:fpush,fpop:fpop,Trap:Trap}
  ext.init= function(){
@@ -48,7 +48,7 @@ function kstart(d){let s=d.s
    postMessage({m:"prompt"})
   }
  }
- //ext.read=d.r
+ ext.read=function(s){return (s in fs)?fs[s]:new Uint8Array(0)}
  ext.write=function(f,u){
   let k
   if(fstack.length>0){ //extract source position from last function call
@@ -185,6 +185,7 @@ function kasa(x){ // x:`p"program.."
     s[c]=(G[c]===true)?0:x[i]
    }
   }
+  for(let i=0;i<x.length;i++)if((i>0)&&(t[i]=="0")&&(64==lo(x[i]))&&t[i-1]=="s")s[K.sK(x[i-1])]=0
   for(let i=0;i<a.length;i++){s[a[i]]=0}
   let sym=Object.keys(s)
   for(let i=0;i<sym.length;i++){
