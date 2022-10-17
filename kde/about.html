@@ -64,9 +64,7 @@ the same can be done with <code>shift-enter</code> or <code>shift-rightclick</co
 if some text is selected, these shortcuts only send the current selection to the repl, without restarting k.
 clicking an a line number executes that line only.</p>
 
-<b>multiple files</b> are executed, if the editor starts with <code>/!</code><br>
-e.g. if the editor has the first line: <code>/!a.k b.k</code>, it executes <code>a.k</code> then <code>b.k</code> followed by the program in the editor.
-
+<b>multiple files</b> are executed, if the input field starts with k, e.g. <code>k a.k b.k</code> executes <code>a.k</code> then <code>b.k</code> followed by the program in the editor.
 
 <h2>repl</h2>
 <p>the repl shows k output and remains active after running the program in the editor.<br>
@@ -133,7 +131,7 @@ there is one switch (the checkbox) that turns everything on or off:
 when k detects an error with position, the position is an offset to the current source, a catenation of the executed files:
 <pre>
 "\n"/:(z.k       /built-in k.wasm
-       a.k;b.k   /by first line: /!a.k b.k
+       a.k;b.k   /included files
        ed)       /editor value
 </pre>
 if the error is within the code shown in the editor, it is highlighted directly.

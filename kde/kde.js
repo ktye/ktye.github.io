@@ -44,7 +44,8 @@ function kmode(x){
  if(x){
   let em={}
   let s=ed.getValue()
-  s=(s.startsWith("/!"))?cats(s.slice(2,s.indexOf("\n")).split(" "),""):""
+  let g=ge("grep").value
+  s=(g.startsWith("k "))?cats(g.slice(2).split(" "),""):""
   let re=/[a-zA-Z][\w]*/g
   var a=s.match(re)
   if(a)a.forEach(x=>{em[x]=true})
@@ -144,7 +145,7 @@ function ffind(s){let r=[]
  }
  return r
 }
-ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value;if(s.trim()=="")return
+ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value;if((s.trim()=="")||s.startsWith("k "))return
  let st=function(s){s=s.trim();if(s=="")return ed.getSelection();return s}
  if((s=="g")||s.startsWith("g ")||s.startsWith("g.")){s=s.slice(1)
   let suffix=""
@@ -387,7 +388,8 @@ ge("repl").onclick=function(e){if(repl==e.target)repl.lastChild.focus()}
 function kstart(s,trc){
  intr.disabled=false
  repl.textContent=""
- s=cats(s.startsWith("/!")?s.slice(2,s.indexOf("\n")).split(" "):[],s)
+ let g=ge("grep").value
+ s=cats(g.startsWith("k ")?g.slice(2).split(" "):[],s)
  kw.postMessage({m:"start",s:s,trc:trc,cons:consize(),fs:readfs()})
 }
 function krep(s){
