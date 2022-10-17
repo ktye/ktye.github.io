@@ -21,7 +21,7 @@ function memory(){
 }
 
 let K={}
-function kstart(d){let s=d.s,fs=d.fs
+function kstart(d){let s=d.s,fs=d.fs,w=d.cons.w,h=d.cons.h
  fstack=[],kerr=[]
  let  ext={fpush:fpush,fpop:fpop,Trap:Trap}
  ext.init= function(){
@@ -40,7 +40,7 @@ function kstart(d){let s=d.s,fs=d.fs
    }
    if(!ok)return
    t0=performance.now()
-   try     { krep(s)    }
+   try     { krep(s,w,h)}
    catch(e){ indicate() }
   }
   if(s==""){
@@ -61,13 +61,13 @@ function kstart(d){let s=d.s,fs=d.fs
  K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
 }
 
-function krep(s){
+function krep(s,w,h){
  let silencio=function(){postMessage({m:"prompt"});return null}
  let x=K.Kx(".",K.KC(s))
  if(x==0)return silencio()
  let r
- if(s.startsWith(" ")) r=K.BK(K.Kx("`k@",K.ref(x))) //kst
- else r=K.BK(K.Kx("\"\\n\"/:`l@",K.ref(x)))
+ if(s.startsWith(" ")) r=K.BK(K.Kx("`kxy@"+w,K.ref(x))) //kst
+ else r=K.BK(K.Kx("\"\\n\"/:(`lxy "+w+" "+(h-4)+")@",K.ref(x)))
  postMessage({m:"write",f:"",s:su(r),k:kinfo(x)})
  postMessage({m:"prompt"})
 }
@@ -98,7 +98,7 @@ function kinfo(x,str){
 
 function repl(d){
  t0=performance.now()
- try     {krep(d.s);K.save()     }
+ try     {krep(d.s,d.cons.w,d.cons.h);K.save()     }
  catch(e){indicate(); K.restore()}
 }
 function kst(x){

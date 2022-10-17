@@ -378,10 +378,10 @@ function enterkey(e){if(e.key!="Enter")return
  }
  pd(e)
 }
-function consize(){let mono=ge("mono");return{
-  w:Math.floor(repl.clientWidth/mono.clientWidth),
-  h:Math.floor(repl.clientHeight/mono.clientHeight)}
-}
+function consize(){let mono=ge("mono");let n=mono.textContent.length;return{
+  w:Math.floor(n*repl.clientWidth/mono.clientWidth),
+  h:Math.floor(repl.clientHeight/mono.clientHeight)
+}}
 ge("repl").onclick=function(e){if(repl==e.target)repl.lastChild.focus()}
 
 
