@@ -32,7 +32,6 @@ window.init=function(){
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
  ed.on("change",modify)
- ed.on("change",function(){})
  kmode(true)
  fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
@@ -111,7 +110,12 @@ function execline(ed,n,gutter){ //click on linenumber executes
 }}
 function modify(){if(ed.modified)return
  ed.modified=true
+ document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#eff"
  if(ed.sp)ed.sp.classList.add("modified")
+}
+function unmodify(){
+ ed.modified=false
+ document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#fff"
 }
 function grep(s,suffix,sn){
  let c=ed.getCursor();ed.setSelection(c,c)
@@ -203,7 +207,7 @@ function openfile(s,ex,p){ //span: .h(handle)
   s.u=new Uint8Array(u)
   ed.setValue(su(s.u))
   ed.sp=s
-  ed.modified=false
+  if(ed.sp.classList.contains("modified"))modify();else unmodify() 
   kmode(s.textContent.endsWith(".k")&&ge("feat").checked) 
   if(p)showpos(p)
   ge("putb").disabled=false
@@ -268,7 +272,7 @@ ge("putb").onclick=async function(){
    await w.close()
   }else download(ed.sp.textContent,ed.sp.u)
   ed.sp.classList.remove("modified")
-  ed.modified=false
+  unmodify()
  }
 }
 
