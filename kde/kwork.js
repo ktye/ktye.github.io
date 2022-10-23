@@ -165,7 +165,7 @@ function kasa(x){ // x:`p"program.."
  let show=function(x,y){ok=false
   let k=kinfo(y)
   k.i="out@ "+k.i
-  postMessage({m:"write",f:"",s:x+"\n",k:k})
+  postMessage({m:"write",f:"",s:x+"\n",k:k,l:true})
  }
  
  x=K.LK(x)

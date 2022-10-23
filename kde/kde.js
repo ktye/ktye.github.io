@@ -332,13 +332,14 @@ ge("intr").onclick=interrupt
 
 
 //repl
-function O(s,k){if(s=="")return
+function O(s,k,l){if(s=="")return
  let e=ce("span");
- if("object"==typeof k)kval(e,k)
+ if("object"==typeof k)kval(e,k,l)
  e.contentEditable="true"
- e.textContent=s
+ e.textContent=l?s.trimEnd()+" ":s
  e.onkeydown=enterkey
  repl.appendChild(e);
+ if(l)filelink(k.p,false)
 }
 function kval(sp,k){ //double-click:redisplay, right-click:assign to x
  sp.k=k
@@ -432,7 +433,7 @@ function newk(){
  kw.onmessage=function(e){let d=e.data
   switch(d.m){
   case"write":
-   if(d.f==""){O(d.s,d.k);if(d.mem!==undefined)ge("memo").textContent=d.mem}
+   if(d.f==""){O(d.s,d.k,d.l);if(d.mem!==undefined)ge("memo").textContent=d.mem}
    else        writefile(d.f,d.u)
    break
   case"prompt":pr();break
@@ -464,8 +465,8 @@ function indicate(p,e,l,fstack){
 function fileat(f,p,direct,extra){
  if(direct&&f=="(ed)"){showpos(p);return}
  let a=ce("a");
- a.href=f+":"+p
- a.textContent=(f+":"+p).padEnd(10)
+ a.href=f+"@"+p
+ a.textContent=(f+"@"+p).padEnd(10)
  if(f=="(ed)")a.onclick=function(e){pd(e);showpos(p)}
  else         a.onclick=function(e){pd(e);openfile(findfile(f),ge("expl"),p)}
  repl.appendChild(a)
