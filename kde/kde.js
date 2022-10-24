@@ -375,10 +375,10 @@ function pr(){
  e.focus()
 }
 function enterkey(e){if(e.key!="Enter")return
- let t=e.target;let s=t.textContent;t.textContent+="\n"
+ let t=e.target;let s=t.textContent;if(!s.endsWith("\n"))t.textContent+=" \n"
  s=s.startsWith(" ")?s.slice(1):s.startsWith("\n ")?s.slice(2):s
  if(t.parentElement==repl){
-  if(repl.lastChild!=t)repl.lastChild.textContent=s
+  if(repl.lastElementChild!=t)repl.lastElementChild.textContent+=s
   krep(s)
  }
  pd(e)
