@@ -365,18 +365,21 @@ function pr(){
  e.classList.add("kinput")
  e.onkeydown=enterkey
  repl.appendChild(e)
- let c=window.getSelection() //go to end
+ endcursor(e)
+ repl.scrollTo(0,repl.scrollHeight)
+ e.focus()
+}
+function endcursor(e){
+ let c=window.getSelection()
  c.removeAllRanges()
  let r=document.createRange()
  r.selectNodeContents(e)
  r.collapse(false)
  c.addRange(r)
- repl.scrollTo(0,repl.scrollHeight)
- e.focus()
 }
-function enterkey(e){if(e.key!="Enter")return
+function enterkey(e){if(e.key=="ArrowUp"||e.key=="ArrowDown"){return histkey(e)};if(e.key!="Enter")return
  let t=e.target;let s=t.textContent;if(!s.endsWith("\n"))t.textContent+=" \n"
- s=s.startsWith(" ")?s.slice(1):s.startsWith("\n ")?s.slice(2):s
+ s=s.startsWith(" ")?s.slice(1):s.startsWith("\n ")?s.slice(2):s;histadd(s)
  if(t.parentElement==repl){
   if(repl.lastElementChild!=t)repl.lastElementChild.textContent+=s
   krep(s)
@@ -389,6 +392,13 @@ function consize(){let mono=ge("mono");let n=mono.textContent.length;return{
 }}
 ge("repl").onclick=function(e){if(repl==e.target)repl.lastChild.focus()}
 
+let hist=[""],histi=0
+function histadd(s){histi=hist.length;if(s.trim().length==0)return
+ let i=hist.indexOf(s)
+ if(0>i){hist.push(s)}else{hist.splice(i,1);hist.push(s);histi=hist.length}}
+function histup(){let r=hist[histi];histi-=(histi>1);return r}
+function histdn(){histi+=(histi<hist.length-1);return(hist[histi])}
+function histkey(e){pd(e);let s=(e.key=="ArrowUp")?histup():histdn(); e.target.textContent="\n "+s;endcursor(e.target)}
 
 function kstart(s,trc){
  intr.disabled=false
