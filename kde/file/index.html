@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<title>file</title>
+</head>
+
+<body onload="window.init()">
+<h1>h1</h1>
+<script>
+function init(){
+ let inner=document.documentElement.innerHTML;
+ let i=inner.indexOf("/script>\n<!--\n")
+ let s=inner.slice(14+i,-14)
+ let u=inner.slice(0,i)+"\n</"+"script>\n<!--\n"
+ window.dopack=function(f){
+  let b=u
+  let k=Object.keys(f)
+  for(let i=0;i<k.length;i++){
+   b+="\n\\"+k[i]+"\n"
+   b+=f[k[i]]
+  }
+  b+="\n!--></"+"body>\n</"+"html>\n"
+  return b
+ }
+}
+</script>
+<!--
+\a.k
+1+!10
+\a.html
+<!DOCTYPE html>
+<body><h1>a a a</h1>
+</body></html>
+\css
+a{color:red}
+!-->
+</body>
+</html>
