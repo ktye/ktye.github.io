@@ -1,0 +1,5 @@
+k -e '`"_d"<"\n"/:(((#d)>)#100*!1+100\#d)^d:`x@<`"../../d.wasm"'
+
+cat index.h _d                        > index.html
+echo -e '\n!-->\n</body>\n</html>\n' >> index.html
+rm _d
