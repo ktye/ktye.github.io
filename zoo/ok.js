@@ -1,14 +1,13 @@
-import { oK } from './ok/oK.js'
+//import { oK } from './ok/oK.js'
 
-let env    = oK.baseEnv()
-let run    = oK.run
-let parse  = oK.parse
-let format = oK.format
-
-let O
+let O,oK
 function ini(left,o) {O=o
 
  let p=document.createElement("pre");p.textContent=help;left.appendChild(p)
+ 
+ fetch("./ok/oK.js").then(r=>r.text()).then(r=>{
+  oK=new Function(r + "\n return{run:run,parse:parse,format:format,baseEnv:baseEnv}")()
+ })
 
  O("Welcome to oK v0.1\n ")
 }
@@ -43,6 +42,11 @@ A more general introduction to array programming is also provided:
 `
 
 function evl(s){
+ let env    = oK.baseEnv()
+ let run    = oK.run
+ let parse  = oK.parse
+ let format = oK.format
+
  O("\n")
  let r
  try{ r=format(run(parse(s),env));r=r.length?r+"\n ":r}catch(e){r=e.message+"\n"}

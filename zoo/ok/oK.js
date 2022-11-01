@@ -971,6 +971,3 @@ this.Environment = Environment;
 this.baseEnv = baseEnv;
 this.setIO = setIO;
 */
-
-let oK = {run:run,parse:parse,format:format,baseEnv:baseEnv}
-export { oK }
