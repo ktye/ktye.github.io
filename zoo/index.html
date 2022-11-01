@@ -23,24 +23,27 @@
     <option value="apl360">APL\360     (1966) 60k</option>
     <option value="ngnapl">ngn/apl     (2018) 50k</option>
     <option value="iv"    >APL\iv      (2020) 6M</option>
-    <option value="bqn"   >BQN         (2022) 150k</option>
     <option value="kap"   >KAP         (2022) 800k</option>
    </optgroup>
    <optgroup label="j">
     <option value="j0"    >Incunabulum (1989)   6k</option>
     <option value="j90"   >APL\?       (1990)     </option>
     <option value="j42"   >j42         (1992) 108k</option>
-    <option value="jstack">jstack      (2021)   2k</option>
    </optgroup>
    <optgroup label="k">
     <option value="ok"    >oK           (2021)  40k</option>
     <option value="k2"    >ktye/k2      (2020) 800k</option>
     <option value="kw"    >ktye/k.w     (2020)  20k</option>
-    <option value="klong" >klong        (2020) 160k</option>
     <option value="ngn"   >ngn/k        (2022) 160k</option>
     <option value="k7"    >k7           (2019)   1M</option>
     <option value="k9"    >k9           (2021) 170k</option>
     <option value="k" selected="selected">ktye/k       (2022)  48k</option>
+   </optgroup>
+   <optgroup label="others">
+    <option value="klong" >klong        (2020) 160k</option>
+    <option value="jstack">jstack      (2021)   2k</option>
+    <option value="bqn"   >BQN         (2022) 150k</option>
+    <option value="lil"   >lil         (2022) 120k</option>
    </optgroup>
     <option value="files" >files</option>
   </select>
@@ -58,21 +61,22 @@
 
 import { apl360 } from './apl360.js'
 import { iv     } from './iv.js'
+import { kap    } from './kap.js'
 import { ngnapl } from './ngnapl.js'
 import { j0     } from './j0.js'
 import { j90    } from './j90.js'
 import { j42    } from './j42.js'
-import { jstack } from './jstack.js'
 import { ok     } from './ok.js'
 import { k2     } from './k2.js'
 import { kw     } from './kw.js'
-import { klong  } from './klong.js'
 import { ngn    } from './ngn.js'
 import { k7     } from './k7.js'
 import { k9     } from './k9.js'
 import { k      } from './k.js'
+import { klong  } from './klong.js'
+import { jstack } from './jstack.js'
 import { bqn    } from './bqn.js'
-import { kap    } from './kap.js'
+import { lil    } from './lil.js'
 import { fs     } from './fs.js' 
 import { files  } from './files.js'
 
@@ -147,23 +151,24 @@ function swtch(s){
 
  let sys
  switch(s){
- case "iv":     sys=iv     ;break
  case "apl360": sys=apl360 ;break
  case "ngnapl": sys=ngnapl ;break
+ case "iv":     sys=iv     ;break
+ case "kap":    sys=kap    ;break
  case "j0":     sys=j0     ;break
  case "j90":    sys=j90    ;break
  case "j42":    sys=j42    ;break
- case "jstack": sys=jstack ;break
  case "ok":     sys=ok     ;break
  case "k2":     sys=k2     ;break
  case "kw":     sys=kw     ;break
- case "klong":  sys=klong  ;break
  case "ngn":    sys=ngn    ;break
  case "k7":     sys=k7     ;break
  case "k9":     sys=k9     ;break
  case "k":      sys=k      ;break
+ case "klong":  sys=klong  ;break
+ case "jstack": sys=jstack ;break
  case "bqn":    sys=bqn    ;break
- case "kap":    sys=kap    ;break
+ case "lil":    sys=lil    ;break
  case "files":  sys=files  ;break
  default:console.log("unknown system", s); sys=k
  }
