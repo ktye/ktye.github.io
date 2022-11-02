@@ -1,4 +1,5 @@
-if('serviceWorker'in navigator)navigator.serviceWorker.register("kde.sw.js")
+if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
+if(('serviceWorker'in navigator)&&kdefile)navigator.serviceWorker.register("kde.sw.js")
 
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
@@ -182,7 +183,7 @@ async function opendir(d){dir=d
  ge("odir").textContent="/"+dir.name
  if(ak!==false)openfile(ak,ex)
 }
-ge("odir").onclick=async function(){
+if(!kdefile)ge("odir").onclick=async function(){
  if("showDirectoryPicker"in window)window.showDirectoryPicker().then(h=>opendir(h))
  else err("directory access is not supported by your browser\ndrop files into the window instead")
 }
@@ -218,7 +219,7 @@ function openfile(s,ex,p){ //span: .h(handle)
  else s.h.getFile().then(r=>r.arrayBuffer()).then(u=>set(s,u))
 }
 
-ge("rall").onclick=function(){ //preload all files for k synchronous read
+if(!kdefile)ge("rall").onclick=function(){ //preload all files for k synchronous read
  let ex=ge("expl")
  let a=ex.children;for(let i=0;i<a.length;i++)preload(a[i])
 }
@@ -276,7 +277,7 @@ ge("putb").onclick=async function(){
  }
 }
 
-ge("newb").onclick=async function(e){
+if(!kdefile)ge("newb").onclick=async function(e){
  let b=e.target
  let h=await window.showSaveFilePicker({startIn:dir})
  openfile(addfile(h),ge("expl"))
@@ -438,7 +439,8 @@ function readfs(){
 function help(){fetch("../readme").then(r=>r.text()).then(t=>{O(t);pr()})}
  
 function newk(){
- kw=new Worker("kwork.js", {name:"kwork"})
+ let b=kdefile?new Blob([document.querySelector('#worker1').textContent]):""
+ kw=new Worker(kdefile?window.URL.createObjectURL(b):"kwork.js",{name:"kwork"})
  
  kw.onmessage=function(e){let d=e.data
   switch(d.m){

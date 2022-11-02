@@ -1,3 +1,4 @@
+if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
 
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
@@ -126,7 +127,8 @@ function indicate(){
 
 //debugger(d.wasm)
 let srcmap, kerr=[]
-fetch("../src.map").then(r=>r.json()).then(r=>{srcmap=r})
+if(kdefile) srcmap=srcmapobj
+else        fetch("../src.map").then(r=>r.json()).then(r=>{srcmap=r})
 
 let fstack=[]
 function fpush(f,x){fstack.push([f,x])}

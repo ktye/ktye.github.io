@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>kde/file</title>
+<link rel=icon href="../../k.png">
+<style>
+ body{font-family:georgia,serif}
+ h2{border-top:1px solid black}
+ pre{margin-left:1em}
+ .CodeMirror{background-color:#ffe;border:none;resize:none;height:auto}
+</style>
+</head>
+<body>
+<a id="dl" style="display:none"></a>
+
+<h1>kde/file</h1>
+
+<p>kde/file is a single-file application &ldquo;file.html&rdquo; that runs from a file-url,
+e.g. <code>file:///path/to/file.html</code> (or open by double-click).<br>
+As such it has does not need an http server or network connection.</p>
+<p>Bundled with the single-file-application there is a development environment (edit/repl/debug)
+combined with the application payload (html/css/js/k) and the runtime k.wasm.</p>
+<p>At start the application runs without showing the ide. In case of a trap, it switches to the debugger.<br>
+The error can be corrected in the editor and a new application bundle is rewritten and downloaded.</p>
+
+<p>it's a self-modifying single-file application</p>
+
+<button id="but">download bundle file.html</button>
+
+<pre>
+   ki
+  jsam
+ cssnot
+htmlfree
+</pre>
+
+<script>
+
+// this file fetches the template file.h and fills {{xxx}} from files 
+// html/css/js/k/.. and a hex encoding of ../../d.wasm(k-debug-build)
+// the result is provided as a download link
+
+console.log("good morning")
+
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+function xu(u){return [...new Uint8Array(u)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+
+
+function fetchall(l,f){let x=[],F={}
+ l.forEach(function(u,i){x.push(fetch(u).then(r=>r.arrayBuffer()).then(r=>F[l[i]]=r))})
+ Promise.all(x).then(function(){f(F)})
+}
+fetchall(["file.h","html","css","js","k","../kwork.js","../kde.js","../../src.map","../../d.wasm"],function(F){
+ build(F)
+})
+
+function build(F){let f //build empty application (fill file.h template)
+ f=                          su(F["file.h"])
+ f=f.replace("{{html}}"     ,su(F["html"]))
+ f=f.replace("{{css}}"      ,su(F["css"]))
+ f=f.replace("{{js}}"       ,su(F["js"]))
+ f=f.replace("{{k}}"        ,su(F["k"]))
+ f=f.replace("{{kwork.js}}" ,su(F["../kwork.js"]))
+ f=f.replace("{{kde.js}}"   ,su(F["../kde.js"]))
+ f=f.replace("{{src.map}}"  ,su(F["../../src.map"]))
+ f=f.replace("{{d.hx.wasm}}",xu(F["../../d.wasm"])+"\n")
+ ge("but").onclick=function(e){download(us(f))}
+}
+
+function download(u){
+ var dl=ge("dl");var b=new Blob([u],{type:"application/octet-stream"})
+ dl.href=URL.createObjectURL(b);dl.download="file.html";dl.click()
+}
+
+</script>
+</body>
