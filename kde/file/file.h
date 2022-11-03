@@ -64,11 +64,12 @@
  <div id="brow" class="k">
   <div id="bar">
    <button id="runb">run</button>
-   <button id="putb" disabled title="write&download">put</button>
+   <button id="putb" disabled title="commit file modification">put</button>
    <button id="intr" disabled title="interrupt">int</button>
    <input  id="feat" checked type="checkbox" title="switch">
    <input  id="grep"         type="text"     title="input"/>
    <span   id="memo" style="flex-grow:1">0k</span>
+   <button id="dlbt" title="download bundle file">download</button>
   </div>
   <div id="expl"></div>
  </div>
@@ -98,7 +99,8 @@ let kdefile=true
 let blob = new Blob([document.querySelector('#worker1').textContent]);
 let worker = new Worker(window.URL.createObjectURL(blob));
 {{kde.js}}
-function addFile(name,s){
+ge("putb").onclick=function(){ed.sp.u=us(ed.getValue());ed.sp.classList.remove("modified");unmodify()}
+function newfile(name,s){
  let sp=addfile({name:name})
  delete sp.h //no handle
  sp.u=us(s)
@@ -107,14 +109,12 @@ function addFile(name,s){
 
 
 <script>
-let fs={} //in-src-fs modified and repacked by the application
-let K
-let kenv={env:{}} //todo
 function init(){
+ let fs={} //in-src-fs modified and repacked by the application
  let inner=document.documentElement.innerHTML;
  let i=inner.indexOf("/script>\n<!--\n")
- let s=inner.slice(14+i,-14)
- let u=inner.slice(0,i)+"\n</"+"script>\n<!--\n"
+ let s=inner.slice(14+i,-13)
+ let u=inner.slice(0,i)+"/"+"script>\n<!--\n"
  for(let i=0;;i++){
   let p=s.indexOf("\n")
   let name=s.slice(1,p)
@@ -124,23 +124,28 @@ function init(){
   fs[name]=s.slice(1,1+p)
   s=s.slice(1+p)
  }
+ console.log("fs",fs)
  
- addFile("html",fs["html"])
- addFile("css",fs["css"])
- addFile("js",fs["js"])
- addFile("k",fs["k"])
+ let t=document.title
+ newfile(t+".html",fs["html"])
+ newfile(t+".css",fs["css"])
+ newfile(t+".js",fs["js"])
+ newfile(t+".k",fs["k"])
  
- window.dopack=function(f){
+ let pack=function(){
   let b="<!DOCTYPE html>\n"+u
-  let k=Object.keys(f)
+  let k=Object.keys(fs)
   for(let i=0;i<k.length;i++){
-   b+="\n\\"+k[i]+"\n"
-   b+=f[k[i]]
+   b+="\\"+k[i]+"\n"
+   b+=fs[k[i]]
   }
-  b+="\n!--></"+"body>\n</"+"html>\n"
+  b+="\n!-->\n</"+"body>\n</"+"html>\n"
   return b
  }
+ 
  kdeinit()
+ ge("dlbt").onclick=function(){download(t+".html",us(pack()))}
+ //todo run foreground application
 }
 </script>
 <!--
