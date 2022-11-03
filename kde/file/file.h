@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
-<title>file</title>
+<title>{{title}}</title>
 
+<style>{{k.mode.css}}</style>
+<style>{{codemirror.min.css}}</style>
+<style>{{foldgutter.css}}</style>
+<style>{{show-hint.css}}</style>
 <style>
  *{font-family:monospace}
  body{margin:0}
@@ -37,13 +41,22 @@
  #mono{position:absolute;margin:0;outline:0px;z-index:-1}
 </style>
 
+<script>{{jquery.min.js}}</script>
+<script>{{codemirror.min.js}}</script>
+<script>{{matchbrackets.js}}</script>
+<script>{{foldcode.js}}</script>
+<script>{{foldgutter.js}}</script>
+<script>{{brace-fold.js}}</script>
+<script>{{fullscreen.js}}</script>
+<script>{{show-hint.js}}</script>
+<script>{{k.mode.js}}</script>
+<script>{{plot.js}}</script>
+
 </head>
 
 
+<body onload="init()">
 
-
-
-<body onload="window.init()">
 <div id="left" class="left0"></div>
  <pre id="repl" class="repl0 k" spellcheck="false">k</pre>
  <canvas id="canv" class="repl0"></canvas>
@@ -63,10 +76,19 @@
  <pre id="mono">0 1 2 3 4 5 6 7 8 9 0</pre> <!-- to calculate font metrics -->
 
 
-
 <script id="worker1" type="javascript/worker">
+ 
+let dwasm=function(){
+ let w="{{d.hx.wasm}}"
+ let a=new Uint8Array(w.length/2)
+ let b=function(x){return x-((x<97)?48:87)}
+ for(let i=0;i<a.length;i++)a[i]=b(w.charCodeAt(1+2*i))+16*b(w.charCodeAt(2*i))
+ return a
+}
+
 let kdefile=true
 let srcmapobj={{src.map}}
+let zk={{z.k}}
 {{kwork.js}}
 </script>
 
@@ -76,14 +98,12 @@ let kdefile=true
 let blob = new Blob([document.querySelector('#worker1').textContent]);
 let worker = new Worker(window.URL.createObjectURL(blob));
 {{kde.js}}
-
 function addFile(name,s){
  let sp=addfile({name:name})
  delete sp.h //no handle
  sp.u=us(s)
 }
 </script>
-
 
 
 <script>
@@ -110,13 +130,6 @@ function init(){
  addFile("js",fs["js"])
  addFile("k",fs["k"])
  
- /*
- let w=fs["d.hx.wasm"]
- let a=new Uint8Array(w.length/2)
- let b=function(x){return x-((x<97)?48:87)}
- for(let i=0;i<a.length;i++)a[i]=b(w.charCodeAt(1+2*i))+16*b(w.charCodeAt(2*i))
- WebAssembly.compile(a).then(x=>WebAssembly.instantiate(x,kenv))
- */
  window.dopack=function(f){
   let b="<!DOCTYPE html>\n"+u
   let k=Object.keys(f)
@@ -127,6 +140,7 @@ function init(){
   b+="\n!--></"+"body>\n</"+"html>\n"
   return b
  }
+ kdeinit()
 }
 </script>
 <!--
@@ -138,8 +152,6 @@ function init(){
 {{js}}
 \k
 {{k}}
-\d.hx.wasm
-{{d.hx.wasm}}
 !-->
 </body>
 </html>

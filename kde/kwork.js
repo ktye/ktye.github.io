@@ -59,7 +59,7 @@ function kstart(d){let s=d.s,fs=d.fs,w=d.cons.w,h=d.cons.h
   }
   postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt(),k:k})
  }
- K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
+ K.kinit(ext,(d.trc===true||kdefile)?"../d.wasm":"../k.wasm")
 }
 
 function krep(s,w,h){
@@ -266,15 +266,19 @@ K.kinit = function(ext,kw){
  if('fpop' in ext){kenv.env.fpop =ext.fpop; delete ext.fpop }
  if('Trap' in ext){kenv.env.Trap =ext.Trap; delete ext.Trap }
 
- function binsize(x){K.n=x.byteLength;return x}
- fetch(kw).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(binsize(r),kenv)).then(r=>{
+ let initk=function(r){
   _=r.instance.exports
   _.kinit()
   K._=_
   K.register("plot",0,1)
   ext.init()
   K.save()
- })
+  console.log("k is running")
+ }
+
+ function binsize(x){K.n=x.byteLength;return x}
+ if(kdefile){let r=dwasm();                      WebAssembly.instantiate(binsize(r),kenv ).then(initk) }
+ else fetch(kw).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(binsize(r),kenv)).then(initk)
 }
 K.TK = function(x){ 
  const t="0-cisfz---mdplx---CISFZLDT";

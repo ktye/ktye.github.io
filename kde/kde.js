@@ -1,5 +1,5 @@
 if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
-if(('serviceWorker'in navigator)&&kdefile)navigator.serviceWorker.register("kde.sw.js")
+if(!kdefile)if(('serviceWorker'in navigator)&&kdefile)navigator.serviceWorker.register("kde.sw.js")
 
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
@@ -18,7 +18,7 @@ window.onerror=function(m,s,l,c,e){err(s+m)}
 let src={}
 let zk //built-in z.k source for error indication
 let kw
-window.init=function(){
+window.kdeinit=function(){
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")
@@ -34,7 +34,7 @@ window.init=function(){
  ed.sp=false //.sp(span) ed.sp.h(handle)
  ed.on("change",modify)
  kmode(true)
- fetch("z.k").then(r=>r.text()).then(r=>zk=r)
+ if(!kdefile)fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
 }
 function save(){if(ed.sp)ed.sp.u=us(ed.getValue())}
@@ -509,4 +509,3 @@ function printstack(fstack){for(let i=0;i<fstack.length;i++){
  filelink(fstack[i].p,false,extra)
 }}
 
-//window.ge=ge //for js console
