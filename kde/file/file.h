@@ -95,21 +95,25 @@ let zk={{z.k}}
 
 
 <script>
-let kdefile=true
-let blob = new Blob([document.querySelector('#worker1').textContent]);
-let worker = new Worker(window.URL.createObjectURL(blob));
-{{kde.js}}
-ge("putb").onclick=function(){ed.sp.u=us(ed.getValue());ed.sp.classList.remove("modified");unmodify()}
-function newfile(name,s){
- let sp=addfile({name:name})
- delete sp.h //no handle
- sp.u=us(s)
-}
+let kde=function(){
+ let kdefile=true
+ let blob = new Blob([document.querySelector('#worker1').textContent]);
+ let worker = new Worker(window.URL.createObjectURL(blob));
+ {{kde.js}}
+ ge("putb").onclick=function(){ed.sp.u=us(ed.getValue());ed.sp.classList.remove("modified");unmodify()}
+ let newfile=function(name,s){
+  let sp=addfile({name:name})
+  delete sp.h //no handle
+  sp.u=us(s)
+ }
+ return {newfile:newfile}
+}()
 </script>
 
 
 <script>
 function init(){
+ let ge=function(x){return document.getElementById(x)}
  let fs={} //in-src-fs modified and repacked by the application
  let inner=document.documentElement.innerHTML;
  let i=inner.indexOf("/script>\n<!--\n")
@@ -127,10 +131,10 @@ function init(){
  console.log("fs",fs)
  
  let t=document.title
- newfile(t+".html",fs["html"])
- newfile(t+".css",fs["css"])
- newfile(t+".js",fs["js"])
- newfile(t+".k",fs["k"])
+ kde.newfile(t+".html",fs["html"])
+ kde.newfile(t+".css",fs["css"])
+ kde.newfile(t+".js",fs["js"])
+ kde.newfile(t+".k",fs["k"])
  
  let pack=function(){
   let b="<!DOCTYPE html>\n"+u

@@ -273,7 +273,6 @@ K.kinit = function(ext,kw){
   K.register("plot",0,1)
   ext.init()
   K.save()
-  console.log("k is running")
  }
 
  function binsize(x){K.n=x.byteLength;return x}
