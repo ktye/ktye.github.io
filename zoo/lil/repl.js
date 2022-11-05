@@ -1,9 +1,12 @@
 // derived from: https://raw.githubusercontent.com/JohnEarnest/Decker/main/js/repl.js
 
-readBinaryFile=path=>{ throw("readBinaryFile nyi") /*const b=require('fs').readFileSync(path);return array_make(b.length,'u8',0,new Uint8Array(b))*/ }
-writeBinaryFile=(path,x)=>{ throw("writeBinaryFile nyi")  /*require('fs').writeFileSync(path,Buffer.from(x.data))*/}
-readTextFile=path=>{ throw("readTextFile nyi") /*require('fs').readFileSync(path,{encoding:'utf8'}).replace(/\uFEFF/g, '')*/}
-writeTextFile=(path,text)=>{ throw("readTextFile nyi") /*require('fs').writeFileSync(path,text,{encoding:'utf8'})*/}
+function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(u){return new TextEncoder("utf-8").encode(u)}
+
+readBinaryFile=path=>{ let b=window.readfile(path);return array_make(b.length,'u8',0,new Uint8Array(b)) }
+writeBinaryFile=(path,x)=>{ window.writefile(path,x); return 1 }
+readTextFile=path=>{ return su(window.readfile(path)).replace(/\uFEFF/g, '') }
+writeTextFile=(path,text)=>{ window.writefile(path,us(text));return 1}
 go_notify=(deck,x,t)=>{/*console.log('go notify',x,t)*/}
 const env=lmenv()
 n_play=([x])=>NONE

@@ -1,3 +1,7 @@
+import {fs} from './fs.js'
+
+window.readfile=fs.readfile
+window.writefile=fs.writefile
 
 let O,ev
 function ini(left,o) {O=o
