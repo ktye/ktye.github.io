@@ -96,7 +96,6 @@ let srcmapobj={{src.map}}
 </script>
 
 <script>
-let fs={}
 let kde=function(){
  let kdefile=true
  let blob = new Blob([document.querySelector('#worker1').textContent]);
@@ -115,29 +114,22 @@ let kde=function(){
 
 
 <script>
+let fs={{fs}}
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
 function debug(x){ge(x?"kde":"main").classList.remove("hidden");ge(x?"main":"kde").classList.add("hidden")}
+function download(name,u){
+ var dl=ge("dl");var b=new Blob([u],{type:"application/octet-stream"})
+ dl.href=URL.createObjectURL(b);dl.download=name;dl.click()
+}
 window.onkeydown=function(e){if(e.ctrlKey&&e.key=='k'){pd(e);debug(ge("kde").classList.contains("hidden"))}}
 let run;ge("runb").onclick=function(e){run()}
 function init(){
  let inner=document.documentElement.innerHTML;
- let i=inner.indexOf("/script>\n<!--\n")
- let s=inner.slice(14+i,-13)
- let u=inner.slice(0,i)+"/"+"script>\n<!--\n"
- for(let i=0;;i++){
-  let p=s.indexOf("\n")
-  let name=s.slice(1,p)
-  s=s.slice(p)
-  p=s.indexOf("\n\\")
-  if(p<0){fs[name]=s.slice(1,p-1);break}
-  fs[name]=s.slice(1,1+p)
-  s=s.slice(1+p)
- }
- console.log("fs",fs)
- 
  let t=document.title
  kde.newfile(".html",fs[".html"])
  kde.newfile(".css",fs[".css"])
@@ -145,14 +137,11 @@ function init(){
  kde.newfile(".k",fs[".k"])
  
  let pack=function(){
-  let b="<!DOCTYPE html>\n"+u
-  let k=Object.keys(fs)
-  for(let i=0;i<k.length;i++){
-   b+="\\"+k[i]+"\n"
-   b+=fs[k[i]]
-  }
-  b+="\n!-->\n</"+"body>\n</"+"html>\n"
-  return b
+  let b="<!DOCTYPE html>\n"+inner+"</"+"html>"
+  let i=b.indexOf("\nlet fs={")
+  let n=1+b.slice(1+i).indexOf("\n")
+  let newfs="\nlet fs="+JSON.stringify(fs)
+  return b.slice(0,i)+newfs+b.slice(i+n)
  }
  run=function(){
   kde.kstart(fs[".k"],true)
@@ -168,15 +157,5 @@ function init(){
  run()
 }
 </script>
-<!--
-\.html
-{{html}}
-\.css
-{{css}}
-\.js
-{{js}}
-\.k
-{{k}}
-!-->
 </body>
 </html>

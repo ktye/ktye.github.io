@@ -77,10 +77,11 @@ function build(F,id,desc){let f //build example application (fill file.h templat
  let re=function(s,x,y){let i=s.indexOf(x);if((i<0)||(y.length==0))throw("replace "+x);return s.slice(0,i)+y+s.slice(i+x.length)}
  f=su(F["file.h"])
  f=re(f,"{{title}}"    ,id)
- f=re(f,"{{k}}"        ,su(F[id+".k"]))
- f=re(f,"{{js}}"       ,su(F[id+".js"]))
- f=re(f,"{{css}}"      ,su(F[id+".css"]))
- f=re(f,"{{html}}"     ,su(F[id+".html"]))
+ f=re(f,"{{fs}}", JSON.stringify({
+        ".k":su(F[id+".k"]),
+       ".js":su(F[id+".js"]),
+      ".css":su(F[id+".css"]),
+     ".html":su(F[id+".html"])}))
  f=re(f,"{{kde.js}}"   ,su(F["../kde.js"]))
  f=re(f,"{{z.k}}"      ,JSON.stringify(su(F["../z.k"])))
  f=re(f,"{{src.map}}"  ,su(F["../../src.map"]))
