@@ -39,7 +39,7 @@
  .kval-pos:{hover:color:darkred;text-decoration:underline}
  .kout{color:red}
  #mono{position:absolute;margin:0;outline:0px;z-index:-1}
- .hidden{display:none}
+ .hidden{visibility:hidden} /*consize needs "mono" and "repl"*/
 </style>
 <style id="maincss"></style>
 
