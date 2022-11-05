@@ -40,10 +40,10 @@
  .CodeMirror-selected{background-color:white;outline:2px solid red;outline-offset:-0.5px}
  .CodeMirror-focused .CodeMirror-selected{background-color:#d7d4f0;outline:none}
  .CodeMirror-fullscreen{position:fixed;top:0;left:0;right:0;bottom:0;height:auto;z-index:9}
- button{border:1px solid black;background-color:#fff}
- button:active{transform:translateY(1px)}
+ .kdebutton{border:1px solid black;background-color:#fff}
+ .kdebutton:active{transform:translateY(1px)}
  #odir{float:right}
- #expl{margin-top:5px;display:grid;grid-template-columns:repeat(3,1fr);}
+ #expl{margin-top:5px;display:grid;grid-template-columns:repeat(4,1fr);}
  .kfile{color:#a00}
  .curfile{font-weight:bold;background:#bca}
  .modified{text-decoration:underline}
@@ -61,15 +61,16 @@
  <span id="legn"></span>
  <div id="brow" class="k">
   <div id="bar">
-   <button id="runb">run</button>
-   <button id="putb" disabled title="write current file to disk">put</button>
-   <button id="newb" disabled title="create new file on disk">new</button>
-   <button id="intr" disabled title="interrupt">int</button>
+   <button id="runb" class="kdebutton">run</button>
+   <button id="putb" class="kdebutton" disabled title="write current file to disk">put</button>
+   <button id="newb" class="kdebutton" disabled title="create new file on disk">new</button>
+   <button id="intr" class="kdebutton" disabled title="interrupt">int</button>
    <input  id="feat" checked type="checkbox" title="switch">
    <input  id="grep"         type="text"     title="input"/>
    <span   id="memo" style="flex-grow:1">0k</span>
-   <button id="rall" disabled title="preload all files">rda</button>
-   <button id="odir" title="open working directory">dir</button>
+   <select id="colb" class="kdebutton" title="columns"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+   <button id="rall" class="kdebutton" disabled title="preload all files">rda</button>
+   <button id="odir" class="kdebutton" title="open working directory">dir</button>
   </div>
   <div id="expl"></div>
  </div>

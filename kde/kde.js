@@ -74,7 +74,6 @@ function kmode(x){
   for(let i=0;i<ex.length;i++)if(ex[i].startsWith(curWord))li.push(ex[i])
   return{list:li,from:CodeMirror.Pos(cur.line,start),to:CodeMirror.Pos(cur.line,end)};
  }
- ed.setOption("lineNumbers",x)
  ed.setOption("mode",x?"k":"")  
  ed.setOption("theme",x?"k":"")
  if(x)ed.on("gutterClick",execline);else ed.off("gutterClick",execline)
@@ -165,6 +164,9 @@ ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value;if((s.t
   if(1==r.length)openfile(r[0],ge("expl"))
   for(let i=0;i<r.length;i++)fileat(r[i].textContent,0,1==r.length)
 }}}
+
+ge("colb").onchange=function(e){ge("expl").style.gridTemplateColumns="repeat("+e.target.selectedOptions[0].textContent+",1fr)"}
+ge("colb").selectedIndex=3
 
 //opendir by button click or dropping a directory
 async function opendir(d){dir=d
