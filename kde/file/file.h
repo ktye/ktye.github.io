@@ -47,14 +47,15 @@
  <span id="legn"></span>
  <div id="brow" class="k">
   <div id="bar">
-   <button id="runb" class="kdebutton">run</button>
+   <button id="stab" class="kdebutton" title="restart application">start</button>
    <button id="putb" class="kdebutton" disabled title="commit file modification">put</button>
+   <button id="runb" class="kdebutton" title="run .k">k</button>
    <button id="intr" class="kdebutton" disabled title="interrupt">int</button>
    <input  id="feat" checked type="checkbox" title="switch" style="display:none">
    <input  id="grep"         type="text"     title="input"/>
    <span   id="memo" style="flex-grow:1">0k</span>
    <select id="colb" class="kdebutton" title="columns"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
-   <button id="dlbt" class="kdebutton" title="download bundle file">download</button>
+   <button id="dlbt" class="kdebutton" title="download file bundle">download</button>
   </div>
   <div id="expl"></div>
  </div>
@@ -90,7 +91,8 @@ let kde=function(){
   sp.u=us(s)
  }
  zk={{z.k}}
- return {newfile:newfile,kstart:kstart}
+ let setfile=function(name){openfile(findfile(name),ge("expl"))}
+ return {newfile:newfile,setfile:setfile,kstart:kstart}
 }()
 </script>
 
@@ -109,7 +111,7 @@ function download(name,u){
  dl.href=URL.createObjectURL(b);dl.download=name;dl.click()
 }
 window.onkeydown=function(e){if(e.ctrlKey&&e.key=='k'){pd(e);debug(ge("kde").classList.contains("hidden"))}}
-let run;ge("runb").onclick=function(e){run()}
+let start;ge("stab").onclick=function(e){start()}
 function init(){
  let inner=document.documentElement.innerHTML;
  let t=document.title
@@ -125,7 +127,7 @@ function init(){
   let newfs="\nlet fs="+JSON.stringify(fs)
   return b.slice(0,i)+newfs+b.slice(i+n)
  }
- run=function(){
+ start=function(){
   kde.kstart(fs[".k"],true)
   let c=ge("maincss");c.innerHTML=fs[".css"]
   let m=ge("main");rm(m);m.insertAdjacentHTML("afterbegin",fs[".html"])
@@ -133,10 +135,12 @@ function init(){
   debug(false)
   if("function"===typeof main)main()
  }
+ let krun=ge("runb").onclick //from kde
+ ge("runb").onclick=function(e){kde.setfile(".k");krun()}
  
  kdeinit()
  ge("dlbt").onclick=function(){download(t+".html",us(pack()))}
- run()
+ start()
 }
 </script>
 </body>

@@ -9,6 +9,7 @@ onmessage=function(e){
  case"repl" :repl(e.data)  ;break
  case"kst"  :kst(e.data.k) ;break
  case"xgets":xgets(e.data.k);break
+ //case"kcall":kcall(e.data.uid,e.data.f,e.data.a);break //kdefile
  default:console.log("kwork: unknown message:", e)
  }
 }
@@ -110,6 +111,45 @@ function kst(x){
  postMessage({m:"prompt"})
 }
 function xgets(x){K.KA(K.Ks("x"),K.ref(x))}
+
+/*
+function kcall(f,a){let r
+ if(a==undefined)return jk(K.Kx(f))) //maybe 0n(err)
+ let e=false
+ for(let i=0;i<a.length;i++){a[i]=kj(a[i]);if(a[i]==0n)e=true}
+ if(e){for(let i=0;i<a.length;i++)K.unref(a[i]);return 0n}
+ try  {return jk(K.Kx(f,...a))}
+ catch{return 0n}
+}
+function kj(x){switch(typeof x){// f:1 i:true i:2n C:"" s:Symbol("") L:[]
+ case"number": return K.Ki(Math.round(x))
+ case"string": return K.KC(x)
+// or tag with {t:"I",I:[1,2,3]} ?
+// case "number": return K.Kf(x)
+// case "bool":   return K.Ki(x?1:0)
+// case "bigint": return K.Ki(x)
+// case "string": return K.KC(x)
+// case "symbol": return K.Ks(x.toString().slice(7,-1))
+// case "object": if(Array.isArray(x)){
+//  for(let i=0;i<x.length;i++){
+//   let r=kj(x[i]);if(r===false){for(j=0;j<i;j++)K.unref(x[j]);return false};
+//   x[i]=r
+//  }
+  return K.LK(K) // todo: unify with K.Kx(":'",x)
+ }
+ default: return 0n
+}}
+function jk(x){
+ switch(K.TK(x)){
+ case"i":return K.iK(x)
+ case"f":return K.fK(x)
+ case"s":return K.sK(x)
+ case"C":return K.CK(x)
+ case"I":return K.IK(x)
+ case"F":return K.FK(x)
+ default:K.unref(x);return 0n
+}}
+*/
 
 let t0
 function dt(){
