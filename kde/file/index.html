@@ -30,7 +30,9 @@ As such it has does not need an http server or network connection.</p>
 <p>Bundled with the single-file-application there is a development environment (edit/repl/debug)
 combined with the application payload (html/css/js/k) and the runtime k.wasm.</p>
 <p>At start the application runs without showing the ide. In case of a trap, it switches to the debugger.<br>
-The error can be corrected in the editor and a new application bundle is rewritten and downloaded.</p>
+The error can be corrected in the editor and a new application bundle is rewritten and may be downloaded.</p>
+
+<p>The application can also store data in it's filesystem (e.g. computed or dropped files), together with program and runtime.</p>
 
 <p>it's a self-modifying single-file application</p>
 
@@ -87,22 +89,6 @@ function build(F,id,desc){let f //build example application (fill file.h templat
  f=re(f,"{{src.map}}"  ,su(F["../../src.map"]))
  f=re(f,"{{kwork.js}}" ,su(F["../kwork.js"]))
  f=re(f,"{{d.hx.wasm}}",xu(F["../../d.wasm"]))
- 
- let cmdir="../../codemirror/"
- f=re(f,"{{k.mode.css}}"        ,su(F["../k.mode.css"]))
- f=re(f,"{{codemirror.min.css}}",su(F[cmdir+"/codemirror.min.css"]))
- f=re(f,"{{foldgutter.css}}"    ,su(F[cmdir+"/foldgutter.css"]))
- f=re(f,"{{show-hint.css}}"     ,su(F[cmdir+"/show-hint.css"]))
- 
- f=re(f,"{{jquery.min.js}}"     ,su(F[cmdir+"/jquery.min.js"]))
- f=re(f,"{{codemirror.min.js}}" ,su(F[cmdir+"/codemirror.min.js"]))
- f=re(f,"{{matchbrackets.js}}"  ,su(F[cmdir+"/matchbrackets.js"]))
- f=re(f,"{{foldcode.js}}"       ,su(F[cmdir+"/foldcode.js"]))
- f=re(f,"{{foldgutter.js}}"     ,su(F[cmdir+"/foldgutter.js"]))
- f=re(f,"{{brace-fold.js}}"     ,su(F[cmdir+"/brace-fold.js"]))
- f=re(f,"{{fullscreen.js}}"     ,su(F[cmdir+"/fullscreen.js"]))
- f=re(f,"{{show-hint.js}}"      ,su(F[cmdir+"/show-hint.js"]))
- f=re(f,"{{k.mode.js}}"         ,su(F["../k.mode.js"]))
  f=re(f,"{{plot.js}}"           ,su(F["../plot.js"]))
  
  let r=ce("tr")
@@ -121,11 +107,7 @@ function init(){
  //for(let i=0,row;row=ge("tab").rows[i];i++)examples.push(row.cells[0].textContent.slice(0,-5))
  
 
- let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm"]
- let cmdir="../../codemirror/"
- allfiles.push(...["../k.mode.css",cmdir+"/codemirror.min.css",cmdir+"/foldgutter.css",cmdir+"/show-hint.css"])
- allfiles.push(...[cmdir+"/jquery.min.js",cmdir+"/codemirror.min.js",cmdir+"/matchbrackets.js",cmdir+"/foldcode.js",cmdir+"/foldgutter.js",cmdir+"/brace-fold.js",cmdir+"/fullscreen.js",cmdir+"/show-hint.js","../k.mode.js","../plot.js"])
- 
+ let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm","../plot.js"]
  let extensions=["k","js","css","html"]
  for(let i=0;i<examples.length;i++)for(let j=0;j<4;j++)allfiles.push(examples[i]+"."+extensions[j])
  fetchall(allfiles,function(F){for(let i=0;i<examples.length;i++)build(F,examples[i],desc[examples[i]])})

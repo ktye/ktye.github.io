@@ -3,14 +3,10 @@
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
 <title>{{title}}</title>
 
-<style>{{k.mode.css}}</style>
-<style>{{codemirror.min.css}}</style>
-<style>{{foldgutter.css}}</style>
-<style>{{show-hint.css}}</style>
 <style>
  *{font-family:monospace}
- body{margin:0}
- #left{position:absolute; left:0; top:0}
+ body{margin:0;overflow:hidden}
+ #left{position:absolute; left:0; top:0; background:#ffe; resize:none; border:none; outline:none}
  .left0{width:50vw;height:100vh;}
  .left1{width:100vw;height:50vh;}
  #repl{box-sizing: border-box;border-left:1px solid black;;background-color:#fff; position:absolute; margin:0;outline:0px;overflow:auto}
@@ -24,10 +20,6 @@
  #brow{box-sizing: border-box;border-left:1px solid black; position:absolute;overflow:auto; left:50vw; width:50vw; height:50vh; top:50vh;}
  #brow.k{background-color:#efe;border:none}
  #bar{display:flex;flex-direction:row}
- .CodeMirror{height:100%!important;border:none;resize:none}
- .CodeMirror-selected{background-color:white;outline:2px solid red;outline-offset:-0.5px}
- .CodeMirror-focused .CodeMirror-selected{background-color:#d7d4f0;outline:none}
- .CodeMirror-fullscreen{position:fixed;top:0;left:0;right:0;bottom:0;height:auto;z-index:9}
  .kdebutton{border:1px solid black;background-color:#fff}
  .kdebutton:active{transform:translateY(1px)}
  #odir{float:right}
@@ -42,16 +34,6 @@
  .hidden{visibility:hidden} /*consize needs "mono" and "repl"*/
 </style>
 <style id="maincss"></style>
-
-<script>{{jquery.min.js}}</script>
-<script>{{codemirror.min.js}}</script>
-<script>{{matchbrackets.js}}</script>
-<script>{{foldcode.js}}</script>
-<script>{{foldgutter.js}}</script>
-<script>{{brace-fold.js}}</script>
-<script>{{fullscreen.js}}</script>
-<script>{{show-hint.js}}</script>
-<script>{{k.mode.js}}</script>
 <script>{{plot.js}}</script>
 
 </head>
@@ -59,7 +41,7 @@
 
 <body onload="init()">
 <div id="kde" class="hidden">
- <div id="left" class="left0"></div>
+ <textarea id="left" class="left0" spellcheck="false"></textarea>
  <pre id="repl" class="repl0 k" spellcheck="false">k</pre>
  <canvas id="canv" class="repl0"></canvas>
  <span id="legn"></span>
@@ -97,7 +79,7 @@ let srcmapobj={{src.map}}
 
 <script>
 let kde=function(){
- let kdefile=true
+ let kdefile=true,cmedit=false
  let blob = new Blob([document.querySelector('#worker1').textContent]);
  let worker = new Worker(window.URL.createObjectURL(blob));
  {{kde.js}}

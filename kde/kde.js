@@ -1,4 +1,5 @@
 if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
+if(typeof cmedit ==="undefined")cmedit =true  //used by ./file/.. (no codemirror)
 if(!kdefile)if(('serviceWorker'in navigator)&&kdefile)navigator.serviceWorker.register("kde.sw.js")
 
 function ge(x){return document.getElementById(x)}
@@ -22,24 +23,32 @@ window.kdeinit=function(){
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")
- ed = CodeMirror(left,{
-  "lineNumbers":true,
-  "dragDrop":false,"tabSize":8,"smartIndent":false,
-  "matchBrackets":true,
-  "foldGutter":true,
-  "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
- ed.on("contextmenu",function(_,e){pd(e)})
- ed.setValue(decodeURIComponent(window.location.hash.substr(1)))
+ if(cmedit){
+  ed=CodeMirror(left,{
+   "lineNumbers":true,
+   "dragDrop":false,"tabSize":8,"smartIndent":false,
+   "matchBrackets":true,
+   "foldGutter":true,
+   "gutters":["CodeMirror-linenumbers","CodeMirror-foldgutter"]})
+  ed.on("contextmenu",function(_,e){pd(e)})
+  ed.setValue(decodeURIComponent(window.location.hash.substr(1)))
+  ed.on("change",modify)
+ }else{
+  ed=ge("left")
+  ed.getValue=function(){return ed.value}
+  ed.setValue=function(x){ed.value=x}
+  ed.setOption=function(o){}
+  ed.onchange=modify
+ }
  ed.modified=false
  ed.sp=false //.sp(span) ed.sp.h(handle)
- ed.on("change",modify)
  kmode(true)
  if(!kdefile)fetch("z.k").then(r=>r.text()).then(r=>zk=r)
  kstart("")
 }
 function save(){if(ed.sp)ed.sp.u=us(ed.getValue())}
 
-function kmode(x){
+function kmode(x){if(!cmedit)return
  let ex=[] //words in a.k b.k if first line is /!a.k b.k
  if(x){
   let em={}
@@ -110,12 +119,14 @@ function execline(ed,n,gutter){ //click on linenumber executes
 }}
 function modify(){if(ed.modified)return
  ed.modified=true
- document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#eff"
+ if(cmedit)document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#eff"
+ else      ed.style.background="#eff" 
  if(ed.sp)ed.sp.classList.add("modified")
 }
 function unmodify(){
  ed.modified=false
- document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#fff"
+ if(cmedit)document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#fff"
+ else      ed.style.background="#ffe"
 }
 function grep(s,suffix,sn){
  let c=ed.getCursor();ed.setSelection(c,c)
@@ -126,7 +137,7 @@ function grep(s,suffix,sn){
   if((suffix!="")&&(!f.endsWith(suffix)))return
   let l=a.split("\n")
   let p=0
-  for(let i=0;i<l.length;i++){let j
+  for(let i=0;i<l.length;i++){let j //todo !cmedit
    if("string"===typeof s)j=l[i].indexOf(s)
    else{let m=s.exec(l[i]);j=(m===null)?-1:m.index}
    if(j>=0){
@@ -494,8 +505,8 @@ function filelink(p,direct,extra){
  }
 }
 function showpos(i){
- let p=ed.posFromIndex(i)
- ed.setSelection(p,{line:p.line,ch:1+p.ch})
+ if(cmedit){let p=ed.posFromIndex(i);ed.setSelection(p,{line:p.line,ch:1+p.ch})
+ }else{ed.selectionStart=i;ed.selectionEnd=1+i;ed.focus()}
 }
 function printstack(fstack){for(let i=0;i<fstack.length;i++){
  let kx=fstack[i].k
