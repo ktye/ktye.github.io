@@ -92,13 +92,17 @@ let kde=function(){
  }
  zk={{z.k}}
  let setfile=function(name){openfile(findfile(name),ge("expl"))}
- return {newfile:newfile,setfile:setfile,kstart:kstart}
+ let kpost=function(x){kw.postMessage(x)}
+ return {newfile:newfile,setfile:setfile,kstart:kstart,kpost:kpost}
 }()
 </script>
 
 
 <script>
 let fs={{fs}}
+let kuid=0
+let kresolv={}
+let kreject={}
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 function ge(x){return document.getElementById(x)}
@@ -112,6 +116,18 @@ function download(name,u){
 }
 window.onkeydown=function(e){if(e.ctrlKey&&e.key=='k'){pd(e);debug(ge("kde").classList.contains("hidden"))}}
 let start;ge("stab").onclick=function(e){start()}
+function k(f,a){ //kcall
+ kuid++
+ return new Promise(function(xx,yy){kresolv[kuid]=xx;kreject[kuid]=yy
+  kde.kpost({m:"kcall",uid:kuid,f:f,a:a})
+ })
+}
+function kres(m){
+console.log("kres",m.r)
+ if("e"in m)kreject[m.uid](m.e) //todo js indicate
+ else       kresolv[m.uid](m.r)
+ delete     kresolv[m.uid];delete kreject[m.uid]
+}
 function init(){
  let inner=document.documentElement.innerHTML;
  let t=document.title

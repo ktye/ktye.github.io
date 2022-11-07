@@ -9,7 +9,10 @@ onmessage=function(e){
  case"repl" :repl(e.data)  ;break
  case"kst"  :kst(e.data.k) ;break
  case"xgets":xgets(e.data.k);break
- //case"kcall":kcall(e.data.uid,e.data.f,e.data.a);break //kdefile
+ case"kcall":let r=kcall(e.data.f,e.data.a) //kdefile
+  if("string"==typeof(r))postMessage({m:"kres",e:r,uid:e.data.uid       })
+  else                   postMessage({m:"kres",    uid:e.data.uid,r:r[0]})
+  break
  default:console.log("kwork: unknown message:", e)
  }
 }
@@ -112,44 +115,34 @@ function kst(x){
 }
 function xgets(x){K.KA(K.Ks("x"),K.ref(x))}
 
-/*
-function kcall(f,a){let r
- if(a==undefined)return jk(K.Kx(f))) //maybe 0n(err)
+function kcall(f,a){let r=0n
+ if(a==undefined){
+  try     {r=K.Kx(f);K.save()}
+  catch(e){indicate();K.restore()}
+  return jk(r)}
  let e=false
  for(let i=0;i<a.length;i++){a[i]=kj(a[i]);if(a[i]==0n)e=true}
- if(e){for(let i=0;i<a.length;i++)K.unref(a[i]);return 0n}
- try  {return jk(K.Kx(f,...a))}
- catch{return 0n}
+ if(e){for(let i=0;i<a.length;i++)_.dx(a[i]);return"k-input-type"}
+ try  {r=K.Kx(f,...a)}
+ catch{indicate();K.restore()}
+ return jk(r)
 }
 function kj(x){switch(typeof x){// f:1 i:true i:2n C:"" s:Symbol("") L:[]
  case"number": return K.Ki(Math.round(x))
  case"string": return K.KC(x)
-// or tag with {t:"I",I:[1,2,3]} ?
-// case "number": return K.Kf(x)
-// case "bool":   return K.Ki(x?1:0)
-// case "bigint": return K.Ki(x)
-// case "string": return K.KC(x)
-// case "symbol": return K.Ks(x.toString().slice(7,-1))
-// case "object": if(Array.isArray(x)){
-//  for(let i=0;i<x.length;i++){
-//   let r=kj(x[i]);if(r===false){for(j=0;j<i;j++)K.unref(x[j]);return false};
-//   x[i]=r
-//  }
-  return K.LK(K) // todo: unify with K.Kx(":'",x)
- }
  default: return 0n
 }}
-function jk(x){
- switch(K.TK(x)){
- case"i":return K.iK(x)
- case"f":return K.fK(x)
- case"s":return K.sK(x)
- case"C":return K.CK(x)
- case"I":return K.IK(x)
- case"F":return K.FK(x)
- default:K.unref(x);return 0n
+function jk(x){let t=K.TK(x)
+ switch(t){
+ case"i":return[lo(x)]
+ case"f":return[K.fK(x)]
+ case"s":return[K.sK(x)]
+ case"C":return[K.CK(x)]
+ case"I":return[K.IK(x)]
+ case"F":return[K.FK(x)]
+ default:return dxr(x,"k-return-type "+t)
 }}
-*/
+
 
 let t0
 function dt(){
