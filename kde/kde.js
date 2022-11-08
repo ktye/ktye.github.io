@@ -11,9 +11,14 @@ let left,repl,intr,ed,dir
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 
-function err(x){ge("repl").textContent+="\n"+x+"\n "}
+function err(x){ge("repl").lastChild.textContent+="\n"+x+"\n ";if(kdefile)debug(true)}
 
-window.onerror=function(m,s,l,c,e){err(s+m)}
+window.onerror=function(m,s,l,c,e){
+ //console.log("winerr src/line/col",s,l,c)
+ //console.log("winerr file/line/col",e.fileName,e.lineNumber,e.columnNumber)
+ //console.log("winerr stack",e.stack)
+ err(e.stack)
+ err(s+m)}
 
 
 let src={}
@@ -487,6 +492,7 @@ function indicate(p,e,l,fstack){
  }
  if(fstack.length)printstack(fstack)
  else filelink(p,true)
+ if(kdefile)debug(true)
 }
 function fileat(f,p,direct,extra){
  if(direct&&f=="(ed)"){showpos(p);return}
@@ -504,6 +510,20 @@ function filelink(p,direct,extra){
   if(p<ni){fileat(src.f[i],p-2,direct,extra);return}
   p-=1+ni
  }
+}
+function jslink(lc,e){ //kdefile-only
+ let sp=findfile(".js")
+ let jspos=function(l,c){let p=0
+  let a=su(sp.u).split("\n")
+  for(let i=0;i<l-1;i++)p+=1+a[i].length
+  return p+c-1
+ }
+ let a=ce("a");
+ a.style.color="green"
+ a.href=".js:"+lc[0]+":"+lc[1]
+ a.textContent=".js:"+lc[0]+":"+lc[1]+":  "+e
+ a.onclick=function(e){pd(e);openfile(sp,ge("expl"),jspos(...lc))} //todo p from l/c
+ repl.appendChild(a);pr();debug(true)
 }
 function showpos(i){
  if(cmedit){let p=ed.posFromIndex(i);ed.setSelection(p,{line:p.line,ch:1+p.ch})

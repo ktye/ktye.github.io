@@ -10,7 +10,7 @@ onmessage=function(e){
  case"kst"  :kst(e.data.k) ;break
  case"xgets":xgets(e.data.k);break
  case"kcall":let r=kcall(e.data.f,e.data.a) //kdefile
-  if("string"==typeof(r))postMessage({m:"kres",e:r,uid:e.data.uid       })
+  if("string"==typeof(r))postMessage({m:"kres",e:r,uid:e.data.uid,pos:e.data.pos})
   else                   postMessage({m:"kres",    uid:e.data.uid,r:r[0]})
   break
  default:console.log("kwork: unknown message:", e)
@@ -127,7 +127,8 @@ function kcall(f,a){let r=0n
  catch{indicate();K.restore()}
  return jk(r)
 }
-function kj(x){switch(typeof x){// f:1 i:true i:2n C:"" s:Symbol("") L:[]
+function kj(x){
+ switch(typeof x){// f:1 i:true i:2n C:"" s:Symbol("") L:[]
  case"number": return K.Ki(Math.round(x))
  case"string": return K.KC(x)
  default: return 0n

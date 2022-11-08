@@ -93,7 +93,7 @@ let kde=function(){
  zk={{z.k}}
  let setfile=function(name){openfile(findfile(name),ge("expl"))}
  let kpost=function(x){kw.postMessage(x)}
- return {newfile:newfile,setfile:setfile,kstart:kstart,kpost:kpost}
+ return {newfile:newfile,setfile:setfile,kstart:kstart,kpost:kpost,jslink:jslink}
 }()
 </script>
 
@@ -116,25 +116,29 @@ function download(name,u){
 }
 window.onkeydown=function(e){if(e.ctrlKey&&e.key=='k'){pd(e);debug(ge("kde").classList.contains("hidden"))}}
 let start;ge("stab").onclick=function(e){start()}
-function k(f,a){ //kcall
+
+
+function k(f,...a){ //kcall
+ let sp=new Error().stack.split("\n")
+ let s=sp[(sp[0]=="Error")?2:1] //chrome-vs-firefox  chrome: (...<anonymous>:8:2)  ff: ...eval:8:3
+ console.log("trace",s)
+ let pos=s.match(/.*:([0-9]+):([0-9]+)\)?$/)
+ if(pos===null)pos=[0,0]
+ else          pos=[+pos[1],+pos[2]]
  kuid++
- return new Promise(function(xx,yy){kresolv[kuid]=xx;kreject[kuid]=yy
-  kde.kpost({m:"kcall",uid:kuid,f:f,a:a})
+ let p=new Promise(function(xx,yy){kresolv[kuid]=xx;kreject[kuid]=yy
+  kde.kpost({m:"kcall",uid:kuid,f:f,a:a,pos:pos})
  })
+ return p
 }
 function kres(m){
-console.log("kres",m.r)
- if("e"in m)kreject[m.uid](m.e) //todo js indicate
+ if("e"in m)kde.jslink(m.pos,m.e) //kreject[m.uid](m.e) //todo js indicate
  else       kresolv[m.uid](m.r)
  delete     kresolv[m.uid];delete kreject[m.uid]
 }
 function init(){
  let inner=document.documentElement.innerHTML;
  let t=document.title
- kde.newfile(".html",fs[".html"])
- kde.newfile(".css",fs[".css"])
- kde.newfile(".js",fs[".js"])
- kde.newfile(".k",fs[".k"])
  
  let pack=function(){
   let b="<!DOCTYPE html>\n"+inner+"</"+"html>"
@@ -155,6 +159,11 @@ function init(){
  ge("runb").onclick=function(e){kde.setfile(".k");krun()}
  
  kdeinit()
+ kde.newfile(".html",fs[".html"])
+ kde.newfile(".css",fs[".css"])
+ kde.newfile(".js",fs[".js"])
+ kde.newfile(".k",fs[".k"])
+ kde.setfile(".k")
  ge("dlbt").onclick=function(){download(t+".html",us(pack()))}
  start()
 }
