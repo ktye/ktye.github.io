@@ -11,14 +11,35 @@ let left,repl,intr,ed,dir
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 
-function err(x){ge("repl").lastChild.textContent+="\n"+x+"\n ";if(kdefile)debug(true)}
-
-window.onerror=function(m,s,l,c,e){
- //console.log("winerr src/line/col",s,l,c)
- //console.log("winerr file/line/col",e.fileName,e.lineNumber,e.columnNumber)
- //console.log("winerr stack",e.stack)
- err(e.stack)
- err(s+m)}
+let startuperr=false
+function err(m,s){staruperr=true;let r=ge("repl");debug(true)
+ if((!kdefile)||("string"!==typeof s)){let sp=ce("span");sp.textContent(m+" "+s);r.appendChild(sp);return}
+ let st=parseStack(s)
+ let sp=findfile(".js")
+ let counts=su(sp.u).split("\n").map(x=>x.length)
+ let pos=function(l,c){
+  let n=0;for(let i=0;i<Math.min(counts.length,l-1);i++)n+=1+counts[i];return n+c-1}
+ if(r.lastChild!==null&&r.lastChild.textContent==" ")r.removeChild(r.lastChild)
+ let lc=[]
+ for(let i=0;i<st.length;i++){let lci=st[i].l+":"+st[i].c;if(lc.indexOf(lci)>=0)continue;lc.push(lci)
+  let a=ce("a");a.style.color="green";let h=".js:"+lci
+  a.href=h
+  a.textContent=h;if(i==0)a.textContent+=":  "+m+"\n"
+  a.onclick=function(e){pd(e);openfile(sp,ge("expl"),pos(+st[i].l,+st[i].c))}
+  r.appendChild(a)
+ };pr()
+}
+function parseStack(s){
+ let r=[];let a=s.split("\n")
+ for(let i=0;i<a.length;i++){
+  let x=s.match(       /eval:([0-9]+):([0-9]+)/) //ff
+  let y=s.match(/eval at start.*<anonymous>:([0-9]+):([0-9]+)\)/) //chrome
+  if     (x!==null)r.push({l:x[1],c:x[2]})
+  else if(y!==null)r.push({l:y[1],c:y[2]})
+ };return r
+}
+ 
+window.onerror=function(m,s,l,c,e){err(m,e.stack)}
 
 
 let src={}
@@ -341,6 +362,7 @@ window.onmousedown=function(e){
 
 
 function clickrun(e){
+ startuperr=false
  let s=ed.getValue()
  save()
  location.hash=(s.length<1000)?"#"+encodeURIComponent(s):""
@@ -421,9 +443,10 @@ function histkey(e){pd(e);let s=(e.key=="ArrowUp")?histup():histdn(); e.target.t
 
 function kstart(s,trc){
  intr.disabled=false
+ if(startuperr)return
  repl.textContent=""
  let g=ge("grep").value
- s=cats(g.startsWith("k ")?g.slice(2).split(" "):[],s)
+ s=cats(kdefile?[".k"]:g.startsWith("k ")?g.slice(2).split(" "):[],s)
  kw.postMessage({m:"start",s:s,trc:trc,cons:consize(),fs:readfs()})
 }
 function krep(s){
@@ -436,10 +459,10 @@ function cats(files,s){
  src={f:["(z.k)"],n:[zk?zk.length:0]}
  let k={}; let r=[]
  if(files.length){
-  let a=ge("expl").children;for(let i=0;i<a.length;i++)k[a[i].textContent]=su(a[i].u)
+  let a=ge("expl").children;for(let i=0;i<a.length;i++)if(a[i].textContent.endsWith(".k"))k[a[i].textContent]=su(a[i].u)
   if(a.length==0)return s;
   for(let i=0;i<files.length;i++){
-   if(!files[i]in k)throw(files[k]+" is missing")
+   if(!files[i]in k)throw new Error(files[k]+" is missing")
    let fi=files[i]; let si=k[fi]
    src.f.push(fi);src.n.push(si.length)
    r.push(si)
@@ -510,20 +533,6 @@ function filelink(p,direct,extra){
   if(p<ni){fileat(src.f[i],p-2,direct,extra);return}
   p-=1+ni
  }
-}
-function jslink(lc,e){ //kdefile-only
- let sp=findfile(".js")
- let jspos=function(l,c){let p=0
-  let a=su(sp.u).split("\n")
-  for(let i=0;i<l-1;i++)p+=1+a[i].length
-  return p+c-1
- }
- let a=ce("a");
- a.style.color="green"
- a.href=".js:"+lc[0]+":"+lc[1]
- a.textContent=".js:"+lc[0]+":"+lc[1]+":  "+e
- a.onclick=function(e){pd(e);openfile(sp,ge("expl"),jspos(...lc))} //todo p from l/c
- repl.appendChild(a);pr();debug(true)
 }
 function showpos(i){
  if(cmedit){let p=ed.posFromIndex(i);ed.setSelection(p,{line:p.line,ch:1+p.ch})

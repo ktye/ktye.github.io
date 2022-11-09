@@ -10,7 +10,7 @@ onmessage=function(e){
  case"kst"  :kst(e.data.k) ;break
  case"xgets":xgets(e.data.k);break
  case"kcall":let r=kcall(e.data.f,e.data.a) //kdefile
-  if("string"==typeof(r))postMessage({m:"kres",e:r,uid:e.data.uid,pos:e.data.pos})
+  if("string"==typeof(r))postMessage({m:"kres",e:r,uid:e.data.uid,jstack:e.data.jstack})
   else                   postMessage({m:"kres",    uid:e.data.uid,r:r[0]})
   break
  default:console.log("kwork: unknown message:", e)

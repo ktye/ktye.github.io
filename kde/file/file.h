@@ -93,7 +93,7 @@ let kde=function(){
  zk={{z.k}}
  let setfile=function(name){openfile(findfile(name),ge("expl"))}
  let kpost=function(x){kw.postMessage(x)}
- return {newfile:newfile,setfile:setfile,kstart:kstart,kpost:kpost,jslink:jslink}
+ return {newfile:newfile,setfile:setfile,kstart:kstart,kpost:kpost,err:err}
 }()
 </script>
 
@@ -119,20 +119,16 @@ let start;ge("stab").onclick=function(e){start()}
 
 
 function k(f,...a){ //kcall
- let sp=new Error().stack.split("\n")
- let s=sp[(sp[0]=="Error")?2:1] //chrome-vs-firefox  chrome: (...<anonymous>:8:2)  ff: ...eval:8:3
- console.log("trace",s)
- let pos=s.match(/.*:([0-9]+):([0-9]+)\)?$/)
- if(pos===null)pos=[0,0]
- else          pos=[+pos[1],+pos[2]]
+ let jstack=new Error().stack
  kuid++
  let p=new Promise(function(xx,yy){kresolv[kuid]=xx;kreject[kuid]=yy
-  kde.kpost({m:"kcall",uid:kuid,f:f,a:a,pos:pos})
+  kde.kpost({m:"kcall",uid:kuid,f:f,a:a,jstack:jstack})
  })
  return p
 }
 function kres(m){
- if("e"in m)kde.jslink(m.pos,m.e) //kreject[m.uid](m.e) //todo js indicate
+console.log("kres",m)
+ if("e"in m)kde.err(m.e,m.jstack) //kreject[m.uid](m.e) //todo js indicate
  else       kresolv[m.uid](m.r)
  delete     kresolv[m.uid];delete kreject[m.uid]
 }
@@ -148,7 +144,7 @@ function init(){
   return b.slice(0,i)+newfs+b.slice(i+n)
  }
  start=function(){
-  kde.kstart(fs[".k"],true)
+  kde.kstart("",true)
   let c=ge("maincss");c.innerHTML=fs[".css"]
   let m=ge("main");rm(m);m.insertAdjacentHTML("afterbegin",fs[".html"])
   eval?.(fs[".js"]) //indirect eval in global scope
