@@ -365,7 +365,8 @@ parse=text=>{
 	const iblock=r=>{let c=0;while(hasnext()){if(match('end')){if(!c)blk_lit(r,NONE);return}if(c)blk_op(r,op.DROP);expr(r),c++};er(`Expected 'end' for block.`)}
 	const parsequery=(b,func,dcol)=>{
 		const cols=lmd([],[]);while(!matchp('from')&&!matchp('where')&&!matchp('by')&&!matchp('orderby')){
-			let name=lms(peek().t=='name'?peek().v:''), set=peek2().t==':', get=ident(ls(name)), unique=ls(name).length&&dkix(cols,name)==-1
+			let set=peek2().t==':', lit=peek().t=='string', name=lms(lit?(set?peek().v:''):peek().t=='name'?peek().v:'')
+			let get=ident(ls(name)), unique=ls(name).length&&dkix(cols,name)==-1; if(set&&lit&&!unique)next(),next()
 			const x=set&&unique?(next(),next(),name): get&&unique&&dcol?name: lms(dcol?`c${cols.k.length}`: '')
 			cols.k.push(x),cols.v.push(quote())
 		}
@@ -376,9 +377,9 @@ parse=text=>{
 		else{co=lmblk(),blk_get(co,lms('index'))}if(!match('from'))er(`Expected 'from'.`)
 		expr(b),blk_op1(b,'@tab')
 		blk_lit(b,cw),blk_op(b,op.COL),blk_lit(b,cb),blk_op(b,op.COL),blk_lit(b,co),blk_op(b,op.COL),blk_lit(b,lmn(dir)),blk_opa(b,op.QUERY,func=='@upd')
-		const keys=lml(cols.k.concat([lms('@index')]))
-		blk_op(b,op.ITER);const head=blk_here(b);blk_lit(b,['x']);const each=blk_opa(b,op.EACH,0);
-			blk_lit(b,keys),blk_get(b,lms('x')),cols.v.map(x=>(blk_lit(b,x),blk_op(b,op.COL)))
+		const keys=lml(cols.k.concat([lms('@index')])),name=tempname()
+		blk_op(b,op.ITER);const head=blk_here(b);blk_lit(b,[ls(name)]);const each=blk_opa(b,op.EACH,0);
+			blk_lit(b,keys),blk_get(b,name),cols.v.map(x=>(blk_lit(b,x),blk_op(b,op.COL)))
 			blk_lit(b,index),blk_op(b,op.COL),blk_op(b,op.DROP),blk_opa(b,op.BUND,count(keys)),blk_op2(b,'dict')
 		blk_opa(b,op.NEXT,head),blk_sets(b,each,blk_here(b)),blk_lit(b,keys),blk_op3(b,func)
 	}
@@ -428,7 +429,7 @@ parse=text=>{
 		if(match('extract')){parsequery(b,'@ext',0);return}
 		if(match('update' )){parsequery(b,'@upd',1);return}
 		if(match('insert')){
-			const n=lml([]);while(!match('into')){n.v.push(lms(name('column'))),expect(':'),expr(b)}
+			const n=lml([]);while(!match('into')){n.v.push(lms(peek().t=='string'?next().v:name('column'))),expect(':'),expr(b)}
 			blk_opa(b,op.BUND,count(n)),blk_lit(b,n),expr(b),blk_op3(b,'@ins');return
 		}
 		if(matchsp('(')){if(matchsp(')')){blk_lit(b,lml([]));return}expr(b),expect(')');return}
@@ -506,15 +507,24 @@ runop=_=>{
 			state.e.push(env_bind(getev(),n,v)),ret(s),ret(r);break
 		}
 		case op.NEXT :{const v=arg(),r=arg(),s=arg();state.e.pop();if(lid(r))r.k.push(s.k[r.v.length]);r.v.push(v),ret(s),ret(r),setpc(imm);break}
-		case op.COL  :{const ex=arg(),t=arg(),n=Object.keys(t.v),v=lml(Object.values(t.v).map(lml));ret(t),issue(env_bind(getev(),n,v),ex);break}
+		case op.COL  :{
+			const ex=arg(),t=arg(),n=Object.keys(t.v),v=lml(Object.values(t.v).map(lml));ret(t)
+			n.push('column'),v.v.push(t),issue(env_bind(getev(),n,v),ex);break
+		}
 		case op.QUERY:{
 			const order_dir=ln(arg()),t=arg(),ct=lmn(count(t))
 			const o=dyad.take(ct,lml(ll(arg()))),b=dyad.take(ct,lml(ll(arg()))),w=dyad.take(ct,lml(ll(arg()))),r=monad.rows(t)
 			const uk=r.v.reduce((x,_,z)=>{if(lb(w.v[z]))dset(x,b.v[z],b.v[z]);return x},lmd([],[]))
 			const rows=uk.v.map((v,group)=>{ // sort groups, select rows
+				const lex_list=(x,y,a,ix)=>{
+					if(x.length<ix&&y.length<ix)return 0;const xv=x[ix]||NONE,yv=y[ix]||NONE
+					return lex_less(xv,yv)?a: lex_more(xv,yv)?!a: lex_list(x,y,a,ix+1)
+				}
+				const lex_less=(a,b)=>lil(a)&&lil(b)? lex_list(a.v,b.v,1,0): lb(dyad['<'](a,b))
+				const lex_more=(a,b)=>lil(a)&&lil(b)? lex_list(a.v,b.v,0,0): lb(dyad['>'](a,b))
 				const gp=range(r.v.length).filter(x=>lb(w.v[x])&&match(v,b.v[x])).sort((a,b)=>{
-					if(lb(dyad['<'](o.v[a],o.v[b])))return  order_dir
-					if(lb(dyad['>'](o.v[a],o.v[b])))return -order_dir
+					if(lex_less(o.v[a],o.v[b]))return  order_dir
+					if(lex_more(o.v[a],o.v[b]))return -order_dir
 					return a-b // produce a stable sort
 				})
 				return monad.table(lml(gp.map((v,z)=>{const t=r.v[v];dset(t,lms('gindex'),lmn(z)),dset(t,lms('group'),lmn(group));return t})))
@@ -524,6 +534,7 @@ runop=_=>{
 	}while(running()&&getpc()>=blk_here(getblock()))descope()
 }
 
+fchar=x=>x=='I'?'i': x=='B'?'b': x=='L'?'s': x
 n_writecsv=([x,y,d])=>{
 	let r='', spec=y?ls(y).split(''):[];const t=lt(x), c=Object.keys(t.v).length; d=d?ls(d)[0]:','
 	while(spec.length<c)spec.push('s')
@@ -531,7 +542,7 @@ n_writecsv=([x,y,d])=>{
 	rows(t).v.forEach(row=>{
 		r+='\n';let n=0, cols=Object.keys(row.v);spec.forEach((x,i)=>{
 			if(x=='_')return;if(n)r+=d;n++
-			const sv=dyad.format(lms('%'+x),row.v[cols[i]]).v; r+=(/["\n]/.test(sv)||sv.indexOf(d)>=0?`"${sv.replace(/"/g,'""')}"`:sv)
+			const sv=dyad.format(lms('%'+fchar(x)),row.v[cols[i]]).v; r+=(/["\n]/.test(sv)||sv.indexOf(d)>=0?`"${sv.replace(/"/g,'""')}"`:sv)
 		})
 	});return lms(r)
 }
@@ -550,7 +561,7 @@ n_readcsv=([x,y,d])=>{
 		if(spec[n]&&spec[n]!='_'){
 			const k=Object.keys(r.v)[slot], x=(val[0]||'').toLowerCase(), s=spec[n]
 			let sign=1,o=0; if(val[o]=='-')sign=-1,o++;if(val[o]=='$')o++;
-			r.v[k].push(dyad.parse(lms('%'+s),lms(val))),slot++
+			r.v[k].push(dyad.parse(lms('%'+fchar(s)),lms(val))),slot++
 		};n++
 		if(i>=text.length||text[i]=='\n'){
 			while(n<spec.length){const u=spec[n++];if(u!='_'&&slot<slots)r.v[Object.keys(r.v)[slot++]].push(u=='s'?lms(''):NONE);}
@@ -609,7 +620,7 @@ interface_system=lmi((self,i,x)=>{
 	if(lis(i)&&i.v=='seed'     )return lmn(seed)
 	if(lis(i)&&i.v=='frame'    )return lmn(frame_count)
 	if(lis(i)&&i.v=='now'      )return lmn(0|(new Date().getTime()/1000))
-	if(lis(i)&&i.v=='ms'       )return lmn(Date.now())
+	if(lis(i)&&i.v=='ms'       )return lmn(0|(Date.now()))
 	if(lis(i)&&i.v=='workspace')return lmd(['allocs','depth'].map(lms),[allocs,calldepth].map(lmn))
 	return x?x:NONE
 },'system')
@@ -634,7 +645,7 @@ FORMAT_VERSION=1, RTEXT_END=2147483647, SFX_RATE=8000, FRAME_QUOTA=MODULE_QUOTA=
 sleep_frames=0, sleep_play=0, pending_popstate=0
 DEFAULT_HANDLERS=`
 on link x do go[x] end
-on drag x do if !me.locked me.line[(pointer.prev-me.pos)/me.scale x] end end
+on drag x do if !me.locked|me.draggable me.line[(pointer.prev-me.pos)/me.scale x] end end
 on order x do if !me.locked me.value:select orderby me.value[x] asc from me.value end end
 on navigate x do if x~"right" go["Next"] end if x~"left" go["Prev"] end end
 `
@@ -826,7 +837,7 @@ anchor=(r,a)=>{
 }
 unpack_rect=(z,size)=>{
 	let s=size||frame.image.size, v=rect(0,0,s.x,s.y)
-	if(z.length>=1){const a=getpair(z[0]),b=getpair(z[1]);if(b.x<0)a.x+=1+b.x,b.x*=-1;if(b.y<0)a.y+=1+b.y,b.y*=-1;v=rpair(a,b)}
+	if(z.length>=1){const a=rint(getpair(z[0])),b=rint(getpair(z[1]));if(b.x<0)a.x+=1+b.x,b.x*=-1;if(b.y<0)a.y+=1+b.y,b.y*=-1;v=rpair(a,b)}
 	return anchor(v,z[2])
 }
 unpack_poly=z=>{
@@ -1200,7 +1211,7 @@ image_paste=(r,clip,src,dst,opaque)=>{
 	for(let y=0;y<s.y;y++)for(let x=0;x<s.x;x++)if(rin(clip,rect(r.x+x,r.y+y))&&(opaque||src.pix[x+s.x*y]))dst.pix[r.x+x+ds.x*(r.y+y)]=src.pix[x+s.x*y]
 }
 image_paste_scaled=(r,clip,src,dst,opaque)=>{
-	if(r.w==0||r.h==0)return;const s=src.size,ds=dst.size;if(r.w==s.x&&r.h==s.y)return image_paste(r,clip,src,dst,opaque)
+	r=rint(r);if(r.w==0||r.h==0)return;const s=src.size,ds=dst.size;if(r.w==s.x&&r.h==s.y)return image_paste(r,clip,src,dst,opaque)
 	for(let a=0;a<r.h;a++)for(let b=0;b<r.w;b++){
 		let sx=0|((b*1.0)/r.w)*s.x, sy=0|((a*1.0)/r.h)*s.y, c=src.pix[sx+sy*s.x]
 		if((opaque||c!=0)&&rin(clip,rect(r.x+b,r.y+a)))dst.pix[r.x+b+ds.x*(r.y+a)]=c
@@ -1245,9 +1256,7 @@ image_make=size=>{
 		if(ikey(i,'copy'))return lmnat(z=>image_copy(self,unpack_rect(z,self.size)))
 		if(ikey(i,'paste'))return lmnat(([img,pos,t])=>{
 			img=getimage(img), pos=(pos?ll(pos):[]).map(ln); let solid=t?!lb(t):1, cl=rect(0,0,self.size.x,self.size.y); if(img==self)img=image_copy(img)
-			// TODO: can we squash these calls together?
-			if(pos.length<=2){image_paste(rect(pos[0],pos[1],img.size.x,img.size.y),cl,img,self,solid)}
-			else{image_paste_scaled(getrect(pos),cl,img,self,solid)}return self
+			image_paste_scaled(pos.length<=2?rect(pos[0],pos[1],img.size.x,img.size.y):getrect(pos),cl,img,self,solid)
 		})
 		return x?x:NONE
 	};return {t:'int',f:f,n:'image',size:size,pix:new Uint8Array(size.x*size.y)}
@@ -1647,42 +1656,42 @@ canvas_read=(x,card)=>{
 	const ri=lmi((self,i,x)=>{
 		if(!is_rooted(self))return NONE
 		if(x){
-			if(ikey(i,'brush'  ))return self.brush=0|clamp(0,ln(x),23),x
-			if(ikey(i,'pattern'))return self.pattern=0|clamp(0,ln(x),47),x
-			if(ikey(i,'font'   ))return self.font=normalize_font(self.card.deck.fonts,x),x
+			if(ikey(i,'brush'    ))return self.brush=0|clamp(0,ln(x),23),x
+			if(ikey(i,'pattern'  ))return self.pattern=0|clamp(0,ln(x),47),x
+			if(ikey(i,'font'     ))return self.font=normalize_font(self.card.deck.fonts,x),x
 			if(!lis(i)){const img=canvas_image(self,1);return img.f(img,i,x)}
 			if(has_parent(self)||self.free)return x
-			if(ikey(i,'border' ))return self.border=lb(x),x
-			if(ikey(i,'lsize'  )){i=lms('size'),x=lmpair(rmul(getpair(x),ln(ifield(self,'scale'))))}
-			if(ikey(i,'size'   )){canvas_resize(self,getpair(x))}
-			if(ikey(i,'scale'  )){return self.scale=max(0.1,ln(x)),canvas_resize(self,getpair(ifield(self,'size'))),x}
+			if(ikey(i,'border'   ))return self.border=lb(x),x
+			if(ikey(i,'draggable'))return self.draggable=lb(x),x
+			if(ikey(i,'lsize'    )){i=lms('size'),x=lmpair(rmul(getpair(x),ln(ifield(self,'scale'))))}
+			if(ikey(i,'size'     )){canvas_resize(self,getpair(x))}
+			if(ikey(i,'scale'    )){return self.scale=max(0.1,ln(x)),canvas_resize(self,getpair(ifield(self,'size'))),x}
 		}else{
 			if(!lis(i)){const img=canvas_image(self,0);return img?img.f(img,i,x):NONE}
-			if(ikey(i,'border' ))return lmn(widget_inherit(self,ls(i),1))
-			if(ikey(i,'brush'  ))return lmn(widget_inherit(self,ls(i),0))
-			if(ikey(i,'pattern'))return lmn(widget_inherit(self,ls(i),1))
-			if(ikey(i,'size'   ))return lmpair(widget_inherit(self,ls(i),rect(100,100)))
-			if(ikey(i,'scale'  ))return lmn(widget_inherit(self,ls(i),1.0))
-			if(ikey(i,'lsize'  )){const s=getpair(ifield(self,'size')),z=ln(ifield(self,'scale'));return lmpair(rect(ceil(s.x/z),ceil(s.y/z)))}
-			if(ikey(i,'clip'   ))return lmnat(z=>(canvas_clip(self,z),NONE))
-			if(ikey(i,'clear'  ))return lmnat(z=>(canvas_pick(self),draw_rect(wid_crect(self,z),0            )           ,NONE))
-			if(ikey(i,'rect'   ))return lmnat(z=>(canvas_pick(self),draw_rect(wid_crect(self,z),frame.pattern)           ,NONE))
-			if(ikey(i,'invert' ))return lmnat(z=>(canvas_pick(self),draw_invert_raw(wid_pal(self),wid_crect(self,z))     ,NONE))
-			if(ikey(i,'box'    ))return lmnat(z=>(canvas_pick(self),draw_box(wid_rect(self,z),frame.brush,frame.pattern) ,NONE))
-			if(ikey(i,'poly'   ))return lmnat(z=>(canvas_pick(self),draw_poly(unpack_poly(z),frame.pattern)              ,NONE))
-			if(ikey(i,'line'   ))return lmnat(z=>(canvas_pick(self),draw_lines(unpack_poly(z),frame.brush,frame.pattern) ,NONE))
-			if(ikey(i,'fill'   ))return lmnat(([pos])=>(canvas_pick(self),draw_fill(rint(getpair(pos)),self.pattern)     ,NONE))
-			if(ikey(i,'copy'   ))return lmnat(z=>{const img=canvas_image(self,1);return image_copy(img,unpack_rect(z,img.size))})
-			if(ikey(i,'paste'  ))return lmnat(([img,pos,t])=>{
+			if(ikey(i,'border'   ))return lmn(widget_inherit(self,ls(i),1))
+			if(ikey(i,'draggable'))return lmn(widget_inherit(self,ls(i),0))
+			if(ikey(i,'brush'    ))return lmn(widget_inherit(self,ls(i),0))
+			if(ikey(i,'pattern'  ))return lmn(widget_inherit(self,ls(i),1))
+			if(ikey(i,'size'     ))return lmpair(widget_inherit(self,ls(i),rect(100,100)))
+			if(ikey(i,'scale'    ))return lmn(widget_inherit(self,ls(i),1.0))
+			if(ikey(i,'lsize'    )){const s=getpair(ifield(self,'size')),z=ln(ifield(self,'scale'));return lmpair(rect(ceil(s.x/z),ceil(s.y/z)))}
+			if(ikey(i,'clip'     ))return lmnat(z=>(canvas_clip(self,z),NONE))
+			if(ikey(i,'clear'    ))return lmnat(z=>(canvas_pick(self),draw_rect(wid_crect(self,z),0            )           ,NONE))
+			if(ikey(i,'rect'     ))return lmnat(z=>(canvas_pick(self),draw_rect(wid_crect(self,z),frame.pattern)           ,NONE))
+			if(ikey(i,'invert'   ))return lmnat(z=>(canvas_pick(self),draw_invert_raw(wid_pal(self),wid_crect(self,z))     ,NONE))
+			if(ikey(i,'box'      ))return lmnat(z=>(canvas_pick(self),draw_box(wid_rect(self,z),frame.brush,frame.pattern) ,NONE))
+			if(ikey(i,'poly'     ))return lmnat(z=>(canvas_pick(self),draw_poly(unpack_poly(z),frame.pattern)              ,NONE))
+			if(ikey(i,'line'     ))return lmnat(z=>(canvas_pick(self),draw_lines(unpack_poly(z),frame.brush,frame.pattern) ,NONE))
+			if(ikey(i,'fill'     ))return lmnat(([pos])=>(canvas_pick(self),draw_fill(rint(getpair(pos)),self.pattern)     ,NONE))
+			if(ikey(i,'copy'     ))return lmnat(z=>{const img=canvas_image(self,1);return image_copy(img,unpack_rect(z,img.size))})
+			if(ikey(i,'paste'    ))return lmnat(([img,pos,t])=>{
 				canvas_pick(self);const dst=canvas_image(self,1)
 				img=getimage(img),pos=(pos?ll(pos):[]).map(ln); let solid=t?!lb(t):1
-				// TODO: can we squash these calls together?
-				if(pos.length<=2){image_paste(rect(pos[0],pos[1],img.size.x,img.size.y),frame.clip,img,dst,solid)}
-				else{image_paste_scaled(getrect(pos),frame.clip,img,dst,solid)}
+				image_paste_scaled(pos.length<=2?rect(pos[0],pos[1],img.size.x,img.size.y):getrect(pos),frame.clip,img,dst,solid)
 				return NONE
 			})
 			if(ikey(i,'merge'))return lmnat(z=>{
-				canvas_pick(self);const nice=x=>x&&image_is(x)&&x.size.x>0&&x.size.y>0, size=frame.image.size
+				canvas_pick(self);if(lil(z[0]))z=ll(z[0]);const nice=x=>x&&image_is(x)&&x.size.x>0&&x.size.y>0, size=frame.image.size
 				for(let y=0;y<size.y;y++)for(let x=0;x<size.x;x++){
 					const h=rect(x,y);if(!inclip(h))continue;let p=gpix(h),c=0;
 					if(nice(z[p])){const i=z[p];c=i.pix[(x%i.size.x)+(y%i.size.y)*i.size.x]}
@@ -1700,17 +1709,19 @@ canvas_read=(x,card)=>{
 	{const v=dget(x,lms('clip' ));if(v)canvas_clip(ri,ll(v))}
 	{const v=dget(x,lms('size' ));if(v)ri.size=getpair(v)}
 	{const v=dget(x,lms('scale'));if(v)ri.scale=max(0.1,ln(v))}
-	init_field(ri,'border' ,x)
-	init_field(ri,'brush'  ,x)
-	init_field(ri,'pattern',x)
-	init_field(ri,'font'   ,x)
+	init_field(ri,'border'   ,x)
+	init_field(ri,'draggable',x)
+	init_field(ri,'brush'    ,x)
+	init_field(ri,'pattern'  ,x)
+	init_field(ri,'font'     ,x)
 	return ri
 }
 canvas_write=x=>{
 	const r=lmd([lms('type')],[lms('canvas')])
 	if(x.border!=undefined)dset(r,lms('border'),lmn(x.border))
-	if(x.image)dset(r,lms('image'),lms(image_write(x.image)))
-	if(x.brush)dset(r,lms('brush'),lmn(x.brush))
+	if(x.image    )dset(r,lms('image'    ),lms(image_write(x.image)))
+	if(x.draggable)dset(r,lms('draggable'),lmn(x.draggable))
+	if(x.brush    )dset(r,lms('brush'    ),lmn(x.brush))
 	if(x.pattern!=undefined&&x.pattern!=1)dset(r,lms('pattern'),lmn(x.pattern))
 	if(x.scale)dset(r,lms('scale'),lmn(x.scale))
 	if(x.clip&&!requ(x.clip,rpair(rect(),getpair(ifield(x,'lsize')))))dset(r,lms('clip'),lml([x.clip.x,x.clip.y,x.clip.w,x.clip.h].map(lmn)))
@@ -1808,7 +1819,7 @@ card_read=(x,deck,cdata)=>{
 			}
 			if(ikey(i,'script'))return self.script=ls(x),x
 			if(ikey(i,'image' ))return self.image=image_is(x)?x:image_make(rect()),x
-			if(ikey(i,'index'))return reorder(self.deck.cards,dvix(self.deck.cards,self),ln(x)),self.deck.history=[],x
+			if(ikey(i,'index'))return reorder(self.deck.cards,dvix(self.deck.cards,self),ln(x)),self.deck.history=[ln(ifield(self,'index'))],x
 		}else{
 			if(ikey(i,'name'   ))return lms(self.name)
 			if(ikey(i,'size'   ))return lmpair(deck.size)
@@ -1900,10 +1911,12 @@ deck_remove=(deck,t)=>{
 			card.widgets.v.map(x=>x.dead=true),card.widgets=lmd()
 			card_children(card,child=>widget_removeall(child))
 		}
-		if(count(deck.cards)<=1)return NONE;deck.history=[]
+		if(count(deck.cards)<=1)return 0
 		deck.cards.v.map(card=>{if(ifield(card,'parent')==t){card.parent=0,widget_removeall(card)}})
 		deck.cards=dyad.drop(dkey(deck.cards,t)||NONE,deck.cards),t.dead=true
-		if(deck.card>=count(deck.cards))deck.card=count(deck.cards-1);return 1
+		if(deck.card>=count(deck.cards))deck.card=count(deck.cards-1)
+		deck.history=[ln(ifield(ifield(deck,'card'),'index'))]
+		return 1
 	}return 0
 }
 deck_copy=(deck,z)=>!card_is(z)?NONE: lms(`%%CRD0${fjson(card_write(z))}`)
@@ -1971,7 +1984,6 @@ deck_read=x=>{
 			if(ikey(i,'paste')&&state.external)return lmnat(([x])=>deck_paste(self,x))
 		}return x?x:NONE
 	},'deck')
-	ri.history =[]
 	ri.fonts   =fonts
 	ri.sounds  =sounds
 	ri.cards   =lmd()
@@ -1990,6 +2002,7 @@ deck_read=x=>{
 	pushstate(root),issue(root,parse(DEFAULT_TRANSITIONS));while(running())runop();popstate()
 	Object.keys(cards  ).map(k=>{const v=card_read(cards[k],ri,cards);dset(ri.cards,ifield(v,'name'),v)})
 	Object.keys(modules).map(k=>{const v=module_read(modules[k],ri);dset(ri.modules,ifield(v,'name'),v)})
+	ri.history=[ln(ifield(ifield(ri,'card'),'index'))]
 	return ri
 }
 deck_write=(x,html)=>{
@@ -2057,7 +2070,7 @@ n_go=([x,t],deck)=>{
 	}if(r!=null){go_notify(deck,r,t,x),deck.card=r;if(i!=r)deck.history.push(r)}else{go_notify(deck,-1,t,x)}return lmn(deck.card)
 }
 n_sleep=([z])=>{if(lis(z)&&ls(z)=='play'){sleep_play=1}else{sleep_frames=max(1,ln(z))};return z}
-n_transition=(f,deck)=>{const t=deck.transit;if(f.t=='on')dset(t,lms(f.n),f);return t}
+n_transition=(f,deck)=>{const t=deck.transit;if(lion(f))dset(t,lms(f.n),f);return t}
 
 constants=env=>{
 	env.local('sys'    ,interface_system)
