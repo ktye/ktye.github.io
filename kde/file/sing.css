@@ -1,0 +1,5 @@
+#spec{background:grey}
+#freq{background:lightgrey}
+#time{background:darkgrey}
+.center{text-align:center}
+.rotate{transform:rotate(-90deg)}

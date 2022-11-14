@@ -131,7 +131,9 @@ function kj(x){
  switch(typeof x){// f:1 i:true i:2n C:"" s:Symbol("") L:[]
  case"number": return K.Ki(Math.round(x))
  case"string": return K.KC(x)
- default: return 0n
+ default:
+  if(x.constructor===Float64Array)return K.KF(x)
+  return 0n
 }}
 function jk(x){let t=K.TK(x)
  switch(t){
@@ -208,7 +210,7 @@ function kasa(x){ // x:`p"program.."
  let typs=function(x){let t=[];for(let i=0;i<x.length;i++)t.push(K.TK(x[i]));return t}
 
  let T=typs(x)
- let G={plot:true} //global assigned variables
+ let G={plot:true,abs:true,sin:true,cos:true,find:true,fill:true,imag:true,conj:true,angle:true,exp:true,log:true} //global assigned variables
  for(let i=0;i<x.length;i++)if((i>0)&&(T[i]=="0")&&(64==lo(x[i]))&&T[i-1]=="s")G[K.sK(x[i-1])]=true
 
  //undefined variables
@@ -346,6 +348,7 @@ K.FK = function(x){
  let t=_.tp(x); let n=(t==6) ? 2 : (t==22) ? 2*_.nn(x) : _.nn(x);
  let p=lo(x)>>>3;return dxr(x,F().slice(p,p+n))
 }
+K.KF = function(x){let r=_.mk(21,x.length);F().set(x,lo(r)>>>3);return r}
 K.LK = function(x){
  let n=(_.tp(x)==23) ? _.nn(x) : 2 // L vs D,T
  let r=new Array(n); let p=lo(x)>>>3; let j=J()
