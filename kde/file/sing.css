@@ -1,5 +1,5 @@
+#main{display:flex;margin:20px}
 #spec{background:grey}
-#freq{background:lightgrey}
-#time{background:darkgrey}
 .center{text-align:center}
 .rotate{transform:rotate(-90deg)}
+.column{flex:50%}

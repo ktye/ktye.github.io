@@ -492,7 +492,7 @@ function newk(){
   case"prompt":pr();break
   case"indicate":indicate(d.p,d.e,d.l,d.stack);break
   case"plot":plot(d.t,d.l);break
-  case"kres":kres(e.data);break //kde/file
+  case"kres":kres(e.data);break //kde/file/file.h
   default: console.log("unknown from kwork:", e.data)
  }}
  kw.onerror=function(e){

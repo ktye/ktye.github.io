@@ -127,7 +127,6 @@ function k(f,...a){ //kcall
  return p
 }
 function kres(m){
-console.log("kres",m)
  if("e"in m)kde.err(m.e,m.jstack) //kreject[m.uid](m.e) //todo js indicate
  else       kresolv[m.uid](m.r)
  delete     kresolv[m.uid];delete kreject[m.uid]
