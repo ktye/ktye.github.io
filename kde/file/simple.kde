@@ -1,0 +1,52 @@
+///.k///
+
+label:"static text"                       /variable
+click:{(,"random text:"),10^_97+100?26}   /niladic
+
+sum:0                                     /global
+acc:{sum+:x}                              /monadic
+
+1+ \!10                                   /output to the k console
+///.js///
+
+function main(){ console.log("main example running") }
+function countup(x){ return 1+x }
+
+//standard js callback
+ge("counter").onclick=function(e){
+ e.target.textContent=String(countup(+e.target.textContent))
+}
+
+//k-callbacks are promises created by k(f,args)
+ge("k-button").onclick=function(e){
+ let r=k("acc",+ge("num").value).then(r=>ge("k-output").textContent=r).catch(e=>console.log(e))
+}
+///.css///
+#main{background:#eee}
+///.html///
+<h1>simple example</h1>
+
+counter button with js callback:
+<button id="counter">1</button>
+
+<h2>change the program</h2>
+
+<p>modify the background color, and increase the button value by 2 on each click:</p>
+
+<pre>
+- cntrl-k switches to kde
+- click on [.css]
+- edit the background color
+- click on [put] to apply changes to the in-doc-filesystem
+- click on [.js]
+- change the callback then click [put]
+- [start] restarts the application
+</pre>
+
+<h1>k</h1>
+
+k callback:
+<button id="k-button">accumulate</button>
+<input  id="num" type="number" value="5"/>
+result:
+<pre    id="k-output"></pre>

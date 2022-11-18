@@ -55,7 +55,8 @@
    <input  id="grep"         type="text"     title="input"/>
    <span   id="memo" style="flex-grow:1">0k</span>
    <select id="colb" class="kdebutton" title="columns"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
-   <button id="dlbt" class="kdebutton" title="download file bundle">download</button>
+   <button id="dlbt" class="kdebutton" title="download file bundle">html</button>
+   <button id="dlct" class="kdebutton" title="download kde file">kde</button>
   </div>
   <div id="expl"></div>
  </div>
@@ -93,7 +94,8 @@ let kde=function(){
  zk={{z.k}}
  let setfile=function(name){openfile(findfile(name),ge("expl"))}
  let kpost=function(x){kw.postMessage(x)}
- return {newfile:newfile,setfile:setfile,kstart:kstart,kpost:kpost,err:err}
+ let kdefilesys=function(){let ex=ge("expl"),fs={};let a=ex.children;for(let i=0;i<a.length;i++)fs[a[i].textContent]=su(a[i].u);return fs}
+ return {newfile:newfile,setfile:setfile,fs:kdefilesys,kstart:kstart,kpost:kpost,err:err}
 }()
 </script>
 
@@ -116,6 +118,25 @@ function download(name,u){
 }
 window.onkeydown=function(e){if(e.ctrlKey&&e.key=='k'){pd(e);debug(ge("kde").classList.contains("hidden"))}}
 let start;ge("stab").onclick=function(e){start()}
+window.ondragover=function(e){pd(e)}
+
+window.ondrop=function(e){pd(e);
+ let kdesplit=function(s){
+  let fs={},v=s.split("\n");let f="";fs[f]=[]
+  for(let i=0;i<v.length;i++){let l=v[i]
+   if((l.length>6)&&l.startsWith("///")&&l.endsWith("///")){f=l.slice(3,l.length-3);fs[f]=[]}
+   else fs[f].push(l)
+  };delete fs[""];
+  let k=Object.keys(fs);for(let i=0;i<k.length;i++)fs[k[i]]=fs[k[i]].join("\n")
+  return fs}
+ let l=e.dataTransfer.files
+ for(let i=0;i<l.length;i++){
+  let f=l.item(i);
+  f.arrayBuffer().then(u=>{
+   if(f.name.endsWith(".kde")){fs=kdesplit(su(u));init()}
+   else if(typeof dropfile!=='undefined')dropfile(f.name,u) //application defined handler
+   else kde.newfile(f.name,su(u))                           //default: add to fs
+})}}
 
 
 function k(f,...a){ //kcall
@@ -135,12 +156,17 @@ function init(){
  let inner=document.documentElement.innerHTML;
  let t=document.title
  
- let pack=function(){
+ let pack=function(){fs=kde.fs()
   let b="<!DOCTYPE html>\n"+inner+"</"+"html>"
   let i=b.indexOf("\nlet fs={")
   let n=1+b.slice(1+i).indexOf("\n")
   let newfs="\nlet fs="+JSON.stringify(fs)
   return b.slice(0,i)+newfs+b.slice(i+n)
+ }
+ let kdepack=function(){fs=kde.fs()
+  let k=Object.keys(fs);let o=""
+  for(let i=0;i<k.length;i++){let name=k[i];o+=((i==0||o.endsWith("\n"))?"":"\n")+"///"+name+"///\n"+fs[name]}
+  return o
  }
  start=function(){
   kde.kstart("",true)
@@ -160,6 +186,7 @@ function init(){
  kde.newfile(".k",fs[".k"])
  kde.setfile(".k")
  ge("dlbt").onclick=function(){download(t+".html",us(pack()))}
+ ge("dlct").onclick=function(){download(t+".kde",us(kdepack()))}
  start()
 }
 </script>

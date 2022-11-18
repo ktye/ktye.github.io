@@ -46,6 +46,7 @@ let src={}
 let zk //built-in z.k source for error indication
 let kw
 window.kdeinit=function(){
+ rm(ge("expl"))
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")

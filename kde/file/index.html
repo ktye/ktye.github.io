@@ -45,17 +45,6 @@ The error can be corrected in the editor and a new application bundle is rewritt
 <table id="tab">
 </table></p>
 
-<h2>api</h2>
-<p>the <code>html</code> part of the application is filled into the <code>main</code> tag with the same id.</p>
-
-<p>a js function <code>main()</code> is called, if it exists.<br>
-predefined are:</p>
-<table>
-<tr><td><code>ge</code></td><td>get element</td></tr>
-<tr><td><code>ce</code></td><td>create element</td></tr>
-<tr><td><code>pd</code></td><td>prevent default</td></tr>
-<tr><td><code>rm</code></td><td>delete children</td></tr>
-</table>
 
 
 <script>
@@ -79,11 +68,13 @@ function build(F,id,desc){let f //build example application (fill file.h templat
  let re=function(s,x,y){let i=s.indexOf(x);if((i<0)||(y.length==0))throw("replace "+x);return s.slice(0,i)+y+s.slice(i+x.length)}
  f=su(F["file.h"])
  f=re(f,"{{title}}"    ,id)
- f=re(f,"{{fs}}", JSON.stringify({
+ f=re(f,"{{fs}}", JSON.stringify(kdesplit(su(F[id+".kde"]))))
+ 
+ /*{
         ".k":su(F[id+".k"]),
        ".js":su(F[id+".js"]),
       ".css":su(F[id+".css"]),
-     ".html":su(F[id+".html"])}))
+     ".html":su(F[id+".html"])})) */
  f=re(f,"{{kde.js}}"   ,su(F["../kde.js"]))
  f=re(f,"{{z.k}}"      ,JSON.stringify(su(F["../z.k"])))
  f=re(f,"{{src.map}}"  ,su(F["../../src.map"]))
@@ -102,14 +93,14 @@ function build(F,id,desc){let f //build example application (fill file.h templat
 }
 
 function init(){
- let desc={simple:"basic example",error:"debug errors",sing:"audio spectrogram"}
+ let desc={simple:"basic example",error:"debug errors",sing:"audio spectrogram",fs:"in-app file system"}
  let examples=Object.keys(desc)
  //for(let i=0,row;row=ge("tab").rows[i];i++)examples.push(row.cells[0].textContent.slice(0,-5))
  
 
  let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm","../plot.js"]
  let extensions=["k","js","css","html"]
- for(let i=0;i<examples.length;i++)for(let j=0;j<4;j++)allfiles.push(examples[i]+"."+extensions[j])
+ for(let i=0;i<examples.length;i++)allfiles.push(examples[i]+".kde") //for(let j=0;j<4;j++)allfiles.push(examples[i]+"."+extensions[j])
  fetchall(allfiles,function(F){for(let i=0;i<examples.length;i++)build(F,examples[i],desc[examples[i]])})
 }
 
@@ -118,5 +109,14 @@ function download(u,name){
  dl.href=URL.createObjectURL(b);dl.download=name;dl.click()
 }
 
+function kdesplit(s){
+ let fs={},v=s.split("\n");let f="";fs[f]=[]
+ for(let i=0;i<v.length;i++){let l=v[i]
+  if((l.length>6)&&l.startsWith("///")&&l.endsWith("///")){f=l.slice(3,l.length-3);fs[f]=[]}
+  else fs[f].push(l)
+ };delete fs[""];
+ let k=Object.keys(fs);for(let i=0;i<k.length;i++)fs[k[i]]=fs[k[i]].join("\n")
+ return fs
+}
 </script>
 </body>

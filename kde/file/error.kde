@@ -1,0 +1,36 @@
+///.k///
+add:{x+y}
+oneplus:{1+x}
+
+oneplus`sym   /remove this line to prevent the startup error, then press [put] and [start]
+
+kclick:{add[`abc;x]}
+///.js///
+// 1+undef  //startup-error
+
+function f1(x){return f2(x)}
+function f2(x){return 1+undefinedVariable}
+
+ge("jsbutton").onclick=function(e){ f1(f2()) }
+
+ge("kbutton" ).onclick=function(e){ //
+ k("kclick",1).then(r=>ge("output").textContent += "\nresult is\n"+r)
+}
+///.css///
+///.html///
+<h1>errors</h1>
+
+<p>k fails at startup and shows the debugger.</p>
+
+<p>remove the offending line then press <code>put</code> and <code>start</start>.</p>
+
+<h2>js errors in callback</h2>
+
+<p>this button triggers a pure js error.
+<button id="jsbutton">js error</button> </p>
+
+<h2>k errors in callback</h2>
+<p>this button triggers calls a k function which fails
+<button id="kbutton">k error</button> </p>
+
+<pre id="output"></pre>
