@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>compress</title>
+<link rel=icon href="../../k.png">
+<style>
+</style>
+</head>
+
+<body onload="init()">
+
+input size: <span id="in"></span><br>
+compressed: <span id="co"></span><br>
+uncompressed: <span id="uc"></span>
+
+<p>
+<span id="nb"></span><pre id="b6"></pre>
+<span id="nc"></span><pre id="c6"></pre>
+<span id="nu"></span><pre id="u6"></pre>
+</p>
+
+<script src="compress.js"></script>
+<script src="uncompress.js"></script>
+<script src="b64.js"></script>
+
+<script>
+
+
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+function xu(u){return [...new Uint8Array(u)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+
+function init(){
+ fetch("../../k.wasm").then(r=>r.arrayBuffer()).then(r=>{
+  let u=new Uint8Array(r)
+  ge("in").textContent=""+u.length
+  let c=compress(u)
+  //let c=snap.enc(u)
+  //let d=snap.dec(c)
+  let d=uncompress(c)
+  if(u.length!=d.length)throw new Error("length")
+  for(let i=0;i<u.length;i++)if(u[i]!=d[i])throw new Error("mismatch")
+
+  ge("co").textContent=""+c.length
+  ge("uc").textContent=""+d.length
+  ge("b6").textContent=b64.enc(u)
+  ge("c6").textContent=b64.enc(c)
+  ge("u6").textContent=b64.enc(d)
+  ge("nb").textContent=""+ge("b6").textContent.length
+  ge("nc").textContent=""+ge("c6").textContent.length
+  ge("nu").textContent=""+ge("u6").textContent.length
+ })
+}
+
+</script>
+</body>

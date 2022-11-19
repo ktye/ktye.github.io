@@ -66,13 +66,50 @@
 <main id="main"></main>
 
 <script id="worker1" type="javascript/worker">
- 
+
+function uncompress(x){ //from SnappyJs 0.7.0 Zhipeng Jia (MIT) https://github.com/zhipeng-jia/snappyjs
+ let uclen=function(x){let p=0,r=0,s=0,c,v
+  while(s<32&&p<x.length){c=x[p];p+=1;v=c&0x7f;
+   if(((v<<s)>>>s)!==v)return -1;r|=v<<s;if(c<128)return[r,p];s+=7
+  };return -1}
+ let cp=function(x,a,y,b,n){for(let i=0;i<n;i++)y[b+i]=x[a+i]}
+ let scb=function(x,p,o,n){for(let i=0;i<n;i++)x[p+i]=x[p-o+i]}
+ let dectob=function(r,x,p){let n=x.length,q=0,c,l,s,o,W=[0,0xff,0xffff,0xffffff,0xffffffff]
+  while(p<n){c=x[p];p++
+   if((c&0x3)===0){l=(c>>>2)+1
+    if(l>60){if(p+3>=n)return false;s=l-60;l=x[p]+(x[p+1]<<8)+(x[p+2]<<16)+(x[p+3]<<24);l=(l&W[s])+1;p+=s}
+    if(p+l>n)return false;cp(x,p,r,q,l);p+=l;q+=l
+   }else{switch(c&0x3){
+    case 1:l=((c>>>2)&0x7)+4;o=x[p]+((c>>>5)<<8);p+=1;break
+    case 2:if(p+1>=n)return false;l=(c>>>2)+1;o=x[p]+(x[p+1]<<8);p+=2;break
+    case 3:if(p+3>=n)return false;l=(c>>>2)+1;o=x[p]+(x[p+1]<<8)+(x[p+2]<<16)+(x[p+3]<<24);p+=4;break
+    default:break}
+    if(o===0||o>q)return false
+    scb(r,q,o,l);q+=l
+  }};return true}
+ let [n,p]=uclen(x);let r=new Uint8Array(n);dectob(r,x,p);return r}
+function b64dec(s){
+ const y=[
+  255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+  255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+  255,62,255,255,255,63,52,53,54,55,56,57,58,59,60,61,255,255,255,0,255,255,255,0,1,2,
+  3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,255,255,255,255,255,
+  255,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51];
+  let g=function(c){
+   if(c>=y.length)throw new Error("b64");
+   const o=y[c];if(o===255)throw new Error("b64")
+   return o;}
+  if(s.length%4!==0)throw new Error("b64");
+   const i=s.indexOf("=");if (i!==-1&&i<s.length-2)throw new Error("b64");
+   let m=s.endsWith("==")?2:s.endsWith("=")?1:0,
+   n=s.length,r=new Uint8Array(3*(n/4)),b;
+   for(let i=0,j=0;i<n;i+=4,j+=3){
+    b=g(s.charCodeAt(i))<<18|g(s.charCodeAt(i+1))<<12|g(s.charCodeAt(i+2))<<6|g(s.charCodeAt(i+3));
+    r[j]=b>>16;r[j+1]=(b>>8)&0xFF;r[j+2]=b&0xFF;}
+   return r.subarray(0,r.length-m);}
 let dwasm=function(){
- let w="{{d.hx.wasm}}"
- let a=new Uint8Array(w.length/2)
- let b=function(x){return x-((x<97)?48:87)}
- for(let i=0;i<a.length;i++)a[i]=b(w.charCodeAt(1+2*i))+16*b(w.charCodeAt(2*i))
- return a
+ let w="{{d.wasm.z}}"
+ return uncompress(b64dec(w))
 }
 let kdefile=true
 let srcmapobj={{src.map}}
