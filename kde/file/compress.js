@@ -1,4 +1,4 @@
-function compress(u){ //from SnappyJs 0.7.0 Zhipeng Jia (MIT) https://github.com/zhipeng-jia/snappyjs
+function compress(u){ //see github.com/zhipeng-jia/snappyjs(0.7.0)
  let G=new Array(15)
  let H=(k,s)=>(k*0x1e35a7bd)>>>s
  let L=(a,p)=>a[p]+(a[p+1]<<8)+(a[p+2]<<16)+(a[p+3]<<24)
@@ -11,7 +11,7 @@ function compress(u){ //from SnappyJs 0.7.0 Zhipeng Jia (MIT) https://github.com
   else{r[p]=2+((n-1)<<2);r[p+1]=o&255;r[p+2]=o>>>8;return p+3}}
  let A=function(r,p,o,n){while(n>=68){p=C(r,p,o,64);n-=64}
   if(n>64){p=C(r,p,o,60);n-=60};return C(r,p,o,n)}
- let F=function(x,p,s,r,q){ //xpsrqthlcmofigenbadjkuvwy
+ let F=function(x,p,s,r,q){
   let t=1;while((1<<t)<=s&&t<=14)t++;t--
   let h=32-t;if(typeof G[t]==='undefined'){G[t]=new Uint16Array(1<<t)}
   let g=G[t];g.fill(0)

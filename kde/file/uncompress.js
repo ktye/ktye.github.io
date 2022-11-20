@@ -1,4 +1,4 @@
-function uncompress(x){ //from SnappyJs 0.7.0 Zhipeng Jia (MIT) https://github.com/zhipeng-jia/snappyjs
+function uncompress(x){ //see github.com/zhipeng-jia/snappyjs(0.7.0) (trusted input)
  let L=function(x){let p=0,r=0,s=0,c,v
   while(s<32&&p<x.length){c=x[p];p++;v=c&127;r|=v<<s;if(c<128)return[r,p];s+=7}}
  let D=function(r,x,p){let n=x.length,q=0,c,l,s,o,W=[0,255,0xffff,0xffffff,0xffffffff]
