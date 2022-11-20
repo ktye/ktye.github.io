@@ -88,28 +88,10 @@ function uncompress(x){ //from SnappyJs 0.7.0 Zhipeng Jia (MIT) https://github.c
     scb(r,q,o,l);q+=l
   }};return true}
  let [n,p]=uclen(x);let r=new Uint8Array(n);dectob(r,x,p);return r}
-function b64dec(s){
- const y=[
-  255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
-  255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
-  255,62,255,255,255,63,52,53,54,55,56,57,58,59,60,61,255,255,255,0,255,255,255,0,1,2,
-  3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,255,255,255,255,255,
-  255,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51];
-  let g=function(c){
-   if(c>=y.length)throw new Error("b64");
-   const o=y[c];if(o===255)throw new Error("b64")
-   return o;}
-  if(s.length%4!==0)throw new Error("b64");
-   const i=s.indexOf("=");if (i!==-1&&i<s.length-2)throw new Error("b64");
-   let m=s.endsWith("==")?2:s.endsWith("=")?1:0,
-   n=s.length,r=new Uint8Array(3*(n/4)),b;
-   for(let i=0,j=0;i<n;i+=4,j+=3){
-    b=g(s.charCodeAt(i))<<18|g(s.charCodeAt(i+1))<<12|g(s.charCodeAt(i+2))<<6|g(s.charCodeAt(i+3));
-    r[j]=b>>16;r[j+1]=(b>>8)&0xFF;r[j+2]=b&0xFF;}
-   return r.subarray(0,r.length-m);}
+let u64s=function(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
 let dwasm=function(){
  let w="{{d.wasm.z}}"
- return uncompress(b64dec(w))
+ return uncompress(u64s(w))
 }
 let kdefile=true
 let srcmapobj={{src.map}}

@@ -46,17 +46,17 @@ The error can be corrected in the editor and a new application bundle is rewritt
 </table></p>
 
 
-<script src="b64.js"></script>
 <script src="compress.js"></script>
 <script>
+
 
 
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
-function zu(u){return b64.enc(compress(new Uint8Array(u)))}
-//function zu(u){return [...new Uint8Array(u)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
+function zu(u){return s64u(compress(new Uint8Array(u)))}
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 

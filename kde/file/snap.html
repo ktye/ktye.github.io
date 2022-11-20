@@ -19,7 +19,6 @@ uncompressed: <span id="uc"></span>
 
 <script src="compress.js"></script>
 <script src="uncompress.js"></script>
-<script src="b64.js"></script>
 
 <script>
 
@@ -32,22 +31,23 @@ function xu(u){return [...new Uint8Array(u)].map(x=>x.toString(16).padStart(2,'0
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 
+function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
+function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(x))}
+
 function init(){
  fetch("../../k.wasm").then(r=>r.arrayBuffer()).then(r=>{
   let u=new Uint8Array(r)
   ge("in").textContent=""+u.length
   let c=compress(u)
-  //let c=snap.enc(u)
-  //let d=snap.dec(c)
   let d=uncompress(c)
   if(u.length!=d.length)throw new Error("length")
   for(let i=0;i<u.length;i++)if(u[i]!=d[i])throw new Error("mismatch")
 
   ge("co").textContent=""+c.length
   ge("uc").textContent=""+d.length
-  ge("b6").textContent=b64.enc(u)
-  ge("c6").textContent=b64.enc(c)
-  ge("u6").textContent=b64.enc(d)
+  ge("b6").textContent=s64u(u)
+  ge("c6").textContent=s64u(c)
+  ge("u6").textContent=s64u(d)
   ge("nb").textContent=""+ge("b6").textContent.length
   ge("nc").textContent=""+ge("c6").textContent.length
   ge("nu").textContent=""+ge("u6").textContent.length
