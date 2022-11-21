@@ -34,7 +34,7 @@
  .hidden{visibility:hidden} /*consize needs "mono" and "repl"*/
 </style>
 <style id="maincss"></style>
-<script>{{plot.js}}</script>
+<script>/*{{ plot.js }}*/function plot(){console.log("plot nyi")}</script>
 
 </head>
 
@@ -66,33 +66,6 @@
 <main id="main"></main>
 
 <script id="worker1" type="javascript/worker">
-
-function uncompress(x){ //from SnappyJs 0.7.0 Zhipeng Jia (MIT) https://github.com/zhipeng-jia/snappyjs
- let uclen=function(x){let p=0,r=0,s=0,c,v
-  while(s<32&&p<x.length){c=x[p];p+=1;v=c&0x7f;
-   if(((v<<s)>>>s)!==v)return -1;r|=v<<s;if(c<128)return[r,p];s+=7
-  };return -1}
- let cp=function(x,a,y,b,n){for(let i=0;i<n;i++)y[b+i]=x[a+i]}
- let scb=function(x,p,o,n){for(let i=0;i<n;i++)x[p+i]=x[p-o+i]}
- let dectob=function(r,x,p){let n=x.length,q=0,c,l,s,o,W=[0,0xff,0xffff,0xffffff,0xffffffff]
-  while(p<n){c=x[p];p++
-   if((c&0x3)===0){l=(c>>>2)+1
-    if(l>60){if(p+3>=n)return false;s=l-60;l=x[p]+(x[p+1]<<8)+(x[p+2]<<16)+(x[p+3]<<24);l=(l&W[s])+1;p+=s}
-    if(p+l>n)return false;cp(x,p,r,q,l);p+=l;q+=l
-   }else{switch(c&0x3){
-    case 1:l=((c>>>2)&0x7)+4;o=x[p]+((c>>>5)<<8);p+=1;break
-    case 2:if(p+1>=n)return false;l=(c>>>2)+1;o=x[p]+(x[p+1]<<8);p+=2;break
-    case 3:if(p+3>=n)return false;l=(c>>>2)+1;o=x[p]+(x[p+1]<<8)+(x[p+2]<<16)+(x[p+3]<<24);p+=4;break
-    default:break}
-    if(o===0||o>q)return false
-    scb(r,q,o,l);q+=l
-  }};return true}
- let [n,p]=uclen(x);let r=new Uint8Array(n);dectob(r,x,p);return r}
-let u64s=function(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
-let dwasm=function(){
- let w="{{d.wasm.z}}"
- return uncompress(u64s(w))
-}
 let kdefile=true
 let srcmapobj={{src.map}}
 {{kwork.js}}
@@ -130,6 +103,10 @@ function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+{{compress.js}}
+{{uncompress.js}}
+function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
+function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
 function debug(x){ge(x?"kde":"main").classList.remove("hidden");ge(x?"main":"kde").classList.add("hidden")}
 function download(name,u){
  var dl=ge("dl");var b=new Blob([u],{type:"application/octet-stream"})
@@ -172,6 +149,7 @@ function kres(m){
  delete     kresolv[m.uid];delete kreject[m.uid]
 }
 function init(){
+ let kw=uncompress(u64s("{{d.wasm.z}}"))
  let inner=document.documentElement.innerHTML;
  let t=document.title
  
@@ -188,7 +166,7 @@ function init(){
   return o
  }
  start=function(){
-  kde.kstart("",true)
+  kde.kstart("",true,kw)
   let c=ge("maincss");c.innerHTML=fs[".css"]
   let m=ge("main");rm(m);m.insertAdjacentHTML("afterbegin",fs[".html"])
   eval?.(fs[".js"]) //indirect eval in global scope

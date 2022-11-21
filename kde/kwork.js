@@ -63,7 +63,8 @@ function kstart(d){let s=d.s,fs=d.fs,w=d.cons.w,h=d.cons.h
   }
   postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt(),k:k})
  }
- K.kinit(ext,(d.trc===true||kdefile)?"../d.wasm":"../k.wasm")
+ if(kdefile)K.kinit(ext,d.kw)
+ else       K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
 }
 
 function krep(s,w,h){
@@ -310,9 +311,8 @@ K.kinit = function(ext,kw){
   ext.init()
   K.save()
  }
-
  function binsize(x){K.n=x.byteLength;return x}
- if(kdefile){let r=dwasm();                      WebAssembly.instantiate(binsize(r),kenv ).then(initk) }
+ if(kdefile){let r=kw.buffer;                    WebAssembly.instantiate(binsize(r),kenv ).then(initk) }
  else fetch(kw).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(binsize(r),kenv)).then(initk)
 }
 K.TK = function(x){ 

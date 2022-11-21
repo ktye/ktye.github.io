@@ -76,7 +76,9 @@ function build(F,id,desc){let f //build example application (fill file.h templat
  f=re(f,"{{src.map}}" ,su(F["../../src.map"]))
  f=re(f,"{{kwork.js}}",su(F["../kwork.js"]))
  f=re(f,"{{d.wasm.z}}",zu(F["../../d.wasm"]))
- f=re(f,"{{plot.js}}" ,su(F["../plot.js"]))
+ //f=re(f,"{{plot.js}}" ,su(F["../plot.js"]))
+ f=re(f,"{{compress.js}}",su(F["compress.js"]))
+ f=re(f,"{{uncompress.js}}",su(F["uncompress.js"]))
  
  let r=ce("tr")
  let a=ce("th");a.textContent=id
@@ -94,7 +96,7 @@ function init(){
  //for(let i=0,row;row=ge("tab").rows[i];i++)examples.push(row.cells[0].textContent.slice(0,-5))
  
 
- let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm","../plot.js"]
+ let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm","../plot.js","compress.js","uncompress.js"]
  let extensions=["k","js","css","html"]
  for(let i=0;i<examples.length;i++)allfiles.push(examples[i]+".kde") //for(let j=0;j<4;j++)allfiles.push(examples[i]+"."+extensions[j])
  fetchall(allfiles,function(F){for(let i=0;i<examples.length;i++)build(F,examples[i],desc[examples[i]])})

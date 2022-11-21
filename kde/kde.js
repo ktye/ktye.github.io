@@ -1,5 +1,6 @@
 if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
 if(typeof cmedit ==="undefined")cmedit =true  //used by ./file/.. (no codemirror)
+if(typeof debug  ==="undefined")debug=function(x){}
 if(!kdefile)if(('serviceWorker'in navigator)&&kdefile)navigator.serviceWorker.register("kde.sw.js")
 
 function ge(x){return document.getElementById(x)}
@@ -71,7 +72,7 @@ window.kdeinit=function(){
  ed.sp=false //.sp(span) ed.sp.h(handle)
  kmode(true)
  if(!kdefile)fetch("z.k").then(r=>r.text()).then(r=>zk=r)
- kstart("")
+ if(!kdefile)kstart("")
 }
 function save(){if(ed.sp)ed.sp.u=us(ed.getValue())}
 
@@ -442,13 +443,13 @@ function histup(){let r=hist[histi];histi-=(histi>1);return r}
 function histdn(){histi+=(histi<hist.length-1);return(hist[histi])}
 function histkey(e){pd(e);let s=(e.key=="ArrowUp")?histup():histdn(); e.target.textContent="\n "+s;endcursor(e.target)}
 
-function kstart(s,trc){
+function kstart(s,trc,kwasm){
  intr.disabled=false
  if(startuperr)return
  repl.textContent=""
  let g=ge("grep").value
  s=cats(kdefile?[".k"]:g.startsWith("k ")?g.slice(2).split(" "):[],s)
- kw.postMessage({m:"start",s:s,trc:trc,cons:consize(),fs:readfs()})
+ kw.postMessage({m:"start",s:s,trc:trc,cons:consize(),fs:readfs(),kw:kwasm})
 }
 function krep(s){
  if(s==""){rm(repl);pr();return}
