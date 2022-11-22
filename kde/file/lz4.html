@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title></title>
+<style>
+</style>
+</head>
+<body>
+<script>
+
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+
+// https://github.com/lz4/lz4/blob/dev/doc/lz4_Block_format.md
+// https://github.com/lz4/lz4/blob/dev/doc/lz4_Frame_format.md
+
+function lz(x){let i=7,r=[],E=(x,a,n)=>{for(let j=0;j<n;j++)r.push(x[a+j]);return n}
+ let d=(x,n)=>{let t,c,o;n+=i;while(i<n){t=x[i++];c=t>>4;
+  if(c>0){if(c===15)while(1){c+=x[i];if(x[i++]!==255)break};i+=E(x,i,c)}
+  if(i>=n)break;c=t&15;o=r.length-(x[i++]|x[i++]<<8);if(c===15)while(1){c+=x[i];if(x[i++]!==255)break};E(r,o,4+c)}}
+ const S=-(1<<31);let n;while(1){n=x[i++]|x[i++]<<8|x[i++]<<16|x[i++]<<24;if(!n)break;if(n&S)i+=E(x,i,n&~S);else d(x,n)}
+ return new Uint8Array(r)}
+  
+  
+function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
+function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
+
+let tests=[
+ "alphabetagammahanswerneralphabeth\n", "BCJNGGRApyIAAIBhbHBoYWJldGFnYW1tYWhhbnN3ZXJuZXJhbHBoYWJldGgKAAAAAB7ptvU="
+]
+
+let x=u64s(tests[1])
+let r=lz(x)
+console.log((su(r)===tests[0])?"ok":"not ok")
+
+let T=function(x){
+ let y=x["../../d.wasm"]
+ let r=lz(x["../../d.wasm.12"])
+ if(y.length!=r.length)console.log("length error")
+ console.log("wasm",(y.map((x,i)=>x==r[i]).every(x=>x==1))?"ok":"not ok")
+}
+
+function fetchall(l,f){let x=[],F={}
+ l.forEach(function(u,i){x.push(fetch(u).then(r=>r.arrayBuffer()).then(r=>F[l[i]]=new Uint8Array(r)))})
+ Promise.all(x).then(function(){f(F)})
+}
+
+fetchall(["../../d.wasm","../../d.wasm.12"],T) //lz4 -12 d.wasm d.wasm.12
+
+</script>
+</body></html>
