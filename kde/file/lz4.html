@@ -13,11 +13,9 @@ const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 // https://github.com/lz4/lz4/blob/dev/doc/lz4_Frame_format.md
 
 function lz(x){let i=7,r=[],E=(x,a,n)=>{for(let j=0;j<n;j++)r.push(x[a+j]);return n}
- let d=(x,n)=>{let t,c,o;n+=i;while(i<n){t=x[i++];c=t>>4;
-  if(c>0){if(c===15)while(1){c+=x[i];if(x[i++]!==255)break};i+=E(x,i,c)}
-  if(i>=n)break;c=t&15;o=r.length-(x[i++]|x[i++]<<8);if(c===15)while(1){c+=x[i];if(x[i++]!==255)break};E(r,o,4+c)}}
- const S=-(1<<31);let n;while(1){n=x[i++]|x[i++]<<8|x[i++]<<16|x[i++]<<24;if(!n)break;if(n&S)i+=E(x,i,n&~S);else d(x,n)}
- return new Uint8Array(r)}
+ let d=(x,n)=>{let t,c,o,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)};n+=i;
+  while(i<n){t=x[i++];c=t>>4;if(c>0){C(c);i+=E(x,i,c)};if(i>=n)break;c=t&15;o=r.length-(x[i++]|x[i++]<<8);C(c);E(r,o,4+c)}}
+ const S=-(1<<31);while(1){let n=x[i++]|x[i++]<<8|x[i++]<<16|x[i++]<<24;if(!n)return new Uint8Array(r);if(n&S)i+=E(x,i,n&~S);else d(x,n)}}
   
   
 function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
