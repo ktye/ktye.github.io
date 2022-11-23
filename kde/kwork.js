@@ -1,4 +1,3 @@
-if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
 
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
@@ -63,8 +62,8 @@ function kstart(d){let s=d.s,fs=d.fs,w=d.cons.w,h=d.cons.h
   }
   postMessage({m:"write",f:f,u:u,s:(f=="")?su(u):"",mem:memory()+" "+dt(),k:k})
  }
- if(kdefile)K.kinit(ext,d.kw)
- else       K.kinit(ext,(d.trc===true)?"../d.wasm":"../k.wasm")
+ if("undefined"!==typeof d.kw)K.kinit(ext,d.kw)
+ else                         K.kinit(ext,(d.trc===true)?"../d.wasm.lz4":"../k.wasm")
 }
 
 function krep(s,w,h){
@@ -164,8 +163,8 @@ function indicate(){
 
 //debugger(d.wasm)
 let srcmap, kerr=[]
-if(kdefile) srcmap=srcmapobj
-else        fetch("../src.map").then(r=>r.json()).then(r=>{srcmap=r})
+if(typeof srcmapobj!="undefined")srcmap=srcmapobj
+else fetch("../src.map").then(r=>r.json()).then(r=>{srcmap=r})
 
 let fstack=[]
 function fpush(f,x){fstack.push([f,x])}
@@ -311,10 +310,18 @@ K.kinit = function(ext,kw){
   ext.init()
   K.save()
  }
- function binsize(x){K.n=x.byteLength;return x}
- if(kdefile){let r=kw.buffer;                    WebAssembly.instantiate(binsize(r),kenv ).then(initk) }
- else fetch(kw).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(binsize(r),kenv)).then(initk)
+ instance(kw,initk)
 }
+function binsize(x){K.n=x.byteLength;return x}
+//!kdefile
+function lz(x){let i=7,j,n,t,c,o,r=[],S=-(1<<31),R=(x,a,n)=>{for(j=0;j<n;j++)r.push(x[a+j]);return n},
+ h=()=>x[i++]|x[i++]<<8,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)},
+ d=(x,n)=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
+ while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(x,i+n);return new Uint8Array(r)}
+function instance(kw,initk){
+ let unzip=(x)=>kw.endsWith(".lz4")?lz(new Uint8Array(x)).buffer:x
+ fetch(kw).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(binsize(unzip(r)),kenv)).then(initk)}
+//kdefile
 K.TK = function(x){ 
  const t="0-cisfz---mdplx---CISFZLDT";
  return t[_.tp(x)]
@@ -381,6 +388,7 @@ K.register= function(name, idx, arity){
  K.KA(K.Ks(name), f)                                  // assign
 }
 
+//!kdefile
 function kplot(x){x=K.Kx("*",x)
  let t=K.TK(x)
  switch(t){
@@ -428,3 +436,4 @@ function kplot(x){x=K.Kx("*",x)
  postMessage({m:"plot",t:"xy",l:l})
  return K.Ki(l.length)
 }
+//kdefile

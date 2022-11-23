@@ -1,16 +1,17 @@
-if(typeof kdefile==="undefined")kdefile=false //used by ./file/..
-if(typeof cmedit ==="undefined")cmedit =true  //used by ./file/.. (no codemirror)
-if(typeof debug  ==="undefined")debug=function(x){}
-if(!kdefile)if(('serviceWorker'in navigator)&&kdefile)navigator.serviceWorker.register("kde.sw.js")
+//!kdefile
+kdefile=false
+debug=function(x){}
+if('serviceWorker'in navigator)navigator.serviceWorker.register("kde.sw.js")
 
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
-
-let left,repl,intr,ed,dir
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+//kdefile
+
+let left,repl,intr,ed,dir
 
 let startuperr=false
 function err(m,s){staruperr=true;let r=ge("repl");debug(true)
@@ -51,8 +52,20 @@ window.kdeinit=function(){
  left=ge("left")
  repl=ge("repl")
  intr=ge("intr")
- if(cmedit){
-  ed=CodeMirror(left,{
+ cminit()
+ ed.modified=false
+ ed.sp=false //.sp(span) ed.sp.h(handle)
+ kmode(true)
+//!kdefile
+ fetch("z.k").then(r=>r.text()).then(r=>zk=r)
+ kstart("")
+//kdefile
+}
+function save(){if(ed.sp)ed.sp.u=us(ed.getValue())}
+
+//!kdefile
+function cminit(){
+ ed=CodeMirror(left,{
    "lineNumbers":true,
    "dragDrop":false,"tabSize":8,"smartIndent":false,
    "matchBrackets":true,
@@ -61,22 +74,9 @@ window.kdeinit=function(){
   ed.on("contextmenu",function(_,e){pd(e)})
   ed.setValue(decodeURIComponent(window.location.hash.substr(1)))
   ed.on("change",modify)
- }else{
-  ed=ge("left")
-  ed.getValue=function(){return ed.value}
-  ed.setValue=function(x){ed.value=x}
-  ed.setOption=function(o){}
-  ed.onchange=modify
- }
- ed.modified=false
- ed.sp=false //.sp(span) ed.sp.h(handle)
- kmode(true)
- if(!kdefile)fetch("z.k").then(r=>r.text()).then(r=>zk=r)
- if(!kdefile)kstart("")
 }
-function save(){if(ed.sp)ed.sp.u=us(ed.getValue())}
 
-function kmode(x){if(!cmedit)return
+function kmode(x){
  let ex=[] //words in a.k b.k if first line is /!a.k b.k
  if(x){
   let em={}
@@ -123,8 +123,6 @@ ge("feat").onchange=function(e){let x=e.target.checked
  ge("repl").classList.toggle("k")
  ge("brow").classList.toggle("k")
 }
-
-
 function search(cm,pos){ //right click selected text in the editor
  let t=cm.getSelection()
  if(!t.length)return 
@@ -145,17 +143,21 @@ function execline(ed,n,gutter){ //click on linenumber executes
   repl.lastChild.textContent+=ed.getLine(n)+"\n"
   krep(ed.getLine(n))  
 }}
-function modify(){if(ed.modified)return
- ed.modified=true
- if(cmedit)document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#eff"
- else      ed.style.background="#eff" 
+//kdefile
+
+function modify(){if(ed.modified)return;ed.modified=true
+//!kdefile
+ document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#eff"
+//kdefile
  if(ed.sp)ed.sp.classList.add("modified")
 }
-function unmodify(){
- ed.modified=false
- if(cmedit)document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#fff"
- else      ed.style.background="#ffe"
+function unmodify(){ed.modified=false
+//!kdefile
+ document.getElementsByClassName("CodeMirror-gutters")[0].style.backgroundColor="#fff"
+//kdefile
 }
+
+//!kdefile
 function grep(s,suffix,sn){
  let c=ed.getCursor();ed.setSelection(c,c)
  let sel=[]
@@ -203,6 +205,7 @@ ge("grep").onkeydown=function(e){if(e.key=="Enter"){let s=e.target.value;if((s.t
   if(1==r.length)openfile(r[0],ge("expl"))
   for(let i=0;i<r.length;i++)fileat(r[i].textContent,0,1==r.length)
 }}}
+//kdefile
 
 ge("colb").onchange=function(e){ge("expl").style.gridTemplateColumns="repeat("+e.target.selectedOptions[0].textContent+",1fr)"}
 ge("colb").selectedIndex=3
@@ -447,8 +450,12 @@ function kstart(s,trc,kwasm){
  intr.disabled=false
  if(startuperr)return
  repl.textContent=""
+ let files=[];if(".k"===s){s="";files=[".k"]}
+//!kdefile
  let g=ge("grep").value
- s=cats(kdefile?[".k"]:g.startsWith("k ")?g.slice(2).split(" "):[],s)
+ if(g.startsWith("k "))files=g.slice(2).split(" ")
+//kdefile
+ s=cats(files,s)
  kw.postMessage({m:"start",s:s,trc:trc,cons:consize(),fs:readfs(),kw:kwasm})
 }
 function krep(s){
@@ -473,18 +480,18 @@ function cats(files,s){
  src.f.push((ed.sp===false)?"(ed)":ed.sp.textContent);src.n.push(s.length)
  return r.join("\n")
 }
+//!kdefile
+function newkw(){kw=new Worker("kwork.js",{name:"kwork"})}
+function help(){fetch("../readme").then(r=>r.text()).then(t=>{O(t);pr()})}
+//kdefile
 function readfs(){
  let fs={}
  let a=ge("expl").children;for(let i=0;i<a.length;i++)if("u"in a[i])fs[a[i].textContent]=a[i].u
  return fs
 }
 
-function help(){fetch("../readme").then(r=>r.text()).then(t=>{O(t);pr()})}
- 
 function newk(){
- let b=kdefile?new Blob([document.querySelector('#worker1').textContent]):""
- kw=new Worker(kdefile?window.URL.createObjectURL(b):"kwork.js",{name:"kwork"})
- 
+ newkw() 
  kw.onmessage=function(e){let d=e.data
   switch(d.m){
   case"write":
@@ -534,12 +541,10 @@ function filelink(p,direct,extra){
  for(let i=0;i<src.n.length;i++){let ni=src.n[i]
   if(p<ni){fileat(src.f[i],p-2,direct,extra);return}
   p-=1+ni
- }
-}
-function showpos(i){
- if(cmedit){let p=ed.posFromIndex(i);ed.setSelection(p,{line:p.line,ch:1+p.ch})
- }else{ed.selectionStart=i;ed.selectionEnd=1+i;ed.focus()}
-}
+}}
+//!kdefile
+function showpos(i){let p=ed.posFromIndex(i);ed.setSelection(p,{line:p.line,ch:1+p.ch})}
+//kdefile
 function printstack(fstack){for(let i=0;i<fstack.length;i++){
  let kx=fstack[i].k
  let spn=function(s){let r=ce("span");r.textContent=s;return r}

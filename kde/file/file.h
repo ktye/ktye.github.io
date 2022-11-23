@@ -52,7 +52,6 @@
    <button id="runb" class="kdebutton" title="run .k">k</button>
    <button id="intr" class="kdebutton" disabled title="interrupt">int</button>
    <input  id="feat" checked type="checkbox" title="switch" style="display:none">
-   <input  id="grep"         type="text"     title="input"/>
    <span   id="memo" style="flex-grow:1">0k</span>
    <select id="colb" class="kdebutton" title="columns"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
    <button id="dlbt" class="kdebutton" title="download file bundle">html</button>
@@ -68,12 +67,29 @@
 <script id="worker1" type="javascript/worker">
 let kdefile=true
 let srcmapobj={{src.map}}
+let instance=(kw,initk)=>{WebAssembly.instantiate(binsize(kw.buffer),kenv ).then(initk)}
 {{kwork.js}}
 </script>
 
 <script>
-let kde=function(){
- let kdefile=true,cmedit=false
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+let kde=(function(){
+ let kdefile=true
+ let kmode=x=>{}
+ let cminit=function(){
+  ed=ge("left")
+  ed.getValue=function(){return ed.value}
+  ed.setValue=function(x){ed.value=x}
+  ed.setOption=function(o){}
+  ed.onchange=modify
+ }
+ let newkw=()=>{kw=new Worker(window.URL.createObjectURL(new Blob([document.querySelector('#worker1').textContent])),{name:"kwork"})}
+ let showpos=(i)=>{ed.selectionStart=i;ed.selectionEnd=1+i;ed.focus()}
  let blob = new Blob([document.querySelector('#worker1').textContent]);
  let worker = new Worker(window.URL.createObjectURL(blob));
  {{kde.js}}
@@ -88,7 +104,7 @@ let kde=function(){
  let kpost=function(x){kw.postMessage(x)}
  let kdefilesys=function(){let ex=ge("expl"),fs={};let a=ex.children;for(let i=0;i<a.length;i++)fs[a[i].textContent]=su(a[i].u);return fs}
  return {newfile:newfile,setfile:setfile,fs:kdefilesys,kstart:kstart,kpost:kpost,err:err}
-}()
+})()
 </script>
 
 
@@ -97,16 +113,13 @@ let fs={{fs}}
 let kuid=0
 let kresolv={}
 let kreject={}
-const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
-const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
-function ge(x){return document.getElementById(x)}
-function ce(x){return document.createElement(x)}
-function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
-function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
-{{compress.js}}
-{{uncompress.js}}
+
 function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
 function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
+function lz(x){let i=7,j,n,t,c,o,r=[],S=-(1<<31),R=(x,a,n)=>{for(j=0;j<n;j++)r.push(x[a+j]);return n},
+ h=()=>x[i++]|x[i++]<<8,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)},
+ d=(x,n)=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
+ while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(x,i+n);return new Uint8Array(r)}
 function debug(x){ge(x?"kde":"main").classList.remove("hidden");ge(x?"main":"kde").classList.add("hidden")}
 function download(name,u){
  var dl=ge("dl");var b=new Blob([u],{type:"application/octet-stream"})
@@ -149,7 +162,7 @@ function kres(m){
  delete     kresolv[m.uid];delete kreject[m.uid]
 }
 function init(){
- let kw=uncompress(u64s("{{d.wasm.z}}"))
+ let kw=lz(u64s("{{d.wasm.lz4}}"))
  let inner=document.documentElement.innerHTML;
  let t=document.title
  
@@ -166,7 +179,7 @@ function init(){
   return o
  }
  start=function(){
-  kde.kstart("",true,kw)
+  kde.kstart(".k",true,kw)
   let c=ge("maincss");c.innerHTML=fs[".css"]
   let m=ge("main");rm(m);m.insertAdjacentHTML("afterbegin",fs[".html"])
   eval?.(fs[".js"]) //indirect eval in global scope

@@ -45,18 +45,14 @@ The error can be corrected in the editor and a new application bundle is rewritt
 <table id="tab">
 </table></p>
 
-
-<script src="compress.js"></script>
 <script>
-
-
 
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
 function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
-function zu(u){return s64u(compress(new Uint8Array(u)))}
+function bu(u){return s64u(new Uint8Array(u))}
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 
@@ -71,14 +67,12 @@ function build(F,id,desc){let f //build example application (fill file.h templat
  f=su(F["file.h"])
  f=re(f,"{{title}}"    ,id)
  f=re(f,"{{fs}}", JSON.stringify(kdesplit(su(F[id+".kde"]))))
- f=re(f,"{{kde.js}}"  ,su(F["../kde.js"]))
+ f=re(f,"{{kde.js}}"  ,kdestrip(su(F["../kde.js"])))
  f=re(f,"{{z.k}}"     ,JSON.stringify(su(F["../z.k"])))
  f=re(f,"{{src.map}}" ,su(F["../../src.map"]))
- f=re(f,"{{kwork.js}}",su(F["../kwork.js"]))
- f=re(f,"{{d.wasm.z}}",zu(F["../../d.wasm"]))
+ f=re(f,"{{kwork.js}}",kdestrip(su(F["../kwork.js"])))
+ f=re(f,"{{d.wasm.lz4}}",bu(F["../../d.wasm.lz4"]))
  //f=re(f,"{{plot.js}}" ,su(F["../plot.js"]))
- f=re(f,"{{compress.js}}",su(F["compress.js"]))
- f=re(f,"{{uncompress.js}}",su(F["uncompress.js"]))
  
  let r=ce("tr")
  let a=ce("th");a.textContent=id
@@ -90,13 +84,19 @@ function build(F,id,desc){let f //build example application (fill file.h templat
  r.appendChild(a);r.appendChild(b);r.appendChild(c);r.appendChild(d);ge("tab").appendChild(r)
 }
 
+function kdestrip(s){let o=true
+ let v=s.split("\n");let r=[]
+ for(let i=0;i<v.length;i++){if(v[i]=="//!kdefile")o=false;if(o)r.push(v[i]);if(v[i]=="//kdefile")o=true}
+ return r.join("\n")
+}
+
 function init(){
  let desc={simple:"basic example",error:"debug errors",sing:"audio spectrogram",fs:"in-app file system"}
  let examples=Object.keys(desc)
  //for(let i=0,row;row=ge("tab").rows[i];i++)examples.push(row.cells[0].textContent.slice(0,-5))
  
 
- let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm","../plot.js","compress.js","uncompress.js"]
+ let allfiles=["file.h","../kwork.js","../z.k","../kde.js","../../src.map","../../d.wasm.lz4","../plot.js"]
  let extensions=["k","js","css","html"]
  for(let i=0;i<examples.length;i++)allfiles.push(examples[i]+".kde") //for(let j=0;j<4;j++)allfiles.push(examples[i]+"."+extensions[j])
  fetchall(allfiles,function(F){for(let i=0;i<examples.length;i++)build(F,examples[i],desc[examples[i]])})
