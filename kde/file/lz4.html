@@ -4,44 +4,43 @@
 </style>
 </head>
 <body>
+drop <i>file</i> and <i>file.lz4</i> here.
+<pre id="out"></pre>
 <script>
 
+function ge(x){return document.getElementById(x)}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+function O(s){ge("out").textContent+=s}
 
 // https://github.com/lz4/lz4/blob/dev/doc/lz4_Block_format.md
 // https://github.com/lz4/lz4/blob/dev/doc/lz4_Frame_format.md
 
-function lz(x){let i=7,r=[],E=(x,a,n)=>{for(let j=0;j<n;j++)r.push(x[a+j]);return n}
- let d=(x,n)=>{let t,c,o,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)};n+=i;
-  while(i<n){t=x[i++];c=t>>4;if(c>0){C(c);i+=E(x,i,c)};if(i>=n)break;c=t&15;o=r.length-(x[i++]|x[i++]<<8);C(c);E(r,o,4+c)}}
- const S=-(1<<31);while(1){let n=x[i++]|x[i++]<<8|x[i++]<<16|x[i++]<<24;if(!n)return new Uint8Array(r);if(n&S)i+=E(x,i,n&~S);else d(x,n)}}
-  
-  
-function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
-function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
+function lz(x){let i=7,n,r=[],S=-(1<<31),R=(x,a,n)=>{for(let j=0;j<n;j++)r.push(x[a+j]);return n},
+ d=(x,n)=>{let t,c,o,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)};
+  while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-(x[i++]|x[i++]<<8);C();R(r,o,4+c)}}}
+ while(n=x[i++]|x[i++]<<8|x[i++]<<16|x[i++]<<24)(n&S)?i+=R(x,i,n&~S):d(x,i+n);return new Uint8Array(r)}
+ 
 
-let tests=[
- "alphabetagammahanswerneralphabeth\n", "BCJNGGRApyIAAIBhbHBoYWJldGFnYW1tYWhhbnN3ZXJuZXJhbHBoYWJldGgKAAAAAB7ptvU="
-]
+let F={}
+window.ondragover=function(e){pd(e)}
+window.ondrop=function(e){pd(e);
+ let l=e.dataTransfer.files
+ for(let i=0;i<l.length;i++){
+  let f=l.item(i);
+  f.arrayBuffer().then(u=>{
+   F[f.name]=new Uint8Array(u)
+   let b=f.name.endsWith(".lz4")?f.name.slice(0,-4):f.name
+   if((b in F)&&(b+".lz4"in F))compare(b,b+".lz4")
+})}}
 
-let x=u64s(tests[1])
-let r=lz(x)
-console.log((su(r)===tests[0])?"ok":"not ok")
-
-let T=function(x){
- let y=x["../../d.wasm"]
- let r=lz(x["../../d.wasm.12"])
- if(y.length!=r.length)console.log("length error")
- console.log("wasm",(y.map((x,i)=>x==r[i]).every(x=>x==1))?"ok":"not ok")
+function compare(fx,fz){let x=F[fx],z=F[fz]
+ O(fx+"("+x.length+") "+fz+"("+z.length+") ")
+ let r=lz(z)
+ if(r.length!=x.length){O("size mismatch: "+r.length);return}
+ O((x.map((x,i)=>x==r[i]).every(x=>x==1))?"ok\n":"does not match\n")
 }
-
-function fetchall(l,f){let x=[],F={}
- l.forEach(function(u,i){x.push(fetch(u).then(r=>r.arrayBuffer()).then(r=>F[l[i]]=new Uint8Array(r)))})
- Promise.all(x).then(function(){f(F)})
-}
-
-fetchall(["../../d.wasm","../../d.wasm.12"],T) //lz4 -12 d.wasm d.wasm.12
 
 </script>
 </body></html>
