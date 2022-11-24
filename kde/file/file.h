@@ -118,8 +118,8 @@ function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;
 function s64u(u){let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))}
 function lz(x){let i=7,j,n,t,c,o,r=[],S=-(1<<31),R=(x,a,n)=>{for(j=0;j<n;j++)r.push(x[a+j]);return n},
  h=()=>x[i++]|x[i++]<<8,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)},
- d=(x,n)=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
- while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(x,i+n);return new Uint8Array(r)}
+ d=n=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
+ while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(i+n);return new Uint8Array(r)}
 function debug(x){ge(x?"kde":"main").classList.remove("hidden");ge(x?"main":"kde").classList.add("hidden")}
 function download(name,u){
  var dl=ge("dl");var b=new Blob([u],{type:"application/octet-stream"})
