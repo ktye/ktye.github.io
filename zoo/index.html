@@ -51,7 +51,7 @@
   <a id="edt"  href="#"                                 >edit</a>
   <div id="main">
    <div      class="left"         id="dec" ></div>
-   <textarea class="left hidden"  id="editor" autocomplete="off" spellcheck="false" autocorrect="off"></textarea>
+   <textarea class="left hidden"  id="editor" autocomplete="off" spellcheck="false" autocorrect="off" title="shift-enter to exec"></textarea>
    <textarea class="right"        id="tty"    autocomplete="off" spellcheck="false" autocorrect="off"></textarea>
   </div>
  </div>
@@ -96,9 +96,10 @@ sel.onchange=function(e){swtch(e.target.value)}
 function toggled(){editor.classList.toggle("hidden");return false}; ge("edt").onclick=toggled
 editor.value = "/pressing enter sends marked text to the interpreter"
 editor.onkeydown=function(e){
- if("Enter"==e.key){let a=editor.selectionStart,b=editor.selectionEnd;if(a>b)b=[a,a=b][0]
-  if(b-a){
-   tty.recv(editor.value.slice(a,b));return false
+ if("Enter"==e.key){let a=editor.selectionStart,b=editor.selectionEnd,s,i
+  if(e.shiftKey){pd(e);s=editor.value.slice(0,b),i=s.lastIndexOf("\n");tty.recv((i>0)?s.slice(1+i):s)}
+  if(a>b)b=[a,a=b][0]
+  if(b-a){ tty.recv(editor.value.slice(a,b));return false
 }}}
 
 
@@ -113,15 +114,14 @@ let keydown=function(e){
   let i=v.lastIndexOf("\n")
   let s=((i<0)?v:v.slice(i)).trim()
   if(!s.length)return
+  ha(s)
   evl(s); tty.scrollTop=tty.scrollHeight;
 }}
 tty.onkeydown=keydown
 tty.recv=function(s){s=s.trim();tty.value+=s;evl(s);tty.scrollTop=tty.scrollHeight;}
 tty.focus()
 
-function out(s){tty.value+=s;
-	tty.scrollTop=tty.scrollHeight;
-}
+function out(s){tty.value+=s;tty.scrollTop=tty.scrollHeight;}
 
 
 // drop file in console (store in fs)
@@ -141,6 +141,7 @@ function addfile(x){
 var evl
 
 function swtch(s){
+ window.location.hash="#"+s
  let rmc=function(p){if(p)while(p.firstChild)p.removeChild(p.lastChild)}
  let rm=function(p){if(p){rmc(p);p.parentElement.removeChild(p)}}
  document.title=s; sel.value=s
@@ -179,8 +180,14 @@ function swtch(s){
  src.href="browse.html#"+s+":"+sys.src
 }
 
-let h=window.location.hash
-swtch((h.length>0)?h.slice(1):"k")
+function ha(s){
+ window.location.hash=window.location.hash.split(":")[0]+":"+encodeURIComponent(s)
+}
+
+let h=(window.location.hash.length>0)?window.location.hash.slice(1):"k"
+h=h.split(":")
+if(h.length>1){editor.value=decodeURIComponent(h.slice(1).join(":"));toggled()}
+swtch(h[0])
 
 
 </script></body></html>
