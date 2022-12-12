@@ -13,7 +13,7 @@
 `"odo.":{{y@(#y)/!x}/:[*/x;&'x#'|*\-1_1,|x]}
 `"grp.":{(x@*'g)!g:(&~x~':x i)^i:<x}
 abs:`32;sin:`44;cos:`39;find:`31;fill:`38;imag:`33;conj:`34;angle:`35;exp:`42;log:`43
-`"pad.":{(|/#'x)#'x}
+`"pad.":{x@\:!|/#'x}
 `"lxy.":{
 kt:{[x;y;k;T]x:$[`T~@x;T[x;k];`pad("";"-"),$x];(x,'"|"),'T[y;k]}
 d:{[x;k;kt;T]r:!x;x:.x;$[`T~@x;kt[r;x;k;T];,'[,'[`pad(k'r);"|"];k'x]]}

@@ -54,11 +54,11 @@ waast:wastm
 walod:{(y 0),"\n",$[`b~s:S x;"i32.load8_s";(watype s),".load"]}
 wasto:{"\n"/:y,,$[`b~s:S x;"i32.store8";(watype s),".store"]}
 waant:{(y,'"\n"),t,".const -1\n",t,".xor\n",(t:watype S x),".and"}
-waasn:{y[&b:"$_"~/:-1_y]:,"";(*|y),,/|(("\nlocal.set ";"\nglobal.set ";"\ndrop")(2*b)|I 1+x+!I x),'-1_y}
+waasn:{ y,("\nlocal.set $";"\nglobal.set $")[I x],$S x }
 
 wacal:{$[`panic~s:S x;"unreachable";("\n"/:y),"\n",$[#c:wainst s;c;"call $",$s]]}
 
-wacli:{("\n"/:((I x)#1_y),,*y),"\n","call_indirect "," "/:(1+I x)_y}
+wacli:{("\n"/:((I x)#1_y),,*y),"\n","call_indirect "," "/:((1+I x)_y),$[S x;,"(result ",(watype S x),")";()]}
 wadfr:{y;""}
 wadrp:{"\n"/:y,,"drop"}
 wacst:{t:!watype;(y 1),"\n",wacast i:(t?y 0)+5*t?S x}
@@ -127,7 +127,7 @@ wasys:"
 wafmt:{x:"\n"\:x;
  ("\n"/:waind waopt x@&~(x~\:"nop")|x~\:"")}
 waind:{ /indent: +(if block loop else) -(end else)
- s:(#x)#1,1+\(e:"els"~/:h)|("blo"~/:h)|("loo"~/:h)|"if "~/:h:3#'x   
+ s:(#x)#1,1+\(e:"els"~/:h)|("blo"~/:h)|("loo"~/:h)|"if "~/:h:x@\:0 1 2  
  s-:+\e|"end"~/:h;(s#\:" "),'x}
 waopt:{ /tee, !lt_s, last return
  i:&"local.get"~/:9#'x
