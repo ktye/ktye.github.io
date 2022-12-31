@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<title>k/js</title>
+<style>
+textarea{
+ position:absolute;left:5px;top:5px;width:calc(100vw - 10px);height:calc(100vh - 10px);
+ border:none;font-family:monospace;resize:none;outline:0px;overflow:hidden; 
+}
+</style>
+<script src="kj.js"></script>
+</head>
+
+<body>
+
+<textarea id="tty" autocomplete="off" spellcheck="false" autocorrect="off"></textarea>
+
+
+<script>
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function ge(x){return document.getElementById(x)}
+function us(s){return _te.encode(s)};_te=new TextEncoder("utf8")
+function su(u){return _td.decode(u)};_td=new TextDecoder("utf8")
+window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
+
+let tty=ge("tty")
+tty.value = ""
+let keydown=function(e){
+ if("Enter"==e.key){pd(e);
+  let v=tty.value
+  let p=tty.selectionEnd
+  let n=v.slice(p).indexOf("\n")
+  if(n>=0)v=v.slice(0,p+n)
+  tty.value=v
+  let i=v.lastIndexOf("\n")
+  let s=((i<0)?v:v.slice(i)).trim()
+  if(!s.length)return
+  evl(s); tty.scrollTop=tty.scrollHeight;
+}}
+tty.onkeydown=keydown
+tty.focus()
+
+function out(s){tty.value+=s;tty.scrollTop=tty.scrollHeight;}
+function evl(s){out("\n");if(!special(s))try_(ku(us(s)));out(" ") }
+
+// k system interface
+let fs=[],_fbuf
+const ku=u=>{let r=mk(18,u.length);_I8.set(u,_IK(r));return r}
+const sk=(x,n)=>{return su(new Uint8Array(_I8.subarray(x,x+n)))}
+const Write=(f,nf,src,n)=>{
+ if(nf==0){out(sk(src,n));return 0}
+ let name=sk(f,nf)
+ fs[name]=_I8.slice(src,src+n)
+ return 0;
+}
+const Read=(f,n,dst)=>{
+ if(dst!=0){_I8.set(_fbuf,dst);return 0;}
+ let name=sk(f,n)
+ if(name in fs){_fbuf=fs[name];return _fbuf.length};
+ return -1;
+}
+
+
+// k main
+init()
+kinit()
+write(Ku(2932601077199979n))
+store()
+out(" ")
+
+
+function special(s){
+ switch(s){
+ case "\\":
+ case "\\h": out("\\t (test)\n"); break;
+ case "\\t": ktest(); break
+ default: return false;
+ }
+ return true
+}
+function ktest(){
+ let k=ku(us("k.t"))
+ fetch("k.t").then(r=>r.text()).then(s=>{
+  let t=ku(us(s))
+  let t0=performance.now()
+  dofile(k,t)
+  let dt=performance.now()-t0
+  out(dt+"ms\n ")
+ })
+}
+
+</script>
+</body></html>
