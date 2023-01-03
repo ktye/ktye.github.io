@@ -38,6 +38,7 @@
     <option value="k7"    >k7           (2019)   1M</option>
     <option value="k9"    >k9           (2021) 170k</option>
     <option value="k" selected="selected">ktye/k       (2022)  48k</option>
+    <option value="1k"    >1k           (2023)   4k</option>
    </optgroup>
    <optgroup label="others">
     <option value="klong" >klong        (2020) 160k</option>
@@ -73,6 +74,7 @@ import { ngn    } from './ngn.js'
 import { k7     } from './k7.js'
 import { k9     } from './k9.js'
 import { k      } from './k.js'
+import { lk     } from './1k.js'
 import { klong  } from './klong.js'
 import { jstack } from './jstack.js'
 import { bqn    } from './bqn.js'
@@ -169,6 +171,7 @@ function swtch(s){
  case "k7":     sys=k7     ;break
  case "k9":     sys=k9     ;break
  case "k":      sys=k      ;break
+ case "1k":     sys=lk     ;break
  case "klong":  sys=klong  ;break
  case "jstack": sys=jstack ;break
  case "bqn":    sys=bqn    ;break
