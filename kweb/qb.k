@@ -20,6 +20,7 @@ qb:{[o]opts::o
  rwlab'i@&`=S i:&T=`jmp                        /set jmp labels
  S[0]:$[0N~i:o?`lib;S 0;o 1+i]                 /emit`lib`name (instead of main + remove func main)
  ftyp::(S i)!qbsig'i:&T=`fun                   /function signatures "rxyz"
+ ftyp::ftyp,deftyp
  ifun::-1+\T=`fun                              /function index for each node
  ltyp::(!g)!((S 1+i)@.g)!'(S i)@.g:=ifun i:&(T=`arg)|T=`loc
  n:(&#P){x[y]+:1}/P;n[0]-:1;                   /number of children per node
@@ -39,7 +40,6 @@ rwcnd:{c:|1_&P=x;S[x]:`;P[x]:P x-1;c INS\:(T x;1+x;I x; S x:x-1);del x;restm'|i@
 restm:{c:*|&P=x;INS[c;(T x-1;x;I x-1;S x-1)];P[x]:P[x-1];del[x-1]} /fix ret stm
 
 qbren:{S[&(S=x)&T':`fun`cal]:s:`$"_",$x;}
-
 rwlab:{ S[x]:S@{$[`for~T x;x;P x]}/:x }
 
 
@@ -57,8 +57,8 @@ qbprg:{
  main:$[|/`nort`lib':opts;"";qbmain]
  data:$[#D;"%t =l call memcpy(%_M, $data0, ",($#D), ")\n";""]
  dat0:$[#D;"data $data0 = { b ",("\"\\x","\\x"/:(#D)^`x D),"\" }\n";""]
- tabl:nl y@&`tab=T c
- tabl:$[#tabl;"_F=malloc(",($1+|/I@&`tab=T),"*sizeof(void*));\n";""],tabl
+ tabl:,/y@&`tab=T c
+ tabl:$[#tabl;"%_F =l call $malloc(",($8*1+|/I@&`tab=T),");\n";""],tabl
  mems:nl y@&`mem=T c
  init:$[|/(#mems;#data;#tabl);nl("function init(){\n@start\n";mems;data;tabl;,"}");""]
  (runt;cons;dat0),(,fncs),init,main}
@@ -71,19 +71,17 @@ qbfun:{
  /locs:nl@{(qbtype x)," ",y}'[!g;.g:","/:'(y i)@=(S c)i:&`loc=T c]
  defr:     *y@&`dfr=T c
  setj:$[#defr;"if(!setjmp(_jb_)){";""]
- body:qbfmt y@*&`ast=T c
+ body:qbfmt$[#r:y@*&`ast=T c;r;""]
  ,/("function ",ret;" $";$S x;"(";args;"){\n@start\n";setj;body;defr,"\n}\n")}
 
 qbsig:{,/(qbtype 1#S@*&(T=`res)&P=x),qbtype S@&(T=`arg)&P=x} /"rxyz"
-
 qbmem:{y;("Memory";$[`b~S x;"2";""];"(";$I x;");")}
-qbtab:{y;("_F[";$I x;"]=";$S x;";\n")}
+qbtab:{y;"%fi =l add %_F, ",($8*I x),"\nstorel $",($S x),", %fi\n"}
 
 qbflts:{d:{(0=*x)_x:@[@[x;i;-;10];-1+i:&9<x:@[0,2*x;#x;+;y];+;1]};,/$d/,/+(8#2)\\256/256+|x}
 qbflt:{x:C x+!8;$[#r:qbflts x;r;"d_",$*`f x]}
 qblit:{hi:{*`i C 4+x+!4};lo:{*`i C x+!4};y;i:I x
- $[`f~t:S x;qbflt i;(`u~t)|`i~t;$[0N~i;"2147483648";$i];i~0;"0";qbflts C i+!8]}
- 
+ $[`f~t:S x;qbflt i;(`u~t)|`i~t;$[0N~i;"2147483648";$i];i~0;,"0";qbflts C i+!8]}
 
 qbvar:qbcon:{"data $",($S x)," = { ",(qbtype S 1+x)," ",(*y)," }"}
 
@@ -113,49 +111,47 @@ qbsto:{y:ssa'y;(,/*'y),"call $Set",($qbsiz S x),"(",(", "/:y[;1]),")\n"}
 /todo: ftyp for builtins?
 qbdrp:{*ssa@*y}
 qbcl:{[f;rt;at;y] y:ssa'y; a:{x," ",y 1}'[at;y];  (,/*'y;$[" "~rt;"call ";"?=",rt," call "];f;,"("; ", "/:a ;")\n")}
-qbcal:{qbcl["$",$S x;*t;1_t:ftyp S x;y]}
+qbcal:{$[`I32B~S x;*y;qbcl["$",$S x;*t;1_t:ftyp S x;y]]}
 qbcli:{a:ssa@"?=l loadl "/:ssa NL@"?=l add %_F, "/:ssa NL@"?=l mul 8, "/:ssa y 0; n:I x;  (*a),"\n",qbcl[*|a;qbtype S x;(1+n)_*'y;n#1_y]}
 
 qbasn:{ ("%",($S x)," "),/ $[1=#y:"?"\:y 0;("";"=",$[I x;gtyp S x;qbltyp x]," copy ",y,"\n");y] }
 qbltyp:{qbtype(ltyp ifun x)S x}
 
-qbcnd:{l:$ssl+:1;
- ("jnz "/:ssa@*y),", @i",l,", @e",l,"\n@i",l,"\n",(y 1),$[3~#y;"\n"/:("jmp @f",l;"@e",l;(y 2),"@f",l);"@e",l],"\n"}
-
+qbcnd:{l:$ssl+:1;("jnz "/:ssa@*y),", @i",l,", @e",l,"\n@i",l,"\n",(y 1),$[3~#y;"\n"/:("jmp @f",l;"@e",l;(y 2),"@f",l);"@e",l],"\n"}
 qbnop:{y;""}
-/qbswc:{("switch(";*y;"){\n"),(1_(@[("case ",/:$-1+!#y); (-1+#y)*I x; "default"] ,\:":"),'(qbsem'y),\:"break;\n"),"}" }
-qbswc:{y;"swc?"}
- 
-qbdfr:{("else{";*y;";}\n}")}
 
+qbswc:{e:ssa@*y;d:$[I x;*|y;""];n:#y:(-I x)_1_y;  c:{"?=w eq ",x,", ",($y),"\n"}/:[e 1;!n]; 
+ (*e),d{qbcnd[0; y,,x ]}/|{(,x),,y}'[c;y]    }
+
+qbdfr:{("else{";*y;";}\n}")}
 
 qbfor:{l:"@",($S x);le:l,"e"; l,"\n",$[#*y; ("jnz "/:ssa y 0),", ",lc,", ",le,"\n",(lc:l,"c"),"\n";""],(y 2),(y 1),"jmp ",l,"\n",le,"\n"}
 qbjmp:{y;"jmp @",($S x),(" e"I x),"\n"}
 
 qb1:{x,*z}
-/qb2:{z;" "/:("=",(qbtype S y);x;(z 0),",";(z 1),"\n")}
-
 qb2:{z:ssa'z;(,/*'z),("?=",qbtype S y)," ",x," ",(", "/:(*1_)'z),"\n"}
 qbc:{z:ssa'z;(,/*'z),"?=w ",("su"@(S y)':`u`k),x," ",(", "/:(*1_)'z),"\n"}
 
 qbneg:{ NL@("?=",(qbtype S x)," sub 0, ")/:ssa y 0 }
-
-/qb2:{z;" "/:("=",(qbtype S y);x;(z 0),",";(z 1),"\n")}
 qbnot:qb1"!"
 qbadd:qb2"add"; qbsub:qb2"sub"; qbmul:qb2"mul"; qbdiv:qb2"div"; qbmod:qb2"rem"
 qbeql:qb2"eq";qbgte:qbc"ge";qbles:qbc"lt"; qblte:qbc"le";qbmor:qbc"gt"; qbneq:qb2"ne"
 qband:qb2"&"; qbbnd:qb2"&&";qbant:qb2"&~";qborr:qb2"|"; qbbor:qb2"||";qbxor:qb2"^"; qbshl:qb2"<<";qbshr:qb2">>"
 
 qbnd:{$["!=0)"~t:-4#x;(-4_x),")";"==0)"~t;"(!",(1_-4_x),")";x]}
-
-/qbs:{$["?"':x;`qbs \"?"\:x;("";x)]}
-/ssa:{$[#*x:qbs x;(*x;("%.",$ssan+:1),x 1);x]}
 qbs:{x; \`QBS}
 
 ssa:{$["?"':x;((r," ")/:"?"\:x; r:"%.",$ssan+:1);("";x)]}
 ssa1:{ (("?=",x," ")/:ssa y),"\n" }
 
 qbfmt:{"\n"/:" ",/:"\n"\:-1_x}
+
+deftyp:`Memorycopy`Memorycopy2`Memorycopy3`Memoryfill!4#," www"
+deftyp,:`Memorysize`Memorysize2`Memorygrow`Memorygrow2`Exit!(,"w";,"w";"ww";"ww";" w")
+deftyp,:`F64abs`F64sqrt`F64ceil`F64floor`F64nearest!5#,"ff"
+deftyp,:`F64min`F64max`F64copysign!3#,"fff"
+deftyp,:`"F64reinterpret_i64"`"I64reinterpret_f64"`I32clz`Native`panic!("fl";"lf";"ww";"lll";" w")
+deftyp,:`Args`Arg`Read`Write`ReadIn!1 3 4 5 3#'"w"
 
 / run time
 qbrnt:""
