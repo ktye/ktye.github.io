@@ -2,48 +2,44 @@
 <head><meta charset="utf-8">
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
 <title>k/db</title>
-<style>body{font-family:monospace;white-space:pre}</style>
+<!--style>body{font-family:monospace;white-space:pre}</style-->
+<style>
+body{margin:0;overflow:hidden}
+#doc{position:absolute;top:0;margin:0;left: 0;background:#ffe;width:50vw;height:100vh;overflow:auto;border:none;outline:none}
+#tty{position:absolute;top:0;margin:0;right:0;                width:50vw;height:100vh;overflow:auto}
+</style>
+</head>
+
+<body>
+<textarea id="doc" spellcheck="false"></textarea>
+<pre id="tty">tty</pre>
 
 <script type="module">
 import {K} from '../k.js'
 
-window.init=function(){
- let b=document.body
+let tty=document.getElementById("tty")
+let doc=document.getElementById("doc")
+
+window.onkeydown=function(e){
+ if((e.key=="Enter")&&(e.shiftKey==true)){
+  tty.textContent=""
+  K.restore()
+  krep(doc.value)
+  return false
+}}
+
+function init(){
  let  ext={}
- ext.init= function(){b.textContent="ktye/k "+K.n+"\n t\n";load()}
+ ext.init= function(){tty.textContent="ktye/k "+K.n+"\n t\n";load()}
  ext.read= function(){return new Uint8Array(0)}
- ext.write=function(f,x){if(f==="")b.textContent+=new TextDecoder("utf-8").decode(x)}
+ ext.write=function(f,x){if(f==="")O(new TextDecoder("utf-8").decode(x))}
  K.kinit(ext,"../k.wasm")}
 
 function krep(s){
- if(s.startsWith(" "))s=s.slice(1)
- if((s=="\\")||s=="\\h"){help();return}
- if(s=="\\c"){document.body.textContent=" ";end();return}
- try     {K._.repl(K.KC(s));K.save()}
- catch(e){console.log(e);K.restore()}
- document.body.textContent+=" ";end()}
+ try{K._.repl(K.KC(s.trim()))}catch(e){K.restore()}
+ tty.scrollTo(0,tty.scrollHeight);doc.focus()}
 
-window.onkeydown=function(e){if(e.key=="Enter"){
- e.preventDefault()
- let b=document.body
- let r=getSelection().getRangeAt(0)
- let t=b.textContent.slice(0,r.endOffset)
- b.textContent=t
- let i=t.lastIndexOf("\n")
- t=t.slice(i>0?1+i:0)
- b.textContent+="\n"
- if(t.trim()!=""){krep(t)}}}
-
-function end(){
- let b=document.body
- let s=window.getSelection()
- s.removeAllRanges()
- let r=document.createRange()
- r.selectNodeContents(b)
- r.collapse(false)
- s.addRange(r)
- window.scrollTo(0,b.scrollHeight)
- b.focus()}
+function O(s){tty.textContent+=s;tty.textContent=tty.textContent.split("\n").slice(-30).join("\n")}
 
 function load(){
  fetch("db").then(r=>r.text()).then(
@@ -51,16 +47,11 @@ function load(){
   K.KA(K.Ks("db"), K.KC(t))
   let s=("t:{`id`type`year`week`day`time`dist`coords!`i``i`i`i`f`f`i$'\" \"\\:x}'-1_\"\\n\"\\:db")
   K._.repl(K.KC(s));
-  K._.repl(K.KC("id:t`id;type:t`type;year:t`year;week:t`week;day:t`day;time:t`time;dist:t`dist;coords:t`coords"))
   K.save();krep("t")
 })}
 
-function help(){
- document.body.textContent+="t(table)\n`id    :start time, unix seconds\n`type  :r|b|s\n`year  :2008..\n`week  :0..52\n`day   :0..6 (mon..sun)\n`time  :hours\n`dist  :km\n`coords:gps points\n "
- end()
-}
+fetch("a.k").then(r=>r.text()).then(t=>doc.value=t)
+init()
 
-</script>
-</head>
+</script></body></html>
 
-<body contenteditable="true" spellcheck="false" onload="window.init()"></body></html>
