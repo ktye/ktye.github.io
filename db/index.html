@@ -45,7 +45,7 @@ function load(){
  fetch("db").then(r=>r.text()).then(
  t=>{
   K.KA(K.Ks("db"), K.KC(t))
-  let s=("t:{`id`type`year`week`day`time`dist`coords!`i``i`i`i`f`f`i$'\" \"\\:x}'-1_\"\\n\"\\:db")
+  let s=("t:{`id`type`time`dist`coords!`i``f`f`i$'\" \"\\:x}'-1_\"\\n\"\\:db")
   K._.repl(K.KC(s));
   K.save();krep("t")
 })}

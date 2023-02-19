@@ -1,21 +1,42 @@
 / t(table)                               press shift-enter to execute
 /  `id    :start time, unix seconds      (uncomment examples)
 /  `type  :r|b|s
-/  `year  :2008..
-/  `week  :0..52
-/  `day   :0..6 (mon..sun)
 /  `time  :hours
 /  `dist  :km
 /  `coords:#gps points
 
-type:t`type;year:t`year;week:t`week;day:t`day;time:t`time;dist:t`dist
+type:t`type;time:t`time;dist:t`dist
 r:&`r=type /run
 b:&`b=type /bike
-y8:1199145600           /01 Jan 2008 00:00:00
-d:(24*60*60)\(t`id)-y8  /day number
-t:t,'+`d!,d             /add monotonic day column (,' is optmized)
-hms:+60 60 60\\_3600*   /hour min sec from time(h)
-t
+
+/calendar
+date:(t`id)-y7:1167609600   /sec since Mon 2007.01.01 00:00:00
+year:2007+sy\(86400*0=4/y)+sy*y:date%sy:31563000  /ignore leap
+day: date%24*60*60
+week:day %7
+hms: +60 60 60\\_3600*      /hour min sec from time(h)
+
+avg:{(+/x)%#x}
+med:  **|2^^
+
+utf:{(&x>-65)^x}
+blk:utf" ▁▂▃▄▅▆▇█" 
+hist:{[d];n:_8*n-m:_n:(15*x)%|/x:0.+.d;
+ `<"\n"/:,/'blk@|+{(x#8),((!8)y),&15-x}'[m;n]}
+
+/triathlon by definition swim then bike then run within one day
+tri:i@&((day 2+i)=day i)&(`r=type 2+i)&(`b=type 1+i)&i:&`s=type
+
+
+pace:60*(time r)%dist r   /min/km
+
+/pace histogram 0..12:50 min/km
+p:0|(#'=(xp:6.\!78)'pace)@!78
+/jn:{,/x,\:"\n"}
+/x:`<jn@|+15#'(p#\:"#"),\:_32+&15
+/x:`<jn@,/'$10 10 6\\!78
+hist(!78)!p
+
 
 /yearly totals
 / (+/`time`dist#)'t@=year
