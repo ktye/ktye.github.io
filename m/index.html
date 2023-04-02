@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="manifest" href="/k.webmanifest">
+<title>k/mobile</title>
+
+<style>
+.hidden{display:none}
+html{height:100%}
+body{height:100%;overflow-y:hidden}
+#repl{display:flex;flex-direction:column;height:100%}
+#inp{font-family:monospace;font-size:20pt;width:100%}
+#kxy{font-family:monospace;font-size:20pt}
+#out{font-family:monospace;font-size:17pt;height:100%}
+#brow{display:flex;flex-direction:column}
+#mono{font-family:monospace;font-size:17pt;position:absolute;left:100;top:100;z-index:-10}
+@media(orientation:landscape){ #edbut{display:none} }
+@media(orientation: portrait){ }
+</style></head>
+
+
+<body onload="window.init()">
+<div id="repl">
+ <div style="display:flex;flex-direction:row">
+ <input id="inp" value="+/1 2 3">
+ <select id="kxy"><option>ktye</option><option>ngn<option></select>
+ </div>
+ <pre   id="out"></pre>
+</div>
+<div id="edit" class="hidden">
+</div>
+<div id="brow" class="hidden">
+</div>
+<pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre> <!--to measure console size-->
+
+
+
+<script> 
+if('serviceWorker'in navigator)navigator.serviceWorker.register("/k.sw.js")
+
+let ge=x=>document.getElementById(x)
+let inp=ge("inp"),out=ge("out")
+inp.onchange=e=>O(" "+e.target.value+"\n"+"k response\n")
+
+window.init=function(){
+ out.textContent+="ktye/k 2023.04.05\n"
+}
+
+let O=s=>{out.textContent+=s;
+ let wh=window.innerHeight-out.offsetTop,oh=out.offsetHeight
+ console.log("oh/wh",oh,wh)
+ if(oh>wh){
+  let cs=consize()
+  let n=Math.floor(out.clientHeight/cs.h)
+  console.log("cs/n",cs,n)
+  let v=out.textContent.split("\n")
+  out.textContent=v.slice(-n).join("\n")+"\n"
+ }
+}
+
+function consize(){let mono=ge("mono");let n=mono.textContent.length
+ return{w:Math.floor(n*out.clientWidth/mono.clientWidth),
+  h:Math.floor(out.clientHeight/mono.clientHeight)}}
+
+</script>
+
+</body></html>
