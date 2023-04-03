@@ -5,62 +5,121 @@
 <title>k/mobile</title>
 
 <style>
+.flex{display:flex}
 .hidden{display:none}
+*{font-family:monospace;font-size:20pt}
 html{height:100%}
 body{height:100%;overflow-y:hidden}
-#repl{display:flex;flex-direction:column;height:100%}
-#inp{font-family:monospace;font-size:20pt;width:100%}
-#kxy{font-family:monospace;font-size:20pt}
-#out{font-family:monospace;font-size:17pt;height:100%}
+#repl{flex-direction:column;height:100%}
+#edit{flex-direction:column;height:100%}
+#inp {width:100%}
+#edt {resize:none;margin-bottom:1em}
+#file{width:100%}
+#kver{}
+#out{font-size:17pt;margin-bottom:0;flex:auto;overflow:hidden}
+#edt{font-size:17pt;flex:auto}
+#stat{font-size:14pt;background:#eee}
 #brow{display:flex;flex-direction:column}
-#mono{font-family:monospace;font-size:17pt;position:absolute;left:100;top:100;z-index:-10}
+#mono{font-size:17pt;position:absolute;left:100;top:100;z-index:-10}
 @media(orientation:landscape){ #edbut{display:none} }
 @media(orientation: portrait){ }
 </style></head>
 
 
 <body onload="window.init()">
-<div id="repl">
+<div id="repl" class="flex">
  <div style="display:flex;flex-direction:row">
- <input id="inp" value="+/1 2 3">
- <select id="kxy"><option>ktye</option><option>ngn<option></select>
+  <input id="inp" value="+/1 2 3" spellcheck="off" autocomplete="off" spellcheck="false" autocorrect="off">
+  <select id="kver"><option>ktye</option><option>ngn<option></select>
+  <button onclick="changescreen()">edit</button>
  </div>
  <pre   id="out"></pre>
+ <pre id="stat">offline</pre>
 </div>
-<div id="edit" class="hidden">
+<div id="edit" class="hidden flex">
+ <div style="display:flex;flex-direction:row">
+  <button id="save">save</button>
+  <input id="file" value="a.k">
+  <button id="run" onclick="run()">run</button>
+ </div>
+ <textarea id="edt" spellcheck="false" autocorrect="off" wrap="off">x:1+ \!10</textarea>
 </div>
-<div id="brow" class="hidden">
-</div>
+<div id="brow" class="hidden,flex"></div>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre> <!--to measure console size-->
 
 
 
 <script> 
-if('serviceWorker'in navigator)navigator.serviceWorker.register("/k.sw.js")
+//navigator.serviceWorker.register("./m.sw.js")
 
 let ge=x=>document.getElementById(x)
-let inp=ge("inp"),out=ge("out")
-inp.onchange=e=>O(" "+e.target.value+"\n"+"k response\n")
+let kver=ge("kver"),inp=ge("inp"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),edit=ge("edit"),brow=ge("brow"),worker
+inp.onchange=e=>{O(" "+e.target.value+"\n");worker.postMessage({m:"repl",t:e.target.value})}
 
 window.init=function(){
- out.textContent+="ktye/k 2023.04.05\n"
+ out.textContent=""
+ start([])
 }
 
-let O=s=>{out.textContent+=s;
- let wh=window.innerHeight-out.offsetTop,oh=out.offsetHeight
- console.log("oh/wh",oh,wh)
- if(oh>wh){
-  let cs=consize()
-  let n=Math.floor(out.clientHeight/cs.h)
-  console.log("cs/n",cs,n)
-  let v=out.textContent.split("\n")
-  out.textContent=v.slice(-n).join("\n")+"\n"
+let start=(files)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker(kver.value+".js",{name:kver.value})
+ worker.onmessage=function(e){let d=e.data
+  switch(d.m){
+  case"write":O(d.t);                       break
+  case"stat": stat.textContent=d.t;         break
+  default: console.log("unknown message",d)
+ }}
+ worker.onerror=function(e){
+  console.log("worker:", worker)
  }
+ inp.value="!0"
+ out.textContent=""
+ worker.postMessage({m:"start",files:files})
+}
+let interrupt=()=>{} //todo
+
+let O=s=>{out.textContent+=s;clip()},
+clip=()=>{
+ let cs=consize()
+ let v=out.textContent.split("\n")
+ out.textContent=v.slice(-(cs.rows+out.textContent.endsWith("\n"))).join("\n")},
+consize=()=>{let mono=ge("mono");let n=mono.textContent.length
+ return{cols:Math.floor(n*out.clientWidth/mono.clientWidth),
+        rows:Math.floor(out.clientHeight/mono.clientHeight)}}
+
+
+function run(){ //click on run button
+ changescreen()
+ let files=[]
+ //todo push selected libraries first
+ files.push({f:ge("file").value,t:ge("edt").value})
+ start(files)
 }
 
-function consize(){let mono=ge("mono");let n=mono.textContent.length
- return{w:Math.floor(n*out.clientWidth/mono.clientWidth),
-  h:Math.floor(out.clientHeight/mono.clientHeight)}}
+//longpress on statusbar (restart)
+stat.touch=null
+stat.addEventListener("touchstart",e=>{stat.touch=e.timeStamp},{passive:true})
+stat.addEventListener("touchend",e=>{
+ dt=(stat.touch===null)?0:e.timeStamp-stat.touch
+ if(dt>500){start([])}
+},{passive: true})
+
+//swipe out/editor (change screen)
+let swipe=null
+let swipestart=e=>{console.log("swipestart")
+ let t=e.changedTouches[0];swipe={t:e.timeStamp,x:t.screenX,y:t.screenY}}
+let swipeend=e=>{console.log("swipeend",swipe)
+ let t=e.changedTouches[0];if(swipe!==null){
+ let dx=t.screenX-swipe.x,dy=t.screenY-swipe.y;let a=Math.abs(dx)
+  console.log("dx/dy",dx,dy)
+ if((a>Math.abs(dy))&&(a>0.2*screen.width))changescreen()
+}}
+out.addEventListener("touchstart",swipestart,{passive:true})
+out.addEventListener("touchend"  ,swipeend  ,{passive:true})
+
+function changescreen(){
+ repl.classList.toggle("hidden")
+ edit.classList.toggle("hidden")
+}
 
 </script>
 

@@ -17,21 +17,22 @@ persistant storage and offline support
 - main screen (repl):
 
     portrait          landscape
-  +--+----------+    +--------------------+
-  |ic|input line|    |                    |
-  +--+----------+    +--------------------+
+  +----------+--+    +--------------------+
+  |input line|kv|    |                    |
+  +----------+--+    +--------------------+
   | output      |    |                    |
   | pre-element |    |                    |
-  | or canvas   |    |                    |
+  | or canvas   |    +--------------------+
   |             |    +--------------------+ 
   |             | 
-  |             |    output-dimensions are known to k
-  |             |    it produces output that fits
+  +-------------+    output-dimensions are known to k
+  | status      |    it produces output that fits
   +-------------+
 
   - on input, the input field changes to an interrupt button
     (k.wasm runs in a webworker and can be interrupted if it hangs)
-  - ic is an icon of the current k version, click to change
+  - kv is an dropdown with the current k version
+  - status shows mem/timer, longpress restarts k
   
 
 - editor screen
