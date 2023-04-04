@@ -59,7 +59,7 @@ persistant storage and offline support
       back to the editor
 
 
-- browser
+- browser  -> replaced by openfile / opendir
   +-------------+    +--------------------+
   |[ ]a.k 14 m d|    |[ ] a.k 123 date del|
   +-------------+    +--------------------+
@@ -104,6 +104,13 @@ persistant storage and offline support
   - when image or canvas has been called, the output is changed to the
     canvas element
   - swipe left/right (or longclick?) to change between text and canvas output
+  
+  - interface: k reads file "canvas": returns canvas size, e.g. "762 384"
+  - k writes bytes to file "canvas", sets image: 4-bytes interpreted as one pixel
+  
+- desktop
+  - on the desktop with wide screen, both pages are side by side
+  - the edit button is hidden
 
 - requirements on k
   - must have

@@ -7,22 +7,31 @@
 <style>
 .flex{display:flex}
 .hidden{display:none}
+.invisible{display:none}
 *{font-family:monospace;font-size:20pt}
 html{height:100%}
-body{height:100%;overflow-y:hidden}
+body{height:100%;overflow-y:hidden;display:block}
+@media only screen and (min-width:1024px){            /*2columns on desktop*/
+ .flex{width:50%}
+ .hidden{display:flex}
+ body{display:flex}
+ #edit{margin-left:.5em}
+ #edbut{display:none}
+}
 #repl{flex-direction:column;height:100%}
 #edit{flex-direction:column;height:100%}
 #inp {width:100%}
-#edt {resize:none;margin-bottom:1em}
+#edt {resize:none;margin-bottom:1em;margin-top:.5em}
 #file{width:100%}
 #kver{}
 #out{font-size:17pt;margin-bottom:0;flex:auto;overflow:hidden}
+#cnv{margin-top:.5em;margin-bottom:0;flex:auto;background:#efe}
 #edt{font-size:17pt;flex:auto}
 #stat{font-size:14pt;background:#eee}
+.link{color:#0000EE}
+.link:hover{cursor:pointer}
 #brow{display:flex;flex-direction:column}
-#mono{font-size:17pt;position:absolute;left:100;top:100;z-index:-10}
-@media(orientation:landscape){ #edbut{display:none} }
-@media(orientation: portrait){ }
+#mono{font-size:17pt;position:absolute;left:100;top:100;visibility:hidden}
 </style></head>
 
 
@@ -30,19 +39,28 @@ body{height:100%;overflow-y:hidden}
 <div id="repl" class="flex">
  <div style="display:flex;flex-direction:row">
   <input id="inp" value="+/1 2 3" spellcheck="off" autocomplete="off" spellcheck="false" autocorrect="off">
-  <select id="kver"><option>ktye</option><option>ngn<option></select>
-  <button onclick="changescreen()">edit</button>
+  <select id="kver"><option>ktye</option><option>ngn</option></select>
+  <button id="edbut" onclick="changescreen()">edit</button>
  </div>
- <pre   id="out"></pre>
+ <pre    id="out"></pre>
+ <canvas id="cnv" class="invisible"></canvas>
  <pre id="stat">offline</pre>
+ </div>
+ 
 </div>
 <div id="edit" class="hidden flex">
  <div style="display:flex;flex-direction:row">
   <button id="save">save</button>
-  <input id="file" value="a.k">
+  <button id="open">open</button>
+  <input  id="file" value="-"></input>
+  <button id="dir">dir</button>
+  <button id="share">share</button>
   <button id="run" onclick="run()">run</button>
  </div>
- <textarea id="edt" spellcheck="false" autocorrect="off" wrap="off">x:1+ \!10</textarea>
+ <textarea id="edt" spellcheck="false" autocorrect="off" wrap="off">x:1+ \!10
+ 1+`s
+ 2*x
+ </textarea>
 </div>
 <div id="brow" class="hidden,flex"></div>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre> <!--to measure console size-->
@@ -53,19 +71,28 @@ body{height:100%;overflow-y:hidden}
 //navigator.serviceWorker.register("./m.sw.js")
 
 let ge=x=>document.getElementById(x)
-let kver=ge("kver"),inp=ge("inp"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),edit=ge("edit"),brow=ge("brow"),worker
-inp.onchange=e=>{O(" "+e.target.value+"\n");worker.postMessage({m:"repl",t:e.target.value})}
+let ce=x=>document.createElement(x)
+let kver=ge("kver"),inp=ge("inp"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),file=ge("file"),dir=ge("dir"),edit=ge("edit"),edt=ge("edt"),brow=ge("brow"),worker
+inp.onchange=e=>{O(" "+e.target.value+"\n");worker.postMessage({m:"repl",t:e.target.value,cnv:cnvsize()})}
 
 window.init=function(){
  out.textContent=""
- start([])
+ let h=window.location.hash.slice(1)
+ let p=h.indexOf(":")
+ kver.value=(p>0)?h.slice(0,p):kver.value
+ edt.value=(p>0)?decodeURIComponent(h.slice(1+p)):""
+ start({f:"-",t:""},kfs)
 }
 
-let start=(files)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker(kver.value+".js",{name:kver.value})
+let start=(f,fs)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker(kver.value+".js",{name:kver.value})
+ let [w,h]=cnvsize()
  worker.onmessage=function(e){let d=e.data
   switch(d.m){
-  case"write":O(d.t);                       break
-  case"stat": stat.textContent=d.t;         break
+  case"write":    O(d.t);                  break
+  case"stat":     setstat(d.t);            break
+  case"filepos":  editat(d.f,d.l,d.c,d.p); break
+  case"writefile":writefile(d.f,d.u);      break
+  case"image":    cnvimage(d.u);   console.log("onmessageimage",d)  ;      break
   default: console.log("unknown message",d)
  }}
  worker.onerror=function(e){
@@ -73,7 +100,7 @@ let start=(files)=>{if(worker)worker.terminate();worker=undefined;worker=new Wor
  }
  inp.value="!0"
  out.textContent=""
- worker.postMessage({m:"start",files:files})
+ worker.postMessage({m:"start",f,fs:fs,cnv:{w:w,h:h}})
 }
 let interrupt=()=>{} //todo
 
@@ -87,20 +114,30 @@ consize=()=>{let mono=ge("mono");let n=mono.textContent.length
         rows:Math.floor(out.clientHeight/mono.clientHeight)}}
 
 
+function setstat(s){     stat.classList.remove("link");stat.textContent=s;stat.f=undefined}
+function editat(f,l,c,p){stat.classList.add   ("link");stat.textContent=f+":"+(1+l)+":"+(1+c);stat.f=f;stat.p=p}
+
 function run(){ //click on run button
  changescreen()
- let files=[]
- //todo push selected libraries first
- files.push({f:ge("file").value,t:ge("edt").value})
- start(files)
+ start({f:file.value,t:edt.value},kfs)
+ let u=kver.value+":"+encodeURIComponent(edt.value)
+ window.location.hash=(u<1000)?u:""
 }
+
+//click on statusbar (jump to file position)
+stat.onclick=e=>{if(("f"in stat)&&("string"==typeof stat.f)){
+ changescreen()
+ if(file.value==stat.f){ //todo or if file has been written open new file
+  edt.setSelectionRange(stat.p,1+stat.p);edt.focus() //scrollIntoView?
+ }
+}}
 
 //longpress on statusbar (restart)
 stat.touch=null
 stat.addEventListener("touchstart",e=>{stat.touch=e.timeStamp},{passive:true})
 stat.addEventListener("touchend",e=>{
  dt=(stat.touch===null)?0:e.timeStamp-stat.touch
- if(dt>500){start([])}
+ if(dt>500){start({f:"-",t:""},kfs)}
 },{passive: true})
 
 //swipe out/editor (change screen)
@@ -121,6 +158,68 @@ function changescreen(){
  edit.classList.toggle("hidden")
 }
 
+
+//click on open (open file from filesystem api)
+let currentfile={name:"",h:null}                  //name/handle
+ge("open").onclick=async e=>{
+ let o={types:[{accept:{'text/plain':['.k']}}]}  //multiple:false,
+ let[h]=await window.showOpenFilePicker(o)
+ let f= await h.getFile()
+ file.value=f.name;currentfile.name=f.name;currentfile.h=h
+ edt.value= await f.text()
+}
+ge("save").onclick=async e=>{
+ if(currentfile.name=file.value&&currentfile.h!==null){ //write directly
+  const w=await currentfile.h.createWritable()
+  await w.write(edt.value)
+  await w.close();
+ }else{                                                 //file save dialog
+  let h=await self.showSaveFilePicker({
+   suggestedName:file.value,
+   types:[{accept:{'text/plain':['.k']}}]})
+  let f=await h.getFile()
+  currentfile.h=h;currentfile.name=f.name;file.value=f.name
+  const w=await currentfile.h.createWritable()
+  await w.write(edt.value)
+  await w.close();
+}}
+file.onchange=e=>{currentfile={name:"",h:null}}    //invalidate direct save
+
+//click on dir to preload all files (k has synchronous access to them and writes to this dir)
+let kfs={}
+dir.onclick=async e=>{kfs={},dir.h=null
+ const dh=await window.showDirectoryPicker({mode:'readwrite'})
+ dir.h=dh
+ for await(const x of dh.values()){
+  if(x.kind==="file"){
+   x.getFile().then((f)=>{
+    f.arrayBuffer().then(b=>{kfs[f.name]=new Uint8Array(b)})
+})}}}
+
+let writefile=async(name,u)=>{                     //write file to disk from k (async)
+ if(("h"in dir)&&(dir.h!==null)){
+  const h=await dir.h.getFileHandle(name,{create:true})
+  const w=await h.createWritable()
+  await w.write(u)
+  await w.close();
+}}
+
+//click on share button
+share.onclick=async e=>{await navigator.share({title:"share k file",text:edt.value})}
+
+let showcnv=t=>{
+ cnv.classList[["add","remove"][+t]]("invisible")
+ out.classList[["remove","add"][+t]]("invisible")
+}
+let cnvsize=()=>{showcnv(true);let r=[cnv.clientHeight,cnv.clientWidth];showcnv(false);return r}
+let cnvimage=u=>{showcnv(true);cnv.width=cnv.clientHeight;cnv.height=cnv.clientWidth;
+ let c=cnv.getContext("2d");
+ let d=c.createImageData(cnv.width,cnv.height)
+ let m=new Uint8Array(d.data.buffer)
+ console.log("image",u)
+ m.set(u)
+ c.putImageData(d,0,0)
+}
 </script>
 
 </body></html>
