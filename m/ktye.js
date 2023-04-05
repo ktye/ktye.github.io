@@ -1,11 +1,10 @@
-//ktye/k service worker
+//ktye/k web worker
 //
 // message interface:                                   js to worker
 //  m:"start",f:{f:"name",t:"content"},                 input file and fs cnv size
-//    fs:{f1:u1,f2:u2},cnv:{w,h}            
-//  m:"repl",t:"string..",r:rows,c:cols,cnv:[w,h]       repl input line, console/canvas size
+//    fs:{f1:u1,f2:u2},r:rows,c:cols,w:w,h:h           
+//  m:"repl",t:"string..",r:rows,c:cols,w:w,h:h         repl input line, console/canvas size
 // posted messages:                                     worker to js
-//  m:"exit"                                            request to restart k, e.g. after \\
 //  m:"write",t:"string.."
 //  m:"writefile",f:"file",u:uint8array
 //  m:"stat",t:"string"                                 status text, e.g. memory, exec time
@@ -17,9 +16,9 @@ const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 
 onmessage=function(e){let d=e.data
  switch(e.data.m){
- case"start"  :start(d.f,d.fs,d.cnv);break
- case"runfile":runfile(d.f,d.t)     ;break
- case"repl"   :repl(d.t)            ;break
+ case"start"  :start(d.f,d.fs,d.r,d.c,d.w,d.h);break
+ case"runfile":runfile(d.f,d.t)               ;break
+ case"repl"   :repl(d.t,d.r,d.c,d.w,d.h)      ;break
  default:console.log("kwork: unknown message:", e)
 }}
 onerror=function(e){
@@ -28,9 +27,9 @@ onerror=function(e){
 
 
 let K,kfs,cnv
-function start(file,fs,cnvsize){kfs=fs,fs.canvas=us(cnvsize.w+" "+cnvsize.h)
+function start(file,fs,rows,cols,width,height){kfs=fs
  let env={env:{              //ktye/k.wasm import object
-  Exit:x=>postMessage({m:"exit"}),
+  Exit:x=>{},
   Args:()=>{return 0},       //no command line arguments
   Arg:(x,y)=>{return 0},
   Read: kread,               // x:<`file from kfs
@@ -42,8 +41,8 @@ function start(file,fs,cnvsize){kfs=fs,fs.canvas=us(cnvsize.w+" "+cnvsize.h)
  }}}
  fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports;K.kinit();
-  
-  //todo K.register see kde/kwork.js
+  dims(rows,cols,width,height)
+  if(file.t=="")postMessage({m:"write",t:"ktye/k\n"})
   
   //todo: build input files from "\l file", replace with "/l file"
   let files=[file]     //[{f:file.f,t:file.t}]
@@ -98,12 +97,16 @@ function kread(file,nfile,dst){
  return 0
 }
 
-function repl(t){
+function repl(t,rows,cols,width,height){dims(rows,cols,width,height)
  let t0=performance.now()
  try{ K.repl(KC(us(t))); stat(t0)  /*save()*/            }
  catch(e){ indicate(e); /*restore()*/  } 
 }
 
+function dims(rows,cols,width,height){
+ kfs.canvas=us(width+" "+height)
+ K.dx(K.Asn(K.sc(KC("l.")),K.Atx(K.sc(KC("lxy")),K.Val(KC(cols+" "+rows)))))
+}
 
 function indicate(e,name,t,p){
  console.log("indicate-error", e, name, t, p, K.src())
@@ -114,9 +117,9 @@ function linecol(t,p){let v=t.split("\n")
  return[v.length,p]
 }
 
-function stat(t0){
+function stat(t0){let p=x=>x.toPrecision(4)
  let ms=performance.now()-t0
- let t=(ms>1000)?Math.floor(ms/1000)+"s":(ms<1)?Math.floor(ms*1000)+"µs":ms+"ms"
+ let t=(ms>1000)?p(ms/1000)+"s":(ms<1)?p(ms*1000)+"µs":p(ms)+"ms"
  postMessage({m:"stat",t:mem(K.memory.buffer.byteLength)+"   "+t})}
 
 function lo(x){return Number(BigInt.asUintN(32,x))}  // 32-bit of BigInt serves as the wasm memory index (pointer).

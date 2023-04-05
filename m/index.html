@@ -39,7 +39,7 @@ body{height:100%;overflow-y:hidden;display:block}
 <div id="repl" class="flex">
  <div style="display:flex;flex-direction:row">
   <input id="inp" value="+/1 2 3" spellcheck="off" autocomplete="off" spellcheck="false" autocorrect="off">
-  <select id="kver"><option>ktye</option><option>ngn</option></select>
+  <select id="kver"><option>atw</option><option>ktye</option><option>ngn</option></select>
   <button id="edbut" onclick="changescreen()">edit</button>
  </div>
  <pre    id="out"></pre>
@@ -55,7 +55,7 @@ body{height:100%;overflow-y:hidden;display:block}
   <input  id="file" value="-"></input>
   <button id="dir">dir</button>
   <button id="share">share</button>
-  <button id="run" onclick="run()">run</button>
+  <button id="run">run</button>
  </div>
  <textarea id="edt" spellcheck="false" autocorrect="off" wrap="off">x:1+ \!10
  1+`s
@@ -72,8 +72,13 @@ body{height:100%;overflow-y:hidden;display:block}
 
 let ge=x=>document.getElementById(x)
 let ce=x=>document.createElement(x)
-let kver=ge("kver"),inp=ge("inp"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),file=ge("file"),dir=ge("dir"),edit=ge("edit"),edt=ge("edt"),brow=ge("brow"),worker
-inp.onchange=e=>{O(" "+e.target.value+"\n");worker.postMessage({m:"repl",t:e.target.value,cnv:cnvsize()})}
+let kver=ge("kver"),inp=ge("inp"),run=ge("run"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),file=ge("file"),dir=ge("dir"),edit=ge("edit"),edt=ge("edt"),brow=ge("brow"),worker
+inp.onchange=e=>{O(" "+e.target.value+"\n");
+ let rc=consize(),[w,h]=cnvsize()
+ worker.postMessage({m:"repl",t:e.target.value,r:rc.rows,c:rc.cols,w:w,h:h})}
+
+window.onerror=function(m,s,l,c,e){console.log("windowonerror",m,e.stack)}
+
 
 window.init=function(){
  out.textContent=""
@@ -85,22 +90,21 @@ window.init=function(){
 }
 
 let start=(f,fs)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker(kver.value+".js",{name:kver.value})
- let [w,h]=cnvsize()
  worker.onmessage=function(e){let d=e.data
   switch(d.m){
   case"write":    O(d.t);                  break
   case"stat":     setstat(d.t);            break
   case"filepos":  editat(d.f,d.l,d.c,d.p); break
   case"writefile":writefile(d.f,d.u);      break
-  case"image":    cnvimage(d.u);   console.log("onmessageimage",d)  ;      break
+  case"image":    cnvimage(d.u);           break
   default: console.log("unknown message",d)
  }}
- worker.onerror=function(e){
-  console.log("worker:", worker)
- }
+ worker.onerror=e=>O("worker "+e.message,"\n"+e.filename+":"+e.lineno)
+ 
+ let [w,h]=cnvsize(),rc=consize()
  inp.value="!0"
  out.textContent=""
- worker.postMessage({m:"start",f,fs:fs,cnv:{w:w,h:h}})
+ worker.postMessage({m:"start",f,fs:fs,r:rc.rows,c:rc.cols,w:w,h:h})
 }
 let interrupt=()=>{} //todo
 
@@ -117,12 +121,15 @@ consize=()=>{let mono=ge("mono");let n=mono.textContent.length
 function setstat(s){     stat.classList.remove("link");stat.textContent=s;stat.f=undefined}
 function editat(f,l,c,p){stat.classList.add   ("link");stat.textContent=f+":"+(1+l)+":"+(1+c);stat.f=f;stat.p=p}
 
-function run(){ //click on run button
+run.onclick=e=>{ //click on run button
  changescreen()
  start({f:file.value,t:edt.value},kfs)
  let u=kver.value+":"+encodeURIComponent(edt.value)
- window.location.hash=(u<1000)?u:""
+ window.location.hash=(u.length<1000)?u:""
 }
+
+//change k version dropdown
+kver.onchange=e=>{start({f:"-",t:""},kfs)}
 
 //click on statusbar (jump to file position)
 stat.onclick=e=>{if(("f"in stat)&&("string"==typeof stat.f)){
@@ -132,13 +139,14 @@ stat.onclick=e=>{if(("f"in stat)&&("string"==typeof stat.f)){
  }
 }}
 
-//longpress on statusbar (restart)
+//longpress on statusbar or doubleclick (restart)
 stat.touch=null
 stat.addEventListener("touchstart",e=>{stat.touch=e.timeStamp},{passive:true})
 stat.addEventListener("touchend",e=>{
  dt=(stat.touch===null)?0:e.timeStamp-stat.touch
  if(dt>500){start({f:"-",t:""},kfs)}
 },{passive: true})
+stat.ondblclick=e=>{start({f:"-",t:""},kfs)}
 
 //swipe out/editor (change screen)
 let swipe=null
@@ -216,7 +224,7 @@ let cnvimage=u=>{showcnv(true);cnv.width=cnv.clientHeight;cnv.height=cnv.clientW
  let c=cnv.getContext("2d");
  let d=c.createImageData(cnv.width,cnv.height)
  let m=new Uint8Array(d.data.buffer)
- console.log("image",u)
+ for(let i=3;i<u.length;i+=4)u[i]=255; //no-alpha
  m.set(u)
  c.putImageData(d,0,0)
 }
