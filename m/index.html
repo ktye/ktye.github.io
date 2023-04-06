@@ -34,6 +34,7 @@ body{height:100%;overflow-y:hidden;display:block}
 #mono{font-size:17pt;position:absolute;left:100;top:100;visibility:hidden}
 </style></head>
 
+<script src="plot.js"></script>
 
 <body onload="window.init()">
 <div id="repl" class="flex">
@@ -77,7 +78,7 @@ inp.onchange=e=>{O(" "+e.target.value+"\n");
  let rc=consize(),[w,h]=cnvsize()
  worker.postMessage({m:"repl",t:e.target.value,r:rc.rows,c:rc.cols,w:w,h:h})}
 
-window.onerror=function(m,s,l,c,e){console.log("windowonerror",m,e.stack)}
+window.onerror=function(m,s,l,c,e){console.log("windowonerror",m,e)}
 
 
 window.init=function(){
@@ -97,6 +98,7 @@ let start=(f,fs)=>{if(worker)worker.terminate();worker=undefined;worker=new Work
   case"filepos":  editat(d.f,d.l,d.c,d.p); break
   case"writefile":writefile(d.f,d.u);      break
   case"image":    cnvimage(d.u);           break
+  case"plot":     plot(d.p);               break
   default: console.log("unknown message",d)
  }}
  worker.onerror=e=>O("worker "+e.message,"\n"+e.filename+":"+e.lineno)
@@ -228,6 +230,8 @@ let cnvimage=u=>{showcnv(true);cnv.width=cnv.clientHeight;cnv.height=cnv.clientW
  m.set(u)
  c.putImageData(d,0,0)
 }
+
+let plot=p=>{showcnv(true);plotjs.plots(p,cnv)}
 </script>
 
 </body></html>

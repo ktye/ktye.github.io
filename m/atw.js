@@ -13,7 +13,7 @@ onerror=function(e){
 
 let O=s=>postMessage({m:"write",t:s})
 
-function start(file,kfs,rows,cols,width,height){
+function start(file,kfs,r,c,width,height){dims(r,c,width,height)
  
  let env={a:{ //k9.wasm import object
    p: function(){console.log("p ___sys_chdir,")},
@@ -58,6 +58,7 @@ function start(file,kfs,rows,cols,width,height){
   let keys=Object.keys(kfs)
   for(let i=0;i<keys.length;i++)fs.files[keys[i]]=kfs[keys[i]]
   
+  K.B()
   if(file.t!=""){if(!file.f.endsWith(".k"))file.f="a.k";fs.files[file.f]=us(file.t)}
   
   let t0=performance.now()
@@ -68,6 +69,7 @@ function start(file,kfs,rows,cols,width,height){
 }
 
 function repl(t,rows,cols,width,height){dims(rows,cols,width,height)
+ K.B() //WW()
  if(t=="\\")t=`""0:."\\\\"`
  let u=us(t)
  let x=sa(1+u.length)
@@ -82,10 +84,11 @@ function status(t0){let p=x=>x.toPrecision(4)
  postMessage({m:"stat",t:mem(M.byteLength)+"   "+t})}
 let mem=x=>{x/=1024;return (x>1024)?Math.round(x/1024)+"m":Math.round(x)+"k"}
 
-function dims(rows,cols,width,height){ //todo console size
- fs.files["canvas"]=us(width+" "+height)
-}
 
+// WW is exported B() which calls ftoa to read rows and cols. minsize is 24x80.
+// I WW(){ww=256*max(24-2,EMI(rows())-2)+min(255,max(80,EMI(cols())));R 1;}// TIOCGWINSZ
+var rows,cols
+function dims(r,c,width,height){rows=r;cols=c;fs.files["canvas"]=us(width+" "+height)}
 
 function U( ){ return new Uint8Array(M) }
 function I( ){ return new Uint32Array(M) }
@@ -111,8 +114,11 @@ function readConst(s,b){
  return a}
 
 function ftoa(x,y,z){
- if(x!=1158) console.log("ftoa?", x)
+ if(x==1024) return rows;
+ if(x==1041) return cols;
+ if(x!=1158) console.log("ftoa?", x, y, z)
  let a=readConst(y,z)
+ console.log("readConst a=", a)
  let u=us(a[0].toPrecision(7))
  let to=a[1];let max=a[2]
  let d=U()
