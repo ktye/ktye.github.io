@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>halfkey</title>
+<link rel=icon href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABBSURBVDhPY/wPBAxIgJGREcrCBGhKwYAJSqMAdIXYNMIAVgNIAaMGDG8DYIkHXyICgdFABOZeYCChhBJp2ZmBAQC+JhoLeAkPhAAAAABJRU5ErkJggg=='>
+<style>
+ body{font-family:georgia,serif}
+ h2{border-top:1px solid black}
+ pre{margin-left:1em}
+</style>
+</head>
+
+<body>
+<pre>
+f:compile{ .. }
+
+f:compile{[x;y]x+y}  /func f(x,y K)(r K){ r=Add(rx(x),rx(y));dx(x);dx(y);return r}
+f:compile{[x]1+x}    /func f(x K)(r K){ r=Add(Ki(1),rx(x));dx(x);return r}
+f:compile{[x]1.+x}   /func f(x K)(r K){ r=Add(Kf(1.0),rx(x));dx(x);return r}
+
+int/float: + - * / %   << >>   < = > <= >= ~
+unsigned  /' >>' <' >' <=' >='
+
+[xI;yF]
+ prolog   xn:nn[x];xp:cast(x)   length, pointer 
+ x[..]    I32[(xp<<2)+..]       index expression returns int
+ x0       I32[xp<<2]            first
+ x1       I32[1+xp<<2]
+ xi       I32[i+xp<<2]          e.g. within loops
+ xi:..    SetI32[i+xp<<2,..]    set int
+ yi:..    SetF64[i+xp<<3,..]    set float
+ xr       rx[x]
+ epilog   dx[x];dx[y];r         unref args, return r
+
+[xi]
+ prolog  x=int32(x)
+
+$[i>0;..]                       if(i>0)..
+$[a;b;c;d;e]                    if elseif else
+?[i;a;b;c]                      switch(c)case 0:a;case 1:b;default:c
+W[c;..]                         while
+W[`l;c..]                       label l:while..
+N[n;..]   i:0;W[i<n;..;i:+1]    loop
+N[`l;n;..] 
+:l                              break l
+!l                              continue l
+
+</pre>
+</body>
+</html>
