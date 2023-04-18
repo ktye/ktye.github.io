@@ -3,17 +3,71 @@
 <link rel=icon href='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAABBSURBVDhPY/wPBAxIgJGREcrCBGhKwYAJSqMAdIXYNMIAVgNIAaMGDG8DYIkHXyICgdFABOZeYCChhBJp2ZmBAQC+JhoLeAkPhAAAAABJRU5ErkJggg=='>
 <title>k.5</title>
 <style>
-body{margin:0;overflow:hidden}
-#edt{position:absolute;top:0;margin:0;left: 0;background:#ffe;width:50vw;height:100vh;overflow:auto;border:none;outline:none}
-#rep{position:absolute;top:0;margin:0;left:50vw;width:50vw;outline:none}
+body{margin:0;overflow:hidden;font-family:monospace}
+#ain{position:absolute;top:0;margin:0;left: 0;background:#efe;width:50vw;height:50vh;overflow:auto;border:none;outline:none;resize:none}
+#kin{position:absolute;top:50vh;margin:0;left: 0;background:#ffe;width:50vw;height:50vh;overflow:auto;border:none;outline:none;resize:none}
+#but{position:absolute;top:0;margin:0;left:50vw}
 #out{position:absolute;top:2em;margin:0;right:0;width:50vw;height:calc(100vh - 2em);overflow:auto}
 </style>
 </head>
 
-<body>
-<textarea id="edt" spellcheck="false"></textarea>
-<input id="rep" spellcheck="false"></textarea>
+<body onload="init()">
+<textarea id="ain" spellcheck="false">a</textarea>
+<textarea id="kin" spellcheck="false">k</textarea>
+<button id="but" onclick="run()">run</button>
 <pre id="out">out</pre>
+
+<script>
+let K,kk,hk,wb
+function ge(x){return document.getElementById(x)}
+function su(u){return(u.length)?new TextDecoder("utf-8").decode(u):""}
+function us(s){return new TextEncoder("utf-8").encode(s)}
+function O(x){ge("out").textContent+=("string"==typeof x)?x:su(x)}
+function init(){let fe=(u,f)=>{fetch(u).then(r=>r.text()).then(f)}
+ fe("demo.a",r=>ge("ain").value=r);fe("demo.k",r=>ge("kin").value=r)
+ fe("halfkey.k",   r=>hk=r) //halfkey compiler
+ fe("../kweb/k.k", r=>kk=r) //k-source as table
+ fe("../kweb/wb.k",r=>wb=r) //wasm(binary) compiler
+}
+
+let env={env:{ //wasm import object
+ Exit:x=>{        },
+ Args:()=>{return 0},
+ Arg:(x,y)=>{return 0},
+ Read:(x,y,z)=>{return 0},
+ Write:(f,m,s,n)=>{O(new Uint8Array(K.memory.buffer,s,n));return 0},
+ ReadIn:(x,y)=>{return 0},
+ Native:(x,y)=>{return 0},
+}}
+
+//k-memory access
+function lo(x){return Number(BigInt.asUintN(32,x))} //pointer
+function C(){return new Int8Array(K.memory.buffer)} //heap
+function KC(u){u=("string"==typeof u)?us(u):u;let r=K.mk(18,u.length);C().set(u,lo(r));return r}
+function CK(x){C().slice(lo(x),lo(x)+K.nn(x))}
+
+function run(){ //stage 1
+ ge("out").textContent=""
+ fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+  K=r.instance.exports
+  K.kinit()
+  O("k1\n")  
+  K.dx(K.Val(KC(kk)))        //load k.k interpreter source (vars: C D T P I S)
+  K.dx(K.Asn(K.sc(KC("A")),K.Atx(K.Val(KC("`p@")),KC(ain.value)))) //parse src.a, store in A
+  K.dx(K.Val(KC(wb)))        //load wb.k
+  K.dx(K.Val(KC(hk)))        //run halfkey.k compiler
+  //stage2()
+ })
+}
+function stage2(){
+ let w=CK(K.Val(K.sc(KC("J"))))   //new interpreter (wasm binary) stored in J
+ K=null                           //reboot
+ WebAssembly.instantiate(w.buffer,env).then(r=>{
+  K=r.instance.exports
+  K.kinit()
+  O("k2\n")
+ })
+}
 
 </script></body></html>
 

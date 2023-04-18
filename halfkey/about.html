@@ -23,10 +23,10 @@ unsigned  /' >>' <' >' <=' >='
  prolog   xn:nn[x];xp:cast(x)   length, pointer 
  x[..]    I32[(xp<<2)+..]       index expression returns int
  x0       I32[xp<<2]            first
- x1       I32[1+xp<<2]
- xi       I32[i+xp<<2]          e.g. within loops
- xi:..    SetI32[i+xp<<2,..]    set int
- yi:..    SetF64[i+xp<<3,..]    set float
+ x1       I32[4+xp]
+ xi       I32[i<<2+xp]          e.g. within loops
+ xi:..    SetI32[i<<2+xp,..]    set int
+ yi:..    SetF64[i<<2+xp,..]    set float
  xr       rx[x]
  epilog   dx[x];dx[y];r         unref args, return r
 
