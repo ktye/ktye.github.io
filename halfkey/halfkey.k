@@ -6,44 +6,60 @@
 
 
 shift:(`$$"cisfzk")!0 2 2 3 4 3
+symtab:(0#`)!0#`                   /symbol-type map
+tpisq:`t`p`i`s`q                   /table header
 
 compile:{[name;f];f:.f
  a:(f 3)#f 1   /args
  t:"kisfzISFZ"
  t:`$$t@0|t?(*|)'$a
  x:`$$*'$a
- st:x!t        /symbol!type
+ symtab::x!t   /symbol!type
  c:f 0         /code
  c:split[c;,`256] /split expression list
- st expr/c
+ tab:,+tpisq!(0#`;!0;!0;0#`;!0)      /stack of tpisq table and types
+ *tab expr/c
 }
 
-expr:{[st;e]           /compile single expression, track types
- x:prefix/[(st;0#`;());e]
- `result \x
-}
+expr:{[s;e]           /compile single expression
+ r:prefix/[s;e]
+ t:r 1
+ ,(r 0),t[`p]:translate[#r 0;t`p]}
  
-prefix:{st:x 0;t:x 1;s:x 2
- pu:{t::t,x;s::`pu \s,y}                                          /push type and value to stack
- po:{[]r:*|s;s::-1_s;t::-1_t;r}                                   /pop
- $[`v~yt:@y;$[0~n:64\0+y                                          /byte code: see exec.go:func exec
-        pu[,t1;,y,/*(v;t1:type1[y;v:po[];*|t])]                   /monadic 
-    1~n;pu[,t2;,y,/2#(v1;v2;t2:type2[y;v1:po[];*|t;v2:po[];*|t])] /dyadic
-    2~n;err`dyadicindirect
+
+ 
+prefix:{[tab;y]
+ pu:{tab::tab,,+tpisq!x}              /push
+ po:{r:*|tab;tab::-1_tab;r}           /pop
+ $[`v~yt:@y;$[0~n:64\0+y              /byte code: see exec.go:func exec
+        pu monadic[y;po[]]
+    1~n;pu  dyadic[y;po[];po[]]
+    2~n;err`indirect
     3~n;err`tetradic
     4~n;err`drop
     5~n;err`jump
     6~n;err`jumpifnot
     err`quotedverb]
-   yt~`s;pu[st y;y];pu[yt;y]]
- (st;t;s)}
+   yt~`s;pu symbol y;pu const[yt;y]]
+ tab}
+
+symbol: {(,`sym;,0N;,0;,x;,symtab x)}
+const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];,`;,$[`c~t;`i;t])}       /todo fix floats later
+monadic:{[f;x]t:*x`q;
+ $[(f~(.))&`sym~*x`t;.x[0;`t]:`get
+  ((op1 f),x`t;0N,translate[0;x`p];t,x`t;1,x`i;t,x`q)]}
+dyadic:{[f;y;x]t:type2[*x`q;*y`q]
+ ((op2 f),(x`t),y`t;0N,translate[1;x`p],translate[1+#x;y`p];1,(x`i),(y`i);t,(x`s),(y`s);t,(x`q),(y`q))}
+
+op1:{$[f~(-);`neg;f~(~);`not;err`op1]}
+op2:{$[s:ops 0+x;s;err`op2]}
+
+ops:66 67 68 69 70 71 72 73 74 75 78!`add`sum`mul`div`and`orr`les`mor`eql`neq`xor
+
+translate:{[n;p]0|n+p}   /catenate(translate) parent vector by n and link 0N to 0
 
 
-/type propagation
-type1:{[f;x;xt]        /monadic: typeof f(x:xt)  xt is a type vector for each expr node
- (*xt),xt}
-type2:{[f;x;xt;y;yt]   /dyadic:  typeof f(x:xt;y:yt)
- (*xt),xt,yt}
+type2:{$[x~y;x;err`type2]} /type check
 
 err:{`err \x;0+x}      /trap e.g. err`type
 
@@ -70,6 +86,6 @@ replace:{join[z;split[x;y]]}
 
 /example: expand[`p"1+xi";`x;`i]
 
-compile[`f;{[xi;yi]1+x*y}]
+B:compile[`f;{[xi;yi]1+x*y;2*x;3+x}]
 
 /compile'[A 2+i;A 1+i:4*!(#(A:0,A))%4]         /compile each function
