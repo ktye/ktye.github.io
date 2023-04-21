@@ -1,2 +1,1 @@
-ptr:{[x]xp}
-f:{[x;y]x+y}
+f:{[xi;yi]1+x*y;2*x;3+x}

@@ -18,15 +18,17 @@ body{margin:0;overflow:hidden}
 <textarea id="ain" spellcheck="false" title="extension source">a</textarea>
 <textarea id="kin" spellcheck="false" title="k source for stage2">k</textarea>
 <div      id="bar">
- <button  id="but" onclick="run(false)" title="compile to wasm and run">run</button>
- <span class="ln" onclick="showhk()"    title="show compiler source">halfkey.k</span> <span class="ln" onclick="run(true)" title="download generated k+.c">k+.c</span>
+ <button  id="but" onclick="run(0)"  title="compile to wasm and run">run</button>
+ <button  id="ast" onclick="run(1)"  title="show IR table">ast</button>
+ <button  id="ccc" onclick="run(2)"  title="compile to c">c</button>
+ <span class="ln" onclick="showhk()" title="show compiler source">halfkey.k</span> <span class="ln" onclick="run(3)" title="download generated k+.c">k+.c</span>
  <a href="about.html">about</a>
 </div>
 <pre id="out">out</pre>
 <a id="dl" style="display:none"></a>
 
 <script>
-let K,kk,hk,cc,wb
+let K,kk,hk,cc,wb,dt
 function ge(x){return document.getElementById(x)}
 function su(u){return(u.length)?new TextDecoder("utf-8").decode(u):""}
 function us(s){return new TextEncoder("utf-8").encode(s)}
@@ -34,6 +36,7 @@ function O(x){let o=ge("out");o.textContent+=("string"==typeof x)?x:su(x)}
 function init(){let fe=(u,f)=>{fetch(u).then(r=>r.text()).then(f)}
  fe("demo.a",r=>ge("ain").value=r);fe("demo.k",r=>ge("kin").value=r)
  fe("halfkey.k",   r=>hk=r) //halfkey compiler
+ fe("drawtree.k",  r=>dt=r) //tree view
  fe("../kweb/k.k", r=>kk=r) //k-source as table
  fe("../kweb/cc.k",r=>cc=r) //c transpiler
  fe("../kweb/wb.k",r=>wb=r) //wasm(binary) compiler
@@ -66,11 +69,17 @@ function run(c){ //stage 1
   K=r.instance.exports
   K.kinit()
   O("k1\n")  
-  K.dx(K.Val(KC(kk)))        //load k.k interpreter source (vars: C D T P I S)
+  if(c!=2&&c!=3)K.dx(K.Val(KC(kk)))   //load k.k interpreter source (vars: C D T P I S)
   K.dx(K.Asn(sc("A"),K.Atx(K.Val(KC("`p@")),KC(ain.value)))) //parse src.a, store in A 
   K.dx(K.Val(KC(hk)))        //run halfkey.k compiler
-  O("compile to "+(c?"c":"wasm")+"..\n")
+  O("compile to "+(["wasm","IR","c","c"][c])+"..\n")
   setTimeout(()=>{            //to flush O
+   if(c==1){
+    K.dx(K.Val(KC(dt)))
+    K.dx(K.Val(KC("draw simple B")))
+    ge("out").textContent=ge("out").textContent.replaceAll("|","│").replaceAll("+","├").replaceAll("L","└").replaceAll("-","─").replaceAll("T","┬")
+    return
+   }
    K.dx(K.Val(KC(c?cc:wb)))   //load wb.k or cc.k
    let b=CK(K.Atx(K.Val(sc(c?"cc":"wb")),K.Val(KC("``")))) //call cc`` or wb``
    if(c)downld(b)

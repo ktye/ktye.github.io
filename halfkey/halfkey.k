@@ -2,12 +2,10 @@
 /interpreter source is stored in C D T P I S as a k table
 /input parse tree is stored in A as kvm byte code
 /the compiler converts A to lower form and appends it to T P I S
-/the result is compiled to wasm with wb
-
 
 shift:(`$$"cisfzk")!0 2 2 3 4 3
 symtab:(0#`)!0#`                   /symbol-type map
-tpisq:`t`p`i`s`q                   /table header
+tpis:4#tpisq:`t`p`i`s`q                   /table header
 
 compile:{[name;f];f:.f
  a:(f 3)#f 1   /args
@@ -17,16 +15,48 @@ compile:{[name;f];f:.f
  symtab::x!t   /symbol!type
  c:f 0         /code
  c:split[c;,`256] /split expression list
- tab:,+tpisq!(0#`;!0;!0;0#`;!0)      /stack of tpisq table and types
- *tab expr/c
+ ast:,p,'+`q!,(#p:prolog[x;t])#`             /init ast as prolog + empty q column
+ ast:return@*ast expr/c
+ 
+ r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
+ r,:+tpis!(,`ast;,0;,0N;,`)
+ r,:tpis#ast[`p]:(-1+#r)|(#r)+ast`p
+ r epilog/|1+&`ret=r`t
+}                                       /todo fix k-literals
+
+prolog:{[s;y]
+ t:+tpis!(0#`;!0;!0;0#`)
+ t:unpack/[t;s;y;!#y]
 }
 
-expr:{[s;e]           /compile single expression
- r:prefix/[s;e]
- t:r 1
- ,(r 0),t[`p]:translate[#r 0;t`p]}
- 
 
+unpack:{[t;s;y;i];n:#t
+ xi:+tpis!(`cst`typ`lod`add`lit`get;0N 0 0 2 3 3;0N 0N 0N 2,(8*i),0N;`i`k`k`k`k`X)  /int32(I64(8i+int32(X)))
+ xp:+tpis!(`asn`cst`typ`get;0N 0 1 0;0 0N 0N 0;(`$($s),"p"),`i`k,s)                 /xp:int32(x)
+ xn:+tpis!(`asn`cal`get;0N 1 2;0 0N 0N;(`$($s),"n"),`nn,s)                          /xn:nn(x)
+ xk:+tpis!(`asn`cal`lod`add`lit`get;0N 0 1 2 3 3;0N 0N 0N 2,(8*i),0N;`k`rx`k`k`k`X) /x:rx(I64(8i+int32(x)))
+ xk,:xp[`p]:(#xk)+xp`p
+ t,+tpis!$[`i~y;(,`asn;,0N;,0;,s),'.xi[`p]:n+0|1+xi`p                               /x:..        xi(int)
+           `f~y;(`asn`lod;0N 1;0 0N;s,`f),'.xi[`p]:n+0|2+xi`p                       /x:F64(..)   xf(float)
+	 y~`I`F;(.xk),'.xn;.xk[`p]+:n]}                                             /   xI(ints) xF(floats) x(K)
+
+
+expr:{[s;e]           /compile single expression
+ t:(r:prefix/[s;e])1
+ ,(r 0),t[`p]+:#r 0}  /keep root nodes negative
+ 
+return:{[t]l:(i:*|&0>t`p)_t  
+ (i#t),(+tpisq!(`ret;0N;0N;n`q;(n:*l)`q)),l[`p]:i|1+l`p} /insert return node before last expr
+ 
+epilog:{[t;i]                        /convert `i`f to k and unref all k vars
+ l:kif[t[i;`s];i_t]unref/&symtab=`k
+ t:(i#t),$[#l;l[`p;0 1]:i+-1 0;l]
+ t[i-1;`s]:`k}                       /return type k
+
+unref:{[t;s](+tpis!(`cal`get;0 0;0N 0N;`Dex,s)),t[`p]:2+t`p}       /prepend dex call
+kif:{[s;t]$[s':`i`f;(+tpis!(,`cal;,0N;,0N;,`$"K",$s)),t[`p]+:1;t]} /call Ki or Kf on atoms
+ 
+ 
  
 prefix:{[tab;y]
  pu:{tab::tab,,+tpisq!x}              /push
@@ -86,6 +116,10 @@ replace:{join[z;split[x;y]]}
 
 /example: expand[`p"1+xi";`x;`i]
 
-B:compile[`f;{[xi;yi]1+x*y;2*x;3+x}]
+/B:compile[`f;{[xi;yi]1+x*y;2*x;3+x}]
+A:`p"f:{[xi;yi]1+x*y;2*x;3+x}"
+B:*compile'[A 2+i;A 1+i:4*!(#(A:0,A))%4]         /compile each function
 
-/compile'[A 2+i;A 1+i:4*!(#(A:0,A))%4]         /compile each function
+simple:{[t](+tpis!(,`prg;,0;,0;`"k.5")),t[`p]:0|1+t[`p]}
+draw:{[x]t:drawtree x`p;`<"\n"/:((2^(2*#*t)#" "),t),'(`lxy 20,10+#x)(+`id!,!#x),'x}
+
