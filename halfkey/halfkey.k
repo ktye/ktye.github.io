@@ -7,7 +7,7 @@ shift:(`$$"cisfzk")!0 2 2 3 4 3
 symtab:(0#`)!0#`                   /symbol-type map
 tpis:4#tpisq:`t`p`i`s`q                   /table header
 
-compile:{[name;f];f:.f
+compile:{[prog;name;f];f:.f
  a:(f 3)#f 1   /args
  t:"kisfzISFZ"
  t:`$$t@0|t?(*|)'$a
@@ -21,7 +21,8 @@ compile:{[name;f];f:.f
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
  r,:+tpis!(,`ast;,0;,0N;,`)
  r,:tpis#ast[`p]:(-1+#r)|(#r)+ast`p
- r epilog/|1+&`ret=r`t
+ r:r epilog/|1+&`ret=r`t
+ prog,r[`p]:0|(#prog)+r`p
 }                                       /todo fix k-literals
 
 prolog:{[s;y]
@@ -116,10 +117,13 @@ replace:{join[z;split[x;y]]}
 
 /example: expand[`p"1+xi";`x;`i]
 
-/B:compile[`f;{[xi;yi]1+x*y;2*x;3+x}]
+
 A:`p"f:{[xi;yi]1+x*y;2*x;3+x}"
-B:*compile'[A 2+i;A 1+i:4*!(#(A:0,A))%4]         /compile each function
+codes:A 1+i:4*!(#(A:0,A))%4
+names:A 2+i
 
-simple:{[t](+tpis!(,`prg;,0;,0;`"k.5")),t[`p]:0|1+t[`p]}
+full:{[]export compile/[+tpis!(T;P;I;S);names;codes]}               /full interpreter
+simple:{[]export compile/[+tpis!(,`prg;,0;,0;`"k.5");names;codes]}  /only extensions
+export:{T::x`t;P::x`p;I::x`i;S::x`s;x}
+
 draw:{[x]t:drawtree x`p;`<"\n"/:((2^(2*#*t)#" "),t),'(`lxy 20,10+#x)(+`id!,!#x),'x}
-

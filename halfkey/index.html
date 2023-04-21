@@ -76,14 +76,16 @@ function run(c){ //stage 1
   setTimeout(()=>{            //to flush O
    if(c==1){
     K.dx(K.Val(KC(dt)))
-    K.dx(K.Val(KC("draw simple B")))
+    K.dx(K.Val(KC("draw simple[]")))
     ge("out").textContent=ge("out").textContent.replaceAll("|","│").replaceAll("+","├").replaceAll("L","└").replaceAll("-","─").replaceAll("T","┬")
     return
    }
    K.dx(K.Val(KC(c?cc:wb)))   //load wb.k or cc.k
-   let b=CK(K.Atx(K.Val(sc(c?"cc":"wb")),K.Val(KC("``")))) //call cc`` or wb``
-   if(c)downld(b)
-   else stage2(b)
+   K.dx(K.Val(KC(((2==c)?"simple[];C:_&8;ccren:{x}":"full[]"))))
+   let b=CK(K.Val(KC(["wb``","","cc`nort`lib","cc``"][c])))
+   if(0==c)state2(b)
+   if(2==c)ge("out").textContent=su(b)
+   else    downld(b)
   },10)
  })
 }
