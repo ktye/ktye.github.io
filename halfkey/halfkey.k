@@ -5,7 +5,7 @@
 
 shift:(`$$"cisfzk")!0 2 2 3 4 3
 symtab:(0#`)!0#`                   /symbol-type map
-tpis:4#tpisq:`t`p`i`s`q                   /table header
+tpis:4#tpisq:`t`p`i`s`q            /table header
 
 compile:{[prog;name;f];f:.f
  a:(f 3)#f 1   /args
@@ -78,19 +78,20 @@ symbol: {(,`sym;,0N;,0;,x;,symtab x)}
 const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];,`;,$[`c~t;`i;t])}       /todo fix floats later
 monadic:{[f;x]t:*x`q;
  $[(f~(.))&`sym~*x`t;.x[0;`t]:`get
-  ((op1 f),x`t;0N,translate[0;x`p];t,x`t;1,x`i;t,x`q)]}
-dyadic:{[f;y;x]t:type2[*x`q;*y`q]
- ((op2 f),(x`t),y`t;0N,translate[1;x`p],translate[1+#x;y`p];1,(x`i),(y`i);t,(x`s),(y`s);t,(x`q),(y`q))}
+  ((op1 f),x`t;0N,(0|x`p);t,x`t;1,x`i;t,x`q)]}
+dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];0];t:type2[*x`q;*y`q]
+ ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);t,(x`q),(y`q))}
+
+index:{$[`get`i~(*x)`t`s;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p   /i x (cast)
+ err`index]}    
 
 op1:{$[f~(-);`neg;f~(~);`not;err`op1]}
 op2:{$[s:ops 0+x;s;err`op2]}
 
 ops:66 67 68 69 70 71 72 73 74 75 78!`add`sum`mul`div`and`orr`les`mor`eql`neq`xor
 
-translate:{[n;p]0|n+p}   /catenate(translate) parent vector by n and link 0N to 0
-
-
 type2:{$[x~y;x;err`type2]} /type check
+
 
 err:{`err \x;0+x}      /trap e.g. err`type
 
@@ -118,7 +119,8 @@ replace:{join[z;split[x;y]]}
 /example: expand[`p"1+xi";`x;`i]
 
 
-A:`p"f:{[xi;yi]1+x*y;2*x;3+x}"
+/A:`p"f:{[xi;yi]1+x*y;2*x;3+x}"
+/A:`p"f:{[xi;yi]i 2}"
 codes:A 1+i:4*!(#(A:0,A))%4
 names:A 2+i
 
@@ -127,3 +129,5 @@ simple:{[]export compile/[+tpis!(,`prg;,0;,0;`"k.5");names;codes]}  /only extens
 export:{T::x`t;P::x`p;I::x`i;S::x`s;x}
 
 draw:{[x]t:drawtree x`p;`<"\n"/:((2^(2*#*t)#" "),t),'(`lxy 20,10+#x)(+`id!,!#x),'x}
+
+/compile/[+tpis!(,`prg;,0;,0;`"exa");names;codes]
