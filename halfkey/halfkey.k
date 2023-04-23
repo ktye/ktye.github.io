@@ -3,20 +3,22 @@
 /input parse tree is stored in A as kvm byte code
 /the compiler converts A to lower form and appends it to T P I S
 
-shift:(`$$"cisfzk")!0 2 2 3 4 3
 symtab:(0#`)!0#`                   /symbol-type map
 tpis:4#tpisq:`t`p`i`s`q            /table header
+shift:(`$$"cisfk")!0 2 2 3 3
+load:(`$$"cisfk")!`I8`I32`I32`F64`I64
+ftype:`I32`I64!`i`k
 
 compile:{[prog;name;f];f:.f
  a:(f 3)#f 1   /args
  t:"kisfzISFZ"
  t:`$$t@0|t?(*|)'$a
  x:`$$*'$a
- symtab::x!t   /symbol!type
- c:f 0         /code
+ symtab::(`X!`k),x!t   /symbol!type
+ c:unpack/[f 0;x;t;!#t]    /code
+ c:expand/[c;!symtab;.symtab]          /X[i] -> I64(..)
  c:split[c;,`256] /split expression list
- ast:,p,'+`q!,(#p:prolog[x;t])#`             /init ast as prolog + empty q column
- ast:return@*ast expr/c
+ ast:`ast \return@*(,+tpisq!(s0;!0;!0;s0;s0:0#`))expr/ `code \c
  
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
  r,:+tpis!(,`ast;,0;,0N;,`)
@@ -25,26 +27,17 @@ compile:{[prog;name;f];f:.f
  prog,r[`p]:0|(#prog)+r`p
 }                                       /todo fix k-literals
 
-prolog:{[s;y]
- t:+tpis!(0#`;!0;!0;0#`)
- t:unpack/[t;s;y;!#y]
-}
+unpack:{[e;s;y;i];y:$[y':`i`f`I`F;y;`]
+ (`p@ \($s),":",($y)," X[",($i),"]"),(`256),e}     /x:i X[i] ..
 
-
-unpack:{[t;s;y;i];n:#t
- xi:+tpis!(`cst`typ`lod`add`lit`get;0N 0 0 2 3 3;0N 0N 0N 2,(8*i),0N;`i`k`k`k`k`X)  /int32(I64(8i+int32(X)))
- xp:+tpis!(`asn`cst`typ`get;0N 0 1 0;0 0N 0N 0;(`$($s),"p"),`i`k,s)                 /xp:int32(x)
- xn:+tpis!(`asn`cal`get;0N 1 2;0 0N 0N;(`$($s),"n"),`nn,s)                          /xn:nn(x)
- xk:+tpis!(`asn`cal`lod`add`lit`get;0N 0 1 2 3 3;0N 0N 0N 2,(8*i),0N;`k`rx`k`k`k`X) /x:rx(I64(8i+int32(x)))
- xk,:xp[`p]:(#xk)+xp`p
- t,+tpis!$[`i~y;(,`asn;,0N;,0;,s),'.xi[`p]:n+0|1+xi`p                               /x:..        xi(int)
-           `f~y;(`asn`lod;0N 1;0 0N;s,`f),'.xi[`p]:n+0|2+xi`p                       /x:F64(..)   xf(float)
-	 y~`I`F;(.xk),'.xn;.xk[`p]+:n]}                                             /   xI(ints) xF(floats) x(K)
-
+expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
+ $[t':`I`F`k;replace[e;(s;.;`83);1_`p"rx I64 (i ",($s),")+8*0"]
+   t~`i     ;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0"]
+   t~`f     ;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0"];e]}
 
 expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1
- ,(r 0),t[`p]+:#r 0}  /keep root nodes negative
+ $[1=#r;r;,(r 0),t[`p]+:#r 0]}  /keep root nodes negative
  
 return:{[t]l:(i:*|&0>t`p)_t  
  (i#t),(+tpisq!(`ret;0N;0N;n`q;(n:*l)`q)),l[`p]:i|1+l`p} /insert return node before last expr
@@ -75,15 +68,18 @@ prefix:{[tab;y]
  tab}
 
 symbol: {(,`sym;,0N;,0;,x;,symtab x)}
-const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];,`;,$[`c~t;`i;t])}       /todo fix floats later
+const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];t;t:,$[`c~t;`i;t])}       /todo fix floats later
 monadic:{[f;x]t:*x`q;
- $[(f~(.))&`sym~*x`t;.x[0;`t]:`get
+ $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
   ((op1 f),x`t;0N,(0|x`p);t,x`t;1,x`i;t,x`q)]}
-dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];0];t:type2[*x`q;*y`q]
+dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];0];t:type2[*x`q;*y`q]
  ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);t,(x`q),(y`q))}
 
-index:{$[`get`i~(*x)`t`s;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p   /i x (cast)
- err`index]}    
+index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s;sh:shift s;ld:load s
+ $[s~`i;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p   /i x (cast)
+   .(+tpisq!(,`cal;,0N;,0N;,s;,r:ftype s)),y[`p]:0|1+y`p]}               /call
+
+assign:{ `assign \(x;y);.(+tpisq!(,`asn;,0N;,0;(*x)`s;(*x)`q)),y[`p]:0|1+y`p}
 
 op1:{$[f~(-);`neg;f~(~);`not;err`op1]}
 op2:{$[s:ops 0+x;s;err`op2]}
@@ -99,27 +95,29 @@ err:{`err \x;0+x}      /trap e.g. err`type
 /v1:{[s;v]}
 /v2:{[s;v]`nyi}
 
-expand:{[b;x;t]     /macro expansions in byte code
- c:$x
- xp:`$c,"p"
- xi:`$c,"i"
- sh:$[shift t;(shift t;\;`83);()]
- b:replace[b;(/;`83);,(/)]                         /shift-adverb as verb
- b:replace[b;(\;`83);,(\)]                         /
- b:replace[b;(xi;.);(`i;.;`x;.;`83)]               /xi    -> x[i]
- b:replace[b;(`x;.;`83);sh,(xp;.;+;`I32;.;`83)]    /x[..] -> I32[xp+shift\..]
-}
+/expand:{[b;x;t]     /macro expansions in byte code
+/ c:$x
+/ xp:`$c,"p"
+/ xi:`$c,"i"
+/ sh:$[shift t;(shift t;\;`83);()]
+/ b:replace[b;(/;`83);,(/)]                         /shift-adverb as verb
+/ b:replace[b;(\;`83);,(\)]                         /
+/ b:replace[b;(xi;.);(`i;.;`x;.;`83)]               /xi    -> x[i]
+/ b:replace[b;(`x;.;`83);sh,(xp;.;+;`I32;.;`83)]    /x[..] -> I32[xp+shift\..]
+/}
+//example: expand[`p"1+xi";`x;`i]
 
-
+replace:{join[z;split[x;y]]}
 join:   {(-#x)_,/y,\:x}
 split:  {n_'(&n=+/rotate'[!n:#y;x~\:/:y])^x:y,x}
 rotate: {y@n/x+!n:#y}
-replace:{join[z;split[x;y]]}
 
-/example: expand[`p"1+xi";`x;`i]
+/ x'        int32(x)
+/ y:<x[i]   copy/clone
+/ x:I y[i]
+/ i:i x
 
-
-/A:`p"f:{[xi;yi]1+x*y;2*x;3+x}"
+A:`p"f:{[xi;yi]x*y}"
 /A:`p"f:{[xi;yi]i 2}"
 codes:A 1+i:4*!(#(A:0,A))%4
 names:A 2+i
@@ -130,4 +128,4 @@ export:{T::x`t;P::x`p;I::x`i;S::x`s;x}
 
 draw:{[x]t:drawtree x`p;`<"\n"/:((2^(2*#*t)#" "),t),'(`lxy 20,10+#x)(+`id!,!#x),'x}
 
-/compile/[+tpis!(,`prg;,0;,0;`"exa");names;codes]
+B:compile/[+tpis!(,`prg;,0;,0;`"exa");names;codes]
