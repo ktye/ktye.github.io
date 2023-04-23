@@ -16,14 +16,15 @@ compile:{[prog;name;f];f:.f
  x:`$$*'$a
  symtab::(`X!`k),x!t   /symbol!type
  c:unpack/[f 0;x;t;!#t]    /code
- c:expand/[c;!symtab;.symtab]          /X[i] -> I64(..)
- c:split[c;,`256] /split expression list
- ast:`ast \return@*(,+tpisq!(s0;!0;!0;s0;s0:0#`))expr/ `code \c
+ c:replace[c;(`1;1048576;`320);,(`1)],(`1)  /:(return)
+ c:unref expand/[c;!symtab;.symtab]          /X[i] -> I64(..)
+ c:split[`c \c;,`256] /split expression list
+ ast:*(,+tpisq!(s0;!0;!0;s0;s0:0#`))expr/c
  
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
  r,:+tpis!(,`ast;,0;,0N;,`)
  r,:tpis#ast[`p]:(-1+#r)|(#r)+ast`p
- r:r epilog/|1+&`ret=r`t
+ /r:r epilog/|1+&`ret=r`t
  prog,r[`p]:0|(#prog)+r`p
 }                                       /todo fix k-literals
 
@@ -39,23 +40,20 @@ expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1
  $[1=#r;r;,(r 0),t[`p]+:#r 0]}  /keep root nodes negative
  
-return:{[t]l:(i:*|&0>t`p)_t  
- (i#t),(+tpisq!(`ret;0N;0N;n`q;(n:*l)`q)),l[`p]:i|1+l`p} /insert return node before last expr
- 
-epilog:{[t;i]                        /convert `i`f to k and unref all k vars
- l:kif[t[i;`s];i_t]unref/&symtab=`k
- t:(i#t),$[#l;l[`p;0 1]:i+-1 0;l]
- t[i-1;`s]:`k}                       /return type k
 
-unref:{[t;s](+tpis!(`cal`get;0 0;0N 0N;`Dex,s)),t[`p]:2+t`p}       /prepend dex call
-kif:{[s;t]$[s':`i`f;(+tpis!(,`cal;,0N;,0N;,`$"K",$s)),t[`p]+:1;t]} /call Ki or Kf on atoms
- 
+/kif:{[s;t]$[s':`i`f;(+tpis!(,`cal;,0N;,0N;,`$"K",$s)),t[`p]+:1;t]} /call Ki or Kf on atoms
+
+unref:{[c]s:,/(=symtab)`k`C`I`S`F   /unref at return  :Dex[x;Dex[y;..]]
+ replace[c;,(`1);(1_`p(";"/:"Dex[",/:$s),";0",(#s)#"]"),(`1)]}
+
  
  
 prefix:{[tab;y]
  pu:{tab::tab,,+tpisq!x}              /push
  po:{r:*|tab;tab::-1_tab;r}           /pop
- $[`v~yt:@y;$[0~n:64\0+y              /byte code: see exec.go:func exec
+ li:{n:-x;tab::(n_tab),,|n#tab}
+ $[`v~yt:@y;$[(y)~`27;li@*po[]`i      /list(call args)
+    0~n:64\0+y              /byte code: see exec.go:func exec
         pu monadic[y;po[]]
     1~n;pu  dyadic[y;po[];po[]]
     2~n;err`indirect
@@ -71,15 +69,19 @@ symbol: {(,`sym;,0N;,0;,x;,symtab x)}
 const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];t;t:,$[`c~t;`i;t])}       /todo fix floats later
 monadic:{[f;x]t:*x`q;
  $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
+  f~(`1);.(+tpisq!(,`ret;,0N;,0N;,`k;,`k)),x[`p]:0|1+x`p /todo Ki Kf
   ((op1 f),x`t;0N,(0|x`p);t,x`t;1,x`i;t,x`q)]}
-dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];0];t:type2[*x`q;*y`q]
+dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0];t:type2[*x`q;*y`q]
  ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);t,(x`q),(y`q))}
 
 index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s;sh:shift s;ld:load s
  $[s~`i;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p   /i x (cast)
    .(+tpisq!(,`cal;,0N;,0N;,s;,r:ftype s)),y[`p]:0|1+y`p]}               /call
 
-assign:{ `assign \(x;y);.(+tpisq!(,`asn;,0N;,0;(*x)`s;(*x)`q)),y[`p]:0|1+y`p}
+assign:{.(+tpisq!(,`asn;,0N;,0;(*x)`s;(*x)`q)),y[`p]:0|1+y`p}
+
+call:{[f;x].(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
+
 
 op1:{$[f~(-);`neg;f~(~);`not;err`op1]}
 op2:{$[s:ops 0+x;s;err`op2]}
