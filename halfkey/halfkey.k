@@ -101,7 +101,14 @@ coerce:{[t;a]t:def t                   /type conversion, e.g. convert args to k 
  (t,s)~`k`f;(+tpisq!(,`cal;,0N;,0;,`Kf;,`k)),a[`p]:0|1+a`p;err`coerce,t,s]} /Kf
  
 
-native:{[t]t}
+native:{[t]
+ /append function halfkey: func halfkey(x,y int64)int64{return Func[int32(x)].(func(int64)int64)(y)}
+ h:(+tpis!(`fun`arg`sym`arg`sym`res`ast`ret`cli`cst`typ`get`get`arg
+  0N 0 1 0 3 0 0 6 7 8 9 9 8 8
+  0 0N 0 0N 0 0N 0N 0N 1 0N 0N 0N 0N 0N
+  `halfkey`j`x`j`y`j``j`j`i`j`x`y`j))
+ t,:h[`p]:0|(#t)+h[`p]
+}
 /todo replace call to Native with call to halfkey
 / i:&s=`Native:  remove 10 Nodes starting at i-2
 /                replace with halfkey(x0(f),x)  (parent i-3)
@@ -109,16 +116,9 @@ native:{[t]t}
 /  cal i-2  0N x0
 /  get i-1  0N f
 /  get i-2  0N x
-/append function halfkey:
-/ func halfkey(x,y int64)int64{dx(x);return Func[int32(x)].(func(int64)int64)(y)}
-/  T:`fun`arg`sym`arg`sym`res`ast`cal`get`ret`cli`cst`typ`get`get`arg
-/  P:0N 0 1 0 3 0 0 6 7 6 9 10 11 11 10 10
-/  I:0 0N 0 0N 0 0N 0N 0N 0N 0N 1 0N 0N 0N 0N 0N
-/  S:`halfkey`j`x`j`y`j``dx`x`j`j`i`j`x`y
-/add generated functions to function table
 /add interal function:
-/ func internal(x,y int64)int64{r:l2(x;Ku("native"));SetI64(int32(r)-12,int32(y));return K(uint32(r))|K(xt)<<59}
-/register functions, e.g. after zk(): f:interal(567,2)
+/ func internal(x,y int64)int64{r:l2(x;Kc('x'));SetI64(int32(r)-12,int32(y));return K(uint32(r))|K(xt)<<59}
+/register functions, e.g. after zk(): f:interal[567;2]
 
 
 
@@ -135,8 +135,8 @@ err:    {`err \x;0+x}      /trap e.g. err`type
 codes:A 1+i:4*!(#(A:0,A))%4
 names:A 2+i
 
-full:{[]native export compile/[+tpis!(T;P;I;S);names;codes]}               /full interpreter
-simple:{[]export compile/[+tpis!(,`prg;,0;,0;`"k.5");names;codes]}  /only extensions
+full:{[]export native compile/[+tpis!(T;P;I;S);names;codes]}               /full interpreter
+simple:{[]D::"";export compile/[+tpis!(,`prg;,0;,0;`"k.5");names;codes]}  /only extensions
 export:{T::x`t;P::x`p;I::x`i;S::x`s;x}
 
 draw:{[x]t:drawtree x`p;`<"\n"/:((2^(2*#*t)#" "),t),'(`lxy 20,10+#x)(+`id!,!#x),'x}
