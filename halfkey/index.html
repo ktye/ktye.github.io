@@ -5,8 +5,8 @@
 <style>
 body{margin:0;overflow:hidden}
 *{box-sizing:border-box;font-family:monospace}
-#ain{position:absolute;top:0;left:0;background:#efe;width:50vw;height:50vh;overflow:auto;border:none;outline:none;resize:none}
-#kin{position:absolute;top:50vh;left:0;background:#ffe;width:50vw;height:50vh;overflow:auto;border:none;outline:none;resize:none}
+#ain{position:absolute;top:2em;left:0;background:#efe;width:50vw;height:calc(50vh - 1em);overflow:auto;border:none;outline:none;resize:none}
+#kin{position:absolute;top:calc(50vh + 1em);left:0;background:#ffe;width:50vw;height:calc(50vh - 1em);overflow:auto;border:none;outline:none;resize:none}
 #bar{position:absolute;top:0;left:50vw;height:2em}
 #out{position:absolute;top:2em;margin:0;right:0;width:50vw;height:calc(100vh - 2em);overflow:auto}
 .ln{color:darkblue;cursor:pointer}
@@ -15,13 +15,14 @@ body{margin:0;overflow:hidden}
 </head>
 
 <body onload="init()">
+<select   id="exa" onchange='example(this)'></select>
 <textarea id="ain" spellcheck="false" title="extension source">a</textarea>
 <textarea id="kin" spellcheck="false" title="k source for stage2">k</textarea>
 <div      id="bar">
  <button  id="but" onclick="run(0)"  title="compile to wasm and run">run</button>
  <button  id="ast" onclick="run(1)"  title="show IR table">ast</button>
  <button  id="ccc" onclick="run(2)"  title="compile to c">c</button>
- <span class="ln" onclick="showhk()" title="show compiler source">halfkey.k</span> <span class="ln" onclick="run(3)" title="download generated k+.c">k+.c</span>
+ <span class="ln" onclick="showhk()" title="show compiler source">halfkey.k</span> <span class="ln" onclick="run(3)" title="download generated k+.c">k+.c</span> <span class="ln" onclick="run(4)" title="download generated wasm">k+.wasm</span>
  <a href="about.html">about</a>
 </div>
 <pre id="out">out</pre>
@@ -30,11 +31,11 @@ body{margin:0;overflow:hidden}
 <script>
 let K,kk,hk,cc,wb,dt
 function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
 function su(u){return(u.length)?new TextDecoder("utf-8").decode(u):""}
 function us(s){return new TextEncoder("utf-8").encode(s)}
 function O(x){let o=ge("out");o.textContent+=("string"==typeof x)?x:su(x)}
 function init(){let fe=(u,f)=>{fetch(u).then(r=>r.text()).then(f)}
- fe("demo.a",r=>ge("ain").value=r);fe("demo.k",r=>ge("kin").value=r)
  fe("halfkey.k",   r=>hk=r) //halfkey compiler
  fe("drawtree.k",  r=>dt=r) //tree view
  fe("../kweb/k.k", r=>kk=r) //k-source as table
@@ -69,10 +70,10 @@ function run(c){ //stage 1
   K=r.instance.exports
   K.kinit()
   O("k1\n")  
-  if(c!=2&&c!=3)K.dx(K.Val(KC(kk)))   //load k.k interpreter source (vars: C D T P I S)
+  //if(c!=2&&c!=3)
+  K.dx(K.Val(KC(kk)))   //load k.k interpreter source (vars: C D T P I S)
   K.dx(K.Asn(sc("A"),K.Atx(K.Val(KC("`p@")),KC(ain.value)))) //parse src.a, store in A 
   K.dx(K.Val(KC(hk)))        //run halfkey.k compiler
-  O("compile to "+(["wasm","IR","c","c"][c])+"..\n")
   setTimeout(()=>{            //to flush O
    if(c==1){
     K.dx(K.Val(KC(dt)))
@@ -80,20 +81,22 @@ function run(c){ //stage 1
     ge("out").textContent=ge("out").textContent.replaceAll("|","│").replaceAll("+","├").replaceAll("L","└").replaceAll("-","─").replaceAll("T","┬")
     return
    }
-   K.dx(K.Val(KC(c?cc:wb)))   //load wb.k or cc.k
+   K.dx(K.Val(KC((c%4)?cc:wb)))   //load wb.k or cc.k
    K.dx(K.Val(KC(((2==c)?"simple[];C:_&8;ccren:{x}":"full[]"))))
-   let b=CK(K.Val(KC(["wb``","","cc`nort`lib","cc``"][c])))
-   if(0==c)state2(b)
-   if(2==c)ge("out").textContent=su(b)
-   else    downld(b)
+   let b=CK(K.Val(KC(["wb``","","cc`nort`lib","cc``","wb``"][c])))
+   switch(c){
+   case 0:stage2(b);break
+   case 2:ge("out").textContent=su(b);break
+   default:downld((c==4)?"k+.wasm":"k+.c",b)
+   }
   },10)
  })
 }
-function downld(u){
+function downld(s,u){
  let x=new Blob([u],{type:"application/octet-stream"}) //u:uint8array
  let dl=ge("dl")
  dl.href=URL.createObjectURL(x)
- dl.download="k+.c"
+ dl.download=s
  dl.click()
 }
 function stage2(w){
@@ -107,6 +110,22 @@ function stage2(w){
 }
 
 function showhk(){ge("out").textContent=hk}
+
+
+
+let examples={
+ unpack:{a:`/unpack a
+f:{[xi;yi]x+y}
+`, k:`/test f with two ints
+ \\f[2;3]
+`},
+ sum:{a:`/sum a
+`, k:`/sum k
+`},
+}
+for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
+function example(s){let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
+example({value:"unpack"})
 
 </script></body></html>
 
