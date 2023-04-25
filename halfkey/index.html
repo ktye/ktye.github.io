@@ -114,18 +114,32 @@ function showhk(){ge("out").textContent=hk}
 
 
 let examples={
- unpack:{a:`/unpack a
+ addi:{a:`/add two integers
 f:{[xi;yi]x+y}
+
+/x and y are declared as integer atoms
+/they are automatically unpacked and a k value is returned.
+
+/click on [ast] to see the compiled function representation.
+/click on [c]   to see generated c code.
+/[k+.c] downloads a modified interpreter that has 'f' defined as a native function.
+/compile with: gcc k+.c -lm   or clang -fwrapv k+.c -lm
 `, k:`/test f with two ints
  \\f[2;3]
+ 
+/this code runs in the stage2 interpreter, if you click the [run] button
 `},
- sum:{a:`/sum a
-`, k:`/sum k
-`},
+ first:{
+  a:`/first and last expect integer vectors.
+/typecheck is done on entry, indexing is type-dependent.
+first:{[xI]x[0]}
+last:{[xI]x[-1+xn]}`,
+  k:" \\first 1 2 3\n \\last 1 2 3\n",
+ },
 }
 for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
 function example(s){let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
-example({value:"unpack"})
+example({value:"addi"})
 
 </script></body></html>
 

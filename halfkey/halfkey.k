@@ -6,13 +6,17 @@
 symtab:(0#`)!0#`                   /symbol-type map
 tpis:4#tpisq:`t`p`i`s`q            /table header
 load:`I8`I32`F64`I64!`b`i`f`k
-ftype:`I32`F64!`i`f                /return types (default k)
+ftype:`I32`F64`nn!`i`f`i           /return types (default k)
 atype:`Kf`Ki!`f`i                  /arg type for monadic funcs (default k)
 atyps:`f1`f2!(`i`k`f;`i`i)         /arg types for function calls
 def:``k`i`f`I`C`S`F!`k`k`i`f`k`k`k`k
 float1:`hypot`atan2`pow`fmin`fmax`copysign!`hypot`atan2`pow`F64min`F64max`F64copysign
 float2:`exp`log`atan`abs`sqrt`ceil`floor`nearest!`exp`log`atan`F64abs`F64sqrt`F64ceil`F64floor`F64nearest
 
+replace:{join[z;split[x;y]]}  /replacements in bytecode
+join:   {(-#x)_,/y,\:x}
+split:  {n_'(&n=+/rotate'[!n:#y;x~\:/:y])^x:y,x}
+rotate: {y@n/x+!n:#y}
 
 compile:{[prog;name;f];f:.f
  a:(f 3)#f 1   /args
@@ -33,13 +37,15 @@ compile:{[prog;name;f];f:.f
  prog,r[`p]:0|(#prog)+r`p
 }                                       /todo fix k-literals
 
-unpack:{[e;s;y;i];y:$[y':`i`f`I`F;y;`]
- (`p($s),":",($y)," X[",($i),"]"),(`256),e}     /x:i X[i] ..
+unpack:{[e;s;y;i];c:$[`i~y;"i ";""]
+ xn:$[y':`I`F;";",($s),"n: nn ",$(s);""]
+ (`p($s),":",c,"X[",($i),"]",xn),(`256),e}     /x:i X[i] ..
+ 
 
 expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
  $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (i ",($s),")+8*0"]
-   t~`I;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0"]
-   t~`F;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0"];e]}
+   t~`I;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"]
+   t~`F;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"];e]}
 
 expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1
@@ -81,7 +87,7 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
-assign:{.(+tpisq!(,`asn;,0N;,0;(*x)`s;(*x)`q)),y[`p]:0|1+y`p}
+assign:{(x;y);symtab[s:*x`s]:t:*y`q;.(+tpisq!(,`asn;,0N;,0;s;t)),y[`p]:0|1+y`p}
 
 argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps`f;n#`k]}
 call:{[f;x]x:coerce'[argtypes[*f`s;#x];x];.(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
@@ -101,31 +107,39 @@ coerce:{[t;a]t:def t                   /type conversion, e.g. convert args to k 
  (t,s)~`k`f;(+tpisq!(,`cal;,0N;,0;,`Kf;,`k)),a[`p]:0|1+a`p;err`coerce,t,s]} /Kf
  
 
-native:{[t]
+native:{[t]                                         /redirect calls to native to generated functions
  /append function halfkey: func halfkey(x,y int64)int64{return Func[int32(x)].(func(int64)int64)(y)}
- h:(+tpis!(`fun`arg`sym`arg`sym`res`ast`ret`cli`cst`typ`get`get`arg
+ asm:(+tpis!(`fun`arg`sym`arg`sym`res`ast`ret`cli`cst`typ`get`get`arg
   0N 0 1 0 3 0 0 6 7 8 9 9 8 8
   0 0N 0 0N 0 0N 0N 0N 1 0N 0N 0N 0N 0N
   `halfkey`j`x`j`y`j``j`j`i`j`x`y`j))
- t,:h[`p]:0|(#t)+h[`p]
-}
-/todo replace call to Native with call to halfkey
-/ i:&s=`Native:  remove 10 Nodes starting at i-2
-/                replace with halfkey(x0(f),x)  (parent i-3)
-/  cal i-3  0N halfkey
-/  cal i-2  0N x0
-/  get i-1  0N f
-/  get i-2  0N x
-/add interal function:
-/ func internal(x,y int64)int64{r:l2(x;Kc('x'));SetI64(int32(r)-12,int32(y));return K(uint32(r))|K(xt)<<59}
-/register functions, e.g. after zk(): f:interal[567;2]
+ t,:asm[`p]:0|(#t)+asm[`p]
+ t[*&`Native=t`s;`s]:`halfkey /replace call to Native with call to halfkey
+ 
+ /function reg creates a function type xf(native) and stores in in Ku(f)
+ asm:+tpis!(`fun`arg`sym`arg`sym`arg`sym`loc`sym`ast`asn`cal`cal`get`cal`lit`sto`sub`cst`typ`get`lit`get`cal`cal`cal`cal`get`orr`cst`typ`cst`typ`get`cst`typ`lit
+  0N 0 1 0 3 0 5 0 7 0 9 10 11 12 11 14 9 16 17 18 18 17 16 9 23 24 25 26 24 28 29 29 31 31 28 34 34
+  0 0N 0 0N 0 0N 0 0N 0 0N 0 0N 0N 0N 0N 120 0N 2 0N 0N 0N 12 0N 0N 0N 0N 0N 0N 2 0N 0N 0N 0N 0N 0N 0N 0
+  `reg`k`f`i`i`i`a`k`r``r`l2`Ki`i`Kc`i`i`i`i`k`r`i`a`dx`Asn`sc`Ku`f`k`k`u`u`k`r`k`k`k)
+ asm[36;`i]:#C;C::C,0x0000000000000070 /fix 64bit const
+ t:t,:asm[`p]:0|(#t)+asm[`p]
+ t:register[t;names;i:(1+!n:#names)+|/t[&`tab=t`t;`i];codes]
+ t,+tpis!(n#`tab;&n;i;names)} /tab nodes (put generated funcs to indirect function table)
 
 
+register:{[t;f;n;c]  /create native function and store it to global at the end of kinit (after zk())
+ i:1+*&(`zk=t`s)&`cal=t`t
+ e:i_t;p:e[`p];e[`p]:p[&p=0]:0N
+ t:reg/[i#t;f;n;c]
+ t,e[`p]:0|((#t)-i)+e`p}
+reg:{[t;f;n;a]       /register function, e.g. after zk(): f:interal[567;2]
+ p:*&(`kinit=t`s)&`fun=t`t
+ p:*&(p<!#t)&`ast=t`t        /first ast node within fun kinit
+ a:(.a)3             /arity from lambda
+ c:#C;C::C,f:@[_&8;!#f;f:(8&#f)#f:$f]
+ asm:+tpis!(`cal`lit`lit`lit;0N 0 0 0;0N,c,n,a;`reg`k`i`i) /reg(f,n,a)
+ t,asm[`p]:p|(#t)+asm`p}
 
-replace:{join[z;split[x;y]]}  /replacements in bytecode
-join:   {(-#x)_,/y,\:x}
-split:  {n_'(&n=+/rotate'[!n:#y;x~\:/:y])^x:y,x}
-rotate: {y@n/x+!n:#y}
 
 err:    {`err \x;0+x}      /trap e.g. err`type
 
