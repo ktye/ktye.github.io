@@ -83,10 +83,11 @@ prefix:{[tab;y]
 
 symbol: {(,`sym;,0N;,0;,x;,symtab x)}
 const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];t;t:,$[`c~t;`i;t])}       /todo fix floats later
-monadic:{[f;x]t:*x`q;
+monadic:{[f;x]t:*x`q
  $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
   f~(`1);.(+tpisq!(,`ret;,0N;,0N;,`k;,`k)),x[`p]:0|1+x`p
-  ((op1 f),x`t;0N,(0|x`p);t,x`t;1,x`i;t,x`q)]}
+  t~`k;.k1[`$$f;x]
+  .(+tpisq!(,op1 f;,0N;,1;,t;,t)),x[`p]:0|1+x`p]}
 dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0]
  t:maxtype[*x`q;*y`q];x:uptype[x;typ@*x`q;t];y:uptype[y;typ@*y`q;t]
  $[`k~t; :.k2[`$$f;x;y];0]
@@ -97,24 +98,31 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
-assign:{(x;y);symtab[s:*x`s]:t:*y`q;.(+tpisq!(,`asn;,0N;,0;s;t)),y[`p]:0|1+y`p}
+assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(s':!symtab);err`reassign;0]
+ /y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|1+y`p;y]     /unref
+ symtab[s:*x`s]:q;.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
 
 argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps`f;n#`k]}
 /call:{[f;x]x:coerce'[argtypes[*f`s;#x];x];.(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
 call:{[f;x].(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
+
+/todo cond:
+
+/ b:(*f)`t`s;  q:(*'x)`q
+/ .$[`get`if~b;(+tpisq!(,`cnd
+/ (+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x]}
 
 k1:{[f;x]  x:rx x;       t: +tpisq!(,`cal;,0N;,0N;,kf1 f;,`k); t, x[`p]:0|(#t)+x`p                   } /monadic k call
 k2:{[f;x;y]x:rx x;y:rx y;t:(+tpisq!(,`cal;,0N;,0N;,kf2 f;,`k));t,:x[`p]:0|(#t)+x`p;t,y[`p]:0|(#t)+y`p} /dyadic  k call
 rx:{$[`get~*x`t;(+tpisq!(,`cal;,0N;,0N;,`rx;,`k)),x[`p]:0|1+x`p;x]}                                    /ref k vars
  
 
-
-op1:{$[f~(-);`neg;f~(~);`not;err`op1]}
+op1:{$[x~(-);`neg;x~(~);`not;err`op1]}
 op2:{$[s:ops 0+x;s;err`op2]}
 
 ops:66 67 68 69 70 71 72 73 74 75 78!`add`sub`mul`div`and`orr`les`mor`eql`neq`xor
-kf1:(`$$"+-*%&|<>=~!,^#_$?@.")!`Flp`Neg`Fst`Sqr`Wer`Rev`Asc`Dsc`Grp`Not`Til`Enl`Srt`Cnt`Flr`Str`Unq`Typ`Val
-kf2:(`$$"+-*%&|<>=~!,^#_$?@.")!`Add`Sub`Mul`Div`Min`Max`Les`Mor`Eql`Mtc`Key`Cat`Cut`Tak`Drp`Cst`Fnd`Atx`Cal
+kf1:((`$$"+-*%&|<>=~!,^#_$?@."),`"`41")!`Flp`Neg`Fst`Sqr`Wer`Rev`Asc`Dsc`Grp`Not`Til`Enl`Srt`Cnt`Flr`Str`Unq`Typ`Val`Las
+kf2:(`$$"+-*%&|<>=~!,^#_$?@.")         !`Add`Sub`Mul`Div`Min`Max`Les`Mor`Eql`Mtc`Key`Cat`Cut`Tak`Drp`Cst`Fnd`Atx`Cal
 
 maxtype:{`i`f`k@|/`i`f`k?(typ x),typ y}   /return larger type
 uptype:{[x;s;d]$[s~d;x                    /convert x from src to dst type

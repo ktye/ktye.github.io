@@ -178,6 +178,20 @@ first:{[xI]x0}
 `,
   k:" \\first 1 2 3\n \\last 1 2 3\n",
  },
+ 
+ cond:{
+    a:`/if is a keyword. 2 args is a simple statement:
+absolute:{[xi]if[0>x;x:-x];x}
+
+/multiple args are cond:
+ifelse:{[xi];if[x<3;x:2*x;x<5;x:3*x;x:4*x]}
+
+tern:{[xi]2*if[x<3;4;5]}
+
+`,
+  k:" \\absolute -3\n",
+ },
+ 
 }
 for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
 function example(s){if(ge("exa").value!=s.value)ge("exa").value=s.value;let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
