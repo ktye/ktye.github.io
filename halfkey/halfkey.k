@@ -1,15 +1,16 @@
 /halfkey compiler
 /interpreter source is stored in C D T P I S as a k table
 /input parse tree is stored in A as kvm byte code
-/the compiler converts A to lower form and appends it to T P I S
+/the compiler converts A to lower form and appends it to T P I S \
 
 symtab:(0#`)!0#`                   /symbol-type map
 tpis:4#tpisq:`t`p`i`s`q            /table header
 load:`I8`I32`F64`I64!`b`i`f`k
-ftype:`I32`F64`nn!`i`f`i           /return types (default k)
-atype:`Kf`Ki!`f`i                  /arg type for monadic funcs (default k)
-atyps:`f1`f2!(`i`k`f;`i`i)         /arg types for function calls
+ftype:`I32`F64`nn`fk`tp!`i`f`i`f`i      /return types (default k)
+atype:`Kf`Ki!`f`i                       /arg type for monadic funcs (default k)
+atyps:`f1`f2`xtp!(`i`k`f;`i`i;`k`i)     /arg types for function calls
 def:``k`i`f`I`C`S`F!`k`k`i`f`k`k`k`k
+typ:``k`C`I`S`F`i`f!`k`k`k`k`k`k`i`f
 float1:`hypot`atan2`pow`fmin`fmax`copysign!`hypot`atan2`pow`F64min`F64max`F64copysign
 float2:`exp`log`atan`abs`sqrt`ceil`floor`nearest!`exp`log`atan`F64abs`F64sqrt`F64ceil`F64floor`F64nearest
 
@@ -37,12 +38,19 @@ compile:{[prog;name;f];f:.f
  prog,r[`p]:0|(#prog)+r`p
 }                                       /todo fix k-literals
 
-unpack:{[e;s;y;i];c:$[`i~y;"i ";""]
- xn:$[y':`I`F;";",($s),"n: nn ",$(s);""]
- (`p($s),":",c,"X[",($i),"]",xn),(`256),e}     /x:i X[i] ..
+unpack:{[e;s;y;i]
+ c:$[`i~y;"i xtp[";`f~y;"fk[";`I~y;"xtp[";`F~y;"xtp[";""]
+ t:$[`i~y;";3]";`f~y;,"]";`I~y;";19]";`F~y;";21]";""]
+ (`p($s),":",c,"X[",($i),"]",t),(`256),e}     /x:i X[i] ..
  
 
 expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
+ e:replace[e;(`$($s),"t";.);`p"tp ",($s)]
+ e:replace[e;(`$($s),"n";.);`p"nn ",($s)]
+ e:replace[e;(`$($s),"i";.);`p($s),"[i]"]
+ e:replace[e;(`$($s),"0";.);`p($s),"[0]"]
+ e:replace[e;(`$($s),"1";.);`p($s),"[1]"]
+ e:replace[e;(`$($s),"2";.);`p($s),"[2]"]
  $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (i ",($s),")+8*0"]
    t~`I;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"]
    t~`F;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"];e]}
@@ -79,7 +87,9 @@ monadic:{[f;x]t:*x`q;
  $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
   f~(`1);.(+tpisq!(,`ret;,0N;,0N;,`k;,`k)),x[`p]:0|1+x`p
   ((op1 f),x`t;0N,(0|x`p);t,x`t;1,x`i;t,x`q)]}
-dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0];t:type2[*x`q;*y`q]
+dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0]
+ t:maxtype[*x`q;*y`q];x:uptype[x;typ@*x`q;t];y:uptype[y;typ@*y`q;t]
+ $[`k~t; :.k2[`$$f;x;y];0]
  ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);q:t,(x`q),(y`q))}
 
 index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
@@ -90,17 +100,30 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
 assign:{(x;y);symtab[s:*x`s]:t:*y`q;.(+tpisq!(,`asn;,0N;,0;s;t)),y[`p]:0|1+y`p}
 
 argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps`f;n#`k]}
-call:{[f;x]x:coerce'[argtypes[*f`s;#x];x];.(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
+/call:{[f;x]x:coerce'[argtypes[*f`s;#x];x];.(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
+call:{[f;x].(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
+
+k1:{[f;x]  x:rx x;       t: +tpisq!(,`cal;,0N;,0N;,kf1 f;,`k); t, x[`p]:0|(#t)+x`p                   } /monadic k call
+k2:{[f;x;y]x:rx x;y:rx y;t:(+tpisq!(,`cal;,0N;,0N;,kf2 f;,`k));t,:x[`p]:0|(#t)+x`p;t,y[`p]:0|(#t)+y`p} /dyadic  k call
+rx:{$[`get~*x`t;(+tpisq!(,`cal;,0N;,0N;,`rx;,`k)),x[`p]:0|1+x`p;x]}                                    /ref k vars
+ 
 
 
 op1:{$[f~(-);`neg;f~(~);`not;err`op1]}
 op2:{$[s:ops 0+x;s;err`op2]}
 
-ops:66 67 68 69 70 71 72 73 74 75 78!`add`sum`mul`div`and`orr`les`mor`eql`neq`xor
+ops:66 67 68 69 70 71 72 73 74 75 78!`add`sub`mul`div`and`orr`les`mor`eql`neq`xor
+kf1:(`$$"+-*%&|<>=~!,^#_$?@.")!`Flp`Neg`Fst`Sqr`Wer`Rev`Asc`Dsc`Grp`Not`Til`Enl`Srt`Cnt`Flr`Str`Unq`Typ`Val
+kf2:(`$$"+-*%&|<>=~!,^#_$?@.")!`Add`Sub`Mul`Div`Min`Max`Les`Mor`Eql`Mtc`Key`Cat`Cut`Tak`Drp`Cst`Fnd`Atx`Cal
 
-type2:{$[x~y;x;err`type2]} /type check
+maxtype:{`i`f`k@|/`i`f`k?(typ x),typ y}   /return larger type
+uptype:{[x;s;d]$[s~d;x                    /convert x from src to dst type
+ (d~`f)&s~`i;(+tpisq!(`cst`typ;0N 0;0N 0N;`f`i;`f`i)),x[`p]:0|2+x`p
+ (d~`k)&s~`i;(+tpisq!(,`cal;,0N;,0N;,`Ki;,`k)),       x[`p]:0|1+x`p
+ (d~`k)&s~`f;(+tpisq!(,`cal;,0N;,0N;,`Kf;,`k)),       x[`p]:0|1+x`p
+ err`uptype]}
 
-
+/todo: merge coerce and uptype
 coerce:{[t;a]t:def t                   /type conversion, e.g. convert args to k is automatic
  s:def@*a`q;$[t~s;a;(t':`k`C`I`S`F)&s':`k`C`I`S`F;a           /compatible types   
  (t,s)~`k`i;(+tpisq!(,`cal;,0N;,0;,`Ki;,`k)),a[`p]:0|1+a`p    /Ki
@@ -116,16 +139,22 @@ native:{[t]                                         /redirect calls to native to
  t,:asm[`p]:0|(#t)+asm[`p]
  t[*&`Native=t`s;`s]:`halfkey /replace call to Native with call to halfkey
  
+ /add typecheck func xtp(x K,t int32)K{if(tp(x)!=t){trap(Type)};return x}
+ asm:+tpis!(`fun`arg`sym`arg`sym`res`ast`cnd`neq`cal`get`get`ret`cal`lit`ret`get
+  0N 0 1 0 3 0 0 6 7 8 9 8 7 12 13 6 15
+  0 0N 0 0N 0 0N 0N 0N 2 0N 0N 0N 0N 0N 1 0N 0N
+  `xtp`k`x`i`t`k```i`tp`x`t`k`trap`i`k`x)
+ t,:asm[`p]:0|(#t)+asm`p
+ 
  /function reg creates a function type xf(native) and stores in in Ku(f)
  asm:+tpis!(`fun`arg`sym`arg`sym`arg`sym`loc`sym`ast`asn`cal`cal`get`cal`lit`sto`sub`cst`typ`get`lit`get`cal`cal`cal`cal`get`orr`cst`typ`cst`typ`get`cst`typ`lit
   0N 0 1 0 3 0 5 0 7 0 9 10 11 12 11 14 9 16 17 18 18 17 16 9 23 24 25 26 24 28 29 29 31 31 28 34 34
   0 0N 0 0N 0 0N 0 0N 0 0N 0 0N 0N 0N 0N 120 0N 2 0N 0N 0N 12 0N 0N 0N 0N 0N 0N 2 0N 0N 0N 0N 0N 0N 0N 0
   `reg`k`f`i`i`i`a`k`r``r`l2`Ki`i`Kc`i`i`i`i`k`r`i`a`dx`Asn`sc`Ku`f`k`k`u`u`k`r`k`k`k)
  asm[36;`i]:#C;C::C,0x0000000000000070 /fix 64bit const
- t:t,:asm[`p]:0|(#t)+asm[`p]
+ t:t,:asm[`p]:0|(#t)+asm`p
  t:register[t;names;i:(1+!n:#names)+|/t[&`tab=t`t;`i];codes]
  t,+tpis!(n#`tab;&n;i;names)} /tab nodes (put generated funcs to indirect function table)
-
 
 register:{[t;f;n;c]  /create native function and store it to global at the end of kinit (after zk())
  i:1+*&(`zk=t`s)&`cal=t`t

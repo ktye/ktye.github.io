@@ -124,11 +124,42 @@ f:{[xi;yi]x+y}
 /click on [c]   to see generated c code.
 /[k+.c] downloads a modified interpreter that has 'f' defined as a native function.
 /compile with: gcc k+.c -lm   or clang -fwrapv k+.c -lm
+
+/the text in this editor can be changed.
 `, k:`/test f with two ints
  \\f[2;3]
  
 /this code runs in the stage2 interpreter, if you click the [run] button
 `},
+
+ ktypes:{
+  a:`/variables of k type call k functions instead of integer opcodes.
+/k vars are declared by xk or x alone
+plus:{[x;y]x+y}
+
+/mixed i+k or f+k convert the scalar to k types. mixed i+f converts to float.
+mixed:{[xf;yi]x+y}
+
+/vector types also call k functions
+vectors:{[xI;yF]x+y}
+`,
+  k:` \\plus[1 2 3;0.5]
+ \\mixed[1 2;3]
+ \\vectors[1 2 3;0.5 0.6 0.7]
+`
+ },
+ 
+ float:{
+  a:`/some scalar floating point functions are predefined:
+/ hypot atan2 pow fmin fmax copysign
+/ exp log atan abs sqrt ceil floor nearest
+f:{[xf;yf]exp hypot[xf;yf]}
+`,
+  k:`/scalar integers are automatically uptyped when floats are expected
+ \\f[3;4]
+`,
+ },
+ 
  first:{
   a:`/first and last expect integer vectors.
 /typecheck is done on entry, indexing is type-dependent.
@@ -136,10 +167,21 @@ first:{[xI]x[0]}
 last:{[xI]x[-1+xn]}`,
   k:" \\first 1 2 3\n \\last 1 2 3\n",
  },
+
+ macro:{
+    a:`/for each k variable some symbols are replaced by primitives:
+/ xt     short for tp[x]  int value of the type
+/ xn     short for nn[x]  length of the array
+/ x0..x2      x[0]..x[2]  indexing
+/ xi          x[i]        e.g. within loops
+first:{[xI]x0}
+`,
+  k:" \\first 1 2 3\n \\last 1 2 3\n",
+ },
 }
 for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
-function example(s){let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
-example({value:"addi"})
+function example(s){if(ge("exa").value!=s.value)ge("exa").value=s.value;let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
+let h=window.location.hash.slice(1);example({value:(h.length)?h:"macro"})
 
 </script></body></html>
 
