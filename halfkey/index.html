@@ -114,7 +114,7 @@ function showhk(){ge("out").textContent=hk}
 
 
 let examples={
- addi:{a:`/add two integers
+ add:{a:`/add two integers
 f:{[xi;yi]x+y}
 
 /x and y are declared as integer atoms
@@ -160,7 +160,7 @@ f:{[xf;yf]exp hypot[xf;yf]}
 `,
  },
  
- first:{
+ index:{
   a:`/first and last expect integer vectors.
 /typecheck is done on entry, indexing is type-dependent.
 first:{[xI]x[0]}
@@ -179,23 +179,55 @@ first:{[xI]x0}
   k:" \\first 1 2 3\n \\last 1 2 3\n",
  },
  
+ amend:{
+  a:`/indexed assignment for vector types
+amend:{[xI]x[1]:3;x}
+`,
+  k:"",
+ },
+ 
  cond:{
-    a:`/if is a keyword. 2 args is a simple statement:
+    a:`/if is a keyword. 2 args is a simple if statement:
 absolute:{[xi]if[0>x;x:-x];x}
 
-/multiple args are cond:
-ifelse:{[xi];if[x<3;x:2*x;x<5;x:3*x;x:4*x]}
+/3 args is if-else-then:
+ifelse:{[xi;yf]if[x<3;x:2*x;y:4*y];x}
 
+/if both branches return the same type, it's an expression:
 tern:{[xi]2*if[x<3;4;5]}
 
 `,
-  k:" \\absolute -3\n",
+  k:" \\absolute -3\n \\ifelse[3;4.5]\n \\tern 3",
+ },
+ 
+ switch:{
+    a:`/switch is a jump table
+/the first expression evaluates to an integer, the cases are consecutive 0,1,2..default
+
+jump:{[xi]switch[x;x:2*x;x:5*x;x:3];x}
+`,
+  k:" \\jump 1\n",
+ },
+ 
+ loop:{
+    a:`/while is W
+
+/one statement
+loop:{[xi]W[x>3;x:x-1];x}
+
+/multiple
+loop2:{[xi]W[x>3;x:x-1;x:3*x];x}
+
+/ndo is N. it uses the loop variable i:0..
+ndo:{[xi;yi]N[x;y+:i];y}
+`,
+  k:" \\loop 5\n \\ndo[3;4]\n",
  },
  
 }
 for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
 function example(s){if(ge("exa").value!=s.value)ge("exa").value=s.value;let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
-let h=window.location.hash.slice(1);example({value:(h.length)?h:"macro"})
+let h=window.location.hash.slice(1);example({value:(h.length)?h:"amend"})
 
 </script></body></html>
 

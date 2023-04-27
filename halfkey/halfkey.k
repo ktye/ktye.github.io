@@ -24,12 +24,14 @@ compile:{[prog;name;f];f:.f
  t:"kisfzISFZ"
  t:`$$t@0|t?(*|)'$a
  x:`$$*'$a
- symtab::(`X!`k),x!t   /symbol!type
+ symtab::(`X`i!`k`i),x!t   /symbol!type
+ `symtab \symtab
  c:unpack/[f 0;x;t;!#t]    /code
  c:replace[c;(`1;1048576;`320);,(`1)],(`1)  /:(return)
  c:unref expand/[c;!symtab;.symtab]         /X[i] -> I64(..)
- c:split[c;,`256]                           /split expression list
- ast:*(,+tpisq!(s0;!0;!0;s0;s0:0#`))expr/c
+ c:split[`code \c;,`256]                           /split expression list
+ d:decl/[+tpisq!(s0;!0;!0;s0;s0:0#`);!symtab;.symtab]  /init x=0 for k types
+ ast:*(,d)expr/c
  
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
  r:locals/[r;l`s;(l:`s`q#ast[&`asn=ast`t])`q]
@@ -38,10 +40,13 @@ compile:{[prog;name;f];f:.f
  prog,r[`p]:0|(#prog)+r`p
 }                                       /todo fix k-literals
 
-unpack:{[e;s;y;i]
- c:$[`i~y;"i xtp[";`f~y;"fk[";`I~y;"xtp[";`F~y;"xtp[";""]
- t:$[`i~y;";3]";`f~y;,"]";`I~y;";19]";`F~y;";21]";""]
- (`p($s),":",c,"X[",($i),"]",t),(`256),e}     /x:i X[i] ..
+decl:{[t;s;y]$[(~s~`X)&y':`I`F`k;t,+tpisq!(`asn`lit;0N,#t;0 0;s,`k;`k`k);t]}
+
+unpack:{[e;s;y;i]i:$[i;"+",$8*i;""];                          
+ (`p($s),":",$[`i~y;"int I64 (int X)",i;`f~y;"fk rx I64 (int X)",i /x:int I64 X  y:fk rx I64(int X)+8
+  `I~y;"xtp[rx I64 (int X)",i,";19]"                               /x:xtp[I64 X;21]      typecheck
+  `F~y;"xtp[rx I64 (int X)",i,";21]"
+  "rx I64 (int X)",i]),(`256),e}
  
 
 expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
@@ -51,6 +56,7 @@ expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
  e:replace[e;(`$($s),"0";.);`p($s),"[0]"]
  e:replace[e;(`$($s),"1";.);`p($s),"[1]"]
  e:replace[e;(`$($s),"2";.);`p($s),"[2]"]
+ e:$[#i:,/1 2+/:&(`211)~/:e;e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
  $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (i ",($s),")+8*0"]
    t~`I;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"]
    t~`F;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"];e]}
@@ -73,16 +79,17 @@ prefix:{[tab;y]
         pu monadic[y;po[]]
     1~n;pu  dyadic[y;po[];po[]]
     2~n;err`indirect
-    3~n;err`tetradic
+    3~n;pu amend[y;po[];po[];po[];po[]]
     4~n;err`drop
     5~n;err`jump
     6~n;err`jumpifnot
-    err`quotedverb]
+    pu quotedverb y]
    yt~`s;pu symbol y;pu const[yt;y]]
  tab}
 
 symbol: {(,`sym;,0N;,0;,x;,symtab x)}
 const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];t;t:,$[`c~t;`i;t])}       /todo fix floats later
+quotedverb:{s:ops -384+x;s:$[(`449)~x;`nop;s;s;err`quotedverb]; \(,s;,0N;,2;0#`;0#`)}
 monadic:{[f;x]t:*x`q
  $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
   f~(`1);.(+tpisq!(,`ret;,0N;,0N;,`k;,`k)),x[`p]:0|1+x`p
@@ -94,23 +101,48 @@ dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0]
  ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);q:t,(x`q),(y`q))}
 
 index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
- $[s~`i;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p                /i x (cast)
+ $[s~`int;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p                /int x (cast)
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
 assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(s':!symtab);err`reassign;0]
- /y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|1+y`p;y]     /unref
- symtab[s:*x`s]:q;.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
+ y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref
+ symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
+ 
+amend:{[v;y;f;i;s] `i \i;`f \f;`y \y;`v \v;`s \s; 
+ s:`symbol \(*s)`s
+ t:$[(t:`t \symtab s)':`i`f`k;err`amendtype;t~`I;*(`i;w:4);*(`f;w:8)]
+
+ t:+tpisq!(`sto`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;q;q:t,`i`i`k`k,t,t)
+ 
+ /m:+tpisq(`lod`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2 0;t,`i`i`k`k,t   w
+ 
+ d:i
+ t,:d[`p]:5|7+d`p           /x[i]:
+ .t,$[`nop~(*f)`t;y[`p]:0|(#t)+y`p
+    err`nyimodified]
+ .`amend \t}
 
 argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps`f;n#`k]}
 /call:{[f;x]x:coerce'[argtypes[*f`s;#x];x];.(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
-call:{[f;x].(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
+/call:{[f;x].(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
 
-/todo cond:
+call:{[f;x]            /also: if switch W(while) N(do)
+ q:(*'x)`q;q:$[(2<#q)&1=#?q;?q;0#`];c:(*f)`t`s
+ x:$[(`get`N~c)|`get`W~c;*(1_x;h:*x);x]          /split cnd from while
+ x:{x,y[`p]:(#x)+y`p}/[+tpisq!(0#`;!0;!0;0#`;0#`);x]
+ x:$[(1<#x)&`get`W~c;(+tpisq!(,`stm;,0N;,0N;0#`;0#`)),x[`p]:0|1+x`p;x]
+ inc:+tpisq!(`asn`add`get`lit;0N 0 1 1;0N 2 0 1;`i`i`i`i;`i`i`i`i)
+ t:+tpisq!$[`get`if~c;(,`cnd;,0N;,0N;q;q)
+  `get`W~c;.((+tpisq!(,`for;,0N;,0;,`W;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)
+  `get`N~c;.((+tpisq!(,`for;,0N;,0;,`L;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
+  `get`switch~c;(,`swc;,0N;,1;0#`;0#`)
+  (,`cal;,0N;,0N;f`s;,`k)]
+ t,:x[`p]:0|(#t)+x`p
+ t[0;`p]:0N
+ t:$[`get`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2|2+t`p;t]
+ .t}
 
-/ b:(*f)`t`s;  q:(*'x)`q
-/ .$[`get`if~b;(+tpisq!(,`cnd
-/ (+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x]}
 
 k1:{[f;x]  x:rx x;       t: +tpisq!(,`cal;,0N;,0N;,kf1 f;,`k); t, x[`p]:0|(#t)+x`p                   } /monadic k call
 k2:{[f;x;y]x:rx x;y:rx y;t:(+tpisq!(,`cal;,0N;,0N;,kf2 f;,`k));t,:x[`p]:0|(#t)+x`p;t,y[`p]:0|(#t)+y`p} /dyadic  k call
