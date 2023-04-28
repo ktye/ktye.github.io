@@ -1,5 +1,5 @@
 /halfkey compiler
-/interpreter source is stored in C D T P I S as a k table
+/interpreter source is stored in C D  T P I S as a k table
 /input parse tree is stored in A as kvm byte code
 /the compiler converts A to lower form and appends it to T P I S \
 
@@ -19,25 +19,25 @@ join:   {(-#x)_,/y,\:x}
 split:  {n_'(&n=+/rotate'[!n:#y;x~\:/:y])^x:y,x}
 rotate: {y@n/x+!n:#y}
 
-compile:{[prog;name;f];f:.f
+compile:{[prog;name;f];f:.f                 /compiles a function
  a:(f 3)#f 1   /args
  t:"kisfzISFZ"
  t:`$$t@0|t?(*|)'$a
  x:`$$*'$a
- symtab::(`X`i!`k`i),x!t   /symbol!type
- c:unpack/[f 0;x;t;!#t]    /code
+ symtab::(`X`i!`k`i),x!t                    /symbol!type
+ c:unpack/[f 0;x;t;!#t]                     /unpack k args
  c:replace[c;(`1;1048576;`320);,(`1)],(`1)  /:(return)
  c:unref expand/[c;!symtab;.symtab]         /X[i] -> I64(..)
- c:split[c;,`256]                           /split expression list
+ c:split[c;,`256]                           /split expressions (at ;)
  d:decl/[+tpisq!(s0;!0;!0;s0;s0:0#`);!symtab;.symtab]  /init x=0 for k types
  ast:*(,d)expr/c
  
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
- r:locals/[r;l`s;(l:`s`q#ast[&`asn=ast`t])`q]
+ r:locals/[r;1_!symtab;1_.symtab]
  r,:+tpis!(,`ast;,0;,0N;,`)
  r,:tpis#ast[`p]:(-1+#r)|(#r)+ast`p
  prog,r[`p]:0|(#prog)+r`p
-}                                       /todo fix k-literals
+}
 
 decl:{[t;s;y]$[(~s~`X)&y':`I`F`k;t,+tpisq!(`asn`lit;0N,#t;0 0;s,`k;`k`k);t]}
 
@@ -52,7 +52,7 @@ expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
  e:replace[e;(`$($s),"t";.);`p"tp ",($s)]
  e:replace[e;(`$($s),"n";.);`p"nn ",($s)]
  e:replace[e;(`$($s),"i";.);`p($s),"[i]"]
- e:replace[e;(`$($s),"0";.);`p($s),"[0]"]  /todo modified x0+:1 fails
+ e:replace[e;(`$($s),"0";.);`p($s),"[0]"]  /todo modified x0+:1 fails (would be nice)
  e:replace[e;(`$($s),"1";.);`p($s),"[1]"]
  e:replace[e;(`$($s),"2";.);`p($s),"[2]"]
  e:$[#i:,/1 2+/:&2=+/rotate'[0 1;e~\:/:(`211;s)];e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
@@ -72,9 +72,9 @@ locals:{[t;s;q]r:(+tpis!(`loc`sym;0N 0;0N 0;(def q),s));t,r[`p]:0|(#t)+r`p}
 prefix:{[tab;y]
  pu:{tab::tab,,+tpisq!x}              /push
  po:{r:*|tab;tab::-1_tab;r}           /pop
- li:{n:-x;tab::(n_tab),,|n#tab}
- $[`v~yt:@y;$[(y)~`27;li@*po[]`i      /list(call args)
-    0~n:64\0+y              /byte code: see exec.go:func exec
+ li:{n:-x;tab::(n_tab),,|n#tab}       /make list (`27)
+ $[`v~yt:@y;$[(y)~`27;li@*po[]`i      /kvm switch  see exec.go:^func exec
+    0~n:64\0+y              
         pu monadic[y;po[]]
     1~n;pu  dyadic[y;po[];po[]]
     2~n;err`indirect
@@ -104,7 +104,7 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
-assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(s':!symtab);err`reassign;0]
+assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(r:s':!symtab);err`reassign;0]
  y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref
  symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
  
@@ -119,21 +119,22 @@ amend:{[v;y;f;i;s]
  y:$[`nop~(*f)`t;y;(f,l[`p]:0|1+l`p),y[`p]:+0|1+y`p] /modified y:f,l,y
  .t,y[`p]:0|(#t)+y`p}
 
-argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps`f;n#`k]}
+argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps f;n#`k]}
 call:{[f;x]            /also: if switch W(while) N(do)
- q:(*'x)`q;q:$[(2<#q)&1=#?q;?q;0#`];c:(*f)`t`s
- x:$[(`get`N~c)|`get`W~c;*(1_x;h:*x);x]          /split cnd from while
+ q:(*'x)`q;q:$[(2<#q)&1=#?q;?q;0#`];c:(*f)`s
+ x:$[c':`N`W;*(1_x;h:*x);x]          /split cnd from while
+ x:$[c':`N`W`switch`if;x;uptype'[x;def@*'x@\:`q;argtypes[c;#x]]]
  x:{x,y[`p]:(#x)+y`p}/[+tpisq!(0#`;!0;!0;0#`;0#`);x]
- x:$[(1<#x)&`get`W~c;(+tpisq!(,`stm;,0N;,0N;0#`;0#`)),x[`p]:0|1+x`p;x]
+ x:$[(1<#x)&`W~c;(+tpisq!(,`stm;,0N;,0N;0#`;0#`)),x[`p]:0|1+x`p;x]
  inc:+tpisq!(`asn`add`get`lit;0N 0 1 1;0N 2 0 1;`i`i`i`i;`i`i`i`i)
- t:+tpisq!$[`get`if~c;(,`cnd;,0N;,0N;q;q)
-  `get`W~c;.((+tpisq!(,`for;,0N;,0;,`W;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)
-  `get`N~c;.((+tpisq!(,`for;,0N;,0;,`L;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
-  `get`switch~c;(,`swc;,0N;,1;0#`;0#`)
+ t:+tpisq!$[`if~c;(,`cnd;,0N;,0N;q;q)
+  `W~c;.((+tpisq!(,`for;,0N;,0;,`W;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)
+  `N~c;.((+tpisq!(,`for;,0N;,0;,`L;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
+  `switch~c;(,`swc;,0N;,1;0#`;0#`)
   (,`cal;,0N;,0N;f`s;,`k)]
  t,:x[`p]:0|(#t)+x`p
  t[0;`p]:0N
- t:$[`get`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2|2+t`p;t]
+ t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2|2+t`p;t]
  .t}
 
 
@@ -163,7 +164,7 @@ coerce:{[t;a]t:def t                   /type conversion, e.g. convert args to k 
  (t,s)~`k`f;(+tpisq!(,`cal;,0N;,0;,`Kf;,`k)),a[`p]:0|1+a`p;err`coerce,t,s]} /Kf
  
 
-native:{[t]                                         /redirect calls to native to generated functions
+native:{[t]                /redirect calls to native to generated functions
  /append function halfkey: func halfkey(x,y int64)int64{return Func[int32(x)].(func(int64)int64)(y)}
  asm:(+tpis!(`fun`arg`sym`arg`sym`res`ast`ret`cli`cst`typ`get`get`arg
   0N 0 1 0 3 0 0 6 7 8 9 9 8 8
@@ -194,27 +195,26 @@ register:{[t;f;n;c]  /create native function and store it to global at the end o
  e:i_t;p:e[`p];e[`p]:p[&p=0]:0N
  t:reg/[i#t;f;n;c]
  t,e[`p]:0|((#t)-i)+e`p}
-reg:{[t;f;n;a]       /register function, e.g. after zk(): f:interal[567;2]
+reg:{[t;f;n;a]         /register function, e.g. after zk(): f:interal[567;2]
  p:*&(`kinit=t`s)&`fun=t`t
- p:*&(p<!#t)&`ast=t`t        /first ast node within fun kinit
- a:(.a)3             /arity from lambda
+ p:*&(p<!#t)&`ast=t`t  /first ast node within fun kinit
+ a:(.a)3               /arity from lambda
  c:#C;C::C,f:@[_&8;!#f;f:(8&#f)#f:$f]
  asm:+tpis!(`cal`lit`lit`lit;0N 0 0 0;0N,c,n,a;`reg`k`i`i) /reg(f,n,a)
  t,asm[`p]:p|(#t)+asm`p}
 
-
 err:    {`err \x;0+x}      /trap e.g. err`type
 
-/A:`p"f:{[xi;yi]x*y}"
-/A:`p"f:{[xi;yi]i 2}"
+
+
+/A is assigned by js in index.html
 /A:`p"f:{[xI]x[0]}"
-codes:A 1+i:4*!(#(A:0,A))%4
+codes:A 1+i:4*!(#(A:0,A))%4  /split src into name:{code}
 names:A 2+i
 
-full:{[]export native compile/[+tpis!(T;P;I;S);names;codes]}               /full interpreter
-simple:{[]D::"";export compile/[+tpis!(,`prg;,0;,0;`"k.5");names;codes]}  /only extensions
+full:{[] export native compile/[+tpis!(T;P;I;S);names;codes]}            /full interpreter
+simple:{[]D::"";export compile/[+tpis!(,`prg;,0;,0;`"k.5");names;codes]} /only extensions
 export:{T::x`t;P::x`p;I::x`i;S::x`s;x}
 
 draw:{[x]t:drawtree x`p;`<"\n"/:((2^(2*#*t)#" "),t),'(`lxy 20,10+#x)(+`id!,!#x),'x}
 
-/B:compile/[+tpis!(,`prg;,0;,0;`"exa");names;codes]

@@ -93,6 +93,7 @@ function run(c){ //stage 1
  })
 }
 function downld(s,u){
+ O("download "+s+"\n")
  let x=new Blob([u],{type:"application/octet-stream"}) //u:uint8array
  let dl=ge("dl")
  dl.href=URL.createObjectURL(x)
@@ -106,6 +107,11 @@ function stage2(w){
   K=r.instance.exports
   K.kinit()
   O("k2\n")
+  let x=ge("kin").value
+  console.log("kin",x)
+  x = KC(x)
+  console.log("KC",x)
+  K.dx(K.Val(x))
  })
 }
 
@@ -135,7 +141,7 @@ f:{[xi;yi]x+y}
  ktypes:{
   a:`/variables of k type call k functions instead of integer opcodes.
 /k vars are declared by xk or x alone
-plus:{[x;y]x+y}
+take:{[x;y]x#y}
 
 /mixed i+k or f+k convert the scalar to k types. mixed i+f converts to float.
 mixed:{[xf;yi]x+y}
@@ -143,8 +149,8 @@ mixed:{[xf;yi]x+y}
 /vector types also call k functions
 vectors:{[xI;yF]x+y}
 `,
-  k:` \\plus[1 2 3;0.5]
- \\mixed[1 2;3]
+  k:` \\take[2#;!5]
+ \\mixed[3.5;2]
  \\vectors[1 2 3;0.5 0.6 0.7]
 `
  },
