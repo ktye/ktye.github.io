@@ -61,7 +61,7 @@ the result is catenated to the stack.
 
 ast transformations(are done on the table before flattening), e.g.:
  -rename builtin functions [c]
- -rewrite cond/switch expressions as statements (return or assign each) [go]
+ -rewrite cond/swtich expressions as statements (return or assign each) [go]
   same for c but keep ternary expressions
  -remove explicit zero assignments [go wa] todo
  
