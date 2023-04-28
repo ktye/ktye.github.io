@@ -25,11 +25,10 @@ compile:{[prog;name;f];f:.f
  t:`$$t@0|t?(*|)'$a
  x:`$$*'$a
  symtab::(`X`i!`k`i),x!t   /symbol!type
- `symtab \symtab
  c:unpack/[f 0;x;t;!#t]    /code
  c:replace[c;(`1;1048576;`320);,(`1)],(`1)  /:(return)
  c:unref expand/[c;!symtab;.symtab]         /X[i] -> I64(..)
- c:split[`code \c;,`256]                           /split expression list
+ c:split[c;,`256]                           /split expression list
  d:decl/[+tpisq!(s0;!0;!0;s0;s0:0#`);!symtab;.symtab]  /init x=0 for k types
  ast:*(,d)expr/c
  
@@ -53,10 +52,10 @@ expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
  e:replace[e;(`$($s),"t";.);`p"tp ",($s)]
  e:replace[e;(`$($s),"n";.);`p"nn ",($s)]
  e:replace[e;(`$($s),"i";.);`p($s),"[i]"]
- e:replace[e;(`$($s),"0";.);`p($s),"[0]"]
+ e:replace[e;(`$($s),"0";.);`p($s),"[0]"]  /todo modified x0+:1 fails
  e:replace[e;(`$($s),"1";.);`p($s),"[1]"]
  e:replace[e;(`$($s),"2";.);`p($s),"[2]"]
- e:$[#i:,/1 2+/:&(`211)~/:e;e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
+ e:$[#i:,/1 2+/:&2=+/rotate'[0 1;e~\:/:(`211;s)];e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
  $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (i ",($s),")+8*0"]
    t~`I;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"]
    t~`F;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"];e]}
@@ -89,7 +88,7 @@ prefix:{[tab;y]
 
 symbol: {(,`sym;,0N;,0;,x;,symtab x)}
 const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];t;t:,$[`c~t;`i;t])}       /todo fix floats later
-quotedverb:{s:ops -384+x;s:$[(`449)~x;`nop;s;s;err`quotedverb]; \(,s;,0N;,2;0#`;0#`)}
+quotedverb:{s:ops -384+x;s:$[(`449)~x;`nop;s;s;err`quotedverb];(,s;,0N;,2;0#`;0#`)}
 monadic:{[f;x]t:*x`q
  $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
   f~(`1);.(+tpisq!(,`ret;,0N;,0N;,`k;,`k)),x[`p]:0|1+x`p
@@ -109,24 +108,18 @@ assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(s':!symtab);err`reassign;0]
  y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref
  symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
  
-amend:{[v;y;f;i;s] `i \i;`f \f;`y \y;`v \v;`s \s; 
- s:`symbol \(*s)`s
- t:$[(t:`t \symtab s)':`i`f`k;err`amendtype;t~`I;*(`i;w:4);*(`f;w:8)]
-
- t:+tpisq!(`sto`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;q;q:t,`i`i`k`k,t,t)
- 
- /m:+tpisq(`lod`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2 0;t,`i`i`k`k,t   w
- 
+amend:{[v;y;f;i;s]
+ s:(*s)`s
+ u:$[(u:symtab s)':`i`f`k;err`amendtype;u~`I;*(`i;w:4);*(`f;w:8)]
  d:i
+ t:+tpisq!(`sto`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,u,u;u,`i`i`k`k,u,u)
  t,:d[`p]:5|7+d`p           /x[i]:
- .t,$[`nop~(*f)`t;y[`p]:0|(#t)+y`p
-    err`nyimodified]
- .`amend \t}
+ l:+tpisq!(`lod`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,u,u;u,`i`i`k`k,u,u)
+ l,:i[`p]:5|7+i`p
+ y:$[`nop~(*f)`t;y;(f,l[`p]:0|1+l`p),y[`p]:+0|1+y`p] /modified y:f,l,y
+ .t,y[`p]:0|(#t)+y`p}
 
 argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps`f;n#`k]}
-/call:{[f;x]x:coerce'[argtypes[*f`s;#x];x];.(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
-/call:{[f;x].(+tpisq!(,`cal;,0N;,0N;f`s;,`k)){x,y[`p]:0|(#x)+y`p}/x}
-
 call:{[f;x]            /also: if switch W(while) N(do)
  q:(*'x)`q;q:$[(2<#q)&1=#?q;?q;0#`];c:(*f)`t`s
  x:$[(`get`N~c)|`get`W~c;*(1_x;h:*x);x]          /split cnd from while
