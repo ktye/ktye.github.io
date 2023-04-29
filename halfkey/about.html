@@ -9,40 +9,152 @@
 </head>
 
 <body>
+halfkey
 <pre>
-f:compile{ .. }
+halfkey  is a language that sits halfways between k and the interpreter.
+it extends k with custom builtins and writes a new source file,
+e.g. k+.c
 
-f:compile{[x;y]x+y}  /func f(x,y K)(r K){ r=Add(rx(x),rx(y));dx(x);dx(y);return r}
-f:compile{[x]1+x}    /func f(x K)(r K){ r=Add(Ki(1),rx(x));dx(x);return r}
-f:compile{[x]1.+x}   /func f(x K)(r K){ r=Add(Kf(1.0),rx(x));dx(x);return r}
+the purpose of halfkey is mixed scalar/vector code mutating arrays, e.g.
+linear algebra, faster (or easier) than k.
+ideally it obsoletes itself.
 
-int/float: + - * / %   << >>   < = > <= >= ~
-unsigned  /' >>' <' >' <=' >='
+<a href="https://ktye.github.io/halfkey/index.html">ktye.github.io/halfkey</a> runs a 2 stage k.wasm:
 
-[xI;yF]
- prolog   xn:nn[x];xp:cast(x)   length, pointer 
- x[..]    I32[(xp<<2)+..]       index expression returns int
- x0       I32[xp<<2]            first
- x1       I32[4+xp]
- xi       I32[i<<2+xp]          e.g. within loops
- xi:..    SetI32[i<<2+xp,..]    set int
- yi:..    SetF64[i<<2+xp,..]    set float
- xr       rx[x]
- epilog   dx[x];dx[y];r         unref args, return r
+stage 1  reads the interpreter source (k.k) intermediate form,
+ halfkey.k (the language compiler) and wb.k (IR to wasm binary compiler)
+ it then compiles halfkey's input and emits a new extended k.wasm.
+ js destroys the current instance and boots to:
+stage 2  reads and executes k code that uses the extensions
 
-[xi]
- prolog  x=int32(x)
+clicking [run] does just that,
+[ast]  shows the parse tree of the generated functions
+[c]    shows c output for the functions (by cc.k instead of wb.k)
+[k+.c] downloads the generated source of the extended k interpreter.
 
-$[i>0;..]                       if(i>0)..
-$[a;b;c;d;e]                    if elseif else
-?[i;a;b;c]                      switch(c)case 0:a;case 1:b;default:c
-W[c;..]                         while
-W[`l;c..]                       label l:while..
-N[n;..]   i:0;W[i<n;..;i:+1]    loop
-N[`l;n;..] 
-:l                              break l
-!l                              continue l
+everything is in k <a href="halfkey.k">halfkey.k</a> <a href="../kweb/k.k">k.k</a>(large) <a href="../kweb/wb.k">wb.k</a> <a href="../kweb/cc.k">cc.k</a> <a href="drawtree.k">drawtree.k</a>
+</pre>
+
+halfkey functions
+<pre>
+name:{[xi;yI;z]...}
+
+is compiled to a native function, e.g in c:  K name(K X){..}
+the signature is always monadic (argument list) 
+but from k it is called with fixed arity like a lambda:
+ name[3;4 5;(1 2;3 4)]
+
+the compiler injects unpacking code, type checking/conversion
+and handles refcounting.
+</pre>
+
+types
+<pre>
+halfkey is statically typed and types are inferred.
+within the function there are atoms (ints and floats),
+which true i32 and f64, not tagged k-values.
+and vectors which are k values but can be indexed as ints or floats,
+e.g. for x declared as xI, x[1+y] returns an int.
+
+these verbs are compiled to int & (most)float ops:
+ -~                     neg not
+ +-*%&|&lt;&gt;=~^            add sub..
+
+unspecified types remain k, and all k monadic and dyadic functions
+are available (but no operators, compositions, projections, lambdas..):
+ +-*%&|&lt;&gt;=~!,^#_$?@.
+
+they compile to function calls to the primitive implementations, e.g.
+ 2#x  is Tak(Ki(2),rx(x))
+literals and mixed i+k or f+k are converted to k types.
+mixed i+f are converted to float.
+</pre>
+
+flow
+<pre>
+halfkey's syntax is k for ease of parsing (resue `p@) but flow control is different
+(because k-cond $[x;y..] and while[..] generates complicated byte code with jumps).
+instead we use arthuresque W[cond;a;b;c] for while,
+N[n;..] for a loop with known length and if[a;b] or if[a;b;c] as conditionals.
+the latter is detected as expression, e.g. 1+if[a;b;c] if a and b are the same type.
+also jump table as switch[i;a;b;c] where cases are consecutive 0,1..default.
+</pre>
+
+infix-postfix-treetable
+<pre>
+ "x+3*y"             /k string form, parse with `p"x+2*y" returns
+ (`y;.;3;*;`x;.;+)   /kvm byte code, postfix (actually list for k values)
+ +`t`p`i`s!(..)      /treetable, prefix with parent vector
+       t  p  i  s
+ 0  `add  0  2 `i  
+ 1  `get  0  0 `x
+ 2  `mul  0  2 `i  
+ 3  `lit  2  3 `i 
+ 4  `get  2  0 `y
+
+we have many possibilities where to do transformations,
+e.g. replace x0 with x[0]. byte code is a good fit.
+
+treetables are hardest to write and manipulate, but unbeatable for query.
+
+for type inference we temporarily add column q resulting in tpisq.
+</pre>
+
+prefix
+<pre>
+the main translation from postfix to the treetable is the function:
+
+prefix:{[tab;y]
+ pu:{tab::tab,,+tpisq!x}              /push
+ po:{r:*|tab;tab::-1_tab;r}           /pop
+ li:{n:-x;tab::(n_tab),,|n#tab}       /make list (`27)
+ $[`v~yt:@y;$[(y)~`27;li@*po[]`i      /kvm switch  see exec.go:^func exec
+    0~n:64\0+y
+        pu monadic[y;po[]]
+    1~n;pu  dyadic[y;po[];po[]]
+    2~n;err`indirect
+    3~n;pu amend[y;po[];po[];po[];po[]]
+    4~n;err`drop
+    5~n;err`jump
+    6~n;err`jumpifnot
+    pu quotedverb y]
+   yt~`s;pu symbol y;pu const[yt;y]]
+ tab}
+
+it uses a stack (a list of partial k trees) and is applied as:
+ prefix/[initstack;expression]
+at the end one table remains on the stack
+</pre>
+
+translate&maxout
+<pre>
+catenate two trees is simple if they are tables: x,y
+but we have to fix the parent vector
+
+ x,y[`p]:0|(#x)+y`p
+
+both trees were written in discretion with their root's parent set to 0N.
+it remains negative during translation and is maxed out with the new parent.
+0| can be replaced by any other node number, wherever y should be linked into x
+
+the above assumes indexed assign x[`p]:.. (so should modified assign) returns x
+completely, not just the right hand side.
 
 </pre>
+
+todo
+<pre>
+- fix wb generated code
+- break continue and labels(outer)
+  e.g.  W[`a;1&lt;x;.. &lt;a  ..] /continue
+  and   W[`a;1&lt;x;.. &gt;a  ..] /break
+  labels default to W (N in ndo) for inner loop
+- example&measure k vs halfkey
+  lu fft svd?
+</pre>
+
+
+
+</ul>
 </body>
 </html>

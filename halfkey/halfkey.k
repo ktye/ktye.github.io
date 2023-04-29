@@ -1,7 +1,8 @@
 /halfkey compiler
-/interpreter source is stored in C D  T P I S as a k table
+/interpreter source is stored in C D  T P I S as k table columns
 /input parse tree is stored in A as kvm byte code
-/the compiler converts A to lower form and appends it to T P I S \
+/the compiler converts A to lower form and appends it to T P I S
+/entry point is full[] or simple[]
 
 symtab:(0#`)!0#`                   /symbol-type map
 tpis:4#tpisq:`t`p`i`s`q            /table header
@@ -20,7 +21,7 @@ split:  {n_'(&n=+/rotate'[!n:#y;x~\:/:y])^x:y,x}
 rotate: {y@n/x+!n:#y}
 
 compile:{[prog;name;f];f:.f                 /compiles a function
- a:(f 3)#f 1   /args
+ a:(f 3)#f 1                                /args
  t:"kisfzISFZ"
  t:`$$t@0|t?(*|)'$a
  x:`$$*'$a
@@ -62,9 +63,10 @@ expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
 
 expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1
- $[1=#r;r;,(r 0),t[`p]+:#r 0]}  /keep root nodes negative
+ $[1=#r;r;,(r 0),t[`p]+:#r 0]}
  
-unref:{[c]s:,/(=symtab)`k`C`I`S`F   /unref at return  :Dex[x;Dex[y;..]]
+unref:{[c]s:,/(=symtab)`k`C`I`S`F      /unref at return  :Dex[x;Dex[y;..]]
+ s:$[#&((.)~/:c[-1+i])&i:&(`1)~/:c;s@&~s=c@-2+*i;s] /prevent last sym from unref: Dex[x;x] 
  replace[c;,(`1);(1_`p(";"/:"Dex[",/:$s),";0",(#s)#"]"),(`1)]}
 
 locals:{[t;s;q]r:(+tpis!(`loc`sym;0N 0;0N 0;(def q),s));t,r[`p]:0|(#t)+r`p}
@@ -105,7 +107,7 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
 assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(r:s':!symtab);err`reassign;0]
- y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref
+ y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref if k
  symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
  
 amend:{[v;y;f;i;s]
