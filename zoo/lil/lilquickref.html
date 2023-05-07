@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>Lil Quick Reference</title>
+</head>
+<body>
+
+<style>
+body{margin:1em 5em 5em 3em;font-size:15px;}
+h1,h2,figcaption{font-family:Helvetica Neue,Arial,sans-serif;}
+h1{color:#21183c;font-weight:700;}
+h2{color:#21183c;font-weight:300;}
+pre,code{background-color:Gainsboro;tab-size:2;font-size:large;font-size:15px;}
+pre{margin:0 .5em;padding:.5em;border:1px solid #aaa;border-radius:5px;}
+li{margin:1em 0;}
+table{margin:0 .5em;border-collapse:collapse;border:1px solid #aaa;}
+td{padding:5px;}th{padding:10px;border-bottom:1px solid #aaa;background-color:Gainsboro;}
+td,th:not(:first-child){border-left:1px solid #aaa;}
+</style>
+
+<h1 id="lilquickreference">Lil Quick Reference</h1>
+
+<h2 id="types">Types</h2>
+
+<table>
+<colgroup>
+<col style="text-align:left;"/>
+<col style="text-align:left;"/>
+<col style="text-align:left;"/>
+</colgroup>
+
+<thead>
+<tr>
+	<th style="text-align:left;"> <code>typeof</code>  </th>
+	<th style="text-align:left;"> False  </th>
+	<th style="text-align:left;"> Examples       </th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td style="text-align:left;"> <code>&quot;number&quot;</code> </td>
+	<td style="text-align:left;"> <code>0</code>  </td>
+	<td style="text-align:left;"> <code>42</code> <code>37.5</code> <code>-29999</code>    </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>&quot;string&quot;</code> </td>
+	<td style="text-align:left;"> <code>&quot;&quot;</code>  </td>
+	<td style="text-align:left;"> <code>&quot;foo\nbar&quot;</code>      </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>&quot;list&quot;</code>  </td>
+	<td style="text-align:left;"> <code>()</code>  </td>
+	<td style="text-align:left;"> <code>11,22,33</code> <code>list 3</code>     </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>&quot;dict&quot;</code>  </td>
+	<td style="text-align:left;"> <code>()dict()</code> </td>
+	<td style="text-align:left;"> <code>(&quot;a&quot;,&quot;b&quot;) dict 11,22</code>    </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>&quot;table&quot;</code> </td>
+	<td style="text-align:left;"> n/a  </td>
+	<td style="text-align:left;"> <code>table range 2</code> <code>insert a:1 into 0</code> </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>&quot;function&quot;</code> </td>
+	<td style="text-align:left;"> n/a  </td>
+	<td style="text-align:left;"> <code>on x y do x+y end</code>     </td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="primitives">Primitives</h2>
+
+<table>
+<colgroup>
+<col style="text-align:left;"/>
+<col style="text-align:left;"/>
+<col style="text-align:left;"/>
+</colgroup>
+
+<thead>
+<tr>
+	<th style="text-align:left;"> Valence </th>
+	<th style="text-align:left;"> Purpose </th>
+	<th style="text-align:left;">                    </th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td style="text-align:left;"> monad </td>
+	<td style="text-align:left;"> arithmetic </td>
+	<td style="text-align:left;"> <code>-</code> <code>!</code> <code>floor</code> <code>cos</code> <code>sin</code> <code>tan</code> <code>exp</code> <code>ln</code> <code>sqrt</code> <code>mag</code> <code>unit</code> <code>heading</code> </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> monad </td>
+	<td style="text-align:left;"> reducers </td>
+	<td style="text-align:left;"> <code>count</code> <code>first</code> <code>last</code> <code>sum</code> <code>min</code> <code>max</code> <code>raze</code>        </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> monad </td>
+	<td style="text-align:left;"> data  </td>
+	<td style="text-align:left;"> <code>range</code> [0&#8230;n) <code>list</code> (enlist) <code>rows</code> <code>cols</code> <code>table</code> <code>typeof</code> <code>flip</code>  </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> dyad </td>
+	<td style="text-align:left;"> arithmetic </td>
+	<td style="text-align:left;"> <code>+</code> <code>-</code> <code>*</code> <code>/</code> <code>%</code> (y mod x) <code>^</code> (pow) <code>&amp;</code> (min) <code>|</code> (max)  </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> dyad </td>
+	<td style="text-align:left;"> logical </td>
+	<td style="text-align:left;"> <code>&lt;</code> <code>&gt;</code> <code>=</code> (conforming equal) <code>~</code> (match) <code>unless</code> (x if y is <code>0</code>)   </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> dyad </td>
+	<td style="text-align:left;"> string  </td>
+	<td style="text-align:left;"> <code>fuse</code> <code>split</code> <code>parse</code> <code>format</code>            </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> dyad </td>
+	<td style="text-align:left;"> data  </td>
+	<td style="text-align:left;"> <code>,</code> (concat) <code>@</code> (index each right) <code>dict</code> <code>take</code> <code>drop</code> <code>limit</code> <code>in</code>  </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> dyad </td>
+	<td style="text-align:left;"> joins  </td>
+	<td style="text-align:left;"> <code>join</code> (natural join/zip) <code>cross</code> (cross join/cartesian product)   </td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="flow">Flow</h2>
+
+<ul>
+<li><code>if bool ... end</code></li>
+<li><code>if bool ... else ... end</code></li>
+<li><code>if bool ... elseif bool ... else ... end</code> (etc)</li>
+<li><code>each val key index in x ... end</code></li>
+<li><code>while bool ... end</code></li>
+<li><code>send name[args]</code></li>
+</ul>
+
+<h2 id="queries">Queries</h2>
+
+<ul>
+<li><code>select  n:x where a by b orderby c asc from d</code> reorder, compute, or filter a table</li>
+<li><code>update  n:x where a by b orderby c asc from d</code> modify rows/columns of a table in place</li>
+<li><code>extract n:x where a by b orderby c asc from d</code> like select, but yields non-tabular values</li>
+<li><code>insert  n:x into d</code> append to a table, or <code>into 0</code> to make a new table</li>
+<li><code>index</code>: original row number</li>
+<li><code>gindex</code>: original index within row&#8217;s group</li>
+<li><code>group</code>: index of row&#8217;s group (by appearance)</li>
+<li><code>column</code>: the entire current subtable, for referencing denormal columns</li>
+</ul>
+
+<h2 id="formatting">Formatting</h2>
+
+<p>A format is <code>%*-0N.DX</code>: <code>*</code> skip, <code>0</code> pad, <code>N</code> width.<br/>
+<code>-</code> is invert char class (<code>ro</code>) or left justify.<br/>
+<code>.D</code> is decimal places (<code>fc</code>), size of char class (<code>ro</code>), or truncate to <code>D</code> characters.</p>
+
+<table>
+<colgroup>
+<col style="text-align:left;"/>
+<col style="text-align:left;"/>
+<col style="text-align:left;"/>
+</colgroup>
+
+<thead>
+<tr>
+	<th style="text-align:left;"> <code>X</code>  </th>
+	<th style="text-align:left;"> Purpose </th>
+	<th style="text-align:left;">                        </th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+	<td style="text-align:left;"> <code>%nmz</code> </td>
+	<td style="text-align:left;"> Parsing </td>
+	<td style="text-align:left;"> literal <code>%</code>, number of chars read, matches? matches to end?         </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>ro</code>  </td>
+	<td style="text-align:left;"> Matching </td>
+	<td style="text-align:left;"> repeat (0 or more in char class), optional (0 or 1 in char class)        </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>sula</code> </td>
+	<td style="text-align:left;"> String </td>
+	<td style="text-align:left;"> string, uppercase string, lowercase string, ASCII chars          </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>bficChH</code> </td>
+	<td style="text-align:left;"> Number </td>
+	<td style="text-align:left;"> bool, float, int, currency (<code>-$1.23</code>), plain currency (<code>-1.23</code>), hex lowercase, hex uppercase </td>
+</tr>
+<tr>
+	<td style="text-align:left;"> <code>jep</code>  </td>
+	<td style="text-align:left;"> Misc. </td>
+	<td style="text-align:left;"> JSON, unix epoch, time-parts {<code>year</code>, <code>month</code>, <code>day</code>, <code>hour</code>, <code>minute</code>, <code>second</code>}    </td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
+
