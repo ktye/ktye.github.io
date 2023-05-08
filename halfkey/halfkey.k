@@ -7,13 +7,14 @@
 symtab:(0#`)!0#`                   /symbol-type map
 tpis:4#tpisq:`t`p`i`s`q            /table header
 load:`I8`I32`F64`I64!`b`i`f`k
-ftype:`I32`F64`nn`fk`tp!`i`f`i`f`i      /return types (default k)
-atype:`Kf`Ki!`f`i                       /arg type for monadic funcs (default k)
-atyps:`f1`f2`xtp!(`i`k`f;`i`i;`k`i)     /arg types for function calls
+atype:`Kf`Ki!`f`i                                                   /arg type for monadic funcs (default k)
+atyps:`f1`f2`xtp!(`i`k`f;`i`i;`k`i)                                 /arg types for function calls
+ftype:{$[x':(!float1),!float2;`f;(`I32`F64`nn`fk`tp!`i`f`i`f`i)x]}  /return types (default k)
 def:``k`i`f`I`C`S`F!`k`k`i`f`k`k`k`k
 typ:``k`C`I`S`F`i`f!`k`k`k`k`k`k`i`f
-float1:`hypot`atan2`pow`fmin`fmax`copysign!`hypot`atan2`pow`F64min`F64max`F64copysign
-float2:`exp`log`atan`abs`sqrt`ceil`floor`nearest!`exp`log`atan`F64abs`F64sqrt`F64ceil`F64floor`F64nearest
+float1:`exp`log`atan`abs`sqrt`ceil`floor`nearest!`exp`log`atan`F64abs`F64sqrt`F64ceil`F64floor`F64nearest
+float2:`hypot`atan2`pow`fmin`fmax`copysign!`hypot`atan2`pow`F64min`F64max`F64copysign
+
 
 replace:{join[z;split[x;y]]}  /replacements in bytecode
 join:   {(-#x)_,/y,\:x}
@@ -57,9 +58,9 @@ expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
  e:replace[e;(`$($s),"1";.);`p($s),"[1]"]
  e:replace[e;(`$($s),"2";.);`p($s),"[2]"]
  e:$[#i:,/1 2+/:&2=+/rotate'[0 1;e~\:/:(`211;s)];e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
- $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (i ",($s),")+8*0"]
-   t~`I;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"]
-   t~`F;replace[e;(s;.;`83);1_`p"   I32 (i ",($s),")+4*0;"];e]}
+ $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (int ",($s),")+8*0"]
+   t~`I;replace[e;(s;.;`83);1_`p"   I32 (int ",($s),")+4*0;"]
+   t~`F;replace[e;(s;.;`83);1_`p"   I32 (int ",($s),")+4*0;"];e]}
 
 expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1

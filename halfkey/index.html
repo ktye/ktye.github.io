@@ -29,7 +29,7 @@ body{margin:0;overflow:hidden}
 <a id="dl" style="display:none"></a>
 
 <script>
-let K,kk,hk,cc,wb,dt
+let K,kk,hk,cc,go,wa,wb,dt
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function su(u){return(u.length)?new TextDecoder("utf-8").decode(u):""}
@@ -40,6 +40,8 @@ function init(){let fe=(u,f)=>{fetch(u).then(r=>r.text()).then(f)}
  fe("drawtree.k",  r=>dt=r) //tree view
  fe("../kweb/k.k", r=>kk=r) //k-source as table
  fe("../kweb/cc.k",r=>cc=r) //c transpiler
+ fe("../kweb/go.k",r=>go=r) //go transpiler
+ fe("../kweb/wa.k",r=>wa=r) //wasm(text)   compiler
  fe("../kweb/wb.k",r=>wb=r) //wasm(binary) compiler
 }
 window.onerror=function(m,s,l,c,e){O(m+" "+e+"\n")}
@@ -159,7 +161,7 @@ vectors:{[xI;yF]x+y}
   a:`/some scalar floating point functions are predefined:
 / hypot atan2 pow fmin fmax copysign
 / exp log atan abs sqrt ceil floor nearest
-f:{[xf;yf]exp hypot[xf;yf]}
+f:{[xf;yf]exp hypot[x;y]}
 `,
   k:`/scalar integers are automatically uptyped when floats are expected
  \\f[3;4]
@@ -253,7 +255,7 @@ lu:{[A]i:0;k:!#A;P:!#A
 }
 for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
 function example(s){if(ge("exa").value!=s.value)ge("exa").value=s.value;let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
-let h=window.location.hash.slice(1);example({value:(h.length)?h:"amend"})
+let h=window.location.hash.slice(1);example({value:(h.length)?h:"add"})
 
 </script></body></html>
 
