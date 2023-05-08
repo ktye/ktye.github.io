@@ -71,7 +71,7 @@ wbres:{y;"(result ",(wbtype S x),")"}
 wbloc:{"(local ",(*y)," ",(wbtype S x),")"}
 wbstm:{,/y}
 wbast:wbstm
-wblod:{(y 0),(0x2d282829292b i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
+wblod:{(y 0),(0x2c282829292b i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 wbsto:{(,/y),(0x3a3636373739 i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 wbant:{(,/y),(0x417f7371;0x427f8583)@(S x)':`j`k} /y0 y1 -1 xor and 
 wbasn:{y,$[I x;0x24,leb glob?S x;0x21,leb(locs ifun x)?S x]}
@@ -89,11 +89,16 @@ wblop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
  
 wbget:{y;0x20,leb(locs ifun x)?S x}
 wbGet:{y;0x23,leb glob?S x}
-wbjmp:{y;0x0c,(_1+I x)} /todo:label  /{"br ",$[`~S x;$1+I x;"$",($S x),$I x]}
 wblit:{y;i:I x;((`i`u`k`j`f!0x4141424244)t),,$[`f~t:S x;C i+!8;`i~t;leb i;`u~t;leb i;leb8 C i+!8]}
+wbjmp:{y;0x0c,_$[`~S x;1+I x;wbtrg x]}
+wbtrg:{l:S x;c:-~I x                    /calculate target for labeled break/continue
+ x:1_{$[(`for;l)~(T x;S x);x;P x]}\:x   /scan parents til for-with-label
+ x:x@&~`stm=T x                         /dont nest statements
+ c+-1+(#x)+/(`for=T x)&~I x}            /simple loops add 1 level, others 2
 
-wbneg:{wbsub[x;($[`f~t:S x;0x44,(8#0x00);(0x4141424244@`i`u`j`k?S x),0x00];*y)]}
-wbnot:{(*y),"\ni32.eqz"}
+
+wbneg:{$[`f~t:S x;(*y),0x9a;wbsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
+wbnot:{(*y),0x45} /i32.eqz
 wbnop:{y;""}
 wbret:{(*y),0x0f}
 
@@ -123,7 +128,7 @@ wbcast:(0x0000a7a7aa;0x0000a7a7ab;0xacad0000b0;0xadad0000b1;0xb7b8b9ba00) /iujkf
 
 
 leb:{leb8(`c@,x),4#$[x<0;0xff;0x00]}
-leb8:{r:!0;B:1v:,/+(8#2)\\256/256+|x;while[B&(8<#v)&+/v;b:-7#v;s:*b;v:-7_v;r,:$[((0~&/v)|0x00~s)&(+/v)|s;1;B:0],b];_2//'-8^r}
+leb8:{s:*x:,/+(8#2)\\256/256+|x;|_2//'(1&!#x),'x:-7^(((7*1+7\#x)-#x)#s),x:(x?~s)_x}
 
 wbsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!wbtype@/:(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 /(import \"env\" \"Exit\"  (func $Exit  (param i32)))
