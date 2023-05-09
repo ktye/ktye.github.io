@@ -101,7 +101,7 @@ monadic:{[f;x]t:*x`q
 dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0]
  t:maxtype[*x`q;*y`q];x:uptype[x;typ@*x`q;t];y:uptype[y;typ@*y`q;t]
  $[`k~t; :.k2[`$$f;x;y];0]
- ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);q:t,(x`q),(y`q))}
+ ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);2,(x`i),(y`i);t,(x`s),(y`s);q:t,(x`q),(y`q))}
 
 index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
  $[s~`int;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,def q;`i,(q:*y`q))),y[`p]:0|2+y`p                /int x (cast)
@@ -121,6 +121,7 @@ amend:{[v;y;f;i;s]
  t,:d[`p]:5|7+d`p           /x[i]:
  l:+tpisq!(`lod`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,u,u;u,`i`i`k`k,u,u)
  l,:i[`p]:5|7+i`p
+ f[0;`s]:*l`q
  y:$[`nop~(*f)`t;y;(f,l[`p]:0|1+l`p),y[`p]:+0|1+y`p] /modified y:f,l,y
  .t,y[`p]:0|(#t)+y`p}
 
@@ -131,7 +132,8 @@ call:{[f;x]            /also: if switch W(while) N(do)
  x:$[c':`N`W`switch`if;x;uptype'[x;def@*'x@\:`q;argtypes[c;#x]]]
  x:{x,y[`p]:(#x)+y`p}/[+tpisq!(0#`;!0;!0;0#`;0#`);x]
  x:$[(1<#x)&`W~c;(+tpisq!(,`stm;,0N;,0N;0#`;0#`)),x[`p]:0|1+x`p;x]
- inc:+tpisq!(`asn`add`get`lit;0N 0 1 1;0N 2 0 1;`i`i`i`i;`i`i`i`i)
+ inc:+tpisq!(`asn`add`get`lit;0N 0 1 1;0 2 0 1;`i`i`i`i;`i`i`i`i)
+ h:$[`N~c;(+tpisq!(`les`get;0N 0;2 0;`i`i;`i`i)),h[`p]:0|2+h`p ;h]   /i<n
  t:+tpisq!$[`if~c;(,`cnd;,0N;,0N;q;q)
   `W~c;.((+tpisq!(,`for;,0N;,0;,`W;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)
   `N~c;.((+tpisq!(,`for;,0N;,0;,`L;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
@@ -139,7 +141,7 @@ call:{[f;x]            /also: if switch W(while) N(do)
   (,`cal;,0N;,0N;f`s;,`k)]
  t,:x[`p]:0|(#t)+x`p
  t[0;`p]:0N
- t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2|2+t`p;t]
+ t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2+t`p;t]
  .t}
 
 
