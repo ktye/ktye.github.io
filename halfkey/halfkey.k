@@ -34,6 +34,7 @@ compile:{[prog;name;f];f:.f                 /compiles a function
  d:decl/[+tpisq!(s0;!0;!0;s0;s0:0#`);!symtab;.symtab]  /init x=0 for k types
  ast:*(,d)expr/c
  
+ symtab::$[+/2=+/(`t`s!`get`i)=ast`t`s;symtab;`i_symtab]    /remove i
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
  r:locals/[r;1_!symtab;1_.symtab]
  r,:+tpis!(,`ast;,0;,0N;,`)
@@ -44,13 +45,13 @@ compile:{[prog;name;f];f:.f                 /compiles a function
 decl:{[t;s;y]$[(~s~`X)&y':`I`F`k;t,+tpisq!(`asn`lit;0N,#t;0 0;s,`k;`k`k);t]}
 
 unpack:{[e;s;y;i]i:$[i;"+",$8*i;""];                          
- (`p($s),":",$[`i~y;"int I64 (int X)",i;`f~y;"fk rx I64 (int X)",i /x:int I64 X  y:fk rx I64(int X)+8
-  `I~y;"xtp[rx I64 (int X)",i,";19]"                               /x:xtp[I64 X;21]      typecheck
-  `F~y;"xtp[rx I64 (int X)",i,";21]"
-  "rx I64 (int X)",i]),(`256),e}
+ (`p($s),":",$[`i~y;"int I64 (int X)",i;`f~y;"fk rx K I64 (int X)",i /x:int I64 X  y:fk rx K I64(int X)+8
+  `I~y;"xtp[rx K I64 (int X)",i,";19]"                               /x:xtp[K I64 X;21]      typecheck
+  `F~y;"xtp[rx K I64 (int X)",i,";21]"
+  "rx K I64 (int X)",i]),(`256),e}
  
 
-expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
+expand:{[e;s;t]  /X[i] -> rx K I64 (int32 x)+8*i
  e:replace[e;(`$($s),"t";.);`p"tp ",($s)]
  e:replace[e;(`$($s),"n";.);`p"nn ",($s)]
  e:replace[e;(`$($s),"i";.);`p($s),"[i]"]
@@ -58,9 +59,9 @@ expand:{[e;s;t]  /X[i] -> rx I64 (int32 x)+8*i
  e:replace[e;(`$($s),"1";.);`p($s),"[1]"]
  e:replace[e;(`$($s),"2";.);`p($s),"[2]"]
  e:$[#i:,/1 2+/:&2=+/rotate'[0 1;e~\:/:(`211;s)];e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
- $[t~`k;replace[e;(s;.;`83);1_`p"rx I64 (int ",($s),")+8*0"]
-   t~`I;replace[e;(s;.;`83);1_`p"   I32 (int ",($s),")+4*0;"]
-   t~`F;replace[e;(s;.;`83);1_`p"   I32 (int ",($s),")+4*0;"];e]}
+ $[t~`k;replace[e;(s;.;`83);1_`p"rx K I64 (int ",($s),")+8*0"]
+   t~`I;replace[e;(s;.;`83);1_`p"     I32 (int ",($s),")+4*0;"]
+   t~`F;replace[e;(s;.;`83);1_`p"     I32 (int ",($s),")+4*0;"];e]}
 
 expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1
@@ -103,7 +104,8 @@ dyadic:{[f;y;x]$[f~`64+(@); :index[x;y];f~`64; :assign[x;y];f~`84; :call[x;y];0]
  ((op2 f),(x`t),y`t;0N,(0|1+x`p),(0|1+(#x)+y`p);1,(x`i),(y`i);t,(x`s),(y`s);q:t,(x`q),(y`q))}
 
 index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
- $[s~`int;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,q;`i,(q:*y`q))),y[`p]:0|2+y`p                /int x (cast)
+ $[s~`int;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,def q;`i,(q:*y`q))),y[`p]:0|2+y`p                /int x (cast)
+   s~`K  ;.(+tpisq!(`cst`typ;0N 0;0N 0N;`k,def q;`k,(q:*y`q))),y[`p]:0|2+y`p                /K x   (cast)
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
@@ -168,11 +170,11 @@ coerce:{[t;a]t:def t                   /type conversion, e.g. convert args to k 
  
 
 native:{[t]                /redirect calls to native to generated functions
- /append function halfkey: func halfkey(x,y int64)int64{return Func[int32(x)].(func(int64)int64)(y)}
- asm:(+tpis!(`fun`arg`sym`arg`sym`res`ast`ret`cli`cst`typ`get`get`arg
-  0N 0 1 0 3 0 0 6 7 8 9 9 8 8
-  0 0N 0 0N 0 0N 0N 0N 1 0N 0N 0N 0N 0N
-  `halfkey`j`x`j`y`j``j`j`i`j`x`y`j))
+ /append function halfkey: func halfkey(x,y int64)int64{return int64(Func[int32(x)].(func(uint64)uint64)(uint64(y)))}
+ asm:(+tpis!(`fun`arg`sym`arg`sym`res`ast`ret`cst`typ`cli`cst`typ`get`cst`typ`get`arg
+  0N 0 1 0 3 0 0 6 7 8 8 10 11 11 10 14 14 10
+  0 0N 0 0N 0 0N 0N 0N 0N 0N 1 0N 0N 0N 0N 0N 0N 0N
+  `halfkey`j`x`j`y`j``j`j`k`k`i`j`x`k`j`y`k))
  t,:asm[`p]:0|(#t)+asm[`p]
  t[*&`Native=t`s;`s]:`halfkey /replace call to Native with call to halfkey
  
