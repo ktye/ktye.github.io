@@ -19,10 +19,16 @@ body{margin:0;overflow:hidden}
 <textarea id="ain" spellcheck="false" title="extension source">a</textarea>
 <textarea id="kin" spellcheck="false" title="k source for stage2">k</textarea>
 <div      id="bar">
- <button  id="ccc" onclick="run(2)"  title="compile to c">c</button>
- <button  id="ast" onclick="run(1)"  title="show IR table">ast</button>
- <button  id="run" onclick="run(0)"  title="compile to wasm and run">run</button>
- <span class="ln" onclick="showhk()" title="show compiler source">halfkey.k</span> <span class="ln" onclick="run(3)" title="download generated k+.c">k+.c</span> <span class="ln" onclick="run(4)" title="download generated wasm">k+.wasm</span>
+ <button  id="ast" onclick="run('ast')"  title="show IR table">ast</button>
+ <button  id="run" onclick="run('run')"  title="compile to wasm and run">run</button>
+ <button  id="ccc" onclick="run('ccc')"  title="show compiled code">code</button>
+ <select  id="sel" onchange="sel(this)">
+  <option title="cc.k">c</option>
+  <option title="go.k">go</option>
+  <option title="wa.k: webassembly text format">wat</option>
+  <option title="wb.k: webassembly binary">wasm</option>
+ </select>
+ <span class="ln" id="dlnk" onclick="run('dwn')">download</span> <span class="ln" onclick="showhk()" title="show compiler source">halfkey.k</span>
  <a href="about.html">about</a>
 </div>
 <pre id="out">out</pre>
@@ -49,6 +55,11 @@ window.addEventListener("unhandledrejection",function(e){
    O(e.reason+"\n") 
 });
 
+function sel(o){let v=o.value
+ let d=ge("dlnk");d.title="download generated k+."+v+" (full program)";d.textContent="k+."+v
+}
+ge("sel").value="c";sel({value:"c"})
+
 let env={env:{ //wasm import object
  Exit:x=>{        },
  Args:()=>{return 0},
@@ -67,33 +78,42 @@ function CK(x){return C().slice(lo(x),lo(x)+K.nn(x))}
 function sc(x){return K.sc(KC(x))}
 
 function run(c){ //stage 1
- ge("out").textContent=""
+ ge("out").textContent="";let simple=(c=="ast"||c=="ccc")
  fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports
   K.kinit()
+  
   O("k1\n")  
-  //if(c!=2&&c!=3)
-  K.dx(K.Val(KC(kk)))   //load k.k interpreter source (vars: C D T P I S)
+  K.dx(K.Val(KC(kk)))        //load k.k interpreter source (vars: C D T P I S)
   K.dx(K.Asn(sc("A"),K.Atx(K.Val(KC("`p@")),KC(ain.value)))) //parse src.a, store in A 
   K.dx(K.Val(KC(hk)))        //run halfkey.k compiler
-  setTimeout(()=>{            //to flush O
-   if(c==1){
+  setTimeout(()=>{           //to flush O
+   if(c=="ast"){
     K.dx(K.Val(KC(dt)))
     K.dx(K.Val(KC("draw simple[]")))
     ge("out").textContent=ge("out").textContent.replaceAll("|","│").replaceAll("+","├").replaceAll("L","└").replaceAll("-","─").replaceAll("T","┬")
     return
    }
-   K.dx(K.Val(KC((c%4)?cc:wb)))   //load wb.k or cc.k
-   K.dx(K.Val(KC(((2==c)?"simple[];C:_&8;ccren:{x}":"full[]"))))
-   let b=CK(K.Val(KC(["wb``","","cc`nort`lib","cc``","wb``"][c])))
-   switch(c){
-   case 0:stage2(b);break
-   case 2:ge("out").textContent=su(b);break
-   default:downld((c==4)?"k+.wasm":"k+.c",b)
-   }
+   let lang=ge("sel").value;let l={
+    c:   [cc, ";C:_&8;ccren:{x}", "cc`nort`lib", "cc``"],
+    go:  [go, "",                 "go`nort`lib", "go``"],
+    wat: [wa, "",                 "wa`nort`lib", "wa``"],
+    wasm:[wb, "",                 "wb`nort`lib", "wb``"],
+   }[lang]
+   
+   K.dx(K.Val(KC((c=="run")?wb:l[0])))                        //load ${compiler}.k
+   K.dx(K.Val(KC(simple?"simple[]"+l[1]:"full[]")))
+   let b=CK(K.Val(KC((c=="ast")?"": simple ? l[2] : (c=="run") ? "wb``" : l[3] )))
+   
+        if(c=="run") stage2(b)
+   else if(simple)   ge("out").textContent=(lang=="wasm")?hex(b):su(b)
+   else              downld("k+."+lang,b)
+   
   },10)
  })
 }
+function hex(b){return(" "+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').match(/.{1,4}/g).join(" ")).match(/.{1,40}/g).join("\n")}
+function showhk(){ge("out").textContent=hk}
 function downld(s,u){
  O("download "+s+"\n")
  let x=new Blob([u],{type:"application/octet-stream"}) //u:uint8array
@@ -117,7 +137,6 @@ function stage2(w){
  })
 }
 
-function showhk(){ge("out").textContent=hk}
 
 
 
