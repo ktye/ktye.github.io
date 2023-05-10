@@ -253,18 +253,21 @@ Ndo:{[xi;yi]N[x;y+:i];y}
  },
 
  lu:{
-    a:`/?`,
-  k:`/lu decomposition
-lu:{[A]i:0;k:!#A;P:!#A
+    a:`/lu decomposition
+LU:{[A]n:An;P:!Ki n;P} /todo..
+/LU:{[A]PI;n:An;P:!Ki n;P} /todo..
+/maybe  ^^declare local P as type I
+`,
+  k:`lu:{[A]i:0;k:!#A;P:!#A      /k version
  while[1<#k
   j:i+*&a=m:|/a:abs A[k;i]  /or optimized (*>) 
   P[(i;j)]:P[(j;i)]
   A[(i;j)]:A[(j;i)]
   A[k:1_k;i]%:A[i;i]
-  A[k;k]-:A[k;i]*\:A[i;k]
+  A[k;k]-:A[k;i]*\\:A[i;k]
   i+:1]
  (A;P)}
-`
+` + "\nA:`A \\(0 5.,22%3.;4 2 1.;2 7 9.)\nr:`r \\lu A\n\nR:`R \\LU A"
 
  },
  

@@ -31,8 +31,10 @@ compile:{[prog;name;f];f:.f                 /compiles a function
  c:replace[c;(`1;1048576;`320);,(`1)],(`1)  /:(return)
  c:unref expand/[c;!symtab;.symtab]         /X[i] -> I64(..)
  c:split[c;,`256]                           /split expressions (at ;)
- d:decl/[+tpisq!(s0;!0;!0;s0;s0:0#`);!symtab;.symtab]  /init x=0 for k types
- ast:*(,d)expr/c
+ 
+ ast:*(,t0:+tpisq!(s0;!0;!0;s0;s0:0#`))expr/c
+ d:decl/[t0;!symtab;.symtab]                /init x=0 for k types
+ ast:d,ast[`p]:(#d)+ast`p
  
  symtab::$[+/2=+/(`t`s!`get`i)=ast`t`s;symtab;`i_symtab]    /remove i
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
@@ -109,7 +111,7 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
-assign:{(x;y);s:*x`s;q:*y`q;$[~((typ@*x`q)~typ q)&(r:s':!symtab);err`reassign;0]
+assign:{s:*x`s;q:*y`q;symtab[s]:$[s':!symtab;symtab s;q];$[q~def symtab s;0;err`reassign]
  y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref if k
  symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
  
