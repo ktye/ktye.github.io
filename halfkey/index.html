@@ -95,10 +95,10 @@ function run(c){ //stage 1
     return
    }
    let lang=ge("sel").value;let l={
-    c:   [cc, ";C:_&8;ccren:{x}", "cc`nort`lib", "cc``"],
-    go:  [go, "",                 "go`nort`lib", "go``"],
-    wat: [wa, "",                 "wa`nort`lib", "wa``"],
-    wasm:[wb, "",                 "wb`nort`lib", "wb``"],
+    c:   [cc, ";ccren:{x}", "cc`nort`lib", "cc``"],
+    go:  [go, "",           "go`nort`lib", "go``"],
+    wat: [wa, "",           "wa`nort`lib", "wa``"],
+    wasm:[wb, "",           "wb`nort`lib", "wb``"],
    }[lang]
    
    K.dx(K.Val(KC((c=="run")?wb:l[0])))                        //load ${compiler}.k
@@ -224,8 +224,11 @@ ifelse:{[xi;yf]if[x<3;x:2*x;y:4*y];x}
 /if both branches return the same type, it's an expression:
 tern:{[xi]2*if[x<3;4;5]}
 
+/multiple expressions need a surrounding block:
+multi:{[xi];if[x>3;block[x+:2;x*:3]];x}
+
 `,
-  k:" \\absolute -3\n \\ifelse[3;4.5]\n \\tern 3",
+  k:" \\absolute -3\n \\ifelse[3;4.5]\n \\tern 3\n \\multi 4\n",
  },
  
  switch:{
@@ -254,31 +257,38 @@ Ndo:{[xi;yi]N[x;y+:i];y}
 
  lu:{
     a:`/lu decomposition
-LU:{[B]PI;Ak     /predeclare P as ints
- A:0+B;n:An      /deep copy, we will overwrite A
- P:!Ki n         /permutation vector
- N[n
-  j:0            /todo find pivot
-  t:A[j]         /swap
-  A[i]:A[j]
-  A[j]:t]
- (,A),,P}        /(A;P)
- 
+LU:{[B]PI;Ak;RF;QF;qf;ff /predeclare
+ A:0+B;n:An              /deep copy, we will overwrite A
+ P:!Ki n                 /permutation vector
+ N[n-1
+  m:-1.;k:i;j:i          /find pivot
+  W[j<n;R:A[j];q:abs R[i];if[m<q;block[m:q;k:j]];j+:1]
+  t:A[i];A[i]:A[k];A[k]:t                /swap rows
+  p:P[i];P[i]:P[k];P[k]:p
+  R:A[i]
+  q:R[i]                                 /q:A[i;i]
+  j:1+i;W[j<n
+   Q:A[j]
+   Q[i]%:q                               /A[i_!n;i]%:A[i;i]
+   f:Q[i]                                /f:A[j;i]
+   k:1+i;W[k<n;Q[k]:Q[k]-f*R[k];k+:1]
+   j+:1]]
+  R:rx R;Q:rx Q                          /fix refcounts (prevent double-free)
+ (,A),,P}                                /(A;P)
+
 `,
-  k:`lu:{[A]i:0;k:!#A;P:!#A      /k version
- while[1<#k
-  j:i+*&a=m:|/a:abs A[k;i]  /or optimized (*>) 
-  P[(i;j)]:P[(j;i)]
-  A[(i;j)]:A[(j;i)]
-  A[k:1_k;i]%:A[i;i]
-  A[k;k]-:A[k;i]*\\:A[i;k]
+  k:`lu:{[A]i:0;j:!#A;P:!#A      /k version
+ while[1<#j
+  k:i+*&a=m:|/a:abs A[j;i]  /or optimized (*>) 
+  P[(i;k)]:P[(k;i)]
+  A[(i;k)]:A[(k;i)]
+  A[j:1_j;i]%:A[i;i]
+  A[j;j]-:A[j;i]*\\:A[i;j]
   i+:1]
  (A;P)}
-` + "\nA:`A \\(0 5.,22%3.;4 2 1.;2 7 9.)\nr:`r \\lu A\n\nR:`R \\LU A"
-
- },
  
- 
+` + "\nA:`A \\(0 5.,22%3.;4 2 1.;2 7 9.)\n\nr:`r \\lu A  /interpreted\nR:`R \\LU A  /compiled\n\n`A \\A  /A is not overwritten\n",
+ }
 }
 for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").appendChild(o)}
 function example(s){if(ge("exa").value!=s.value)ge("exa").value=s.value;let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}

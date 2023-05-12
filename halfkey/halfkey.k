@@ -1,4 +1,4 @@
-/halfkey compiler
+/halfkey compiler \
 /interpreter source is stored in C D  T P I S as k table columns
 /input parse tree is stored in A as kvm byte code
 /the compiler converts A to lower form and appends it to T P I S
@@ -14,27 +14,24 @@ def:``k`i`f`I`C`S`F!`k`k`i`f`k`k`k`k
 typ:``k`C`I`S`F`i`f!`k`k`k`k`k`k`i`f
 float1:`exp`log`atan`abs`sqrt`ceil`floor`nearest!`exp`log`atan`F64abs`F64sqrt`F64ceil`F64floor`F64nearest
 float2:`hypot`atan2`pow`fmin`fmax`copysign!`hypot`atan2`pow`F64min`F64max`F64copysign
-
+atype,:(!float1)!`f
 
 replace:{join[z;split[x;y]]}  /replacements in bytecode
 join:   {(-#x)_,/y,\:x}
 split:  {n_'(&n=+/rotate'[!n:#y;x~\:/:y])^x:y,x}
 rotate: {y@n/x+!n:#y}
 
-compile:{[prog;name;f];f:.f                 /compiles a function  \
- a:(f 3)#f 1                                /args
- symtab::(`i!`i),st:symtyp a                /symbol!type
- c:declare f 0                              /split declarations
- c:unpack/[c;!st;.st;!#st]                  /unpack k args
- c:replace[c;(`1;1048576;`320);,(`1)],(`1)  /:(return)
- c:epilog expand/[c;!symtab;.symtab]        /X[i] -> I64(..)
- c:split[c;,`256]                           /split expressions (at ;)
+compile:{[prog;name;f];f:.f                    /compiles a function
+ a:(f 3)#f 1                                   /args
+ symtab::(`i`j`k!`i`i`i),st:symtyp a           /symbol!type
+ c:declare f 0                                 /split declarations
+ c:unpack/[c;!st;.st;!#st]                     /unpack k args
+ c:replace[c;(`1;1048576;`320);,(`1)],(`1)     /:(return)
+ c:epilog expand/[c;!symtab;.symtab]           /X[i] -> I64(..)
+ c:split[c;,`256]                              /split expressions (at ;)
  
- ast:*(,t0:+tpisq!(s0;!0;!0;s0;s0:0#`))expr/c
- /d:decl/[t0;!symtab;.symtab]                /init x=0 for k types
- /ast:d,ast[`p]:(#d)+ast`p
- 
- symtab::$[+/2=+/(`t`s!`get`i)=ast`t`s;symtab;`i_symtab]    /remove i
+ ast:*(,t0:+tpisq!(s0;!0;!0;s0;s0:0#`))expr/c  /compile to table form
+ symtab::symtab deloc/`i`j`k
  r:+tpis!(`fun`arg`sym`res;0N 0 1 0;0 0N 0 0N;name,`k`X`k)
  r:locals/[r;!symtab;.symtab]
  r,:+tpis!(,`ast;,0;,0N;,`)
@@ -50,12 +47,11 @@ unpack:{[e;s;y;i]xi:$[~i;"Fst X";"rx K I64 (int X)+",$8*i]
   `F~y;"xtp[",xi,";21]"
   xi]),(`256),e}
  
-/decl:{[t;s;y]$[(~s~`X)&y':`I`F`k;t,+tpisq!(`asn`lit;0N,#t;0 0;s,`k;`k`k);t]} /assign zeros
-
 declare:{[c]   /declarations are at the beginning, e.g. aI;bf;.. is (`aI;.;`256;`bf;.;`256;..)
  n:2\+/&\(!0),((2*n)#(.;`256))=c i:,/1 2+/:3*!n:+/&\`s`v`v~/:-3^@'c
  symtab,:symtyp c 3*!n;  (3*n)_c}
- 
+
+deloc:{[st;s];$[+/2=+/(`t`s!`get,s)=ast`t`s;st;s_st]}   /remove local(ijk)
 
 expand:{[e;s;t]  /X[i] -> K I64 (int32 x)+8*i
  e:replace[e;(`$($s),"t";.);`p"tp ",($s)]
@@ -67,7 +63,7 @@ expand:{[e;s;t]  /X[i] -> K I64 (int32 x)+8*i
  e:$[#i:,/1 2+/:&2=+/rotate'[0 1;e~\:/:(`211;s)];e@&~(!#e)':i;e]  /remove x: for amend  x[i]:y -> x:@[x;i;:;y]
  $[t~`k;replace[e;(s;.;`83);1_`p"K I64 (int ",($s),")+8*0"]
    t~`I;replace[e;(s;.;`83);1_`p"  I32 (int ",($s),")+4*0;"]
-   t~`F;replace[e;(s;.;`83);1_`p"  I32 (int ",($s),")+4*0;"];e]}
+   t~`F;replace[e;(s;.;`83);1_`p"  F64 (int ",($s),")+8*0;"];e]}
 
 expr:{[s;e]           /compile single expression
  t:(r:prefix/[s;e])1
@@ -97,8 +93,9 @@ prefix:{[tab;y]
    yt~`s;pu symbol y;pu const[yt;y]]
  tab}
 
-symbol: {(,`sym;,0N;,0;,x;,symtab x)}
-const:  {[t;x](,`lit;,0N;,$[`c~t;0+x;x];t;t:,$[`c~t;`i;t])}       /todo fix floats later
+symbol:{(,`sym;,0N;,0;,x;,symtab x)}
+const: {[t;x](,`lit;,0N;,$[`f~t;fltlit x;x];t;t)}
+fltlit:{$[0N~i:*&(f:`c@,x)~/:(-8^C);*|(C,:f;#C);8*i]} /find or intern float literal
 quotedverb:{s:ops -384+x;s:$[(`449)~x;`nop;s;s;err`quotedverb];(,s;,0N;,2;0#`;0#`)}
 monadic:{[f;x]t:*x`q
  $[(f~(.))&`sym~*|x`t;.x[-1+#x;`t]:`get
@@ -114,20 +111,17 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
  $[s~`int;.(+tpisq!(`cst`typ;0N 0;0N 0N;`i,def q;`i,(q:*y`q))),y[`p]:0|2+y`p                /int x (cast)
    s~`K  ;.(+tpisq!(`cst`typ;0N 0;0N 0N;`k,def q;`k,(q:*y`q))),y[`p]:0|2+y`p                /K x   (cast)
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
-  .(+tpisq!(,`cal;,0N;,0N;,s;,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
+  .(+tpisq!(,`cal;,0N;,0N;,$[f:float1 s;f;s];,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
 assign:{s:*x`s;q:*y`q;symtab[s]:$[s':!symtab;symtab s;q];$[q~def symtab s;0;err`reassign]
- /y:$[`k~typ q;(+tpisq!(`cal`get;0N 0;0N 0;`Dex,s;`k`k)),y[`p]:0|2+y`p;y]     /unref if k
  symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
  
 amend:{[v;y;f;i;s]
  s:(*s)`s
  u:$[`I~u:symtab s;*(`i;w:4);`F~u;*(`f;w:8);`k~u;*(`j;w:8);err`amendtype]
  d:i
- /t:+tpisq!(`sto`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,u,u;u,`i`i`k`k,u,u)
  t:+tpisq!(`sto`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,`i`i;u,`i`i`k`k,`i`i)
  t,:d[`p]:5|7+d`p           /x[i]:
- /l:+tpisq!(`lod`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,u,u;u,`i`i`k`k,u,u)
  l:+tpisq!(`lod`add`cst`typ`get`mul`lit;0N 0 1 2 2 1 5;0N 2 0N 0N 0 2,w;u,`i`i`k,s,`i`i;u,`i`i`k`k,`i`i)
  l,:i[`p]:5|7+i`p
  f[0;`s]:*l`q
@@ -135,22 +129,22 @@ amend:{[v;y;f;i;s]
  y:$[`j~u; (+tpisq!(`cst`typ;0N 0;0N 0N;`j`k;`j`k)),y[`p]:0|2+y`p  ;y]  /i64(..)
  .t,y[`p]:0|(#t)+y`p}
 
- 
-
 argtypes:{[f;n];$[f':!float2;`f`f;f':!atyps;atyps f;n#`k]}
-call:{[f;x]            /also: if switch W(while) N(do)
- q:(*'x)`q;q:$[(2<#q)&1=#?q;?q;0#`];c:(*f)`s
+call:{[f;x]            /also: if switch W(while) N Nj Nk(do) block
+ $[`block~*f`s; :.(+tpisq!(,`stm;,0N;,0N;,`;,`)){x,y[`p]:0|(#x)+y`p}/x;0]
+ q:(*'x)`q;q:$[(2<#q)&1=#?q;?q;0#`]
+ c:$[`Nj~c:(*f)`s;*(`N;i:`j);`Nk~c;*(`N;i:`k);*(c;i:`i)]
  x:$[c':`N`W;*(1_x;h:*x);x]          /split cnd from while
  x:$[c':`N`W`switch`if;x;uptype'[x;def@*'x@\:`q;argtypes[c;#x]]]
  x:{x,y[`p]:(#x)+y`p}/[+tpisq!(0#`;!0;!0;0#`;0#`);x]
- x:$[(1<#x)&c':`N`W;(+tpisq!(,`stm;,0N;,0N;0#`;0#`)),x[`p]:0|1+x`p;x]
- inc:+tpisq!(`asn`add`get`lit;0N 0 1 1;0 2 0 1;`i`i`i`i;`i`i`i`i)
- h:$[`N~c;(+tpisq!(`les`get;0N 0;2 0;`i`i;`i`i)),h[`p]:0|2+h`p ;h]   /i<n
+ x:$[(1<#x)&c':`N`W;(+tpisq!(,`stm;,0N;,0N;,`;,`)),x[`p]:0|1+x`p;x]
+ inc:+tpisq!(`asn`add`get`lit;0N 0 1 1;0 2 0 1;i,`i,i,`i;`i`i`i`i)
+ h:$[`N~c;(+tpisq!(`les`get;0N 0;2 0;`i,i;`i`i)),h[`p]:0|2+h`p ;h]   /i<n
  t:+tpisq!$[`if~c;(,`cnd;,0N;,0N;q;q)
-  `W~c;.((+tpisq!(,`for;,0N;,0;,`W;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)
-  `N~c;.((+tpisq!(,`for;,0N;,0;,`L;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
+  `W~c;.((+tpisq!(,`for;,0N;,0;,`;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)  /todo labels/break/continue
+  `N~c;.((+tpisq!(,`for;,0N;,0;,`;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
   `switch~c;(,`swc;,0N;,1;0#`;0#`)
-  (,`cal;,0N;,0N;f`s;,`k)]
+  (,`cal;,0N;,0N;,$[f:float2 c;f;c];,`k)]
  t,:x[`p]:0|(#t)+x`p
  t[0;`p]:0N
  t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2+t`p;t]
@@ -190,14 +184,14 @@ native:{[t]                /redirect calls to native to generated functions
   `halfkey`j`x`j`y`j``j`j`k`k`i`j`x`k`j`y`k))
  t,:asm[`p]:0|(#t)+asm[`p]
  t[*&`Native=t`s;`s]:`halfkey /replace call to Native with call to halfkey
- 
+ /
  /add typecheck func xtp(x K,t int32)K{if(tp(x)!=t){trap(Type)};return x}
  asm:+tpis!(`fun`arg`sym`arg`sym`res`ast`cnd`neq`cal`get`get`ret`cal`lit`ret`get
   0N 0 1 0 3 0 0 6 7 8 9 8 7 12 13 6 15
   0 0N 0 0N 0 0N 0N 0N 2 0N 0N 0N 0N 0N 1 0N 0N
   `xtp`k`x`i`t`k```i`tp`x`t`k`trap`i`k`x)
  t,:asm[`p]:0|(#t)+asm`p
- 
+ /
  /function reg creates a function type xf(native) and stores in in Ku(f)
  asm:+tpis!(`fun`arg`sym`arg`sym`arg`sym`loc`sym`ast`asn`cal`cal`get`cal`lit`sto`sub`cst`typ`get`lit`get`cal`cal`cal`cal`get`orr`cst`typ`cst`typ`get`cst`typ`lit
   0N 0 1 0 3 0 5 0 7 0 9 10 11 12 11 14 9 16 17 18 18 17 16 9 23 24 25 26 24 28 29 29 31 31 28 34 34
@@ -206,9 +200,9 @@ native:{[t]                /redirect calls to native to generated functions
  asm[36;`i]:#C;C::C,0x0000000000000070 /fix 64bit const
  t:t,:asm[`p]:0|(#t)+asm`p
  t:register[t;names;i:(1+!n:#names)+|/t[&`tab=t`t;`i];codes]
- t,+tpis!(n#`tab;&n;i;names)} /tab nodes (put generated funcs to indirect function table)
+ t,+tpis!(n#`tab;&n;i;names)}        /tab nodes (put generated funcs to indirect function table)
 
-register:{[t;f;n;c]  /create native function and store it to global at the end of kinit (after zk())
+register:{[t;f;n;c]    /create native function and store it to global at the end of kinit (after zk())
  i:1+*&(`zk=t`s)&`cal=t`t
  e:i_t;p:e[`p];e[`p]:p[&p=0]:0N
  t:reg/[i#t;f;n;c]
@@ -221,7 +215,7 @@ reg:{[t;f;n;a]         /register function, e.g. after zk(): f:interal[567;2]
  asm:+tpis!(`cal`lit`lit`lit;0N 0 0 0;0N,c,n,a;`reg`k`i`i) /reg(f,n,a)
  t,asm[`p]:p|(#t)+asm`p}
 
-err:    {`err \x;0+x}      /trap e.g. err`type
+err:    {`err \x;0+x}  /trap e.g. err`type
 
 
 
