@@ -251,6 +251,26 @@ Ndo:{[xi;yi]N[x;y+:i];y}
   k:" \\loop 5\n \\loop2 5\n \\Ndo[3;4]\n",
  },
 
+ mm:{
+  a:`MM:{[a;w]Yk;yF;xF;f;rF;Rk  /matmul
+ Y:+w                      /transpose w
+ l:an;m:wn;n:Yn            /dimensions x:l*m y:m*n r:l*n
+ R:l^0.+&Ki l*n            /allocate result
+ N[l;x:a i;r:R i;Nj[n;y:Y j;f:0.;Nk[m;f+:(x k)*y k];r[j]:f]];
+ x:rx x;y:rx y;r:rx r;R}   /fix refcounts
+  `,
+  k:`mm:(+/*)\\:                  /k version
+A:{(-x 1)^?*/x}             /random matrix, e.g. A 10 20
+
+a:A 5 20
+b:A 20 4
+
+r: \\mm[a;b]
+R: \\MM[a;b]
+   \\R~r
+  `,
+ },
+
  lu:{
     a:`/lu decomposition
 LU:{[B]PI;Ak;RF;QF;qf;ff /predeclare
@@ -446,7 +466,7 @@ it's a painful exercise.
 <big><i id="bench">benchmark: lu decomposition 1000x1000</i></big>
 
 -download k+.c from ktye.github.io/halfkey#lu 
--write x.k
+-write lu.k
 lu:{[A]i:0;j:!#A;P:!#A      /k version
  while[1<#j
   k:i+*&a=m:|/a:abs A[j;i]
@@ -460,18 +480,31 @@ A:{x^?x*x}                 /an 5: 5x5 random floats
 
 -compare:
 $gcc -O3 k+.c -lm
-$time ./a.out x.k -e 'lu A 1000'  /k
-$time ./a.out x.k -e 'LU A 1000'  /halfkey
+$time ./a.out lu.k -e 'lu A 1000'  /k
+$time ./a.out lu.k -e 'LU A 1000'  /halfkey
 -same for go:
 $go build k+.go
-$time ./k+ x.k -e 'lu A 1000'
-$time ./k+ x.k -e 'LU A 1000'
+$time ./k+ lu.k -e 'lu A 1000'
+$time ./k+ lu.k -e 'LU A 1000'
+
+-similar for matmul:
+-download k+.c k+.go from ktye.github.io/halfkey#mm
+-write mm.k
+mm:(+/*)\:
+A:{(-x 1)^?*/x}
+a:A 1000 2000
+b:A 2000 1500
+
+-compare with
+$time ./a.out mm.k -e 'mm[a;b]'  /k
+$time ./a.out mm.k -e 'MM[a;b]'  /halfkey
+
 
 time(s):
-
-    k     halfkey
- c  4.28  0.58
- go 9.36  1.76 
+ LU decomposition      matmul
+    k     halfkey      k     halfkey
+ c  4.28  0.58         9.8   4.1
+ go 9.36  1.76        24.9  12.3
 
 <big><i>todo</i></big>
 

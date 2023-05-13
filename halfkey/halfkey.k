@@ -113,7 +113,7 @@ index:{$[`get~*|x`t;0;err`index];p:*|x`p;s:*|x`s;t:symtab s
    s':!load;.(+tpisq!(,`lod;,0N;,0;,$[`k~q;`j;q];,q:load s)),y[`p]:0|1+y`p
   .(+tpisq!(,`cal;,0N;,0N;,$[f:float1 s;f;s];,r:def ftype s)),y[`p]:0|1+(y:coerce[def atype s;y])`p]} /call
 
-assign:{s:*x`s;q:*y`q;symtab[s]:$[s':!symtab;symtab s;q];$[q~def symtab s;0;err`reassign]
+assign:{s:*x`s;q:*y`q;symtab[s]:$[s':!symtab;symtab s;q];$[q~def symtab s;0;err`reassign,s]
  symtab[s]:$[s':!symtab;symtab s;q];.(+tpisq!(,`asn;,0N;,0;s;q)),y[`p]:0|1+y`p}
  
 amend:{[v;y;f;i;s]
@@ -147,7 +147,7 @@ call:{[f;x]            /also: if switch W(while) N Nj Nk(do) block
   (,`cal;,0N;,0N;,$[f:float2 c;f;c];,def ftype c)]
  t,:x[`p]:0|(#t)+x`p
  t[0;`p]:0N
- t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2+t`p;t]
+ t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;i,`i;`i`i)),t[`p]:2+t`p;t]
  .t}
 
 
