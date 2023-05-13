@@ -409,6 +409,11 @@ it uses a stack (a list of partial k trees) and is applied as:
  prefix/[initstack;expression]
 at the end one table remains on the stack
 
+basic verbs in byte code have numeric values and can be written
+in a special form: e.g. (+;-;*)~(`2;`3;`4), and 2~0+(+)
+the dyadic forms are specialized by the parser and add 64 to the
+numeric values, e.g. the plus in 0+*|`p"1+2" is 66 not 2.
+
 <big><i>translate&maxout</i></big>
 
 catenate two trees is simple if they are tables: x,y
@@ -422,6 +427,21 @@ it remains negative during translation and is maxed out with the new parent.
 
 the above assumes indexed assign x[`p]:.. (so should modified assign) returns x
 completely, not just the right hand side.
+
+this pattern is used throughout halfkey.k
+
+<big><i>inline assembly</i></big>
+
+halfkey also patches the k table directly, e.g. this adds
+function xtp (which does type checking)
+
+ asm:+tpis!(`fun`arg`sym`arg`sym`res`ast`cnd`neq`cal`get`get`ret`cal`lit`ret`get
+  0N 0 1 0 3 0 0 6 7 8 9 8 7 12 13 6 15
+  0 0N 0 0N 0 0N 0N 0N 2 0N 0N 0N 0N 0N 1 0N 0N
+  `xtp`k`x`i`t`k```i`tp`x`t`k`trap`i`k`x)
+ t,:asm[`p]:0|(#t)+asm`p
+
+it's a painful exercise.
 
 <big><i id="bench">benchmark: lu decomposition 1000x1000</i></big>
 
