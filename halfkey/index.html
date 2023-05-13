@@ -245,7 +245,7 @@ loop:{[xi]W[x>3;x:x-1];x}
 /multiple
 loop2:{[xi]W[x<10;x:x-1;x:2*x];x}
 
-/Ndo is N. it uses the loop variable i:0..
+/N is ndo. it uses the loop variable i:0..,  also Nj Nk
 Ndo:{[xi;yi]N[x;y+:i];y}
 `,
   k:" \\loop 5\n \\loop2 5\n \\Ndo[3;4]\n",

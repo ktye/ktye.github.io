@@ -144,7 +144,7 @@ call:{[f;x]            /also: if switch W(while) N Nj Nk(do) block
   `W~c;.((+tpisq!(,`for;,0N;,0;,`;,`)),(h[`p]:0|1+h`p)),+tpisq!(,`nop;,0;,0N;,`;,`)  /todo labels/break/continue
   `N~c;.((+tpisq!(,`for;,0N;,0;,`;,`)),(h[`p]:0|1+h`p)),inc[`p]:0|(1+#h)+inc`p
   `switch~c;(,`swc;,0N;,1;0#`;0#`)
-  (,`cal;,0N;,0N;,$[f:float2 c;f;c];,`k)]
+  (,`cal;,0N;,0N;,$[f:float2 c;f;c];,def ftype c)]
  t,:x[`p]:0|(#t)+x`p
  t[0;`p]:0N
  t:$[`N~c;(+tpisq!(`asn`lit;0N 0;0 0;`i`i;`i`i)),t[`p]:2+t`p;t]
