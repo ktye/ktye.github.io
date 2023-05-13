@@ -5,12 +5,12 @@
 <style>
 body{margin:0;overflow:hidden}
 *{box-sizing:border-box;font-family:monospace}
-#ain{position:absolute;top:2em;left:0;background:#efe;width:50vw;height:calc(50vh - 1em);overflow:auto;border:none;outline:none;resize:none}
-#kin{position:absolute;top:calc(50vh + 1em);left:0;background:#ffe;width:50vw;height:calc(50vh - 1em);overflow:auto;border:none;outline:none;resize:none}
+#exa{position:absolute;right:50vw;z-index:10}
+#ain{position:absolute;top:0;left:0;background:#efe;width:50vw;height:50vh;overflow:auto;border:none;outline:none;resize:none}
+#kin{position:absolute;top:50vh;left:0;background:#ffe;width:50vw;height:50vh;overflow:auto;border:none;outline:none;resize:none}
 #bar{position:absolute;top:0;left:50vw;height:2em}
 #out{position:absolute;top:2em;margin:0;right:0;width:50vw;height:calc(100vh - 2em);overflow:auto}
-.ln{color:darkblue;cursor:pointer}
-.ln:hover{text-decoration:underline}
+.ln{color:blue;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 
@@ -28,14 +28,12 @@ body{margin:0;overflow:hidden}
   <option title="wa.k: webassembly text format">wat</option>
   <option title="wb.k: webassembly binary">wasm</option>
  </select>
- <span class="ln" id="dlnk" onclick="run('dwn')">download</span> <span class="ln" onclick="showhk()" title="show compiler source">halfkey.k</span>
- <a href="about.html">about</a>
+ <span class="ln" id="dlnk" onclick="run('dwn')">download</span>
 </div>
-<pre id="out">out</pre>
 <a id="dl" style="display:none"></a>
 
 <script>
-let K,kk,hk,cc,go,wa,wb,dt
+let K,hk,dt,kk,cc,go,wa,wb
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function su(u){return(u.length)?new TextDecoder("utf-8").decode(u):""}
@@ -113,7 +111,7 @@ function run(c){ //stage 1
  })
 }
 function hex(b){return(" "+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('').match(/.{1,4}/g).join(" ")).match(/.{1,40}/g).join("\n")}
-function showhk(){ge("out").textContent=hk}
+function show(x){ge("out").textContent=x}
 function downld(s,u){
  O("download "+s+"\n")
  let x=new Blob([u],{type:"application/octet-stream"}) //u:uint8array
@@ -134,8 +132,6 @@ function stage2(w){
   K.dx(K.Val(x))
  })
 }
-
-
 
 
 let examples={
@@ -263,15 +259,14 @@ LU:{[B]PI;Ak;RF;QF;qf;ff /predeclare
  N[n-1
   m:-1.;k:i;j:i          /find pivot
   W[j<n;R:A[j];q:abs R[i];if[m<q;block[m:q;k:j]];j+:1]
-  t:A[i];A[i]:A[k];A[k]:t                /swap rows
-  p:P[i];P[i]:P[k];P[k]:p
-  R:A[i]
-  q:R[i]                                 /q:A[i;i]
+  t:A i;A[i]:A k;A[k]:t                  /swap rows
+  p:P i;P[i]:P k;P[k]:p
+  R:A i;q:R i                            /q:A[i;i]
   j:1+i;W[j<n
-   Q:A[j]
+   Q:A j
    Q[i]%:q                               /A[i_!n;i]%:A[i;i]
-   f:Q[i]                                /f:A[j;i]
-   k:1+i;W[k<n;Q[k]:Q[k]-f*R[k];k+:1]
+   f:Q i                                 /f:A[j;i]
+   k:1+i;W[k<n;Q[k]:Q[k]-f*R k;k+:1]
    j+:1]]
   R:rx R;Q:rx Q                          /fix refcounts (prevent double-free)
  (,A),,P}                                /(A;P)
@@ -294,5 +289,185 @@ for(let x in examples){let o=ce("option");o.value=x;o.textContent=x;ge("exa").ap
 function example(s){if(ge("exa").value!=s.value)ge("exa").value=s.value;let x=examples[s.value];ge("ain").value=x.a;ge("kin").value=x.k}
 let h=window.location.hash.slice(1);example({value:(h.length)?h:"add"})
 
-</script></body></html>
+</script>
+
+<pre id="out">
+<big><i>halfkey</i></big>: étude in k flat
+
+halfkey is a language that sits halfways between k and the interpreter.
+it extends k with custom builtins and writes a new source file:
+e.g. k+.c
+
+the purpose of halfkey is mixed scalar/vector code mutating arrays, e.g.
+linear algebra, faster (or easier) than k.
+ideally it obsoletes itself.
+
+this page runs a 2 stage k.wasm:
+
+stage 1  reads the interpreter source (k.k) intermediate form,
+ halfkey.k (the language compiler) and wb.k (IR to wasm binary compiler).
+ it then compiles halfkey's input and emits a new extended k.wasm.
+ js destroys the current instance and boots to:
+stage 2  reads and executes k code that uses the extensions
+
+clicking [run] does just that,
+[ast ] shows the parse tree of the generated functions
+[code] shows source for the functions for c/go/wat/wasm
+[k+.c] downloads the generated source of the extended k interpreter.
+
+everything is in k: <span class="ln" onclick="show(hk)">halfkey.k</span> <span class="ln" onclick="show(kk)">k.k</span>(large) <span class="ln" onclick="show(wb)">wb.k</span> <span class="ln" onclick="show(cc)">cc.k</span> <span class="ln" onclick="show(dt)">drawtree.k</span> 
+
+halfkey is <a href="#bench">7 times faster than k</a>
+
+<big><i>halfkey functions</i></big>
+
+name:{[xi;yI;z]...}
+
+is compiled to a native function, e.g in c:  K name(K X){..}
+the signature is always monadic (argument list) 
+but from k it is called with fixed arity like a lambda:
+ name[3;4 5;(1 2;3 4)]           /name[3;4 5] projects
+
+the compiler injects unpacking code, type checking/conversion
+and handles refcounting.
+
+<big><i>types</i></big>
+
+halfkey is statically typed and types are inferred.
+within the function there are atoms (ints and floats),
+which are true i32/f64, not tagged k-values.
+and vectors which are k values but can be indexed as ints or floats,
+e.g. for x declared as xI, x[1+y] returns an int.
+
+these verbs are compiled to int & (most)float ops:
+ -~                     neg not
+ +-*%&|&lt;&gt;=~^            add sub..
+
+unspecified types remain k, and all k monadic and dyadic functions
+are available (but no operators, compositions, projections, lambdas..):
+ +-*%&|&lt;&gt;=~!,^#_$?@.
+
+they compile to function calls to the primitive implementations, e.g.
+ 2#x  is Tak(Ki(2),rx(x))
+literals and mixed i+k or f+k are converted to k types.
+mixed i+f are converted to float.
+
+the above k expression also refcounts automatically: rx(x).
+but assignments and indexing does not, we want to be able to
+modify k objects directly. see the lu example.
+
+<big><i>flow</i></big>
+
+halfkey's syntax is k for ease of parsing (it uses `p"..") but flow control is different
+(because k-cond $[x;y..] and while[..] generate complicated byte code with jumps).
+instead we use arthuresque W[cond;a;b;c] function call syntax for while,
+N[n;..] for a loop with known length and if[a;b] or if[a;b;c] as conditionals.
+the latter is detected as expression, e.g. 1+if[a;b;c] if a and b are the same type.
+also jump table as switch[i;a;b;c] where cases are consecutive 0,1..default.
+
+<big><i>infix-postfix-treetable</i></big>
+
+ "x+3*y"             /k string form, parse with `p"x+2*y" returns:
+ (`y;.;3;*;`x;.;+)   /kvm byte code, postfix (actually list for k values)
+ +`t`p`i`s!(..)      /treetable, prefix with parent vector
+       t  p  i  s    /type parent int symbol(payloads)
+ 0  `add  0  2 `i  
+ 1  `get  0  0 `x
+ 2  `mul  0  2 `i  
+ 3  `lit  2  3 `i 
+ 4  `get  2  0 `y
+
+there are many possibilities to do the transformations,
+e.g. replace x0 with x[0]. byte code is a good fit for find and replace.
+
+treetables are hardest to write and manipulate, but unbeatable for query.
+
+for type inference during compilation, we temporarily add a type column q resulting in tpisq.
+
+<big><i>prefix</i></big>
+
+the main translation from postfix to the treetable is the function:
+
+prefix:{[tab;y]
+ pu:{tab::tab,,+tpisq!x}              /push
+ po:{r:*|tab;tab::-1_tab;r}           /pop
+ li:{n:-x;tab::(n_tab),,|n#tab}       /make list (`27)
+ $[`v~yt:@y;$[(y)~`27;li@*po[]`i      /kvm switch  see exec.go:^func exec
+    0~n:64\0+y
+        pu monadic[y;po[]]
+    1~n;pu  dyadic[y;po[];po[]]
+    2~n;err`indirect
+    3~n;pu amend[y;po[];po[];po[];po[]]
+    4~n;err`drop
+    5~n;err`jump
+    6~n;err`jumpifnot
+    pu quotedverb y]
+   yt~`s;pu symbol y;pu const[yt;y]]
+ tab}
+
+it uses a stack (a list of partial k trees) and is applied as:
+ prefix/[initstack;expression]
+at the end one table remains on the stack
+
+<big><i>translate&maxout</i></big>
+
+catenate two trees is simple if they are tables: x,y
+but we have to fix the parent vector
+
+ x,y[`p]:0|(#x)+y`p
+
+both trees were written in discretion with their root's parent set to 0N.
+it remains negative during translation and is maxed out with the new parent.
+0| can be replaced by any other node number, wherever y should be linked into x
+
+the above assumes indexed assign x[`p]:.. (so should modified assign) returns x
+completely, not just the right hand side.
+
+<big><i id="bench">benchmark: lu decomposition 1000x1000</i></big>
+
+-download k+.c from ktye.github.io/halfkey#lu 
+-write x.k
+lu:{[A]i:0;j:!#A;P:!#A      /k version
+ while[1<#j
+  k:i+*&a=m:|/a:abs A[j;i]
+  P[(i;k)]:P[(k;i)]
+  A[(i;k)]:A[(k;i)]
+  A[j:1_j;i]%:A[i;i]
+  A[j;j]-:A[j;i]*\:A[i;j]
+  i+:1]
+ (A;P)}
+A:{x^?x*x}                 /an 5: 5x5 random floats
+
+-compare:
+$gcc -O3 k+.c -lm
+$time ./a.out x.k -e 'lu A 1000'  /k
+$time ./a.out x.k -e 'LU A 1000'  /halfkey
+-same for go:
+$go build k+.go
+$time ./k+ x.k -e 'lu A 1000'
+$time ./k+ x.k -e 'LU A 1000'
+
+time(s):
+
+    k     halfkey
+ c  4.28  0.58
+ go 9.36  1.76 
+
+<big><i>todo</i></big>
+
+- break continue and labels(outer)
+  e.g.  W[`a;1&lt;x;.. &lt;a  ..] /continue
+  and   W[`a;1&lt;x;.. &gt;a  ..] /break
+  labels default to W (N in ndo) for inner loop
+- allow more types, e.g. chars, symbols
+- allow some reductions in for k types, e.g. +/ &/
+- avoid some predeclarations
+  apl evaluation order during compilation sometimes prevents
+  the compiler from knowing the type of a previously assign
+  variable. they need to be predeclared as a work-around.
+- if[c;block[a;b]] is ugly, if[c;[a;b]] would be better but is hard to parse from byte code
+
+</pre>
+
+</body></html>
 
