@@ -22,8 +22,6 @@
 
 <script>
 
-if('serviceWorker'in navigator)navigator.serviceWorker.register("/e.sw.js")
-
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function su(u){return (u.length)?new TextDecoder("utf-8").decode(u):""}
 function us(s){return new TextEncoder("utf-8").encode(s)}
@@ -32,12 +30,12 @@ let edt=ge("edt")
 let ed = CodeMirror(edt, {"dark":true,"lineNumbers":true,"dragDrop":false,"tabSize":8,"smartIndent":false,"matchBrackets":true})
 
 
-// search selected: middle-button(all), right(next) (bug: mouseup(chrome), ff ok)
-edt.addEventListener('contextmenu',function(e){console.log("click");pd(e);})
+// search selected: middle-button(all), right(next)) 
 ed.on('mousedown', function(cm, e) {
  if     (e.button==2 && (ed.getSelection().length>0)){search(ed.getSelection(),false);pd(e)}
  else if(e.button==1 && (ed.getSelection().length>0)){search(ed.getSelection(),true );pd(e)}
 })
+ed.on('contextmenu', function(cm, e){pd(e)})
 function indexAll(a, s) { let r = [], i = -1; while ((i = a.indexOf(s, i+1)) != -1){ r.push(i); }; return r; }
 function search(t, all){
  let v=ed.getValue();let p=ed.getCursor();if(all){
