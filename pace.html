@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>pace</title>
+<style>
+*{font-family:monospace}
+.e{background-color:#efe}
+</style>
+</head>
+<body onload="init()">
+
+<pre id="table">
+ 100 <span id="t0" class="e" contenteditable="true">       </span> 
+ 200 <span id="t1" class="e" contenteditable="true">       </span> 
+ lap <span id="t2" class="e" contenteditable="true">       </span>     palmares
+ 800 <span id="t3" class="e" contenteditable="true">       </span>  <span id="p3" >   2:11</span>  2016 Pfungstadt
+   k <span id="t4" class="e" contenteditable="true">   3:00</span>  <span id="p4" >   2:55</span>  2017 Pfungstadt
+1500 <span id="t5" class="e" contenteditable="true">       </span>  <span id="p5" >   4:37</span>  2017 Pfungstadt
+  mi <span id="t6" class="e" contenteditable="true">       </span>  <span id="p6" >   4:50</span>  2016 Boren
+3000 <span id="t7" class="e" contenteditable="true">       </span>  <span id="p7" >   9:40</span>  2014 Pfungstadt
+5000 <span id="t8" class="e" contenteditable="true">       </span>  <span id="p8" >  16:58</span>  2014 Pfungstadt
+ 10k <span id="t9" class="e" contenteditable="true">       </span>  <span id="p9" >  35:07</span>  2013 Darmstadt
+  HM <span id="ta" class="e" contenteditable="true">       </span>  <span id="pa" >1:18:02</span>  2014 Griesheim
+   M <span id="tb" class="e" contenteditable="true">       </span>  <span id="pb" >2:49:47</span>  2014 Hamburg
+</pre>
+
+<table>
+<tr><td class="v"></td><td><canvas id="cnv" width="600" height="300"></canvas></td><td></td></tr>
+<tr><td>800</td><td style="text-align:center">vel over log dist</td><td>M</td></tr>
+</table>
+
+<pre id="wall">
+<b>1500 wall times</b>
+
+ 300 <span id="wall1"></span>
+ 700 <span id="wall2"></span>
+1100 <span id="wall3"></span>
+1500 <span id="wall4" class="e" contenteditable="true">   4:30</span>
+</pre>
+
+
+<script>
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+let st=t=>pad(3600>t?((t-t%60)/60+":"+z2(Math.round(t%60))):sT(t))
+let sT=t=>{let m=(t-t%60)/60,h=Math.floor(m/60);return (h+":"+z2(m%60)+":"+z2(Math.round(t%60)))}
+let z2=x=>(""+x).length<2?"0"+x:x+""
+let pad=x=>("       "+x).substr(-7)
+
+function init(){
+ let a="0123456789ab".split("").map(x=>"t"+x)
+ for(let i=0;i<a.length;i++)ge(a[i]).oninput=function(e){editable(e.target)}
+ ge("wall4").oninput=function(e){editpace(e.target)}
+ editable(ge("t4"))
+ editpace(ge("wall4"))
+ draw()
+}
+
+function parse(s){let v=("0:0:"+s.trim()).split(":").splice(-3).map(x=>Number(x));return v[0]*3600+v[1]*60+v[2]}
+
+function editable(target){let s=target.textContent
+ let a="0123456789ab".split("").map(x=>"t"+x)
+ let b=[.1,.2,.4,.8,1,1.5,1.60934,3,5,10,42.195/2,42.195]
+ s=s.replace(/[^0-9:]/g,'')
+ let t=parse(s)
+ target.style.background=t?"#efe":"#fcc"
+ target.textContent=pad(s)
+ let j=0;for(let i=0;i<a.length;i++)if(ge(a[i])==target)j=i
+ for(let i=0;i<a.length;i++)if(ge(a[i])!=target)ge(a[i]).textContent=t?st(t*b[i]/b[j]):"?"
+}
+
+function editpace(target){let s=target.textContent
+ s=s.replace(/[^0-9:]/g,'')
+ let t=parse(s)
+ target.style.background=t?"#efe":"#fcc"
+ target.textContent=pad(s)
+ let a="wall1.wall2.wall3".split(".")
+ let b=[300,700,1100]
+ for(let i=0;i<a.length;i++)ge(a[i]).textContent=t?st(t*b[i]/1500):"?"
+}
+
+function draw(){
+ let c=ge("cnv").getContext("2d");let w=600,h=300
+ let d=[.8,1,1.5,1.60934,3,5,10,42.195/2,42.195]
+ let l=d.map(x=>37+150*Math.log(x))
+ let t="3456789ab".split("").map(x=>parse(ge("p"+x).textContent))
+ let vl=x=>{c.beginPath();c.moveTo(x,0);c.lineTo(x,h);c.stroke()}
+ let scale=(x,a,b)=>h*(x-b)/(a-b)
+ let v=t.map((x,i)=>{return scale(d[i]/x,0.004,0.007)})
+ let L=y=>{c.beginPath();c.moveTo(l[0],y[0]);for(let i=1;i<l.length;i++)c.lineTo(l[i],y[i]);c.stroke()}
+ 
+ c.strokeStyle="black"
+ //c.strokeRect(0,0,w,h)
+ for(let i=0;i<l.length;i++)vl(l[i])
+ c.strokeStyle="blue";
+ L(v);L(v)
+}
+</script>
+</body></html>
+
