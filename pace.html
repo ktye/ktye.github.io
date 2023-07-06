@@ -2,24 +2,25 @@
 <head><meta charset="utf-8"><title>pace</title>
 <style>
 *{font-family:monospace}
+input{outline:none;border:0;text-align:right}
 .e{background-color:#efe}
 </style>
 </head>
 <body onload="init()">
 
 <pre id="table">
- 100 <span id="t0" class="e" contenteditable="true">       </span> 
- 200 <span id="t1" class="e" contenteditable="true">       </span> 
- lap <span id="t2" class="e" contenteditable="true">       </span>     palmares
- 800 <span id="t3" class="e" contenteditable="true">       </span>  <span id="p3" >   2:11</span>  2016 Pfungstadt
-   k <span id="t4" class="e" contenteditable="true">   3:00</span>  <span id="p4" >   2:55</span>  2017 Pfungstadt
-1500 <span id="t5" class="e" contenteditable="true">       </span>  <span id="p5" >   4:37</span>  2017 Pfungstadt
-  mi <span id="t6" class="e" contenteditable="true">       </span>  <span id="p6" >   4:50</span>  2016 Boren
-3000 <span id="t7" class="e" contenteditable="true">       </span>  <span id="p7" >   9:40</span>  2014 Pfungstadt
-5000 <span id="t8" class="e" contenteditable="true">       </span>  <span id="p8" >  16:58</span>  2014 Pfungstadt
- 10k <span id="t9" class="e" contenteditable="true">       </span>  <span id="p9" >  35:07</span>  2013 Darmstadt
-  HM <span id="ta" class="e" contenteditable="true">       </span>  <span id="pa" >1:18:02</span>  2014 Griesheim
-   M <span id="tb" class="e" contenteditable="true">       </span>  <span id="pb" >2:49:47</span>  2014 Hamburg
+ 100 <input id="t0" class="e" size="7"/> 
+ 200 <input id="t1" class="e" size="7"/> 
+ lap <input id="t2" class="e" size="7"/>     palmares
+ 800 <input id="t3" class="e" size="7"/>  <span id="p3" >   2:11</span>  2016 Pfungstadt
+   k <input id="t4" class="e" size="7" value="3:00"/>  <span id="p4" >   2:55</span>  2017 Pfungstadt
+1500 <input id="t5" class="e" size="7"/>  <span id="p5" >   4:37</span>  2017 Pfungstadt
+  mi <input id="t6" class="e" size="7"/>  <span id="p6" >   4:50</span>  2016 Boren
+3000 <input id="t7" class="e" size="7"/>  <span id="p7" >   9:40</span>  2014 Pfungstadt
+5000 <input id="t8" class="e" size="7"/>  <span id="p8" >  16:58</span>  2014 Pfungstadt
+ 10k <input id="t9" class="e" size="7"/>  <span id="p9" >  35:07</span>  2013 Darmstadt
+  HM <input id="ta" class="e" size="7"/>  <span id="pa" >1:18:02</span>  2014 Griesheim
+   M <input id="tb" class="e" size="7"/>  <span id="pb" >2:49:47</span>  2014 Hamburg
 </pre>
 
 <table>
@@ -30,10 +31,10 @@
 <pre id="wall">
 <b>1500 wall times</b>
 
- 300 <span id="wall1"></span>
- 700 <span id="wall2"></span>
-1100 <span id="wall3"></span>
-1500 <span id="wall4" class="e" contenteditable="true">   4:30</span>
+ 300 <input id="wall1" size="7" readonly="true"/>
+ 700 <input id="wall2" size="7" readonly="true"/>
+1100 <input id="wall3" size="7" readonly="true"/>
+1500 <input id="wall4" size="7" class="e" value="4:30"/>
 </pre>
 
 
@@ -41,15 +42,14 @@
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
-let st=t=>pad(3600>t?((t-t%60)/60+":"+z2(Math.round(t%60))):sT(t))
+let st=t=>3600>t?((t-t%60)/60+":"+z2(Math.round(t%60))):sT(t)
 let sT=t=>{let m=(t-t%60)/60,h=Math.floor(m/60);return (h+":"+z2(m%60)+":"+z2(Math.round(t%60)))}
 let z2=x=>(""+x).length<2?"0"+x:x+""
-let pad=x=>("       "+x).substr(-7)
 
 function init(){
  let a="0123456789ab".split("").map(x=>"t"+x)
- for(let i=0;i<a.length;i++)ge(a[i]).oninput=function(e){editable(e.target)}
- ge("wall4").oninput=function(e){editpace(e.target)}
+ for(let i=0;i<a.length;i++)ge(a[i]).onchange=function(e){editable(e.target)}
+ ge("wall4").onchange=function(e){editpace(e.target)}
  editable(ge("t4"))
  editpace(ge("wall4"))
  draw()
@@ -57,25 +57,23 @@ function init(){
 
 function parse(s){let v=("0:0:"+s.trim()).split(":").splice(-3).map(x=>Number(x));return v[0]*3600+v[1]*60+v[2]}
 
-function editable(target){let s=target.textContent
+function editable(target){let s=target.value
  let a="0123456789ab".split("").map(x=>"t"+x)
  let b=[.1,.2,.4,.8,1,1.5,1.60934,3,5,10,42.195/2,42.195]
- s=s.replace(/[^0-9:]/g,'')
  let t=parse(s)
  target.style.background=t?"#efe":"#fcc"
- target.textContent=pad(s)
+ target.value=s
  let j=0;for(let i=0;i<a.length;i++)if(ge(a[i])==target)j=i
- for(let i=0;i<a.length;i++)if(ge(a[i])!=target)ge(a[i]).textContent=t?st(t*b[i]/b[j]):"?"
+ for(let i=0;i<a.length;i++)if(ge(a[i])!=target)ge(a[i]).value=t?st(t*b[i]/b[j]):"?"
 }
 
-function editpace(target){let s=target.textContent
- s=s.replace(/[^0-9:]/g,'')
+function editpace(target){let s=target.value
  let t=parse(s)
  target.style.background=t?"#efe":"#fcc"
- target.textContent=pad(s)
+ target.value=s
  let a="wall1.wall2.wall3".split(".")
  let b=[300,700,1100]
- for(let i=0;i<a.length;i++)ge(a[i]).textContent=t?st(t*b[i]/1500):"?"
+ for(let i=0;i<a.length;i++)ge(a[i]).value=t?st(t*b[i]/1500):"?"
 }
 
 function draw(){
