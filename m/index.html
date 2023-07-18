@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
-<link rel="manifest" href="/k.webmanifest">
-<title>k/mobile</title>
+<link rel="manifest" href="k.webmanifest">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#ffe"/>
+<title>k</title>
 
 <style>
 .flex{display:flex}
 .hidden{display:none}
 .invisible{display:none}
-*{font-family:monospace;font-size:20pt}
+*{font-family:monospace;font-size:20pt;background:#ffe}
 html{height:100%}
 body{height:100%;overflow-y:hidden;display:block}
 @media only screen and (min-width:1024px){            /*2columns on desktop*/
@@ -23,7 +25,6 @@ body{height:100%;overflow-y:hidden;display:block}
 #inp {width:100%}
 #edt {resize:none;margin-bottom:1em;margin-top:.5em}
 #file{width:100%}
-#kver{}
 #out{font-size:17pt;margin-bottom:0;flex:auto;overflow:hidden}
 #cnv{margin-top:.5em;margin-bottom:0;flex:auto;background:#efe}
 #edt{font-size:17pt;flex:auto}
@@ -34,13 +35,10 @@ body{height:100%;overflow-y:hidden;display:block}
 #mono{font-size:17pt;position:absolute;left:100;top:100;visibility:hidden}
 </style></head>
 
-<script src="plot.js"></script>
-
 <body onload="window.init()">
 <div id="repl" class="flex">
  <div style="display:flex;flex-direction:row">
   <input id="inp" value="+/1 2 3" spellcheck="off" autocomplete="off" spellcheck="false" autocorrect="off">
-  <select id="kver"><option>atw</option><option>ktye</option><option>ngn</option></select>
   <button id="edbut" onclick="changescreen()">edit</button>
  </div>
  <pre    id="out"></pre>
@@ -69,11 +67,11 @@ body{height:100%;overflow-y:hidden;display:block}
 
 
 <script> 
-//navigator.serviceWorker.register("./m.sw.js")
+navigator.serviceWorker.register("k.sw.js")
 
 let ge=x=>document.getElementById(x)
 let ce=x=>document.createElement(x)
-let kver=ge("kver"),inp=ge("inp"),run=ge("run"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),file=ge("file"),dir=ge("dir"),edit=ge("edit"),edt=ge("edt"),brow=ge("brow"),worker
+let inp=ge("inp"),run=ge("run"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),file=ge("file"),dir=ge("dir"),edit=ge("edit"),edt=ge("edt"),brow=ge("brow"),worker
 inp.onchange=e=>{O(" "+e.target.value+"\n");
  let rc=consize(),[w,h]=cnvsize()
  worker.postMessage({m:"repl",t:e.target.value,r:rc.rows,c:rc.cols,w:w,h:h})}
@@ -85,12 +83,11 @@ window.init=function(){
  out.textContent=""
  let h=window.location.hash.slice(1)
  let p=h.indexOf(":")
- kver.value=(p>0)?h.slice(0,p):kver.value
  edt.value=(p>0)?decodeURIComponent(h.slice(1+p)):""
  start({f:"-",t:""},kfs)
 }
 
-let start=(f,fs)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker(kver.value+".js",{name:kver.value})
+let start=(f,fs)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker("ktye.js")
  worker.onmessage=function(e){let d=e.data
   switch(d.m){
   case"write":    O(d.t);                  break
@@ -126,12 +123,9 @@ function editat(f,l,c,p){stat.classList.add   ("link");stat.textContent=f+":"+(1
 run.onclick=e=>{ //click on run button
  changescreen()
  start({f:file.value,t:edt.value},kfs)
- let u=kver.value+":"+encodeURIComponent(edt.value)
+ let u=encodeURIComponent(edt.value)
  window.location.hash=(u.length<1000)?u:""
 }
-
-//change k version dropdown
-kver.onchange=e=>{start({f:"-",t:""},kfs)}
 
 //click on statusbar (jump to file position)
 stat.onclick=e=>{if(("f"in stat)&&("string"==typeof stat.f)){
