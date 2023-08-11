@@ -1064,7 +1064,7 @@ async function copyplot(e){
   let s=new XMLSerializer()
   let t=s.serializeToString(svg)
   let p=ge("tab").innerHTML
-  let h="<!DOCTYPE html><body>"+s+"<br/><pre>"+p+"</pre></body></html>"
+  let h="<!DOCTYPE html><body>"+t+"<br/><pre>"+p+"</pre></body></html>"
   const f=new File([h],savename,{type:"text/html"})
   navigator.share({files:[f]})
  }else if('write' in navigator.clipboard){ //copy table as html for powerpoint
