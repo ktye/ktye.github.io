@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>b</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' height='64' width='64'%3E%3Ccircle cx='32' cy='32' r='30' fill='black' /%3E%3Ccircle cx='32' cy='32' r='28' stroke='yellow' stroke-width='6' /%3E%3Ccircle cx='32' cy='32' r='16' stroke='yellow' stroke-width='6' stroke-dasharray='4.377,4' stroke-dashoffset='2.2' /%3E%3Cline x1='32' y1='8' x2='32' y2='56' stroke='yellow' stroke-width='6' /%3E%3Cline x1='8' y1='32' x2='56' y2='32' stroke='yellow' stroke-width='6' /%3E%3C/svg%3E">
+<link rel="manifest" href="b.webmanifest">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="black"/>
+<style>
+*{font-family:monospace}
+html{margin:0;padding:0}
+body{min-height:100vh;margin:0;padding:0;box-sizing:border-box}
+body nav{position:sticky;top:0}
+h1{font-size:large;text-align:center;border-top:1px solid}
+//.but{margin:auto}
+.but:active{transform:translateY(2px)}
+.centerbut{margin-left:auto;margin-right:auto;display:block}
+.unit{font-style:italic}
+select{border:0;outline:none;overflow-y:hidden}
+.selected{background:#1967d2;color:white}
+option{padding:0px 2px 0px}
+#celltab td{text-align:right}
+.topborder{border-top:1px solid}
+#head{display:flex;gap:3px;margin-bottom:2px;}
+.buttons{display:flex;justify-content:space-between}
+#plt{overflow-x:auto}
+#plotsel{text-align:center;font-weight:bold}
+.curplot{border:2px solid black;border-radius:6px}
+.roundblack{border:2px solid black;border-radius:6px}
+.leftborder{border-left:1px solid black;padding-left:2px}
+.degcolumn{text-align:right}
+</style>
+</head>
+<body onload="init()">
+
+<nav id="head">
+<svg id="tabbut" class="but plot" width="32" height="32" onclick="showtable()">
+ <title>select rows</title>
+ <rect x="0" width="32" height="32" rx="4" fill="black"/>
+ <line x1="6" y1="6" x2="26" y2="6" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line x1="6" y1="12" x2="26" y2="12" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line x1="6" y1="19" x2="26" y2="19" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line x1="6" y1="26" x2="26" y2="26" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+</svg>
+<svg id="colbut" class="but plothide" width="32" height="32" onclick="showcols()">
+ <title>column setup</title>
+ <rect x="0" width="32" height="32" rx="4" fill="black"/>
+ <line y1="12" x1="6"  y2="26" x2="6"  stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line y1="12" x1="16" y2="26" x2="16" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line y1="12" x1="26" y2="26" x2="26" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <circle cx="6"  cy="6" r="2" fill="yellow"/>
+ <circle cx="16" cy="6" r="2" fill="yellow"/>
+ <circle cx="26" cy="6" r="2" fill="yellow"/>
+</svg>
+<svg id="celbut" class="but plothide" width="32" height="32" onclick="showcells()">
+ <title>edit table</title>
+ <rect x="0" width="32" height="32" rx="4" fill="black"/>
+ <line x1="6" y1="6"  x2="26" y2="6"  stroke="yellow" stroke-width="3" stroke-dasharray="4" stroke-linecap="round"/>
+ <line x1="6" y1="12" x2="26" y2="12" stroke="yellow" stroke-width="3" stroke-dasharray="4" stroke-linecap="round"/>
+ <line x1="6" y1="19" x2="26" y2="19" stroke="yellow" stroke-width="3" stroke-dasharray="4" stroke-linecap="round"/>
+ <line x1="6" y1="26" x2="26" y2="26" stroke="yellow" stroke-width="3" stroke-dasharray="4" stroke-linecap="round"/>
+</svg>
+<svg id="plotedtbut" class="but plotshow" width="32" height="32" onclick="plotedit()">
+ <title>setup plots</title>
+ <rect x="0" width="32" height="32" rx="4" fill="black"/>
+ <line y1="6" x1="6"  y2="26" x2="6"  stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line y1="6" x1="16" y2="26" x2="16" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <line y1="6" x1="26" y2="26" x2="26" stroke="yellow" stroke-width="3" stroke-linecap="round"/>
+ <circle cx="6"  cy="10" r="3" fill="yellow"/>
+ <circle cx="16" cy="22" r="3" fill="yellow"/>
+ <circle cx="26" cy="18" r="3" fill="yellow"/>
+</svg>
+
+<input id="selinp" class="plothide roundblack" type="text" style="flex-grow:2"></input>
+<select id="plotsel" class="plotshow roundblack" style="flex-grow:2"></select>
+
+<svg id="icbut" data-pid="ic0" class="but plotshow" width="32" height="32" onclick="makeplot(this)">
+ <title>calibration plot (ifc)</title>
+ <rect x="0" width="32" height="32" rx="4" fill="black"/>
+ <path d="M8 8 L6 14 L10 14 L8 8 L24 8 L22 14 L26 14 L24 8" stroke="yellow" stroke-width="2" />
+ <line x1="16" y1="8" x2="16" y2="24" stroke="yellow" stroke-width="2" />
+</svg>
+<svg id="ctbut" data-pid="ct0" class="but plotshow" width="32" height="32" onclick="makeplot(this)">
+ <title>calibration test</title>
+ <circle cx="16" cy="16" r="14" stroke="yellow" stroke-width="3" fill="black"/>
+ <circle cx="16" cy="8" r="2" stroke="yellow" fill="yellow"/>
+ <circle cx="16" cy="24" r="2" stroke="yellow" fill="yellow"/>
+ <circle cx="8" cy="16" r="2" stroke="yellow" fill="yellow"/>
+ <circle cx="24" cy="16" r="2" stroke="yellow" fill="yellow"/>
+</svg>
+<svg id="cfbut" data-pid="cf0" class="but plotshow" width="32" height="32" onclick="makeplot(this)">
+ <title>constraint forces</title>
+ <circle cx="16" cy="16" r="14" stroke="yellow" stroke-width="3" fill="black"/>
+ <circle cx="23" cy="17" r="2" stroke="yellow" fill="yellow"/>
+ <line x2="10" y2="8"  x1="23" y1="17" stroke="yellow" stroke-width="1"/>
+</svg>
+<svg id="ixbut" data-pid="ix0" class="but plotshow" width="32" height="32" onclick="makeplot(this)">
+ <title>indexing test</title>
+ <circle cx="16" cy="16" r="14" stroke="yellow" stroke-width="3" fill="black"/>
+ <circle cx="10" cy="8"  r="2" stroke="yellow" fill="yellow"/>
+ <circle cx="26" cy="14" r="2" stroke="yellow" fill="yellow"/>
+ <line x1="16" y1="16" x2="18" y2="11" stroke="yellow" stroke-width="1"/>
+ <line x2="10" y2="8"  x1="26" y1="14" stroke="yellow" stroke-width="1"/>
+</svg>
+<svg id="mubut" data-pid="mu0" class="but plotshow" width="32" height="32" onclick="makeplot(this)">
+ <title>mean and deviation (mu)</title>
+ <circle cx="16" cy="16" r="14" stroke="yellow" stroke-width="3" fill="black"/>
+ <circle cx="20" cy="12" r="6" stroke="yellow" stroke-width="2"/>
+</svg>
+<svg id="pobut" data-pid="po0" class="but plotshow" width="32" height="32" onclick="makeplot(this)">
+ <title>polar plot</title>
+ <circle cx="16" cy="16" r="14" stroke="yellow" stroke-width="3" fill="black"/>
+ <circle cx="16" cy="16" r="8"  stroke="yellow" stroke-width="3" stroke-dasharray="2.31,2" stroke-dashoffset="2.2" />
+ <line x1="16" y1="4"  x2="16" y2="28" stroke="yellow" stroke-width="3" />
+ <line x1="4"  y1="16" x2="28" y2="16" stroke="yellow" stroke-width="3" />
+</svg>
+</nav><a id="dl" style="display:none"></a>
+<div id="out">
+</div>
+<script>
+if(("serviceWorker"in navigator)&&!document.URL.startsWith("file"))navigator.serviceWorker.register("b.sw.js")
+
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+
+
+function examples(){return{
+ unitconvert:[
+  {name:"speed",type:"number",unit:"krpm",show:true,data:[80,90,100,120,140,160,200,250,300]},
+  {name:"S1",type:"complex",unit:"g",show:true,data:[5.10,31,5.02,35,5.52,40,6.70,42,6.57,34,7.08,36,7.62,40,7.51,49,7.15,49]},
+  {name:"S2",type:"complex",unit:"m/s^2",show:true,calc:"convert S1"},
+  {name:"S3",type:"complex",unit:"mm/s",show:true,calc:"convert S1"},
+  {name:"S4",type:"complex",unit:"µm",show:true,calc:"convert S1"},
+  {name:"rotor",type:"string",unit:"-",show:true,data:["a","a","a","a","b","b","b","b","b"]},
+ ],
+ indexing:[
+  {name:"speed",type:"number",unit:"rpm",show:true,data:[900,900,900,900,900,900,900,900]},
+  {name:"ang",type:"number","unit":"deg",show:true,data:[0,90,180,270,0,90,180,270]},
+  {name:"S1",type:"complex",unit:"mm/s",show:true,data:[5.96,11, 7.39,70, 5.88,136,3.96,253,5.90,1,  7.19,59, 6.81,145,3.37,267]},
+  {name:"S2",type:"complex",unit:"mm/s",show:true,data:[6.50,294,5.27,344,1.31,342,4.67,254,6.89,291,5.52,340,1.79,343,4.06,257]},
+  {name:"rotor",type:"string",unit:"-",show:true,data:["a","a","a","a","b","b","b","b"]},
+ ],
+ calibration:[
+  {name:"S1",type:"complex",unit:"V",show:false,data:[7.24,312,6.21,7  ,3.15,115,4.93,239,  3.77,333,  2.47,1,1.29,324,  2.84,308]},
+  {name:"S2",type:"complex",unit:"V",show:false,data:[3.68,12,2.57,34,1.69,6,3.19,332,6.85,12,5.33,91,3.93,203,7.21,312]},  
+  {name:"T1",type:"complex",unit:"gmm",show:true,data:[1.2,0,1.2,90,1.2,180,1.2,270,0,0,0,0,0,0,0,0]},
+  {name:"T2",type:"complex",unit:"gmm",show:true,data:[0,0,0,0,0,0,0,0,1.2,0,1.2,90,1.2,180,1.2,270]},
+  {name:"c1",type:"bool",unit:"x",show:true,data:[1,1,1,1,1,1,1,1]},
+  {name:"U1",type:"complex",unit:"gmm",show:true,calc:"unb[c1;S1,S2;T1,T2]0"},
+  {name:"U2",type:"complex",unit:"gmm",show:true,calc:"unb[c1;S1,S2;T1,T2]1"},
+  {name:"rotor",type:"string",unit:"-",show:true,data:["a","b","a","b","a","b","a","b"]},
+ ],
+ constraints:[
+  {name:"speed",type:"number",unit:"rpm",show:true,data:[300,400,500,600,700,800,900,1000,1100,1200]},
+  {name:"U1",type:"complex",unit:"gmm",show:true,data:[312.2,228.8,184.2,232.6,124.7,236.8,90.4,240.8,70.8,244.6,57.4,248.2,47.9,251.2,42.2,253.2,37.7,255.8,34.6,257.7]},
+  {name:"U2",type:"complex",unit:"gmm",show:true,data:[49.4,102.5,28.2,110  ,21.3,117.3,17.5,129.5,14.5,138.3,12.9,144.7,11.9,149.9,10.9,152.4,10.5,154.8,10.2,157]},
+ ],
+ transform:[
+  {name:"U1",type:"complex",unit:"gmm",show:true,data:[3.12,30,2.4,40,1.5,60]},
+  {name:"U2",type:"complex",unit:"gmm",show:true,data:[1.12,90,1.4,140,3.5,160]},
+  {name:"UA",type:"complex",unit:"gmm",show:true,calc:"abc[20 60 30;U1,U2]0"},
+  {name:"UB",type:"complex",unit:"gmm",show:true,calc:"abc[20 60 30;U1,U2]1"},
+  {name:"US",type:"complex",unit:"gmm",show:true,calc:"U1+U2"},
+  {name:"UC",type:"complex",unit:"gmm",show:true,calc:"couple[50 50;U1,U2]"},
+ ]}
+}
+let infos={
+ unitconvert:"convert a signal channel to a different unit\nwith a calculated column using the function 'calc SRC'\nwhere SRC is the column name to convert from.\nthe unit of the caluclated field is the destination unit.\n\nspeed units are: rpm krpm Hz kHz\nunbalance units: kgm kgmm gcm gmm mgmm ozin\ndisplacement   : nm µm(or um) mm m ..\nvelocity       : mm/s m/s ..\nacceleration   : g m/s^2 ..\npermanent cal  : ms^2",
+ indexing:"for an index balancing test, add a column named 'ang' with unit 'deg'\ncontaining the rotor position relative to the tooling.\n\nselect runs and click on the index plot icon.\nexamples:\n index U1,U2\n index U1,U2 by rotor",
+ calibration:"to create a calibration:\nadd a calibration column type bool and set the calibration runs to 1.\nas a shortcut:\n-select the calibration runs\n-change to the columns setup\n-click 'add calibration'\n-click 'set runs' for the new calibration.\n\ncalibrations need input columns and test mass columns.\n\nto calculate unbalances with a calibration:\nadd columns with the function 'unb[INPUTS;TESTMASSES]PLANE'\nclick on the 'addto data' to do add the columns automatically.",
+ constraints:"",
+ transform:"rigid rotor unbalances can be transformed using a calculated columns\n\ne.g. the calculation 'abc[20 60 30;U1,U2]0'\ntransforms U1,U2 from pedestals to the inboard geometry a=20,b=60,c=30.\nnegative values can be used for overhanging planes.\nuse the index 0 and 1 (last argument) for the two planes respectively.\n\nstatic unbalance is simply 'U1+U2'\n\na couple can be calculated as 'couple[10 20;U1,U2]'\nit returns the couple in plane 1\nassuming the static is between the planes with distances 10 and 20 from plane 1 and 2 respectively.",
+}
+
+//data!
+let font="monospace"
+let formats={rpm:1,gmm:2,deg:0}
+let plotsize=400
+let colors=["#ff2","#e11","#2d2","#28f","#f80","#2ec","#e2e"]
+let title="project title"
+let info="description"
+let table=[
+  {name:"speed",type:"number",unit:"rpm",show:true,data:[300,400,500,600,700,800,900,1000,1100,1200]},
+  {name:"U1",type:"complex",unit:"gmm",show:true,data:[312.2,228.8,184.2,232.6,124.7,236.8,90.4,240.8,70.8,244.6,57.4,248.2,47.9,251.2,42.2,253.2,37.7,255.8,34.6,257.7]},
+  {name:"U2",type:"complex",unit:"gmm",show:true,data:[49.4,102.5,28.2,110  ,21.3,117.3,17.5,129.5,14.5,138.3,12.9,144.7,11.9,149.9,10.9,152.4,10.5,154.8,10.2,157]},
+]
+let calibrations=[{name:"c1","inputs":"S1,S2","tm":"T1,T2"},{name:"c2","inputs":"S1,S2","tm":"T1,T2"}]
+let plots={
+ current:"po0",
+ po0:"",
+ po1:"plot S1,S2",
+ po2:"plot static:S1+S2 unit mm/s",
+ po2:"plot S1,S2 by rotor",
+ mu0:"mu S1,S2 by rotor",
+ mu1:"mu",
+ ix0:"index S1,S2",
+ ix1:"index S1,S2 by rotor",
+ cf0:"constraints",
+ cf1:"constraints U1",
+ cf2:"constraints U1 at 900",
+ ct0:"test",
+ ct1:"test U1,U2 with T1,T2 by rotor",
+ ic0:"cal",
+ ic1:"cal c2",
+ ic2:"cal c1,c2",
+}
+//data!
+function rowcount(){if(0==table.length)return 0;let t0=table[0];return t0.data.length/(("complex"==t0.type)?2:1)}
+
+//drop-files
+window.ondragover=function(e){pd(e)}
+ window.ondrop=function(e){pd(e);
+ let l=e.dataTransfer.files
+ for(let i=0;i<l.length;i++){
+  let f=l.item(i);
+  f.text().then(t=>{
+   if(f.name.endsWith(".csv"))fromcsv(t)
+   if(f.name.endsWith(".json"))fromjson(t)
+})}}
+
+let SelectedIndexes=[]
+function init(){
+ window.onerror=(a,b,c)=>{out.appendChild(ce("br"));out.appendChild(document.createTextNode(a+" (at "+c+")"))}
+ document.title=title
+ setfont(font)
+ showtable()
+ ge("selinp").onchange=keval
+}
+function makeplot(icon){let out=ge("out"),plt=ce("div");plt.id="plt";rm(out);out.appendChild(plt);toggleButtons(true) 
+ Array.from(document.getElementsByClassName("curplot")).map(x=>x.classList.remove("curplot"));if(icon)icon.classList.add("curplot")
+ if(icon)plots.current=icon.dataset.pid
+ selectplot()
+ 
+ // mu U1,title:U2+U3 unit gmm by rotor     plotcmd column-expressions by-clause
+ 
+ let s=plots[plots.current],i
+ if(s=="test")s=testFirst()
+ if(s=="cal")s=calFirst()
+ let by="";i=s.indexOf(" by ");if(i>0){by=s.slice(i+4);s=s.slice(0,i)}
+ let wi=[];i=s.indexOf(" with ");if(i>0){wi=s.slice(i+6).split(",");s=s.slice(0,i)}
+ let at="";i=s.indexOf(" at ");if(i>0){at=s.slice(i+4);s=s.slice(0,i)}
+ let un="";i=s.indexOf(" unit ");if(i>0){un=s.slice(i+6);s=s.slice(0,i)}
+ let cmd,exprs="";i=s.indexOf(" ");if(i>0){cmd=s.slice(0,i);exprs=s.slice(1+i).split(",")}else{cmd=(s=="")?"plot":s,exprs=table.filter(x=>x.show&&("complex"==x.type)).map(x=>x.name)}
+ let t=[];for(let i=0;i<exprs.length;i++){let j=exprs[i].indexOf(":");if(j>0){t.push(exprs[i].slice(0,j));exprs[i]=exprs[i].slice(1+j)}else{t.push(exprs[i])}}
+ un=(un=="")?exprs.map(e=>{let j=table.findIndex(x=>x.name==e);return(j<0)?"":table[j].unit}):un.split(",")
+ if("cal"==cmd)return calplot(exprs,out)
+ 
+ let groups={},gflat=[];if(by!=""){
+  let j=table.findIndex(x=>x.name==by);if(j<0){out.textContent="cannot group by "+by;return}
+  let d=table[j].data
+  for(let i=0;i<SelectedIndexes.length;i++){let di=d[SelectedIndexes[i]]
+   if(!(di in groups))groups[di]=[];groups[di].push(i)
+   gflat.push(Object.keys(groups).findIndex(x=>x==di))
+ }}else{gflat=Array(SelectedIndexes.length).fill(0);groups={all:[...Array(SelectedIndexes.length).keys()]}}
+ 
+ let u=[],r=[],p=[],c=[],g=[],l=[],I=KI(SelectedIndexes);
+ let extra="\n\t\t",extraplots=["mu","index","test","constraints"]
+ for(let i=0;i<exprs.length;i++){
+  try{ let j
+   let[R,P]=rphi(ZK(kzcol(exprs[i],K.rx(I))))
+   u.push(un[i%un.length]);r.push(R);p.push(P);
+   c.push((by=="")?[...Array(SelectedIndexes.length).keys()]:gflat);g.push(gflat);let ti=t[i],ui=u[i];l.push(R.map((r,i)=>zlegend(ti,r,P[i],ui)+(extraplots.includes(cmd)?extra:"")))
+  }catch(e){console.log(e);out.textContent=e.message;return}
+ }
+ K.dx(I)
+ 
+ rm(plt);
+ let svg=polars(t,u,r,p,c,g,l)
+ plt.appendChild(svg)
+ 
+ //console.log("cmd",cmd,"exprs",exprs,"groups",groups)
+ let agg={},nfld=0
+ try{
+  I=KI(SelectedIndexes)
+  for(let j=0;j<exprs.length;j++){let uj=u[j]
+   let groupnames=Object.keys(groups)
+   let grps=[]
+   for(let k=0;k<groupnames.length;k++){let key=groupnames[k],val=groups[key],extra=""
+    let z=kzcol(exprs[j],K.Atx(K.rx(I),KI(val)))
+    switch(cmd){
+    case"mu":{
+     let[r,p]=zK(K.Atx(K.Val(KC("avg")),K.rx(z))),mu=na0(fK(K.Atx(K.Val(KC("mu95")),z)))
+     extra="mu\t"+format(mu,"number",uj)+"\t"+uj
+     let tt=zlegend("mean",r,p,uj)+"\n"+extra
+     let c=annotate(j,"circle","cursor","pointer","title",tt,"cx",0,"cy",0,"r",0,"class","p"+(SelectedIndexes.length+2*k),"data-j",j,"data-r",r,"data-p",p,"data-R",mu,"fill","none","stroke-width",2,"stroke",color(k))
+     c.onclick=circleClick
+     grps[k]={by:by,name:key,fields:{mean:format([r,p],"complex",uj),mu:format(mu,"number",uj)}}
+     break}
+    case"index":{
+     let ai=table.findIndex(x=>"ang"==x.name);if(ai<0)throw new Error("column 'ang' missing for indexing")
+     let a=K.Atx(KF(table[ai].data),K.Atx(K.rx(I),KI(val)))
+     let ixres=K.Cal(K.Val(KC("ix")),K.l2(K.rx(z),K.rx(a))),z0=K.Atx(K.rx(ixres),K.Ki(0)),z1=K.Atx(K.rx(ixres),K.Ki(1)),mu=fK(K.Atx(K.rx(ixres),K.Ki(3)))
+     let[r,p]=rphi(ZK(ixres))
+     extra="mu\t"+format(mu,"number",uj)+"\t"+uj
+     let nom=rphi(ZK(K.Cal(2n,K.l2(z0,K.Cal(K.Val(KC("angle")),K.l2(z1,a))))))
+     let l0=zlegend("offset",r[0],p[0],uj),l1=zlegend("rotor",r[1],p[1],uj)    
+     let q0=annotate(j,"line","cursor","pointer","title",l0,"data-j",j,"class","p"+(SelectedIndexes.length+3*k+1),"data-r1",  0, "data-p1",  0, "data-r2",r[0],"data-p2",p[0],"fill","none","stroke-width",2,"stroke",color(k),"marker-end","url(#arrowhead"+k+")")
+     let q1=annotate(j,"line","cursor","pointer","title",l1,"data-j",j,"class","p"+(SelectedIndexes.length+3*k  ),"data-r1",r[0],"data-p1",p[0],"data-r2",r[2],"data-p2",p[2],"fill","none","stroke-width",2,"stroke",color(k),"marker-end","url(#arrowhead"+k+")")
+     q0.onclick=circleClick;q1.onclick=circleClick
+     errlines(j,c[j].filter((x,i)=>val.includes(i)),z,nom,uj,val)
+     grps[k]={by:by,name:key,fields:{rotor:format([r[1],p[1]],"complex",uj),offset:format([r[0],p[0]],"complex",uj),mu:format(mu,"number",uj)}}
+     break}
+    case"constraints":{at=(""==at)?"900":at;let omega=K.Atx(K.Val(KC("omega")),K.Atx(K.rx(I),KI(val))),w0=K.Kf(Math.PI/30*(Number(at)))
+     if(21!=K.tp(omega))throw new Error("speed column missing for constraint forces")
+     
+     let r=K.Cal(K.Val(KC("cf")),K.l2(K.rx(omega),K.rx(z)))
+     
+     let[r0,p0]=zK(K.Cal(K.Val(KC("cfx")),K.l2(K.rx(r), K.Atx(K.Val(KC("&/")),K.rx(omega)))))
+     let[r1,p1]=zK(K.Cal(K.Val(KC("cfx")),K.l2(K.rx(r), w0)))
+     let[r2,p2]=zK(K.Atx(4n,K.rx(r)))
+     let nom=rphi(ZK(K.Cal(K.Val(KC("cfx")),K.l2(r, omega))))
+     extra="a\tb\tc"
+     
+     let t=zlegend("∞",r2,p2,uj)+"\nΔ\t"+format(r1,"number",uj)+"\t"+uj
+     let a=annotate(j,"line","cursor","pointer","title",t,"data-j",j,"class","p"+(SelectedIndexes.length+k),"data-r1",r0,"data-p1",p0,"data-r2",r2,"data-p2",p2,"fill","none","stroke-width",2,"stroke",color(k),"marker-end","url(#arrowhead"+k+")")
+     a.onclick=circleClick
+     errlines(j,c[j].filter((x,i)=>val.includes(i)),z,nom,uj,val)
+ 
+     grps[k]={by:by,name:key,fields:{"∞":format([r2,p2],"complex",uj),["Δ"+at]:format([r1,p1],"complex",uj)}}
+ 
+     break}
+    case"test":{
+     if(wi.length==0||exprs.length!=wi.length)throw new Error("cal test needs test masses for each unbalance plane")
+     let t=kzcol(wi[j],K.Atx(K.rx(I),KI(val)))
+     let ctres=K.Cal(K.Val(KC("ct")),K.l2(K.rx(z),K.rx(t)))
+     let z0=K.Atx(K.rx(ctres),K.Ki(0)),z1=K.Atx(K.rx(ctres),K.Ki(1)),mu=fK(K.Atx(K.rx(ctres),K.Ki(3)))
+     let[r,p]=rphi(ZK(ctres))
+     let nom=rphi(ZK(K.Cal(2n,K.l2(z0,t))))
+     extra="mu\t"+format(mu,"number",uj)+"\t"+uj
+     errlines(j,c[j].filter((x,i)=>val.includes(i)),z,nom,uj,val)
+     grps[k]={by:by,name:key,fields:{initial:format([r[0],p[0]],"complex",uj),mu:format(mu,"number",uj)}}
+     break}
+    case"cal":{
+     console.log("todo plot cal ic..")
+     break}
+    default:K.dx(z)
+    }
+    if(extra!="")extralegend(j,k,extra)
+   }
+   if(grps.length)nfld=Object.keys(grps[0].fields).length
+   agg[exprs[j]]=grps
+   updatepoints(j)
+  }
+ }catch(e){console.log(e);out.textContent=e.message;return}
+ K.dx(I)
+ 
+ let ta=subTable(SelectedIndexes,(cmd=="plot")?null:agg,false)
+ ta.onchange=(e)=>{let i=getSelection(ta);if(i>=0){highlightCircle(i)}else{unhighlight()}}
+ ta.shiftclick=(e)=>{let i=getSelection(ta);if(i>=0){let sp=e.target;let j=sp.dataset.i;if((i>=0)&&(j>=0)&&(i!=j)){highlightVector(i,j);pd(e)}}}
+ out.appendChild(ta);unhighlight() //onchange
+ svg.ondblclick=clipboardSvg
+ let b=ce("button");b.textContent=copyname();b.style.float="right";b.onclick=copyplot;out.appendChild(b)
+}
+function calplot(cal,out){let n=0,m=0,kk=[],S=[],T=[],unit,cond=[]
+ for(let i=0;i<cal.length;i++){let ci=cal[i]
+  try{
+   let k=calibrations.findIndex(x=>ci==x.name);if(k<0)throw new Error("calibration '"+ci+"' does not exist")
+   let ck=calibrations[k]
+   if(i==0){S=ck.inputs.split(",")}else if(S.join(",")!=ck.inputs)throw new Error("calibration has different inputs")
+   if(i==0){T=ck.tm.split(",")}else if(T.join(",")!=ck.tm)throw new Error("calibration has different test planes")
+   let sj=table.findIndex(x=>S[0]==x.name);if(sj<0)throw new Error("calibration input does not exist as table column: "+S[0])
+   let tj=table.findIndex(x=>T[0]==x.name);if(sj<0)throw new Error("calibration test mass does not exist as table column: "+T[0])
+   if(i==0)unit=table[sj].unit+"/"+table[tj].unit
+   let ic=K.Val(KC("ic["+([ci,ck.inputs,ck.tm].join(";"))+"]"))
+   if(i==0){n=K.nn(ic)}else if(K.nn(ic)!=n)throw new Error("calibration has different number of rows")
+   ic=K.Atx(K.Val(KC(",/+")),ic)
+   if(i==0){m=K.nn(ic)/n}else if(K.nn(ic)/n!=m)throw new Error("calibration has different number of cols")
+   if((n==2)&&(m==2)){cond.push(fK(K.Atx(K.Val(KC("cnd22@2^")),K.rx(ic))).toFixed(1))}else cond.push("")
+   kk.push(rphi(ZK(ic)))
+  }catch(e){console.log(e);out.textContent="calplot "+ci+": "+e.message;return}
+ }
+ 
+ let u=[],r=[],p=[],c=[],g=[],l=[]
+ for(let j=0;j<m;j++){let rj=[],pj=[],cj=[],gj=[],lj=[]
+  for(let k=0;k<kk.length;k++){
+   for(let i=0;i<n;i++){rj.push(kk[k][0][m*i+j]);pj.push(kk[k][1][m*i+j]);cj.push(i);gj.push(k);lj.push(zlegend(cal[k]+" "+(1+i)+","+(1+j),kk[k][0][m*i+j],kk[k][1][m*i+j],unit))}
+  };r.push(rj);p.push(pj);u.push(unit);c.push(cj);g.push(gj);l.push(lj)
+ }
+ 
+ let t=(["cal","cond",""].concat(T)).map(x=>[x])
+ for(let i=0;i<t.length;i++)t[i].push((i>2)?unit:"-")
+ for(let k=0;k<kk.length;k++){
+  for(let i=0;i<n;i++){
+   t[0].push(i?"":cal[k]);t[1].push(i?"":cond[k]);t[2].push(S[i])
+   for(let j=0;j<m;j++)t[3+j].push( format([kk[k][0][m*i+j],kk[k][1][m*i+j]],"complex",unit) )
+  }
+ }
+ for(let i=0;i<t.length;i++)t[i]=pads(t[i])
+ t=transpose(t).map(x=>x.join("│").replace(/ /g,"&nbsp;"))
+ 
+ let ta=ce("select");ta.id="tab";ta.size=t.length
+ t.map((x,i)=>{let o=ce("option");o.innerHTML=x;o.style.borderLeft="1em solid "+((i<2)?"#fff":color((i-2)%n)) ;if((i>1)&&(0==(i-2)%n))o.classList.add("topborder");ta.appendChild(o)})
+ out.appendChild(ta)
+ ta.onchange=(e)=>{let i=ta.selectedIndex-2;if(i>=0){highlightCircle(i)}else{unhighlight()}}
+ 
+ rm(plt);
+ let svg=polars(T,u,r,p,c,g,l)
+ plt.appendChild(svg)
+ 
+}
+function errlines(j,c,z,nom,u,gsel){let rp=rphi(ZK(z))
+ for(let i=0;i<gsel.length;i++){let ii=gsel[i],r1=rp[0][i],p1=rp[1][i],r0=nom[0][i],p0=nom[1][i]
+  let[x0,y0]=re1m(r0,p0),[x1,y1]=re1m(r1,p1),dev=Math.hypot(x1-x0,y1-y0)
+  let t=zlegend("nominal",r0,p0,u)+"\ndev\t"+format(dev,"number",u)+"\t"+u
+  let l=annotate(j,"line","cursor","pointer","title",t,"data-j",j,"class","p"+ii,"data-r1",r0,"data-p1",p0,"data-r2",r1,"data-p2",p1,"fill","none","stroke-width",2,"stroke",color(c[i]))
+  l.onclick=circleClick
+}}
+function toggleButtons(plot){
+ let bts=document.getElementsByClassName("but"),id=plots.current.slice(0,2)
+ for(let i=0;i<bts.length;i++){let b=bts[i]
+  if(b.dataset&&("pid"in b.dataset)){
+   if(id==b.dataset.pid.slice(0,2))b.classList.remove("plotshow")
+   else b.classList.add("plotshow")
+  }
+ }
+ let x=document.getElementsByClassName("plothide");for(let i=0;i<x.length;i++)x[i].style.display=plot?"none":"block"
+     x=document.getElementsByClassName("plotshow");for(let i=0;i<x.length;i++)x[i].style.display=plot?"block":"none"
+}
+function blur(x){x.style="filter:blur(4px)";setTimeout(()=>{x.style=""},300)}
+function setfont(f){document.styleSheets[0].cssRules[0].style.fontFamily=f}
+
+//select-plot
+function selectplot(){
+ let p=ge("plotsel");rm(p)
+ let c=plots.current
+ let keys=Object.keys(plots).filter(x=>x.startsWith(c.slice(0,2)))
+ for(let i=0;i<keys.length;i++){let k=keys[i],s=plots[k]
+  if(s=="")s="plot "+table.filter(x=>x.type=="complex").filter(x=>x.show).map(x=>x.name).join(",")
+  if(s=="test")s=testFirst()
+  if(s=="cal")s=calFirst()
+  let o=ce("option");o.value=k,o.textContent=s;o.selected=k==c;p.appendChild(o)
+ }
+ plots.current=p.value //maybe illegal on input
+ //let o=ce("option");o.value=c.slice(0,2)+keys.length;o.textContent="add new..";p.appendChild(o)
+ p.onchange=()=>{
+  let o=p.options[p.selectedIndex];plots.current=o.value
+  ge(plots.current.slice(0,2)+"but").dataset.pid=o.value
+  //if("edt"==ge("out").firstChild.id){plotedit()}
+  makeplot(null)
+  }
+}
+function testFirst(){let t=table.filter(x=>("calc"in x)&&x.calc.startsWith("unb["))
+ let U=t.map(x=>x.name),T=t.map(x=>x.calc.slice(4,-1).split(/[;\]]/)[2])
+ return "test "+(U.length?U.join(","):"U1,U2")+" with "+(t.length?T[0]:"T1,T2")
+}
+function calFirst(){return "cal "+(calibrations.length?calibrations[0].name:"c1")}
+
+//plotedit
+function plotedit(){let out=ge("out"),key=ge("plotsel").value.slice(0,2);rm(out)
+ let te=ce("textarea");te.id="edt";te.spellcheck=false;te.rows=20;te.style.width="100%";out.appendChild(te)
+ for(const k in plots)if(k!="current")if(k.slice(0,2)==key)te.value+=plots[k]+"\n";te.value=te.value.trim()
+ //te.onchange=()=>{if((te.value.trim()=="")&&(key!="po0")){delete plots[key];makeplot()}else{plots[key]=te.value;selectplot()}}
+ let d=ce("div");d.classList.add("buttons");out.appendChild(d)
+ let b=ce("button");b.textContent="ok";b.onclick=()=>{
+  let l=te.value.trim().split("\n");if("po"==key)l.unshift("")
+  for(const k in plots)if(k.slice(0,2)==key)delete(plots[k])
+  for(let i=0;i<l.length;i++)plots[key+i]=l[i]
+  if(!plots.current in plots)plots.current=key+"0"
+  makeplot(null)
+ };d.appendChild(b)
+ let c=ce("button");c.textContent="cancel";c.onclick=()=>{makeplot(null)};d.appendChild(c)
+}
+
+//selectable-listbox table
+async function showtable(){toggleButtons(false);let t=table;rm(out)
+ let m=t.length                  //columns
+ let n=rowcount()
+ if(m==0||n==0){selectExample();return}
+ let e=await compute()
+ if(e!=null){let p=ce("pre");p.textContent=e;out.appendChild(p);return}
+ let tab=subTable([...Array(rowcount()).keys()],null,true)
+ select(tab,ge("selinp").value)
+ let krange=x=>{return((x.length>4)&&(x.length==1+x[x.length-1]-x[0]))?(x[0]?x[0]+"+":"")+"!"+x.length:x.join(" ")}
+ tab.onchange=e=>{
+  SelectedIndexes=getSelection(tab)
+  selinp.value=krange(SelectedIndexes)
+ }
+ tab.onpaste=fromClipboard
+ out.appendChild(tab)
+}
+function selectExample(p){
+ let h=ce("h1");h.textContent="examples";out.appendChild(h)
+ let s=ce("select");s.appendChild(ce("option"));s.firstChild.textContent="load example...";Object.keys(examples()).map(x=>{let o=ce("option");o.value=x;o.textContent=x;s.appendChild(o)})
+ s.onchange=()=>{table=examples()[s.value];settitle(s.value+" example");info=infos[s.value];showcols()}
+ out.appendChild(s)
+}
+function settitle(t){title=t;document.title=t}
+function subTable(sel,agg,multiple){
+ //let t=ce("select");t.id="tab";t.multiple=true
+ let m=table.length
+ let [an,grps,gfld]=aggcount(agg)
+ let n=sel.length+an
+ let rows=".".repeat(1+n).split(".")
+ let by=aggby(agg),tops=[2]
+ let a=null,havea=false;if(agg!=null){
+  a=".".repeat(1+n).split(".")
+  for(let i=0;i<an;i++)a[a.length-an+i]=gfld[i%gfld.length]
+  a=pads(a)
+ }
+ for(let j=0;j<m;j++){let tj=table[j];
+  let c=formatcolumn(tj,sel)
+  c.unshift(tj.name?tj.name:tj.name,tj.unit)
+  if(agg&&tj.name in agg){let aj=agg[tj.name]
+   for(let i=0;i<aj.length;i++){let g=aj[i]
+    let fields=Object.keys(g.fields)
+    for(let k=0;k<fields.length;k++){
+     c.push(g.fields[fields[k]])
+    }
+   }
+  }else{
+   for(let i=c.length;i<2+n;i++)c.push("")
+  }
+  if(by==tj.name){let am=an/grps.length
+   for(let i=0;i<an;i++)c[c.length-an+i]=(i%am)?"":grps[i/am]
+   c=pads(c)
+   havea=true
+   for(let i=0;i<c.length;i++)rows[i]=c[i]+"│"+a[i]+"│"+rows[i]
+  }else{c=pads(c);for(let i=0;i<c.length;i++)rows[i]+=(j?"│":"")+c[i]}
+ }
+ if((a!==null)&&!havea)for(let i=0;i<rows.length;i++)rows[i]=a[i]+"│"+rows[i]
+ for(let i=0;i<rows.length;i++){
+  //let o=ce("option");o.innerHTML=rows[i].replace(/ /g,"&nbsp;");
+  //if((i==2)||((i>=2+sel.length)&&(0==(i-2-sel.length)%gfld.length)))o.classList.add("topborder")
+  //t.appendChild(o)
+ }
+ //t.size=rows.length
+ //return t
+ let colors=new Array(rows.length).fill(-1)
+ for(let i=0;i<sel.length;i++)colors[2+i]=i
+ let sep=[2];for(let i=0;i<rows.length;i++)if(i>=2+sel.length){let j=i-2-sel.length;if(0==j%gfld.length)sep.push(i);colors[i]=Math.floor(j/gfld.length)}
+ return listbox(rows,colors,sep,multiple)
+}
+function aggcount(a){if(a==null)return[0,0,0];let k=Object.keys(a),g=a[k[0]],n=g.length,m=Object.keys(g[0].fields).length;return[n*m,a[k[0]].map(x=>x.name),Object.keys(g[0].fields)]}
+function aggby(a){if(a==null)return"";let k=Object.keys(a);return a[k[0]][0].by}
+function formatcolumn(tj,sel){let v=tj.data
+ if("complex"===tj.type){
+       return sel.map(i=>format([v[2*i],v[1+2*i]],tj.type,tj.unit))
+ }else return sel.map(i=>format( v[i],            tj.type,tj.unit))
+}
+function format(x,t,u){let f=(u in formats)?formats[u]:3,d=("deg"in formats)?formats["deg"]:0
+ switch(t){
+ case"number":return x.toFixed(f)
+ case"complex":return x[0].toFixed(f)+"a"+x[1].toFixed(d)
+ default:return x.toString()
+}}
+function zlegend(s,r,p,u){return s+"\t"+format(r,"number",u)+"\t"+u+"\nat\t"+format(p,"number","deg")+"\tdeg"}
+function pads(v){
+ let m=Math.max(...v.map(x=>x.length))
+ return v.map(x=>pad(x,m))
+}
+function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
+
+
+//editable-cells table
+function showcells(){let sel=SelectedIndexes;if(sel.length>1)return editMultiple(sel)
+ let t=table;rm(out)
+ let cellinput=function(e){let [i,j]=[e.target.dataset.i,+e.target.dataset.j]
+  let t=e.target.textContent
+  e.target.style.background="#efe"
+  if(table[j].type!="string")if(isNaN(Number(t)))e.target.style.background="orange"
+ }
+ let cellkey=(e,td)=>{if("Enter"==e.key){pd(e);commit(td)}
+  if("Escape"==e.key){td.textContent=table[+td.dataset.j].data[+td.dataset.i];td.style.background=""}
+ }
+ let commit=(td)=>{let[i,j]=[td.dataset.i,td.dataset.j];let t=td.textContent
+  if((table[j].type!="string")&&(isNaN(Number(t)))){td.style.background="red";return}
+  td.style.background="";table[j].data[i]=("string"==table[j].type)?t:Number(t)
+ }
+ let editcell=td=>{td.contentEditable=true;td.oninput=cellinput;td.onblur=()=>commit(td);td.onkeydown=(e)=>cellkey(e,td);return td}
+ let tab=ce("table");tab.id="celltab";tab.style.borderCollapse="collapse"
+ let ignore=t.map(x=>(!x.show)||(("calc"in x)&&x.calc.length))
+ let m=t.length
+ let tr=ce("tr");for(let j=0;j<m;j++){let tj=t[j];if(ignore[j])continue
+  let th=ce("th");th.textContent=tj.name;th.classList.add("leftborder");if("complex"==tj.type)th.colSpan=2;tr.appendChild(th)
+ };tab.appendChild(tr)
+ tr=ce("tr");for(let j=0;j<m;j++){let tj=t[j];if(ignore[j])continue
+  let td=ce("td");td.textContent=tj.unit;td.classList.add("leftborder");tr.appendChild(td)
+  if("complex"==tj.type){let td=ce("td");td.textContent="deg";tr.appendChild(td)}
+ };tab.appendChild(tr)
+ let n=rowcount()
+ for(let i=0;i<n;i++){
+  let tr=ce("tr");for(let j=0;j<m;j++){let tj=t[j];if(ignore[j])continue
+   let z="complex"==tj.type
+   let v=tj.data[z?2*i:i]
+   let td=editcell(ce("td"));td.dataset.i=i;td.dataset.j=j;td.classList.add("leftborder");if(z)td.dataset.i=2*i;td.textContent=v;tr.appendChild(td)
+   if(z){let td=editcell(ce("td"));td.textContent=tj.data[1+2*i];td.classList.add("degcolumn");td.dataset.i=1+2*i;td.dataset.j=j;tr.appendChild(td)}
+  };tab.appendChild(tr)
+ }
+ out.appendChild(tab)
+ out.appendChild(ce("hr"))
+ let d=ce("div");d.classList.add("buttons");out.appendChild(d)
+ let a=ce("button");a.textContent="add row";a.onclick=()=>{addrow();showcells()};d.appendChild(a)
+ let b=ce("button");b.textContent="edit as text";b.onclick=showedit;d.appendChild(b)
+ let c=ce("button");c.textContent="clear rows";c.onclick=()=>{for(let j=0;j<table.length;j++)table[j].data=[];showcells()};d.appendChild(c)
+ let s=ce("button");s.textContent=saveButtonName();s.onclick=save;d.appendChild(s)
+ if(0==rowcount())selectExample(out)
+}
+function addrow(){
+ for(let j=0;j<table.length;j++){let tj=table[j];if(("calc" in tj)&&(""!=tj.calc))continue
+  tj.data.push(("string"==tj.type)?"-":0);if("complex"==tj.type)tj.data.push(0)}
+}
+
+//edit fields of multiple-selected rows
+function editMultiple(sel){let out=ge("out");rm(out)
+ out.appendChild(document.createTextNode("change columns of "+sel.length+" selected rows to the same value:"))
+ let ta=ce("table"),ignore=table.map(x=>(!x.show)||(("calc"in x)&&x.calc.length))
+ for(let j=0;j<table.length;j++){if(ignore[j])continue;let tj=table[j]
+  let tr=ce("tr")
+  let th=ce("th");th.textContent=tj.name;tr.appendChild(th)
+  let td=ce("td"),ip=ce("input")
+  ip.type=("number"==tj.name)?"number":"string"
+  let uq=true,z="complex"==tj.type
+  if(z){
+   for(let i=0;i<sel.length;i++){
+    if(tj.data[  2*sel[i]]!=tj.data[  2*sel[0]])uq=false
+    if(tj.data[1+2*sel[i]]!=tj.data[1+2*sel[0]])uq=false
+   }
+  }else for(let i=0;i<sel.length;i++)if(tj.data[sel[i]]!=tj.data[sel[0]])uq=false
+  ip.disabled=!uq
+  ip.type=("string"==tj.type)?"text":"number"
+  ip.value=z?tj.data[2*sel[0]]:tj.data[sel[0]]
+  ip.style="width:5em"
+  let ap=ce("input");ap.type="number";ap.style="width:3em"
+  if(z){ap.value=tj.data[1+2*sel[0]];ap.disabled=!uq}
+  ip.onchange=()=>{for(let i=0;i<sel.length;i++)tj.data[((z)?2:1)*sel[i]]=("string"==tj.type)?ip.value:Number(ip.value)}
+  ap.onchange=()=>{for(let i=0;i<sel.length;i++)tj.data[      1+2*sel[i]]=Number(ap.value)}
+  let b=ce("input");b.type="button";b.value="force equal values";b.style.display=uq?"none":""
+  b.onclick=e=>{
+   ip.disabled=false;ip.onchange()
+   if(z){ap.disabled=false;ap.onchange()}
+   b.style.display="none"
+  }
+  td.appendChild(ip);if(z)td.appendChild(ap);
+  tr.appendChild(td);td=ce("td");td.appendChild(b);tr.appendChild(td);ta.appendChild(tr)
+ }
+ out.appendChild(ta)
+ out.appendChild(ce("hr"));let b=ce("button");b.textContent="edit full table";b.onclick=()=>{SelectedIndexes=[];showcells()};out.appendChild(b)
+}
+
+//table-texteditor
+function showedit(){rm(out);let ed=ce("textarea");ed.spellcheck=false;ed.rows=3+rowcount();ed.style.width="100%";out.appendChild(ed);let t=table
+ let r=null
+ let ignore=t.map(x=>(!x.show)||(("calc"in x)&&x.calc.length))
+ for(let j=0;j<t.length;j++){if(ignore[j])continue;let tj=t[j]
+  let v=("complex"==tj.type)?(tj.data.filter((x,i)=>0==i%2).map((x,i)=>String(x)+"a"+String(tj.data[1+2*i]))):tj.data.map(x=>String(x))
+  if(tj.type=="string")v=v.map(x=>x.length?x:"-")
+  v.splice(0,0,tj.name,tj.unit);v=pads(v.map(x=>x+" "))
+  if(r===null){r=v}else{r=r.map((x,i)=>x+v[i])}
+ }
+ ed.value=r.join("\n")
+ ed.oninput=e=>{ed.setAttribute("rows",1+ed.value.split("\n").length)}
+ let b=ce("button");b.textContent="apply"
+ let sp=ce("span")
+ b.onclick=e=>{let r=fromText(ed.value);if(r==""){showcells()}else{b.style.background="red";sp.textContent=r}}
+ out.appendChild(b);out.appendChild(sp)
+}
+
+
+//column-definition-table / settings
+function showcols(sel){let t=table;sel=(sel===undefined)?SelectedIndexes:sel;rm(out)
+ let rowfunc=function(i,x){return function(){
+  if     (("up"  ==x)&&(i>0))         [table[i],table[i-1]]=[table[i-1],table[i]]
+  else if(("down"==x)&&(i<t.length-1))[table[i],table[i+1]]=[table[i+1],table[i]]
+  else if( "del" ==x){if(window.confirm("delete "+table[i].name+" column?"))table.splice(i,1)}
+  else if( "add" ==x)table.push({name:"U"+table.length,type:"complex","unit":"gmm",show:true,data:zeros(rowcount(),"complex")})
+  showcols(sel)}}
+ let changefunc=function(i,field,elem,prop){return function(){
+  if("type"==field)table[i].data=zeros(rowcount(),elem[prop])
+  table[i][field]=elem[prop]
+  showcols(sel)
+ }}
+ let sec=x=>{let h1=ce("h1");h1.textContent=x;out.appendChild(h1);return h1}
+ 
+ {let ti=sec(title);ti.contentEditable=true;ti.oninput=(e)=>{settitle(ti.textContent)}
+  let d=ce("details"),s=ce("summary"),b=ce("button"),te=ce("textarea");d.open=title.endsWith("example");
+  b.textContent=saveButtonName();b.style.float="right";b.onclick=save;s.appendChild(document.createTextNode("info"));s.appendChild(b)
+  d.appendChild(s);te.value=info;te.rows=10;te.style.width="100%";d.appendChild(te);out.appendChild(d)
+ }
+ 
+ sec("data columns")
+ let tab=ce("table");out.appendChild(tab)
+ {let tr=ce("tr");tab.appendChild(tr);let x=x=>{let th=ce("th");th.textContent=x;tr.appendChild(th)};x("");x("name");x("unit");x("type");x("calculate");x("")}
+ let names=t.map(x=>x.name),uniq=names.map((x,i)=>names.indexOf(x)==i)
+ for(let j=0;j<t.length;j++){let tj=t[j]
+  let tr=tab.insertRow()
+  let ac=(x,y)=>{let td=ce("td");td.appendChild(x);tr.appendChild(td)}
+  let show=ce("input");show.type="checkbox";show.checked=tj.show;show.onchange=changefunc(j,"show",show,"checked");show.title="show";ac(show)
+  let name=ce("input");name.value=tj.name;name.size=5;name.onchange=changefunc(j,"name",name,"value");if(!uniq[j])name.style.background="orangered";ac(name)
+  let unit=ce("input");unit.value=tj.unit;unit.size=5;unit.onchange=changefunc(j,"unit",unit,"value");ac(unit)
+  let type=ce("select");let v="string.number.complex.bool".split(".")
+   for(let i=0;i<v.length;i++){let o=ce("option");o.textContent=v[i];type.appendChild(o);if(v[i]==tj.type)type.selectedIndex=i};type.onchange=changefunc(j,"type",type,"value");ac(type)
+  let calc=ce("input");calc.size=20;calc.value=("calc"in tj)?tj.calc:"";calc.onchange=changefunc(j,"calc",calc,"value");ac(calc)
+  let td=ce("td");let bt=(x,y)=>{let b=ce("button");b.textContent=x;b.onclick=y;td.appendChild(b)}
+  bt("↑",rowfunc(j,"up"));bt("↓",rowfunc(j,"down"));bt("×",rowfunc(j,"del"));tr.appendChild(td)
+ }
+ let add=ce("button");add.classList.add("centerbut");add.textContent="add column";add.onclick=rowfunc(0,"add");out.appendChild(add)
+ 
+ {sec("calibrations")
+  let ta=ce("table");
+  let tr=ce("tr"),a=(x)=>{let th=ce("th");th.textContent=x;tr.appendChild(th)};a("name");a("input signals");a("test masses");a("set runs");a("add unbalances");ta.appendChild(tr)
+  let calrow=(c)=>{let idx=()=>calibrations.findIndex(x=>x.name==c.name)
+   let tr=ce("tr"),td=ce("td"),ip=ce("input"),jp=ce("input"),tp=ce("input");ip.value=c.name;ip.size=3;td.appendChild(ip);tr.appendChild(td)
+   ip.dataset.old=ip.value
+   ip.onchange=e=>{if(ip.value==""){calibrations.splice(idx(),1);ip.closest("tr").remove();return};c.name=ip.value}
+   td=ce("td");jp.value=c.inputs;jp.size=10;jp.onchange=e=>{c.inputs=jp.value};td.appendChild(jp);tr.appendChild(td);
+   td=ce("td");tp.value=c.tm;    tp.size=10;tp.onchange=e=>{c.tm    =tp.value};td.appendChild(tp);tr.appendChild(td);
+   td=ce("td");if(sel.length){let b=ce("button");b.textContent="set "+sel.length+" runs";
+    td.onclick=e=>{markcal(c.name,sel);showcols(sel)};td.appendChild(b)};tr.appendChild(td)
+   td=ce("td");
+    let bu=ce("button");bu.textContent="addto data";bu.onclick=e=>{addunbalcols(c);showcols(sel)};td.appendChild(bu);tr.appendChild(td)
+   td=ce("td")
+    let bc=ce("button");bc.textContent="ifc"; bc.onclick=e=>{doplot("ic","cal "+ip.value)};td.appendChild(bc);td.appendChild(bc);
+    let bt=ce("button");bt.textContent="test";bt.onclick=async e=>{
+     let t=table.filter(x=>(("calc"in x)&&(x.calc.startsWith("unb["+ip.value+";"))))
+     if(t.length){
+      let u=t.map(x=>x.name).join(",")
+      let w=t.map(x=>x.calc.slice(4,-1).split(";")[2]).join(",")
+      ge("selinp").value="&"+ip.value;await showtable()
+      doplot("ct","test "+u+" with "+w)
+     }
+    };td.appendChild(bt);td.appendChild(bt);
+   tr.appendChild(td)
+   ta.appendChild(tr)
+  }
+  calibrations.map(x=>calrow(x))
+  //for(let i=0;i<calibrations.length;i++)calrow(calibrations[i])
+  out.appendChild(ta)
+  let newcal=()=>{let names=calibrations.map(x=>x.name),i=1;while(names.includes("c"+i))i++;return"c"+i}
+  let b=ce("button");b.classList.add("centerbut");b.textContent="add calibration";b.onclick=e=>{let c={name:newcal(),inputs:"S1,S2",tm:"T1,T2"};calibrations.push(c);calrow(c)};out.appendChild(b)
+ }
+ 
+ {sec("number formats")
+  let fmt=Object.keys(formats)
+  let ta=ce("table"),tr=ce("tr"),th=ce("th");th.textContent="unit";tr.appendChild(th);th=ce("th");th.textContent="decimals";tr.appendChild(th);ta.appendChild(tr)
+  let newrow=u=>{
+   let tr=ce("tr"),td=ce("td");td.textContent=u;tr.appendChild(td);
+   td=ce("td");
+   let inp=ce("input");inp.type="number";inp.step=1;inp.value=(u in formats)?formats[u]:0;inp.size=3;inp.min=0
+   inp.onchange=(e)=>{
+    if(e.target.value===""){e.target.closest("tr").style.display="none";delete formats[u];return}
+    formats[u]=Number(e.target.value)}
+   td.appendChild(inp);tr.appendChild(td);ta.appendChild(tr)
+  }
+  for(let i=0;i<fmt.length;i++)newrow(fmt[i])
+  out.appendChild(ta)
+  let add=ce("button");add.classList.add("centerbut");add.textContent="add unit";add.onclick=()=>{let u=prompt('unit','');formats[u]=0;if(u)newrow(u)};out.appendChild(add)
+ }
+ {sec("style")
+  let ta=ce("table")
+  let row=(a,b)=>{let tr=ce("tr"),th=ce("td"),td=ce("td");th.textContent=a;td.appendChild(b);tr.appendChild(th);tr.appendChild(td);ta.appendChild(tr)}
+  let fn=ce("input");fn.value=font;fn.onchange=e=>{setfont(fn.value);font=fn.value};
+  row("font",fn)
+  let ps=ce("input");ps.type="number";ps.min=100;ps.max=2000;ps.step=1;ps.value=plotsize;ps.onchange=e=>{plotsize=Number(ps.value)}
+  row("plot size",ps)
+  let co=ce("input");co.value=colors.join(",");co.onchange=e=>{colors=co.value.split(",")};co.size=40
+  row("colors",co)
+  out.appendChild(ta)
+ }
+ if(title.endsWith("example"))selectExample(out)
+}
+function zeros(n,t){console.log("zeros",n,t);return new Array(n*(("complex"==t)?2:1)).fill(("string"==t)?"-":0)}
+function doplot(po,cmd){ //select or add command, then plot
+ let keys=Object.keys(plots)
+ for(let i=0;i<keys.length;i++)if(cmd==plots[keys[i]]){plots.current=keys[i];return makeplot(ge(po+"but"))}
+ let c=po+keys.filter(x=>x.startsWith(po)).length;plots[c]=cmd;plots.current=c;makeplot(ge(po+"but"))
+}
+
+function polars(t,u,r,p,c,grp,l){const w=plotsize,m=t.length; //titles,units,rvectors,anglevectors,colors,groups,legends
+ let s=autoscale(u,r)
+ let ce=x=>document.createElementNS("http://www.w3.org/2000/svg",x)
+ let sa=function(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i])}
+ let svg=ce("svg")
+ let ln=l[0][0].split("\n").length
+ sa(svg,"width",w*m,"height",polarheight(w,l[0]),"font-family","monospace")
+ 
+ let defs=ce("defs")
+ for(let i=0;i<colors.length;i++){let ma=ce("marker")
+  sa(ma,"id","arrowhead"+i,"markerWidth",10,"markerHeight",5,"refX",10,"refY",2.5,"orient","auto","fill",color(i))
+  let po=ce("polygon");sa(po,"points","0 0,10 2.5,0 5");ma.appendChild(po);defs.appendChild(ma)
+ };svg.appendChild(defs)
+ 
+ for(let j=0;j<m;j++){let g=document.createElementNS("http://www.w3.org/2000/svg","g")
+  g.setAttributeNS(null,"transform","translate("+(w*j)+",0)")
+  polar(g,"plt"+j,w,t[j],u[j],r[j],p[j],s[j],c[j],grp[j],l[j])
+  svg.appendChild(g)
+ }
+ svg.id="svg";svg.dataset.h=plotsize-4;svg.dataset.H=polarheight(w,l[0])
+ svg.onwheel=e=>{let j=Math.floor(e.offsetX/w);zoom(j,e.deltaY>0,w)}
+ return svg
+}
+function polarheight(w,l){let ln=l[0].split("\n").length;return ln?(w+3+24*ln):w}
+function polar(parent,id,w,t,u,r,p,s,c,g,l){ //width,title,unit,rvec,phivec,scale,colors,legends
+ let sa=function(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i])}
+ let ce=x=>document.createElementNS("http://www.w3.org/2000/svg",x)
+ let ca=function(x,...y){let r=ce(x);sa(r,...y);parent.appendChild(r);return r}
+ let rowbase=i=>w-3+12+i*24
+ let R=0.46*w
+ let ln=l[0].split("\n").length,L=0.4*w,H=ln*24
+ ca("rect","width",w,"height",polarheight(w,l),"fill","black")
+ if(ln){ //legend box
+  ca("rect","x",w/2-L,"y",w-3,"width",2*L,"height",H,"stroke-width",2,"stroke","yellow","fill","none")
+  for(let i=0;i<ln;i++){
+   ca("text","id",id+":l"+i+"l","x",w/2-2*L/3,"y",rowbase(i),"font-size","16px","fill","yellow", "text-anchor","middle","alignment-baseline","central")
+   ca("text","id",id+":l"+i+"c","x",w/2,      "y",rowbase(i),"font-size","20px","fill","white",  "text-anchor","middle","alignment-baseline","central")
+   ca("text","id",id+":l"+i+"r","x",w/2+2*L/3,"y",rowbase(i),"font-size","16px","fill","yellow", "text-anchor","middle","alignment-baseline","central")
+ }}
+ ca("line","id","vec"+id,"x1",w/2,"y1",w/2,"x2",w/4,"y2",w/4,"stroke-width",3,"stroke","yellow","fill","none","marker-end","url(#arrowhead0)","class","arrow","data-u",u,"visibility","hidden")
+ 
+ let cc=ca("circle","id",id+"circle","cx",w/2,"cy",w/2,"r",R,"stroke-width",2,"stroke","yellow","fill","none")
+ let [se,ss]=expnum(s)
+ let tx=ca("text","x",10,"y",22,"font-size","20px","fill","yellow");tx.textContent=t
+ let st=ss+" "+u,su="";if(st.length>8)[st,su]=[ss,u]
+ tx=ca("text","x",10,"y",44,"font-size","20px","fill","yellow","id","scale"+id,"data-w",w,"data-scale",s,"data-unit",u);tx.textContent=st
+ tx.onclick=e=>{ge("scale"+id).dataset.scale=s;updatepoints(+id.slice(3))}
+ tx=ca("text","x",10,"y",66,"font-size","20px","fill","yellow");tx.textContent=su
+ 
+ let comp=ca("g","id","comp"+id,"data-r",0,"data-p",0,"data-unit",u,"visibility","hidden");
+ tx=ce("text");sa(tx,"x",w-10,"y",22,"font-size","20px","fill","green","text-anchor","end");tx.textContent="→←";comp.appendChild(tx);tx.onclick=e=>removeComp(+id.slice(3))
+ tx=ce("text");sa(tx,"id","comp"+id+"r","x",w-10,"y",44,"font-size","20px","fill","green","text-anchor","end");tx.textContent="1.234";comp.appendChild(tx)
+ tx=ce("text");sa(tx,"id","comp"+id+"p","x",w-10,"y",66,"font-size","20px","fill","green","text-anchor","end");tx.textContent="30°";comp.appendChild(tx)
+ 
+ let ni=(3==se||4==se||8==se)?3:4;for(let i=0;i<ni;i++){//inner rings
+  ca("circle","cx",w/2,"cy",w/2,"r",(1+i)*R/(1+ni),"stroke-width",2,"stroke-dasharray","4,4","stroke","yellow","fill","none")
+ }
+ let r1=1*R/(1+ni),r2=ni*R/(1+ni)
+ ca("line","x1",w/2-r2,"y1",w/2,"x2",w/2+r2,"y2",w/2,"stroke-width",2,"stroke","yellow")
+ ca("line","x1",w/2,"y1",w/2-r2,"x2",w/2,"y2",w/2+r2,"stroke-width",2,"stroke","yellow")
+ for(let a=30;a<360;a+=30){let sn=Math.sin(a/180*Math.PI),cs=Math.cos(a/180*Math.PI)
+  if(a%90)ca("line","x1",w/2+r1*cs,"y1",w/2+r1*sn,"x2",w/2+R*cs,"y2",w/2+R*sn,"stroke-width",2,"stroke-dasharray","4,4","stroke","yellow")
+ }
+ tx=ca("text","x",w/2,"y",w/2-R+9,"font-size","18px","fill","green","text-anchor","middle","alignment-baseline","hanging");tx.textContent="0"
+ tx=ca("text","x",w/2+R-5,"y",w/2,"font-size","18px","fill","green","text-anchor","end","alignment-baseline","central");tx.textContent="90"
+ tx=ca("text","x",w/2,"y",w/2+R-9,"font-size","18px","fill","green","text-anchor","middle","alignment-baseline","baseline");tx.textContent="180"
+ tx=ca("text","x",w/2-R+5,"y",w/2,"font-size","18px","fill","green","text-anchor","start","alignment-baseline","central");tx.textContent="270"
+ let sc=R/s
+ let cl=ca("clipPath","id",id+"clip"),lc=ce("circle");sa(lc,"cx",w/2,"cy",w/2,"r",R);cl.appendChild(lc)
+ let dg=ca("g","id",id+"data","clip-path","url(#"+id+"clip)")
+ 
+ for(let i=0;i<r.length;i++){
+  let ci=ce("circle")
+  sa(ci,"cx",w/2+sc*r[i]*Math.sin(p[i]/180*Math.PI),"cy",w/2-sc*r[i]*Math.cos(p[i]/180*Math.PI),"r",8,"stroke","none","fill",color(c[i]),"cursor","pointer","title",l[i],"class","p"+i,"data-r",r[i],"data-p",p[i],"data-j",id.slice(3),"data-group",g[i])
+  ci.onclick=circleClick;ci.ondblclick=circleDblClick
+  dg.appendChild(ci)
+ }
+}
+function annotate(j,x,...y){
+ let ce=x=>document.createElementNS("http://www.w3.org/2000/svg",x),sa=function(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i])}
+ let r=ce(x);sa(r,...y);ge("plt"+j+"data").appendChild(r);return r
+}
+function zoom(j,inn,w){
+ let s=ge("scaleplt"+j)
+ let r=scaleup((inn?1.1:0.4)*+s.textContent.split(" ")[0])
+ s.dataset.scale=r
+ updatepoints(j)
+}
+function removeComp(j){let c=ge("compplt"+j)
+ c.setAttributeNS(null,"visibility","hidden")
+ c.dataset.r=0;c.dataset.p=0
+ updatepoints(j)
+}
+function updatepoints(j){
+ let comp=ge("compplt"+j)
+ let scale=ge("scaleplt"+j).dataset.scale,w=ge("scaleplt"+j).dataset.w
+ let rc=+comp.dataset.r
+ let pc=+comp.dataset.p
+ let un= comp.dataset.unit
+ 
+ let xc=rc*Math.sin(pc/180*Math.PI)
+ let yc=rc*Math.cos(pc/180*Math.PI)
+ ge("compplt"+j+"r").textContent=format(rc,"number",un)
+ ge("compplt"+j+"p").textContent=format(pc,"number","deg")
+ comp.setAttributeNS(null,"visibility",(rc>0)?"":"hidden")
+ 
+ let scl=ge("scaleplt"+j);
+ let v=scl.textContent.split(" ")
+ let [rb,rs]=expnum(+scl.dataset.scale)
+ scl.textContent=rs+((v.length>1)?(" "+v[1]):"")
+ 
+ let c=ge("plt"+j+"data").childNodes
+ let sc=0.46*w/scale
+ for(let i=0;i<c.length;i++){
+  let r=+c[i].dataset.r,p=+c[i].dataset.p
+  c[i].setAttributeNS(null,"cx",w/2+sc*(r*Math.sin(p/180*Math.PI)-xc))        //circle (filled or stroked)
+  c[i].setAttributeNS(null,"cy",w/2-sc*(r*Math.cos(p/180*Math.PI)-yc))        // ..
+  if("R" in c[i].dataset)c[i].setAttributeNS(null,"r",sc*c[i].dataset.R)      //stroked circle
+  if("r1"in c[i].dataset){let d=c[i].dataset,r1=d.r1,p1=d.p1,r2=d.r2,p2=d.p2  //line(arrow)
+   c[i].setAttributeNS(null,"x1",w/2+sc*(r1*Math.sin(p1/180*Math.PI)-xc))
+   c[i].setAttributeNS(null,"y1",w/2-sc*(r1*Math.cos(p1/180*Math.PI)-yc))
+   c[i].setAttributeNS(null,"x2",w/2+sc*(r2*Math.sin(p2/180*Math.PI)-xc))
+   c[i].setAttributeNS(null,"y2",w/2-sc*(r2*Math.cos(p2/180*Math.PI)-yc))
+  }
+}}
+function extralegend(j,g,s){let c=ge("plt"+j+"data").childNodes;for(let i=0;i<c.length;i++)if("group"in c[i].dataset&&g==+c[i].dataset.group)c[i].setAttribute("title",c[i].getAttribute("title").slice(0,-2)+s)}
+function legend(j,l){l=l.split("\n");for(let i=0;i<l.length;i++){let c=l[i].split("\t");let id="plt"+j+":l"+i;ge(id+"l").textContent=c[0];ge(id+"c").textContent=c[1];ge(id+"r").textContent=c[2]}}
+function legendVec(j,u,r1,p1,r2,p2){p1*=Math.PI/180;p2*=Math.PI/180;
+ let dx=r2*Math.cos(p2)-r1*Math.cos(p1),dy=r2*Math.sin(p2)-r1*Math.sin(p1)
+ let r=Math.hypot(dx,dy),p=180/Math.PI*Math.atan2(dy,dx);if(p<0)p+=360
+ legend(j,"vec\t"+format(r,"number",u)+"\t"+u+"\nat\t"+format(p,"number","deg")+"\tdeg")
+}
+function circleClick(e){let i=+e.target.classList[0].slice(1)
+ if(e.shiftKey&&HI.length)highlightVector(+HI[0].classList[0].slice(1),i)
+ else highlightBoth(i)}
+let HI=[]
+function unhighlight(){
+ for(let i=0;i<HI.length;i++){
+  if(HI[i].getAttributeNS(null,"fill")=="none")HI[i].setAttributeNS(null,"stroke-width","2")
+  else                                         HI[i].setAttributeNS(null,"stroke","none")  
+ };HI=[]
+ let v=document.getElementsByClassName("arrow")
+ for(let i=0;i<v.length;i++)v[i].setAttributeNS(null,"visibility","hidden")
+ ge("svg").setAttributeNS(null,"height",ge("svg").dataset.h)
+}
+function circleDblClick(e){let d=e.target.dataset;let comp=ge("compplt"+d.j);comp.dataset.r=d.r;comp.dataset.p=d.p;updatepoints(+d.j)}
+function highlightBoth(i){highlightCircle(i);highlightList(i)}
+function highlightCircle(ii){
+ unhighlight()
+ let a=Array.from(document.getElementsByClassName("p"+ii))
+ for(let i=0;i<a.length;i++){
+  HI.push(a[i]);
+  if(a[i].getAttributeNS(null,"fill")=="none")    a[i].setAttributeNS(null,"stroke-width","4")
+  else{a[i].setAttributeNS(null,"stroke","white");a[i].setAttributeNS(null,"stroke-width","3")}
+  a[i].parentNode.appendChild(a[i]); //move-to-end(bring to front)
+  legend(+a[i].dataset.j,a[i].getAttribute("title"))
+ }
+ ge("svg").setAttributeNS(null,"height",ge("svg").dataset.H)
+}
+function highlightVector(a,b){
+ unhighlight()
+ let aa=document.getElementsByClassName("p"+a),bb=document.getElementsByClassName("p"+b)
+ let A=[],B=[]
+ for(let j=0;j<aa.length;j++){A[+aa[j].dataset.j]=aa[j],B[+bb[j].dataset.j]=bb[j]}
+ for(let j=0;j<aa.length;j++){
+  let v=ge("vecplt"+j),sa=(x,y)=>{v.setAttributeNS(null,x,y)}
+  v.setAttributeNS(null,"visibility","");sa("x1",A[j].cx.animVal.value);sa("y1",A[j].cy.animVal.value);sa("x2",B[j].cx.animVal.value);sa("y2",B[j].cy.animVal.value)
+  v.parentNode.appendChild(v)
+  legendVec(j,v.dataset.u,A[j].dataset.r,A[j].dataset.p,B[j].dataset.r,B[j].dataset.p)
+ }
+ ge("svg").setAttributeNS(null,"height",ge("svg").dataset.H)
+}
+function highlightList(i){setSelection(ge("tab"),i)}
+function color(i){return colors[i%colors.length]}
+function svgser(svg){let s=new XMLSerializer();return s.serializeToString(svg)}
+
+function autoscale(u,r){ //auto scale by unit
+ let mx={};for(let j=0;j<u.length;j++)mx[u[j]]=0
+ for(let j=0;j<r.length;j++){let m=mx[u[j]],rj=r[j];for(let i=0;i<rj.length;i++)if(rj[i]>m)m=rj[i];mx[u[j]]=m}
+ for(const k in mx)mx[k]=scaleup(mx[k])
+ let R=[];for(let j=0;j<u.length;j++)R.push(mx[u[j]]);return R
+}
+function scaleup(x){
+ let p=Math.floor(Math.log10(x))
+ let b=[1,2,3,4,5,8]
+ for(let i=0;i<b.length;i++)if(x<=b[i]*10**p)return b[i]*10**p
+ return 10**(1+p)
+}
+function expnum(x){
+ let p=Math.floor(Math.log10(x))
+ let b=Math.round(x/10**p)
+ if(Math.abs(x-0.3)<1e-12)return[3,"0.3"]
+ return[b,(p>4||p<-3)?b+"e"+p:String(x)]
+}
+
+function listbox(lines,colors,separators,multiple){ //select-for-mobile
+ let p=ce("pre");p.id="tab";p.dataset.multiple=+multiple
+ let ch=()=>{if(p.onchange)p.onchange()}
+ for(let i=0;i<lines.length;i++){
+  let sp=ce("span");sp.dataset.i=i-2;sp.textContent=lines[i]+"\n";sp.style.borderLeft="1em solid "+((0>colors[i])?"white":color(colors[i]))
+  if(separators.includes(i))sp.style.borderTop="1px solid black"
+  if(multiple)sp.onclick=( )=>{sp.classList.toggle("selected");ch();return false}
+  else        sp.onclick=(e)=>{if(e.shiftKey){if(p.shiftclick){p.shiftclick(e);return}};let a=p.getElementsByTagName("span");for(let i=0;i<a.length;i++)a[i].classList.remove("selected");sp.classList.add("selected");ch()}
+  p.appendChild(sp)
+ };
+ if(multiple){
+  let d=ce("div");d.classList.add("buttons")
+  let a=ce("button");a.textContent="all";  d.appendChild(a);a.onclick=()=>{Array.from(p.getElementsByTagName("span")).map(x=>x.classList.add("selected"));ch()}
+  let b=ce("button");b.textContent="range";d.appendChild(b);b.onclick=()=>{let x=p.getElementsByTagName("span"),y=0;for(let i=0;i<x.length;i++){y+=+x[i].classList.contains("selected");if(1==y)x[i].classList.add("selected")};ch()}
+  let c=ce("button");c.textContent="clear";d.appendChild(c);c.onclick=()=>{Array.from(p.getElementsByTagName("span")).map(x=>x.classList.remove("selected"));ch()}
+  p.appendChild(d)
+ }
+ return p
+}
+function getSelection(lb){let v=Array.from(lb.getElementsByTagName("span")).slice(2)
+ if(+lb.dataset.multiple){let r=[];for(let i=0;i<v.length;i++)if(v[i].classList.contains("selected"))r.push(i);return r}
+ for(let i=0;i<v.length;i++)if(v[i].classList.contains("selected"))return i;return -1}
+function setSelection(lb,sel){let v=Array.from(lb.getElementsByTagName("span"));v.map((x,i)=>x.classList.remove("selected"));v=v.slice(2)
+ if("number"==typeof sel){if((sel>=0)&&(sel<v.length))v[sel].classList.add("selected")}
+ else for(let i=0;i<sel.length;i++)if((sel[i]>=0)&&(sel[i]<v.length))v[sel[i]].classList.add("selected")
+}
+function tableFromListbox(lb){ //for powerpoint-paste
+ let rows=Array.from(lb.getElementsByTagName("span"))
+ let row=r=>"<tr>"+r.textContent.split("│").map((x,i)=>"<td>"+(i?"":"<span style=\"color:'"+r.style.borderLeft.slice(10)+"'\">█</span>")+x.trim()+"</td>").join("")+"</tr>"
+ return"<table>"+rows.map(row).join("")+"</table>"
+}
+
+let lastLocation
+async function clipboardSvg(){let svg=ge("svg");
+ let s=new XMLSerializer()
+ let t=s.serializeToString(svg)
+ 
+ /*
+ //let xx="<html><body>"+t+"<select>"+ge("tab").innerHTML+"</select></body></html>"
+ let xx="<html><body>"+t+"</body></html>"
+ const b=new Blob([xx],{type:"text/html"})
+ if('write' in navigator.clipboard){
+  await navigator.clipboard.write([new ClipboardItem({[b.type]:b})]);
+  blur(svg)
+  console.log("copied html to clipboard")
+  return
+ }
+ */
+ 
+ /*store svg file
+ const options={suggestedName:"plot.svg",startIn:lastLocation,types:[{description:"Svg Files",accept:{"image/svg+xml":[".svg"]}}]};
+ const h=await window.showSaveFilePicker(options);
+ const w=await h.createWritable();
+ await w.write(t);
+ await w.close();
+ lastLocation=h
+ */
+ 
+ /*store as svg is not allowed
+ const b=new Blob([t],{type:"image/svg+xml"})
+ if('write' in navigator.clipboard){
+  await navigator.clipboard.write([new ClipboardItem({[b.type]:b})]);
+  blur(svg)
+ } //using png instead
+ */
+ const img=new Image()
+ img.addEventListener('load',()=>{
+  const w=svg.getAttribute('width')
+  const h=svg.getAttribute('height')
+  const cnv=ce("canvas")
+  cnv.setAttribute("width",w)
+  cnv.setAttribute("height",h)
+  const ctx=cnv.getContext('2d')
+  ctx.drawImage(img,0,0,w,h)
+  cnv.toBlob(b=>{navigator.clipboard.write([new ClipboardItem({[b.type]:b})]).then(r=>{blur(svg)})},"image/png")
+  
+  /*
+  let u=cnv.toDataURL()
+  let tt="<table><tr><th>alpha</th><th>beta</th></tr><tr><td>1.23</td><td style='color:red'>4.56</td></tr><tr><td>1.23</td><td>4.56</td></tr></table>"
+  let xx="<html><body><img src='"+u+"'/><br/>"+tt+"</body></html>"
+  const b=new Blob([xx],{type:"text/html"})
+  navigator.clipboard.write([new ClipboardItem({[b.type]:b})]).then(r=>{
+  console.log("copied to html")})
+  */
+ })
+ img.src=URL.createObjectURL(new Blob([t],{type:"image/svg+xml"}))
+}
+
+function transpose(x){
+ let n=x.length,m=x[0].length,r=[]
+ for(let i=0;i<m;i++)r[i]=Array(n)
+ for(let i=0;i<n;i++){for(let j=0;j<m;j++)r[j][i]=x[i][j]}
+ return r
+}
+
+async function copyplot(e){
+ if(e.target.textContent=="share"){
+  let svg=ge("svg");
+  let s=new XMLSerializer()
+  let t=s.serializeToString(svg)
+  let p=ge("tab").innerHTML
+  let h="<!DOCTYPE html><body>"+s+"<br/><pre>"+p+"</pre></body></html>"
+  const f=new File([h],savename,{type:"text/html"})
+  navigator.share({files:[f]})
+ }else if('write' in navigator.clipboard){ //copy table as html for powerpoint
+  let b=new Blob([tableFromListbox(ge("tab"))],{type:"text/html"})
+  if('write' in navigator.clipboard)await navigator.clipboard.write([new ClipboardItem({[b.type]:b})])
+}}
+function ismobile(){return(0<navigator.userAgent.indexOf("iPhone"))}
+function copyname(){return(ismobile()&&("share"in navigator))?"share":"copy table"}
+
+let savefile=undefined,savename=document.URL.split("/").slice(-1)[0]
+function pagesrc(){
+ let b="<!DOCTYPE html>\n"+document.documentElement.innerHTML+"</"+"html>"
+ let v=b.split(/\/\/data!/);if(3!=v.length)throw new Error("cannot write data section, wrong markers")
+ let u=v[0]+"\n//data"+"!\n"
+ let x=(x,y)=>{u+="let "+x+"="+JSON.stringify(y)+"\n"}
+ x("font",font)
+ x("formats",formats)
+ x("plotsize",plotsize)
+ x("colors",colors)
+ x("title",title)
+ x("info",info)
+ x("table",table)
+ x("calibrations",calibrations)
+ x("plots",plots)
+ return u+"//data"+"!\n"+v[2]
+}
+async function save(e){
+ if(savefile){
+  let u=pagesrc()
+  const w=await savefile.createWritable()
+  await w.write(u)
+  await w.close()
+  return
+ }
+ if("showSaveFilePicker"in window){
+  showSaveFilePicker({suggestedName:savename,types:[{description:"html file",accept:{"text/html":[".html"]}}]}).then(r=>{
+   console.log(r);savefile=r;savename=r.name
+   e.target.textContent="save"
+   save()
+  })
+ }else if("share"in navigator){
+  const f=new File([pagesrc()],savename,{type:"text/html"})
+  navigator.share({files:[f]})
+  console.log(f)
+ }else{
+  let x=new Blob([us(pagesrc())],{type:"application/octet-stream"})
+  dl.href=URL.createObjectURL(x)
+  dl.download=savename
+  dl.click()
+ }
+}
+function saveButtonName(){return("showSaveFilePicker"in window)?"save as":("share"in navigator)?"share":"download"}
+ 
+
+function fromcsv(t){
+ let r=t.split("\n")
+ let n=r.length-2
+ r=r.map(x=>x.replace(/\r/g,"").split(","))
+ let m=r[0].length
+ let T=[]
+ for(let j=0;j<m;j++){let name=r[0][j],unit=r[1][j]
+  if("deg"==unit)T[T.length-1].type="complex"
+  else if("-"==unit)T.push({name:name,unit:"string",show:true,data:[]})
+  else if("x"==unit)T.push({name:unit,unit:"bool",  show:true,data:[]})
+  else              T.push({name:name,unit:"number",show:true,data:[]})
+ }
+ let real=T.map(x=>x.unit!="complex")
+ J=real.map((x,i)=>i).filter(x=>real[x]) //array with orig col index
+ m=J.length
+ for(let j=0;j<m;j++){
+  for(let i=0;i<n;i++){let s=r[2+i][J[j]]
+   if(T[j].type=="string")T[j].data.push(s)
+   else T[j].data.push(+s)
+   if(T[j].type=="complex")T[j].data.push(+r[2+i][1+J[j]])
+  }
+ }
+ if(table.length>T.length){
+  for(let j=T.length;j<table.length;j++)if(table[j].computed!="")T.push(table[j])
+ }
+ table=T;showtable()
+}
+function fromjson(t){table=JSON.parse(t);showtable()}
+function fromText(s){s=s.trim()
+ s=s.replaceAll(/[ \t]+/g,' ').replaceAll(/\r/g,"")
+ let v=s.split("\n").map(x=>x.trim())
+ if(v.length<2)return"not enough rows"
+ v=v.map(x=>x.split(" "))
+ if(v.map(x=>x.length).every(x=>x==v[0].length)==false){return"table is not uniform"}
+ v=transpose(v)
+ let m=v.length
+ let r={}
+ for(let j=0;j<m;j++){let vj=v[j]
+  let k=table.map(x=>x.name).indexOf(vj[0])
+  if(k<0){return"column does not exist:"+vj[0]}
+  if(vj[1]!=table[k].unit){return"wrong unit for column"+j}
+  vj=vj.slice(2)
+  r[k]=vj
+  if(table[k].type=="number"||table[k].type=="bool"){r[k]=vj.map(Number);if(r[k].some(isNaN)){return"cannot parse number"}}
+  if(table[k].type=="complex"){let u=[]
+   for(let i=0;i<vj.length;i++){
+    let z=vj[i].split("a");if(z.length!=2)return"cannot parse complex"
+    u.push(Number(z[0]));u.push(Number(z[1]))}
+   if(u.some(isNaN))return"cannot parse complex";r[k]=u}
+ }
+ let keys=Object.keys(r)
+ for(let j=0;j<keys.length;j++){let k=keys[j];table[k].data=r[k]}
+ return""
+}
+function fromClipboard(e){
+ let s=(e.clipboardData||window.clipboardData).getData("text")
+ console.log("todo paste",s)
+}
+
+function markcal(c,sel){
+ let n=rowcount()
+ let i=table.findIndex(x=>(x.name==c&&x.type=="bool"))
+ if(i<0){i=table.length;table.push({name:c,type:"bool",unit:"x",show:true})}
+ table[i].data=Array(n).fill(0)
+ for(let j=0;j<sel.length;j++)table[i].data[sel[j]]=1
+}
+function addunbalcols(c){let ip=c.inputs.split(","),tm=c.tm.split(",")
+ let ui=()=>{let i=1;while(table.map(x=>x.name).includes("U"+i))i++;return"U"+i}
+ let n=c.tm.split(",").length
+ for(let i=0;i<n;i++)table.push({name:ui(),type:"complex",unit:"g",show:true,calc:`unb[${c.name};${c.inputs};${c.tm};${i}]`,value:new Array(2*rowcount()).fill(0)})
+}
+
+function convert(dst,s){
+ let j=table.findIndex(x=>x.name==s)
+ if(j<0)throw new Error("cannot convert from unknown column "+s)
+ let src=table[j].unit,[pre,int]=unitconvert(dst,src)
+ if(int!=0&&table.findIndex(x=>x.name=="speed"&&(x.unit in speedunits))<0)throw new Error("cannot convert units: speed column missing")
+ return"convert["+[s,pre,int].join(";")+"]"}
+function unitconvert(dst,src){
+ if(0==src.length*dst.length)throw new Error("cannot convert from "+s+" to "+dst+" (empty unit)")
+ let spd=speedunits,spds=Object.keys(spd)
+ let pre=1,int=0
+ if(spds.includes(src)&&spds.includes(dst))pre=spd[src]/spd[dst]
+ else{let suf={"/s":-1,"/s^2":-2,"/s^3":-3,"/s^4":-4,"/s^5":-5,s:1,"s^2":2,"s^3":3,"s^4":4,"s^5":5},sufs=Object.keys(suf)
+  let si=sufs.filter(x=>src.endsWith(x));if(si.length){src=src.slice(0,-si[0].length);si=suf[si[0]]}else si=0
+  let di=sufs.filter(x=>dst.endsWith(x));if(di.length){dst=dst.slice(0,-di[0].length);di=suf[di[0]]}else di=0
+  int=si-di
+  let pf={"m":1e3,"u":1e6,"µ":1e6,"n":1e9,"k":1e-3,"K":1e-3,"M":1e-6,"G":1e-9},pfs=Object.keys(pf)
+  let sp=pfs.filter(x=>src.startsWith(x)&&src.length>1);if(sp.length){src=src.slice(sp[0].length);sp=pf[sp[0]]}else sp=1
+  let dp=pfs.filter(x=>dst.startsWith(x)&&dst.length>1);if(dp.length){dst=dst.slice(dp[0].length);dp=pf[dp[0]]}else dp=1
+  if(sp==1&&src=="g"){sp=1/9.81;src="m";int-=2}
+  if(dp==1&&dst=="g"){dp=1/9.81;dst="m";int+=2}
+  pre=dp/sp
+  if(src!=dst)throw new Error("cannot convert base unit from '"+src+"' to '"+dst+"'")
+ }
+ return[pre,int]
+}
+let speedunits={rpm:1,"1/min":1,krpm:1000,Hz:60,"1/s":60,kHz:60000}
+
+async function compute(){
+ let name="?",calc="?"
+ try{
+  await kinit()
+  let n=rowcount()
+  for(let j=0;j<table.length;j++){let tj=table[j]
+   if(0==n){tj.data=[];
+    asn(tj.name,K.mk({string:18,bool:19,number:21,complex:22}[tj.type],0))
+    continue
+   }
+   if(tj.name=="speed"&&(tj.unit in speedunits))asn("omega",K.Atx(K.Val(KC("("+speedunits[tj.unit]+"*2p%60)*")),KF(tj.data)))
+   if("calc" in tj&&tj.calc.length){name=tj.name,calc=tj.calc; 
+    if(calc.startsWith("convert"))calc=convert(tj.unit,calc.slice(8))
+    let r=K.Val(KC(calc))
+    let nn=K.nn(r),t=K.tp(r)
+    if(nn!=n)throw new Error("result has wrong length: "+nn)
+    let T={"string":[SK,20],"bool":[IK,19],"number":[FK,21],"complex":[x=>absa(ZK(x)),22]}
+    if(t!=T[tj.type][1])throw new Error("column "+tj.name+" expected type "+tj.type+", got "+t)
+    table[j].data=T[tj.type][0](K.Asn(K.sc(KC(tj.name)),r))
+   } else asn(tj.name,("string"===tj.type)?KS(tj.data):("bool"===tj.type)?KI(tj.data):("number"===tj.type)?KF(tj.data):("complex"===tj.type)?KZ(reim(tj.data)):0)
+  }
+ }catch(e){return "error in calculated column "+name+":\n "+calc+"\n"+e.message};return null
+}
+function select(tab,s){if(s==""||s.startsWith("k)"))return
+ try{
+  asn("n",K.Ki(rowcount()))
+  let r=K.Val(KC(s))
+  r=(3==K.tp(r))?KI([lo(r)]):r
+  if(K.tp(r)!=19)throw new Error("select returns type "+K.tp(r))
+  let v=Array.from(IK(r));
+  setSelection(tab,v);SelectedIndexes=v
+  //let v=IK(r).map(x=>2+x)
+  //let o=tab.childNodes;for(let i=0;i<o.length;i++)o[i].selected=v.includes(i)
+  //SelectedIndexes=Array.from(v.map(x=>-2+x))
+ }catch(e){
+  ge("out").appendChild(document.createTextNode(e.message))
+ }
+}
+function keval(e){let s=e.target.value.trim();if(s.startsWith("k)")){kout(" "+s.slice(2)+"\n");K.repl(KC(s.slice(2)))}else showtable()}
+function kout(s){let o=ge("kout");if(o===null){o=ce("pre");o.id="kout";ge("out").appendChild(o)};o.textContent+=s}
+function kzcol(s,i){let z=K.Val(KC(s));if(22!=K.tp(z))throw new Error(s+": expr does not return a complex vector");return K.Atx(z,i)}
+
+let K
+let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
+let kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y    ){return 0},
+}}
+async function kinit(){
+ let kw=lz(u64s("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"))
+ let r=await WebAssembly.instantiate(kw,kenv)
+ K=r.instance.exports
+ K.kinit()
+ K.Grp=x=>K.Atx(10n,x)
+ K.Val(KC(ak))
+}
+let lz=(x)=>{let i=7,j,n,t,c,o,r=[],S=-(1<<31),R=(x,a,n)=>{for(j=0;j<n;j++)r.push(x[a+j]);return n},
+ h=()=>x[i++]|x[i++]<<8,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)},
+ d=n=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
+ while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(i+n);return new Uint8Array(r)},
+re1m=(r,p)=>{p*=Math.PI/180;return[r*Math.cos(p),r*Math.sin(p)]}
+reim=z=>{let r=new Float64Array(z.length);for(let i=0;i<z.length;i+=2){let p=z[1+i]*Math.PI/180;r[i]=z[i]*Math.cos(p);r[1+i]=z[i]*Math.sin(p)};return r},
+absa=z=>{for(let i=0;i<z.length;i+=2){let a=Math.hypot(z[i],z[1+i]),b=(a==0)?0:180/Math.PI*Math.atan2(z[1+i],z[i]);z[i]=a;z[1+i]=(b<0)?b+360:b};return z},
+rphi=z=>{let r=[],p=[];z=absa(z);for(let i=0;i<z.length/2;i++){r[i]=z[2*i];p[i]=z[1+2*i]};return[r,p]}
+na0=x=>isNaN(x)?0:x
+zK=z=>{let p=lo(z)>>>3,f=F().slice(p,2+p);K.dx(z);return absa(f)},
+fK=x=>{let r=F()[lo(x)>>>3];K.dx(x);return r},
+KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
+KF=x=>{let r=K.mk(21,x.length  );F().set(x,lo(r)>>>3);return r},
+FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},
+KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
+ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},
+KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
+SK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n).map(x=>sK(K.Ks(x)));K.dx(x);return r},
+KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r}
+IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r}
+Ks=x=>K.sc(KC(x)),
+sK=x=>CK(K.cs(x)),
+asn=(s,y)=>K.dx(K.Asn(Ks(s),y))
+
+const ak=String.raw`
+qr:{K:!m:#*x;I:!n:#x;j:0;r:n#0a;turn:$[°Z~@*x;{(-x)@angle y};{x*1. -1@y>0}]
+ while[j<n;I:1_I;r[j]:turn[s:abs@abs/j_x j;xx:x[j;j]]
+  x[j;j]-:r[j];x[j;K]%:%s*(s+abs xx)
+  x[I;K]-:{+/x*y}/:[(conj x[j;K]);x[I;K]]*\:x[j;K];K:1_K;j+:1];(x;r;n;m)}
+solve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m
+ while[j<n;y[K]-:(+/(conj H[j;K])*y K)*H[j;K];K:1_K;j+:1]
+ i:n-1;J:!n;y[i]%:r@i
+ while[i;j:i_J;i-:1;y[i]:(y[i]-+/H[j;i]*y@j)%r@i];n#y}
+ q:$[°i~@*|x;x;qr x];$[°L~@y;qslv/:[q;y];qslv[q;y]]}
+dot:(+/*)\:
+avg:{(+/x)%0.+#x}
+var:{(+/x*x:(x-avg x))%-1+#x}
+std:{%var x}
+mu95:{b:3.2;f:{(std x)^b};1.97*((f@_x)+f imag x)^(1%b)}
+med: **|2^^
+ic:{[c;s;t]n:#c;i:&c;np:n\#t;ns:n\#s;K:-1_'solve[((np^t)@\:i),,(#i)#1a;(ns^s)@\:i]}
+unb:{[c;s;t]ns:(#c)\#s;K:ic[c;s;t];+solve[K;+ns^s]}
+cnd22:{[A]A:A(+/*)\:+conj A;m:a:_**A;d:_A[1;1];bb:abs A[0;1];t:.5*a+d;p:a*d-bb;%/|^%(t-s;t+s:%(t*t)-p)}
+ix:{[x;a]r:solve[A:((#a)#1a;angle[1;a]);x];r,(+/r),1a*mu95(+/A*r)}
+ct:{[u;t]r:solve[A:((#t)#1a;t)         ;u];r,(+/r),1a*mu95(+/A*r)}
+cf:{[w;z]solve[A:((#z)#1a;angle[1%w*w;0]);z]}
+cfx:{[r;w]+/r*(1;1%w*w)}
+abc:{[abc;U]u:(-2\#U)^U;d:1.%abc 1;((u[0]*d*a+b)-u[1]*d*c;(u[1]*d*(c:abc 2)+b:abc 1)-u[0]*d*a:*abc)}
+couple:{[ab;U](*U)-(+/U:((-2\#U)^U))*(ab 1)%0.+/ab}
+convert:{z;$[0~z;y*x;y*x*(omega^z)*1a 1a90 1a180 1a270[4/8+z]]}
+`.replaceAll(/°/g,"`")
+
+</script></body></html>
