@@ -6,7 +6,6 @@ this.addEventListener("install", (event) => {
    .then((cache) =>
     cache.addAll([
      "index.html",
-     "ktye.js",
      "../k.wasm",
      "k.svg"
     ])

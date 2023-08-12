@@ -3,229 +3,89 @@
 <link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
 <link rel="manifest" href="k.webmanifest">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="theme-color" content="#ffe"/>
+<meta name="theme-color" content="#fff"/>
 <title>k</title>
 
 <style>
 .flex{display:flex}
 .hidden{display:none}
 .invisible{display:none}
-*{font-family:monospace;font-size:20pt;background:#ffe}
+*{font-family:monospace}
 html{height:100%}
 body{height:100%;overflow-y:hidden;display:block}
-@media only screen and (min-width:1024px){            /*2columns on desktop*/
- .flex{width:50%}
- .hidden{display:flex}
- body{display:flex}
- #edit{margin-left:.5em}
- #edbut{display:none}
-}
-#repl{flex-direction:column;height:100%}
-#edit{flex-direction:column;height:100%}
-#inp {width:100%}
-#edt {resize:none;margin-bottom:1em;margin-top:.5em}
-#file{width:100%}
-#out{font-size:17pt;margin-bottom:0;flex:auto;overflow:hidden}
-#cnv{margin-top:.5em;margin-bottom:0;flex:auto;background:#efe}
-#edt{font-size:17pt;flex:auto}
-#stat{font-size:14pt;background:#eee}
-.link{color:#0000EE}
-.link:hover{cursor:pointer}
-#brow{display:flex;flex-direction:column}
-#mono{font-size:17pt;position:absolute;left:100;top:100;visibility:hidden}
+#tty{height:50%}
+#mono{position:absolute;left:100;top:100;visibility:hidden}
+[contenteditable]{outline:0px solid transparent;}
 </style></head>
 
 <body onload="window.init()">
-<div id="repl" class="flex">
- <div style="display:flex;flex-direction:row">
-  <input id="inp" value="+/1 2 3" spellcheck="off" autocomplete="off" spellcheck="false" autocorrect="off">
-  <button id="edbut" onclick="changescreen()">edit</button>
- </div>
- <pre    id="out"></pre>
- <canvas id="cnv" class="invisible"></canvas>
- <pre id="stat">offline</pre>
- </div>
- 
-</div>
-<div id="edit" class="hidden flex">
- <div style="display:flex;flex-direction:row">
-  <button id="save">save</button>
-  <button id="open">open</button>
-  <input  id="file" value="-"></input>
-  <button id="dir">dir</button>
-  <button id="share">share</button>
-  <button id="run">run</button>
- </div>
- <textarea id="edt" spellcheck="false" autocorrect="off" wrap="off">x:1+ \!10
- 1+`s
- 2*x
- </textarea>
-</div>
-<div id="brow" class="hidden,flex"></div>
-<pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre> <!--to measure console size-->
-
-
+<pre id="tty"></pre>
+<pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
 
 <script> 
-navigator.serviceWorker.register("k.sw.js")
+//navigator.serviceWorker.register("k.sw.js")
 
 let ge=x=>document.getElementById(x)
 let ce=x=>document.createElement(x)
-let inp=ge("inp"),run=ge("run"),out=ge("out"),stat=ge("stat"),repl=ge("repl"),file=ge("file"),dir=ge("dir"),edit=ge("edit"),edt=ge("edt"),brow=ge("brow"),worker
+let ct=x=>document.createTextNode(x)
+let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
+let te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+let td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+let tty=ge("tty")
+
+let O=s=>tty.appendChild(ct(s))
+clip=()=>{
+ let cs=ttysize()
+ let v=tty.textContent.split("\n")
+ tty.textContent=v.slice(-(cs.rows+tty.textContent.endsWith("\n"))).join("\n")},
+ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
+ return{cols:Math.floor(n*tty.clientWidth/mono.clientWidth),
+        rows:Math.floor(tty.clientHeight/mono.clientHeight)}}
+
+
+window.onerror=(m,s,l,c,e)=>O(m+e)
+
+/*
 inp.onchange=e=>{O(" "+e.target.value+"\n");
  let rc=consize(),[w,h]=cnvsize()
  worker.postMessage({m:"repl",t:e.target.value,r:rc.rows,c:rc.cols,w:w,h:h})}
+*/
 
-window.onerror=function(m,s,l,c,e){console.log("windowonerror",m,e)}
-
-
+let K
 window.init=function(){
- out.textContent=""
- let h=window.location.hash.slice(1)
- let p=h.indexOf(":")
- edt.value=(p>0)?decodeURIComponent(h.slice(1+p)):""
- start({f:"-",t:""},kfs)
-}
+ let cs=ttysize()
+ fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+  K=r.instance.exports;K.kinit();
+  K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" "+cs.rows)))))
+  keval("!100")
+})}
 
-let start=(f,fs)=>{if(worker)worker.terminate();worker=undefined;worker=new Worker("ktye.js")
- worker.onmessage=function(e){let d=e.data
-  switch(d.m){
-  case"write":    O(d.t);                  break
-  case"stat":     setstat(d.t);            break
-  case"filepos":  editat(d.f,d.l,d.c,d.p); break
-  case"writefile":writefile(d.f,d.u);      break
-  case"image":    cnvimage(d.u);           break
-  case"plot":     plot(d.p);               break
-  default: console.log("unknown message",d)
- }}
- worker.onerror=e=>O("worker "+e.message,"\n"+e.filename+":"+e.lineno)
- 
- let [w,h]=cnvsize(),rc=consize()
- inp.value="!0"
- out.textContent=""
- worker.postMessage({m:"start",f,fs:fs,r:rc.rows,c:rc.cols,w:w,h:h})
-}
-let interrupt=()=>{} //todo
-
-let O=s=>{out.textContent+=s;clip()},
-clip=()=>{
- let cs=consize()
- let v=out.textContent.split("\n")
- out.textContent=v.slice(-(cs.rows+out.textContent.endsWith("\n"))).join("\n")},
-consize=()=>{let mono=ge("mono");let n=mono.textContent.length
- return{cols:Math.floor(n*out.clientWidth/mono.clientWidth),
-        rows:Math.floor(out.clientHeight/mono.clientHeight)}}
-
-
-function setstat(s){     stat.classList.remove("link");stat.textContent=s;stat.f=undefined}
-function editat(f,l,c,p){stat.classList.add   ("link");stat.textContent=f+":"+(1+l)+":"+(1+c);stat.f=f;stat.p=p}
-
-run.onclick=e=>{ //click on run button
- changescreen()
- start({f:file.value,t:edt.value},kfs)
- let u=encodeURIComponent(edt.value)
- window.location.hash=(u.length<1000)?u:""
-}
-
-//click on statusbar (jump to file position)
-stat.onclick=e=>{if(("f"in stat)&&("string"==typeof stat.f)){
- changescreen()
- if(file.value==stat.f){ //todo or if file has been written open new file
-  edt.setSelectionRange(stat.p,1+stat.p);edt.focus() //scrollIntoView?
- }
+let env={env:{
+ Exit:x=>{},
+ Args:()=>{return 0},
+ Arg:(x,y)=>{return 0},
+ Read:(x,y,z)=>{return 0},
+ Write:(x,y,z,n)=>{let d=new Uint8Array(n);d.set(new Uint8Array(K.memory.buffer,z,n));O(su(d));return 0},
+ ReadIn:(x,y)=>{return 0},
+ Native:(x,y)=>{return 0},
 }}
 
-//longpress on statusbar or doubleclick (restart)
-stat.touch=null
-stat.addEventListener("touchstart",e=>{stat.touch=e.timeStamp},{passive:true})
-stat.addEventListener("touchend",e=>{
- dt=(stat.touch===null)?0:e.timeStamp-stat.touch
- if(dt>500){start({f:"-",t:""},kfs)}
-},{passive: true})
-stat.ondblclick=e=>{start({f:"-",t:""},kfs)}
+let lo=x=>Number(BigInt.asUintN(32,x))
+let C=()=>new Int8Array(K.memory.buffer)
+let KC=x=>{x=("string"==typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r}
+let CK=x=>{let n=K.nn(x);K.dx(x);return su(U().slice(lo(x),lo(x)+n))}
+let Ks=x=>K.sc(KC(x))
 
-//swipe out/editor (change screen)
-let swipe=null
-let swipestart=e=>{console.log("swipestart")
- let t=e.changedTouches[0];swipe={t:e.timeStamp,x:t.screenX,y:t.screenY}}
-let swipeend=e=>{console.log("swipeend",swipe)
- let t=e.changedTouches[0];if(swipe!==null){
- let dx=t.screenX-swipe.x,dy=t.screenY-swipe.y;let a=Math.abs(dx)
-  console.log("dx/dy",dx,dy)
- if((a>Math.abs(dy))&&(a>0.2*screen.width))changescreen()
-}}
-out.addEventListener("touchstart",swipestart,{passive:true})
-out.addEventListener("touchend"  ,swipeend  ,{passive:true})
-
-function changescreen(){
- repl.classList.toggle("hidden")
- edit.classList.toggle("hidden")
+let keval=(s)=>{rm(tty);tty.appendChild(ce("br"));tty.appendChild(ct(" "))
+ let sp=ce("span");sp.contentEditable=true;sp.style.color="darkred";sp.textContent=s;tty.appendChild(sp)
+ sp.onkeydown=(e)=>{if(e.key=="Enter"){e.preventDefault();keval(sp.textContent)}}
+ tty.appendChild(ce("br"))
+ K.repl(KC(us(s)))
 }
-
-
-//click on open (open file from filesystem api)
-let currentfile={name:"",h:null}                  //name/handle
-ge("open").onclick=async e=>{
- let o={types:[{accept:{'text/plain':['.k']}}]}  //multiple:false,
- let[h]=await window.showOpenFilePicker(o)
- let f= await h.getFile()
- file.value=f.name;currentfile.name=f.name;currentfile.h=h
- edt.value= await f.text()
-}
-ge("save").onclick=async e=>{
- if(currentfile.name=file.value&&currentfile.h!==null){ //write directly
-  const w=await currentfile.h.createWritable()
-  await w.write(edt.value)
-  await w.close();
- }else{                                                 //file save dialog
-  let h=await self.showSaveFilePicker({
-   suggestedName:file.value,
-   types:[{accept:{'text/plain':['.k']}}]})
-  let f=await h.getFile()
-  currentfile.h=h;currentfile.name=f.name;file.value=f.name
-  const w=await currentfile.h.createWritable()
-  await w.write(edt.value)
-  await w.close();
-}}
-file.onchange=e=>{currentfile={name:"",h:null}}    //invalidate direct save
-
-//click on dir to preload all files (k has synchronous access to them and writes to this dir)
-let kfs={}
-dir.onclick=async e=>{kfs={},dir.h=null
- const dh=await window.showDirectoryPicker({mode:'readwrite'})
- dir.h=dh
- for await(const x of dh.values()){
-  if(x.kind==="file"){
-   x.getFile().then((f)=>{
-    f.arrayBuffer().then(b=>{kfs[f.name]=new Uint8Array(b)})
-})}}}
-
-let writefile=async(name,u)=>{                     //write file to disk from k (async)
- if(("h"in dir)&&(dir.h!==null)){
-  const h=await dir.h.getFileHandle(name,{create:true})
-  const w=await h.createWritable()
-  await w.write(u)
-  await w.close();
-}}
 
 //click on share button
-share.onclick=async e=>{await navigator.share({title:"share k file",text:edt.value})}
+//share.onclick=async e=>{await navigator.share({title:"share k file",text:edt.value})}
 
-let showcnv=t=>{
- cnv.classList[["add","remove"][+t]]("invisible")
- out.classList[["remove","add"][+t]]("invisible")
-}
-let cnvsize=()=>{showcnv(true);let r=[cnv.clientHeight,cnv.clientWidth];showcnv(false);return r}
-let cnvimage=u=>{showcnv(true);cnv.width=cnv.clientHeight;cnv.height=cnv.clientWidth;
- let c=cnv.getContext("2d");
- let d=c.createImageData(cnv.width,cnv.height)
- let m=new Uint8Array(d.data.buffer)
- for(let i=3;i<u.length;i+=4)u[i]=255; //no-alpha
- m.set(u)
- c.putImageData(d,0,0)
-}
-
-let plot=p=>{showcnv(true);plotjs.plots(p,cnv)}
 </script>
 
 </body></html>
