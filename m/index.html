@@ -12,17 +12,19 @@
 .invisible{display:none}
 *{font-family:monospace;font-size:large}
 html{height:100%}
-body{height:100%;overflow-y:hidden;display:block;margin:0}
+body{height:100%;overflow-y:hidden;display:block;margin:0;overflow:hidden}
 pre{margin:0}
-#inp{color:darkred;height:1em;width:100%;padding-left:0.5em}
+#inp{color:darkred;height:1em;width:100%;padding-left:0.5em;margin-top:1em;margin-bottom:0.2em}
 #tty{height:50%}
+#edt{display:none;width:100%;height:50%;resize:none;color:darkred;border:none}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 [contenteditable]{outline:0px solid transparent;}
 </style></head>
 
 <body onload="window.init()">
-<pre id="inp" contenteditable="true">xxx</pre>
+<pre id="inp" contenteditable="true" autocapitalize="off">!10</pre>
 <pre id="tty"></pre>
+<textarea id="edt" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
 
 <script> 
@@ -34,7 +36,7 @@ let ct=x=>document.createTextNode(x)
 let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 let te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
-let tty=ge("tty")
+let tty=ge("tty"),inp=ge("inp"),edt=ge("edt")
 
 let O=s=>tty.textContent=s //appendChild(ct(s))
 ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
@@ -53,10 +55,10 @@ inp.onchange=e=>{O(" "+e.target.value+"\n");
 let K
 window.init=function(){
  let cs=ttysize()
+ inp.focus()
  fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports;K.kinit();
   K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" 20")))))
-  keval("!100")
 })}
 
 let env={env:{
@@ -75,11 +77,29 @@ let KC=x=>{x=("string"==typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r
 let CK=x=>{let n=K.nn(x);K.dx(x);return su(U().slice(lo(x),lo(x)+n))}
 let Ks=x=>K.sc(KC(x))
 
-ge("inp").onkeydown=(e)=>{if(e.key=="Enter"){e.preventDefault();keval(e.target.textContent)}}
-let keval=s=>K.repl(KC(us(s)))
+inp.onkeydown=(e)=>{
+ if(e.key=="Enter"){e.preventDefault();let s=e.target.textContent;if("\\e"==s)return edit();if("\\s"==s)return share();if(s.startsWith("\\"))return help();keval(s)}
+}
+let keval=s=>{tty.textContent="";K.repl(KC(us(s)))}
+
+let E="/editor, quit with \\\\"
+let edit=()=>{
+ inp.style.display="none";tty.style.display="none";edt.style.display="block";
+ tty.textContent=""
+ edt.value=E;edt.focus()
+}
+edt.onkeydown=(e)=>{if((e.key=="\\")&&edt.value.endsWith("\n\\")){
+ e.preventDefault()
+ inp.style.display="block";tty.style.display="block";edt.style.display="none";
+ E=edt.value.slice(0,-2)
+ K.dx(K.Val(KC(E)))
+ inp.focus()
+}}
 
 //click on share button
-//share.onclick=async e=>{await navigator.share({title:"share k file",text:edt.value})}
+async function share(){await navigator.share({title:"share k file",text:E})}
+
+let help=()=>{tty.textContent="\\e(edit)\n\\s(share)\n"}
 
 </script>
 
