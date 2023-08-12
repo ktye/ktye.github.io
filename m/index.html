@@ -53,13 +53,15 @@ inp.onchange=e=>{O(" "+e.target.value+"\n");
 */
 
 let K
-window.init=function(){
+let kinit=()=>{
  let cs=ttysize()
+ help()
  inp.focus()
  fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports;K.kinit();
   K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" 20")))))
 })}
+window.init=()=>kinit()
 
 let env={env:{
  Exit:x=>{},
@@ -77,8 +79,9 @@ let KC=x=>{x=("string"==typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r
 let CK=x=>{let n=K.nn(x);K.dx(x);return su(U().slice(lo(x),lo(x)+n))}
 let Ks=x=>K.sc(KC(x))
 
+tty.onclick=()=>inp.focus()
 inp.onkeydown=(e)=>{
- if(e.key=="Enter"){e.preventDefault();let s=e.target.textContent;if("\\e"==s)return edit();if("\\s"==s)return share();if(s.startsWith("\\"))return help();keval(s)}
+ if(e.key=="Enter"){e.preventDefault();let s=e.target.textContent;if("\\e"==s)return edit();if("\\s"==s)return share();if("\\r"==s)return kinit();if(s.startsWith("\\"))return help();keval(s)}
 }
 let keval=s=>{tty.textContent="";K.repl(KC(us(s)))}
 
@@ -99,7 +102,7 @@ edt.onkeydown=(e)=>{if((e.key=="\\")&&edt.value.endsWith("\n\\")){
 //click on share button
 async function share(){await navigator.share({title:"share k file",text:E})}
 
-let help=()=>{tty.textContent="\\e(edit)\n\\s(share)\n"}
+let help=()=>{tty.textContent="\\e(edit)\n\\s(share)\n\\r(reset)"}
 
 </script>
 
