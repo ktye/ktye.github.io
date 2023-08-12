@@ -10,15 +10,18 @@
 .flex{display:flex}
 .hidden{display:none}
 .invisible{display:none}
-*{font-family:monospace}
+*{font-family:monospace;font-size:large}
 html{height:100%}
-body{height:100%;overflow-y:hidden;display:block}
+body{height:100%;overflow-y:hidden;display:block;margin:0}
+pre{margin:0}
+#inp{color:darkred;height:1em;width:100%;padding-left:0.5em}
 #tty{height:50%}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 [contenteditable]{outline:0px solid transparent;}
 </style></head>
 
 <body onload="window.init()">
+<pre id="inp" contenteditable="true">xxx</pre>
 <pre id="tty"></pre>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
 
@@ -33,11 +36,7 @@ let te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 let tty=ge("tty")
 
-let O=s=>tty.appendChild(ct(s))
-clip=()=>{
- let cs=ttysize()
- let v=tty.textContent.split("\n")
- tty.textContent=v.slice(-(cs.rows+tty.textContent.endsWith("\n"))).join("\n")},
+let O=s=>tty.textContent=s //appendChild(ct(s))
 ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
  return{cols:Math.floor(n*tty.clientWidth/mono.clientWidth),
         rows:Math.floor(tty.clientHeight/mono.clientHeight)}}
@@ -56,7 +55,7 @@ window.init=function(){
  let cs=ttysize()
  fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports;K.kinit();
-  K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" "+cs.rows)))))
+  K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" 20")))))
   keval("!100")
 })}
 
@@ -76,12 +75,8 @@ let KC=x=>{x=("string"==typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r
 let CK=x=>{let n=K.nn(x);K.dx(x);return su(U().slice(lo(x),lo(x)+n))}
 let Ks=x=>K.sc(KC(x))
 
-let keval=(s)=>{rm(tty);tty.appendChild(ce("br"));tty.appendChild(ct(" "))
- let sp=ce("span");sp.contentEditable=true;sp.style.color="darkred";sp.textContent=s;tty.appendChild(sp)
- sp.onkeydown=(e)=>{if(e.key=="Enter"){e.preventDefault();keval(sp.textContent)}}
- tty.appendChild(ce("br"))
- K.repl(KC(us(s)))
-}
+ge("inp").onkeydown=(e)=>{if(e.key=="Enter"){e.preventDefault();keval(e.target.textContent)}}
+let keval=s=>K.repl(KC(us(s)))
 
 //click on share button
 //share.onclick=async e=>{await navigator.share({title:"share k file",text:edt.value})}
