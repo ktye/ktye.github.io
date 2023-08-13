@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
-<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="icon" href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
+<link rel="apple-touch-icon" href="k.svg">
 <link rel="manifest" href="k.webmanifest">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="theme-color" content="#fff"/>
@@ -63,7 +64,9 @@ let kinit=(x)=>{
   if(x)K.dx(K.Val(KC(x)))
 })}
 window.init=()=>{
- kinit(decodeURIComponent(window.location.hash.substr(1)))
+ let s=decodeURIComponent(window.location.hash.substr(1))
+ if(s){edt.value=s;edit();return}
+ kinit()
  if("launchQueue"in window)launchQueue.setConsumer(async(x)=>{
   let f=await x.files[0].getFile()
   edt.value=await f.text()
