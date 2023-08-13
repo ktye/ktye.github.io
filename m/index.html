@@ -29,6 +29,7 @@ pre{margin:0}
  <button id="runbut" onclick="run()" class="invisible">run</button>
  <button id="shrbut" onclick="share()">share</button>
  <button id="rstbut" onclick="kinit()">reset</button>
+ <input  id="filbut" type="file" onchange="loadfile()" class="invisible"/>
 </div>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
 
@@ -41,7 +42,7 @@ let ct=x=>document.createTextNode(x)
 let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 let te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
-let tty=ge("tty"),inp=ge("inp"),edt=ge("edt"),edtbut=ge("edtbut"),runbut=ge("runbut"),shrbut=ge("shrbut"),rstbut=ge("rstbut")
+let tty=ge("tty"),inp=ge("inp"),edt=ge("edt"),edtbut=ge("edtbut"),runbut=ge("runbut"),shrbut=ge("shrbut"),rstbut=ge("rstbut"),filbut=ge("filbut")
 
 let O=s=>{tty.textContent=(tty.textContent+s).split("\n").slice(-rows).join("\n")}
 ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
@@ -92,7 +93,7 @@ inp.onkeydown=(e)=>{
 }
 let keval=s=>{tty.textContent+=" "+s+"\n";K.repl(KC(us(s)))}
 
-let screens=[edtbut,runbut,rstbut,inp,tty,edt]
+let screens=[edtbut,runbut,rstbut,inp,tty,edt,filbut]
 let edit=()=>{
  for(let i=0;i<screens.length;i++)screens[i].classList.toggle("invisible")
  edt.focus()
@@ -102,6 +103,7 @@ let run=()=>{
  kinit(edt.value)
  focus()
 }
+let loadfile=async (e)=>edt.value=await filbut.files[0].text()
 
 let focus=()=>{inp.focus()
  let r=document.createRange();r.selectNodeContents(inp);r.collapse(false)
