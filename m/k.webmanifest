@@ -4,6 +4,7 @@
  "display":         "standalone",
  "theme_color":     "#ffffff",
  "background_color":"#ffffff",
+ "file_handlers":[{"action":"index.html","accept":{"text/k":[".k"]}}],
  "icons":[{
   "src":            "k.svg",
   "sizes":          "16x16 48x48 72x72 96x96 128x128 256x256 512x512",

@@ -61,7 +61,14 @@ let kinit=()=>{
   K=r.instance.exports;K.kinit();
   K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" 20")))))
 })}
-window.init=()=>kinit()
+window.init=()=>{
+ kinit()
+ if("launchQueue"in window)launchQueue.setConsumer(async(x)=>{
+  let f=await x.files[0].getFile()
+  E=await f.text()
+  edit()
+ })
+}
 
 let env={env:{
  Exit:x=>{},
