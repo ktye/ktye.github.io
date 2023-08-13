@@ -60,10 +60,10 @@ let kinit=(x)=>{
   K=r.instance.exports;K.kinit();
   K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cs.cols+" 20")))))
   tty.textContent="ktye/k\n"
-  if(x!=undefined)K.dx(K.Val(KC(x)))
+  if(x)K.dx(K.Val(KC(x)))
 })}
 window.init=()=>{
- kinit()
+ kinit(decodeURIComponent(window.location.hash.substr(1)))
  if("launchQueue"in window)launchQueue.setConsumer(async(x)=>{
   let f=await x.files[0].getFile()
   edt.value=await f.text()
@@ -111,7 +111,12 @@ let focus=()=>{inp.focus()
 }
 
 //click on share button
-async function share(){await navigator.share({title:"share k file",text:edt.value})}
+async function share(){let t=edt.value;await navigator.share({
+ title:"share k file",
+ url:"https://ktye.github.io/m/index.html#"+encodeURI(t),
+ text:t,
+ files:[new File([t],"a.k",{type:"text/plain"})],
+})}
 
 let help=()=>{tty.textContent="\\e(edit)\n\\s(share)\n\\r(reset)"}
 
