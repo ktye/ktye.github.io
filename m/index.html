@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel="icon" href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
-<link rel="apple-touch-icon" href="k.svg">
 <link rel="manifest" href="k.webmanifest">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="theme-color" content="#fff"/>
@@ -113,12 +112,11 @@ let focus=()=>{inp.focus()
  let s=window.getSelection();s.removeAllRanges();s.addRange(r)
 }
 
-//click on share button
 async function share(){let t=edt.value;await navigator.share({
  title:"share k file",
  url:"https://ktye.github.io/m/index.html#"+encodeURI(t),
  text:t,
- files:[new File([t],"a.k",{type:"text/plain"})],
+ //files:[new File([t],"a.k",{type:"text/plain"})],
 })}
 
 let help=()=>{tty.textContent="\\e(edit)\n\\s(share)\n\\r(reset)"}
