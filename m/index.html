@@ -14,7 +14,7 @@ pre{margin:0}
 .invisible{display:none}
 #inp{color:darkred;height:1em;width:100%;padding-left:0.5em;margin-top:1em;margin-bottom:0.2em}
 #tty{height:40%;border-bottom:1px solid}
-#edt{width:100%;height:40%;resize:none;color:darkred;border:none;border-bottom:1px solid;outline:none}
+#edt{width:100%;height:40%;resize:none;color:darkred;border:none;border-bottom:1px solid;outline:none;white-space:nowrap;overflow:auto}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 .buttons{display:flex;justify-content:space-between}
 [contenteditable]{outline:0px solid transparent;}
@@ -43,7 +43,7 @@ let te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 let tty=ge("tty"),inp=ge("inp"),edt=ge("edt"),edtbut=ge("edtbut"),runbut=ge("runbut"),shrbut=ge("shrbut"),rstbut=ge("rstbut")
 
-let O=s=>tty.textContent+=s //appendChild(ct(s))
+let O=s=>{tty.textContent=(tty.textContent+s).split("\n").slice(-rows).join("\n")}
 ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
  return{cols:Math.floor(n*tty.clientWidth/mono.clientWidth),
         rows:Math.floor(tty.clientHeight/mono.clientHeight)}}
@@ -51,15 +51,9 @@ ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
 
 window.onerror=(m,s,l,c,e)=>O(m+e)
 
-/*
-inp.onchange=e=>{O(" "+e.target.value+"\n");
- let rc=consize(),[w,h]=cnvsize()
- worker.postMessage({m:"repl",t:e.target.value,r:rc.rows,c:rc.cols,w:w,h:h})}
-*/
-
-let K
+let K,rows
 let kinit=(x)=>{
- let cs=ttysize()
+ let cs=ttysize();rows=cs.rows
  focus()
  fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports;K.kinit();
