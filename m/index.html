@@ -28,10 +28,13 @@ pre{margin:0}
  <button id="edtbut" onclick="edit()">edit</button>
  <button id="runbut" onclick="run()" class="invisible">run</button>
  <button id="shrbut" onclick="share()">share</button>
+ <button id="dwnbut" onclick="download()" class="invisible">save</button>
  <button id="rstbut" onclick="kinit()">reset</button>
- <input  id="filbut" type="file" onchange="loadfile()" class="invisible"/>
+ <button id="filbut" onclick="lfile()" class="invisible">load</button>
+ <input  id="filebut" type="file" onchange="loadfile()" style="display:none"/>
 </div>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
+<a id="dl" style="display:none"></a>
 
 <script> 
 //navigator.serviceWorker.register("k.sw.js")
@@ -42,7 +45,7 @@ let ct=x=>document.createTextNode(x)
 let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 let te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
-let tty=ge("tty"),inp=ge("inp"),edt=ge("edt"),edtbut=ge("edtbut"),runbut=ge("runbut"),shrbut=ge("shrbut"),rstbut=ge("rstbut"),filbut=ge("filbut")
+let tty=ge("tty"),inp=ge("inp"),edt=ge("edt"),edtbut=ge("edtbut"),runbut=ge("runbut"),shrbut=ge("shrbut"),dwnbut=ge("dwnbut"),rstbut=ge("rstbut"),filbut=ge("filbut")
 
 let O=s=>{tty.textContent=(tty.textContent+s).split("\n").slice(-rows).join("\n")}
 ttysize=()=>{let mono=ge("mono");let n=mono.textContent.length
@@ -95,22 +98,23 @@ inp.onkeydown=(e)=>{
 }
 let keval=s=>{tty.textContent+=" "+s+"\n";K.repl(KC(us(s)))}
 
-let screens=[edtbut,runbut,rstbut,inp,tty,edt,filbut]
+let screens=[edtbut,runbut,rstbut,inp,tty,edt,dwnbut,filbut]
 let edit=()=>{
  for(let i=0;i<screens.length;i++)screens[i].classList.toggle("invisible")
- edt.focus()
-}
+ edt.focus()}
 let run=()=>{
  for(let i=0;i<screens.length;i++)screens[i].classList.toggle("invisible")
- kinit(edt.value)
- focus()
-}
-let loadfile=async (e)=>edt.value=await filbut.files[0].text()
+ kinit(edt.value);focus()}
+
+let download=()=>{
+ let x=new Blob([us(edt.value)],{type:"application/octet-stream"})
+ dl.href=URL.createObjectURL(x);dl.download="a.k";dl.click()}
+let lfile=(e)=>ge("filebut").click()
+let loadfile=async (e)=>edt.value=await ge("filebut").files[0].text()
 
 let focus=()=>{inp.focus()
  let r=document.createRange();r.selectNodeContents(inp);r.collapse(false)
- let s=window.getSelection();s.removeAllRanges();s.addRange(r)
-}
+ let s=window.getSelection();s.removeAllRanges();s.addRange(r)}
 
 async function share(){let t=edt.value;await navigator.share({
  title:"share k file",
