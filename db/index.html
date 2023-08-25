@@ -73,7 +73,7 @@ function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
 function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery():0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
-function sharequery(){let v=currentOption().value;const f=new File([v],v.split("\n")[0].slice(1),{type:"text/plain"});navigator.share({files:[f]})}
+function sharequery(){let v=currentOption().value;navigator.share({title:v.split("\n")[0].slice(1),text:v})}
 function newquery(){addquery("query "+queries.options.length,"`answer"+queries.options.length)}
 async function querychange(){
  let q=currentOption().value,b=ge("buttons");b.style.display=q.length?"block":"none"

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>ied text editor</title>
+<link rel="manifest" href="ied.webmanifest">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="black"/>
+<style>
+*{font-size:x-large;font-family:monospace;box-sizing:border-box}
+html{margin:0;padding:0}
+body{display:flex;flex-direction:column;margin:0;height:100vh}
+#edt{height:100%;resize:none;outline:none;border:none;overflow:auto;white-space:pre;background:#ffe}
+</style>
+</head>
+
+<body>
+<input    id="inp" type="file" onchange="ld(event)"/>
+<textarea id="edt" spellcheck="false"></textarea>
+<input    id="sav" type="button" value="save" onclick="dl()"/>
+<a id="dl" style="display:none"></a>
+
+
+<script>
+let file="file.txt"
+function ge(x){return document.getElementById(x)}
+function ld(e){e.target.files[0].text().then(r=>{edt.value=r;file=e.target.files[0].name})}
+function dl( ){let t=ge("edt").value
+ let x=new Blob([us(t)],{type:"text/plain"})
+ let a=ge("dl")
+ a.href=URL.createObjectURL(x)
+ a.download=file
+ a.click()
+}
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+</script></body></html>
