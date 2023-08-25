@@ -7,10 +7,11 @@
 *{font-size:x-large;font-family:monospace;box-sizing:border-box}
 html{margin:0;padding:0}
 body{min-height:100vh;margin:0;padding:0;overflow:hidden}
-h1{text-align:center}
 caption{border-bottom:1px solid}
 .but:active{transform:translateY(2px)}
 .topborder{border-top:1px solid}
+a,.link{text-decoration:underline;color:blue;y-padding:1em}
+.link:hover{cursor:pointer}
 #buttons{display:none;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 #queries{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 #buttons{position:absolute;top:0;right:0;width:2em;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
@@ -24,14 +25,13 @@ caption{border-bottom:1px solid}
 <body onload="init()">
 
 <select id="queries" onchange="querychange()">
- <option value="" style="font-weight:bold;font-style:italic">show tables</option>
+ <option value="">[tables]</option>
 </select>
-<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option></select>
+<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="share">↑</option></select>
 
 <div id="out"></div>
 
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>   <!--measure console size-->
-<a id="dl" style="display:none"></a>           <!--download-->
 
 <script>
 let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1.234,-4.2],["hans","peter","werner","florian"]]}]
@@ -47,8 +47,7 @@ function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function ct(x){return document.createTextNode(x)}
 function tc(x,y){x.textContent=y;return x}
-function ac(x,y){x.appendChild(y);return x}
-function h1(x){let h=ce("h1");h.textContent=x;return h}
+function ac(x,y){x.appendChild(y);return y}
 function th(t){let T=ce("table");t.forEach((r,i)=>{let R=ce("tr");ac(T,R);r.forEach(c=>{ac(R,tc(ce(i?"td":"th"),c))})});return T}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
@@ -71,9 +70,10 @@ function Nt(t){return tables.length}
 function pads(v){let m=Math.max(...v.map(x=>x.length));return v.map(x=>pad(x,m))}
 function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
 
-function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():0;querychange()}
+function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery():0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
+function sharequery(){let v=currentOption().value;const f=new File([v],v.split("\n")[0].slice(1),{type:"text/plain"});navigator.share({files:[f]})}
 function newquery(){addquery("query "+queries.options.length,"`answer"+queries.options.length)}
 async function querychange(){
  let q=currentOption().value,b=ge("buttons");b.style.display=q.length?"block":"none"
@@ -87,27 +87,52 @@ async function runquery(q){
  await kinit(queries.options[1].value) //always start with prolog
  K.repl(KC(q.trim()))
 }
-function loadqueries(){
-}
-function savequeries(){
-}
 function currentOption(){return queries.options[queries.selectedIndex]}
+function load(s){
+ try{
+  JSON.parse(s) //todo..
+ }catch(e){ac(out,ct(e.message))}
+}
+function importcsv(name,s){
+ try{
+  tables.push(fromcsv(name,s));showtables()
+ }catch(e){ac(out,ct(e.message))}
+}
 
 function showtables(){rm(out)
- ac(out,h1("loaded table"+((1==tables.length)?"":"s")))
  let T=[["name"],["rows"],["keys"]]
  tables.map(t=>{
   T[0].push(t.name);T[1].push(nt(t));T[2].push(t.k.slice(0,3).join(",")+"..")
  })
  ac(out,th(flip(T)))
+ ac(out,ce("hr"))
+
+ let dl=ac(out,ce("a"));dl.textContent="save ";
+ let x=new Blob([us(JSON.stringify({tables:tables,queries:Array.from(queries.options).slice(1).map(x=>({name:x.textContent,value:x.value}))}))],{type:"application/json"})
+ dl.href=URL.createObjectURL(x);dl.download="db.json"
 
  ac(out,ce("br"))
- ac(out,ct("todo import(table-as-csv) download(tables+queries/json) load(tables+queries)"))
-}
-function showqueries(){
- // name-a [x]
- // name-b [x]
- // [load]  [save]
+ ac(out,ct("load:"))
+ let ld=ac(out,ce("input"));ld.type="file";ld.accept=".json"
+ ld.onchange=e=>e.target.files[0].text().then(r=>load(r))
+ 
+ ac(out,ce("br"))
+ ac(out,ct("csv::"))
+ let cs=ac(out,ce("input"));cs.type="file";cs.accept=".csv"
+ cs.onchange=e=>e.target.files[0].text().then(r=>importcsv(e.target.files[0].name.slice(0,-4),r))
+
+ ac(out,ce("br"))
+ let cl=tc(ac(out,ce("span")),"clear");cl.classList.add("link")
+ cl.onclick=()=>{tables=[];Array.from(queries.options).slice(1).forEach(o=>queries.removeChild(o)); showtables()}
+
+ ac(out,ce("hr"))
+ ac(out,ce("pre")).textContent=`
+save/load(code and data) as json
+csv import table:
+ 1st row names
+ 2nd row types i,f,s
+clear(tables and queries)
+ `
 }
 function fromcsv(name,x){x=x.trim().split("\n")
  let k=x[0].split(",")  //first row names
