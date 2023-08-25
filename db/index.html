@@ -1,57 +1,167 @@
 <!DOCTYPE html>
-<head><meta charset="utf-8">
-<link rel=icon href='data:;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAgMAAABinRfyAAAACVBMVEX/AAAAAAD////KksOZAAAAMElEQVR4nGJYtWrVKoYFq1ZxMSyYhkZMgxNRXAwLpmbBCDAXSRZEgAwAGQUIAAD//+QzHr+8V1EyAAAAAElFTkSuQmCC'>
-<title>k/db</title>
-<!--style>body{font-family:monospace;white-space:pre}</style-->
+<head><meta charset="utf-8"><title>tables</title>
+<link rel="manifest" href="t.webmanifest">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="black"/>
 <style>
-body{margin:0;overflow:hidden}
-#doc{position:absolute;top:0;margin:0;left: 0;background:#ffe;width:50vw;height:100vh;overflow:auto;border:none;outline:none}
-#tty{position:absolute;top:0;margin:0;right:0;                width:50vw;height:100vh;overflow:auto}
+*{font-family:monospace;box-sizing:border-box}
+html{margin:0;padding:0}
+body{min-height:100vh;margin:0;padding:0;overflow:hidden}
+footer{position:absolute;bottom:0;width:100%;height:2em;display:flex;justify-content:space-between;background:#fef}
+h1{font-size:large;text-align:center}
+caption{border-bottom:1px solid}
+.but:active{transform:translateY(2px)}
+.topborder{border-top:1px solid}
+button{height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+#queries{position:absolute;top:0;width:100%;height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+
+#out{position:absolute;width:100%;height:calc(100vh - 4em);top:2em;background:#efe}
+#kout{margin:0.5em;height:calc(50% - 2em)}
+#mono{position:absolute;left:100;top:100;visibility:hidden}
+#editor{width:100%;padding:0;height:calc(50vh - 2em);resize:none;border:none;outline:none;overflow:auto;padding:0.5em;white-space:nowrap;background:#ffe}
 </style>
 </head>
+<body onload="init()">
 
-<body>
-<textarea id="doc" spellcheck="false"></textarea>
-<pre id="tty">tty</pre>
+<select id="queries" onchange="querychange(this.value)">
+ <option value="" style="font-weight:bold;font-style:italic">show tables</option>
+</select>
 
-<script type="module">
-import {K} from '../k.js'
+<div id="out"></div>
 
-let tty=document.getElementById("tty")
-let doc=document.getElementById("doc")
+<footer id="footer">
+ <button onclick="newquery()">new</button>
+ <button onclick="delquery()">del</button>
+</footer>
 
-window.onkeydown=function(e){
- if((e.key=="Enter")&&(e.shiftKey==true)){
-  tty.textContent=""
-  K.restore()
-  krep(doc.value)
-  return false
+<pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>   <!--measure console size-->
+<a id="dl" style="display:none"></a>           <!--download-->
+
+<script>
+let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1.234,-4.2],["hans","peter","werner","florian"]]}]
+
+let init=async()=>{
+ window.onerror=(a,b,c)=>{out.appendChild(ce("br"));out.appendChild(document.createTextNode(a+" (at "+c+")"))}
+ await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
+ fetch("queries").then(r=>r.text()).then(r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))}))
+ showtables()
+}
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function ct(x){return document.createTextNode(x)}
+function tc(x,y){x.textContent=y;return x}
+function ac(x,y){x.appendChild(y);return x}
+function h1(x){let h=ce("h1");h.textContent=x;return h}
+function th(t){let T=ce("table");t.forEach((r,i)=>{let R=ce("tr");ac(T,R);r.forEach(c=>{ac(R,tc(ce(i?"td":"th"),c))})});return T}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
+function flip(x){
+ let n=x.length,m=x[0].length,r=[]
+ for(let i=0;i<m;i++)r[i]=Array(n)
+ for(let i=0;i<n;i++){for(let j=0;j<m;j++)r[j][i]=x[i][j]}
+ return r
+}
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+
+
+let out=ge("out"),queries=ge("queries")
+
+function vt(t){}
+function nt(t){return(0==t.v.length)?0:t.v[0].length}
+function Nt(t){return tables.length}
+function pads(v){let m=Math.max(...v.map(x=>x.length));return v.map(x=>pad(x,m))}
+function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
+
+function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o)}
+function delquery(){queries.removeChild(currentOption())}
+function newquery(){addquery("query "+queries.options.length,"`answer"+queries.options.length)}
+async function querychange(q){
+ if(""==q)       return showtables()
+ if("queries"==q)return showqueries()
+ ge("footer").style.display="flex"
+ rm(out);let e=ce("textarea");e.id="editor";e.value=currentOption().value;ac(out,e)
+ e.onchange=()=>{currentOption().value=e.value;tc(currentOption(),e.value.split("\n")[0].slice(1,41));querychange(e.value)}
+ runquery(e.value)
+}
+async function runquery(q){
+ let p=ce("pre");p.id="kout";ac(out,p)
+ await kinit(queries.options[1].value) //always start with prolog
+ K.repl(KC(q.trim()))
+}
+function loadqueries(){
+}
+function savequeries(){
+}
+function currentOption(){return queries.options[queries.selectedIndex]}
+
+function showtables(){rm(out)
+ ge("footer").style.display="none"
+ ac(out,h1("loaded table"+((1==tables.length)?"":"s")))
+ let T=[["name"],["rows"],["keys"]]
+ tables.map(t=>{
+  T[0].push(t.name);T[1].push(nt(t));T[2].push(t.k.slice(0,3).join(",")+"..")
+ })
+ ac(out,th(flip(T)))
+}
+function showqueries(){
+ // name-a [x]
+ // name-b [x]
+ // [load]  [save]
+}
+function fromcsv(name,x){x=x.trim().split("\n")
+ let k=x[0].split(",")  //first row names
+ let t=x[1].split(",")  //secnd row types, e.g. i,f,s
+ let v=flip(x.slice(2).map(x=>x.split(","))).map((c,j)=>c.map(v=>("s"==t[j])?v:Number(v)))
+ return{name:name,k:k,t:t,v:v}
+}
+function ttysize(){let mono=ge("mono");let n=mono.textContent.length;
+ return[Math.floor(ge("kout").clientHeight/mono.clientHeight),Math.floor(n*ge("kout").clientWidth/mono.clientWidth)]}
+
+let /*there be*/ K
+let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
+let kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y    ){return 0},
 }}
+function kout(s){let o=ge("kout");if(o===null){o=ce("pre");o.id="kout";ac(ge("out"),o)};o.textContent+=s}
+async function kinit(a){
+ let kw;await fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=r) //lz(u64s(""))
+ let r=await WebAssembly.instantiate(kw,kenv)
+ K=r.instance.exports
+ K.kinit()
+ let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols+" "+rows)))))
+ K.Grp=x=>K.Atx(10n,x)
+ tables.forEach(t=>asn(t.name,KT(t)))
+ K.Val(KC(a))
+}
+let lz/*4(uncompress)*/=(x)=>{let i=7,j,n,t,c,o,r=[],S=-(1<<31),R=(x,a,n)=>{for(j=0;j<n;j++)r.push(x[a+j]);return n},
+ h=()=>x[i++]|x[i++]<<8,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)},
+ d=n=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
+ while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(i+n);return new Uint8Array(r)},
 
-function init(){
- let  ext={}
- ext.init= function(){tty.textContent="ktye/k "+K.n+"\n t\n";load()}
- ext.read= function(){return new Uint8Array(0)}
- ext.write=function(f,x){if(f==="")O(new TextDecoder("utf-8").decode(x))}
- K.kinit(ext,"../k.wasm")}
+KT=t=>K.Atx(K.Val(KC("+!/")),K.l2(KS(t.k),KL(t.v.map((x,i)=>("i"==t.t[i])?KI(x):("f"==t.t[i])?KF(x):KS(x))))),
+KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
+KF=x=>{let r=K.mk(21,x.length  );F().set(x,lo(r)>>>3);return r},
+KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
+KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},
+KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},
+Ks=x=>K.sc(KC(x)),
+asn=(s,y)=>K.dx(K.Asn(Ks(s),y))
 
-function krep(s){
- try{K._.repl(K.KC(s.trim()))}catch(e){K.restore()}
- tty.scrollTo(0,tty.scrollHeight);doc.focus()}
+/*
+FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},
+fK=x=>{let r=F()[lo(x)>>>3];K.dx(x);return r},
+IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},
+SK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n).map(x=>sK(K.Ks(x)));K.dx(x);return r},
+sK=x=>CK(K.cs(x)),
+*/
 
-function O(s){tty.textContent+=s;tty.textContent=tty.textContent.split("\n").slice(-30).join("\n")}
-
-function load(){
- fetch("db").then(r=>r.text()).then(
- t=>{
-  K.KA(K.Ks("db"), K.KC(t))
-  let s=("t:{`id`type`time`dist`coords!`i``f`f`i$'\" \"\\:x}'-1_\"\\n\"\\:db")
-  K._.repl(K.KC(s));
-  K.save();krep("t")
-})}
-
-fetch("a.k").then(r=>r.text()).then(t=>doc.value=t)
-init()
 
 </script></body></html>
-
