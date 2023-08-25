@@ -7,32 +7,28 @@
 *{font-size:x-large;font-family:monospace;box-sizing:border-box;-webkit-appearance:none;}
 html{margin:0;padding:0}
 body{min-height:100vh;margin:0;padding:0;overflow:hidden}
-footer{position:absolute;bottom:0;width:100%;height:2em;display:flex;justify-content:space-between;background:#fef}
 h1{text-align:center}
 caption{border-bottom:1px solid}
 .but:active{transform:translateY(2px)}
 .topborder{border-top:1px solid}
-button{height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
-#queries{position:absolute;top:0;width:100%;height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+#buttons{display:none;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+#queries{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+#buttons{position:absolute;top:0;right:0;width:2em;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 
-#out{position:absolute;width:100%;height:calc(100vh - 4em);top:2em;background:#efe}
-#kout{margin:0.5em;height:calc(50% - 2em)}
+#out{position:absolute;width:100%;height:calc(100vh - 2em);top:2em;background:#efe}
+#kout{margin:0.5em;height:50%;overflow-y:auto}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 #editor{width:100%;padding:0;height:calc(50vh - 2em);resize:none;border:none;outline:none;overflow:auto;padding:0.5em;white-space:nowrap;background:#ffe}
 </style>
 </head>
 <body onload="init()">
 
-<select id="queries" onchange="querychange(this.value)">
+<select id="queries" onchange="querychange()">
  <option value="" style="font-weight:bold;font-style:italic">show tables</option>
 </select>
+<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option></select>
 
 <div id="out"></div>
-
-<footer id="footer">
- <button onclick="newquery()">new</button>
- <button onclick="delquery()">del</button>
-</footer>
 
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>   <!--measure console size-->
 <a id="dl" style="display:none"></a>           <!--download-->
@@ -74,15 +70,15 @@ function Nt(t){return tables.length}
 function pads(v){let m=Math.max(...v.map(x=>x.length));return v.map(x=>pad(x,m))}
 function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
 
-function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o)}
-function delquery(){queries.removeChild(currentOption())}
+function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():0}
+function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value;querychange()}
+function delquery(){queries.removeChild(currentOption());querychange()}
 function newquery(){addquery("query "+queries.options.length,"`answer"+queries.options.length)}
-async function querychange(q){
+async function querychange(){
+ let q=currentOption().value,b=ge("buttons");b.style.display=q.length?"block":"none"
  if(""==q)       return showtables()
- if("queries"==q)return showqueries()
- ge("footer").style.display="flex"
- rm(out);let e=ce("textarea");e.id="editor";e.value=currentOption().value;ac(out,e)
- e.onchange=()=>{currentOption().value=e.value;tc(currentOption(),e.value.split("\n")[0].slice(1,41));querychange(e.value)}
+ rm(out);b.value="..";let e=ce("textarea");e.id="editor";e.value=currentOption().value;ac(out,e)
+ e.onchange=()=>{currentOption().value=e.value;tc(currentOption(),e.value.split("\n")[0].slice(1,41));querychange()}
  runquery(e.value)
 }
 async function runquery(q){
@@ -97,7 +93,6 @@ function savequeries(){
 function currentOption(){return queries.options[queries.selectedIndex]}
 
 function showtables(){rm(out)
- ge("footer").style.display="none"
  ac(out,h1("loaded table"+((1==tables.length)?"":"s")))
  let T=[["name"],["rows"],["keys"]]
  tables.map(t=>{
@@ -136,7 +131,7 @@ async function kinit(a){
  let r=await WebAssembly.instantiate(kw,kenv)
  K=r.instance.exports
  K.kinit()
- let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols+" "+rows)))))
+ let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols+" 50")))))
  K.Grp=x=>K.Atx(10n,x)
  tables.forEach(t=>asn(t.name,KT(t)))
  K.Val(KC(a))
