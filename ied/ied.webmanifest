@@ -1,7 +1,7 @@
-{"name":            "db",
- "short_name":      "db",
+{"name":            "ed",
+ "short_name":      "ed",
  "start_url":       "index.html",
  "display":         "standalone",
- "theme_color":     "#999999",
- "background_color":"#999999"
+ "theme_color":     "#eeffee",
+ "background_color":"#eeffee"
 }
