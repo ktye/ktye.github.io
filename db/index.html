@@ -90,7 +90,10 @@ async function runquery(q){
 function currentOption(){return queries.options[queries.selectedIndex]}
 function load(s){
  try{
-  JSON.parse(s) //todo..
+  let j=JSON.parse(s)
+  clear()
+  tables=j.tables;j.queries.forEach(q=>addquery(q.name,q.value))
+  showtables()
  }catch(e){ac(out,ct(e.message))}
 }
 function importcsv(name,s){
@@ -123,17 +126,23 @@ function showtables(){rm(out)
 
  ac(out,ce("br"))
  let cl=tc(ac(out,ce("span")),"clear");cl.classList.add("link")
- cl.onclick=()=>{tables=[];Array.from(queries.options).slice(1).forEach(o=>queries.removeChild(o)); showtables()}
+ cl.onclick=clear
+
+ ac(out,ce("br"))
+ let rs=tc(ac(out,ce("span")),"reset");rs.classList.add("link")
+ rs.onclick=init
 
  ac(out,ce("hr"))
  ac(out,ce("pre")).textContent=`
-save/load(code and data) as json
+save/load(code and data)as json
 csv import table:
  1st row names
  2nd row types i,f,s
 clear(tables and queries)
+reset(reload example)
  `
 }
+function clear(){tables=[];Array.from(queries.options).slice(1).forEach(o=>queries.removeChild(o)); showtables()}
 function fromcsv(name,x){x=x.trim().split("\n")
  let k=x[0].split(",")  //first row names
  let t=x[1].split(",")  //secnd row types, e.g. i,f,s
