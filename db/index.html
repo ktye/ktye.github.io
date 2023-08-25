@@ -39,7 +39,7 @@ let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1
 let init=async()=>{
  window.onerror=(a,b,c)=>{out.appendChild(ce("br"));out.appendChild(document.createTextNode(a+" (at "+c+")"))}
  await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
- await fetch("queries").then(r=>r.text()).then(r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))}))
+ await fetch("queries.k").then(r=>r.text()).then(r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))}))
  queries.value=""
  showtables()
 }
