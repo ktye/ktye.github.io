@@ -16,7 +16,8 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
 .link:hover{cursor:pointer}
 #buttons{display:none;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 #queries{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
-#buttons{position:absolute;top:0;right:0;width:2em;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+#buttons{position:absolute;z-index:1;top:0;right:0;width:2em;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
+#kelas{position:absolute;top:4px;right:4px;cursor:pointer}
 
 #out{position:absolute;width:100%;height:calc(100vh - 2em);top:2em;background:#efe}
 #kout{margin:0.5em;height:50%;overflow-y:auto}
@@ -30,6 +31,7 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
  <option value="">[tables]</option>
 </select>
 <select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="share">↑</option><option value="shareurl">#</option></select>
+<img id="kelas" src="kelas32.png" onclick="help()"/>
 
 <div id="out"></div>
 
@@ -70,12 +72,7 @@ const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 
 let out=ge("out"),queries=ge("queries")
 
-function vt(t){}
 function nt(t){return(0==t.v.length)?0:t.v[0].length}
-function Nt(t){return tables.length}
-function pads(v){let m=Math.max(...v.map(x=>x.length));return v.map(x=>pad(x,m))}
-function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
-
 function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery(0):("shareurl"==q)?sharequery(1):0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
@@ -152,7 +149,8 @@ clear(tables and queries)
 reset(reload example)
  `
 }
-function clear(){tables=[];Array.from(queries.options).slice(1).forEach(o=>queries.removeChild(o)); showtables()}
+function help(){if("PRE"==out.firstElementChild.nodeName)return showtables();rm(out);fetch("../readme").then(r=>r.text()).then(r=>ac(out,ce("pre")).textContent=r)}
+function clear(){tables=[];Array.from(queries.options).slice(1).forEach(o=>queries.removeChild(o));addquery("prolog","/prolog\n");queries.value="";showtables()}
 function fromcsv(name,x){x=x.trim().split("\n")
  let k=x[0].split(",")  //first row names
  let t=x[1].split(",")  //secnd row types, e.g. i,f,s
