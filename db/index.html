@@ -9,17 +9,17 @@
 *{font-size:x-large;font-family:monospace;box-sizing:border-box}
 html{margin:0;padding:0}
 body{min-height:100vh;margin:0;padding:0;overflow:hidden}
-caption{border-bottom:1px solid}
 .but:active{transform:translateY(2px)}
-.topborder{border-top:1px solid}
 a,.link{text-decoration:underline;color:blue;y-padding:1em}
 .link:hover{cursor:pointer}
+select{-webkit-appearance:none}
+input{-webkit-appearance:none}
 #buttons{display:none;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 #queries{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 #buttons{position:absolute;z-index:1;top:0;right:0;width:2em;height:2em;font-weight:bold;border:2px solid black;border-radius:6px;background:#fff}
 #kelas{position:absolute;top:4px;right:4px;cursor:pointer}
 
-#out{position:absolute;width:100%;height:calc(100vh - 2em);top:2em;background:#efe}
+#out{position:absolute;width:100%;height:calc(100vh - 2em);top:2em;background:#fdfdfd}
 #kout{margin:0.5em;height:50%;overflow-y:auto}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 #editor{width:100%;padding:0;height:calc(50vh - 2em);resize:none;border:none;outline:none;overflow:auto;padding:0.5em;white-space:pre;background:#ffe}
@@ -31,7 +31,7 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
  <option value="">[tables]</option>
 </select>
 <select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="share">↑</option><option value="shareurl">#</option></select>
-<img id="kelas" src="kelas32.png" onclick="help()"/>
+<img id="kelas" class="but" src="kelas32.png" onclick="help()"/>
 
 <div id="out"></div>
 
@@ -43,7 +43,6 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("db.sw.js")
 let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1.234,-4.2],["hans","peter","werner","florian"]]}]
 
 let init=async()=>{
- window.onerror=(a,b,c)=>{out.appendChild(ce("br"));out.appendChild(document.createTextNode(a+" (at "+c+")"))}
  await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
  await fetch("queries.k").then(r=>r.text()).then(r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))}))
  queries.value=""
@@ -112,7 +111,7 @@ function importcsv(name,s){
 function showtables(){rm(out)
  let T=[["name"],["rows"],["keys"]]
  tables.map(t=>{
-  T[0].push(t.name);T[1].push(nt(t));T[2].push(t.k.slice(0,3).join(",")+"..")
+  T[0].push(t.name);T[1].push(nt(t));T[2].push(t.k.length+":"+t.k.slice(0,3).join(",")+"..")
  })
  ac(out,th(flip(T)))
  ac(out,ce("hr"))
