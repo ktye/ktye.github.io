@@ -27,7 +27,7 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
 <select id="queries" onchange="querychange()">
  <option value="">[tables]</option>
 </select>
-<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="share">↑</option></select>
+<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="share">↑</option><option value="shareurl">#</option></select>
 
 <div id="out"></div>
 
@@ -72,10 +72,14 @@ function Nt(t){return tables.length}
 function pads(v){let m=Math.max(...v.map(x=>x.length));return v.map(x=>pad(x,m))}
 function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
 
-function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery():0;querychange()}
+function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery(0):("shareurl"==q)?sharequery(1):0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
-function sharequery(){let v=currentOption().value;navigator.share({title:v.split("\n")[0].slice(1),text:v,url:"https://ktye.github.io/db/index.html#"+encodeURI(v)})}
+function sharequery(u){
+ let v=currentOption().value,d={title:v.split("\n")[0].slice(1),text:v,url:"https://ktye.github.io/db/index.html#"+encodeURI(v)}
+ window.location.hash="#"+encodeURI(v)
+ delete(d[u?"text":"url"]);navigator.share(d)
+}
 function newquery(){addquery("query "+queries.options.length,"`answer"+queries.options.length)}
 async function querychange(){
  let q=currentOption().value,b=ge("buttons");b.style.display=q.length?"block":"none"
