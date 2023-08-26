@@ -9,12 +9,17 @@ ktye/k  6#k  github.com/ktye/i
 < asc les $[a;b;...]      cond
 > dsc mor @[x;i;+;y]     amend
 = grp eql .[x;i;+;y]     dmend
-~ not mtc {a+b}.d          env
-, enl cat k?t            group
-^ srt cut k!t              key
-# cnt tak t,d t,t t,'t    join
-_ flr drp                     
-$ str cst types: cisfzLDTvcdlx
-? unq fnd                     
-@ typ atx `@i(verb) (+)~`2    
-. val cal .(1;2;`64+(+))  exec
+~ not mtc k?t            group
+, enl cat k!t              key
+^ srt cut t,d t,t t,'t    join
+# cnt tak {[x;y]x+y}  "abc"  c
+_ flr drp             1 2 3  i       
+$ str cst 01234567    4 5 6. f
+? unq fnd  :+-*%&|    2a300  z         
+@ typ atx <>=~!,^#   (1;2 3) L 
+. val cal _$?@.    `a`b!5 6  D 
+
+abs sin cos exp log find angle
+imag conj  types:cisfzLDTvcdlx
+?n(uniform) ?-n(normal) ?z(bi)
+n?n(with) -n?n(w/o) n?L(chose)
