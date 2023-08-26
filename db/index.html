@@ -41,6 +41,8 @@ let init=async()=>{
  await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
  await fetch("queries.k").then(r=>r.text()).then(r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))}))
  queries.value=""
+ let s=decodeURIComponent(window.location.hash.substr(1))
+ if(s){addquery(s.split("\n")[0].slice(1),s);queries.value=s;return querychange()}
  showtables()
 }
 function ge(x){return document.getElementById(x)}
@@ -73,7 +75,7 @@ function pad(s,n){return s+" ".repeat(Math.max(0,n-s.length))}
 function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery():0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
-function sharequery(){let v=currentOption().value;navigator.share({title:v.split("\n")[0].slice(1),text:v})}
+function sharequery(){let v=currentOption().value;navigator.share({title:v.split("\n")[0].slice(1),text:v,url:"https://ktye.github.io/db/index.html#"+encodeURI(v)})}
 function newquery(){addquery("query "+queries.options.length,"`answer"+queries.options.length)}
 async function querychange(){
  let q=currentOption().value,b=ge("buttons");b.style.display=q.length?"block":"none"
@@ -82,10 +84,10 @@ async function querychange(){
  e.onchange=()=>{currentOption().value=e.value;tc(currentOption(),e.value.split("\n")[0].slice(1,41));querychange()}
  runquery(q)
 }
-async function runquery(q){
+async function runquery(q){q=q.trim()
  let p=ce("pre");p.id="kout";ac(out,p)
  await kinit(queries.options[1].value) //always start with prolog
- K.repl(KC(q.trim()))
+ K.repl(KC(q))
 }
 function currentOption(){return queries.options[queries.selectedIndex]}
 function load(s){
