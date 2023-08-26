@@ -1,0 +1,20 @@
+ktye/k  6#k  github.com/ktye/i
++ flp add '  ech bin  x y' lin
+- neg sub /  rdc mod  f n/ ndo
+* fst mul \  scn div  x//y dec
+% sqr div ': ecp in   y\\x enc
+! til key /: ecr split  f/:fix
+& wer min \: ecl join   f\:fix
+| rev max while[c;a;b;..]     
+< asc les $[a;b;...]      cond
+> dsc mor @[x;i;+;y]     amend
+= grp eql .[x;i;+;y]     dmend
+~ not mtc {a+b}.d          env
+, enl cat k?t            group
+^ srt cut k!t              key
+# cnt tak t,d t,t t,'t    join
+_ flr drp                     
+$ str cst types: cisfzLDTvcdlx
+? unq fnd                     
+@ typ atx `@i(verb) (+)~`2    
+. val cal .(1;2;`64+(+))  exec

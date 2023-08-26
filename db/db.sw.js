@@ -7,7 +7,7 @@ this.addEventListener("install", (event) => {
     cache.addAll([
      "index.html",
      "../k.wasm",
-     "../readme",
+     "ref",
      "kelas16.png",
      "kelas32.png",
      "queries.k",

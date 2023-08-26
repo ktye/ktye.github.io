@@ -149,7 +149,7 @@ clear(tables and queries)
 reset(reload example)
  `
 }
-function help(){if("PRE"==out.firstElementChild.nodeName)return showtables();rm(out);fetch("../readme").then(r=>r.text()).then(r=>ac(out,ce("pre")).textContent=r)}
+function help(){if("PRE"==out.firstElementChild.nodeName)return showtables();rm(out);fetch("ref").then(r=>r.text()).then(r=>ac(out,ce("pre")).textContent=r)}
 function clear(){tables=[];Array.from(queries.options).slice(1).forEach(o=>queries.removeChild(o));addquery("prolog","/prolog\n");queries.value="";showtables()}
 function fromcsv(name,x){x=x.trim().split("\n")
  let k=x[0].split(",")  //first row names
