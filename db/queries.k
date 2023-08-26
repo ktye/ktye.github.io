@@ -16,7 +16,7 @@
 /  type   sym  r|b|s
 /  time   flt  hours
 /  dist   flt  km
-/  coords int  #gps points na.
+/  coords int  #gps points(na)
 
 type:t`type;time:t`time
 dist:t`dist
@@ -24,12 +24,14 @@ r:&`r=type  /run
 b:&`b=type  /bike
 
 /calendar
-date:(t`id)-y7:1167609600
-y:date%z:31563000
+s7:(t`id)-y7:1167609600
+y:s7%z:31563000
 year:2007+z\(86400*0=4/y)+z*y
-day: date%24*60*60
+day: s7%24*60*60
 week:day %7
 hms: +60 60 60\\_3600*
+
+/ "babababbabab"-67 /days per month (w/o leaps)
 
 avg:{(+/x)%#x}
 med:  **|2^^
