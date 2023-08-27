@@ -18,20 +18,31 @@
 /  dist   flt  km
 /  coords int  #gps points(na)
 
-type:t`type;time:t`time
+type:t`type
+time:t`time
 dist:t`dist
-r:&`r=type  /run
-b:&`b=type  /bike
+r: &`r=type  /run
+b: &`b=type  /bike
 
-/calendar
-s7:(t`id)-y7:1167609600
-y:s7%z:31563000
-year:2007+z\(86400*0=4/y)+z*y
-day: s7%24*60*60
-week:day %7
-hms: +60 60 60\\_3600*
+hms:+60 60 60\\_3600*
 
-/ "babababbabab"-67 /days per month (w/o leaps)
+/calendar(start at 2007)
+start:(t`id)-1167609600
+   y:start%z:31563000
+leap:86400*0=4/3+y
+year:2007+(leap+z*y)%z
+day: start%24*60*60
+week:day%7
+
+/formatted date: e.g. 20230826
+l:-2006+*|year
+m:l^(l*12)#"babababbabab"-67
+m[;1]:28+0=4/3+!l
+m:86400*+\,/m
+ym:2+12/i:m'start
+md:1+86400\start-m(m'start)
+date:md+(100*ym)+10000*year
+
 
 avg:{(+/x)%#x}
 med:  **|2^^
@@ -55,57 +66,65 @@ hist:{[d]
 / ,/,[;"\n"]'r^,/(b@+/d*)'-8^p}
 
 //input table
+
 t
 
+/or e.g.
+/+`date`dist!(date;dist)
+
 //yearly totals
+
 (+/`time`dist#)'t@=year
 
 //collected gps data
+
 p:+/t`coords
 m:8*p%1024^2.
 `points`mb!p,m
 
+//when were 100k km exceeded?
+
+date@*&100000<+\dist
+
 //pace histogram 0..12:50 min/km
+
 pace:60*(time r)%dist r
 p:0|(#'=(xp:6.\!78)'pace)@!78
-/jn:{,/x,\:"\n"}
-/x:`<jn@|+15#'(p#\:"#"),\:_32+&15
-/x:`<jn@,/'$10 10 6\\!78
 x:hist(!78)!p
 
-/shows run/walk clusters
+/shows race/run/walk clusters
+
+//fastest 5k/10k/half/marathon
+
+d:5 10 21 42<\:dist r
+t:(hms@*^(time r)@&)'d
+
+(":"/:$)'`five`ten`half`full!t
+
+//bike distance histogram
+
+d:#'=(0.+!40)'(dist b)%10
+hist(!40)!0|d@!40
+
+x:`<"\n",/'$1_'!4 10
+x:`<"*10km"
+
 
 //long rides per year
+
 #'=year@&200<dist
 
+//rest days per year
+
++/'(0|-1+-':day)@=year
 
 //count triathlons
+
 / by definition:
 / swim then bike then run
 / within one day
-m:(`b=type 1+i)&i:&`s=type
-m&:`r=type 2+i
-m&:(day 2+i)=day i
-#tri:&m
 
-//when were 100k km exceeded?
-i:*&100000<+\dist
-(year;week;day)@\:i
-
-//fastest 10k/half/marathon
-d:9.9 21 42<\:dist r
-t:(hms@*^(time r)@&)'d
-`ten`half`full!t
-
-//rest days per year
-+/'(0|-1+-':day)@=year
-
-//knockouts
-/more than 6 offdays in a row
-
-rd:0|-1+-':day
-+/'((6<rd)*rd)@=year
-
-//distance histogram
-,/'$!6 10   /..
-
+i:&&/(`s=type
+      `b=1_type,`
+      `r=2_type,``)
+#tri:i@&(day 2+i)=day i
