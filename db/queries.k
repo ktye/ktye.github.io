@@ -117,15 +117,15 @@ hist(!40)!0|d@!40
 x:`<"\n",/'$1_'!4 10
 x:`<"*10km"
 
-//weibull distribution
+//rayleigh distribution
 
 /estimate parameter(sigma)
 s:%(+/d*d)%2*#d:dist b
 
 k:`mean`median`q95
 k!+`analytic`counted!1_(
-  s*(%.5p;%2*log 2;%-2*log .05)
- (avg;**|2^^;(^d)@_0.95*#)@\:d)
+ s*(%.5p;%2*log 2;%-2*log .05)
+(avg;**|2^^;(^d)@_0.95*#)@\:d)
 
 /not a good fit
 
