@@ -82,6 +82,21 @@ p:+/t`coords
 m:8*p%1024^2.
 `points`mb!p,m
 
+//10k progression ?&\
+
+t:?&\(time r)@i:&10<dist r
+d:(date r i)(time r i)?t
+
+k:`date`hour`min`sec
++k!(,d),+hms t
+
+//fastest 5k/10k/half/marathon
+
+d:5 10 21 42<\:dist r
+t:(hms@*^(time r)@&)'d
+
+(":"/:$)'`five`ten`half`full!t
+
 //when were 100k km exceeded?
 
 date@*&100000<+\dist
@@ -94,13 +109,6 @@ x:hist(!78)!p
 
 /shows race/run/walk clusters
 
-//fastest 5k/10k/half/marathon
-
-d:5 10 21 42<\:dist r
-t:(hms@*^(time r)@&)'d
-
-(":"/:$)'`five`ten`half`full!t
-
 //bike distance histogram
 
 d:#'=(0.+!40)'(dist b)%10
@@ -109,6 +117,17 @@ hist(!40)!0|d@!40
 x:`<"\n",/'$1_'!4 10
 x:`<"*10km"
 
+//weibull distribution
+
+/estimate parameter(sigma)
+s:%(+/d*d)%2*#d:dist b
+
+k:`mean`median`q95
+k!+`analytic`counted!1_(
+  s*(%.5p;%2*log 2;%-2*log .05)
+ (avg;**|2^^;(^d)@_0.95*#)@\:d)
+
+/not a good fit
 
 //long rides per year
 
