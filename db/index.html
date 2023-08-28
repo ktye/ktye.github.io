@@ -57,7 +57,6 @@ function ac(x,y){x.appendChild(y);return y}
 function th(t){let T=ce("table");t.forEach((r,i)=>{let R=ce("tr");ac(T,R);r.forEach(c=>{ac(R,tc(ce(i?"td":"th"),c))})});return T}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
-function u64s(s){let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
 function flip(x){
  let n=x.length,m=x[0].length,r=[]
  for(let i=0;i<m;i++)r[i]=Array(n)
@@ -158,6 +157,7 @@ function fromcsv(name,x){x=x.trim().split("\n")
 function ttysize(){let mono=ge("mono");let n=mono.textContent.length;
  return[Math.floor(ge("kout").clientHeight/mono.clientHeight),Math.floor(n*ge("kout").clientWidth/mono.clientWidth)]}
 
+
 let /*there be*/ K
 let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
 let kenv={env:{ 
@@ -167,7 +167,7 @@ let kenv={env:{
  Read:  function(a,b,c  ){return -1},
  Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y    ){return 0},
+ Native:function(x,y    ){let i=lo(x);console.log("xcal i",i,"x",x);K.dx(x);return xcal[i](K.Atx(4n,y))},
 }}
 function kout(s){let o=ge("kout");if(o===null){o=ce("pre");o.id="kout";ac(ge("out"),o)};o.textContent+=s}
 async function kinit(a){
@@ -175,15 +175,19 @@ async function kinit(a){
  let r=await WebAssembly.instantiate(kw,kenv)
  K=r.instance.exports
  K.kinit()
+ xcal=[];xreg("bar",bar);xreg("axis",axis);xreg("plot",plot);xreg("polar",polar)
  let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC((cols-2)+" 50")))))
+ svg=newsvg()
  K.Grp=x=>K.Atx(10n,x)
  tables.forEach(t=>asn(t.name,KT(t)))
  K.Val(KC(a))
 }
-let lz/*4(uncompress)*/=(x)=>{let i=7,j,n,t,c,o,r=[],S=-(1<<31),R=(x,a,n)=>{for(j=0;j<n;j++)r.push(x[a+j]);return n},
- h=()=>x[i++]|x[i++]<<8,C=()=>{if(c===15)do{c+=x[i]}while(x[i++]==255)},
- d=n=>{while(i<n){t=x[i++];c=t>>4;C();i+=R(x,i,c);if(i<n){c=t&15;o=r.length-h();C();R(r,o,4+c)}}}
- while(n=h()|h()<<16)(n&S)?i+=R(x,i,n&~S):d(i+n);return new Uint8Array(r)},
+let xcal=[],xreg=(name,g)=>{xcal.push(g)
+ let f=K.l2(BigInt(xcal.length-1),Ks(name))         //external function representation idx-as-verb,name
+ I()[(lo(f)>>>2)-3]=1                             //arity here:monadic only
+ f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))) //type tag xf
+ asn(name,f)
+}
 
 KT=t=>K.Atx(K.Val(KC("+!/")),K.l2(KS(t.k),KL(t.v.map((x,i)=>("i"==t.t[i])?KI(x):("f"==t.t[i])?KF(x):KS(x))))),
 KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
@@ -191,16 +195,32 @@ KF=x=>{let r=K.mk(21,x.length  );F().set(x,lo(r)>>>3);return r},
 KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},
 KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},
+IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},
+FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},
+ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},
+DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r}
 Ks=x=>K.sc(KC(x)),
 asn=(s,y)=>K.dx(K.Asn(Ks(s),y))
 
 /*
-FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},
+
 fK=x=>{let r=F()[lo(x)>>>3];K.dx(x);return r},
-IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},
 SK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n).map(x=>sK(K.Ks(x)));K.dx(x);return r},
 sK=x=>CK(K.cs(x)),
 */
+
+
+//plot
+let svg,newsvg=()=>sA(cE("svg"))
+function vec(x){let t=K.tp(x);return(19==t)?IK(x):(21==t)?FK(x):K.trap(1)}
+function unpkg(x,y){if(24!=K.tp(x))K.trap(1);[x,y]=DK(x);return[vec(x),vec(y)]}
+function bar(x){[x,y]=unpkg(x);console.log("bar",x,y);return 0n}
+function axis(x){x=vec(x);console.log("axis",x,y);return 0n}
+function plot(x){[x,y]=unpkg(x);console.log("plot",x,y);return 0n}
+function polar(x){if(22!=K.tp(x))K.trap(1);x=ZK(x);console.log("polar",x);return 0n}
+
+function cE(x){return document.createElementNS("http://www.w3.org/2000/svg",x)}
+function sA(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i]);return x}
 
 
 </script></body></html>
