@@ -1,9 +1,8 @@
-this.addEventListener("install", (event) => {
- console.log("sw install");
- event.waitUntil(
+this.addEventListener("install",e=>{
+ e.waitUntil(
   caches
    .open("v1")
-   .then((cache) =>
+   .then((cache)=>
     cache.addAll([
      "index.html",
      "../k.wasm",
@@ -16,14 +15,6 @@ this.addEventListener("install", (event) => {
    )
   )
 })
-
-self.addEventListener('fetch', function(event) {
- event.respondWith(
-  caches.match(event.request).then(function(response) {
-   return response || fetch(event.request);
-  })
- );
-});
-
-self.addEventListener("activate",event=>{})
-self.addEventListener("beforeinstallprompt",event=>{})
+self.addEventListener('fetch',function(e){e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
+self.addEventListener("activate",e=>{})
+self.addEventListener("beforeinstallprompt",e=>{})

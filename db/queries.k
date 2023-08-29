@@ -147,3 +147,20 @@ i:&&/(`s=type
       `b=1_type,`
       `r=2_type,``)
 #tri:i@&(day 2+i)=day i
+
+//plot
+
+axis -1 7 -1 10
+x:!5
+y:3 1 2 8 5
+bar x!y
+
+x:-1 2 4 8 11
+y:4 1 8 2 9
+plot x!y
+
+//polar
+
+z:1a30 2a40 3a50
+polar z
+
