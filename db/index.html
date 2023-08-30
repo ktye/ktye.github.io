@@ -54,7 +54,7 @@ let init=async()=>{
  if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(add)
        else add(s);queries.selectedIndex=1;return querychange()}
  await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
- await fetch("x.k").then(r=>r.text()).then(add)
+ await fetch("queries.k").then(r=>r.text()).then(add)
  queries.value=""
  showtables()
 }
