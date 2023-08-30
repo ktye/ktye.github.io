@@ -12,7 +12,7 @@ body{min-height:100vh;margin:0;padding:0;overflow:hidden}
 .but:active{transform:translateY(2px)}
 a,.link{text-decoration:underline;color:blue;y-padding:1em}
 .link:hover{cursor:pointer}
-input{-webkit-appearance:none}
+input{-webkit-appearance:none;border:1px dashed}
 select{-webkit-appearance:none}
 #buttons{position:absolute;z-index:1;display:none;width:2em;height:2em;top:0;right:0;font-weight:bold;text-align:center;border:2px solid black;border-radius:6px;color:black;background:white}
 #queries{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;color:black;background:white}
@@ -24,9 +24,11 @@ select{-webkit-appearance:none}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 #editor{width:100%;padding:0;height:50%;resize:none;border:none;outline:none;overflow:auto;padding:0.5em;white-space:pre;background:#ffe}
 svg{display:block;margin-left:auto;margin-right:auto}
-.bar{fill:grey}.hibar{stroke:white;stroke-width:4px}.highpoint{fill:red}
-.legend{fill:white;text-anchor:middle}
-.line{fill:none;stroke-width:3}.stroke0{stroke:#ff2}.stroke1{stroke:#e11}.stroke2{stroke:#2d2}.stroke3{stroke:#28f}
+.bar{fill:grey}.hi{stroke:white;stroke-width:2px}
+.legend{fill:white}
+.line{fill:none;stroke-width:3}
+.strk0{stroke:#f85c24}.strk1{stroke:#2d2}.strk2{stroke:#28f}.strk3{stroke:#e20074}
+.fill0{fill:  #f85c24}.fill1{fill:  #2d2}.fill2{fill:  #28f}.fill3{fill:  #e20074}
 </style>
 </head>
 <body onload="init()">
@@ -47,11 +49,13 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("db.sw.js")
 let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1.234,-4.2],["hans","peter","werner","florian"]]}]
 
 let init=async()=>{
- await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
- await fetch("queries.k").then(r=>r.text()).then(r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))}))
- queries.value=""
+ let add=r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))})
  let s=decodeURIComponent(window.location.hash.substr(1))
- if(s){addquery(s.split("\n")[0].slice(1),s);queries.value=s;return querychange()}
+ if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(add)
+       else add(s);queries.selectedIndex=1;return querychange()}
+ await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
+ await fetch("x.k").then(r=>r.text()).then(add)
+ queries.value=""
  showtables()
 }
 function ge(x){return document.getElementById(x)}
@@ -62,6 +66,7 @@ function ac(x,y){x.appendChild(y);return y}
 function th(t){let T=ce("table");t.forEach((r,i)=>{let R=ce("tr");ac(T,R);r.forEach(c=>{ac(R,tc(ce(i?"td":"th"),c))})});return T}
 function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+function sa(x,...y){for(let i=0;i<y.length;i+=2)x.setAttribute(y[i],y[1+i]);return x}
 function flip(x){
  let n=x.length,m=x[0].length,r=[]
  for(let i=0;i<m;i++)r[i]=Array(n)
@@ -75,11 +80,12 @@ const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let out=ge("out"),queries=ge("queries")
 
 function nt(t){return(0==t.v.length)?0:t.v[0].length}
-function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequery(0):("shareurl"==q)?sharequery(1):0;querychange()}
+function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequeries(0):("shareurl"==q)?sharequeries(1):0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
-function sharequery(u){
- let v=currentOption().value,d={title:v.split("\n")[0].slice(1),text:v,url:"https://ktye.github.io/db/index.html#"+encodeURI(v)}
+function sharequeries(u){
+ let v="\n"+Array.from(queries).slice(1).map(x=>"/"+x.value).join("\n")
+ let d={title:v.split("\n")[0].slice(1),text:v,url:"https://ktye.github.io/db/index.html#"+encodeURI(v)}
  window.location.hash="#"+encodeURI(v)
  delete(d[u?"text":"url"]);navigator.share(d)
 }
@@ -94,9 +100,10 @@ async function querychange(){
 async function runquery(q){q=q.trim()
  let p=ce("pre"),d=ce("div");p.id="tty";d.id="kout";ac(d,p);ac(out,d)
  await kinit(queries.options[1].value) //always start with prolog
- svg=newsvg(Math.min(out.clientWidth-10,Math.floor(out.clientHeight/2)-12))
+ let w=Math.min(out.clientWidth-10,Math.floor(out.clientHeight/2)-12);svg=newsvg(w),cnv=newcnv()
  K.repl(KC(q))
- fillsvg();if(svg.childElementCount)ge("tty").parentNode.insertBefore(svg,ge("tty"))
+ fillsvg();if(pdata.length)ge("tty").parentNode.insertBefore(svg,ge("tty"))
+ fillcnv();if(mdata.length)ge("tty").parentNode.insertBefore(cnv,ge("tty"))
 }
 function currentOption(){return queries.options[queries.selectedIndex]}
 function load(s){
@@ -174,7 +181,7 @@ let kenv={env:{
  Read:  function(a,b,c  ){return -1},
  Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y    ){let i=lo(x);console.log("xcal i",i,"x",x);K.dx(x);return xcal[i](K.Atx(4n,y))},
+ Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))},
 }}
 function kout(s){let o=ge("tty");if(o===null){o=ce("pre");o.id="tty";ac(ge("out"),o)};o.textContent+=s}
 async function kinit(a){
@@ -182,15 +189,15 @@ async function kinit(a){
  let r=await WebAssembly.instantiate(kw,kenv)
  K=r.instance.exports
  K.kinit()
- xcal=[];xreg("bar",bar);xreg("axis",axis);xreg("plot",plot);xreg("polar",polar)
+ xcal=[];xreg("axis",axis);xreg("bar",bar);xreg("plot",plot);xreg("image",image)
  let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC((cols-2)+" 50")))))
  K.Grp=x=>K.Atx(10n,x)
  tables.forEach(t=>asn(t.name,KT(t)))
  K.Val(KC(a))
 }
 let xcal=[],xreg=(name,g)=>{xcal.push(g)
- let f=K.l2(BigInt(xcal.length-1),Ks(name))         //external function representation idx-as-verb,name
- I()[(lo(f)>>>2)-3]=1                             //arity here:monadic only
+ let f=K.l2(BigInt(xcal.length-1),Ks(name))       //external function representation idx-as-verb,name
+ I()[(lo(f)>>>2)-3]=1                             //arity(here:monadic only)
  f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))) //type tag xf
  asn(name,f)
 }
@@ -209,22 +216,22 @@ Ks=x=>K.sc(KC(x)),
 asn=(s,y)=>K.dx(K.Asn(Ks(s),y))
 
 /*
-
 fK=x=>{let r=F()[lo(x)>>>3];K.dx(x);return r},
 SK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n).map(x=>sK(K.Ks(x)));K.dx(x);return r},
 sK=x=>CK(K.cs(x)),
 */
 
 
-//plot
-let svg,W,pdata,legend,ax=[],newsvg=(w)=>{ax=[];pdata=[];W=w;return sA(cE("svg"),"width",w,"height",w)}
+//plot (k-interface: axis bar plot image)
+let svg,W,pdata,mdata,legend,ax=[],newsvg=w=>{ax=[];pdata=[];W=w;return sA(cE("svg"),"width",w,"height",w)},newcnv=w=>{mdata=[];return ce("canvas")}
 
+function axis(x){ax=vec(x);ax=(1==ax.length)?[-ax[0],ax[0],-ax[0],ax[0]]:ax;return 0n}
 function bar(x){[x,y]=unpkg(x);pdata.push({t:"bar",x:x,y:y});return 0n}
-function axis(x){ax=vec(x);return 0n}
-function plot(x){[x,y]=unpkg(x);pdata.push({t:"xy",x:x,y:y});return 0n}
-function polar(x){if(22!=K.tp(x))K.trap(1);x=ZK(x);pdata.push({t:"polar",x:x.filter((x,i)=>1==i%2),y:x.filter((x,i)=>0==i%2)});return 0n}
+function plot(x){x=(16>K.tp(x))?K.Atx(13n,x):x;if(22==K.tp(x))return polar(x);[x,y]=unpkg(x);pdata.push({t:"xy",x:x,y:y});return 0n}
+function image(x){if(19!=K.tp(x))K.trap(1);x=IK(x);mdata=new Uint8ClampedArray(x.buffer);return 0n}
 
-function vec(x){let t=K.tp(x);return(19==t)?IK(x):(21==t)?FK(x):K.trap(1)}
+function polar(x){x=ZK(x);pdata.push({t:"polar",x:x.filter((x,i)=>1==i%2),y:x.filter((x,i)=>0==i%2)});return 0n}
+function vec(x){x=(16>K.tp(x))?K.Atx(13n,x):x;let t=K.tp(x);return(19==t)?IK(x):(21==t)?FK(x):K.trap(1)}
 function unpkg(x,y){if(24!=K.tp(x))K.trap(1);[x,y]=DK(x);return[vec(x),vec(y)]}
 
 function cE(x){return document.createElementNS("http://www.w3.org/2000/svg",x)}
@@ -233,13 +240,15 @@ function sA(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i
 function fillsvg(){if(!pdata.length)return
  limits()
  pdata.forEach((d,c)=>("bar"==d.t)?bars(d,c):("xy"==d.t)?lines(d,c):points(d,c))
- legend=[ac(svg,sA(cE("text"),"class","legend")),ac(svg,sA(cE("text"),"class","legend"))]
-}
+ legend=[ac(svg,sA(cE("text"),"class","legend")),ac(svg,sA(cE("text"),"class","legend"))]}
+function fillcnv(){if(!mdata.length)return;let w=Math.sqrt(mdata.length/4) //h=w
+ if(mdata.length!=4*w*w){console.log(mdata.length,"w",w);K.trap(4)};let d=new ImageData(mdata,w);
+ for(let i=3;i<d.data.length;i+=4)d.data[i]=255;cnv.getContext("2d").putImageData(d,0,0)}
 function limits(){if(ax.length)return;(pdata.findIndex(d=>d.t=="polar")<0)?xylimits():polimits()}
-function polimits(){pdata.forEach(d=>{let r=Math.max(...d.x.map((x,i)=>Math.hypot(x,d.y[i])));if((!ax.length)||(r<ax[1]))ax=[-r,r,-r,r]})}
+function polimits(){let r=0;pdata.forEach(d=>{r=Math.max(r,Math.max(...d.x.map((x,i)=>Math.hypot(x,d.y[i]))))});ax=[-r,r,-r,r]}
 function xylimits(){let q=0
  pdata.forEach(d=>{let x0=Math.min(...d.x),x1=Math.max(...d.x),y0=Math.min(...d.y),y1=Math.max(...d.y)
-  ax=(!ax.length)?[x0,x1,y0,y1]:[Math.min(ax[0],x0),Math.max(ax[1],x1),Math.min(ax[2],y0),Math.max(ax[0],y1)]
+  ax=(!ax.length)?[x0,x1,y0,y1]:[Math.min(ax[0],x0),Math.max(ax[1],x1),Math.min(ax[2],y0),Math.max(ax[3],y1)]
   if("bar"==d.t){ax[2]=0;q=0.5*(x1-x0)/(d.x.length-1)}
  })
  ax[0]-=q;ax[1]+=q
@@ -249,43 +258,32 @@ function Y(y){return W*(y-ax[3])/(ax[2]-ax[3])}
 function bars(d,c){let n=d.x.length,wbar=(d.x[d.x.length-1]-d.x[0])/(d.x.length-1),w=-2+X(wbar)-X(0)
  d.x.forEach((x,i)=>{let xi=2+X(x-wbar/2),yi=Y(d.y[i])
   let r=ac(svg,sA(cE("rect"),"x",xi,"y",yi,"width",w,"height",Y(0)-Y(d.y[i]),"class","link bar"))
-  r.onclick=barclick
-  r.dataset.xtext=short(x)
-  r.dataset.ytext=short(d.y[i]);
+  r.onclick=pointclick
+  r.dataset.xtext="x: "+short(x)
+  r.dataset.ytext="y: "+short(d.y[i]);
   r.dataset.x=xi+w/2;r.dataset.y=yi;r.dataset.shift=(y[i]<0.8*ax[3])?"50%":"-100%"
- })
-}
+})}
 function lines(d,c){
- let l=ac(svg,sA(cE("polyline"),"class","line stroke"+c%4,"points",(Array.from(d.x).map((x,i)=>X(x)+","+Y(d.y[i])).join(" "))))
+ let l=ac(svg,sA(cE("polyline"),"class","line strk"+c%4,"points",(Array.from(d.x).map((x,i)=>X(x)+","+Y(d.y[i])).join(" "))))
  d.x.forEach((x,i)=>{
   let p=ac(svg,sA(cE("circle"),"cx",X(x),"cy",Y(d.y[i]),"r",10,"class","link","fill","transparent"))
-  p.onclick=lineclick
+  p.onclick=pointclick
   p.dataset.x=X(x);p.dataset.y=Y(d.y[i]);p.dataset.xtext="x: "+short(x);p.dataset.ytext="y: "+short(d.y[i])
- })
-}
+})}
 function points(d,c){let R=W/2
  if(!svg.childNodes.length){
-  ac(svg,sA(cE("circle"),"cx",R,"cy",R,"r",R,"stroke","grey","stroke-width",3))
-  ac(svg,sA(cE("line"),"x1",0,"x2",W,"y1",R,"y2",R,"stroke","grey","stroke-width",2))
-  ac(svg,sA(cE("line"),"y1",0,"y2",W,"x1",R,"x2",R,"stroke","grey","stroke-width",2))
-  let a=[30,60,120,150,210,240,300,330].map(x=>x*Math.PI/180)
-  a.forEach(a=>ac(svg,sA(cE("line"),"x1",R+0.95*R*Math.cos(a),"y1",R+0.95*R*Math.sin(a),"x2",R+R*Math.cos(a),"y2",R+R*Math.sin(a),"stroke","grey","stroke-width",2)))
- }
- d.x.forEach((x,i)=>{
-  let p=ac(svg,sA(cE("circle"),"cx",X(x),"cy",Y(d.y[i]),"r",5,"fill","red"))
- })
-}
+  ac(svg,sA(cE("circle"),"cx",R,"cy",R,"r",1.00*R,"fill","#222"))
+  ac(svg,sA(cE("circle"),"cx",R,"cy",R,"r",0.02*R,"fill","#000"))}
+ d.x.forEach((x,i)=>{let y=d.y[i]
+  let p=ac(svg,sA(cE("circle"),"cx",X(x),"cy",Y(y),"r",5,"class","link fill"+c%4))
+  p.onclick=pointclick
+  p.dataset.xtext="r: "+short(Math.hypot(x,y));y=180/Math.PI*Math.atan2(x,y);p.dataset.ytext="φ: "+Math.round((y<0)?y+360:y)+"°"
+})}
 function short(x){let r=String(x);return(r.length>7)?x.toPrecision(6):x}
-function unhighlight(){svg.childNodes.forEach(x=>x.classList.remove("hibar","highpoint"))}
-function barclick(e){
- unhighlight();e.target.classList.add("hibar");let d=e.target.dataset;
- sA(legend[0],"x",d.x,"y",W,"baseline-shift","50%").textContent=d.xtext
- sA(legend[1],"x",d.x,"y",d.y,"baseline-shift",d.shift).textContent=d.ytext
-}
-function lineclick(e){
- unhighlight();e.target.classList.add("hipoint");let d=e.target.dataset;
- sA(legend[1],"x",d.x,"y",d.y,"baseline-shift","50%").textContent=d.ytext
- sA(legend[0],"x",d.x,"y",d.y,"baseline-shift","-100%").textContent=d.xtext
+function pointclick(e){svg.childNodes.forEach(x=>x.classList.remove("hi"))
+ e.target.classList.add("hi");let d=e.target.dataset;
+ sA(legend[0],"x",10,"y",0,"text-anchor","left","baseline-shift","-100%").textContent=d.xtext
+ sA(legend[1],"x",10,"y",0,"text-anchor","left","baseline-shift","-200%").textContent=d.ytext
 }
 
 </script></body></html>

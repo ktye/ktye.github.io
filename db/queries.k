@@ -2,6 +2,29 @@
 / examples are split with //
 / these can also be run as
 / $k load.k queries.k
+
+
+
+utf:{(&x>-65)^x}
+blk:utf" ▁▂▃▄▅▆▇█" 
+hist:{[d]
+ n:_8*n-m:_n:(15*x)%|/x:0.+.d
+ f:{(x#8),((!8)y),&15-x}
+ `<"\n"/:,/'blk@|+f'[m;n]}
+
+/braille:{[w;h;x;y]
+/ p:@[&w*h;x+w*y;1]
+/ i:0 3 1 2
+/ s:(r:h%4;2;w%2;4)
+/ p@:(s i)//(s\\!#p)i
+/ q:,/64#'(192*!4)
+/ b:`c 14852224+(!256)+q
+/ b:|-3^|b@&~0=b
+/ d:1 2 4 64 8 16 32 128
+/ ,/,[;"\n"]'r^,/(b@+/d*)'-8^p}
+
+
+
 /----------------------------|
 
 //prolog
@@ -47,24 +70,6 @@ date:md+(100*ym)+10000*year
 avg:{(+/x)%#x}
 med:  **|2^^
 
-utf:{(&x>-65)^x}
-blk:utf" ▁▂▃▄▅▆▇█" 
-hist:{[d]
- n:_8*n-m:_n:(15*x)%|/x:0.+.d
- f:{(x#8),((!8)y),&15-x}
- `<"\n"/:,/'blk@|+f'[m;n]}
-
-/braille:{[w;h;x;y]
-/ p:@[&w*h;x+w*y;1]
-/ i:0 3 1 2
-/ s:(r:h%4;2;w%2;4)
-/ p@:(s i)//(s\\!#p)i
-/ q:,/64#'(192*!4)
-/ b:`c 14852224+(!256)+q
-/ b:|-3^|b@&~0=b
-/ d:1 2 4 64 8 16 32 128
-/ ,/,[;"\n"]'r^,/(b@+/d*)'-8^p}
-
 //input table
 
 t
@@ -104,23 +109,35 @@ date@*&100000<+\dist
 //pace histogram 0..12:50 min/km
 
 pace:60*(time r)%dist r
-p:0|(#'=(xp:6.\!78)'pace)@!78
-x:hist(!78)!p
 
-/shows race/run/walk clusters
+pace:60*(time r)%dist r
+x:(!78)%6.
+y:0|(#'=x'pace)@!78
+
+bar x!y
+
+/the bar plot is interactive:
+/click to show numbers
+
+/it shows race/run/walk clusters
 
 //bike distance histogram
 
 d:#'=(0.+!40)'(dist b)%10
-hist(!40)!0|d@!40
-
-x:`<"\n",/'$1_'!4 10
-x:`<"*10km"
+bar(10*!40)!0|d@!40
 
 //rayleigh distribution
 
+x:(dx:5.)*!80
+h:#'=x'd:dist b
+bar x!y:(0.|h@!80)%dx*#b
+
+
 /estimate parameter(sigma)
-s:%(+/d*d)%2*#d:dist b
+s:%(+/d*d)%2*#d
+
+f:(x%s*s)*exp(-x*x%2*s*s)
+plot x!f
 
 k:`mean`median`q95
 k!+`analytic`counted!1_(
@@ -148,19 +165,4 @@ i:&&/(`s=type
       `r=2_type,``)
 #tri:i@&(day 2+i)=day i
 
-//plot
-
-axis -1 7 -1 10
-x:!5
-y:3 1 2 8 5
-bar x!y
-
-x:-1 2 4 8 11
-y:4 1 8 2 9
-plot x!y
-
-//polar
-
-z:1a30 2a40 3a50
-polar z
 
