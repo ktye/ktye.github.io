@@ -307,4 +307,9 @@ function svgtouchmv(e){if((swipe===null)||(300<e.timeStamp-swipe.t)){swipe=null;
 function svgtouched(e){if(swipe===null)svgmouseup()}
 */
 
+function gesturend(e){ let r=svg.getBoundingClientRect(),pos=(e.clientX-r.left)+" "+(e.clientY-r.top)
+ sA(legend[0],"x",10,"y",0,"text-anchor","left","baseline-shift","-100%").textContent="scale: "+e.scale
+ sA(legend[1],"x",10,"y",0,"text-anchor","left","baseline-shift","-200%").textContent="pos: "+pos
+}
+
 </script></body></html>
