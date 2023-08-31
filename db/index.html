@@ -23,6 +23,9 @@ select{-webkit-appearance:none}
 #tty{margin:0;color:white}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 #editor{width:100%;padding:0;height:50%;resize:none;border:none;outline:none;overflow:auto;padding:0.5em;white-space:pre;background:#ffe}
+@media(orientation:landscape){
+ #editor{width:50%;height:100%}
+ #kout{width:50%;height:100%;float:right;border-top:0;border-left:2px solid #f85c24}}
 svg{display:block;margin-left:auto;margin-right:auto}
 .bar{fill:grey}.hi{stroke:white;stroke-width:2px}
 .legend{fill:white}
@@ -168,9 +171,14 @@ function fromcsv(name,x){x=x.trim().split("\n")
  let v=flip(x.slice(2).map(x=>x.split(","))).map((c,j)=>c.map(v=>("s"==t[j])?v:Number(v)))
  return{name:name,k:k,t:t,v:v}
 }
-function ttysize(){let mono=ge("mono");let n=mono.textContent.length;
- return[Math.floor(ge("tty").clientHeight/mono.clientHeight),Math.floor(n*ge("tty").clientWidth/mono.clientWidth)]}
+function ttysize(){let mono=ge("mono");let n=mono.textContent.length;return[Math.floor(ge("tty").clientHeight/mono.clientHeight),Math.floor(n*ge("tty").clientWidth/mono.clientWidth)]}
 
+let swipe=null //swipe left/right: change query, long-press-swipe on svg:zoom
+let swipestart=e=>{if("editor"==e.target.id)return false;let t=e.changedTouches[0];swipe={t:e.timeStamp,x:t.screenX,y:t.screenY}}
+let swipeend=e=>{let t=e.changedTouches[0];if(swipe!==null){let dx=t.screenX-swipe.x,dy=t.screenY-swipe.y,a=Math.abs(dx)
+ if((a>Math.abs(dy))&&(a>0.1*e.target.clientWidth)){queries.selectedIndex=Math.min(queries.options.length-1,Math.max(0,queries.selectedIndex+-1+2*(+dx<0)));querychange()}}}
+out.addEventListener("touchstart",swipestart,{passive:true})
+out.addEventListener("touchend"  ,swipeend  ,{passive:true})
 
 let /*there be*/ K
 let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
@@ -181,8 +189,7 @@ let kenv={env:{
  Read:  function(a,b,c  ){return -1},
  Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))},
-}}
+ Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))}}}
 function kout(s){let o=ge("tty");if(o===null){o=ce("pre");o.id="tty";ac(ge("out"),o)};o.textContent+=s}
 async function kinit(a){
  let kw;await fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=r) //lz(u64s(""))
@@ -193,14 +200,12 @@ async function kinit(a){
  let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC((cols-2)+" 50")))))
  K.Grp=x=>K.Atx(10n,x)
  tables.forEach(t=>asn(t.name,KT(t)))
- K.Val(KC(a))
-}
+ K.Val(KC(a))}
 let xcal=[],xreg=(name,g)=>{xcal.push(g)
  let f=K.l2(BigInt(xcal.length-1),Ks(name))       //external function representation idx-as-verb,name
  I()[(lo(f)>>>2)-3]=1                             //arity(here:monadic only)
  f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))) //type tag xf
- asn(name,f)
-}
+ asn(name,f)}
 
 KT=t=>K.Atx(K.Val(KC("+!/")),K.l2(KS(t.k),KL(t.v.map((x,i)=>("i"==t.t[i])?KI(x):("f"==t.t[i])?KF(x):KS(x))))),
 KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
@@ -223,7 +228,7 @@ sK=x=>CK(K.cs(x)),
 
 
 //plot (k-interface: axis bar plot image)
-let svg,W,pdata,mdata,legend,ax=[],newsvg=w=>{ax=[];pdata=[];W=w;return sA(cE("svg"),"width",w,"height",w)},newcnv=w=>{mdata=[];return ce("canvas")}
+let svg,W,pdata,mdata,legend,ax,zoom,newsvg=w=>{ax=[];zoom={};pdata=[];W=w;return sA(cE("svg"),"width",w,"height",w)},newcnv=w=>{mdata=[];return ce("canvas")}
 
 function axis(x){ax=vec(x);ax=(1==ax.length)?[-ax[0],ax[0],-ax[0],ax[0]]:ax;return 0n}
 function bar(x){[x,y]=unpkg(x);pdata.push({t:"bar",x:x,y:y});return 0n}
@@ -240,9 +245,14 @@ function sA(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i
 function fillsvg(){if(!pdata.length)return
  limits()
  pdata.forEach((d,c)=>("bar"==d.t)?bars(d,c):("xy"==d.t)?lines(d,c):points(d,c))
- legend=[ac(svg,sA(cE("text"),"class","legend")),ac(svg,sA(cE("text"),"class","legend"))]}
+ legend=[ac(svg,sA(cE("text"),"class","legend")),ac(svg,sA(cE("text"),"class","legend"))]
+ ac(svg,sA(cE("rect"),"id","zoomrect","fill","transparent","stroke","red","stroke-width",2))
+ svg.ondblclick=()=>{ax=[];rm(svg);fillsvg();zoom={}}
+ svg.ontouchmove=svgtouchmv;svg.ontouchstart=svgtouchst;svg.ontouchend=svgtouched
+ svg.onmousedown=svgmousedn;svg.onmouseup=svgmouseup;svg.onmousemove=svgmousemv
+}
 function fillcnv(){if(!mdata.length)return;let w=Math.sqrt(mdata.length/4) //h=w
- if(mdata.length!=4*w*w){console.log(mdata.length,"w",w);K.trap(4)};let d=new ImageData(mdata,w);
+ if(mdata.length!=4*w*w)K.trap(4);let d=new ImageData(mdata,w);
  for(let i=3;i<d.data.length;i+=4)d.data[i]=255;cnv.getContext("2d").putImageData(d,0,0)}
 function limits(){if(ax.length)return;(pdata.findIndex(d=>d.t=="polar")<0)?xylimits():polimits()}
 function polimits(){let r=0;pdata.forEach(d=>{r=Math.max(r,Math.max(...d.x.map((x,i)=>Math.hypot(x,d.y[i]))))});ax=[-r,r,-r,r]}
@@ -283,7 +293,16 @@ function short(x){let r=String(x);return(r.length>7)?x.toPrecision(6):x}
 function pointclick(e){svg.childNodes.forEach(x=>x.classList.remove("hi"))
  e.target.classList.add("hi");let d=e.target.dataset;
  sA(legend[0],"x",10,"y",0,"text-anchor","left","baseline-shift","-100%").textContent=d.xtext
- sA(legend[1],"x",10,"y",0,"text-anchor","left","baseline-shift","-200%").textContent=d.ytext
-}
+ sA(legend[1],"x",10,"y",0,"text-anchor","left","baseline-shift","-200%").textContent=d.ytext}
+function clientpos(e){let r=svg.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top,r.width,r.height]}
+function rect(r){let[x,y,w,h]=[r.x,r.y,r.X-r.x,r.Y-r.y];if(w<0){x=r.X;w=-w};if(h<0){y=r.Y;h=-h};return[x,y,w,h,r.W,r.H]}
+function svgmousedn(e){[zoom.x,zoom.y]=clientpos(e)}
+function svgmousemv(e){if(false=="x"in zoom)return false;
+ [zoom.X,zoom.Y,zoom.W,zoom.H]=clientpos(e);let[x,y,w,h]=rect(zoom);sA(ge("zoomrect"),"x",x,"y",y,"width",w,"height",h)}
+function svgmouseup(e){let[x,y,dx,dy,W,H]=rect(zoom),w=ax[1]-ax[0],h=ax[3]-ax[2];if((dx>5)&&(dy>5)){
+  ax=[ax[0]+w/W*x,ax[0]+w/W*(x+dx),ax[2]+h/H*y,ax[2]+h/H*(y+dy)];rm(svg);fillsvg()};zoom={}}
+function svgtouchst(e){[zoom.x,zoom.y]=clientpos(e.touches[0])}
+function svgtouchmv(e){if((swipe===null)||(300<e.timeStamp-swipe.t)){swipe=null;return svgmousemv(e.touches[0])}}
+function svgtouched(e){if(swipe===null)svgmouseup()}
 
 </script></body></html>
