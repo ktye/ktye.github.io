@@ -249,6 +249,7 @@ function fillsvg(){if(!pdata.length)return
  ac(svg,sA(cE("rect"),"id","zoomrect","fill","transparent","stroke","red","stroke-width",2))
  svg.ondblclick=()=>{ax=[];rm(svg);fillsvg();zoom={}}
  //svg.ontouchmove=svgtouchmv;svg.ontouchstart=svgtouchst;svg.ontouchend=svgtouched
+ svg.ongestureend=gesturend
  svg.onmousedown=svgmousedn;svg.onmouseup=svgmouseup;svg.onmousemove=svgmousemv
 }
 function fillcnv(){if(!mdata.length)return;let w=Math.sqrt(mdata.length/4) //h=w
