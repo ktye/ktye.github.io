@@ -37,9 +37,9 @@ svg{display:block;margin-left:auto;margin-right:auto}
 <body onload="init()">
 
 <select id="queries" onchange="querychange()">
- <option value="">[tables]</option>
+ <option value="">*</option>
 </select>
-<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="share">↑</option><option value="shareurl">#</option></select>
+<select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="shareurl">#</option></select>
 <img id="kelas" class="but" src="kelas32.png" onclick="help()"/>
 
 <div id="out"></div>
@@ -52,12 +52,11 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("db.sw.js")
 let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1.234,-4.2],["hans","peter","werner","florian"]]}]
 
 let init=async()=>{
- let add=r=>r.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))})
  let s=decodeURIComponent(window.location.hash.substr(1))
- if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(add)
-       else add(s);queries.selectedIndex=1;return querychange()}
+ if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(importqueries)
+       else importqueries(s);queries.selectedIndex=1;return querychange()}
  await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
- await fetch("queries.k").then(r=>r.text()).then(add)
+ await fetch("queries.k").then(r=>r.text()).then(importqueries)
  queries.value=""
  showtables()
 }
@@ -83,14 +82,14 @@ const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let out=ge("out"),queries=ge("queries")
 
 function nt(t){return(0==t.v.length)?0:t.v[0].length}
-function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("share"==q)?sharequeries(0):("shareurl"==q)?sharequeries(1):0;querychange()}
+function addelquery(q){("add"==q)?newquery():("del"==q)?delquery():("shareurl"==q)?sharequeries():0;querychange()}
 function addquery(name,q){let o=ce("option");o.textContent=name;o.value=q;ac(queries,o);queries.value=o.value}
 function delquery(){queries.removeChild(currentOption())}
-function sharequeries(u){
+function sharequeries(){
  let v="\n"+Array.from(queries).slice(1).map(x=>"/"+x.value).join("\n")
- let d={title:v.split("\n")[0].slice(1),text:v,url:"https://ktye.github.io/db/index.html#"+encodeURI(v)}
+ let d={title:v.split("\n")[0].slice(1),url:"https://ktye.github.io/db/index.html#"+encodeURI(v)}
  window.location.hash="#"+encodeURI(v)
- delete(d[u?"text":"url"]);navigator.share(d)
+ navigator.share(d)
 }
 function newquery(){let s="query"+queries.options.length;addquery(s,"/"+s+"\n`answer"+queries.options.length)}
 async function querychange(){
@@ -109,19 +108,12 @@ async function runquery(q){q=q.trim()
  fillcnv();if(mdata.length)ge("tty").parentNode.insertBefore(cnv,ge("tty"))
 }
 function currentOption(){return queries.options[queries.selectedIndex]}
-function load(s){
- try{
-  let j=JSON.parse(s)
-  clear()
-  tables=j.tables;j.queries.forEach(q=>addquery(q.name,q.value))
-  showtables()
- }catch(e){ac(out,ct(e.message))}
-}
-function importcsv(name,s){
- try{
-  tables.push(fromcsv(name,s));showtables()
- }catch(e){ac(out,ct(e.message))}
-}
+function importqueries(s){s.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))})}
+function importcsv(name,s){let i=tables.findIndex(x=>x.name==name),t=fromcsv(name,s);if(0>i)tables.push(t);else tables[i]=t;showtables()}
+out.ondragover=function(e){pd(e)}
+out.ondrop=function(e){pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);
+  f.text().then(t=>{if(f.name.endsWith(".csv"))importcsv(f.name.slice(0,-4),t);if(f.name.endsWith(".k"))importqueries(t)
+})}}
 
 function showtables(){rm(out)
  let T=[["name"],["rows"],["keys"]]
@@ -132,13 +124,13 @@ function showtables(){rm(out)
  ac(out,ce("hr"))
 
  let dl=ac(out,ce("a"));dl.textContent="save ";
- let x=new Blob([us(JSON.stringify({tables:tables,queries:Array.from(queries.options).slice(1).map(x=>({name:x.textContent,value:x.value}))}))],{type:"application/json"})
- dl.href=URL.createObjectURL(x);dl.download="db.json"
+ let x=new Blob([us("\n"+Array.from(queries).slice(1).map(x=>"/"+x.value).join("\n"))],{type:"application/k"})
+ dl.href=URL.createObjectURL(x);dl.download="a.k"
 
  ac(out,ce("br"))
  ac(out,ct("load:"))
- let ld=ac(out,ce("input"));ld.type="file";ld.accept=".json"
- ld.onchange=e=>e.target.files[0].text().then(r=>load(r))
+ let ld=ac(out,ce("input"));ld.type="file";ld.accept=".k"
+ ld.onchange=e=>e.target.files[0].text().then(r=>importqueries(r))
  
  ac(out,ce("br"))
  ac(out,ct("csv::"))
@@ -155,7 +147,7 @@ function showtables(){rm(out)
 
  ac(out,ce("hr"))
  ac(out,ce("pre")).textContent=`
-save/load(code and data)as json
+save/load(queries as k file)
 csv import table:
  1st row names
  2nd row types i,f,s
@@ -175,10 +167,11 @@ function ttysize(){let mono=ge("mono");let n=mono.textContent.length;return[Math
 
 let swipe=null //swipe left/right: change query
 let swipestart=e=>{if("editor"==e.target.id)return false;let t=e.changedTouches[0];swipe={t:e.timeStamp,x:t.screenX,y:t.screenY}}
-let swipeend=e=>{let t=e.changedTouches[0];if(swipe!==null){let dx=t.screenX-swipe.x,dy=t.screenY-swipe.y,a=Math.abs(dx)
- if((a>Math.abs(dy))&&(a>0.1*e.target.clientWidth)){queries.selectedIndex=Math.min(queries.options.length-1,Math.max(0,queries.selectedIndex+-1+2*(+dx<0)));querychange()}}}
+let swipeend=e=>{let t=e.changedTouches[0];if(swipe!==null){let dx=t.screenX-swipe.x,dy=t.screenY-swipe.y,a=Math.abs(dx);if((a>Math.abs(dy))&&(a>0.1*e.target.clientWidth)){next(dx<0)}}}
 out.addEventListener("touchstart",swipestart,{passive:true})
 out.addEventListener("touchend"  ,swipeend  ,{passive:true})
+out.oncontextmenu=e=>{pd(e);next(true)}
+function next(t){queries.selectedIndex=Math.min(queries.options.length-1,Math.max(0,queries.selectedIndex+-1+2*(+t)));querychange()}
 
 let /*there be*/ K
 let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
@@ -248,8 +241,6 @@ function fillsvg(){if(!pdata.length)return
  legend=[ac(svg,sA(cE("text"),"class","legend")),ac(svg,sA(cE("text"),"class","legend"))]
  ac(svg,sA(cE("rect"),"id","zoomrect","fill","transparent","stroke","red","stroke-width",2))
  svg.ondblclick=()=>{ax=[];rm(svg);fillsvg();zoom={}}
- //svg.ontouchmove=svgtouchmv;svg.ontouchstart=svgtouchst;svg.ontouchend=svgtouched
- svg.ongestureend=gesturend
  svg.onmousedown=svgmousedn;svg.onmouseup=svgmouseup;svg.onmousemove=svgmousemv
 }
 function fillcnv(){if(!mdata.length)return;let w=Math.sqrt(mdata.length/4) //h=w
@@ -302,15 +293,5 @@ function svgmousemv(e){if(false=="x"in zoom)return false;
  [zoom.X,zoom.Y,zoom.W,zoom.H]=clientpos(e);let[x,y,w,h]=rect(zoom);if(10<w+h){sA(ge("zoomrect"),"x",x,"y",y,"width",w,"height",h)}}
 function svgmouseup(e){let[x,y,dx,dy,W,H]=rect(zoom),w=ax[1]-ax[0],h=ax[3]-ax[2];if(10<dx+dy){
   ax=[ax[0]+w/W*x,ax[0]+w/W*(x+dx),ax[2]+h/H*y,ax[2]+h/H*(y+dy)];rm(svg);fillsvg()};zoom={}}
-/*
-function svgtouchst(e){[zoom.x,zoom.y]=clientpos(e.touches[0])}
-function svgtouchmv(e){if((swipe===null)||(300<e.timeStamp-swipe.t)){swipe=null;return svgmousemv(e.touches[0])}}
-function svgtouched(e){if(swipe===null)svgmouseup()}
-*/
-
-function gesturend(e){ let r=svg.getBoundingClientRect(),pos=(e.clientX-r.left)+" "+(e.clientY-r.top)
- sA(legend[0],"x",10,"y",0,"text-anchor","left","baseline-shift","-100%").textContent="scale: "+e.scale
- sA(legend[1],"x",10,"y",0,"text-anchor","left","baseline-shift","-200%").textContent="pos: "+pos
-}
 
 </script></body></html>
