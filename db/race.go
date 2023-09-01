@@ -65,6 +65,7 @@ const s = `20080914T120000 half 1h33m44s
 20160708T193000 mile 4m50s
 20160911T090000 half 1h24m5s
 20170621T180000 five 17m45s
+20170906T180000 onek 2m55s
 20180518T190000 ten 39m48s
 20180620T210000 five 18m1s
 20190508T190000 metric 4m41s
@@ -78,10 +79,12 @@ const s = `20080914T120000 half 1h33m44s
 
 func main() {
 	v := strings.Split(s, "\n")
+	fmt.Println("date,what,time")
+	fmt.Println("i,s,f")
 	for _, s := range v {
 		w := strings.Split(s, " ")
 		d, _ := time.Parse("20060102T150405", w[0])
 		u, _ := time.ParseDuration(w[2])
-		fmt.Printf("%d,%s,%.6f\n", d.Unix(), w[1], u.Hours())
+		fmt.Printf("%s,%s,%.7f\n", d.Format("20060102"), w[1], u.Hours())
 	}
 }

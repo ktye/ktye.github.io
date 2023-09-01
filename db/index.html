@@ -54,7 +54,7 @@ let init=async()=>{
  let s=decodeURIComponent(window.location.hash.substr(1))
  if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(importqueries)
        else importqueries(s);queries.selectedIndex=1;return querychange()}
- await fetch("db.csv").then(r=>r.text()).then(r=>importcsv("t",r))
+ let f={t:"db.csv",race:"race.csv",wr:"wr.csv"};for(let name in f)await fetch(f[name]).then(r=>r.text()).then(r=>importcsv(name,r))
  await fetch("queries.k").then(r=>r.text()).then(importqueries)
  queries.value=""
  showtables()

@@ -165,4 +165,9 @@ i:&&/(`s=type
       `r=2_type,``)
 #tri:i@&(day 2+i)=day i
 
+//asof
+
+/asof[tabl1;tabl2;timecol]
+asof:{x,'(z_y)[(y z)'x z]}
+
 

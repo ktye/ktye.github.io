@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -39,15 +38,17 @@ func main() {
 		{"1998.07.14", "metric", "3m26s", "hicham", "rome"},
 		{"1999.07.14", "onek", "2m11s", "noah", "rieti"},
 
-		{"1997.08.24", "twolaps", "1m41s", "wilson", "cologne"},
-		{"2010.08.22", "twolaps", "1m41s", "david", "berlin"},
-		{"2010.08.29", "twolaps", "1m41s", "david", "rieti"},
-		{"2012.08.09", "twolaps", "1m40s", "david", "london"},
+		{"1997.08.24", "twolaps", "1m41.11s", "wilson", "cologne"},
+		{"2010.08.22", "twolaps", "1m41.09s", "david", "berlin"},
+		{"2010.08.29", "twolaps", "1m41.01s", "david", "rieti"},
+		{"2012.08.09", "twolaps", "1m40.91s", "david", "london"},
 	}
+	fmt.Println("date,what,time,who,where")
+	fmt.Println("i,s,f,s,s")
 	for _, t := range tc {
 		d, _ := time.Parse("2006.01.02 15:04:05", t.date+" 12:00:00")
 		u, _ := time.ParseDuration(t.time)
-		v := []string{strconv.Itoa(int(d.Unix())), t.typ, fmt.Sprintf("%.6f", u.Hours()), t.who, t.where}
+		v := []string{d.Format("20060102"), t.typ, fmt.Sprintf("%.7f", u.Hours()), t.who, t.where}
 		fmt.Println(strings.Join(v, ","))
 	}
 }
