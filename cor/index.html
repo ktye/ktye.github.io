@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>cor</title>
+<!--link rel="manifest" href="cor.webmanifest"-->
+<!--link rel="icon" type="image/png" sizes="32x32" href="cor.png"-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="black"/>
+<style>
+*{font-size:x-large;font-family:monospace;box-sizing:border-box}
+html{margin:0;padding:0}
+body{min-height:100vh;margin:0;padding:0;overflow:hidden}
+select{-webkit-appearance:none}
+svg{display:block;margin:auto} /*margin-left:auto;margin-right:auto}*/
+a,.link{text-decoration:underline;color:blue;y-padding:1em}
+.link:hover{cursor:pointer}
+#gen{position:absolute;width:100%;height:calc(100% - 2em);top:2em;z-index:1;background:#fefefe}
+#ani{position:absolute;width:100%;top:2em;padding:0;height:calc(50% - 2em);border:none;padding:0.5em;background:#ffe}
+#set{position:absolute;width:100%;top:50%;height:50%;margin:0;padding:5px;overflow:auto;background:grey;scrollbar-width:none}
+@media(orientation:landscape){
+ #ani{width:50%;height:100%}
+ #set{width:50%;top:2em;left:50%;height:100%;float:right;border-top:0;border-left:2px solid #f85c24}}
+
+#planes{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;color:black;background:white}
+#but{position:absolute;width:2em;height:2em;top:0;right:0;font-weight:bold;border:2px solid black;border-radius:6px;color:black;background:white}
+#bar{display:flex;justify-content:space-between}
+</style>
+<body onload="init()">
+
+<!-- ⭮⭯⌖ -->
+
+<select id="planes" onchange="changeplane()"><option>⚙</option></select>
+<select id="but"    onchange="pushbutton()"><option>⚙ plane setup</option><option>✐ prepare correction</option><option>🔧 confirm correction</option><option>⏣ list corrections</option><option>+ add plane</option><option>- delete plane</option></select>
+<div id="ani"></div>
+<div id="set"></div>
+<div id="gen">
+ <table><tr><td>mass unit  </td><td><input id="massunit" value="g"/></td></tr>
+ <tr><td>length unit</td><td><input id="lengthunit" value="mm"/></td></tr></table>
+ <hr/>
+ <span class="link">save</span><br/>
+ load:<input type="file"/><br/>
+ <span class="link" onclick=reset()>reset</span>
+</div>
+
+<script>
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function cE(x){return document.createElementNS("http://www.w3.org/2000/svg",x)}
+function ct(x){return document.createTextNode(x)}
+function tc(x,y){x.textContent=y;return x}
+function ac(x,y){x.appendChild(y);return y}
+function th(t){let T=ce("table");t.forEach((r,i)=>{let R=ce("tr");ac(T,R);r.forEach(c=>{ac(R,tc(ce(i?"td":"th"),c))})});return T}
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}}
+function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
+function sa(x,...y){for(let i=0;i<y.length;i+=2)x.setAttribute(y[i],y[1+i]);return x}
+function sA(x,...y){for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i]);return x}
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+
+let plane=[]
+let mass=[]
+let nphi="1",phi0="0",radi="1"
+
+let planes=ge("planes"),but=ge("but"),gen=ge("gen"),massunit=ge("massunit"),lengthunit=ge("lengthunit")
+
+function init(){
+ newplane()
+}
+function reset(){
+ if(confirm("reset and delete everything?")){
+  plane=[],mass=[];while(planes.options.length>1)planes.options[planes.options.length-1].remove()
+  newplane()
+ }
+}
+function newplane(){
+ plane.push({name:"E"+(1+plane.length),r:[],deg:[]})
+ ac(planes,ce("option")).textContent=plane[plane.length-1].name
+ changeplane()
+}
+function changeplane(){
+ if(0==planes.selectedIndex){showgeneral();return}
+ gen.style.zIndex=-1;but.style.display="block"
+ rm(ani);ac(ani,drawplane())
+ rm(set);setuplane()
+}
+function addplane(){console.log("addplane")
+ newplane()
+ planes.selectedIndex=plane.length
+ but.selectedIndex=0
+}
+function delplane(){console.log("delplane");
+ if(1==plane.length)return
+ let i=planes.selectedIndex
+ if(confirm("delete plane: "+plane[i-1].name+"?")){plane.splice(i,1);planes.options[i].remove();changeplane()}
+ but.selectedIndex=0
+ }
+function drawplane(){
+ let w=Math.min(ani.clientWidth-20,Math.floor(ani.clientHeight)-12),svg=newsvg(w)
+ svg.id="svg"
+ ac(svg,sA(cE("circle"),"cx",w/2,"cy",w/2,"r",w/2,"fill","lightblue"))
+ return svg
+}
+function setuplane(){let p=planes.selectedIndex-1
+ let t=ac(set,ce("table")),r=ac(t,ce("tr"))
+ ac(r,ce("th")).textContent="angles"
+ ac(r,ce("th")).textContent="start∢"
+ ac(r,ce("th")).textContent="radius/"+lengthunit.value //⌀/2"
+ r=ac(t,ce("tr"))
+ ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","nphi","value",nphi,"style","width:3em")).onchange=(e)=>{nphi=e.target.value}
+ ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","phi0","value",phi0,"style","width:7em")).onchange=(e)=>{phi0=e.target.value}
+ ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","radi","value",radi,"style","width:7em")).onchange=(e)=>{radi=e.target.value}
+ let b=ac(ac(r,ce("td")),ce("button"));b.textContent="create";b.onclick=()=>{
+  let n=Number(ge("nphi").value),a0=Number(ge("phi0").value),r=Number(ge("radi").value)
+  console.log("create?",n,a0,r)
+  for(let i=0;i<n;i++){let a=(a0+i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a)}
+  changeplane()
+ }
+ ac(set,ce("hr"))
+ t=ac(set,ce("table")),r=ac(t,ce("tr"))
+ ac(r,ce("th")).textContent=""
+ ac(r,ce("th")).textContent="angle"
+ ac(r,ce("th")).textContent="radius"
+ plane[p].deg.forEach((a,i)=>{
+  r=ac(t,ce("tr"))
+  ac(r,ac(ce("td"),sa(ce("input"),"type","checkbox")))
+  ac(r,ce("td")).textContent=a
+  ac(r,ce("td")).textContent=plane[p].r[i]
+  r.onclick=e=>{if("INPUT"==e.target.nodeName)return;pd(e);let c=e.target.closest("tr").firstElementChild;c.checked=!c.checked}
+ })
+ b=ac(set,ce("button"));b.textContent="delete";b.onclick=()=>{
+  let n=Array.from(t.rows).slice(1).filter(r=>r.firstChild.checked).length
+  if(confirm("delete "+n+" positions?")){
+   //todo disallow if there are masses
+   Array.from(t.rows).slice(1).map((r,i)=>r.firstChild.checked).flatMap((b,i)=>b?i:[]).reverse().forEach(i=>{
+    plane[p].deg.splice(i,1)
+    plane[p].r.splice(i,1)
+   })
+   changeplane()
+  }
+ }
+}
+function newsvg(w){return sA(cE("svg"),"width",w,"height",w)}
+
+
+function pushbutton(){console.log("pushbutton",but.value)
+ if("+ add plane"   ==but.value)return addplane()
+ if("- delete plane"==but.value)return delplane()
+}
+
+function showgeneral(){gen.style.zIndex=1;but.style.display="none"
+
+}
+</script></body></html>
