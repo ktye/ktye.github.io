@@ -49,13 +49,12 @@ svg{display:block;margin-left:auto;margin-right:auto}
 <script>
 if("serviceWorker"in navigator)navigator.serviceWorker.register("db.sw.js")
 
-let tables=[{name:"A",k:["alpha","beta","gamma"],t:"ifs",v:[[1,2,3,4],[2.3,4.5,1.234,-4.2],["hans","peter","werner","florian"]]}]
-
+let tables=[]
 let init=async()=>{
  let s=decodeURIComponent(window.location.hash.substr(1))
  if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(importqueries)
        else importqueries(s);queries.selectedIndex=1;return querychange()}
- await fetch("db").then(r=>r.text()).then(r=>tables=[fromcsv("t","id,type,time,dist,coords\ni,s,f,f,i\n"+r.replaceAll(" ",","))])
+ await fetch("db.csv").then(r=>r.text()).then(r=>importcsv("t",r))
  await fetch("queries.k").then(r=>r.text()).then(importqueries)
  queries.value=""
  showtables()
