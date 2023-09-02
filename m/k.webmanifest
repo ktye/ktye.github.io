@@ -2,12 +2,10 @@
  "short_name":      "k",
  "start_url":       "index.html",
  "display":         "standalone",
- "theme_color":     "#ffffff",
- "background_color":"#ffffff",
- "file_handlers":[{"action":"index.html","accept":{"text/k":[".k"]}}],
- "icons":[{
-  "src":            "k.svg",
-  "sizes":          "512x512",
-  "type":           "image/svg+xml",
-  "purpose":        "any maskable"
-}]}
+ "theme_color":     "#000000",
+ "background_color":"#000000",
+ "icons":[
+  {"src":"../db/kelas16.png","sizes":"16x16","type":"image/png"},
+  {"src":"../db/kelas32.png","sizes":"32x32","type":"image/png"}
+ ]
+}
