@@ -56,12 +56,10 @@ let kinit=(x)=>{
   if(x)K.dx(K.Val(KC(x)))
 })}
 window.init=()=>{
- navigator.virtualKeyboard.overlaysContent=true
  let h=decodeURIComponent(window.location.hash.substr(1))
  inp.textContent=(h.length)?h:"!10"
  kinit()
 }
-document.body.onclick=()=>{navigator.virtualKeyboard.show()}
 let clr=()=>{inp.textContent="";focus()}
 
 let env={env:{
