@@ -88,7 +88,7 @@ let focus=()=>{inp.focus()
  let r=document.createRange();r.selectNodeContents(inp);r.collapse(false)
  let s=window.getSelection();s.removeAllRanges();s.addRange(r)}
 
-let help=()=>{fetch("../db/ref").then(r=>r.text()).then(tty.textContent=r)}
+let help=()=>{fetch("../db/ref").then(r=>r.text()).then(r=>tty.textContent=r)}
 
 </script>
 
