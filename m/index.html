@@ -11,19 +11,21 @@
 html{height:100%}
 body{height:100%;overflow-y:hidden;display:block;margin:0;overflow:hidden}
 pre{margin:0}
-.invisible{display:none}
-#top{width:100%;display:flex;margin-top:1em;margin-bottom:0.2em}
-#inp{color:darkred;height:1em;margin-left:0.5em;flex-grow:1;/*width:100%;padding-left:0.5em;margin-top:1em;margin-bottom:0.2em*/}
-#clr{text-decoration:underline;color:blue}#clr:hover{cursor:pointer}
-#tty{height:100%;border-bottom:1px solid}
+.lnk{text-decoration:underline;color:blue}.lnk:hover{cursor:pointer}
+#inp{color:darkred;height:1em;margin-left:0.5em;width:100%;padding-left:0.5em;margin-top:1em;margin-bottom:0.2em}
+#tty{height:40%;border-bottom:1px solid}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 .buttons{display:flex;justify-content:space-between}
 [contenteditable]{outline:0px solid transparent;}
 </style></head>
 
 <body onload="window.init()">
-<div id="top"><pre id="inp" contenteditable="true" autocapitalize="off"></pre><span id="clr" onclick=clr()>clear</span></div>
+<pre id="inp" contenteditable="true" autocapitalize="off"></pre>
 <pre id="tty"></pre>
+<div class="buttons">
+ <span id="rst" class="lnk" onclick=init()>reset</span>
+ <span id="clr" class="lnk" onclick=clr()>clear</span>
+</div>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
 <a id="dl" style="display:none"></a>
 
