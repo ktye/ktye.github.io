@@ -38,6 +38,7 @@ svg{display:block;margin-left:auto;margin-right:auto}
 
 <select id="queries" onchange="querychange()">
  <option value="">*</option>
+ <option value="/.">/.</option>
 </select>
 <select id="buttons" onchange="addelquery(this.value)"><option>..</option><option value="add">+</option><option value="del">-</option><option value="shareurl">#</option></select>
 <img id="kelas" class="but" src="kelas32.png" onclick="help()"/>
@@ -52,12 +53,8 @@ svg{display:block;margin-left:auto;margin-right:auto}
 let tables=[]
 let init=async()=>{
  let s=decodeURIComponent(window.location.hash.substr(1))
- if(s){if(s.match(/[a-z]+\.k$/))await fetch(s).then(r=>r.text()).then(importqueries)
-       else importqueries(s);queries.selectedIndex=1;return querychange()}
- let f={t:"db.csv",race:"race.csv",wr:"wr.csv"};for(let name in f)await fetch(f[name]).then(r=>r.text()).then(r=>importcsv(name,r))
- await fetch("queries.k").then(r=>r.text()).then(importqueries)
- queries.value=""
- showtables()
+ if(s){if(s.endsWith(".k")||s.endsWith(".csv"))await imports(s);else importqueries(s);queries.selectedIndex=1;querychange()}
+ else {imports("db.csv,queries.k");queries.value="";showtables()}
 }
 function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
@@ -100,15 +97,18 @@ async function querychange(){
 }
 async function runquery(q){q=q.trim()
  let p=ce("pre"),d=ce("div");p.id="tty";d.id="kout";ac(d,p);ac(out,d)
+ let w=Math.min(out.clientWidth-10,Math.floor(out.clientHeight/2)-12);
+ svg=newsvg(w),cnv=newcnv()
  await kinit(queries.options[1].value) //always start with prolog
- let w=Math.min(out.clientWidth-10,Math.floor(out.clientHeight/2)-12);svg=newsvg(w),cnv=newcnv()
  K.repl(KC(q))
  fillsvg();if(pdata.length)ge("tty").parentNode.insertBefore(svg,ge("tty"))
  fillcnv();if(mdata.length)ge("tty").parentNode.insertBefore(cnv,ge("tty"))
 }
 function currentOption(){return queries.options[queries.selectedIndex]}
-function importqueries(s){s.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))})}
+function importqueries(s){while(queries.options.length>1)queries.options[queries.options.length-1].remove()
+ s.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))})}
 function importcsv(name,s){let i=tables.findIndex(x=>x.name==name),t=fromcsv(name,s);if(0>i)tables.push(t);else tables[i]=t;showtables()}
+async function imports(s){let v=s.split(",");for(let i=0;i<v.length;i++){await fetch(v[i]).then(r=>r.text()).then(t=>(v[i].endsWith(".k")?importqueries(t):importcsv(v[i].slice(0,-4),t)))}}
 out.ondragover=function(e){pd(e)}
 out.ondrop=function(e){pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);
   f.text().then(t=>{if(f.name.endsWith(".csv"))importcsv(f.name.slice(0,-4),t);if(f.name.endsWith(".k"))importqueries(t)
@@ -238,7 +238,7 @@ function fillsvg(){if(!pdata.length)return
 function fillcnv(){if(!mdata.length)return;let w=Math.sqrt(mdata.length/4) //h=w
  if(mdata.length!=4*w*w)K.trap(4);let d=new ImageData(mdata,w);
  for(let i=3;i<d.data.length;i+=4)d.data[i]=255;cnv.getContext("2d").putImageData(d,0,0)}
-function limits(){if(ax.length)return;(pdata.findIndex(d=>d.t=="polar")<0)?xylimits():polimits()}
+function limits(){if(ax.length)return;(pdata.findIndex(d=>d.t=="polar")<0)?xylimits():polimits();let dx=ax[1]-ax[0],dy=ax[3]-ax[2];ax=[ax[0]-0.1*dx,ax[1]+0.1*dx,ax[2]-0.1*dy,ax[3]+0.1*dy]}
 function polimits(){let r=0;pdata.forEach(d=>{r=Math.max(r,Math.max(...d.x.map((x,i)=>Math.hypot(x,d.y[i]))))});ax=[-r,r,-r,r]}
 function xylimits(){let q=0
  pdata.forEach(d=>{let x0=Math.min(...d.x),x1=Math.max(...d.x),y0=Math.min(...d.y),y1=Math.max(...d.y)

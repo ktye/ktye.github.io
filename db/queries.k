@@ -32,7 +32,7 @@ hist:{[d]
 / each time at startup and 
 / contains initialization code
 /
-/ this example uses 1 table: t
+/ this example uses 1 table:db 
 /  symbol type what 
 /  ---------------------------
 /  id     int  start time unix
@@ -41,16 +41,16 @@ hist:{[d]
 /  dist   flt  km
 /  coords int  #gps points(na)
 
-type:t`type
-time:t`time
-dist:t`dist
+type:db`type
+time:db`time
+dist:db`dist
 r: &`r=type  /run
 b: &`b=type  /bike
 
 hms:+60 60 60\\_3600*
 
 /calendar(start at 2007)
-start:(t`id)-1167609600
+start:(db`id)-1167609600
    y:start%z:31563000
 leap:86400*0=4/3+y
 year:2007+(leap+z*y)%z
@@ -72,18 +72,15 @@ med:  **|2^^
 
 //input table
 
-t
-
-/or e.g.
-/+`date`dist!(date;dist)
+db
 
 //yearly totals
 
-(+/`time`dist#)'t@=year
+(+/`time`dist#)'db@=year
 
 //collected gps data
 
-p:+/t`coords
+p:+/db`coords
 m:8*p%1024^2.
 `points`mb!p,m
 
@@ -164,6 +161,11 @@ i:&&/(`s=type
       `b=1_type,`
       `r=2_type,``)
 #tri:i@&(day 2+i)=day i
+
+//speed over distance
+
+u:(dist r)%time r
+v:(dist b)%time b
 
 //asof
 
