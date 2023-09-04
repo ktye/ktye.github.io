@@ -9,26 +9,27 @@
 html{margin:0;padding:0}
 body{min-height:100vh;margin:0;padding:0;overflow:hidden}
 select{-webkit-appearance:none}
+th,td{padding-left:0.5em}
 svg{display:block;margin:auto} /*margin-left:auto;margin-right:auto}*/
 a,.link{text-decoration:underline;color:blue;y-padding:1em}
 .link:hover{cursor:pointer}
 #gen{position:absolute;width:100%;height:calc(100% - 2em);top:2em;z-index:1;background:#fefefe}
 #ani{position:absolute;width:100%;top:2em;padding:0;height:calc(50% - 2em);border:none;padding:0.5em;background:#ffe}
-#set{position:absolute;width:100%;top:50%;height:50%;margin:0;padding:5px;overflow:auto;background:grey;scrollbar-width:none}
+#set{position:absolute;width:100%;top:50%;height:50%;margin:0;padding:5px;overflow:auto;background:lightgrey;scrollbar-width:none}
 @media(orientation:landscape){
  #ani{width:50%;height:100%}
  #set{width:50%;top:2em;left:50%;height:100%;float:right;border-top:0;border-left:2px solid #f85c24}}
 
 #planes{position:absolute;top:0;width:calc(100% - 2em);height:2em;text-align:center;font-weight:bold;border:2px solid black;border-radius:6px;color:black;background:white}
 #but{position:absolute;width:2em;height:2em;top:0;right:0;font-weight:bold;border:2px solid black;border-radius:6px;color:black;background:white}
-#bar{display:flex;justify-content:space-between}
+.bar{display:flex;justify-content:space-between}
 </style>
 <body onload="init()">
 
 <!-- ⭮⭯⌖ -->
 
 <select id="planes" onchange="changeplane()"><option>⚙</option></select>
-<select id="but"    onchange="pushbutton()"><option>⚙ plane setup</option><option>✐ prepare correction</option><option>🔧 confirm correction</option><option>⏣ list corrections</option><option>+ add plane</option><option>- delete plane</option></select>
+<select id="but"    onchange="pushbutton()"><option>⚙ plane setup</option><option>✐ prepare correction</option><option>🔧 confirm correction</option><option>⏣ list corrections</option><option>+ add plane 2</option><option>- delete plane 1</option></select>
 <div id="ani"></div>
 <div id="set"></div>
 <div id="gen">
@@ -38,6 +39,8 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
  <span class="link">save</span><br/>
  load:<input type="file"/><br/>
  <span class="link" onclick=reset()>reset</span>
+ <hr/>
+ <span class="link" onclick="changeplane(1)">Plane 1</span><br/>
 </div>
 
 <script>
@@ -45,6 +48,7 @@ function ge(x){return document.getElementById(x)}
 function ce(x){return document.createElement(x)}
 function cE(x){return document.createElementNS("http://www.w3.org/2000/svg",x)}
 function ct(x){return document.createTextNode(x)}
+function cl(x,y){x.classList.add(y);return x}
 function tc(x,y){x.textContent=y;return x}
 function ac(x,y){x.appendChild(y);return y}
 function th(t){let T=ce("table");t.forEach((r,i)=>{let R=ce("tr");ac(T,R);r.forEach(c=>{ac(R,tc(ce(i?"td":"th"),c))})});return T}
@@ -56,8 +60,10 @@ const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 
 let plane=[]
-let mass=[]
 let nphi="1",phi0="0",radi="1"
+
+let colors="lightblue,#ddffbb,#ffd3b0,#ece8dd".split(",")
+let Colors="#00798c,#d1495b,#edae49,#66a182,#2e4057,#8d96a3".split(",")
 
 let planes=ge("planes"),but=ge("but"),gen=ge("gen"),massunit=ge("massunit"),lengthunit=ge("lengthunit")
 
@@ -65,40 +71,93 @@ function init(){
  newplane()
 }
 function reset(){
- if(confirm("reset and delete everything?")){
-  plane=[],mass=[];while(planes.options.length>1)planes.options[planes.options.length-1].remove()
+ if(confirm("reset and delete everything?")){plane=[]
+  while(planes.options.length>1)planes.options[planes.options.length-1].remove()
   newplane()
  }
 }
 function newplane(){
- plane.push({name:"E"+(1+plane.length),r:[],deg:[]})
- ac(planes,ce("option")).textContent=plane[plane.length-1].name
+ //plane.push({r:[],deg:[],mark:[]})
+ plane.push({r:[1,1,1],deg:[0,120,240],mark:[false,false,false],mass:[[1.23],[],[2.5,1.23]],targetabs:1.23,targetang:30,plan:{}})
+ ac(planes,ce("option")).textContent="Plane "+plane.length
  changeplane()
 }
-function changeplane(){
+function changeplane(n){if(n!==undefined)planes.selectedIndex=n
  if(0==planes.selectedIndex){showgeneral();return}
+ but.options[4].textContent="+ add plane "+(1+plane.length)
+ but.options[5].textContent="- delete plane "+planes.selectedIndex
  gen.style.zIndex=-1;but.style.display="block"
- rm(ani);ac(ani,drawplane())
- rm(set);setuplane()
+ 
+ rm(ani);ac(ani,drawplane(plane[planes.selectedIndex-1],planes.selectedIndex-1))
+ if(but.value.startsWith("⚙"))return showsetup()
+ if(but.value.startsWith("✐"))return prepare()
+ if(but.value.startsWith("⏣"))return showlist()
 }
-function addplane(){console.log("addplane")
+function addplane(){
  newplane()
  planes.selectedIndex=plane.length
  but.selectedIndex=0
+ changeplane()
 }
-function delplane(){console.log("delplane");
+function delplane(){
  if(1==plane.length)return
  let i=planes.selectedIndex
- if(confirm("delete plane: "+plane[i-1].name+"?")){plane.splice(i,1);planes.options[i].remove();changeplane()}
+ if(confirm("delete plane "+i+" ?")){
+  plane.splice(i-1,1);planes.options[i].remove();
+  for(let i=1;i<planes.options.length;i++)planes.options[i].textContent="Plane "+i
+  changeplane()
+ }
  but.selectedIndex=0
  }
-function drawplane(){
- let w=Math.min(ani.clientWidth-20,Math.floor(ani.clientHeight)-12),svg=newsvg(w)
+function drawplane(p,pi){
+ if(!but.value.startsWith("⚙"))p.mark=p.mark.map(x=>false)
+ let w=Math.min(ani.clientWidth-20,Math.floor(ani.clientHeight)-12),svg=newsvg(w),c=w/2
  svg.id="svg"
- ac(svg,sA(cE("circle"),"cx",w/2,"cy",w/2,"r",w/2,"fill","lightblue"))
+ 
+ //defs(arrowheads)
+ let defs=ac(svg,cE("defs"))
+ for(let i=0;i<2;i++){
+  let a0=sA(cE("marker"),"id","arrowhead"+i,"markerWidth",10,"markerHeight",5,"refX",10,"refY",2.5,"orient","auto","fill",["blue","green"][i])
+  let po=ac(a0,sA(cE("polygon"),"points","0 0,10 2.5,0 5"))
+  ac(defs,a0)
+ }
+ 
+ ac(svg,sA(cE("circle"),"cx",c,"cy",c,"r",c,"fill",colors[pi%colors.length]))
+ 
+ if(0==p.r.length)return svg
+ let r=p.r.filter((x,i)=>p.r.indexOf(x)===i).sort().reverse(),R=1.15*Math.max(...r)
+ 
+ //bolt-circle
+ r.forEach(r=>ac(svg,sA(cE("circle"),"cx",c,"cy",w/2,"r",c*r/R,"fill","transparent","stroke","black","stroke-width",1,"stroke-dasharray","10,5,2,5","class","link")).onclick=e=>radclick(r))
+ 
+ //positions
+ let all=allmasses(),maxmass=Math.max(...all)
+ p.r.forEach((r,i)=>{let phi=p.deg[i]*Math.PI/180
+ 
+  //holes
+  let x=c+(c*r/R)*Math.sin(phi),y=c-(c*r/R)*Math.cos(phi)
+  let q=ac(svg,sA(cE("circle"),"cx",x,"cy",y,"r",0.1*c,"fill","white","stroke",p.mark[i]?"black":"none","stroke-width",2,"class","link")).onclick=e=>posclick(i)
+  
+  //masses
+  let m=[...p.mass[i]].sort().reverse()
+  m.forEach(m=>{
+   let j=all.indexOf(m),r=0.08*c*m/maxmass
+   ac(svg,sA(cE("circle"),"cx",x,"cy",y,"r",r,"fill",Colors[j%Colors.length],"stroke","none","stroke-width",2,"class","link"))   
+  })
+ })
+ 
+ if(but.value.startsWith("✐")){
+  let s=0.7*c
+  let x2=c+s*Math.sin(p.targetang/180*Math.PI),y2=c-s*Math.cos(p.targetang/180*Math.PI)
+  ac(svg,sA(cE("line"),"x1",c,"y1",c,"x2",x2,"y2",y2,"stroke-width",3,"stroke","blue","fill","none","marker-end","url(#arrowhead0)"))
+  let[C,S]=totalplan(),q=Math.hypot(C,S)/p.targetabs
+  let xe=x2+q*s*S,ye=y2-q*s*C
+  ac(svg,sA(cE("line"),"x1",x2,"y1",y2,"x2",xe,"y2",ye,"stroke-width",3,"stroke","green","fill","none","marker-end","url(#arrowhead1)")) 
+ }
+
  return svg
 }
-function setuplane(){let p=planes.selectedIndex-1
+function showsetup(){rm(set);let p=planes.selectedIndex-1
  let t=ac(set,ce("table")),r=ac(t,ce("tr"))
  ac(r,ce("th")).textContent="angles"
  ac(r,ce("th")).textContent="start∢"
@@ -109,8 +168,7 @@ function setuplane(){let p=planes.selectedIndex-1
  ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","radi","value",radi,"style","width:7em")).onchange=(e)=>{radi=e.target.value}
  let b=ac(ac(r,ce("td")),ce("button"));b.textContent="create";b.onclick=()=>{
   let n=Number(ge("nphi").value),a0=Number(ge("phi0").value),r=Number(ge("radi").value)
-  console.log("create?",n,a0,r)
-  for(let i=0;i<n;i++){let a=(a0+i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a)}
+  for(let i=0;i<n;i++){let a=(a0+i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a);plane[p].mark.push(false),plane[p].mass.push([])}
   changeplane()
  }
  ac(set,ce("hr"))
@@ -119,19 +177,26 @@ function setuplane(){let p=planes.selectedIndex-1
  ac(r,ce("th")).textContent="angle"
  ac(r,ce("th")).textContent="radius"
  plane[p].deg.forEach((a,i)=>{
-  r=ac(t,ce("tr"))
-  ac(r,ac(ce("td"),sa(ce("input"),"type","checkbox")))
+  r=ac(t,ce("tr"));r.dataset.i=i
+  let c=ac(r,ac(ce("td"),sa(ce("input"),"type","checkbox","data-i",i)))
+  c.checked=plane[p].mark[i];c.onchange=e=>console.log("changed-new: todo",e.target.checked)
   ac(r,ce("td")).textContent=a
   ac(r,ce("td")).textContent=plane[p].r[i]
-  r.onclick=e=>{if("INPUT"==e.target.nodeName)return;pd(e);let c=e.target.closest("tr").firstElementChild;c.checked=!c.checked}
+  r.onclick=e=>posclick(i)
  })
- b=ac(set,ce("button"));b.textContent="delete";b.onclick=()=>{
+ let d=cl(ac(set,ce("div")),"bar")
+ b=ac(d,ce("button"));b.textContent="all";b.onclick=()=>{plane[p].mark=plane[p].mark.map(x=>true);changeplane()}
+ b=ac(d,ce("button"));b.textContent="none";b.onclick=()=>{plane[p].mark=plane[p].mark.map(x=>false);changeplane()}
+ b=ac(d,ce("button"));b.textContent="delete";b.onclick=()=>{
   let n=Array.from(t.rows).slice(1).filter(r=>r.firstChild.checked).length
+  let pos=plane[p].mark.flatMap((b,i)=>b?i:[]).reverse()
+  if(pos.some(i=>plane[p].mass[i].length>0)){alert("position is not empty\nremove masses first");return}
   if(confirm("delete "+n+" positions?")){
-   //todo disallow if there are masses
-   Array.from(t.rows).slice(1).map((r,i)=>r.firstChild.checked).flatMap((b,i)=>b?i:[]).reverse().forEach(i=>{
+   pos.forEach(i=>{
     plane[p].deg.splice(i,1)
     plane[p].r.splice(i,1)
+    plane[p].mark.splice(i,1)
+    plane[p].mass.splice(i,1)
    })
    changeplane()
   }
@@ -139,13 +204,75 @@ function setuplane(){let p=planes.selectedIndex-1
 }
 function newsvg(w){return sA(cE("svg"),"width",w,"height",w)}
 
+function posclick(j){let i=planes.selectedIndex-1;
+ if(but.value.startsWith("⚙")){plane[i].mark[j]=!plane[i].mark[j];changeplane()}
+ if(but.value.startsWith("✐")){console.log("add-mass-at-pos",j)}
+}
+function radclick(r){console.log("radclick",r)}
+
+function allmasses(){let m={};plane.forEach(p=>p.mass.forEach(mp=>mp.forEach(x=>m[x]=true)));return Object.keys(m).map(x=>+x).sort()}
+function combined(){let p=plane[planes.selectedIndex-1]
+ let C=0,S=0;p.deg.forEach((a,i)=>{let phi=a*Math.PI/180,c=Math.cos(phi),s=Math.sin(phi),R=p.r[i];p.mass[i].forEach(m=>{C+=m*R*c;S+=m*R*s})})
+ return[C,S]}
+function totalplan(){let p=plane[planes.selectedIndex-1]
+ let C=0,S=0;for(let i in p.plan){let phi=p.deg[i]*Math.PI/180,c=Math.cos(phi),s=Math.sin(phi),R=p.r[i],m=p.plan[i];C+=m*R*c;S+=m*R*s}
+ return[C,S]}
+function absang(cs){let a=Math.atan2(cs[0],cs[1])*180/Math.PI;return[Math.hypot(cs[0],cs[1]),(a<0)?a+360:a]}
 
 function pushbutton(){console.log("pushbutton",but.value)
- if("+ add plane"   ==but.value)return addplane()
- if("- delete plane"==but.value)return delplane()
+ if(but.value.startsWith("+"))return addplane()
+ if(but.value.startsWith("-"))return delplane()
+ changeplane()
 }
 
 function showgeneral(){gen.style.zIndex=1;but.style.display="none"
-
 }
+function small(x){let s=String(x);return(s.length>6)?x.toPrecision(4):s}
+function showlist(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
+ let[abs,ang]=absang(combined())
+ ac(set,ct("plane "+(1+pi)+" sum: "+small(abs)+" "+massunit.value+lengthunit.value+" at "+ang.toFixed(0)+"°"))
+ ac(set,ce("hr"))
+ let t=ac(set,ce("table")),r=ac(t,ce("tr"))
+ ac(r,ce("th")).textContent="R"
+ ac(r,ce("th")).textContent="mass/"+massunit.value
+ ac(r,ce("th")).textContent=massunit.value+lengthunit.value
+ ac(r,ce("th")).textContent="angle"
+ p.mass.forEach((M,i)=>{
+  let R=p.r[i],deg=p.deg[i]
+  M.forEach(m=>{
+   let r=ac(t,ce("tr"))
+   ac(r,ce("td")).textContent=small(R)
+   ac(r,ce("td")).textContent=small(m)
+   ac(r,ce("td")).textContent=small(m*R)
+   ac(r,ce("td")).textContent=deg.toFixed(0)
+  })
+ })
+}
+
+function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
+ //target
+ let t=ac(set,ce("table")),r=ac(t,ce("tr"))
+ ac(r,ce("th")).textContent=massunit.value+lengthunit.value
+ ac(r,ce("th")).textContent="angle"
+ r=ac(t,ce("tr"))
+ let tabs=ac(ac(r,ce("td")),ce("input"));                        tabs.value=p.targetabs;tabs.onchange=()=>{plane[pi].targetabs=tabs.value;changeplane()}
+ let tang=ac(ac(r,ce("td")),sa(ce("input"),"style","width:4em"));tang.value=p.targetang;tang.onchange=()=>{plane[pi].targetang=tang.value;changeplane()}
+ tabs.style.color="blue";tang.style.color="blue"
+ 
+ //action
+ ac(set,ce("hr"))
+ let d=cl(ac(set,ce("div")),"bar")
+ let ar=ac(d,ce("select"))
+ ac(ar,ce("option")).textContent="add"
+ ac(ar,ce("option")).textContent="remove"
+ 
+ let ma=ac(d,ce("select"))
+ 
+ ac(set,ce("button")).textContent="ok"
+ 
+ //changelist  remove(strike-through) add(bold)
+ ac(set,ce("hr"))
+ 
+}
+
 </script></body></html>
