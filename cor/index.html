@@ -13,6 +13,9 @@ th,td{padding-left:0.5em}
 svg{display:block;margin:auto} /*margin-left:auto;margin-right:auto}*/
 a,.link{text-decoration:underline;color:blue;y-padding:1em}
 .link:hover{cursor:pointer}
+.small{font-size:large}
+.strike{text-decoration:line-through}.bold{font-weight:bold}.default{}
+#dir{font-size:xxx-large}#dir:hover{cursor:pointer}
 #gen{position:absolute;width:100%;height:calc(100% - 2em);top:2em;z-index:1;background:#fefefe}
 #ani{position:absolute;width:100%;top:2em;padding:0;height:calc(50% - 2em);border:none;padding:0.5em;background:#ffe}
 #set{position:absolute;width:100%;top:50%;height:50%;margin:0;padding:5px;overflow:auto;background:lightgrey;scrollbar-width:none}
@@ -29,7 +32,7 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
 <!-- ⭮⭯⌖ -->
 
 <select id="planes" onchange="changeplane()"><option>⚙</option></select>
-<select id="but"    onchange="pushbutton()"><option>⚙ plane setup</option><option>✐ prepare correction</option><option>🔧 confirm correction</option><option>⏣ list corrections</option><option>+ add plane 2</option><option>- delete plane 1</option></select>
+<select id="but"    onchange="pushbutton()"><option>⌖ plane setup</option><option>✐ prepare correction</option><option>🔧 confirm correction</option><option style="border-bottom:1px solid">⏣ list corrections</option><option>+ add plane 2</option><option>- delete plane 1</option></select>
 <div id="ani"></div>
 <div id="set"></div>
 <div id="gen">
@@ -78,7 +81,7 @@ function reset(){
 }
 function newplane(){
  //plane.push({r:[],deg:[],mark:[]})
- plane.push({r:[1,1,1],deg:[0,120,240],mark:[false,false,false],mass:[[1.23],[],[2.5,1.23]],targetabs:1.23,targetang:30,plan:{}})
+ plane.push({r:[1,1,1],deg:[0,120,240],mark:[false,false,false],mass:[{i:0,m:1.2,state:"old"},{i:2,m:2.5,state:"old"},{i:2,m:1.23,state:"old"}],dir:1,targetabs:1.23,targetang:30,plan:{m:1,i:0,add:true}})
  ac(planes,ce("option")).textContent="Plane "+plane.length
  changeplane()
 }
@@ -89,7 +92,7 @@ function changeplane(n){if(n!==undefined)planes.selectedIndex=n
  gen.style.zIndex=-1;but.style.display="block"
  
  rm(ani);ac(ani,drawplane(plane[planes.selectedIndex-1],planes.selectedIndex-1))
- if(but.value.startsWith("⚙"))return showsetup()
+ if(but.value.startsWith("⌖"))return showsetup()
  if(but.value.startsWith("✐"))return prepare()
  if(but.value.startsWith("⏣"))return showlist()
 }
@@ -110,7 +113,7 @@ function delplane(){
  but.selectedIndex=0
  }
 function drawplane(p,pi){
- if(!but.value.startsWith("⚙"))p.mark=p.mark.map(x=>false)
+ if(!but.value.startsWith("⌖"))p.mark=p.mark.map(x=>false)
  let w=Math.min(ani.clientWidth-20,Math.floor(ani.clientHeight)-12),svg=newsvg(w),c=w/2
  svg.id="svg"
  
@@ -128,33 +131,61 @@ function drawplane(p,pi){
  let r=p.r.filter((x,i)=>p.r.indexOf(x)===i).sort().reverse(),R=1.15*Math.max(...r)
  
  //bolt-circle
- r.forEach(r=>ac(svg,sA(cE("circle"),"cx",c,"cy",w/2,"r",c*r/R,"fill","transparent","stroke","black","stroke-width",1,"stroke-dasharray","10,5,2,5","class","link")).onclick=e=>radclick(r))
+ r.forEach(r=>ac(svg,sA(cE("circle"),"cx",c,"cy",w/2,"r",c*r/R,"fill","none","stroke","black","stroke-width",1,"stroke-dasharray","10,5,2,5")))
+ 
+ //angle direction
+ let dir=ac(svg,sA(cE("text"),"x",c,"y",c,"id","dir","text-anchor","middle","alignment-baseline","central"))
+ dir.textContent=(p.dir>0)?"⭮":"⭯";dir.onclick=()=>{p.dir=-1*p.dir;changeplane()}
  
  //positions
- let all=allmasses(),maxmass=Math.max(...all)
+ let all=uniqmasses() //,maxmass=Math.max(...all)
+ let xy=(i)=>{let phi=p.deg[i]*Math.PI/180,r=p.r[i];return[c+(c*r/R)*p.dir*Math.sin(phi),c-(c*r/R)*Math.cos(phi)]}
  p.r.forEach((r,i)=>{let phi=p.deg[i]*Math.PI/180
  
   //holes
-  let x=c+(c*r/R)*Math.sin(phi),y=c-(c*r/R)*Math.cos(phi)
+  //let x=c+(c*r/R)*p.dir*Math.sin(phi),y=c-(c*r/R)*Math.cos(phi)
+  let[x,y]=xy(i)
   let q=ac(svg,sA(cE("circle"),"cx",x,"cy",y,"r",0.1*c,"fill","white","stroke",p.mark[i]?"black":"none","stroke-width",2,"class","link")).onclick=e=>posclick(i)
   
-  //masses
-  let m=[...p.mass[i]].sort().reverse()
-  m.forEach(m=>{
-   let j=all.indexOf(m),r=0.08*c*m/maxmass
-   ac(svg,sA(cE("circle"),"cx",x,"cy",y,"r",r,"fill",Colors[j%Colors.length],"stroke","none","stroke-width",2,"class","link"))   
-  })
+  //labels
+  let tx=c+(c*(r/R-0.15))*p.dir*Math.sin(phi),ty=c-(c*(r/R-0.15))*Math.cos(phi)
+  ac(svg,sA(cE("text"),"x",tx,"y",ty,"class","small","text-anchor","middle","alignment-baseline","central")).textContent=small(p.deg[i])
+ })
+ 
+ 
+ let rscale={}
+ p.mass.forEach(x=>{
+  let[X,Y]=xy(x.i)
+  rscale[x.i]=(x.i in rscale)?rscale[x.i]*0.6:0.08*c //always scale down masses per position (not per absolute mass)
+  let r=rscale[x.i]
+  let j=all.indexOf(x.m) //,r=0.08*c*x.m/maxmass
+  let removed=(but.value.startsWith("✐")&&(x.state=="remove"))
+  let m=sA(cE("circle"),"cx",X,"cy",Y,"r",r,"fill",removed?"none":Colors[j%Colors.length],"stroke",removed?Colors[j%Colors.length]:"none","stroke-width",2,"class","link");m.onclick=e=>massclick(x.i,x.m)
+  if(but.value.startsWith("✐"))ac(svg,m)
+  if(but.value.startsWith("⌖"))if(x.state!="new")ac(svg,m)
  })
  
  if(but.value.startsWith("✐")){
   let s=0.7*c
-  let x2=c+s*Math.sin(p.targetang/180*Math.PI),y2=c-s*Math.cos(p.targetang/180*Math.PI)
+  let x2=c+s*p.dir*Math.sin(p.targetang/180*Math.PI),y2=c-s*Math.cos(p.targetang/180*Math.PI)
   ac(svg,sA(cE("line"),"x1",c,"y1",c,"x2",x2,"y2",y2,"stroke-width",3,"stroke","blue","fill","none","marker-end","url(#arrowhead0)"))
-  let[C,S]=totalplan(),q=Math.hypot(C,S)/p.targetabs
-  let xe=x2+q*s*S,ye=y2-q*s*C
-  ac(svg,sA(cE("line"),"x1",x2,"y1",y2,"x2",xe,"y2",ye,"stroke-width",3,"stroke","green","fill","none","marker-end","url(#arrowhead1)")) 
+  
+  let[x1,y1]=[x2,y2]
+  let ms=p.mass.filter(x=>x.state!="old")
+  for(let j=0;j<ms.length;j++){let m=ms[j];if(m.state=="old")continue;
+   let k=all.indexOf(Math.abs(m.m))
+   let phi=p.deg[m.i]/180*Math.PI,u=p.r[m.i]*m.m/p.targetabs
+   x2=x1+s*p.dir*u*Math.sin(phi)
+   y2=y1-s*u*Math.cos(phi)
+   let l=ac(svg,sA(cE("line"),"x1",x1,"y1",y1,"x2",x2,"y2",y2,"stroke-width",3,"stroke",Colors[k%Colors.length],"fill","none"))
+   if(j==ms.length-1)sA(l,"marker-end","url(#arrowhead1)")
+   x1=x2;y1=y2
+  }
+  
+  //let[C,S]=planned(),q=Math.hypot(C,S)/p.targetabs
+  //let xe=x2+p.dir*q*s*S,ye=y2-q*s*C
+  //ac(svg,sA(cE("line"),"x1",x2,"y1",y2,"x2",xe,"y2",ye,"stroke-width",3,"stroke","green","fill","none","marker-end","url(#arrowhead1)")) 
  }
-
  return svg
 }
 function showsetup(){rm(set);let p=planes.selectedIndex-1
@@ -204,19 +235,24 @@ function showsetup(){rm(set);let p=planes.selectedIndex-1
 }
 function newsvg(w){return sA(cE("svg"),"width",w,"height",w)}
 
-function posclick(j){let i=planes.selectedIndex-1;
- if(but.value.startsWith("⚙")){plane[i].mark[j]=!plane[i].mark[j];changeplane()}
- if(but.value.startsWith("✐")){console.log("add-mass-at-pos",j)}
+function posclick(j){let i=planes.selectedIndex-1;p=plane[i]
+ if(but.value.startsWith("⌖")){plane[i].mark[j]=!p.mark[j];changeplane()}
+ if(but.value.startsWith("✐")){plane[i].plan.i=j;plane[i].plan.add=true;changeplane()}
 }
-function radclick(r){console.log("radclick",r)}
+function massclick(j,m){let i=planes.selectedIndex-1;p=plane[i]
+ if(but.value.startsWith("✐")){plane[i].plan.i=j;plane[i].plan.add=false;plane[i].plan.m=m;changeplane()}
+}
 
-function allmasses(){let m={};plane.forEach(p=>p.mass.forEach(mp=>mp.forEach(x=>m[x]=true)));return Object.keys(m).map(x=>+x).sort()}
+function uniqmasses(){let m=[];plane.forEach(p=>p.mass.forEach(x=>m.push(Math.abs(x.m))));m.sort();return m.filter((x,i)=>m.indexOf(x)===i)}
+
 function combined(){let p=plane[planes.selectedIndex-1]
  let C=0,S=0;p.deg.forEach((a,i)=>{let phi=a*Math.PI/180,c=Math.cos(phi),s=Math.sin(phi),R=p.r[i];p.mass[i].forEach(m=>{C+=m*R*c;S+=m*R*s})})
  return[C,S]}
-function totalplan(){let p=plane[planes.selectedIndex-1]
- let C=0,S=0;for(let i in p.plan){let phi=p.deg[i]*Math.PI/180,c=Math.cos(phi),s=Math.sin(phi),R=p.r[i],m=p.plan[i];C+=m*R*c;S+=m*R*s}
+
+function planned(){let p=plane[planes.selectedIndex-1],C=0,S=0;
+ p.mass.filter(x=>x.state!="old").forEach((x,i)=>{let phi=p.deg[x.i]*Math.PI/180,c=Math.cos(phi),s=Math.sin(phi),R=p.r[x.i];C+=x.m*R*c;S+=x.m*R*s})
  return[C,S]}
+ 
 function absang(cs){let a=Math.atan2(cs[0],cs[1])*180/Math.PI;return[Math.hypot(cs[0],cs[1]),(a<0)?a+360:a]}
 
 function pushbutton(){console.log("pushbutton",but.value)
@@ -228,9 +264,10 @@ function pushbutton(){console.log("pushbutton",but.value)
 function showgeneral(){gen.style.zIndex=1;but.style.display="none"
 }
 function small(x){let s=String(x);return(s.length>6)?x.toPrecision(4):s}
+function smaller(x){return x.toFixed(0)}
 function showlist(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  let[abs,ang]=absang(combined())
- ac(set,ct("plane "+(1+pi)+" sum: "+small(abs)+" "+massunit.value+lengthunit.value+" at "+ang.toFixed(0)+"°"))
+ ac(set,ct("plane "+(1+pi)+" sum: "+small(abs)+" "+massunit.value+lengthunit.value+" at "+smaller(ang)+"°"))
  ac(set,ce("hr"))
  let t=ac(set,ce("table")),r=ac(t,ce("tr"))
  ac(r,ce("th")).textContent="R"
@@ -244,7 +281,7 @@ function showlist(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
    ac(r,ce("td")).textContent=small(R)
    ac(r,ce("td")).textContent=small(m)
    ac(r,ce("td")).textContent=small(m*R)
-   ac(r,ce("td")).textContent=deg.toFixed(0)
+   ac(r,ce("td")).textContent=smaller(deg)+"°"
   })
  })
 }
@@ -252,27 +289,74 @@ function showlist(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
 function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  //target
  let t=ac(set,ce("table")),r=ac(t,ce("tr"))
- ac(r,ce("th")).textContent=massunit.value+lengthunit.value
- ac(r,ce("th")).textContent="angle"
+ ac(r,ce("th"));ac(r,ce("th")).textContent=massunit.value+lengthunit.value;ac(r,ce("th")).textContent="angle"
  r=ac(t,ce("tr"))
- let tabs=ac(ac(r,ce("td")),ce("input"));                        tabs.value=p.targetabs;tabs.onchange=()=>{plane[pi].targetabs=tabs.value;changeplane()}
- let tang=ac(ac(r,ce("td")),sa(ce("input"),"style","width:4em"));tang.value=p.targetang;tang.onchange=()=>{plane[pi].targetang=tang.value;changeplane()}
+ ac(r,ce("th")).textContent="unbal";
+ let tabs=ac(ac(r,ce("td")),ce("input"));                        tabs.type="number";tabs.value=p.targetabs;tabs.onchange=()=>{plane[pi].targetabs=tabs.value;changeplane()}
+ let tang=ac(ac(r,ce("td")),sa(ce("input"),"style","width:4em"));tang.type="number";tang.value=p.targetang;tang.onchange=()=>{plane[pi].targetang=tang.value;changeplane()}
+ let phi=tang.value/180*Math.PI,targ=[tabs.value*Math.cos(phi),tabs.value*Math.sin(phi)]
  tabs.style.color="blue";tang.style.color="blue"
+ r=ac(t,ce("tr"))
+ let cor=planned(),cora=absang(cor)
+ ac(r,ce("th")).textContent="correct"
+ ac(r,sa(ce("td"),"style","color:green")).textContent=small(cora[0])
+ ac(r,sa(ce("td"),"style","color:green")).textContent=smaller(cora[1])
+ r=ac(t,ce("tr"))
+ let res=[targ[0]-cor[0],targ[1]-cor[1]],resa=absang(res)
+ ac(r,ce("th")).textContent="residual"
+ ac(r,sa(ce("td"),"style","color:red")).textContent=small(resa[0])
+ ac(r,sa(ce("td"),"style","color:red")).textContent=smaller(resa[1])
  
  //action
  ac(set,ce("hr"))
  let d=cl(ac(set,ce("div")),"bar")
  let ar=ac(d,ce("select"))
- ac(ar,ce("option")).textContent="add"
- ac(ar,ce("option")).textContent="remove"
+ ac(ar,ce("option")).textContent="█ add"
+ ac(ar,ce("option")).textContent="✗ remove"
+ ar.selectedIndex=+!p.plan.add
+ ar.onchange=()=>{plane[pi].plan.add=0==ar.selectedIndex}
  
- let ma=ac(d,ce("select"))
+ let dd=ac(d,ce("div"))
+ console.log("plan?",p.plan,p.plan.m)
+ let ms=ac(d,sa(ce("datalist"),"id","masses"));uniqmasses().forEach(m=>ac(ms,ce("option")).value=m);
+ let m=ac(dd,sa(ce("input"),"type","number","value",p.plan.m,"min",0,"list","masses","style","width:6em"));m.onchange=e=>plane[pi].plan.m=+m.value
+ ac(dd,ct(" "+massunit.value))
  
- ac(set,ce("button")).textContent="ok"
+ ac(d,ct("at"))
+ 
+ let po=ac(d,ce("select"))
+ p.r.forEach((r,i)=>{
+  ac(po,ce("option")).textContent="r="+small(r)+" ∡"+smaller(p.deg[i])+"°"
+ })
+ po.selectedIndex=p.plan.i
+ po.onchange=()=>plane[pi].plan.i=po.selectedIndex
+ 
+ let ok=ac(d,ce("button"));ok.textContent="ok";ok.onclick=e=>{
+  let j=p.mass.findIndex(x=>(x.state=="old")&&(x.m==p.plan.m)&&(x.i==p.plan.i))
+  if((p.plan.add===false)&&(j<0)){alert("cannot find mass "+p.plan.m+" at position "+p.plan.i);return}
+  if(p.plan.add==false)plane[pi].mass[j].state="remove"
+  else                 plane[pi].mass.push({m:p.plan.m,i:p.plan.i,state:"new"})
+  changeplane()}
  
  //changelist  remove(strike-through) add(bold)
  ac(set,ce("hr"))
+ t=ac(set,ce("table"));r=ac(t,ce("tr"))
+ ac(r,ce("th")).textContent="R"
+ ac(r,ce("th")).textContent="mass/"+massunit.value
+ ac(r,ce("th")).textContent=massunit.value+lengthunit.value
+ ac(r,ce("th")).textContent="angle"
  
+ p.mass.forEach((x,j)=>{
+  r=ac(t,ce("tr"));cl(r,(x.state=="remove")?"strike":(x.state=="new")?"bold":"old")
+  ac(r,ce("td")).textContent=small(p.r[x.i])
+  ac(r,ce("td")).textContent=small(x.m)
+  ac(r,ce("td")).textContent=small(p.r[x.i]*x.m)
+  ac(r,ce("td")).textContent=smaller(p.deg[x.i])+"°"
+  if(x.state!="old"){let b=ac(r,ce("button"));b.textContent="✗";b.onclick=()=>{
+   plane[pi].mass.splice(j,1)
+   changeplane()}}
+ })
 }
+
 
 </script></body></html>
