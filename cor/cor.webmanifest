@@ -1,0 +1,10 @@
+{"name":            "cor",
+ "short_name":      "cor",
+ "start_url":       "index.html",
+ "display":         "standalone",
+ "theme_color":     "#999999",
+ "background_color":"#999999",
+ "icons":[
+  {"src":"cor32.png","sizes":"32x32","type":"image/png"}
+ ]
+}
