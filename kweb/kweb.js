@@ -392,7 +392,7 @@ function init(o){
   js:   K.JS,
  }
  if("ext"in o)Object.assign(ext,o.ext)
- K.kinit(ext,("wasm"in o)?o.wasm:"../k.wasm")
+ K.kinit(ext,("wasm"in o)?o.wasm:"../oldk.wasm")
 }
 
 function ktry(s){
