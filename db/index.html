@@ -106,7 +106,7 @@ async function runquery(q){q=q.trim()
 }
 function currentOption(){return queries.options[queries.selectedIndex]}
 function importqueries(s){while(queries.options.length>1)queries.options[queries.options.length-1].remove()
- s.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))})}
+ s.split(/\n\/\//).slice(1).map(x=>{x=x.trim().split("\n");addquery(x[0],"/"+x[0]+"\n"+x.slice(1).join("\n"))});queries.selectedIndex=0}
 function importcsv(name,s){let i=tables.findIndex(x=>x.name==name),t=fromcsv(name,s);if(0>i)tables.push(t);else tables[i]=t;showtables()}
 async function imports(s){let v=s.split(",");for(let i=0;i<v.length;i++){await fetch(v[i]).then(r=>r.text()).then(t=>(v[i].endsWith(".k")?importqueries(t):importcsv(v[i].slice(0,-4),t)))}}
 out.ondragover=function(e){pd(e)}
@@ -296,6 +296,6 @@ let swipeend=e=>{let t=e.changedTouches[0];if(swipe!==null){
  else{let dx=t.screenX-swipe.x,dy=t.screenY-swipe.y,a=Math.abs(dx);if((a>3*Math.abs(dy))&&(a>0.2*e.target.clientWidth)){next(dx<0)}}}}
 out.addEventListener("touchstart",swipestart,{passive:true})
 out.addEventListener("touchend"  ,swipeend  ,{passive:true})
-//out.oncontextmenu=e=>{pd(e);next(true)}
+out.oncontextmenu=e=>{pd(e);next(true)}
 
 </script></body></html>

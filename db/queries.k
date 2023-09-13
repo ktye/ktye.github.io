@@ -47,12 +47,12 @@ dist:db`dist
 r: &`r=type  /run
 b: &`b=type  /bike
 
-hms:+60 60 60\\_3600*
+hms:+60 60 60\_3600*
 
 /calendar(start at 2007)
 start:(db`id)-1167609600
    y:start%z:31563000
-leap:86400*0=4/3+y
+leap:86400*0=4!3+y
 year:2007+(leap+z*y)%z
 day: start%24*60*60
 week:day%7
@@ -60,10 +60,10 @@ week:day%7
 /formatted date: e.g. 20230826
 l:-2006+*|year
 m:l^(l*12)#"babababbabab"-67
-m[;1]:28+0=4/3+!l
+m[;1]:28+0=4!3+!l
 m:86400*+\,/m
-ym:2+12/i:m'start
-md:1+86400\start-m(m'start)
+ym:2+12!i:m'start
+md:1+(start-m(m'start))%86400
 date:md+(100*ym)+10000*year
 
 
@@ -94,10 +94,10 @@ k:`date`hour`min`sec
 
 //fastest 5k/10k/half/marathon
 
-d:5 10 21 42<\:dist r
+d:5 10 21 42<\dist r
 t:(hms@*^(time r)@&)'d
 
-(":"/:$)'`five`ten`half`full!t
+(":"/$)'`five`ten`half`full!t
 
 //when were 100k km exceeded?
 
@@ -139,7 +139,7 @@ plot x!f
 k:`mean`median`q95
 k!+`analytic`counted!1_(
  s*(%.5p;%2*log 2;%-2*log .05)
-(avg;**|2^^;(^d)@_0.95*#)@\:d)
+(avg;**|2^^;(^d)@_0.95*#)@\d)
 
 /not a good fit
 
@@ -149,7 +149,7 @@ k!+`analytic`counted!1_(
 
 //rest days per year
 
-+/'(0|-1+-':day)@=year
++/'(0|-1+`d day)@=year
 
 //count triathlons
 
