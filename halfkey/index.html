@@ -77,7 +77,7 @@ function sc(x){return K.sc(KC(x))}
 
 function run(c){ //stage 1
  ge("out").textContent="";let simple=(c=="ast"||c=="ccc")
- fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
+ fetch("../oldk.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,env)).then(r=>{
   K=r.instance.exports
   K.kinit()
   
