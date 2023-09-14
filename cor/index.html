@@ -16,7 +16,7 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
 .small{font-size:large}
 .strike{text-decoration:line-through}.bold{font-weight:bold}.default{}
 #dir{font-size:xxx-large}#dir:hover{cursor:pointer}
-#gen{position:absolute;width:100%;height:calc(100% - 2em);top:2em;z-index:1;background:#fefefe}
+#gen{position:absolute;width:100%;height:calc(100% - 2em);top:2em;z-index:1;background:#fefefe;overflow:hidden}
 #ani{position:absolute;width:100%;top:2em;padding:0;height:calc(50% - 2em);border:none;padding:0.5em;background:#ffe}
 #set{position:absolute;width:100%;top:50%;height:50%;margin:0;padding:5px;overflow:auto;background:lightgrey;scrollbar-width:none}
 @media(orientation:landscape){
@@ -44,7 +44,11 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
 <div id="set"></div>
 <div id="gen">
  <table><tr><td>mass unit  </td><td><input id="massunit" value="g"/></td></tr>
- <tr><td>length unit</td><td><input id="lengthunit" value="mm"/></td></tr></table>
+ <tr><td>length unit</td><td><input id="lengthunit" value="mm"/></td></tr>
+ <tr><td>auto masses</td><td><input id="automasses" value="0.9 1.5 2.7"/></td></tr>
+ <tr><td>max pos</td><td><input type="number" id="maxpos" value="4"/></td></tr>
+ <tr><td>allow remove</td><td><input id="allowremove" type="checkbox" checked/></td></tr>
+ </table>
  <hr/>
  <span class="link" onclick=save()>save</span><br/>
  load:<input type="file" style="border:1px dashed" onchange="load(this)"/><br/>
@@ -76,6 +80,7 @@ const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
  deg:[0,120,240],
  mark:[false,false,false],
  mass:[{i:0,m:1.2,state:"old"},{i:2,m:2.5,state:"old"},{i:2,m:1.23,state:"old"}],
+ choice:{},
  dir:1,
  targetabs:1.23,
  targetang:30,
@@ -92,6 +97,8 @@ let planes=ge("planes"),but=ge("but"),gen=ge("gen"),massunit=ge("massunit"),leng
 
 function init(){
  newplane()
+ let n=7,p=0,r=1;for(let i=0;i<n;i++){let a=(i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a);plane[p].mark.push(false)}
+ 
 }
 function load(x){let f=x.files[0];filename=f.name;f.text().then(t=>{
  try{let p=JSON.parse(t);plane=p;planes.selectedIndex=1;changeplane()}catch(e){console.log(e)}
@@ -116,7 +123,7 @@ function reset(){
  }
 }
 function newplane(){
- let q={r:[],deg:[],mark:[],mass:[],dir:1,targetabs:1.0,targetang:30,plan:{}}
+ let q={r:[],deg:[],mark:[],mass:[],choice:{},dir:1,targetabs:1.0,targetang:30,plan:{}}
  if(plane.length){
   if(confirm("copy positions from plane "+plane.length+"?")){
    let p=plane[plane.length-1]
@@ -251,7 +258,7 @@ function showsetup(){rm(set);let p=planes.selectedIndex-1
  ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","nphi","value",nphi,"style","width:3em")).onchange=(e)=>{nphi=e.target.value}
  ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","phi0","value",phi0,"style","width:7em")).onchange=(e)=>{phi0=e.target.value}
  ac(ac(r,ce("td")),sa(ce("input"),"type","number","id","radi","value",radi,"style","width:7em")).onchange=(e)=>{radi=e.target.value}
- let b=ac(ac(r,ce("td")),ce("button"));b.textContent="create";b.onclick=()=>{
+ let b=ac(set,ce("button"));b.textContent="create";b.onclick=()=>{
   let n=Number(ge("nphi").value),a0=Number(ge("phi0").value),r=Number(ge("radi").value)
   for(let i=0;i<n;i++){let a=(a0+i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a);plane[p].mark.push(false)}
   changeplane()
@@ -328,8 +335,8 @@ function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  ac(r,ce("th"));ac(r,ce("th")).textContent=massunit.value+lengthunit.value;ac(r,ce("th")).textContent="angle"
  r=ac(t,ce("tr"))
  ac(r,ce("th")).textContent="unb";
- let tabs=ac(ac(r,ce("td")),sa(ce("input"),"style","width:6em"));tabs.type="number";tabs.value=p.targetabs;tabs.onchange=()=>{plane[pi].targetabs=tabs.value;changeplane()}
- let tang=ac(ac(r,ce("td")),sa(ce("input"),"style","width:4em"));tang.type="number";tang.value=p.targetang;tang.onchange=()=>{plane[pi].targetang=tang.value;changeplane()}
+ let tabs=ac(ac(r,ce("td")),sa(ce("input"),"style","width:6em"));tabs.type="number";tabs.value=p.targetabs;tabs.onchange=()=>{plane[pi].targetabs=+tabs.value;nochoice();changeplane()}
+ let tang=ac(ac(r,ce("td")),sa(ce("input"),"style","width:4em"));tang.type="number";tang.value=p.targetang;tang.onchange=()=>{plane[pi].targetang=+tang.value;nochoice();changeplane()}
  let phi=tang.value/180*Math.PI,targ=[tabs.value*Math.cos(phi),tabs.value*Math.sin(phi)]
  tabs.style.color="blue";tang.style.color="blue"
  r=ac(t,ce("tr"))
@@ -377,9 +384,26 @@ function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
   if(p.plan.add==false)plane[pi].mass[j].state="remove"
   else                 plane[pi].mass.push({m:p.plan.m,i:p.plan.i,state:"new"})
   changeplane()}
-
- ac(set,ce("hr"))
- worklist(false)
+ 
+ //auto
+ ac(set,ce("hr"));autobuttons()
+ 
+ //choices(auto results)
+ if(Object.keys(p.choice).length)choices(p,p.choice)
+ 
+ ac(set,ce("hr"));worklist(false)
+}
+function autobuttons(){
+ let d=ac(set,cl(ce("div"),"bar"))
+ let sb=ac(d,ce("button"));sb.textContent="split";sb.onclick=split2
+ let au=ac(d,ce("button"));au.textContent="auto" ;au.onclick=automatic
+}
+function choices(p,c){
+ let d=ac(set,cl(ce("div"),"bar"))
+ for(let k in c){
+  let m=c[k]
+  let b=ac(d,ce("button"));b.textContent=k;b.onclick=()=>{p.mass=m;changeplane()}
+ }
 }
 function worklist(correct){let pi=planes.selectedIndex-1,p=plane[pi]
  //changelist  remove(strike-through) add(bold)
@@ -404,7 +428,7 @@ function worklist(correct){let pi=planes.selectedIndex-1,p=plane[pi]
   if(x.state=="old")r.onclick=()=>{plane[pi].plan.i=x.i;plane[pi].plan.add=false;plane[pi].plan.m=x.m;changeplane()}
  })
 }
-function correct(){rm(set);worklist(true)}
+function correct(){rm(set);nochoice();worklist(true)}
 function summary(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  let[abs,ang]=absang(totalcor())
  ac(set,ct("plane "+(1+pi)+" ∑: "+small(abs)+" "+massunit.value+lengthunit.value+" at "+smaller(ang)+"°"))
@@ -426,6 +450,74 @@ function summary(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
 function totalcor(){let pi=planes.selectedIndex-1,p=plane[pi],C=0,S=0
  p.mass.filter(x=>x.state=="old").forEach(x=>{let phi=p.deg[x.i]*Math.PI/180,c=Math.cos(phi),s=Math.sin(phi),R=p.r[x.i];C+=x.m*R*c;S+=x.m*R*s})
  return[C,S]}
+
+function split2(){let pi=planes.selectedIndex-1,p=plane[pi],ang=(p.targetang>180)?p.targetang-180:p.targetang+180
+ let i=-1,j=-1,blocked=[];p.mass.forEach(x=>{if(!blocked.includes(x.i))blocked.push(x.i)})
+ p.deg.forEach((x,k)=>{let d=Math.abs(x-ang);if((!blocked.includes(k))&&(d<179)){if((i<0)||(d<Math.abs(p.deg[i]-ang)))i=k}})
+ if(i<0)return
+ if(1>Math.abs(p.deg[i]-ang)){p.mass.push({i:i,m:p.targetabs,state:"new"});changeplane();return}
+ let si=Math.sign(p.deg[i]-ang)
+ p.deg.forEach((x,k)=>{let d=Math.abs(x-ang),s=Math.sign(x-ang);if((!blocked.includes(k))&&(d<179)&&(s!=si)){if((j<0)||(d<Math.abs(p.deg[j]-ang)))j=k}})
+ if(j<0){p.mass.push({i:i,m:Math.cos((p.deg[i]-ang)/180*Math.PI)*p.targetabs,state:"new"});changeplane();return} 
+ let phi1=p.deg[i]/180*Math.PI,phi2=p.deg[j]/180*Math.PI,phi=ang/180*Math.PI
+ let a=Math.cos(phi1),b=Math.cos(phi2),c=Math.sin(phi1),d=Math.sin(phi2),e=p.targetabs*Math.cos(phi),f=p.targetabs*Math.sin(phi)
+ let[x,y]=solve2(a,b,c,d,e,f)
+ p.mass.push({i:i,m:x,state:"new"});p.mass.push({i:j,m:y,state:"new"});changeplane()
+}
+function solve2(a,b,c,d,e,f){
+ if(Math.abs(a)>=Math.abs(c)){
+  let alpha=c/a,beta=d-b*alpha,gamma=f-e*alpha,y=gamma/beta,x=(e-b*y)/a;return[x,y]
+ }else{
+  let alpha=a/c,beta=b-d*alpha,gamma=e-f*alpha,y=gamma/beta,x=(f-d*y)/c;return[x,y]
+}}
+function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=ge("automasses").value.split(" ").map(x=>+x),rem=ge("allowremove").checked,nmax=+ge("maxpos").value
+ let phi=p.deg.map(x=>x/180*Math.PI),tp=p.targetang/180*Math.PI,ct=p.targetabs*Math.cos(tp),st=p.targetabs*Math.sin(tp); M.unshift(0)
+ //let idx=new Array(phi.length).fill(0).map((x,i)=>i)
+ let orig=x=>x
+ if(rem){let[a,b]=totalcor();ct-=a;st-=b}
+ else{
+  let b=new Array(phi.length).fill(1)
+  p.mass.forEach(x=>b[x.i]=0)
+  phi=phi.filter((x,i)=>b[i])
+  let idx=[];b.forEach((x,i)=>{if(x)idx.push(i)})
+  orig=function(P){let r=new Array(p.deg.length).fill(0);P.forEach((x,i)=>r[idx[i]]=x);return r} //transform permutation back to orig indexes
+ }
+ let C=phi.map((x,i)=>p.r[i]*Math.cos(x)),S=phi.map((x,i)=>p.r[i]*Math.sin(x))
+ let P=new Array(phi.length).fill(0),mx=M.length
+ 
+ let best={}
+ 
+ while(nextperm(P,mx)){ let n=count(P);if(n>nmax)continue
+  let c=ct,s=st;
+  for(let i=0;i<P.length;i++){let m=M[P[i]];c+=m*C[i];s+=m*S[i]}
+  let e=c*c+s*s
+  if((!(n in best))||(e<best[n].e)){best[n]={e:e,p:[...P]}}
+ }
+ 
+ let l=1;for(let i=2;i<1+nmax;i++){if(best[i].e>=best[l].e){delete best[i]}else{l=i}}
+ for(let k in best){best[k].p=orig(best[k].p)}
+
+ console.log("best",best)
+ 
+ p.choice={}
+ for(let n in best){
+  let P=[...best[n].p];
+  let c=[]
+  if(!rem)p.mass.forEach(x=>{if(x.state=="old")c.push({i:x.i,m:x.m,state:"old"})})
+  P.forEach((q,i)=>{ 
+   let o=p.mass.filter(x=>x.i==i)
+   let k=o.findIndex(x=>x.m==M[P[i]])
+   if(k>=0){  c.push({i:i,m:M[P[i]],state:"old"}) }           //keep old one
+   else{ if(P[i])c.push({i:i,m:M[P[i]],state:"new"})}      //add new
+   o.forEach(x=>c.push({i:x.i,m:x.m,state:"remove"}))      //remove all old additionals
+  })
+  p.choice[n]=c
+ }
+ changeplane()
+}
+function nextperm(p,n){let i=0;while(i<p.length){p[i]++;if(p[i]==n){p[i]=0;i++}else{return true}};return false}
+function count(p){let n=0;for(let i=0;i<p.length;i++)n+=p[i]!=0;return n}
+function nochoice(){plane[planes.selectedIndex-1].choice={}}
 
 // plane[i].plan.i=j;plane[i].plan.add=false;plane[i].plan.m=m;changeplane()
 
