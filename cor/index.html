@@ -47,7 +47,7 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
  <tr><td>length unit</td><td><input id="lengthunit" value="mm"/></td></tr>
  <tr><td>auto masses</td><td><input id="automasses" value="0.9 1.5 2.7"/></td></tr>
  <tr><td>max pos</td><td><input type="number" id="maxpos" value="4"/></td></tr>
- <tr><td>allow remove</td><td><input id="allowremove" type="checkbox" checked/></td></tr>
+ <tr><td>remove mass</td><td><select id="removemass"><option>minimal</option><option>any</option><option>never</option></select></td></tr>
  </table>
  <hr/>
  <span class="link" onclick=save()>save</span><br/>
@@ -123,7 +123,7 @@ function reset(){
  }
 }
 function newplane(){
- let q={r:[],deg:[],mark:[],mass:[],choice:{},dir:1,targetabs:1.0,targetang:30,plan:{}}
+ let q={r:[],deg:[],mark:[],mass:[],choice:{},dir:1,targetabs:1.0,targetang:30,plan:{add:true}}
  if(plane.length){
   if(confirm("copy positions from plane "+plane.length+"?")){
    let p=plane[plane.length-1]
@@ -318,7 +318,7 @@ function planned(){let p=plane[planes.selectedIndex-1],C=0,S=0;
  
 function absang(cs){let a=Math.atan2(cs[1],cs[0])*180/Math.PI;return[Math.hypot(cs[0],cs[1]),(a<0)?a+360:a]}
 
-function pushbutton(){console.log("pushbutton",but.value)
+function pushbutton(){
  if(but.value.startsWith("+"))return addplane()
  if(but.value.startsWith("-"))return delplane()
  changeplane()
@@ -330,6 +330,8 @@ function small(x){let s=String(x);return(s.length>6)?x.toPrecision(4):s}
 function smaller(x){return x.toFixed(0)}
 
 function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
+ if(p.deg.length==0){but.selectedIndex=0;return changeplane()}
+
  //target
  let t=ac(set,ce("table")),r=ac(t,ce("tr"))
  ac(r,ce("th"));ac(r,ce("th")).textContent=massunit.value+lengthunit.value;ac(r,ce("th")).textContent="angle"
@@ -379,8 +381,14 @@ function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  po.onchange=()=>plane[pi].plan.i=po.selectedIndex
  
  let ok=ac(d,ce("button"));ok.textContent="ok";ok.onclick=e=>{
+  
   let j=p.mass.findIndex(x=>(x.state=="old")&&(x.m==p.plan.m)&&(x.i==p.plan.i))
+  console.log("p.plan.add",p.plan.add,"j",j, "m", p.plan.m, "i", p.plan.i)
   if((p.plan.add===false)&&(j<0)){alert("cannot find mass "+p.plan.m+" at position "+p.plan.i);return}
+  if(p.plan.add){
+   if(p.plan.i===undefined){alert("no position is selected");return}
+   if(p.plan.m===undefined){alert("mass value is missing");return}
+  }
   if(p.plan.add==false)plane[pi].mass[j].state="remove"
   else                 plane[pi].mass.push({m:p.plan.m,i:p.plan.i,state:"new"})
   changeplane()}
@@ -389,7 +397,8 @@ function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  ac(set,ce("hr"));autobuttons()
  
  //choices(auto results)
- if(Object.keys(p.choice).length)choices(p,p.choice)
+ if("string"===typeof p.choice)ac(set,tc(p.choice))
+ else if(Object.keys(p.choice).length)choices(p,p.choice)
  
  ac(set,ce("hr"));worklist(false)
 }
@@ -470,10 +479,13 @@ function solve2(a,b,c,d,e,f){
  }else{
   let alpha=a/c,beta=b-d*alpha,gamma=e-f*alpha,y=gamma/beta,x=(f-d*y)/c;return[x,y]
 }}
-function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=ge("automasses").value.split(" ").map(x=>+x),rem=ge("allowremove").checked,nmax=+ge("maxpos").value
+function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=ge("automasses").value.split(" ").map(x=>+x),rem=(ge("removemass").value!="never"),min=(ge("removemass").value=="minimal"),nmax=+ge("maxpos").value
  let phi=p.deg.map(x=>x/180*Math.PI),tp=p.targetang/180*Math.PI,ct=p.targetabs*Math.cos(tp),st=p.targetabs*Math.sin(tp); M.unshift(0)
  //let idx=new Array(phi.length).fill(0).map((x,i)=>i)
  let orig=x=>x
+ let used=new Array(p.deg.length).fill(0);p.mass.forEach(x=>{if(x.state=="old")used[x.i]=x.m})
+ let count=countNonzero
+ if(min)count=function(x){let n=0;for(let i=0;i<x.length;i++){if(M[x[i]]!=used[i])n++};return n}
  if(rem){let[a,b]=totalcor();ct-=a;st-=b}
  else{
   let b=new Array(phi.length).fill(1)
@@ -494,29 +506,30 @@ function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=ge("automasses"
   if((!(n in best))||(e<best[n].e)){best[n]={e:e,p:[...P]}}
  }
  
+ 
  let l=1;for(let i=2;i<1+nmax;i++){if(best[i].e>=best[l].e){delete best[i]}else{l=i}}
  for(let k in best){best[k].p=orig(best[k].p)}
-
- console.log("best",best)
  
  p.choice={}
  for(let n in best){
   let P=[...best[n].p];
   let c=[]
-  if(!rem)p.mass.forEach(x=>{if(x.state=="old")c.push({i:x.i,m:x.m,state:"old"})})
-  P.forEach((q,i)=>{ 
-   let o=p.mass.filter(x=>x.i==i)
-   let k=o.findIndex(x=>x.m==M[P[i]])
-   if(k>=0){  c.push({i:i,m:M[P[i]],state:"old"}) }           //keep old one
-   else{ if(P[i])c.push({i:i,m:M[P[i]],state:"new"})}      //add new
-   o.forEach(x=>c.push({i:x.i,m:x.m,state:"remove"}))      //remove all old additionals
-  })
+  if(rem){
+   p.mass.forEach(x=>{
+    if(M[P[x.i]]==x.m){c.push({i:x.i,m:x.m,state:"old"});P[x.i]=0}
+    else{c.push({i:x.i,m:x.m,state:"remove"})}
+   })
+   P.forEach((x,i)=>{if(M[x])c.push({i:i,m:M[x],state:"new"})})
+  }else{
+   p.mass.forEach(x=>{if(x.state=="old")c.push({i:x.i,m:x.m,state:"old"})})
+   P.forEach((x,i)=>{if(x){c.push({i:i,m:M[x],state:"new"})}})
+  }
   p.choice[n]=c
  }
  changeplane()
 }
 function nextperm(p,n){let i=0;while(i<p.length){p[i]++;if(p[i]==n){p[i]=0;i++}else{return true}};return false}
-function count(p){let n=0;for(let i=0;i<p.length;i++)n+=p[i]!=0;return n}
+function countNonzero(p){let n=0;for(let i=0;i<p.length;i++)n+=p[i]!=0;return n}
 function nochoice(){plane[planes.selectedIndex-1].choice={}}
 
 // plane[i].plan.i=j;plane[i].plan.add=false;plane[i].plan.m=m;changeplane()
