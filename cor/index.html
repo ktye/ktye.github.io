@@ -43,10 +43,10 @@ a,.link{text-decoration:underline;color:blue;y-padding:1em}
 <div id="ani"></div>
 <div id="set"></div>
 <div id="gen">
- <table><tr><td>mass unit  </td><td><input id="massunit" value="g"/></td></tr>
+ <table><tr><td>mass unit</td><td><input id="massunit" value="g"/></td></tr>
  <tr><td>length unit</td><td><input id="lengthunit" value="mm"/></td></tr>
  <tr><td>auto masses</td><td><input id="automasses" value="0.9 1.5 2.7"/></td></tr>
- <tr><td>max pos</td><td><input type="number" id="maxpos" value="4"/></td></tr>
+ <tr><td>max pos</td><td><input type="number" id="maxpos" value="8"/></td></tr>
  <tr><td>remove mass</td><td><select id="removemass"><option>minimal</option><option>any</option><option>never</option></select></td></tr>
  </table>
  <hr/>
@@ -97,7 +97,7 @@ let planes=ge("planes"),but=ge("but"),gen=ge("gen"),massunit=ge("massunit"),leng
 
 function init(){
  newplane()
- let n=7,p=0,r=1;for(let i=0;i<n;i++){let a=(i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a);plane[p].mark.push(false)}
+ let n=12,p=0,r=1;for(let i=0;i<n;i++){let a=(i*360/n)%360;plane[p].r.push(r);plane[p].deg.push(a);plane[p].mark.push(false)}
  
 }
 function load(x){let f=x.files[0];filename=f.name;f.text().then(t=>{
@@ -289,7 +289,6 @@ function showsetup(){rm(set);let p=planes.selectedIndex-1
     plane[p].r.splice(i,1)
     plane[p].mark.splice(i,1)
     plane[p].mass.forEach((x,j)=>plane[p].mass[j].i-=(x.i>i)?1:0)
-    console.log("mass reorder",plane[p].mass)
    })
    changeplane()
   }
@@ -366,7 +365,6 @@ function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
   let ms=ac(d,sa(ce("datalist"),"id","masses"));uniqmasses().forEach(m=>ac(ms,ce("option")).value=m);
   let m=ac(dd,sa(ce("input"),"type","number","value",p.plan.m,"min",0,"list","masses","style","width:6em"));m.onchange=e=>plane[pi].plan.m=+m.value
   ac(dd,ct(" "+massunit.value))
-  console.log("select..todo")
  }else{
   let ms=ac(dd,ce("select"));p.mass.filter(x=>(x.i==p.plan.i)&&(x.state=="old")).forEach(x=>{
    let o=ac(ms,ce("option"));o.value=x.m;o.selected=x.m==p.plan.m;o.textContent=small(x.m)+" "+massunit.value
@@ -383,7 +381,6 @@ function prepare(){rm(set);let pi=planes.selectedIndex-1,p=plane[pi]
  let ok=ac(d,ce("button"));ok.textContent="ok";ok.onclick=e=>{
   
   let j=p.mass.findIndex(x=>(x.state=="old")&&(x.m==p.plan.m)&&(x.i==p.plan.i))
-  console.log("p.plan.add",p.plan.add,"j",j, "m", p.plan.m, "i", p.plan.i)
   if((p.plan.add===false)&&(j<0)){alert("cannot find mass "+p.plan.m+" at position "+p.plan.i);return}
   if(p.plan.add){
    if(p.plan.i===undefined){alert("no position is selected");return}
@@ -479,37 +476,31 @@ function solve2(a,b,c,d,e,f){
  }else{
   let alpha=a/c,beta=b-d*alpha,gamma=e-f*alpha,y=gamma/beta,x=(f-d*y)/c;return[x,y]
 }}
-function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=ge("automasses").value.split(" ").map(x=>+x),rem=(ge("removemass").value!="never"),min=(ge("removemass").value=="minimal"),nmax=+ge("maxpos").value
- let phi=p.deg.map(x=>x/180*Math.PI),tp=p.targetang/180*Math.PI,ct=p.targetabs*Math.cos(tp),st=p.targetabs*Math.sin(tp); M.unshift(0)
- //let idx=new Array(phi.length).fill(0).map((x,i)=>i)
- let orig=x=>x
+function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=clip4(ge("automasses").value.split(" ").map(x=>+x)),rem=(ge("removemass").value!="never"),min=(ge("removemass").value=="minimal"),nmax=+ge("maxpos").value
+ let tp=p.targetang/180*Math.PI,ct=p.targetabs*Math.cos(tp),st=p.targetabs*Math.sin(tp); M.unshift(0)
+ p.mass=p.mass.filter(x=>x.state=="old")
  let used=new Array(p.deg.length).fill(0);p.mass.forEach(x=>{if(x.state=="old")used[x.i]=x.m})
+ let frei=new Array(p.deg.length).fill(true);p.mass.forEach(x=>{if(x.state=="old")frei[x.i]=false})
+ let idx=new Array(p.deg.length).fill(0).map((x,i)=>i)
  let count=countNonzero
  if(min)count=function(x){let n=0;for(let i=0;i<x.length;i++){if(M[x[i]]!=used[i])n++};return n}
  if(rem){let[a,b]=totalcor();ct-=a;st-=b}
- else{
-  let b=new Array(phi.length).fill(1)
-  p.mass.forEach(x=>b[x.i]=0)
-  phi=phi.filter((x,i)=>b[i])
-  let idx=[];b.forEach((x,i)=>{if(x)idx.push(i)})
-  orig=function(P){let r=new Array(p.deg.length).fill(0);P.forEach((x,i)=>r[idx[i]]=x);return r} //transform permutation back to orig indexes
- }
- let C=phi.map((x,i)=>p.r[i]*Math.cos(x)),S=phi.map((x,i)=>p.r[i]*Math.sin(x))
- let P=new Array(phi.length).fill(0),mx=M.length
+ else{idx=idx.filter((x,i)=>frei[i])}
  
  let best={}
- 
- while(nextperm(P,mx)){ let n=count(P);if(n>nmax)continue
-  let c=ct,s=st;
-  for(let i=0;i<P.length;i++){let m=M[P[i]];c+=m*C[i];s+=m*S[i]}
-  let e=c*c+s*s
-  if((!(n in best))||(e<best[n].e)){best[n]={e:e,p:[...P]}}
+ if(idx.length<13)autocor(M,p.deg,p.r,idx,nmax,best,count,ct,st)
+ else{
+  let t=p.targetang-180;if(t<0)t+=360
+  let angdst=(x)=>{let r=Math.abs(t-x);return(r>180)?360-r:r}
+  let cmp=(x,y)=>{let X=angdst(p.deg[x]),Y=angdst(p.deg[y]);return(X<Y)?-1:(X>Y)?1:0}
+  idx.sort(cmp)
+  let a=idx.slice(0,12)                             //all on one side
+  let b=idx.slice(0,8).concat(idx.slice(-4))        //8 on one 4 on the other side
+  autocor(M,p.deg,p.r,a,nmax,best,count,ct,st)
+  autocor(M,p.deg,p.r,b,nmax,best,count,ct,st)
  }
- 
- 
- let l=1;for(let i=2;i<1+nmax;i++){if(best[i].e>=best[l].e){delete best[i]}else{l=i}}
- for(let k in best){best[k].p=orig(best[k].p)}
- 
+
+ let l=1;for(let i=2;i<1+nmax;i++){if((i in best)&&best[i].e>=0.999*best[l].e){delete best[i]}else{l=i}}
  p.choice={}
  for(let n in best){
   let P=[...best[n].p];
@@ -528,10 +519,28 @@ function automatic(){let pi=planes.selectedIndex-1,p=plane[pi],M=ge("automasses"
  }
  changeplane()
 }
+
+
+function autocor(M,deg,R,idx,nmax,best,count,ct,st){
+ let phi=idx.map(i=>deg[i]/180*Math.PI)
+ let r=idx.map(i=>R[i])
+ let C=phi.map((x,i)=>r[i]*Math.cos(x)),S=phi.map((x,i)=>r[i]*Math.sin(x))
+ let orig=P=>{let r=new Array(deg.length).fill(0);P.forEach((x,i)=>r[idx[i]]=x);return r}
+ let tryperm=function(P){let n=count(P);if(n>nmax)return
+  let c=ct,s=st
+  for(let i=0;i<P.length;i++){let m=M[P[i]];c+=m*C[i];s+=m*S[i]}
+  let e=c*c+s*s
+  if((!(n in best))||(e<best[n].e)){best[n]={e:e,p:orig(P)}}
+ }
+ let P=new Array(phi.length).fill(0),mx=M.length
+ while(nextperm(P,mx))tryperm(P)
+}
+
 function nextperm(p,n){let i=0;while(i<p.length){p[i]++;if(p[i]==n){p[i]=0;i++}else{return true}};return false}
 function countNonzero(p){let n=0;for(let i=0;i<p.length;i++)n+=p[i]!=0;return n}
 function nochoice(){plane[planes.selectedIndex-1].choice={}}
+function grade(x,cmp){ /*cmp=(x,y)=>(x<y)?-1:(x>y)?1:0*/ let r=new Array(x.length);x.forEach((q,i)=>r[i]=i);r.sort((i,j)=>cmp(x[i],x[j]));return r}
+function clip4(x){x.sort();if(x.length<5)return x;return[x[0],x[1],x[x.length-2],x[length-1]]}
 
-// plane[i].plan.i=j;plane[i].plan.add=false;plane[i].plan.m=m;changeplane()
 
 </script></body></html>
