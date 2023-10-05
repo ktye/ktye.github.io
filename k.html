@@ -20,7 +20,6 @@ window.init=function(){
 
 function krep(s){
  if(s.startsWith(" "))s=s.slice(1)
- if((s=="\\")||s=="\\h"){help();return}
  try     {K._.repl(K.KC(s));K.save()}
  catch(e){console.log(e);K.restore()}
  document.body.textContent+=" ";end()}
@@ -46,8 +45,6 @@ function end(){
  s.addRange(r)
  window.scrollTo(0,b.scrollHeight)
  b.focus()}
-
-function help(){fetch("readme").then(r=>r.text()).then(t=>{document.body.textContent+=t+" ";end()})}
 
 </script>
 </head>
