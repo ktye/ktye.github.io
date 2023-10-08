@@ -18,7 +18,7 @@ body{min-height:100vh;margin:0;padding:0;overflow:hidden}
 } 
 </style>
 </head>
-<body onload="init()">
+<body onload="resize()">
 <canvas   id="cnv"></canvas>
 <textarea id="edt"></textarea>
 <pre      id="out"></pre>
@@ -26,12 +26,13 @@ body{min-height:100vh;margin:0;padding:0;overflow:hidden}
 <script>
 function ge(x){return document.getElementById(x)}
 function fe(x,f){fetch(x).then(r=>r.text()).then(r=>f(r))}
+function db(f,d=200){let t;return()=>{clearTimeout(t);t=setTimeout(()=>f(),d)}}
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
-let cnv=ge("cnv"),edt=ge("edt"),out=ge("out"),sel=ge("sel")
-sel.onchange=()=>{fe(sel.value,t=>{edt.value=t;kinit()})}
-function init(){sel.onchange()}
-function banner(x){out.textContent="ktye/k "+x.byteLength+"\n";return x}
+let cnv=ge("cnv"),edt=ge("edt"),sel=ge("sel"),out=ge("out"),O=(s)=>out.textContent+=s
+window.onresize=db(resize);sel.onchange=()=>resize()
+
+function resize(){out.textContent="";fe(sel.value,t=>{edt.value=t;kinit()})}
 
 let /*there be*/ K
 let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
@@ -40,11 +41,11 @@ let kenv={env:{
  Args:  function(       ){return 0},
  Arg:   function(x,y    ){return 0},
  Read:  function(a,b,c  ){return -1},
- Write: function(a,b,c,d){out.textContent+=su(new Uint8Array(K.memory.buffer,c,d));return 0},
+ Write: function(a,b,c,d){O(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))}}}
 function kinit(){
- fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(banner(r),kenv)).then(r=>{
+ fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(ban(r),kenv)).then(r=>{
   K=r.instance.exports
   K.kinit()
   xcal=[];xreg("xxx",xxx);
@@ -54,8 +55,7 @@ let xcal=[],xreg=(name,g)=>{xcal.push(g)
  let f=K.l2(BigInt(xcal.length-1),Ks(name))       //external function representation idx-as-verb,name
  I()[(lo(f)>>>2)-3]=1                             //arity(here:monadic only)
  f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))) //type tag xf
- asn(name,f)}
-function xxx(x){return x}
+ asn(name,f)},
 KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
 KF=x=>{let r=K.mk(21,x.length  );F().set(x,lo(r)>>>3);return r},
 KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
@@ -64,10 +64,12 @@ KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return 
 IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},
 FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},
 ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},
-DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r}
-Ks=x=>K.sc(KC(x))
-asn=(s,y)=>K.dx(K.Asn(Ks(s),y))
+DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r},
+Ks=x=>K.sc(KC(x)),
+asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
+ban=(x)=>{O("ktye/k "+x.byteLength+"\n");return x}
 
+function xxx(x){return x}
 
 
 </script>

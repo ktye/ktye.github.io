@@ -1,5 +1,5 @@
 st:()
-ps:{ev'`t x;`0}
+ps:{ev'`t x[&-1<i]:"/%"#"/%"i:"%/"?x;`0}
 pu:{st,:x}
 po:{r: *|st;st::-1_st;r}
 xy:{r:-2#st;st::-2_st;r}
@@ -19,4 +19,5 @@ bi:{
  copy:{[]n:-po[];st,:n#st}
  roll:{[]i:po[];n:-po[];st::(n_st),ro[-i;n#st]}
  exch:{pu'xy[]} }
-`<"PS>"
+
+`<"PS>"   /ps in tu le ta st il
