@@ -6,6 +6,7 @@
 <style>
 *{font-family:monospace}
 .q{color:blue}.q:hover{cursor:pointer}
+.h{background:#ffe}
 body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 #ref{display:inline-block;background:#ffe}
 #tty{display:inline-block;background:black;color:white;width:100%;margin-left:1em}
@@ -22,16 +23,24 @@ function ce(x){return document.createElement(x)}
 function ct(x){return document.createTextNode(x)}
 function tc(x,y){x.textContent=y;return x}
 function ac(x,y){x.appendChild(y);return y}
+function id(x,y){x.id=y;return x}
 function fe(u,f){fetch(u).then(r=>r.text()).then(f)}
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x),te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+let fn={}
 function init(){let ref=ge("ref")
  let w="flp add neg sub fst mul sqr div til key wer min rev max asc les dsc mor grp eql not mtc enl cat srt cut cnt tak flr drp str cst unq fnd typ atx val cal".split(" ")
  w.forEach(x=>{ref.innerHTML=ref.innerHTML.split(" "+x+" ").join(" <span class='q' onclick='goto(\""+x+"\")'>"+x+"</span> ")})
  ge("tty").textContent=" \n".repeat(25)
- fe("klisp/kl.c",x=>ge("src").textContent=x)
+ fe("k.go",x=>{//ge("src").textContent=x
+  let v=x.split("\n")
+  let a=v.map((x,i)=>(x.startsWith("func ")?i:-1)).filter(x=>x>=0)
+  let f=v.filter((x,i)=>a.includes(i)).map(x=>x.slice(5,x.indexOf('(')))
+  f.forEach((x,i)=>fn[x]=a[i])
+  v.forEach((x,i)=>{ac(ge("src"),a.includes(i)?id(tc(ce("span"),x+"\n"),"fn:"+f[i]):ct(x+"\n"))})
+ })
  kinit("3*4")
 }
-function goto(x){ge("src").textContent="goto..."+x}
+function goto(x){let s=ge("fn:"+x);s.scrollIntoView();s.classList.add("h")}
 function ttysize(){let mono=ge("mono");let n=mono.textContent.length;return[Math.floor(ge("tty").clientHeight/mono.clientHeight),Math.floor(n*ge("tty").clientWidth/mono.clientWidth)]}
 
 let /*there be*/ K
