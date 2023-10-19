@@ -10,7 +10,7 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 #ref{display:inline-block;background:#ffe}
 #tty{display:inline-block;background:black;color:white;width:100%;margin-left:1em}
 #top{display:flex}
-#src{overflow:auto}
+#src{overflow:auto;outline:none}
 #mono{position:absolute;left:100;top:100;visibility:hidden}
 </style>
 </head>
@@ -45,12 +45,13 @@ let kenv={env:{
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))}}}
 function O(s){let o=ge("tty");console.log("kout", s);o.textContent+=s}
-function kinit(a){
- fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
+function kinit(a){let s,sz=x=>{s=x.byteLength;return x}
+ fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(sz(r),kenv)).then(r=>{
  K=r.instance.exports
  K.kinit()
  let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC((cols-2)+" 50")))))
- K.Val(KC(a));O("ktye/k\n ")})
+ O("ktye/k "+s+"\n "+a+"\n")
+ K.repl(KC(a));O(" ")})
 }
 let
 KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
@@ -88,7 +89,7 @@ n?n(with)   random   -n?n(w/o)
 </pre>
 <pre id="tty">xx</pre>
 </div>
-<pre id="src"></pre>
+<pre id="src" contenteditable spellcheck="false"></pre>
 <pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
 </body>
 
