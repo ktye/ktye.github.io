@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="32x32" href="db/kelas32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="db/kelas16.png">
+<title>ktye</title>
+<style>
+*{font-family:monospace}
+.q{color:blue}.q:hover{cursor:pointer}
+body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+#ref{display:inline-block;background:#ffe}
+#tty{display:inline-block;background:black;color:white;width:100%;margin-left:1em}
+#top{display:flex}
+#src{overflow:auto}
+#mono{position:absolute;left:100;top:100;visibility:hidden}
+</style>
+</head>
+<body onload="init()">
+
+<script>
+function ge(x){return document.getElementById(x)}
+function ce(x){return document.createElement(x)}
+function ct(x){return document.createTextNode(x)}
+function tc(x,y){x.textContent=y;return x}
+function ac(x,y){x.appendChild(y);return y}
+function fe(u,f){fetch(u).then(r=>r.text()).then(f)}
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x),te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
+function init(){let ref=ge("ref")
+ let w="flp add neg sub fst mul sqr div til key wer min rev max asc les dsc mor grp eql not mtc enl cat srt cut cnt tak flr drp str cst unq fnd typ atx val cal".split(" ")
+ w.forEach(x=>{ref.innerHTML=ref.innerHTML.split(" "+x+" ").join(" <span class='q' onclick='goto(\""+x+"\")'>"+x+"</span> ")})
+ ge("tty").textContent=" \n".repeat(25)
+ fe("klisp/kl.c",x=>ge("src").textContent=x)
+ kinit("3*4")
+}
+function goto(x){ge("src").textContent="goto..."+x}
+function ttysize(){let mono=ge("mono");let n=mono.textContent.length;return[Math.floor(ge("tty").clientHeight/mono.clientHeight),Math.floor(n*ge("tty").clientWidth/mono.clientWidth)]}
+
+let /*there be*/ K
+let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),lo=x=>Number(BigInt.asUintN(32,x))
+let kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){O(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))}}}
+function O(s){let o=ge("tty");console.log("kout", s);o.textContent+=s}
+function kinit(a){
+ fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
+ K=r.instance.exports
+ K.kinit()
+ let[rows,cols]=ttysize();K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC((cols-2)+" 50")))))
+ K.Val(KC(a));O("ktye/k\n ")})
+}
+let
+KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
+Ks=x=>K.sc(KC(x))
+
+</script>
+
+<div id="top">
+<pre id="ref">
+ktye/k ktye.github.io intro.md
++ flp add  '  ech both bin lin
+- neg sub  /  ovr/fix echright
+* fst mul  \  scn/fix eachleft
+% sqr div      / join   decode
+! til key  mod \ split  encode
+& wer min  $[a;b;...]     cond
+| rev max  while[c;a;b;d;e;..]
+< asc les  f:{x+y}   [bl;o;ck]
+> dsc mor              "abc" c
+= grp eql  01234567   1 2 3  i
+~ not mtc   :+-*%&|   4 5 6. f
+, enl cat  <>=~!,^#   2a300  z
+^ srt cut  _$?@.     (1;2 3) L
+# cnt tak           `a`b!5 6 D
+_ flr drp  t,d t,t t,'t   join
+$ str cst           k!t    key
+? unq fnd  in       k?t  group
+@ typ atx  @[x;i;+;y]    amend
+. val cal  .[x;i;+;y]    dmend
+
+abs sin cos exp log find angle
+imag conj  types:cisfzLDTvcdlx
+?n(uniform) ?-n(normal) ?z(bi)
+n?n(with)   random   -n?n(w/o)
+</pre>
+<pre id="tty">xx</pre>
+</div>
+<pre id="src"></pre>
+<pre id="mono">M 0 1 2 3 4 5 6 7 8 9 0</pre>
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
