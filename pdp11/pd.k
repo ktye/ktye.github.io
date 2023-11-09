@@ -1,6 +1,6 @@
 /pdp11 compiler
 /
-/ pd`` compiles the table in T P I S to integers (pdp11 instructions)
+/ pd`` compiles the table in T P I S to integers (pdp11 instructions) \
 / representing u16 as octal numbers. e.g. 177775 means -3
 /
 / we use r0+r1 to hold 32 bit integers and r0..r4 for i64.
@@ -52,14 +52,14 @@ pd:{[o]opts::o
  perfunc:!1+*|ifun
  em:{$[#x;x;(!0)!0#`]}              /empty prototype
  a:i(=ifun i:&T=`arg)
- atyp::`atyp \(em S   a)perfunc     /argtypes
- anam::`anam \(em S 1+a)perfunc     /argnames
- a:`a \ i(=ifun i:&T=`loc)
- ltyp::`ltyp \(em S   a)perfunc     /loctypes
- lnam::`lnam \(em S 1+a)perfunc     /locnames
- offs::`offs \(+\'-pdw atyp),'(+\'pdw ltyp) /offsets for args and locals
- ctyp::`ctyp \atyp,'ltyp
- cnam::`cnam \anam,'lnam
+ atyp::(em S   a)perfunc     /argtypes
+ anam::(em S 1+a)perfunc     /argnames
+ a:i(=ifun i:&T=`loc)
+ ltyp::(em S   a)perfunc     /loctypes
+ lnam::(em S 1+a)perfunc     /locnames
+ offs::(+\'-pdw atyp),'(+\'pdw ltyp) /offsets for args and locals
+ ctyp::atyp,'ltyp
+ cnam::anam,'lnam
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -124,7 +124,11 @@ pdast:pdstm
 pdlod:{(y 0),(0x2c282829292b i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 pdsto:{(,/y),(0x3a3636373739 i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and 
-pdasn:{y,$[I x;0x24,leb glob?S x;0x21,leb(locs ifun x)?S x]}
+/pdasn:{y,$[I x;0x24,leb glob?S x;0x21,leb(locs ifun x)?S x]}
+
+
+/local assign: mov r0,-2(r5) ... mov r3,-8(r5)
+pdasn:{y; $[I x;0+`globalassign;0]; j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j];y,,/+(10065+100*w;O'o-2*w)}
 
 / $[#pdinst S x;0;$[0N~(!fsig)?S x;`null \S x;0]];
 pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
@@ -136,8 +140,9 @@ pdcst:{(y 1),$[0x00~c:pdcast[t?S x;(t:!pdtype)?S 1+x];"";c]}
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
 pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
- 
-pdget:{y;j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j]; \,/+(16500+w;O'o-w)}
+
+/todo w:2*!.. ?
+pdget:{y;j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j];,/+(16500+w;O'o-w)}
 pdGet:{y;0x23,leb glob?S x}
 
 /pdlit:{y;i:I x;((`i`u`k`j`f!0x4141424244)t),,$[`f~t:S x;C i+!8;`i~t;leb i;`u~t;leb i;leb8 C i+!8]}
@@ -154,7 +159,7 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
 pdneg:{$[`f~t:S x;(*y),0x9a;pdsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
 pdnot:{(*y),0x45} /i32.eqz
 pdnop:{y;""}
-pdret:{(*y),0x0f}
+pdret:{y;!0} /todo rts
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
@@ -165,12 +170,16 @@ pdtyp:{y;pdtype S x} /keep as symbol
 
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
-pdadd:pd2 0x6a6a7c7ca0;pdsub:pd2 0x6b6b7d7da1
+/pdadd:pd2 0x6a6a7c7ca0;
+pdsub:pd2 0x6b6b7d7da1
 pdmul:pd2 0x6c6c7e7ea2;pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
 pdand:pdbnd:pd2 0x7171838300;pdorr:pdbor:pd2 0x7272848400;pdxor:pd2 0x7373858500
 pdneq:pd2 0x4747525262;pdeql:pd2 0x4646515161
 pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 0x4c4d575865
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
+
+//add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
+pdadd:{y;$[2~pdw S x;(push 2),(y 1),64600 05501 64601;0+`nyiaddl]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -184,7 +193,7 @@ pdcast:(0x0000a7a7aa;0x0000a7a7ab;0xacad0000b0;0xadad0000b1;0xb7b8b9ba00) /iujkf
 push:10026+100*!   /e.g. push 2 or push 4
 pop: 14600+   |!
 
-O:.,/$8\65535!65535+
+O:.,/$8\65536!65536+
 
 leb:{leb8(`c@,x),4#$[x<0;0xff;0x00]}
 leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)_x}
