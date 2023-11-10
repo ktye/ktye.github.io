@@ -57,7 +57,7 @@ pd:{[o]opts::o
  a:i(=ifun i:&T=`loc)
  ltyp::(em S   a)perfunc     /loctypes
  lnam::(em S 1+a)perfunc     /locnames
- offs::(+\'-pdw atyp),'(+\'pdw ltyp) /offsets for args and locals
+ offs::({$[#x;+\0,-1_x;!0]}'pdw atyp),'(+\'-pdw ltyp) /offsets for args and locals
  ctyp::atyp,'ltyp
  cnam::anam,'lnam
  
@@ -93,9 +93,11 @@ pdprg:{
  /elem:$[#t;s[9;(leb@#t),,/t:pdtbl y t];""]
  /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
- r:0 12705 177776
+ init: 12706 157777           /init sp
+ init,:12700 177777 12701 0,push 2    /mov #177777,r0 
+ init,:12700 3 12701 0,push 2    /mov #3,r0 
  c:1_&P=0;f:y fn:&`fun=T c;
- ,/f}
+ init,,/f}
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
 pdmem:{y;""}
@@ -113,7 +115,10 @@ pdfun:{
  /(leb@#r),r:locs,((- 0x0f~*|body)_body),0x0b}
  c:&x=P
  body:y@*&`ast=T c
- body}
+ pro:010605     /mov sp,r5
+ pro,:5000 5001 /clear r0/r1
+ /todo push locals
+ pro,body}
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
@@ -128,7 +133,7 @@ pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and
 
 
 /local assign: mov r0,-2(r5) ... mov r3,-8(r5)
-pdasn:{y; $[I x;0+`globalassign;0]; j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j];y,,/+(10065+100*w;O'o-2*w)}
+pdasn:{y; $[I x;0+`globalassign;0]; j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j];y,,/+(10065+100*w;O'o-2*|w)}
 
 / $[#pdinst S x;0;$[0N~(!fsig)?S x;`null \S x;0]];
 pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
@@ -142,7 +147,7 @@ pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
 /todo w:2*!.. ?
-pdget:{y;j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j];,/+(16500+w;O'o-w)}
+pdget:{y;j:(cnam i:ifun x)?S x;`offs \offs;o:`o \offs[i;j];w:pdw ctyp[i;j];(push w),,/+(16500+!w;O'o+|2*!w)}
 pdGet:{y;0x23,leb glob?S x}
 
 /pdlit:{y;i:I x;((`i`u`k`j`f!0x4141424244)t),,$[`f~t:S x;C i+!8;`i~t;leb i;`u~t;leb i;leb8 C i+!8]}
@@ -159,7 +164,7 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
 pdneg:{$[`f~t:S x;(*y),0x9a;pdsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
 pdnot:{(*y),0x45} /i32.eqz
 pdnop:{y;""}
-pdret:{y;!0} /todo rts
+pdret:{y; ,/y} /todo rts
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
@@ -179,7 +184,7 @@ pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;$[2~pdw S x;(push 2),(y 1),64600 05501 64601;0+`nyiaddl]}
+pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601;0+`nyiaddl]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -190,8 +195,9 @@ pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpre
 
 pdcast:(0x0000a7a7aa;0x0000a7a7ab;0xacad0000b0;0xadad0000b1;0xb7b8b9ba00) /iujkf
 
-push:10026+100*!   /e.g. push 2 or push 4
-pop: 14600+   |!
+push:10046+100*|!   /e.g. push 2 or push 4
+pop: 12600+     !
+
 
 O:.,/$8\65536!65536+
 
