@@ -7,33 +7,56 @@
 / low bits are in r0, also comparison results.
 / r6 is the stack pointer(sp), initially at 177776 growing downwards.
 /
-/ on function entry arguments are on the stack
-/   +=============+  sp(r6)
-/   | x  i32    2 |
-/   +-------------+
-/   | y  i64    4 |  (4 words)
-/   +-------------+
+/ on function entry arguments are on the stack.
+/ values on the stack are always 64 bits (4 words).
+/   +---------+
+/   | x     4 |
+/   +---------+
+/   | y     4 |
+/   +=========+  sp(r6)
 /
-/ the function stores sp in r5 and pushes it's locals
-/   +=============+  sp
-/   | l1 i32    2 |
-/   +-------------+
-/   | l0 i32    2 |
-/   +-------------+  r5
-/   | x  i32    2 |
-/   +-------------+
-/   | y  i64    4 |
-/   +-------------+
-/ now arguments are at r5-i and locals r5+i
+/ the function sets r5 to the start of the arguments
+/ and pushes it's locals
+/   +---------+ r5
+/   | x     4 |
+/   +---------+
+/   | y     4 |
+/   +---------+ 
+/   | l1    4 |
+/   +---------+
+/   | l2    4 |
+/   +=========+  sp
+/ now all args/locals can be accessed by r5-4*i
+/
+/ pu/po from the stack replaces r0..r4.
+/ it takes 2 instructions: jsr pc,#push  or jsr pc,#pop
+/ #push/#pop are addresses of these operations that need 7 instructions each.
+/
+/ get[0..n] are instructions to jump to functions
+/ that copy local variables to the accumulator r0..r3
+/ set[0..n] do the reverse, they set locals to the values of r0..r3.
+/ 
+/
+/linking
+/ in the first pass all instructions are generated and absolute function
+/ addresses are replaced with negative numbers
+/ when the function is assembled the known address is collected
+/ and at the end all negative instructions are replaced with correct addresses.
+/
+/prelink addresses for assembler builtins:
+/ pu  -88888     push 1 value   on the stack
+/ po  -77777     pop  1 value from the stack
+/ get -10000-i   get local index i
+/ set -20000-i   set local index i
 
 
 F:(0#`)!()
 lp:{(~~)#@[&#x;x i;i:!#x]}
-ifun:&#T          /function index of each node
+ifun:&#T                /function index of each node
+afun:s!-1-!#s:S@&T=`fun /fname!-addr
 locs:0            
 atyp:anam:()            /argtypes  argnames for each function
-ltyp:lnam:()            /loctypes  locnames for each function
-ctyp:cnam:()            /combined arg+log names and types
+ltyp:lnam:()            /loctypes  locnames for each function (args+locs)
 offs:0                  /ifun!(symbol!offset)
 glob:0#`
 fsig:(0#`)!()
@@ -50,16 +73,16 @@ pd:{[o]opts::o
  
  ifun::1_+\-1,T=`fun                              /function index for each node
  perfunc:!1+*|ifun
- em:{$[#x;x;(!0)!0#`]}              /empty prototype
- a:i(=ifun i:&T=`arg)
- atyp::(em S   a)perfunc     /argtypes
- anam::(em S 1+a)perfunc     /argnames
- a:i(=ifun i:&T=`loc)
- ltyp::(em S   a)perfunc     /loctypes
- lnam::(em S 1+a)perfunc     /locnames
- offs::({$[#x;+\0,-1_x;!0]}'pdw atyp),'(+\'-pdw ltyp) /offsets for args and locals
- ctyp::atyp,'ltyp
- cnam::anam,'lnam
+ fill:{x[i]:(#i:&~#'x@!n:+/T=`fun)#,!0}
+ a:fill i(=ifun i:&T=`arg)
+ atyp::(S   a)perfunc     /argtypes
+ anam::(S 1+a)perfunc     /argnames
+ a:fill i(=ifun i:&T=`loc)
+ ltyp::(S   a)perfunc     /loctypes
+ lnam::(S 1+a)perfunc     /locnames
+ ltyp::atyp,'ltyp
+ lnam::anam,'lnam
+ offs::{x!-4*!#x}'lnam    /local offsets (name!off) per function
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -73,9 +96,8 @@ pd:{[o]opts::o
  
  S[0]:$[0N~i:o?`lib;S 0;o 1+i]
  n:{x[y]+:1}/(,&#P),P;n[0]-:1;
- s:{c:(0,(#x)-z)^x;(c 0),,,/(F T y)[y;|c 1]}/[();|!#P;|n]
+ s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \T y)[y;|c 1]}/[();|!#P;|n]
 *s}
- 
 
 pdprg:{
  /s:{(_x),(leb@#y),y} /0(custom) 1(type) 2(import) 3(func) 4(table) 5(mem) 6(global) 7(export) 8(start) 9(element) 10(code) 11(data) 12(data count)
@@ -141,18 +163,17 @@ pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
 pddfr:{y;""}
 pddrp:{y,0x1a}
-pdcst:{(y 1),$[0x00~c:pdcast[t?S x;(t:!pdtype)?S 1+x];"";c]}
+pdcst:{d:*y;s:S x;(y 1),$[(pdw d)>pdw s;  ]}
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
 pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
-/todo w:2*!.. ?
-pdget:{y;j:(cnam i:ifun x)?S x;`offs \offs;o:`o \offs[i;j];w:pdw ctyp[i;j];(push w),,/+(16500+!w;O'o+|2*!w)}
+pdget:{y;`get \pu,get(lnam ifun x)?S x}
 pdGet:{y;0x23,leb glob?S x}
 
 /pdlit:{y;i:I x;((`i`u`k`j`f!0x4141424244)t),,$[`f~t:S x;C i+!8;`i~t;leb i;`u~t;leb i;leb8 C i+!8]}
 /todo float
-pdlit:{y;i:I x;t:S x; x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:012700+!#x; (push w),,/+(r;x) }
+pdlit:{y;i:I x;t:S x; x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:012700+!#x;`lit \ pu,,/+(r;x) }
 
 pdjmp:{y;0x0c,_$[`~S x;1+I x;pdtrg x]}
 pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/continue
@@ -164,14 +185,14 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
 pdneg:{$[`f~t:S x;(*y),0x9a;pdsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
 pdnot:{(*y),0x45} /i32.eqz
 pdnop:{y;""}
-pdret:{y; ,/y} /todo rts
+pdret:{y;`ret \,/y} /todo rts
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
  r,,/(1_y),'0x0c,/(leb'|!n-1),\0x0b}
 pdcnd:{(*y),0x04,$[`~t:S x;0x40;pdtype t],(y 1),$[3~#y;0x05,(y 2);""],0x0b}
 
-pdtyp:{y;pdtype S x} /keep as symbol
+pdtyp:{y;`typ \S x}
 
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
@@ -184,7 +205,7 @@ pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601;0+`nyiaddl]}
+pdadd:{y;`add \$[2~pdw S x;(,/y),62600 05501 62601;0+`nyiaddl]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -193,10 +214,13 @@ pdinst:`Memorysize`Memorygrow`Memorycopy`Memoryfill!(0x3f00;0x4000;0xfc0a0000;0x
 pdinst,:`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3!(0x3f01;0x4001;0xfc0a0001;0xfc0a0100)
 pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"!,'0x67999f9ca6a4a5bfbd
 
-pdcast:(0x0000a7a7aa;0x0000a7a7ab;0xacad0000b0;0xadad0000b1;0xb7b8b9ba00) /iujkf
 
-push:10046+100*|!   /e.g. push 2 or push 4
-pop: 12600+     !
+pu:4727 -99999            /jsr pc,#push
+po:4727 -88888            /jsr pc,#pop
+PU:(10046+100*|!4),207    /push r3..r0;rts pc
+PO:(12600+     !4),207    /pop  r0..r3;rts pc
+get:4727,-10000-
+set:4727,-20000-
 
 
 O:.,/$8\65536!65536+
@@ -207,3 +231,55 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
 
+/ pdp11 refcard
+/ 
+/ register modes              pc(r7) addressing
+/  0    R     reg             2   #n  immediate
+/  1   (R)    deferred        3  @#A  absolute
+/  2   (R)+   increment       6    A  relative 
+/  3  @(R)+   def inc         7   @A  rel def
+/  4  -(R)    decrement
+/  5 @-(R)    def dec
+/  6  X(R)    index
+/  7 @X(R)    def ind
+/ 
+/ opcodes
+/  00 00 00 halt      00 60 dd ror     10 40 00
+/  00 00 01 wait      00 61 dd rol        ..    emt
+/  00 00 02 rti       00 62 dd asr     10 43 77
+/  00 00 03 bpt       00 63 dd asl
+/  00 00 04 iot       00 64 dd mark    10 44 00
+/  00 00 05 reset     00 65 dd mfpi       ..    trap
+/  00 00 06 rtt       00 66 dd mtpi    10 47 77
+/                     00 67 dd sxt
+/  00 01 dd jmp                        10 50 dd clrb
+/  00 02 or rts       01 ss dd mov     10 51 dd comb
+/                     02 ss dd cmp     10 52 dd decb
+/  00 02 3n spl       03 ss dd bit     10 53 dd necb
+/  00 02 40 nop       04 ss dd bic     10 54 dd negb
+/                     05 ss dd bis     10 55 dd adcb
+/  00 02 41 cond      06 ss dd add     10 56 dd sbcb
+/     ..    codes     07 ss dd add     10 57 dd tstb
+/  00 02 77           
+/                     07 0r ss mul     10 60 dd rorb
+/  00 03 dd swab      07 1r ss div     10 61 dd rolb
+/                     07 2r ss ash     10 62 dd asrb
+/  00 04 xx br        07 3r ss ashc    10 63 dd aslb
+/  00 10 xx bne       07 4r dd xor 
+/  00 14 xx beq                        10 65 ss mfpd
+/  00 20 xx bge       07 7r nn sob     10 66 dd mtpd
+/  00 24 xx blt
+/  00 30 xx bgt       10 00 xx bpl     11 ss dd movb
+/  00 34 xx ble       10 04 xx bmi     12 ss dd cmpb
+/                     10 10 xx bhi     13 ss dd bitb
+/  00 4r dd jsr       10 14 xx blos    14 ss dd bicb
+/                     10 20 xx bvc     15 ss dd bisb
+/  00 50 dd clr       10 24 xx bcs     16 ss dd sub
+/  00 51 dd com       10 30 xx bcc,bhis 
+/  00 52 dd inc       10 34 xx bcs,blo  
+/  00 53 dd dec
+/  00 54 dd neg       00 02 41 clc  c  sec 00 02 61
+/  00 55 dd adc       00 02 42 clv  v  sev 00 02 62
+/  00 56 dd sbc       00 02 44 clz  z  sez 00 02 64
+/  00 57 dd tst       00 02 50 cln  n  sen 00 02 70
+/                     00 02 57 ccc all scc 00 02 77
