@@ -96,7 +96,7 @@ pd:{[o]opts::o
  
  S[0]:$[0N~i:o?`lib;S 0;o 1+i]
  n:{x[y]+:1}/(,&#P),P;n[0]-:1;
- s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \T y)[y;|c 1]}/[();|!#P;|n]
+ s:{c:(0,(#x)-z)^x;(c 0),,,/(F T y)[y;|c 1]}/[();|!#P;|n]
 *s}
 
 pdprg:{
@@ -115,7 +115,7 @@ pdprg:{
  /elem:$[#t;s[9;(leb@#t),,/t:pdtbl y t];""]
  /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
- init: 12706 157777           /init sp
+ init: 12706 157777                   /init sp
  init,:12700 177777 12701 0,push 2    /mov #177777,r0 
  init,:12700 3 12701 0,push 2    /mov #3,r0 
  c:1_&P=0;f:y fn:&`fun=T c;
@@ -151,29 +151,25 @@ pdast:pdstm
 pdlod:{(y 0),(0x2c282829292b i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 pdsto:{(,/y),(0x3a3636373739 i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and 
-/pdasn:{y,$[I x;0x24,leb glob?S x;0x21,leb(locs ifun x)?S x]}
 
 
-/local assign: mov r0,-2(r5) ... mov r3,-8(r5)
-pdasn:{y; $[I x;0+`globalassign;0]; j:(cnam i:ifun x)?S x;o:offs[i;j];w:!pdw ctyp[i;j];y,,/+(10065+100*w;O'o-2*|w)}
+pdasn:{y;(y 0),$[I x;0+`globalassign;set(lnam ifun x)?S x]}
+pdget:{y;pu,get(lnam ifun x)?S x}
+pdGet:{y;0x23,leb glob?S x}
 
-/ $[#pdinst S x;0;$[0N~(!fsig)?S x;`null \S x;0]];
+
 pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
 
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
 pddfr:{y;""}
 pddrp:{y,0x1a}
-pdcst:{d:*y;s:S x;(y 1),$[(pdw d)>pdw s;  ]}
+pdcst:{d:*y;s:S x;(y 1),$[(pdw d)~pdw s;!0;0+`cast]}
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
 pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
-pdget:{y;`get \pu,get(lnam ifun x)?S x}
-pdGet:{y;0x23,leb glob?S x}
 
-/pdlit:{y;i:I x;((`i`u`k`j`f!0x4141424244)t),,$[`f~t:S x;C i+!8;`i~t;leb i;`u~t;leb i;leb8 C i+!8]}
-/todo float
-pdlit:{y;i:I x;t:S x; x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:012700+!#x;`lit \ pu,,/+(r;x) }
+pdlit:{y;i:I x;t:S x; pu,$[t?`i`u; 12701,(O i),5001; 0+`lit64]}  /x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:12700+!#x;`lit \ pu,,/+(r;x)
 
 pdjmp:{y;0x0c,_$[`~S x;1+I x;pdtrg x]}
 pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/continue
@@ -185,14 +181,14 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
 pdneg:{$[`f~t:S x;(*y),0x9a;pdsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
 pdnot:{(*y),0x45} /i32.eqz
 pdnop:{y;""}
-pdret:{y;`ret \,/y} /todo rts
+pdret:{y;,/y} /todo rts
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
  r,,/(1_y),'0x0c,/(leb'|!n-1),\0x0b}
 pdcnd:{(*y),0x04,$[`~t:S x;0x40;pdtype t],(y 1),$[3~#y;0x05,(y 2);""],0x0b}
 
-pdtyp:{y;`typ \S x}
+pdtyp:{y;S x}
 
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
@@ -205,7 +201,7 @@ pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;`add \$[2~pdw S x;(,/y),62600 05501 62601;0+`nyiaddl]}
+pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601;0+`nyiaddl]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -223,13 +219,41 @@ get:4727,-10000-
 set:4727,-20000-
 
 
-O:.,/$8\65536!65536+
+O:10/8\65536!
 
 leb:{leb8(`c@,x),4#$[x<0;0xff;0x00]}
 leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)_x}
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
+/ pu  -88888     push 1 value   on the stack
+/ po  -77777     pop  1 value from the stack
+/ get -10000-i   get local index i
+/ set -20000-i   set local index i
+
+builtins:!/+-2^(-99999;(10046+100*|!4),207           /push r3..r0;rts pc
+                -88888;(12600+     !4),207           /pop  r0..r3;rts pc
+ -10000;11500 16501 02 16502 04 16503 06 207         /mov  0(r5),r0 ..  6(r5),r3;rts pc  (get x0)
+ -10001;16500 10 16501 12 16502 14 16503 16 207      /mov 10(r5),r0 .. 16(r5),r3;rts pc  (get x1)
+ -10002;16500 20 16501 22 16502 24 16503 26 207      /mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
+ -10003;16500 30 16501 32 16502 34 16503 36 207      /mov 30(r5),r0 .. 36(r5),r3;rts pc  (get x3)
+ -10004;16500 40 16501 42 16502 44 16503 46 207      /mov 40(r5),r0 .. 46(r5),r3;rts pc  (get x4)
+ -10005;16500 50 16501 52 16502 54 16503 56 207      /mov 50(r5),r0 .. 56(r5),r3;rts pc  (get x5)
+ -10006;16500 60 16501 62 16502 64 16503 66 207      /mov 60(r5),r0 .. 66(r5),r3;rts pc  (get x6)
+ -10007;16500 70 16501 72 16502 74 16503 76 207      /mov 70(r5),r0 .. 76(r5),r3;rts pc  (get x7)
+ -10008;16500 100 16501 102 16502 104 16503 106 207  /mov 80(r5),r0 .. 86(r5),r3;rts pc  (get x8)
+ -10009;16500 110 16501 112 16502 114 16503 116 207  /mov 90(r5),r0 .. 96(r5),r3;rts pc  (get x9)
+ -10000;10065 00 10165 02 10265 04 10365 06 207      /mov r0, 0(r5) .. r3, 6(r5);rts pc  (set x0)
+ -10001;10065 10 10165 12 10265 14 10365 16 207      /mov r0,10(r5) .. r3,16(r5);rts pc  (set x1)
+ -10002;10065 20 10165 22 10265 24 10365 26 207      /mov r0,20(r5) .. r3,26(r5);rts pc  (set x2)
+ -10003;10065 30 10165 32 10265 34 10365 36 207      /mov r0,30(r5) .. r3,36(r5);rts pc  (set x3)
+ -10004;10065 40 10165 42 10265 44 10365 46 207      /mov r0,40(r5) .. r3,46(r5);rts pc  (set x4)
+ -10005;10065 50 10165 52 10265 54 10365 56 207      /mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
+ -10006;10065 60 10165 62 10265 64 10365 66 207      /mov r0,60(r5) .. r3,66(r5);rts pc  (set x6)
+ -10007;10065 70 10165 72 10265 74 10365 76 207      /mov r0,70(r5) .. r3,76(r5);rts pc  (set x7)
+ -10008;10065 100 10165 102 10265 104 10365 106 207  /mov r0,80(r5) .. r3,86(r5);rts pc  (set x8)
+ -10009;10065 110 10165 112 10265 114 10365 116 207  /mov r0,90(r5) .. r3,96(r5);rts pc  (set x9)
+)
 
 / pdp11 refcard
 / 
