@@ -153,8 +153,8 @@ pdsto:{(,/y),(0x3a3636373739 i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and 
 
 
-pdasn:{y;(y 0),$[I x;0+`globalassign;set(lnam ifun x)?S x]}
-pdget:{y;pu,get(lnam ifun x)?S x}
+pdasn:{y;(y 0),$[I x;0+`globalassign;set setbuiltin(lnam ifun x)?S x]}
+pdget:{y;pu,get getbuiltin(lnam ifun x)?S x}
 pdGet:{y;0x23,leb glob?S x}
 
 
@@ -232,28 +232,13 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 / set -20000-i   set local index i
 
 builtins:!/+-2^(-99999;(10046+100*|!4),207           /push r3..r0;rts pc
-                -88888;(12600+     !4),207           /pop  r0..r3;rts pc
- -10000;11500 16501 02 16502 04 16503 06 207         /mov  0(r5),r0 ..  6(r5),r3;rts pc  (get x0)
- -10001;16500 10 16501 12 16502 14 16503 16 207      /mov 10(r5),r0 .. 16(r5),r3;rts pc  (get x1)
- -10002;16500 20 16501 22 16502 24 16503 26 207      /mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
- -10003;16500 30 16501 32 16502 34 16503 36 207      /mov 30(r5),r0 .. 36(r5),r3;rts pc  (get x3)
- -10004;16500 40 16501 42 16502 44 16503 46 207      /mov 40(r5),r0 .. 46(r5),r3;rts pc  (get x4)
- -10005;16500 50 16501 52 16502 54 16503 56 207      /mov 50(r5),r0 .. 56(r5),r3;rts pc  (get x5)
- -10006;16500 60 16501 62 16502 64 16503 66 207      /mov 60(r5),r0 .. 66(r5),r3;rts pc  (get x6)
- -10007;16500 70 16501 72 16502 74 16503 76 207      /mov 70(r5),r0 .. 76(r5),r3;rts pc  (get x7)
- -10008;16500 100 16501 102 16502 104 16503 106 207  /mov 80(r5),r0 .. 86(r5),r3;rts pc  (get x8)
- -10009;16500 110 16501 112 16502 114 16503 116 207  /mov 90(r5),r0 .. 96(r5),r3;rts pc  (get x9)
- -10000;10065 00 10165 02 10265 04 10365 06 207      /mov r0, 0(r5) .. r3, 6(r5);rts pc  (set x0)
- -10001;10065 10 10165 12 10265 14 10365 16 207      /mov r0,10(r5) .. r3,16(r5);rts pc  (set x1)
- -10002;10065 20 10165 22 10265 24 10365 26 207      /mov r0,20(r5) .. r3,26(r5);rts pc  (set x2)
- -10003;10065 30 10165 32 10265 34 10365 36 207      /mov r0,30(r5) .. r3,36(r5);rts pc  (set x3)
- -10004;10065 40 10165 42 10265 44 10365 46 207      /mov r0,40(r5) .. r3,46(r5);rts pc  (set x4)
- -10005;10065 50 10165 52 10265 54 10365 56 207      /mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
- -10006;10065 60 10165 62 10265 64 10365 66 207      /mov r0,60(r5) .. r3,66(r5);rts pc  (set x6)
- -10007;10065 70 10165 72 10265 74 10365 76 207      /mov r0,70(r5) .. r3,76(r5);rts pc  (set x7)
- -10008;10065 100 10165 102 10265 104 10365 106 207  /mov r0,80(r5) .. r3,86(r5);rts pc  (set x8)
- -10009;10065 110 10165 112 10265 114 10365 116 207  /mov r0,90(r5) .. r3,96(r5);rts pc  (set x9)
-)
+                -88888;(12600+     !4),207)          /pop  r0..r3;rts pc
+
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:16500 0 16501 2 16502 4 16503 6 207+(,/+2^(&4),O (8*x)+&4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
+setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6 207+(,/+2^(&4),O (8*x)+&4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
+		
+
+/11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
 
 / pdp11 refcard
 / 
