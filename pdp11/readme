@@ -1,1 +1,6 @@
-emulator source: pdp11.aiju.de (mit)
+other emulators:
+ (1) pd11.aiju.de         js, runs unix, mmu but no split I/D mode, no floats
+ (2) nankervis-pdp11-js   js, nice graphics, comprehensive
+ (3) rsc/unix/pdp11       go, unix-builtin runs user space, no I/D, floats
+ (4) simh/PDP11           c, probably does everything
+ ...

@@ -1,57 +1,4 @@
-/pdp11 compiler
-/
-/ pd`` compiles the table in T P I S to integers (pdp11 instructions) \
-/ representing u16 as octal numbers. e.g. 177775 means -3
-/
-/ we use r0+r1 to hold 32 bit integers and r0..r4 for i64.
-/ low bits are in r0, also comparison results.
-/ r6 is the stack pointer(sp), initially at 177776 growing downwards.
-/
-/ on function entry arguments are on the stack.
-/ values on the stack are always 64 bits (4 words).
-/   +---------+
-/   | x     4 |
-/   +---------+
-/   | y     4 |
-/   +=========+  sp(r6)
-/
-/ the function sets r5 to the start of the arguments
-/ and pushes it's locals
-/   +---------+ r5
-/   | x     4 |
-/   +---------+
-/   | y     4 |
-/   +---------+ 
-/   | l1    4 |
-/   +---------+
-/   | l2    4 |
-/   +=========+  sp
-/ now all args/locals can be accessed by r5-4*i
-/
-/ pu/po from the stack replaces r0..r4.
-/ it takes 2 instructions: jsr pc,#push  or jsr pc,#pop
-/ #push/#pop are addresses of these operations that need 7 instructions each.
-/
-/ get[0..n] are instructions to jump to functions
-/ that copy local variables to the accumulator r0..r3
-/ set[0..n] do the reverse, they set locals to the values of r0..r3.
-/ 
-/
-/linking
-/ in the first pass all instructions are generated and absolute function
-/ addresses are replaced with negative numbers
-/ when the function is assembled the known address is collected
-/ and at the end all negative instructions are replaced with correct addresses.
-/
-/prelink addresses for assembler builtins:
-/ pu  -88888     push 1 value   on the stack
-/ po  -77777     pop  1 value from the stack
-/ get -10000-i   get local index i
-/ set -20000-i   set local index i
-
-
 F:(0#`)!()
-lp:{(~~)#@[&#x;x i;i:!#x]}
 ifun:&#T                /function index of each node
 afun:s!-1-!#s:S@&T=`fun /fname!-addr
 locs:0            
@@ -94,10 +41,13 @@ pd:{[o]opts::o
  /glob::     S@&`con=T
  /glob::glob,S@&`var=T
  
- S[0]:$[0N~i:o?`lib;S 0;o 1+i]
- n:{x[y]+:1}/(,&#P),P;n[0]-:1;
+ /S[0]:`so \ $[0N~i:o?`lib;S 0;o 1+i]
+ n:{x[y]+:1}/(,&#P),P;n[0]-:1
  s:{c:(0,(#x)-z)^x;(c 0),,,/(F T y)[y;|c 1]}/[();|!#P;|n]
-*s}
+      /link@*s}   
+"0",",\n0"/$link@*s}
+
+link:{o:(!builtins)!1000+2*1_+\(#x),#'b:.builtins;@[x;i;o x i:&x<0],,/b}
 
 pdprg:{
  /s:{(_x),(leb@#y),y} /0(custom) 1(type) 2(import) 3(func) 4(table) 5(mem) 6(global) 7(export) 8(start) 9(element) 10(code) 11(data) 12(data count)
@@ -115,10 +65,8 @@ pdprg:{
  /elem:$[#t;s[9;(leb@#t),,/t:pdtbl y t];""]
  /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
- init: 12706 157777                   /init sp
- init,:12700 177777 12701 0,push 2    /mov #177777,r0 
- init,:12700 3 12701 0,push 2    /mov #3,r0 
- c:1_&P=0;f:y fn:&`fun=T c;
+ init: 12706 11776            /mov #11776,sp (init sp: 1k reserved for kos)
+ c:1_&P=0;f:y fn:&`fun=T c
  init,,/f}
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
@@ -236,6 +184,7 @@ builtins:!/+-2^(-99999;(10046+100*|!4),207           /push r3..r0;rts pc
 
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:16500 0 16501 2 16502 4 16503 6 207+(,/+2^(&4),O (8*x)+&4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6 207+(,/+2^(&4),O (8*x)+&4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
+
 		
 
 /11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
@@ -268,7 +217,7 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6
 /  00 02 40 nop       04 ss dd bic     10 54 dd negb
 /                     05 ss dd bis     10 55 dd adcb
 /  00 02 41 cond      06 ss dd add     10 56 dd sbcb
-/     ..    codes     07 ss dd add     10 57 dd tstb
+/     ..    codes                      10 57 dd tstb
 /  00 02 77           
 /                     07 0r ss mul     10 60 dd rorb
 /  00 03 dd swab      07 1r ss div     10 61 dd rolb
@@ -292,3 +241,61 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6
 /  00 56 dd sbc       00 02 44 clz  z  sez 00 02 64
 /  00 57 dd tst       00 02 50 cln  n  sen 00 02 70
 /                     00 02 57 ccc all scc 00 02 77
+
+
+
+
+
+/pdp11 compiler
+/
+/ pd`` compiles the table in T P I S to integers (pdp11 instructions)
+/ representing u16 as octal numbers. e.g. 177775 means -3
+/
+/ we use r0,r1 to hold 32 bit integers and r0..r4 for i64.
+/ low bits are in r0, also comparison results.
+/ r6 is the stack pointer(sp), initially at 11776 growing downwards.
+/
+/ on function entry arguments are on the stack.
+/ values on the stack are always 64 bits (4 words).
+/   +---------+
+/   | x     4 |
+/   +---------+
+/   | y     4 |
+/   +=========+  sp(r6)
+/
+/ the function sets r5 to the start of the arguments
+/ and pushes it's locals
+/   +---------+ r5
+/   | x     4 |
+/   +---------+
+/   | y     4 |
+/   +---------+ 
+/   | l1    4 |
+/   +---------+
+/   | l2    4 |
+/   +=========+  sp
+/ now all args/locals can be accessed by r5-4*i
+/
+/ pu/po from the stack replaces r0..r4.
+/ it takes 2 instructions: jsr pc,#push  or jsr pc,#pop
+/ #push/#pop are addresses of these operations that need 7 instructions each.
+/
+/ get[0..n] are instructions to jump to functions
+/ that copy local variables to the accumulator r0..r3
+/ set[0..n] do the reverse, they set locals to the values of r0..r3.
+/ 
+/
+/linking
+/ in the first pass all instructions are generated and absolute function
+/ addresses are replaced with negative numbers
+/ when the function is assembled the known address is collected
+/ and at the end all negative instructions are replaced with correct addresses.
+/
+/prelink addresses for assembler builtins:
+/ pu  -88888     push 1 value   on the stack
+/ po  -77777     pop  1 value from the stack
+/ get -10000-i   get local index i
+/ set -20000-i   set local index i
+
+
+
