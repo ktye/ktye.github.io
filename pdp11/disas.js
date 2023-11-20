@@ -1,4 +1,4 @@
-//the disassembler is only used to display instructions as text
+//print instructions as text
 
 let pc,rs=["r0","r1","r2","r3","r4","r5","sp","pc"],dtab=[
  [0077700, 0005000, "clr", "d", 1], [0077700, 0005100, "com", "d", 1], [0077700, 0005200, "inc", "d", 1],
@@ -58,9 +58,9 @@ function disas(a,aa){
  return   r
 }
 function disasm(O){let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
- pc=01000;while(pc<10+01000){ let id=pc.toString(8)
+ pc=01000;while(pc<100+01000){ let id=pc.toString(8)
   let p=[pc]
-  O(o(pc)+": "+o(M[pc>>1])+" [000000 000000 000000 000000] "+disas(pc,p)+"\n",id)
+  O(o(pc)+": "+o(M[pc>>1])+" [000000 000000 000000 000000][000000 000000 000000 000000] "+disas(pc,p)+"\n",id)
   pc=p[0];pc+=2
 }}
 

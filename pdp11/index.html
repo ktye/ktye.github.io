@@ -7,8 +7,8 @@
 body{margin:0}
 * {font-family:monospace;box-sizing:border-box}
 .b{font-weight:bold}
-#terminal{font-family:monospace;width:100%;height:10cm;background:#920e5a;color:white;outline:none;resize:none}
-#debug{font-family: monospace;width:100%;height:5cm;background:#ce082c;color:white;outline:none;resize:none}
+#terminal{font-family:monospace;width:100%;height:10cm;/*background:#920e5a;color:white*/;outline:none;resize:none}
+#debug{font-family: monospace;width:100%;height:5cm;background:/*#ce082c;color:white*/;outline:none;resize:none}
 #lights{border:2px solid black;border-radius:10px;display:flex;justify-content:center}
 legend{text-align:center}
 button{flex-grow:1;background:#333;color:white;height:2em}
@@ -38,10 +38,9 @@ button{flex-grow:1;background:#333;color:white;height:2em}
  }}
  let show=x=>{blink(M[x]>>1,0);if(bold!==null)bold.classList.remove("b");
   bold=ge(x.toString(8));
-  console.log("b", bold, x, x.toString(8))
   bold.classList.add("b")}
  let reset=()=>{lights();let h=document.location.hash.slice(1),asm=ge("asm")
-  asm.textContent=" addr    inst     r0     r1     r2     r3\n"
+  asm.textContent=" addr    inst     r0     r1     r2     r3      r4     r5     sp     pc\n"
   fetch((h.length?h:"x.out")).then(r=>r.text()).then(r=>{
    rst(eval("["+r+"]"));disasm((x,y)=>{let t=ce("span");t.textContent=x;t.id=y;asm.appendChild(t)})
   })
