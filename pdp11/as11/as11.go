@@ -54,7 +54,7 @@ func disasm(u []uint16) {
 	var cpu pdp11.CPU
 	mem := new(pdp11.ArrayMem)
 	cpu.Mem = mem
-	const basePC = 0o010000
+	const basePC = 0o01000
 	for i := range mem {
 		mem[i] = 0o375
 	}
@@ -81,14 +81,15 @@ func run(file string) {
 		v = v[:len(v)-1]
 	}
 	for i := range v {
+		v[i] = strings.TrimSuffix(v[i], ",")
 		j, e := strconv.ParseUint(v[i], 8, 16)
 		fatal(e)
 		c[i] = uint16(j)
 	}
 
-	cpu.R[7] = 0o010000
+	cpu.R[7] = 0o01000
 	for i := range c {
-		cpu.Mem.WriteW(0o010000+2*uint16(i), c[i])
+		cpu.Mem.WriteW(0o01000+2*uint16(i), c[i])
 	}
 	fmt.Println("   r0/r1    r2/r3     r4 r5(bp) r6(sp) r7(pc)  instruction")
 	for i := 0; i < 1e3; i++ {
