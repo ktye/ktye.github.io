@@ -1,9 +1,10 @@
 let M,D=32*1024 //M:I,D; D:data offset 
+let wait=false
 let rst=(c)=>{M=new Uint16Array(64*1024);M[7]=01000;c.forEach((x,i)=>M[256+i]=x)}
 
 let A=(x,a)=>{let r=x&7,y=(6==x&070)?M[-1+M[7]>>1]:0
  //todo pc: if((m&7)==7){..}      //pc see 3-18
- if(x==027){a[0]=2;return M[7]}
+ if(x==027){a[0]=2;return M[7]>>1}
  a[0]=2*+(5<((x&070)>>3))
  //     r (r)    (r)+     @(r+) -(r)     @-(r) x(r)     @x(r) //addressing modes
  return[r,M[D+r],M[D+r]++,     ,--M[D+r],     ,y+M[D+r],     ][x&070]}
@@ -21,10 +22,26 @@ let step=()=>{
  case 05400: M[d]=-M[d] ; return //neg
  }
  let s=A((x&07700)>>6,a);M[7]+=a[0]
- switch(x&070000){
+ switch(x&070000){ //mov,cmp,bit,bic,bis
  case 010000: M[d] =M[s] ; return  //mov
  case 060000: M[s]+=M[d] ; return  //add
  }
+ switch(x&0170000){ //add,sub
+ case 0060000: nyi() //add
+ case 0160000: nyi() //sub
+ }
+ switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
+ case 0004000: pu(M[s]);M[7]=M[d] ; return //jsr
+ }
+}
+let pu=x=>{M[M[6]>>1]-=2;M[M[6]>>1]=x} //mov x,-(sp)
+let po=()=>{nyi()}                      //mov (sp)+,r
+
+let run=()=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;ge("stopbut").disabled=false
+ let f=t=>{step();if(!wait)requestAnimationFrame(f)}
+ if(!wait)requestAnimationFrame(f)
 }
 
-function oct(x) { return "0"+x.toString(8) }
+function oct(x){return"0"+x.toString(8)}
+function Oct(x){let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
+function nyi(){throw("nyi")}
