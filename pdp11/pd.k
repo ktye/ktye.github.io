@@ -47,7 +47,7 @@ pd:{[o]opts::o
       /link@*s}   
 "0",",\n0"/$link@*s}
 
-link:{o:(!builtins)!1000+2*1_+\(#x),#'b:.builtins;@[x;i;o x i:&x<0],,/b}
+link:{o:(!builtins)!512+2*-1_+\(#x),#'b:.builtins;@[x;i;O o x i:&x<0],,/b}
 
 pdprg:{
  /s:{(_x),(leb@#y),y} /0(custom) 1(type) 2(import) 3(func) 4(table) 5(mem) 6(global) 7(export) 8(start) 9(element) 10(code) 11(data) 12(data count)
@@ -85,9 +85,8 @@ pdfun:{
  /(leb@#r),r:locs,((- 0x0f~*|body)_body),0x0b}
  c:&x=P
  body:y@*&`ast=T c
- pro:010605     /mov sp,r5
- pro,:5000 5001 /clear r0/r1
- /todo push locals
+ pro:10605      /mov sp,r5
+ pro,:$[n:#&`loc=T c;,/n#,pu;!0] /push locals   /todo loop for n>..
  pro,body}
  
 pdarg:{y;pdtype S x}
@@ -161,8 +160,6 @@ pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpre
 
 pu:4727 -99999            /jsr pc,#push
 po:4727 -88888            /jsr pc,#pop
-PU:(10046+100*|!4),207    /push r3..r0;rts pc
-PO:(12600+     !4),207    /pop  r0..r3;rts pc
 get:4727,-10000-
 set:4727,-20000-
 
@@ -174,16 +171,12 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
-/ pu  -88888     push 1 value   on the stack
-/ po  -77777     pop  1 value from the stack
-/ get -10000-i   get local index i
-/ set -20000-i   set local index i
 
-builtins:!/+-2^(-99999;(10046+100*|!4),207           /push r3..r0;rts pc
-                -88888;(12600+     !4),207)          /pop  r0..r3;rts pc
+builtins:!/+-2^(-99999;12604,(10046+100*|!4),104   /mov (sp)+,r4;push r3..r0;jmp r4
+                -88888;12604,(12600+     !4),104)  /mov (sp)+,r4;pop  r0..r3;jmp r4
 
-getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:16500 0 16501 2 16502 4 16503 6 207+(,/+2^(&4),O (8*x)+&4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
-setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6 207+(,/+2^(&4),O (8*x)+&4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:16500 0 16501 2 16502 4 16503 6 104+(,/+2^(&4),O(8*x)+&4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
+setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6 104+(,/+2^(&4),O(8*x)+&4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
 
 		
 

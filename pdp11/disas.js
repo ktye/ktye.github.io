@@ -58,11 +58,11 @@ function disas(a,aa){
  return   r
 }
 function disasm(O){let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
- pc=01000;while(pc<100+01000){ let id=pc.toString(8)
+ pc=01000;do{ let id=pc.toString(8)
   let p=[pc]
   O(o(pc)+": "+o(M[pc>>1])+" [000000 000000 000000 000000][000000 000000 000000 000000] "+disas(pc,p)+"\n",id)
   pc=p[0];pc+=2
-}}
+ }while(M[pc>>1])}
 
 
 
