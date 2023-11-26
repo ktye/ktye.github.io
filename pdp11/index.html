@@ -9,7 +9,7 @@ body{margin:0}
 * {font-family:monospace;box-sizing:border-box}
 .b{font-weight:bold}
 #tty{font-family:monospace;width:100%;height:7em;background:#920e5a;color:white;outline:none;resize:none}
-#stk{font-family: monospace;width:100%;height:7em;background:#ce082c;color:white;outline:none;resize:none}
+#stk{font-family: monospace;width:100%;height:7em;background:#ce082c;color:white;outline:none;overflow:auto}
 #lights{border:2px solid black;border-radius:10px;display:flex;justify-content:center}
 legend{text-align:center}
 button{flex-grow:1;background:#333;color:white;height:2em}button:disabled{background:#888}
@@ -24,7 +24,8 @@ button{flex-grow:1;background:#333;color:white;height:2em}button:disabled{backgr
 
 let ge=x=>document.getElementById(x)
 let ce=x=>document.createElement(x)
-let ctx,bold=null,lsp=0
+let rm=x=>{while(x.firstChild)x.removeChild(x.firstChild)}
+let ctx,bold=null
 let lights=()=>{let cnv=ge("cnv")
  ctx=cnv.getContext("2d")
  ctx.clearRect(0,0,cnv.width,cnv.height)
@@ -39,7 +40,8 @@ let blink=(u,y)=>{let x=470;y*=25
   ctx.arc(x, y+25, 10, 0, 2*Math.PI)
   ctx.fill();if(!((1+i)%3))x-=10
 }}
-let show=x=>{blink(x,0);blink(M[x>>1],1);stack()
+let show=x=>{blink(x,0);blink(M[x>>1],1);
+ stack()
  let b=ge(x.toString(8));if((!x)||(!b)){trap((x==0)?"halt":"illegal addr "+Oct(x));return}
  if(bold)bold.classList.remove("b");bold=b
  let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
@@ -47,23 +49,17 @@ let show=x=>{blink(x,0);blink(M[x>>1],1);stack()
  bold.textContent=t.slice(0,16)+s+t.slice(72)
  bold.classList.add("b")
 }
-let stack=()=>{let sp=M[6];if((sp==lsp)||(sp==011776)){lsp=sp;return}
- let d=ge("stk"),t=d.textContent,b=011774-1000
- if(sp <     b){trap("stack overflow" );return}
- if(sp >011776){trap("stack underflow");return}
- if(sp== lsp-2){lsp=sp;d.textContent=t+(t.length?"\n":"")+Oct(sp)+": "+Oct(M[sp>>1]);return}
- if(sp== lsp+2){lsp=sp;d.textContent=t.slice(lastIndexOf(t,"\n")-1);return}
- trap("stack error: sp="+Oct(sp))
-}
+let stack=()=>{let sp=M[6],stk=ge("stk");if(0==sp)return
+ let a=Array.from(Array((011776-sp)>>1)).map((x,i)=>Oct(011774-2*i)+": "+Oct(M[D+(011774>>1)-i]))
+ stk.textContent=a.join("\n")
+ stk.scrollTop=stk.scrollHeight}
 let trap=x=>{blink(0177777,1);ge("stepbut").disabled=true ;ge("runbut").disabled=true;ge("stk").textContent+="\n"+x;wait=true}
 let reset=()=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disabled=false;wait=false
- ge("stk").textContent="";lsp=0
  let h=document.location.hash.slice(1),asm=ge("asm")
  asm.textContent=" addr    inst     r0     r1     r2     r3      r4     r5     sp     pc\n"
  fetch((h.length?h:"x.out")).then(r=>r.text()).then(r=>{
   rst(eval("["+r+"]"));disasm((x,y)=>{let t=ce("span");t.textContent=x;t.id=y;asm.appendChild(t)})
- })
-}
+})}
  
 </script>
 </head>
@@ -79,7 +75,7 @@ let reset=()=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disabled
   <button id="runbut"   onclick="run()">run</button>
   <button id="stopbut"  onclick="stop()" disabled>stop</button>
  </div>
- <textarea id="stk" readonly="readonly"> </textarea>
+ <pre id="stk"></pre>
  <pre id="asm"></pre>
 </body>
 </html>

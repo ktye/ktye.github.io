@@ -86,7 +86,7 @@ pdfun:{
  c:&x=P
  body:y@*&`ast=T c
  pro:10605      /mov sp,r5
- pro,:$[n:#&`loc=T c;,/n#,pu;!0] /push locals   /todo loop for n>..
+ pro,:$[n:8*#&`loc=T c;162706,O n; !0]  /sub #n,sp (stack for locals)
  pro,body}
  
 pdarg:{y;pdtype S x}
@@ -101,7 +101,7 @@ pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and
 
 
 pdasn:{y;(y 0),$[I x;0+`globalassign;set setbuiltin(lnam ifun x)?S x]}
-pdget:{y;pu,get getbuiltin(lnam ifun x)?S x}
+pdget:{y;pu,`get \get getbuiltin(lnam ifun x)?S x}
 pdGet:{y;0x23,leb glob?S x}
 
 
@@ -116,7 +116,10 @@ pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
 
-pdlit:{y;i:I x;t:S x; pu,$[t?`i`u; 12701,(O i),5001; 0+`lit64]}  /x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:12700+!#x;`lit \ pu,,/+(r;x)
+/x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:12700+!#x;`lit \ pu,,/+(r;x)
+pdlit:{y;i:I x;t:S x; pu,$[t?`i`u
+ $[*|r:,/12700 12701,'O@|16 16\i;r;(2#r),5001]  /mov #lo,r0;mov #hi,r1 or clr r1
+ 0+`lit64]}
 
 pdjmp:{y;0x0c,_$[`~S x;1+I x;pdtrg x]}
 pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/continue
@@ -175,10 +178,9 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),104   /mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604,(12600+     !4),104)  /mov (sp)+,r4;pop  r0..r3;jmp r4
 
-getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:16500 0 16501 2 16502 4 16503 6 104+(,/+2^(&4),O(8*x)+&4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;rts pc  (get x2)
-setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:10065 0 10165 2 10265 4 10365 6 104+(,/+2^(&4),O(8*x)+&4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);rts pc  (set x5)
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O@- 8+(8*x)+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
+setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O@- 8+(8*x)+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
-		
 
 /11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
 
