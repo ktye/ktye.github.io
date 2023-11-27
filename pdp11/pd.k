@@ -1,13 +1,13 @@
 F:(0#`)!()
 ifun:&#T                /function index of each node
-afun:s!-1-!#s:S@&T=`fun /fname!-addr
+afun:s!-!#s:S@&T=`fun   /fname!-addr  first is 0(main), never called
 locs:0            
 atyp:anam:()            /argtypes  argnames for each function
 ltyp:lnam:()            /loctypes  locnames for each function (args+locs)
-offs:0                  /ifun!(symbol!offset)
 glob:0#`
 fsig:(0#`)!()
 sigs:()
+offs:0                  /ifun!(symbol!offset)   for args and locals
 
 pd:{[o]opts::o
  F[`prg`mem`con`var`tab`fun`arg`sym`res`loc`ast`lod`sto]:(pdprg;pdmem;pdcon;pdvar;pdtab;pdfun;pdarg;pdsym;pdres;pdloc;pdast;pdlod;pdsto)
@@ -27,9 +27,8 @@ pd:{[o]opts::o
  a:fill i(=ifun i:&T=`loc)
  ltyp::(S   a)perfunc     /loctypes
  lnam::(S 1+a)perfunc     /locnames
- ltyp::atyp,'ltyp
- lnam::anam,'lnam
- offs::{x!-4*!#x}'lnam    /local offsets (name!off) per function
+ offs::({x!2+4*!#x}'anam),'{x!-8-8*!#x}'lnam
+ 
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -43,7 +42,7 @@ pd:{[o]opts::o
  
  /S[0]:`so \ $[0N~i:o?`lib;S 0;o 1+i]
  n:{x[y]+:1}/(,&#P),P;n[0]-:1
- s:{c:(0,(#x)-z)^x;(c 0),,,/(F T y)[y;|c 1]}/[();|!#P;|n]
+ s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \ T y)[y;|c 1]}/[();|!#P;|n]
       /link@*s}   
 "0",",\n0"/$link@*s}
 
@@ -67,7 +66,8 @@ pdprg:{
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
  init: 12706 11776            /mov #11776,sp (init sp: 1k reserved for kos)
  c:1_&P=0;f:y fn:&`fun=T c
- init,,/f}
+ d:(- 1_!#f)!O 512+2*2_+\(#init),#'f             /-1 -2..!function start addresses
+ @[r;i;d r i:&(r>-#f)&0>r:init,,/f]}         /link calls
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
 pdmem:{y;""}
@@ -85,9 +85,10 @@ pdfun:{
  /(leb@#r),r:locs,((- 0x0f~*|body)_body),0x0b}
  c:&x=P
  body:y@*&`ast=T c
- pro:10605      /mov sp,r5
- pro,:$[n:8*#&`loc=T c;162706,O n; !0]  /sub #n,sp (stack for locals)
- pro,body}
+ pro:4727 -77777                        /jsr pc,prolog
+ pro,:$[n:8*#&`loc=T c;162706,O n;!0]   /sub #n,sp (stack for locals)
+ epi:127 -66666                         /jmp epilog
+ $[`main~S x;body;pro,body,epi]}
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
@@ -101,15 +102,21 @@ pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and
 
 
 pdasn:{y;(y 0),$[I x;0+`globalassign;set setbuiltin(lnam ifun x)?S x]}
-pdget:{y;pu,`get \get getbuiltin(lnam ifun x)?S x}
+pdget:{y;pu,get getbuiltin@(offs ifun x)S x}
 pdGet:{y;0x23,leb glob?S x}
 
 
-pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
+/pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
+pdcal:{y;s:S x;n:O 4*#y; (,/|y),$[#y;pu;!0],4727,(afun s),62706,n} 
+
+/ jsr pc,#f  (push next pc, jump to function code)     ret addr    .
+/ add 4*#args,sp 
 
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
 pddfr:{y;""}
-pddrp:{y,0x1a}
+
+pddrp:{(*y),po}
+
 pdcst:{d:*y;s:S x;(y 1),$[(pdw d)~pdw s;!0;0+`cast]}
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
 pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
@@ -163,7 +170,7 @@ pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpre
 
 pu:4727 -99999            /jsr pc,#push
 po:4727 -88888            /jsr pc,#pop
-get:4727,-10000-
+get:4727,-10000-          /e.g. -9996..-10002
 set:4727,-20000-
 
 
@@ -176,10 +183,15 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 
 
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),104   /mov (sp)+,r4;push r3..r0;jmp r4
-                -88888;12604,(12600+     !4),104)  /mov (sp)+,r4;pop  r0..r3;jmp r4
+                -88888;12604,(12600+     !4),104   /mov (sp)+,r4;pop  r0..r3;jmp r4
+		-77777;12604 10546 10605 104       /mov (sp)+,r4;mov r5,-(sp);mov sp,r5;jmp r4 (prolog)
+		-66666;10506 12605 207)            /mov r5,sp;mov (sp)+,r5;rts pc              (epilog)
 
-getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O@- 8+(8*x)+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
-setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O@- 8+(8*x)+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+
+
+
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
+setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
 
 /11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
@@ -240,6 +252,33 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 
 
 
+/caller                                                stack:      pro:
+/ push |args (each 8 bytes)                            [args]      .
+/ jsr pc,#f  (push next pc, jump to function code)     ret addr    .
+/ add 4*-1+#args,sp                 (discard args)
+/callee
+/ jsr pc,#pro                                          &body       old fp   <-fp
+/ sub 4*#loc,sp                                                    [locs]
+/ (body result in r0..r4)
+/ jmp #epi
+/pro
+/ mov (sp)+,r4   pop body addr                    r5 is frame pointer
+/ mov r5,-(sp)   push old fp                      r4 scratch/free to use
+/ mov sp,r5      set new fp
+/ jmp r4         jump to body                     argi is at  fp+2+4*i
+/epi                                              loci is at  fp-  4*i
+/ mov fp,sp      discard locals
+/ mov (sp)+,r5   restore old fp
+/ rts pc
+/
+/in total
+/ caller: 6w: 2(pu)+2(jsr)+2(adjust sp)
+/ callee: 4w: 2(jsr pro)+2(jmp epi)
+/ once:  10w: 4(pro)+6(epi)
+
+
+
+/see also: c-calling convention https://www.bell-labs.com/usr/dmr/www/clcs.html
 
 /pdp11 compiler
 /
@@ -250,26 +289,6 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 / low bits are in r0, also comparison results.
 / r6 is the stack pointer(sp), initially at 11776 growing downwards.
 /
-/ on function entry arguments are on the stack.
-/ values on the stack are always 64 bits (4 words).
-/   +---------+
-/   | x     4 |
-/   +---------+
-/   | y     4 |
-/   +=========+  sp(r6)
-/
-/ the function sets r5 to the start of the arguments
-/ and pushes it's locals
-/   +---------+ r5
-/   | x     4 |
-/   +---------+
-/   | y     4 |
-/   +---------+ 
-/   | l1    4 |
-/   +---------+
-/   | l2    4 |
-/   +=========+  sp
-/ now all args/locals can be accessed by r5-4*i
 /
 / pu/po from the stack replaces r0..r4.
 / it takes 2 instructions: jsr pc,#push  or jsr pc,#pop
@@ -281,16 +300,6 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 / 
 /
 /linking
-/ in the first pass all instructions are generated and absolute function
-/ addresses are replaced with negative numbers
-/ when the function is assembled the known address is collected
-/ and at the end all negative instructions are replaced with correct addresses.
-/
-/prelink addresses for assembler builtins:
-/ pu  -88888     push 1 value   on the stack
-/ po  -77777     pop  1 value from the stack
-/ get -10000-i   get local index i
-/ set -20000-i   set local index i
-
-
-
+/ in the first pass all instructions are generated and unknown function
+/ addresses are replaced with negative numbers.
+/ when assembling, the function addresses are collected and offsets are adjusted

@@ -1,6 +1,8 @@
 let M,D=32*1024 //M:I,D; D:data offset 
 let si=new Int16Array(1),S=x=>{si[0]=x;return si[0]}
+let carry=0  //Z(zero) N(negative) C(carry) V(overflow) T(trap)
 let wait=false
+let brk=0
 let rst=(c)=>{M=new Uint16Array(64*1024);M[7]=01000;c.forEach((x,i)=>M[256+i]=x)}
 
 let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
@@ -24,11 +26,12 @@ let step=()=>{ let l=x=>console.log(x)
  M[7]+=2
  let d=A(x&077,a);M[7]+=a[0];a[0]=0
  if(0200==(x&01777770)){M[7]=M[d];M[7]=po();return} //rts
- switch(x&077700){
+ switch(x&077700){ //clr,com,inc,dec,neg,adc,sbc,tst,ror,rol,asr,asl,sxt
  case 05000:M[d]=0     ;l("clr"); return //clr
  case 05200:M[d]++     ;l("inc"); return //inc  todo flags
  case 05300:M[d]--     ;l("dec"); return //dec
  case 05400:M[d]=-M[d] ;l("neg"); return //neg
+ case 05500:M[d]+=carry;l("adc"); return //adc  todo flags
  }
  switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
@@ -49,8 +52,8 @@ let step=()=>{ let l=x=>console.log(x)
 let pu=x=>{M[6]-=2;M[D+(M[6]>>1)]=x} //mov x,-(sp)
 let po=()=>{M[6]+=2; nyi();  return M[D+(M[6]>>1)]}       //mov (sp)+,r
 
-let run=()=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;ge("stopbut").disabled=false
- let f=t=>{step();if(!wait)requestAnimationFrame(f)}
+let run=()=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
+ let f=t=>{step();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
 }
 
