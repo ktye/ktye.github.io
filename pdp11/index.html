@@ -62,9 +62,10 @@ let reset=()=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disabled
  let h=document.location.hash.slice(1),asm=ge("asm")
  asm.textContent=" addr    inst     r0     r1     r2     r3      r4     fp     sp     pc\n"
  fetch((h.length?h:"x.out")).then(r=>r.text()).then(r=>{
-  rst(eval("["+r+"]"));disasm((x,y)=>{let t=ce("span");t.textContent=x;t.id=y;asm.appendChild(t)})
+  rst(eval("["+r+"]"));disasm((x,y)=>{let t=ce("span");t.textContent=x;hi(t);t.id=y;asm.appendChild(t)})
   asm.ondblclick=setbrk
 })}
+let fnum=0,hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.borderTop="1px solid";t.textContent=t.textContent.slice(0,-1)+"  /"+fnum+"\n"}}
  
 </script>
 </head>

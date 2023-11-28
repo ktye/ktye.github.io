@@ -7,7 +7,7 @@ ltyp:lnam:()            /loctypes  locnames for each function (args+locs)
 glob:0#`
 fsig:(0#`)!()
 sigs:()
-offs:0                  /ifun!(symbol!offset)   for args and locals
+offs:0                  /`symbol!offset for get/set args+locals for each function
 
 pd:{[o]opts::o
  F[`prg`mem`con`var`tab`fun`arg`sym`res`loc`ast`lod`sto]:(pdprg;pdmem;pdcon;pdvar;pdtab;pdfun;pdarg;pdsym;pdres;pdloc;pdast;pdlod;pdsto)
@@ -26,9 +26,8 @@ pd:{[o]opts::o
  anam::(S 1+a)perfunc     /argnames
  a:fill i(=ifun i:&T=`loc)
  ltyp::(S   a)perfunc     /loctypes
- lnam::(S 1+a)perfunc     /locnames
- offs::({x!2+4*!#x}'anam),'{x!-8-8*!#x}'lnam
- 
+ lnam::(S 1+a)perfunc     /locnames                                     /  main   ; xyz:args ab:locals
+ offs::`offs \({x!$[#r:-8+8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]),'{x!8*!#x}'lnam   /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -66,7 +65,7 @@ pdprg:{
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
  init: 12706 11776            /mov #11776,sp (init sp: 1k reserved for kos)
  c:1_&P=0;f:y fn:&`fun=T c
- d:(- 1_!#f)!O 512+2*2_+\(#init),#'f             /-1 -2..!function start addresses
+ d:(- 1_!#f)!O 512+2*1_-1_+\(#init),#'f      /-1 -2..!function start addresses
  @[r;i;d r i:&(r>-#f)&0>r:init,,/f]}         /link calls
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
@@ -85,10 +84,13 @@ pdfun:{
  /(leb@#r),r:locs,((- 0x0f~*|body)_body),0x0b}
  c:&x=P
  body:y@*&`ast=T c
- pro:4727 -77777                        /jsr pc,prolog
- pro,:$[n:8*#&`loc=T c;162706,O n;!0]   /sub #n,sp (stack for locals)
- epi:127 -66666                         /jmp epilog
- $[`main~S x;body;pro,body,epi]}
+ n:O 4+8*+/`loc=T c
+ m:0|8*-1++/`arg=T c
+ pro:10546 162706,n,10605                /mov fp,-(sp) ; sub #n(sp)  ; mov sp,fp
+ epi:62706,n,12605 12604                 /add #n(fp),sp; mov (sp)+,fp; mov (sp)+,r4; add 8*-1+#args,sp
+ epi,:$[m;62706,O m;!0],104              /add #m,sp    ; jmp r4
+ $[`main~S x;body,127 0;pro,body,epi]}
+ 
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
@@ -107,10 +109,9 @@ pdGet:{y;0x23,leb glob?S x}
 
 
 /pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
-pdcal:{y;s:S x;n:O 4*#y; (,/|y),$[#y;pu;!0],4727,(afun s),62706,n} 
+pdcal:{(,/|y),4727,(afun S x)}
 
-/ jsr pc,#f  (push next pc, jump to function code)     ret addr    .
-/ add 4*#args,sp 
+
 
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
 pddfr:{y;""}
@@ -138,7 +139,7 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
 pdneg:{$[`f~t:S x;(*y),0x9a;pdsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
 pdnot:{(*y),0x45} /i32.eqz
 pdnop:{y;""}
-pdret:{y;,/y} /todo rts
+pdret:{,/y}  /todo jump to epilog if not last
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
@@ -158,7 +159,7 @@ pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601;0+`nyiaddl]}
+pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601,inc2;0+`nyiaddl]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -167,7 +168,7 @@ pdinst:`Memorysize`Memorygrow`Memorycopy`Memoryfill!(0x3f00;0x4000;0xfc0a0000;0x
 pdinst,:`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3!(0x3f01;0x4001;0xfc0a0001;0xfc0a0100)
 pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"!,'0x67999f9ca6a4a5bfbd
 
-
+inc2:62706 4              /drop top 2 from stack
 pu:4727 -99999            /jsr pc,#push
 po:4727 -88888            /jsr pc,#pop
 get:4727,-10000-          /e.g. -9996..-10002
@@ -183,13 +184,11 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 
 
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),104   /mov (sp)+,r4;push r3..r0;jmp r4
-                -88888;12604,(12600+     !4),104   /mov (sp)+,r4;pop  r0..r3;jmp r4
-		-77777;12604 10546 10605 104       /mov (sp)+,r4;mov r5,-(sp);mov sp,r5;jmp r4 (prolog)
-		-66666;10506 12605 207)            /mov r5,sp;mov (sp)+,r5;rts pc              (epilog)
+                -88888;12604,(12600+     !4),104)   /mov (sp)+,r4;pop  r0..r3;jmp r4
 
 
-
-
+/todo: set also needs to drop.
+/todo: optimize:(set x;drop;get x)->set x
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
@@ -251,32 +250,31 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 
 
 
-
-/caller                                                stack:      pro:
-/ push |args (each 8 bytes)                            [args]      .
-/ jsr pc,#f  (push next pc, jump to function code)     ret addr    .
-/ add 4*-1+#args,sp                 (discard args)
-/callee
-/ jsr pc,#pro                                          &body       old fp   <-fp
-/ sub 4*#loc,sp                                                    [locs]
-/ (body result in r0..r4)
-/ jmp #epi
-/pro
-/ mov (sp)+,r4   pop body addr                    r5 is frame pointer
-/ mov r5,-(sp)   push old fp                      r4 scratch/free to use
-/ mov sp,r5      set new fp
-/ jmp r4         jump to body                     argi is at  fp+2+4*i
-/epi                                              loci is at  fp-  4*i
-/ mov fp,sp      discard locals
-/ mov (sp)+,r5   restore old fp
-/ rts pc
+/calling convention: overhead is 2 words for the caller (that's the minimum) and 11 for the callee.
+/there are about 6 times more calls than functions.
+/the first arg is not pushed but remains on r0..r3, it is pushed implicitly by the first leaf node.
+/access is 4 word aligned on the stack. this requires fewer helper functions for get/set.
 /
-/in total
-/ caller: 6w: 2(pu)+2(jsr)+2(adjust sp)
-/ callee: 4w: 2(jsr pro)+2(jmp epi)
-/ once:  10w: 4(pro)+6(epi)
-
-
+/caller                    count      stack
+/ push z y, x on r0..r3    (words)    z
+/                                     y
+/ jsr pc,#f                2          ret addr              4727 -f
+/callee
+/ mov fp,-(sp)             1      +-> old fp               10546 
+/ sub 4+8*#loc,sp          2      |   gap                 162706 (4+8*#loc)
+/                                 |   [locs]
+/ mov sp,fp                1      |         ^-fp           10605
+/ (body)                          |   x  (body pushes x)
+/ add (4+8*#loc)fp,sp      2      sp                       62706 (4+8*#loc)
+/ mov (sp)+,fp             1                               12605
+/ mov (sp)+,r4             1                               12604
+/ add 8*-1+#args,sp        2                               62706 (8*-1+#args)
+/ jmp r4                   1                                 104
+/total:                           caller(2) callee(11)
+/access:
+/ arg0 x                          -8(fp)
+/ argi y(1),z(2)..                8*i+nloc(fp)
+/ loci a(0),b(1)..                8*1+i(fp) 
 
 /see also: c-calling convention https://www.bell-labs.com/usr/dmr/www/clcs.html
 
