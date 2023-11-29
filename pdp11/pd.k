@@ -86,11 +86,12 @@ pdfun:{
  body:y@*&`ast=T c
  n:O 4+8*+/`loc=T c
  m:0|8*-1++/`arg=T c
- pro:10546 162706,n,10605                /mov fp,-(sp) ; sub #n(sp)  ; mov sp,fp
- epi:62706,n,12605 12604                 /add #n(fp),sp; mov (sp)+,fp; mov (sp)+,r4; add 8*-1+#args,sp
- epi,:$[m;62706,O m;!0],104              /add #m,sp    ; jmp r4
+ pro:10546 162706,n,10605                /mov fp,-(sp); sub #n(sp); mov sp,fp
+ epi:10506 62706,n,12605 12604           /mov fp,sp   ; add #n,sp ; mov (sp)+,fp; mov (sp)+,r4; add 8*-1+#args,sp
+ epi,:$[m;62706,O m;!0],104              /add #m,sp   ; jmp r4
  $[`main~S x;body,127 0;pro,body,epi]}
  
+/10506, 
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
@@ -103,7 +104,8 @@ pdsto:{(,/y),(0x3a3636373739 i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
 pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and 
 
 
-pdasn:{y;(y 0),$[I x;0+`globalassign;set setbuiltin(lnam ifun x)?S x]}
+/todo: detect tee instruction (don't pop result)
+pdasn:{y;(y 0),$[I x;0+`globalassign;(set setbuiltin(lnam ifun x)?S x),po]}
 pdget:{y;pu,get getbuiltin@(offs ifun x)S x}
 pdGet:{y;0x23,leb glob?S x}
 
@@ -250,7 +252,7 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 
 
 
-/calling convention: overhead is 2 words for the caller (that's the minimum) and 11 for the callee.
+/calling convention: overhead is 2 words for the caller (that's the minimum) and 12 for the callee.
 /there are about 6 times more calls than functions.
 /the first arg is not pushed but remains on r0..r3, it is pushed implicitly by the first leaf node.
 /access is 4 word aligned on the stack. this requires fewer helper functions for get/set.
@@ -265,12 +267,13 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 /                                 |   [locs]
 / mov sp,fp                1      |         ^-fp           10605
 / (body)                          |   x  (body pushes x)
-/ add (4+8*#loc)fp,sp      2      sp                       62706 (4+8*#loc)
+/ mov fp,sp                1                               10506
+/ add (4+8*#loc),sp        2      sp                       62706 (4+8*#loc)
 / mov (sp)+,fp             1                               12605
 / mov (sp)+,r4             1                               12604
 / add 8*-1+#args,sp        2                               62706 (8*-1+#args)
 / jmp r4                   1                                 104
-/total:                           caller(2) callee(11)
+/total:                           caller(2) callee(12)
 /access:
 / arg0 x                          -8(fp)
 / argi y(1),z(2)..                8*i+nloc(fp)
