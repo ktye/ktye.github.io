@@ -27,7 +27,7 @@ pd:{[o]opts::o
  a:fill i(=ifun i:&T=`loc)
  ltyp::(S   a)perfunc     /loctypes
  lnam::(S 1+a)perfunc     /locnames                                     /  main   ; xyz:args ab:locals
- offs::`offs \({x!$[#r:-8+8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]),'{x!8*!#x}'lnam   /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
+ offs::({x!$[#r:-8+8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]),'{x!8*!#x}'lnam   /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -83,7 +83,7 @@ pdfun:{
  /body:    y@*&`ast=T c
  /(leb@#r),r:locs,((- 0x0f~*|body)_body),0x0b}
  c:&x=P
- body:y@*&`ast=T c
+ body:opt y@*&`ast=T c
  n:O 4+8*+/`loc=T c
  m:0|8*-1++/`arg=T c
  pro:10546 162706,n,10605                /mov fp,-(sp); sub #n(sp); mov sp,fp
@@ -160,6 +160,8 @@ pdneq:pd2 0x4747525262;pdeql:pd2 0x4646515161
 pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 0x4c4d575865
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 
+/todo: use fp relative src for locals
+/todo: flip x y if x is not a local
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
 pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601,inc2;0+`nyiaddl]}
 
@@ -186,13 +188,20 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 
 
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),104   /mov (sp)+,r4;push r3..r0;jmp r4
-                -88888;12604,(12600+     !4),104)   /mov (sp)+,r4;pop  r0..r3;jmp r4
+                -88888;12604,(12600+     !4),104)  /mov (sp)+,r4;pop  r0..r3;jmp r4
 
 
 /todo: set also needs to drop.
 /todo: optimize:(set x;drop;get x)->set x
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+
+/optimizations (before linking)
+opt:{ oppo oppu x}
+
+oppu:{s:2_x,0 0;$[#i:&(-99999=s)&-88888=x;,/(*x),4_'1_x:(0,i)^x;x]} /remove pop push   4727 -88888 4727 -99999
+oppo:{s:2_x,0 0;$[#i:&(-88888=s)&-99999=x;,/(*x),4_'1_x:(0,i)^x;x]} /remove push pop
+
 
 
 /11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
