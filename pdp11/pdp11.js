@@ -1,6 +1,6 @@
 let M,D=32*1024 //M:I,D; D:data offset 
 let si=new Int16Array(1),S=x=>{si[0]=x;return si[0]}
-let carry=0  //Z(zero) N(negative) C(carry) V(overflow) T(trap)
+let carry=0,sign=0,zero=0 //Z(zero) N(negative) C(carry) V(overflow) T(trap)
 let wait=false
 let brk=0
 let rst=(c)=>{M=new Uint16Array(64*1024);M[7]=01000;c.forEach((x,i)=>M[256+i]=x)}
@@ -24,7 +24,7 @@ let step=()=>{ let l=x=>console.log(x)
  let x=M[M[7]>>1],a=[0]
  show(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
  M[7]+=2
- let d=A(x&077,a);M[7]+=a[0];a[0]=0
+ let r,d=A(x&077,a);M[7]+=a[0];a[0]=0
  if(0200==(x&01777770)){M[7]=M[d];M[7]=po();return} //rts
  switch(x&077700){ //clr,com,inc,dec,neg,adc,sbc,tst,ror,rol,asr,asl,sxt
  case 05000:M[d]=0     ;l("clr"); return //clr
@@ -35,6 +35,7 @@ let step=()=>{ let l=x=>console.log(x)
  }
  switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
+ case 0070000:r=M[s]*M[d];M[s]=r>>16;M[1+s]=f&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));return //mul
  }
  switch(x&0177700){ //jmp,swab,mark,mfpi,mtpi
  case 0100:M[7]=M[d]   ;l("jmp"); return //jmp

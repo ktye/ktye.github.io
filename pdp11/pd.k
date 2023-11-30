@@ -43,7 +43,7 @@ pd:{[o]opts::o
  n:{x[y]+:1}/(,&#P),P;n[0]-:1
  s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \ T y)[y;|c 1]}/[();|!#P;|n]
       /link@*s}   
-"0",",\n0"/$link@*s}
+"0",",\n0"/$ \link@*s}
 
 link:{o:(!builtins)!512+2*-1_+\(#x),#'b:.builtins;@[x;i;O o x i:&x<0],,/b}
 
@@ -152,9 +152,8 @@ pdtyp:{y;S x}
 
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
-/pdadd:pd2 0x6a6a7c7ca0;
 pdsub:pd2 0x6b6b7d7da1
-pdmul:pd2 0x6c6c7e7ea2;pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
+pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
 pdand:pdbnd:pd2 0x7171838300;pdorr:pdbor:pd2 0x7272848400;pdxor:pd2 0x7373858500
 pdneq:pd2 0x4747525262;pdeql:pd2 0x4646515161
 pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 0x4c4d575865
@@ -163,7 +162,12 @@ pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 /todo: use fp relative src for locals
 /todo: flip x y if x is not a local
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;$[2~pdw S x;(,/y),62600 05501 62601,inc2;0+`nyiaddl]}
+pdadd:{y;$[2~pdw S x;(,/y),62600 5501 62601,inc2;0+`nyiaddl]}
+
+/multiply sets both r0 and r2 (32bit result)
+/32bit multiplication: (al ah)*(bl bh) = (al bl) + (al bh)<<16 + (ah bl)<<16
+/pdmul:{y;$[2~pdw S x;(,/y),70046 05501 62601,inc2;0+`nyiaddl]}
+pdmul:{y;0+`nyi}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
