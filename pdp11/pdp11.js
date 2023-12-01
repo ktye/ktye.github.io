@@ -53,7 +53,8 @@ let step=()=>{ let l=x=>console.log(x)
 let pu=x=>{M[6]-=2;M[D+(M[6]>>1)]=x} //mov x,-(sp)
 let po=()=>{M[6]+=2; nyi();  return M[D+(M[6]>>1)]}       //mov (sp)+,r
 
-let run=()=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
+let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
+ if(x!="")return runtest(x)
  let f=t=>{step();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
 }

@@ -162,12 +162,12 @@ pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 /todo: use fp relative src for locals
 /todo: flip x y if x is not a local
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;$[2~pdw S x;(,/y),62600 5501 62601,inc2;0+`nyiaddl]}
+pdadd:{y;$[2~pdw S x;(,/y),4727 -50000;0+`nyiaddl]}
 
 /multiply sets both r0 and r2 (32bit result)
 /32bit multiplication: (al ah)*(bl bh) = (al bl) + (al bh)<<16 + (ah bl)<<16
 /pdmul:{y;$[2~pdw S x;(,/y),70046 05501 62601,inc2;0+`nyiaddl]}
-pdmul:{y;0+`nyi}
+pdmul:{y;$[2~pdw S x;(,/y),4727 -50002;0+`nyimul]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -191,9 +191,26 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
 
-builtins:!/+-2^(-99999;12604,(10046+100*|!4),104   /mov (sp)+,r4;push r3..r0;jmp r4
-                -88888;12604,(12600+     !4),104)  /mov (sp)+,r4;pop  r0..r3;jmp r4
+builtins:!/+-2^(-99999;12604,(10046+100*|!4),104           /push4: mov (sp)+,r4;push r3..r0;jmp r4
+                -88888;12604,(12600+     !4),104           /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
+		-50000;12604 62600 5501 62601 62706 4 104  /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add #4,sp;jmp r4
+                -50002;12604 10102 10046 70066 2 70266 2 10346 10246 16602 4 70266 10 62602 5503 62603 62706 6 104) /mul32
 
+
+
+/mul32 r0..r3:[a b][c d]     ab*cd = [a*c][a*d+b*c]
+/  mov  r1,r2     10102      shift high bit
+/  push r0        10046
+/  mul  2(sp),r0  70066 2    a*c in r0,r1
+/  mul  2(sp),r2  70266 2    b*c in r2,r3
+/  push r3        10346      save b*c
+/  push r2        10246
+/  mov  4(sp),r2  16602 4
+/  mul  8(sp),r2  70266 10   a*d in r2,r3
+/  add  (sp)+,r2  62602
+/  adc  r3        5503
+/  add  (sp)+,r3  62603      a*d+b*c in r2,r3
+/  add  #6,sp     62706 6 
 
 /todo: set also needs to drop.
 /todo: optimize:(set x;drop;get x)->set x
