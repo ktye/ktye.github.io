@@ -5,7 +5,7 @@
  "theme_color":     "#999999",
  "background_color":"#999999",
  "icons":[
-  {"src":"kelas16.png","sizes":"16x16","type":"image/png"},
-  {"src":"kelas32.png","sizes":"32x32","type":"image/png"}
+  {"src":"../kelas16.png","sizes":"16x16","type":"image/png"},
+  {"src":"../kelas32.png","sizes":"32x32","type":"image/png"}
  ]
 }
