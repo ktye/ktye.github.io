@@ -5,12 +5,13 @@
 <!--title>pdp11</title-->
 <title>pd</title>
 <style>
-body{margin:0}
+body{margin:0;height:100vh;display:flex;flex-flow:column;overflow:hidden}
 * {font-family:monospace;box-sizing:border-box}
 .b{font-weight:bold}
 .brk{border-left:1ch solid black}
 #tty{font-family:monospace;width:100%;height:7em;/*background:#920e5a;color:white;*/outline:none;resize:none}
 #stk{font-family: monospace;width:100%;height:7em;/*background:#ce082c;color:white;*/outline:none;overflow:auto}
+#asm{overflow:auto}
 #lights{border:2px solid black;border-radius:10px;display:flex;justify-content:center}
 legend{text-align:center}
 button{flex-grow:1;background:#333;color:white;height:2em}button:disabled{background:#888}
@@ -21,7 +22,7 @@ button{flex-grow:1;background:#333;color:white;height:2em}button:disabled{backgr
 -->
 <script src="pdp11.js" type="text/javascript"></script>
 <script src="disas.js" type="text/javascript"></script>
-<script src="tests.js" type="text/javascript"></script>
+<!--script src="tests.js" type="text/javascript"></script-->
 <script>
 
 let ge=x=>document.getElementById(x)
@@ -49,7 +50,7 @@ let show=x=>{blink(x,0);blink(M[x>>1],1);
  let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
  let t=bold.textContent,s=Array.from(M.slice(0,4)).map(o).join(" ")+"]["+Array.from(M.slice(4,8)).map(o).join(" ")
  bold.textContent=t.slice(0,16)+s+t.slice(72)
- bold.classList.add("b")
+ bold.classList.add("b");bold.scrollIntoView({block:"center"})
 }
 let stack=()=>{let sp=M[6],stk=ge("stk");if(0==sp)return
  let a=Array.from(Array((011776-sp)>>1)).map((x,i)=>Oct(011774-2*i)+": "+Oct(M[D+(011774>>1)-i]))

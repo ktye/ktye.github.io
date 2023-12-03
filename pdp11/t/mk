@@ -8,7 +8,7 @@ if [ -f "$1.go" ]; then
 	exit 0
 fi
 
-for f in x asn add; do
+for f in x asn mul add; do
  	wg -k $f.go > $f.k
 	k $f.k ../pd.k -e "\`\"$f.out\"<pd\`\`"
 done

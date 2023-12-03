@@ -24,10 +24,11 @@ pd:{[o]opts::o
  a:fill i(=ifun i:&T=`arg)
  atyp::(S   a)perfunc     /argtypes
  anam::(S 1+a)perfunc     /argnames
- a:fill i(=ifun i:&T=`loc)
+ a:fill i $[#j:ifun i:&T=`loc;=j;(!0)!()]
  ltyp::(S   a)perfunc     /loctypes
- lnam::(S 1+a)perfunc     /locnames                                     /  main   ; xyz:args ab:locals
- offs::({x!$[#r:-8+8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]),'{x!8*!#x}'lnam   /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
+ lnam::(S 1+a)perfunc     /locnames                                     
+ offs::({x!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
+ @[`offs;i;,';{x!8*!#x}'lnam(i:&#'lnam)]           /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -43,7 +44,7 @@ pd:{[o]opts::o
  n:{x[y]+:1}/(,&#P),P;n[0]-:1
  s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \ T y)[y;|c 1]}/[();|!#P;|n]
       /link@*s}   
-"0",",\n0"/$ \link@*s}
+"0",",\n0"/$link@*s}
 
 link:{o:(!builtins)!512+2*-1_+\(#x),#'b:.builtins;@[x;i;O o x i:&x<0],,/b}
 
@@ -128,7 +129,7 @@ pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
 /x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:12700+!#x;`lit \ pu,,/+(r;x)
 pdlit:{y;i:I x;t:S x; pu,$[t?`i`u
- $[*|r:,/12700 12701,'O@|16 16\i;r;(2#r),5001]  /mov #lo,r0;mov #hi,r1 or clr r1
+ $[*|r:,/12700 12701,'O@|65536 65536\i;r;(2#r),5001]  /mov #lo,r0;mov #hi,r1 or clr r1
  0+`lit64]}
 
 pdjmp:{y;0x0c,_$[`~S x;1+I x;pdtrg x]}
@@ -194,23 +195,23 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),104           /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604,(12600+     !4),104           /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
 		-50000;12604 62600 5501 62601 62706 4 104  /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add #4,sp;jmp r4
-                -50002;12604 10102 10046 70066 2 70266 2 10346 10246 16602 4 70266 10 62602 5503 62603 62706 6 104) /mul32
+                -50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104) /mul32
 
 
-
-/mul32 r0..r3:[a b][c d]     ab*cd = [a*c][a*d+b*c]
+/mul32 r0..r3:[a b][c d]     ab*cd = [a*c +a*d+b*c]
 /  mov  r1,r2     10102      shift high bit
 /  push r0        10046
-/  mul  2(sp),r0  70066 2    a*c in r0,r1
+/  mul  2(sp),r0  70066 2    a*c in r0,r1   pdp11 mul stores hi,lo words in r0,r1
 /  mul  2(sp),r2  70266 2    b*c in r2,r3
-/  push r3        10346      save b*c
-/  push r2        10246
-/  mov  4(sp),r2  16602 4
-/  mul  8(sp),r2  70266 10   a*d in r2,r3
-/  add  (sp)+,r2  62602
-/  adc  r3        5503
-/  add  (sp)+,r3  62603      a*d+b*c in r2,r3
-/  add  #6,sp     62706 6 
+/  add  r3,r0     60300      (hi ac)+lo bc
+/  mov  4(sp),r2  16602 4    d in r2
+/  mul  (sp),r2   70216      a*d in r2,r3
+/  add  r3,r0     60300      (hi ac)+(lo bc)+lo ad
+/  mov  r0,r2     10002      swap r0 and r1
+/  mov  r1,r0     10100
+/  mov  r2,r1     10201
+/  add  #8,sp     62706 10 
+
 
 /todo: set also needs to drop.
 /todo: optimize:(set x;drop;get x)->set x

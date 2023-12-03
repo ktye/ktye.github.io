@@ -11,7 +11,7 @@ let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
  a[0]=2*+(5<((x&070)>>3))
  switch((x&070)>>3){          //addressing mode
  case 0:return r                         //   r
- case 1:nyi()                            //  (r)
+ case 1:return D+(M[r]>>1)               //  (r)
  case 2:let q=M[r]>>1;M[r]+=2;return D+q //  (r)+
  case 3:nyi()                            // @(r)+
  case 4:M[r]-=2;return D+(      M[r] >>1)// -(r)
@@ -33,15 +33,17 @@ let step=()=>{ let l=x=>console.log(x)
  case 05400:M[d]=-M[d] ;l("neg"); return //neg
  case 05500:M[d]+=carry;l("adc"); return //adc  todo flags
  }
+
+ let s=(x&07700)>>6 //s:src/dest reg
  switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
- case 0070000:r=M[s]*M[d];M[s]=r>>16;M[1+s]=f&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));return //mul
+ case 0070000:r=M[s]*M[d];console.log("mul s",s,"r",r);M[s]=r>>16;M[1+s]=r&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));return //mul
  }
  switch(x&0177700){ //jmp,swab,mark,mfpi,mtpi
  case 0100:M[7]=M[d]   ;l("jmp"); return //jmp
  }
 
- let s=A((x&07700)>>6,a);M[7]+=a[0]
+ s=A((x&07700)>>6,a);M[7]+=a[0]
  switch(x&0170000){ //add,sub
  case 0010000:M[d] =M[s];l("mov");return //mov
  case 0060000:M[d]+=M[s];l("add");return //add  todo flags/carry..
@@ -54,7 +56,7 @@ let pu=x=>{M[6]-=2;M[D+(M[6]>>1)]=x} //mov x,-(sp)
 let po=()=>{M[6]+=2; nyi();  return M[D+(M[6]>>1)]}       //mov (sp)+,r
 
 let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
- if(x!="")return runtest(x)
+ //if(x!="")return runtest(x)
  let f=t=>{step();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
 }
