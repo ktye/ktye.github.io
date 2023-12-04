@@ -28,7 +28,8 @@ pd:{[o]opts::o
  ltyp::(S   a)perfunc     /loctypes
  lnam::(S 1+a)perfunc     /locnames                                     
  offs::({x!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
- @[`offs;i;,';{x!8*!#x}'lnam(i:&#'lnam)]           /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
+ @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
+ `offs \offs
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -92,12 +93,11 @@ pdfun:{
  epi,:$[m;62706,O m;!0],104              /add #m,sp   ; jmp r4
  $[`main~S x;body,127 0;pro,body,epi]}
  
-/10506, 
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
-pdres:{y;"(result ",(pdtype S x),")"}
-pdloc:{"(local ",(*y)," ",(pdtype S x),")"}
+pdres:{y;S x}
+pdloc:{y;S x}
 pdstm:{,/y}
 pdast:pdstm
 pdlod:{(y 0),(0x2c282829292b i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
@@ -106,7 +106,7 @@ pdant:{(,/y),(0x417f7371;0x427f8583)@(S x)?`j`k} /y0 y1 -1 xor and
 
 
 /todo: detect tee instruction (don't pop result)
-pdasn:{y;(y 0),$[I x;0+`globalassign;(set setbuiltin(lnam ifun x)?S x),po]}
+pdasn:{y;(y 0),$[I x;0+`globalassign;(set setbuiltin@(offs ifun x)S x),po]}
 pdget:{y;pu,get getbuiltin@(offs ifun x)S x}
 pdGet:{y;0x23,leb glob?S x}
 
@@ -115,22 +115,22 @@ pdGet:{y;0x23,leb glob?S x}
 pdcal:{(,/|y),4727,(afun S x)}
 
 
-
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
-pddfr:{y;""}
+pddfr:{y;!0}
 
 pddrp:{(*y),po}
+pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50004;!0]}
 
-pdcst:{d:*y;s:S x;(y 1),$[(pdw d)~pdw s;!0;0+`cast]}
+/todo loop
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
 pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
 
 /x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:12700+!#x;`lit \ pu,,/+(r;x)
-pdlit:{y;i:I x;t:S x; pu,$[t?`i`u
+pdlit:{y;i:I x;t:S x; pu,$[2~pdw t
  $[*|r:,/12700 12701,'O@|65536 65536\i;r;(2#r),5001]  /mov #lo,r0;mov #hi,r1 or clr r1
- 0+`lit64]}
+ `lit \,/12700 12701 12702 12703,'O@,/|'+65536 65536\(`i@C i+!4),`i@C i+4+!4]}
 
 pdjmp:{y;0x0c,_$[`~S x;1+I x;pdtrg x]}
 pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/continue
@@ -139,7 +139,7 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
  c+-1++/(#x),(`for=T x)&~I x}           /simple loops add 1 level, others 2
 
 
-pdneg:{$[`f~t:S x;(*y),0x9a;pdsub[x;((0x4141424244@`i`u`j`k?t),0x00;*y)]]}
+pdneg:{(*y),pu,5000 5001 4727 -50001}
 pdnot:{(*y),0x45} /i32.eqz
 pdnop:{y;""}
 pdret:{,/y}  /todo jump to epilog if not last
@@ -153,7 +153,6 @@ pdtyp:{y;S x}
 
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
-pdsub:pd2 0x6b6b7d7da1
 pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
 pdand:pdbnd:pd2 0x7171838300;pdorr:pdbor:pd2 0x7272848400;pdxor:pd2 0x7373858500
 pdneq:pd2 0x4747525262;pdeql:pd2 0x4646515161
@@ -163,12 +162,13 @@ pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 /todo: use fp relative src for locals
 /todo: flip x y if x is not a local
 //add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
-pdadd:{y;$[2~pdw S x;(,/y),4727 -50000;0+`nyiaddl]}
+pdadd:{$[2~pdw S x;(,/|y),4727 -50000;0+`nyiaddl]}
+pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyiaddl]}
 
 /multiply sets both r0 and r2 (32bit result)
 /32bit multiplication: (al ah)*(bl bh) = (al bl) + (al bh)<<16 + (ah bl)<<16
-/pdmul:{y;$[2~pdw S x;(,/y),70046 05501 62601,inc2;0+`nyiaddl]}
-pdmul:{y;$[2~pdw S x;(,/y),4727 -50002;0+`nyimul]}
+/pdmul:{y;$[2~pdw S x;(,/|y),70046 05501 62601,inc2;0+`nyiaddl]}
+pdmul:{y;$[2~pdw S x;(,/|y),4727 -50002;0+`nyimul]}
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
@@ -192,10 +192,13 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
 
-builtins:!/+-2^(-99999;12604,(10046+100*|!4),104           /push4: mov (sp)+,r4;push r3..r0;jmp r4
-                -88888;12604,(12600+     !4),104           /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
-		-50000;12604 62600 5501 62601 62706 4 104  /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add #4,sp;jmp r4
-                -50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104) /mul32
+builtins:!/+-2^(-99999;12604,(10046+100*|!4),104            /push4: mov (sp)+,r4;push r3..r0;jmp r4
+                -88888;12604,(12600+     !4),104            /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
+		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
+                -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
+		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
+		-50003;99999 99999 104                      /todo div
+		-50004;12604 5701 6702 6703 104)            /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
 
 
 /mul32 r0..r3:[a b][c d]     ab*cd = [a*c +a*d+b*c]
@@ -215,8 +218,8 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),104           /push4: mov (sp)+,r4;
 
 /todo: set also needs to drop.
 /todo: optimize:(set x;drop;get x)->set x
-getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
-setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+getbuiltin:{x;$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
+setbuiltin:{x;$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
 /optimizations (before linking)
 opt:{ oppo oppu x}

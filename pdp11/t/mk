@@ -1,6 +1,11 @@
 set -e
 set -x
 
+if [ "$1" = "clean" ];then
+	rm *.k *.out
+	exit 0
+fi
+
 if [ -f "$1.go" ]; then
 	f=$1
  	wg -k $f.go > $f.k
@@ -8,7 +13,7 @@ if [ -f "$1.go" ]; then
 	exit 0
 fi
 
-for f in x asn mul add; do
+for f in *.go; do
  	wg -k $f.go > $f.k
 	k $f.k ../pd.k -e "\`\"$f.out\"<pd\`\`"
 done
