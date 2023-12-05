@@ -18,6 +18,7 @@ let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
  case 6:        return D+((S(y)+M[r])>>1)// x(r)
  default:nyi();                          //@x(r)
 }}
+let F=x=>{sign=x&0x8000;zero=x==0;return x}
 
 let step=()=>{ let l=x=>console.log(x)
  //console.log("step", "pc", oct(M[7]))
@@ -27,12 +28,12 @@ let step=()=>{ let l=x=>console.log(x)
  let r,d=A(x&077,a);M[7]+=a[0];a[0]=0
  if(0200==(x&01777770)){M[7]=M[d];M[7]=po();return} //rts
  switch(x&077700){ //clr,com,inc,dec,neg,adc,sbc,tst,ror,rol,asr,asl,sxt
- case 05000:M[d]=0                           ;l("clr");return //clr
- case 05100:M[d]=~M[d];zero=M[d]==0          ;l("com");return //com
- case 05200:M[d]++                           ;l("inc");return //inc
- case 05300:M[d]--                           ;l("dec");return //dec
- case 05400:M[d]=-M[d]                       ;l("neg");return //neg
- case 05500:M[d]+=carry                      ;l("adc");return //adc
+ case 05000:M[d]=F(0)                        ;l("clr");return //clr
+ case 05100:M[d]=F(~M[d])                    ;l("com");return //com
+ case 05200:M[d]++;F(M[d])                   ;l("inc");return //inc
+ case 05300:M[d]--;F(M[d])                   ;l("dec");return //dec
+ case 05400:M[d]=F(-M[d])                    ;l("neg");return //neg
+ case 05500:M[d]+=carry                      ;l("adc");return //adc  //todo F..vv
  case 05600:M[d]-=carry                      ;l("sbc");return //sbc
  case 05700:sign=!!(M[d]&0x8000);zero=M[d]==0;l("tst");return //tst
  case 06700:M[d]=sign?-1:0                   ;l("sxt");return //sxt
@@ -65,12 +66,12 @@ let step=()=>{ let l=x=>console.log(x)
 
  s=A((x&07700)>>6,a);M[7]+=a[0]
  switch(x&0170000){ //add,sub
- case 0010000:M[d] =M[s]                           ;l("mov");return //mov
+ case 0010000:M[d]=F(M[s])                         ;l("mov");return //mov
  case 0060000:carry=(M[d]+M[s])>=0xffff;M[d]+=M[s] ;l("add");return //add
  case 0160000:carry=M[s]>M[d];M[d]-=M[s];l("sub")  ;l("sub");return //sub
  }
  switch(x&070000){ //mov,cmp,bit,bic,bis
- case 0020000:r=M[s]-M[d];zero=r==0;sign=(r&0x8000)!=0; l("cmp");return //cmp
+ case 0020000:F(M[s]-M[d])                         ;l("cmp");return //cmp
  }
 }
 let br=x=>{if(x&0x80)x=-(((~x)+1)&0xff);x<<=1;M[7]+=x}    //branch
