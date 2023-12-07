@@ -3,11 +3,20 @@ let tests = {
  asn:[5],
  add:[9058058],
  and:[2244932],
+ ant:[66595],
+ orr:[11782135],
+ xor:[9537203],
  loc:[-6588926],
  mul:[1136708649],
  neg:[-123456789],
  cst:[-2,-1],
  lit:[591396865,2146959361],
+ shr:[154320],
+ shl:[1523630080],
+ ks1:[0,1744830464],
+ ks2:[0,123456],
+ ks3:[21,0],
+ ks4:[31,0],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"

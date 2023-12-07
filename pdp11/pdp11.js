@@ -26,7 +26,7 @@ let step=()=>{ let l=x=>console.log(x)
  show(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
  M[7]+=2
  let r,d=A(x&077,a);M[7]+=a[0];a[0]=0
- if(0200==(x&01777770)){M[7]=M[d];M[7]=po();return} //rts
+ if(0200==(x&01777770)){console.log("rts",d,M[d]);M[7]=M[d];M[7]=po();console.log("=>",M[7].toString(8));return} //rts
  switch(x&077700){ //clr,com,inc,dec,neg,adc,sbc,tst,ror,rol,asr,asl,sxt
  case 05000:M[d]=F(0)                        ;l("clr");return //clr
  case 05100:M[d]=F(~M[d])                    ;l("com");return //com
@@ -43,6 +43,10 @@ let step=()=>{ let l=x=>console.log(x)
  switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
  case 0070000:r=M[s]*M[d];M[s]=r>>16;M[1+s]=r&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));l("mul");return //mul
+ case 0072000:s&=7;M[s]=(0x8000&M[d])?(M[s]>>(0xffff&-M[d])):(M[s]<<M[d]);F(M[s]); l("ashc"); return //ashc  todo:carry
+ case 0073000:s&=7;let u=(M[s]<<16)|M[1+s];u=F((0x8000&M[d])?(u>>(0xffff&-M[d])):(u<<M[d]))
+  M[s]=0xffff&(u>>16);M[1+s]=0xffff&u                     ;l("ashc");return //ashc
+ case 0074000:M[d]^=M[s&7];F(M[d])                        ;l("xor"); return //xor
  }
  switch(x&0177700){ //jmp,swab,mark,mfpi,mtpi
  case 0100:M[7]=M[d]   ;l("jmp"); return //jmp
@@ -72,12 +76,13 @@ let step=()=>{ let l=x=>console.log(x)
  }
  switch(x&070000){ //mov,cmp,bit,bic,bis
  case 0020000:F(M[s]-M[d])                         ;l("cmp");return //cmp
- case 0040000:F(M[d]&=~M[s])                       ;l("bic");return //bic
+ case 0040000:M[d]&=~M[s];F(M[d])                  ;l("bic");return //bic
+ case 0050000:M[d]|= M[s];F(M[d])                  ;l("bis");return //bis
  }
 }
 let br=x=>{if(x&0x80)x=-(((~x)+1)&0xff);x<<=1;M[7]+=x}    //branch
-let pu=x=>{M[6]-=2;M[D+(M[6]>>1)]=x} //mov x,-(sp)
-let po=()=>{M[6]+=2; nyi();  return M[D+(M[6]>>1)]}       //mov (sp)+,r
+let pu=x=>{M[6]-=2;M[D+(M[6]>>1)]=x}               //mov x,-(sp)
+let po=()=>{M[6]+=2;return M[D+(M[6]>>1)-1]}       //mov (sp)+,r
 let xor=(x,y)=>((x||y)&&!(x&&y))
 
 let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
