@@ -119,7 +119,7 @@ pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 }
 pddfr:{y;!0}
 
 pddrp:{(*y),po}
-pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50004;!0]}
+pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
 
 /todo loop
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
@@ -154,16 +154,16 @@ pdtyp:{y;S x}
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
 pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
-pdand:pdbnd:pd2 0x7171838300;pdorr:pdbor:pd2 0x7272848400;pdxor:pd2 0x7373858500
+pdbnd:pd2 0x7171838300;pdorr:pdbor:pd2 0x7272848400;pdxor:pd2 0x7373858500
 pdneq:pd2 0x4747525262;pdeql:pd2 0x4646515161
 pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 0x4c4d575865
 pdshl:pd2 0x7474868600;pdshr:pd2 0x7576878800
 
-/todo: use fp relative src for locals
-/todo: flip x y if x is not a local
-//add 32bit: push y;x;add -(sp),r0;adc r1;add -(sp),r1
+
+
 pdadd:{$[2~pdw S x;(,/|y),4727 -50000;0+`nyiaddl]}
-pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyiaddl]}
+pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyisubl]}
+pdand:{(,/|y),4727 -50013}
 
 /multiply sets both r0 and r2 (32bit result)
 /32bit multiplication: (al ah)*(bl bh) = (al bl) + (al bh)<<16 + (ah bl)<<16
@@ -197,8 +197,25 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),104            /push4: mov (sp)+,r4
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
 		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
-		-50003;99999 99999 104                      /todo div
-		-50004;12604 5701 6702 6703 104)            /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
+		-50003;99999 99999 104                      /todo idiv
+		-50004;99999 99999 104                      /todo udiv
+		-50005;99999 99999 104                      /todo irem
+		-50006;99999 99999 104                      /todo urem
+		-50007;12604 5701 6702 6703 104             /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
+		-50010;99999 99999 104                      /todo x<<y
+		-50011;99999 99999 104                      /todo x>>y signed
+		-50012;99999 99999 104                      /todo x>>y unsigned
+		-50013;12604 5116 5166 2 5166 4 5166 6 42600 42601 42602 42603 104  /x&y: com (sp)..; bic (sp)+,r0..
+		-50014;99999 99999 104                      /todo x|y
+		-50015;99999 99999 104                      /todo x^y
+		-50016;99999 99999 104                      /todo x==y
+		-50017;99999 99999 104                      /todo x!=y
+		-50018;99999 99999 104                      /todo x>y
+		-50019;99999 99999 104                      /todo x>=y
+		-50020;99999 99999 104                      /todo x<y
+		-50021;99999 99999 104                      /todo x<=y
+		-50022;99999 99999 104                      /todo -x
+		-50023;99999 99999 104)                     /todo !x
 
 
 /mul32 r0..r3:[a b][c d]     ab*cd = [a*c +a*d+b*c]

@@ -72,6 +72,7 @@ let step=()=>{ let l=x=>console.log(x)
  }
  switch(x&070000){ //mov,cmp,bit,bic,bis
  case 0020000:F(M[s]-M[d])                         ;l("cmp");return //cmp
+ case 0040000:F(M[d]&=~M[s])                       ;l("bic");return //bic
  }
 }
 let br=x=>{if(x&0x80)x=-(((~x)+1)&0xff);x<<=1;M[7]+=x}    //branch

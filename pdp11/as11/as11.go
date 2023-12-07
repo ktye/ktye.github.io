@@ -102,8 +102,7 @@ func printstate() {
 	//u32 := func(a, b uint16) uint32 { return uint32(b)<<16 | uint32(a) }
 	x, _ := cpu.Mem.ReadW(cpu.R[7])
 	asm, _, _ := cpu.Disasm(cpu.R[7])
-	//fmt.Printf("%8d %8d %06o %06o %06o %06o: %06o %s\n",
-	fmt.Printf("[%5d %5d][%5d %5d] %06o %06o %06o %06o: %06o %s\n",
+	fmt.Printf("[%06o %06o][%06o %06o] %06o %06o %06o %06o: %06o %s\n",
 		cpu.R[0], cpu.R[1], cpu.R[2], cpu.R[3], cpu.R[4], cpu.R[5], cpu.R[6], cpu.R[7], x, asm)
 }
 

@@ -74,14 +74,17 @@ let fnum=0,hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.bo
  <div id="lights" >
   <canvas id="cnv" width="470" height="65"></canvas>
  </div>
- <span id="ips"> </span>
- <textarea id="tty" readonly="readonly" onkeypress="addchar(event.which)" onkeyup="specialchar(event.which)"> </textarea>
-  <div style="display:flex">
+ <div>
+  <textarea id="tty" readonly="readonly" onkeypress="addchar(event.which)" onkeyup="specialchar(event.which)"> </textarea>
+ </div>
+ <div style="display:flex">
   <button id="resetbut" onclick="reset(location.hash.slice(1))">reset</button>
   <button id="stepbut"  onclick="step()">step</button>
   <button id="runbut"   onclick="run(location.hash.slice(1))">run</button>
  </div>
- <pre id="stk"></pre>
+ <div>
+  <pre id="stk"></pre>
+ </div>
  <pre id="asm"></pre>
 </body>
 </html>
