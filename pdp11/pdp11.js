@@ -13,10 +13,10 @@ let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
  case 0:return r                         //   r
  case 1:return D+(M[r]>>1)               //  (r)
  case 2:let q=M[r]>>1;M[r]+=2;return D+q //  (r)+
- case 3:nyi()                            // @(r)+
+ //case 3:                               // @(r)+
  case 4:M[r]-=2;return D+(      M[r] >>1)// -(r)
  case 6:        return D+((S(y)+M[r])>>1)// x(r)
- default:nyi();                          //@x(r)
+ default:return r /*nyi*/                //@x(r)
 }}
 let F=x=>{sign=x&0x8000;zero=x==0;return x}
 
@@ -53,7 +53,7 @@ let step=()=>{ let l=x=>console.log(x)
  }
  let o=x&0xff
  switch(x&0177400){ //br
- case 0000400:                              br(o);l("br") ;return //br
+ case 0000400:    console.log("br",o); br(o); console.log("=>",oct(M[7])); l("br") ;return //br
  case 0001000:if(!zero)                     br(o);l("bne");return //bne
  case 0001400:if( zero)                     br(o);l("beq");return //beq
  case 0002000:if( !xor(zero,sign))          br(o);l("bge");return //bge

@@ -74,10 +74,12 @@ let fnum=0,hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.bo
 let link=x=>{
  let s=x.textContent.replace(/jsr #([0-9]+),pc/,"jsr <span class='l' onclick='jmp(this)'>#$1</span>,pc")
  s=s.replace(/ \+([0-9]+)/," <span class='l' onclick='jmp(this)'>+$1</span>")
+ s=s.replace(/ \-([0-9]+)/," <span class='l' onclick='jmp(this)'>-$1</span>")
  x.innerHTML=s;return x}
 let jmp=x=>{let a=x.parentElement.id
- let r=(parseInt(a,8)+2+parseInt(x.textContent.slice(1),8)).toString(8)
- let s=x.textContent,t=ge((s[0]=="#")?(s.slice(1)):(s[0]=="+")?r:"??")
+ let r1=(parseInt(a,8)+2+parseInt(x.textContent.slice(1),8)).toString(8)
+ let r0=(parseInt(a,8)+2-parseInt(x.textContent.slice(1),8)).toString(8)
+ let s=x.textContent,t=ge((s[0]=="#")?(s.slice(1)):(s[0]=="+")?r1:r0)
  t.textContent=t.textContent.slice(0,-1) //todo: this clears links
  let b=ce("span");b.textContent="  →#"+a+"\n";b.classList.add("l")
  b.onclick=()=>{let u=ge(a),p=b.parentElement

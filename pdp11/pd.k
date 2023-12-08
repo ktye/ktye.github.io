@@ -118,26 +118,28 @@ pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
 
 /todo loop
 pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
-pdslp:{0x0340,(-2_y 2),(y 1),(*y),0x0d000b }
 pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
 
+pdslp:{b,of[*y;-(#*y)+#b:cnt brk(-1_y 2),y 1]}  /body,post,br? -n
 
-/x:10/'|'256!256+-2^$[2~w:pdw t;`c@,i;C i+!8]; r:12700+!#x;pu,,/+(r;x)
-pdlit:{y;i:I x;t:S x; pu,$[2~pdw t
- $[*|r:,/12700 12701,'O@|65536 65536\i;r;(2#r),5001]  /mov #lo,r0;mov #hi,r1 or clr r1
- ,/12700 12701 12702 12703,'O@,/|'+65536 65536\(`i@C i+!4),`i@C i+4+!4]}
+/brk:{x[i]:$[+/127<j:(#x)-1+i:&x=-55555;0+`ljmp;10/8\256+     j]}  /replace -55555 (break)    with br +j
+/cnt:{x[i]:$[+/128<j:     1+i:&x=-44444;0+`ljmp;10/8\256+256!-j]}  /replace -44444 (continue) with br -j
+brk:{x}
+cnt:{x}
 
-pdjmp:{y;0x0c,_$[`~S x;1+I x;pdtrg x]}
-pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/continue
- x:1_{$[(`for;l)~(T x;S x);x;P x]}\x    /scan parents til for-with-label
- x:x@&~`stm=T x                         /dont nest statements
- c+-1++/(#x),(`for=T x)&~I x}           /simple loops add 1 level, others 2
+pdjmp:{y;,$[I x;-55555;-44444]}         /no nested loops, just break/continue
+
+lit:0 1 2 4 8 16 32 64 128 -1 -2!(!0;,5200;5200 5200;5200 72002;5200 72003;5200 72004;5200 72005;5200 72006;5200 72007;5300 5301;5300 5300 5301)
+pdlit:{y;i:I x;t:S x; pu,$[`I~@r:lit i;r;2~pdw t
+ $[*|r:,/12700 12701,'O@|65536 65536\i;r;2#r]
+ ,/12700 12701 12702 12703,'O@,/|'+65536 65536\(`i@C i+!4),`i@C i+4+!4]} /todo copy from literal section?
+
 
 
 pdneg:{(*y),5401 5400 5601}             /neg32:neg r1;neg r0;sbc r1
 pdnot:{(*y),0+`not}                     /should not exist
 pdnop:{y;!0}
-pdret:{(*y),-66666}
+pdret:{(*y),$[`ast~T P x;!0;-66666]}
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
@@ -195,8 +197,8 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
-/               -66666 return
-builtins:!/+-2^(-99999;12604,(10046+100*|!4),104            /push4: mov (sp)+,r4;push r3..r0;jmp r4
+/               -44444(break) -55555(continue) -66666(return)
+builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604,(12600+     !4),104            /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
@@ -237,16 +239,14 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),104            /push4: mov (sp)+,r4
 /  add  #8,sp     62706 10 
 
 
-/todo: set also needs to drop.
-/todo: optimize:(set x;drop;get x)->set x
-getbuiltin:{x;$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
-setbuiltin:{x;$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
+setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
 /optimizations (before linking)
-opt:{ oppo oppu x}
-
-oppu:{s:2_x,0 0;$[#i:&(-99999=s)&-88888=x;,/(*x),4_'1_x:(0,i)^x;x]} /remove pop push   4727 -88888 4727 -99999
-oppo:{s:2_x,0 0;$[#i:&(-88888=s)&-99999=x;,/(*x),4_'1_x:(0,i)^x;x]} /remove push pop
+/opt:{oppo oppu x}     /breaks missing clr for small literals
+opt:{x}
+oppu:{s:2_x,0 0;$[#i:&(-99999=s)&-88888=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove pop push   4727 -88888 4727 -99999
+oppo:{s:2_x,0 0;$[#i:&(-88888=s)&-99999=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove push pop
 
 
 
