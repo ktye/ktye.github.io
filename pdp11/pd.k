@@ -79,11 +79,6 @@ pdtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
 pdfex:{(leb@#$x),($x),0x00,leb y}
 
 pdfun:{
- /s:$S x;c:&x=P
- /eqlx:{$[#x;x~'`x,-1_x;0#`]}
- /locs:(leb@#l),,/l:{(leb@#x),pdtype@*x}'(&~eqlx l)^l:S c@&`loc=T c
- /body:    y@*&`ast=T c
- /(leb@#r),r:locs,((- 0x0f~*|body)_body),0x0b}
  c:&x=P
  body:opt y@*&`ast=T c
  n:O 4+8*+/`loc=T c
@@ -91,8 +86,9 @@ pdfun:{
  pro:10546 162706,n,10605                /mov fp,-(sp); sub #n(sp); mov sp,fp
  epi:10506 62706,n,12605 12604           /mov fp,sp   ; add #n,sp ; mov (sp)+,fp; mov (sp)+,r4; add 8*-1+#args,sp
  epi,:$[m;62706,O m;!0],104              /add #m,sp   ; jmp r4
- $[`main~S x;body,127 0;pro,body,epi]}
+ $[`main~S x;body,127 0;ret[pro,body;epi]]}
  
+ret:{x[i]:$[+/127<j:(#x)-1+i:&x=-66666;0+`ljmp; 10/8\256+j];x,y}  /replace -66666 (return) with br +j (jump to epilog)
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
@@ -138,23 +134,25 @@ pdtrg:{l:S x;c:-~I x                    /calculate target for labeled break/cont
  c+-1++/(#x),(`for=T x)&~I x}           /simple loops add 1 level, others 2
 
 
-pdneg:{(*y),pu,5000 5001 4727 -50001}
-pdnot:{(*y),0x45} /i32.eqz
-pdnop:{y;""}
-pdret:{,/y}  /todo jump to epilog if not last
+pdneg:{(*y),5401 5400 5601}             /neg32:neg r1;neg r0;sbc r1
+pdnot:{(*y),0+`not}                     /should not exist
+pdnop:{y;!0}
+pdret:{(*y),-66666}
 
 pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
  r,,/(1_y),'0x0c,/(leb'|!n-1),\0x0b}
-pdcnd:{(*y),0x04,$[`~t:S x;0x40;pdtype t],(y 1),$[3~#y;0x05,(y 2);""],0x0b}
+
+pdcnd:{y,:!0;of[*y;1+#y 2],(y 2),br[#y 1],y 1}        /if y0 then y1 [else y2]
+
+of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
+br:of[,256]
 
 pdtyp:{y;S x}
 
 pd2: {(,/z),x(`i`u`j`k`f?S y)}
 pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
 pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
-pdneq:pd2 0x4747525262;pdeql:pd2 0x4646515161
-pdmor:pd2 0x4a4b555664;pdgte:pd2 0x4e4f595a66;pdles:pd2 0x4849535463; pdlte:pd2 0x4c4d575865
 
 pdadd:{$[2~pdw S x;(,/|y),4727 -50000;0+`nyiaddl]}
 pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyisubl]}
@@ -167,6 +165,13 @@ c32:4727 -99999 12700 40 12701 0 12702 0 12703 0
 
 pd2:{(,/|z),(4727;-50000-x)}
 pdbnd:pdand:pd2 13;pdbor:pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
+
+/todo bor bnd receive boolean input: insert I32B
+
+pdc:{(,/|z),(4727;-50020-(pdw S y)%2),x}  /x:branch instruction without offset (decimal)
+pdneq:pdc  512;  pdeql:pdc  768           /bne beq
+pdles:pdc 1280;  pdmor:pdc 1536           /blt bgt
+pdlte:pdc 1792;  pdgte:pdc 1024           /blt bge
 
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
@@ -190,7 +195,7 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
-
+/               -66666 return
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),104            /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604,(12600+     !4),104            /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
@@ -212,14 +217,9 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),104            /push4: mov (sp)+,r4
 		-50018;10200 10301 5002 5003 207            /u64>>32
 		-50019;12701 13 72001 10003 5000 5001 5002 207     /u64<<59
 		-50020;12700 177765 72300 10300 5001 5002 5003 207 /u64>>59
-		-50021;99999 99999 104                      /todo x==y
-		-50022;99999 99999 104                      /todo x!=y
-		-50023;99999 99999 104                      /todo x>y
-		-50024;99999 99999 104                      /todo x>=y
-		-50025;99999 99999 104                      /todo x<y
-		-50026;99999 99999 104                      /todo x<=y
-		-50027;99999 99999 104                      /todo -x
-		-50028;99999 99999 104)                     /todo !x
+		-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
+		-50022;99999 99999 104                      /todo cmp8
+		-50023;99999 99999 104)
 
 
 /mul32 r0..r3:[a b][c d]     ab*cd = [a*c +a*d+b*c]

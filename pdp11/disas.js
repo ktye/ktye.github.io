@@ -52,7 +52,7 @@ function disas(a,aa){
  case"d" :r+=adr(d,aa);break
  case"ro":r+=rs[(x&0700)>>6]+",";o&=077
  case"o" :if(o&0x80){r+=" -"+(2*((0xff^o)+1)).toString(8)}else{r+=" +"+(2*o).toString(8)};break
- case"rd":r+=rs[(x&0700)>>6]+","+adr(d,aa);break
+ case"rd":r+=adr(d,aa)+","+rs[(x&0700)>>6];break
  case"r" :r+=rs[x&7];break
  case"r3":r+=rs[(x&0700)>>6];break}
  return   r
@@ -60,7 +60,7 @@ function disas(a,aa){
 function disasm(O){let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
  pc=01000;do{ let id=pc.toString(8)
   let p=[pc]
-  O(o(pc)+": "+o(M[pc>>1])+" [000000 000000 000000 000000][000000 000000 000000 000000] "+disas(pc,p)+"\n",id)
+  O(o(pc)+": "+o(M[pc>>1])+" [000000 000000 000000 000000][000000 000000 000000 000000 ---] "+disas(pc,p)+"\n",id)
   pc=p[0];pc+=2
  }while(M[pc>>1])}
 

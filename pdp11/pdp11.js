@@ -32,7 +32,7 @@ let step=()=>{ let l=x=>console.log(x)
  case 05100:M[d]=F(~M[d])                    ;l("com");return //com
  case 05200:M[d]++;F(M[d])                   ;l("inc");return //inc
  case 05300:M[d]--;F(M[d])                   ;l("dec");return //dec
- case 05400:M[d]=F(-M[d])                    ;l("neg");return //neg
+ case 05400:M[d]=F(-M[d]);carry=M[d]!=0      ;l("neg");return //neg
  case 05500:M[d]+=carry                      ;l("adc");return //adc  //todo F..vv
  case 05600:M[d]-=carry                      ;l("sbc");return //sbc
  case 05700:sign=!!(M[d]&0x8000);zero=M[d]==0;l("tst");return //tst
@@ -58,7 +58,9 @@ let step=()=>{ let l=x=>console.log(x)
  case 0001400:if( zero)                     br(o);l("beq");return //beq
  case 0002000:if( !xor(zero,sign))          br(o);l("bge");return //bge
  case 0002400:if(  xor(zero,sign))          br(o);l("blt");return //blt
- case 0003000:if((!xor(zero,sign))&&(!zero))br(o);l("bgt");return //bgt
+ case 0003000:
+  console.log("bgt z/s", zero, sign, "off", o, "cnd", (!xor(zero,sign))&&(!zero))
+  if((!xor(zero,sign))&&(!zero))br(o);l("bgt");return //bgt
  case 0003400:if(( xor(zero,sign))||( zero))br(o);l("ble");return //ble
  case 0100000:if(!sign)                     br(o);l("bpl");return //bpl
  case 0101000:if((!carry)&&(!zero))         br(o);l("bhi");return //bhi

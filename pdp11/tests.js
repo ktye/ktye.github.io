@@ -17,6 +17,9 @@ let tests = {
  ks2:[0,123456],
  ks3:[21,0],
  ks4:[31,0],
+ iff:[-26],
+ ife:[39],
+ ret:[26],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"
