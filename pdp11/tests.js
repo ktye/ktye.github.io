@@ -21,6 +21,9 @@ let tests = {
  ife:[39],
  ret:[26],
  slp:[1],
+ brk:[2],
+ bhi:[10],
+ cnt:[-98],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"

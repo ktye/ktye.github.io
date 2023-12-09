@@ -13,20 +13,40 @@ let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
  case 0:return r                         //   r
  case 1:return D+(M[r]>>1)               //  (r)
  case 2:let q=M[r]>>1;M[r]+=2;return D+q //  (r)+
- //case 3:                               // @(r)+
- case 4:M[r]-=2;return D+(      M[r] >>1)// -(r)
+ case 3:nyi()                            // @(r)+
+ case 4:
+  M[r]-=2;return D+(      M[r] >>1)// -(r)
  case 6:        return D+((S(y)+M[r])>>1)// x(r)
- default:return r /*nyi*/                //@x(r)
+ default:nyi()                           //@x(r)
 }}
 let F=x=>{sign=x&0x8000;zero=x==0;return x}
 
 let step=()=>{ let l=x=>console.log(x)
- //console.log("step", "pc", oct(M[7]))
  let x=M[M[7]>>1],a=[0]
  show(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
  M[7]+=2
- let r,d=A(x&077,a);M[7]+=a[0];a[0]=0
- if(0200==(x&01777770)){console.log("rts",d,M[d]);M[7]=M[d];M[7]=po();console.log("=>",M[7].toString(8));return} //rts
+
+ let o=x&0xff
+ switch(x&0177400){ //br before reading addr
+ case 0000400:                              br(o);l("br") ;return //br
+ case 0001000:if(!zero)                     br(o);l("bne");return //bne
+ case 0001400:if( zero)                     br(o);l("beq");return //beq
+ case 0002000:if( !xor(zero,sign))          br(o);l("bge");return //bge
+ case 0002400:if(  xor(zero,sign))          br(o);l("blt");return //blt
+ case 0003000:if((!xor(zero,sign))&&(!zero))br(o);l("bgt");return //bgt
+ case 0003400:if(( xor(zero,sign))||( zero))br(o);l("ble");return //ble
+ case 0100000:if(!sign)                     br(o);l("bpl");return //bpl
+ case 0101000:if((!carry)&&(!zero))         br(o);l("bhi");return //bhi
+ case 0101400:if(  carry ||  zero )         br(o);l("blos");return//blos
+ case 0100400:if( sign)                     br(o);l("bmi");return //bmi
+ case 0103000:if(!carry)                    br(o);l("bcc");return //bcc bhis
+ case 0103400:if( carry)                    br(o);l("bcs");return //bcs
+ }
+
+
+ let r,d=A(x&077,a);
+ M[7]+=a[0];a[0]=0
+ if(0200==(x&01777770)){M[7]=M[d];M[7]=po();return} //rts
  switch(x&077700){ //clr,com,inc,dec,neg,adc,sbc,tst,ror,rol,asr,asl,sxt
  case 05000:M[d]=F(0)                        ;l("clr");return //clr
  case 05100:M[d]=F(~M[d])                    ;l("com");return //com
@@ -43,7 +63,7 @@ let step=()=>{ let l=x=>console.log(x)
  switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
  case 0070000:r=M[s]*M[d];M[s]=r>>16;M[1+s]=r&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));l("mul");return //mul
- case 0072000:s&=7;M[s]=(0x8000&M[d])?(M[s]>>(0xffff&-M[d])):(M[s]<<M[d]);F(M[s]); l("ashc"); return //ashc  todo:carry
+ case 0072000:s&=7;M[s]=(0x8000&M[d])?(M[s]>>(0xffff&-M[d])):(M[s]<<M[d]);F(M[s]); l("ash"); return //ash  todo:carry
  case 0073000:s&=7;let u=(M[s]<<16)|M[1+s];u=F((0x8000&M[d])?(u>>(0xffff&-M[d])):(u<<M[d]))
   M[s]=0xffff&(u>>16);M[1+s]=0xffff&u                     ;l("ashc");return //ashc
  case 0074000:M[d]^=M[s&7];F(M[d])                        ;l("xor"); return //xor
@@ -51,24 +71,7 @@ let step=()=>{ let l=x=>console.log(x)
  switch(x&0177700){ //jmp,swab,mark,mfpi,mtpi
  case 0100:M[7]=M[d]   ;l("jmp"); return //jmp
  }
- let o=x&0xff
- switch(x&0177400){ //br
- case 0000400:    console.log("br",o); br(o); console.log("=>",oct(M[7])); l("br") ;return //br
- case 0001000:if(!zero)                     br(o);l("bne");return //bne
- case 0001400:if( zero)                     br(o);l("beq");return //beq
- case 0002000:if( !xor(zero,sign))          br(o);l("bge");return //bge
- case 0002400:if(  xor(zero,sign))          br(o);l("blt");return //blt
- case 0003000:
-  console.log("bgt z/s", zero, sign, "off", o, "cnd", (!xor(zero,sign))&&(!zero))
-  if((!xor(zero,sign))&&(!zero))br(o);l("bgt");return //bgt
- case 0003400:if(( xor(zero,sign))||( zero))br(o);l("ble");return //ble
- case 0100000:if(!sign)                     br(o);l("bpl");return //bpl
- case 0101000:if((!carry)&&(!zero))         br(o);l("bhi");return //bhi
- case 0101400:if(  carry ||  zero )         br(o);l("blos");return//blos
- case 0100400:if( sign)                     br(o);l("bmi");return //bmi
- case 0103000:if(!carry)                    br(o);l("bcc");return //bcc bhis
- case 0103400:if( carry)                    br(o);l("bcs");return //bcs
- }
+
 
  s=A((x&07700)>>6,a);M[7]+=a[0]
  switch(x&0170000){ //add,sub

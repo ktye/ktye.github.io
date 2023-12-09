@@ -29,7 +29,6 @@ pd:{[o]opts::o
  lnam::(S 1+a)perfunc     /locnames                                     
  offs::({x!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
  @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
- `offs \offs
  
  /f:&T=`fun
  /a@:&`fun=T P a:&T=`arg
@@ -88,7 +87,7 @@ pdfun:{
  epi,:$[m;62706,O m;!0],104              /add #m,sp   ; jmp r4
  $[`main~S x;body,127 0;ret[pro,body;epi]]}
  
-ret:{x[i]:$[+/127<j:(#x)-1+i:&x=-66666;0+`ljmp; 10/8\256+j];x,y}  /replace -66666 (return) with br +j (jump to epilog)
+ret:{x[i]:$[+/127<j:(#x)-1+i:&x=-66666;0+`ljmp;10/8\256+j];x,y}  /replace -66666 (return) with br +j (jump to epilog)
  
 pdarg:{y;pdtype S x}
 pdsym:{y;S x}
@@ -116,21 +115,17 @@ pddfr:{y;!0}
 pddrp:{(*y),po}
 pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
 
-/todo loop
-pdfor:{$[I x;pdslp[x;y];pdlop[x;y]]}
-pdlop:{0x02400340,(*y),$[#*y;0x450d01;""],(y 2),(y 1),0x0c000b0b}
+pdfor:{(pdlop;pdslp)[I x].(x;y)}                    /slp:do-while; lop:while-do
+pdlop:{cnt brk of[nc y 0;1+#b],(b:,/1_y),-44444}    /cond,br+,body,post,cont
+pdslp:{slp;b,of[*y;-(#*y)+#b:cnt brk(-1_y 2),y 1]}  /body,post,br? -n
 
-pdslp:{b,of[*y;-(#*y)+#b:cnt brk(-1_y 2),y 1]}  /body,post,br? -n
-
-/brk:{x[i]:$[+/127<j:(#x)-1+i:&x=-55555;0+`ljmp;10/8\256+     j]}  /replace -55555 (break)    with br +j
-/cnt:{x[i]:$[+/128<j:     1+i:&x=-44444;0+`ljmp;10/8\256+256!-j]}  /replace -44444 (continue) with br -j
-brk:{x}
-cnt:{x}
+brk:{x[i]:$[+/127<j:(#x)-1+i:&x=-55555;0+`ljmp;10/8\256+     j]}  /replace -55555 (break)    with br +j
+cnt:{x[i]:$[+/128<j:     1+i:&x=-44444;0+`ljmp;10/8\256+256!-j]}  /replace -44444 (continue) with br -j
 
 pdjmp:{y;,$[I x;-55555;-44444]}         /no nested loops, just break/continue
 
-lit:0 1 2 4 8 16 32 64 128 -1 -2!(!0;,5200;5200 5200;5200 72002;5200 72003;5200 72004;5200 72005;5200 72006;5200 72007;5300 5301;5300 5300 5301)
-pdlit:{y;i:I x;t:S x; pu,$[`I~@r:lit i;r;2~pdw t
+lit:0 1 2 -1!(!0;,5200;5200 5200;5300 5301)
+pdlit:{y;i:I x;t:S x;pu,$[`I~@r:lit i;r;2~pdw t
  $[*|r:,/12700 12701,'O@|65536 65536\i;r;2#r]
  ,/12700 12701 12702 12703,'O@,/|'+65536 65536\(`i@C i+!4),`i@C i+4+!4]} /todo copy from literal section?
 
@@ -145,10 +140,11 @@ pdswc:{n:#$[I x;y;y,:,""]
  r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
  r,,/(1_y),'0x0c,/(leb'|!n-1),\0x0b}
 
-pdcnd:{y,:!0;of[*y;1+#y 2],(y 2),br[#y 1],y 1}        /if y0 then y1 [else y2]
+pdcnd:{(iff;ife)[3~#y].(x;y)}
+ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if  y0 then y1 [else y2]
+iff:{of[nc@*y;#b],b:y 1}                     /if !y0 then br
 
 of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
-br:of[,256]
 
 pdtyp:{y;S x}
 
@@ -170,10 +166,11 @@ pdbnd:pdand:pd2 13;pdbor:pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
 
 /todo bor bnd receive boolean input: insert I32B
 
-pdc:{(,/|z),(4727;-50020-(pdw S y)%2),x}  /x:branch instruction without offset (decimal)
-pdneq:pdc  512;  pdeql:pdc  768           /bne beq
-pdles:pdc 1280;  pdmor:pdc 1536           /blt bgt
-pdlte:pdc 1792;  pdgte:pdc 1024           /blt bge
+pdc:{(,/|z),(4727;-50020-(pdw t)%2),x(t:S y)?`u`k} /x:branch instruction without offset (decimal)
+pdneq:pdc  512 512  ;pdeql:pdc  768 768            /bne beq
+pdles:pdc 1280 34560;pdmor:pdc 1536 33280          /blt blo  bgt bhi
+pdlte:pdc 1792 33536;pdgte:pdc 1024 34304          /blt blos bge bhis
+nc:{(-1_x),$[512!c:*|x;c-256;c+256]}               /negate condition +/- 0400
 
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
