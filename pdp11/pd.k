@@ -1,3 +1,5 @@
+/todo load/store global-get/set const initmem indirect-call div(i) mod(i) intrinsics
+
 F:(0#`)!()
 ifun:&#T                /function index of each node
 afun:s!-!#s:S@&T=`fun   /fname!-addr  first is 0(main), never called
@@ -75,7 +77,6 @@ pdcon:{(pdtype S 1+x),0x00,(*y),0x0b}
 pdvar:{(pdtype S 1+x),0x01,(*y),0x0b}
 pdtab:{y;(I x;(!fsig)?S x)}
 pdtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
-pdfex:{(leb@#$x),($x),0x00,leb y}
 
 pdfun:{
  c:&x=P
@@ -136,9 +137,15 @@ pdnot:{(*y),0+`not}                     /should not exist
 pdnop:{y;!0}
 pdret:{(*y),$[`ast~T P x;!0;-66666]}
 
-pdswc:{n:#$[I x;y;y,:,""]
- r:@[,/n#(,0x0240);1;$[t:S x;pdtype t;0x40]],(*y),0x0e,(leb n-2),(,/leb'!n-1),0x0b
- r,,/(1_y),'0x0c,/(leb'|!n-1),\0x0b}
+pdswc:{b:1_y,\-55555;brk@-1_,/(!0
+ (*y)                               /switch-expr in r0
+ 22700,O@-1+#b                      /cmp #(n-1),r0
+ of[,34304;#*|b]                    /bcc #def
+ *|b                                /default
+ 6300 60007                         /asl r0;add r0,pc (jump to case offset)
+ ,/of[,256]'(2*|-1_!#b)+-2_0,+\#'b  /branch offsets
+ ,/-1_b)}                           /cases
+
 
 pdcnd:{(iff;ife)[3~#y].(x;y)}
 ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if  y0 then y1 [else y2]

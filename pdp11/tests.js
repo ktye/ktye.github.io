@@ -24,6 +24,8 @@ let tests = {
  brk:[2],
  bhi:[10],
  cnt:[-98],
+ swc:[-6],
+ swd:[4],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"

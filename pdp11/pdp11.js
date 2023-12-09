@@ -56,6 +56,7 @@ let step=()=>{ let l=x=>console.log(x)
  case 05500:M[d]+=carry                      ;l("adc");return //adc  //todo F..vv
  case 05600:M[d]-=carry                      ;l("sbc");return //sbc
  case 05700:sign=!!(M[d]&0x8000);zero=M[d]==0;l("tst");return //tst
+ case 06300:M[d]<<=1;F(M[d])                 ;l("asl");return //asl
  case 06700:M[d]=sign?-1:0                   ;l("sxt");return //sxt
  }
 
@@ -80,7 +81,7 @@ let step=()=>{ let l=x=>console.log(x)
  case 0160000:carry=M[s]>M[d];M[d]-=M[s];l("sub")  ;l("sub");return //sub
  }
  switch(x&070000){ //mov,cmp,bit,bic,bis
- case 0020000:F(M[s]-M[d])                         ;l("cmp");return //cmp
+ case 0020000:F(M[s]-M[d]);carry=M[s]<M[d]         ;l("cmp");return //cmp
  case 0040000:M[d]&=~M[s];F(M[d])                  ;l("bic");return //bic
  case 0050000:M[d]|= M[s];F(M[d])                  ;l("bis");return //bis
  }
