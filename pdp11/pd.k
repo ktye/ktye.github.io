@@ -96,8 +96,9 @@ pdres:{y;S x}
 pdloc:{y;S x}
 pdstm:{,/y}
 pdast:pdstm
-pdlod:{(y 0),(0x2c282829292b i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
-pdsto:{(,/y),(0x3a3636373739 i),(0x000202030303 i:`b`i`u`j`k`f?S x),0x00}
+
+pdlod:{  (*y),4727,-(70000+`b`i`j?S x)}
+pdsto:{(,/|y),4727,-(60000+`b`i`j?S x)}
 
 
 /todo: detect tee instruction (don't pop result)
@@ -204,6 +205,12 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 /               -44444(break) -55555(continue) -66666(return)
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604,(12600+     !4),104            /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
+		-70000;12604 111000 6701 104                /load`b:movb (r0),r0;sxt r1
+		-70001;12604 10001 11000 16101 2 104        /load`i:mov r0,r1;mov (r0),r0;mov 2(r1),r1
+		-70002;12604 10003 16301 2 16302 4 16303 6 104   /load`j
+		-60000;12604 111610 62706 10 104                 /store`b:movb (sp),(r0);add #8,sp
+		-60001;12604 10003 12623 12623 62706 4 104       /store`i:mov r0,r3;mov (sp+),(r3)+;..;add #4;sp
+		-60002;12604 10003 12623 12623 12623 12623 104   /store`j:mov r0,r3;mov (sp)+,(r3)+;..
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
 		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
