@@ -63,6 +63,7 @@ let setbrk=(e)=>{let x=e.target,y=parseInt(x.id,8);if("SPAN"!=x.nodeName)return;
 }
 let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disabled=false;wait=false
  x=x.replace(/:.*/,"");prg=(""==x)?"k":x
+ ge("stk").textContent=""
  let asm=ge("asm")
  asm.textContent=" addr    inst     r0     r1     r2     r3      r4     fp     sp     pc\n"
  fetch("t/"+prg+".out").then(r=>r.text()).then(r=>{

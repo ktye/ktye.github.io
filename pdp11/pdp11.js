@@ -84,7 +84,7 @@ let step=()=>{ let l=x=>console.log(x)
   if(!d)M[d]=F((r&0x80)?r|0xff00:r)  //dst:r0
   else{if(M[0]&1)M[d]=(r<<8)|(M[d]&0xff)
        else      M[d]= r    |(M[d]&0xff00)}        ;l("movb");return//movb
- case 0010000:M[d]=F(M[s])                         ;l("mov");return //mov
+ case 0010000:M[d]=F(M[s]);                        ;l("mov");return //mov
  case 0060000:carry=(M[d]+M[s])>=0xffff;M[d]+=M[s] ;l("add");return //add
  case 0160000:carry=M[s]>M[d];M[d]-=M[s];l("sub")  ;l("sub");return //sub
  }

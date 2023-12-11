@@ -7,7 +7,7 @@ func main() {
 	lod(4) //-4293732861: 1234435 -1
 }
 func sto(a, v int32) {
-	SetI64(a, -1)
+	SetI64(a, int64(-1))
 	SetI32(a, 1234567)
 	SetI8(a, v)
 }

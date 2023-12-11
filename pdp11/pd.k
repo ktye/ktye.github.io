@@ -1,5 +1,6 @@
 /todo load/store global-get/set const initmem indirect-call div(i) mod(i) intrinsics
 
+D:+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
 F:(0#`)!()
 ifun:&#T                /function index of each node
 afun:s!-!#s:S@&T=`fun   /fname!-addr  first is 0(main), never called
@@ -10,6 +11,9 @@ glob:0#`
 fsig:(0#`)!()
 sigs:()
 offs:0                  /`symbol!offset for get/set args+locals for each function
+
+
+/stack at 2559 word offset (5118 011776 bytes) within data
 
 pd:{[o]opts::o
  F[`prg`mem`con`var`tab`fun`arg`sym`res`loc`ast`lod`sto]:(pdprg;pdmem;pdcon;pdvar;pdtab;pdfun;pdarg;pdsym;pdres;pdloc;pdast;pdlod;pdsto)
@@ -46,9 +50,12 @@ pd:{[o]opts::o
  n:{x[y]+:1}/(,&#P),P;n[0]-:1
  s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \ T y)[y;|c 1]}/[();|!#P;|n]
       /link@*s}   
-"0",",\n0"/$link@*s}
+"0",",\n0"/$imag stak link@*s}
 
 link:{o:(!builtins)!512+2*-1_+\(#x),#'b:.builtins;@[x;i;O o x i:&x<0],,/b}
+stak:{D[(2558)-!n:4*#lits]:,/lits;x} /embed literals/constants/gobals in stack
+imag:{@[&(2^15)-256;!#x;x],D}          /fill disk image: code(32kw-01000) + data(32kw)
+
 
 pdprg:{
  /s:{(_x),(leb@#y),y} /0(custom) 1(type) 2(import) 3(func) 4(table) 5(mem) 6(global) 7(export) 8(start) 9(element) 10(code) 11(data) 12(data count)
@@ -66,7 +73,7 @@ pdprg:{
  /elem:$[#t;s[9;(leb@#t),,/t:pdtbl y t];""]
  /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
- init: 12706 11776            /mov #11776,sp (init sp: 1k reserved for kos)
+ init: 12706,O 5118-8*#lits                  /mov #11776,sp (init sp: 1k reserved for kos) -literals
  c:1_&P=0;f:y fn:&`fun=T c
  d:(- 1_!#f)!O 512+2*1_-1_+\(#init),#'f      /-1 -2..!function start addresses
  @[r;i;d r i:&(r>-#f)&0>r:init,,/f]}         /link calls
@@ -126,12 +133,13 @@ cnt:{x[i]:$[+/128<j:     1+i:&x=-44444;0+`ljmp;10/8\256+256!-j]}  /replace -4444
 
 pdjmp:{y;,$[I x;-55555;-44444]}         /no nested loops, just break/continue
 
-lit:0 1 2 -1!(!0;,5200;5200 5200;5300 5301)
-pdlit:{y;i:I x;t:S x;pu,$[`I~@r:lit i;r;2~pdw t
- $[*|r:,/12700 12701,'O@|65536 65536\i;r;2#r]
- ,/12700 12701 12702 12703,'O@,/|'+65536 65536\(`i@C i+!4),`i@C i+4+!4]} /todo copy from literal section?
 
 
+/literals, constants and globals are embedded in the stack
+pdlit:{y;i:I x;$[2~pdw s:S x;lit1 I x; (0x00000000~C i+4+!4)&(`k~s);lit1@*`i C i+!4;14603 12703,lit[i;`k],4727 -77000]}    /push r3;mov #literal-offset to r3
+lit1:{$[0~x; pu;1~x; pu,5200;-1~x;pu,5300 5301;(x<32767)&x>0; pu,12700,O x; 14603 12703,lit[x;`i],4727 -77000]}            /0.. 1.. -1.. mov #small,r0 
+lit: {x:$[`i~y;(|65536 65536\x),0 0;O@,/|'+65536 65536\(`i@C x+!4),`i@C x+4+!4];$[0N~r:lits?x; -1+#lits,:,x ;r]}
+lits:()
 
 pdneg:{(*y),5401 5400 5601}             /neg32:neg r1;neg r0;sbc r1
 pdnot:{(*y),0+`not}                     /should not exist
@@ -205,9 +213,10 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 /               -44444(break) -55555(continue) -66666(return)
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604,(12600+     !4),104            /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
+		-77000;12604 10246 10146 10046 6303 6303 6303 5403 62703 11776 14300 14301 14302 14303 104 /get literal: store offset (rel to stack bottom) in r3;push r0..r3;load r0..r3 from stack
 		-70000;12604 111000 6701 104                /load`b:movb (r0),r0;sxt r1
 		-70001;12604 10001 11000 16101 2 104        /load`i:mov r0,r1;mov (r0),r0;mov 2(r1),r1
-		-70002;12604 10003 16301 2 16302 4 16303 6 104   /load`j
+		-70002;12604 10003 11000 16301 2 16302 4 16303 6 104   /load`j
 		-60000;12604 111610 62706 10 104                 /store`b:movb (sp),(r0);add #8,sp
 		-60001;12604 10003 12623 12623 62706 4 104       /store`i:mov r0,r3;mov (sp+),(r3)+;..;add #4;sp
 		-60002;12604 10003 12623 12623 12623 12623 104   /store`j:mov r0,r3;mov (sp)+,(r3)+;..
