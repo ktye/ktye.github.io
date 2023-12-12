@@ -99,7 +99,7 @@ pdloc:{y;S x}
 pdstm:{,/y}
 pdast:pdstm
 
-pdlod:{  (*y),4727,-(70000+`b`i`j?S x)}
+pdlod:{(*y),4727,-(70000+`b`i`j?S x)}
 pdsto:{(,/|y),4727,-(60000+`b`i`j?S x)}
 
 
@@ -109,7 +109,7 @@ pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
 
 
 /pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
-pdcal:{(,/|y),4727,pdinst(afun S x)}
+pdcal:{(,/|y),4727,$[0~r:pdinst S x;afun S x;r]}
 
 
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
@@ -188,27 +188,8 @@ pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
 pdsign:`i`u`j`k`f!("_s";  "_u"; "_s"; "_u";   "")
 
 /todo: clz memcpy (replace grow with trap)
-pdinst:{$[`Memorysize`Memorygrow`Memorycopy`Memoryfill`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"?x;0+`nyi;0]
- $[`I32clz;0+`nyi;x]}
-
-/memcpy:
-/ mov +(sp),r4
-/                /r0 src
-/ mov 12(sp),r0  /r1 dst
-/ mov (sp),r2    /r2 n
-/ tst r2
-/ beq +5
-/ movb r0,r1
-/ inc r0
-/ inc r1
-/ dec r2
-/ br -7
-/ add 10(#sp)
-/ mov +(sp),r0
-/ mov +(sp),r1
-/ mov +(sp),r2
-/ mov +(sp),r3
-/ rts pc
+pdinst:{$[0N~`Memorysize`Memorygrow`Memoryfill`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"?x;0;0+`nyi]
+ $[`I32clz~x;0+`nyi;`Memorycopy~x;-55000;0]}
 
 /pdinst:`Memorysize`Memorygrow`Memorycopy`Memoryfill!(0x3f00;0x4000;0xfc0a0000;0xfc0b00)
 /pdinst,:`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3!(0x3f01;0x4001;0xfc0a0001;0xfc0a0100)
@@ -227,6 +208,8 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
+memcpy:12604 16600 12 11602 5702 1403 112021 5302 4373 62716 10 12600 12601 12602 12603 104
+
 /               -44444(break) -55555(continue) -66666(return)
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604 12600 12601 12602 12603 104    /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
@@ -238,6 +221,7 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-60000;12604 111610 62706 10 104                 /store`b:movb (sp),(r0);add #8,sp
 		-60001;12604 10003 12623 12623 62706 4 104       /store`i:mov r0,r3;mov (sp+),(r3)+;..;add #4;sp
 		-60002;12604 10003 12623 12623 12623 12623 104   /store`j:mov r0,r3;mov (sp)+,(r3)+;..
+		-55000;memcpy
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
 		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
@@ -262,6 +246,25 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50023;99999 99999 104)
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+
+
+/memcpy:
+/ mov (sp)+,r4
+/                /r0 src
+/ mov 12(sp),r0  /r1 dst
+/ mov (sp),r2    /r2 n
+/ tst r2
+/ beq +3
+/ movb (r0)+,(r1)+
+/ dec r2
+/ br -5
+/ add #10,(sp)
+/ mov +(sp),r0
+/ mov +(sp),r1
+/ mov +(sp),r2
+/ mov +(sp),r3
+/ rts pc
+
 
 /optimizations (before linking)
 /opt:{oppo oppu x}     /breaks missing clr for small literals
