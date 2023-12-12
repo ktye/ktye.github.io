@@ -1,4 +1,4 @@
-/todo load/store global-get/set const initmem indirect-call div(i) mod(i) intrinsics
+/todo initmem indirect-call div(i) mod(i) intrinsics
 
 D:+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
 F:(0#`)!()
@@ -7,12 +7,14 @@ afun:s!-!#s:S@&T=`fun   /fname!-addr  first is 0(main), never called
 locs:0            
 atyp:anam:()            /argtypes  argnames for each function
 ltyp:lnam:()            /loctypes  locnames for each function (args+locs)
-glob:0#`
 fsig:(0#`)!()
+cons:S@&T=`con          /constant!literal-offset
 sigs:()
 offs:0                  /`symbol!offset for get/set args+locals for each function
+lits:()
 
-
+/print table
+/ `<(`l@+`t`p`i`s!(T;P;I;S)),\"\n"
 /stack at 2559 word offset (5118 011776 bytes) within data
 
 pd:{[o]opts::o
@@ -20,6 +22,7 @@ pd:{[o]opts::o
  F[`add`and`bnd`ant`asn`cal`cli`cnd`dfr`div`drp`eql`cst]:(pdadd;pdand;pdbnd;pdant;pdasn;pdcal;pdcli;pdcnd;pddfr;pddiv;pddrp;pdeql;pdcst)
  F[`for`get`Get`gte`jmp`les`lit`lte`mod`mor`mul`neg    ]:(pdfor;pdget;pdGet;pdgte;pdjmp;pdles;pdlit;pdlte;pdmod;pdmor;pdmul;pdneg)
  F[`neq`nop`not`orr`bor`xor`ret`shl`shr`stm`sub`swc`typ]:(pdneq;pdnop;pdnot;pdorr;pdbor;pdxor;pdret;pdshl;pdshr;pdstm;pdsub;pdswc;pdtyp)
+ 
  
  $[1~#i:i@&`store=S P i:&T=`ast;T[&P=*i]:`nop;0]  /remove store/catch
  $[1~#i:i@&`catch=S P i:&T=`ast;T[&P=*i]:`nop;0]
@@ -35,21 +38,13 @@ pd:{[o]opts::o
  lnam::(S 1+a)perfunc     /locnames                                     
  offs::({x!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
  @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
+ glob::$[#s:S@&T=`var;s!O 5118-8*!#s;(0#`)!!0]
+ lits::$[#glob;-4^&4*#glob;()];T[1+&T=`con]:`nop    /initial values for globals are assigned later
+ cons::$[#cons;cons!pdlit'[1+&T=`con;0];(0#`)!!0]
  
- /f:&T=`fun
- /a@:&`fun=T P a:&T=`arg
- /d:(S f)!(#f)#,0#`
- /d[S@!g]:S a@.g:=f@f'a
- /fsig::pdtype d,'@[(#f)#`;ifun r;S r:&T=`res]
- /fsig::$[`nort?opts;fsig;pdsys,fsig]          /imports
- /sigs::?.fsig
- /glob::     S@&`con=T
- /glob::glob,S@&`var=T
- 
- /S[0]:`so \ $[0N~i:o?`lib;S 0;o 1+i]
  n:{x[y]+:1}/(,&#P),P;n[0]-:1
  s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \ T y)[y;|c 1]}/[();|!#P;|n]
-      /link@*s}   
+ lits[!#glob]:litl'[I i;S i:1+&T=`var]
 "0",",\n0"/$imag stak link@*s}
 
 link:{o:(!builtins)!512+2*-1_+\(#x),#'b:.builtins;@[x;i;O o x i:&x<0],,/b}
@@ -80,14 +75,14 @@ pdprg:{
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
 pdmem:{y;""}
-pdcon:{(pdtype S 1+x),0x00,(*y),0x0b}
+pdcon:{y;*y}
 pdvar:{(pdtype S 1+x),0x01,(*y),0x0b}
 pdtab:{y;(I x;(!fsig)?S x)}
 pdtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
 
 pdfun:{
  c:&x=P
- body:opt y@*&`ast=T c
+ body:y@*&`ast=T c
  n:O 4+8*+/`loc=T c
  m:0|8*-1++/`arg=T c
  pro:10546 162706,n,10605                /mov fp,-(sp); sub #n(sp); mov sp,fp
@@ -108,14 +103,13 @@ pdlod:{  (*y),4727,-(70000+`b`i`j?S x)}
 pdsto:{(,/|y),4727,-(60000+`b`i`j?S x)}
 
 
-/todo: detect tee instruction (don't pop result)
-pdasn:{y;(y 0),$[I x;0+`globalassign;(set setbuiltin@(offs ifun x)S x),po]}
+pdasn:{y;(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x)]}
 pdget:{y;pu,get getbuiltin@(offs ifun x)S x}
-pdGet:{y;0x23,leb glob?S x}
+pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
 
 
 /pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
-pdcal:{(,/|y),4727,(afun S x)}
+pdcal:{(,/|y),4727,pdinst(afun S x)}
 
 
 pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
@@ -138,8 +132,9 @@ pdjmp:{y;,$[I x;-55555;-44444]}         /no nested loops, just break/continue
 /literals, constants and globals are embedded in the stack
 pdlit:{y;i:I x;$[2~pdw s:S x;lit1 I x; (0x00000000~C i+4+!4)&(`k~s);lit1@*`i C i+!4;14603 12703,lit[i;`k],4727 -77000]}    /push r3;mov #literal-offset to r3
 lit1:{$[0~x; pu;1~x; pu,5200;-1~x;pu,5300 5301;(x<32767)&x>0; pu,12700,O x; 14603 12703,lit[x;`i],4727 -77000]}            /0.. 1.. -1.. mov #small,r0 
-lit: {x:$[`i~y;(|65536 65536\x),0 0;O@,/|'+65536 65536\(`i@C x+!4),`i@C x+4+!4];$[0N~r:lits?x; -1+#lits,:,x ;r]}
-lits:()
+litl:{$[`i~y;O@,/(`i@,/(2^`c@,x),\0x0000),0 0;O@,/|'+65536 65536\(`i@C x+!4),`i@C x+4+!4]}
+lit: {O 5118-8*$[0N~r:lits?x:litl[x;y]; -1+#lits,:,x ;r]}
+
 
 pdneg:{(*y),5401 5400 5601}             /neg32:neg r1;neg r0;sbc r1
 pdnot:{(*y),0+`not}                     /should not exist
@@ -164,9 +159,8 @@ of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branc
 
 pdtyp:{y;S x}
 
-pd2: {(,/z),x(`i`u`j`k`f?S y)}
-pd2s:{"\n"/(z 0;z 1;(pdtype t  ),x,pdsign@t:S y)}
-pddiv:pd2 0x6d6e7f80a3;pdmod:pd2 0x6f70818200 
+pddiv:{y;0+`div} /todo
+pdmod:{y;0+`mod} /todo
 
 pdadd:{$[2~pdw S x;(,/|y),4727 -50000;0+`nyiaddl]}
 pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyisubl]}
@@ -192,11 +186,34 @@ nc:{(-1_x),$[512!c:*|x;c-256;c+256]}               /negate condition +/- 0400
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
 pdsign:`i`u`j`k`f!("_s";  "_u"; "_s"; "_u";   "")
-pdinst:`Memorysize`Memorygrow`Memorycopy`Memoryfill!(0x3f00;0x4000;0xfc0a0000;0xfc0b00)
-pdinst,:`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3!(0x3f01;0x4001;0xfc0a0001;0xfc0a0100)
-pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"!,'0x67999f9ca6a4a5bfbd
 
-inc2:62706 4              /drop top 2 from stack
+/todo: clz memcpy (replace grow with trap)
+pdinst:{$[`Memorysize`Memorygrow`Memorycopy`Memoryfill`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"?x;0+`nyi;0]
+ $[`I32clz;0+`nyi;x]}
+
+/memcpy:
+/ mov +(sp),r4
+/                /r0 src
+/ mov 12(sp),r0  /r1 dst
+/ mov (sp),r2    /r2 n
+/ tst r2
+/ beq +5
+/ movb r0,r1
+/ inc r0
+/ inc r1
+/ dec r2
+/ br -7
+/ add 10(#sp)
+/ mov +(sp),r0
+/ mov +(sp),r1
+/ mov +(sp),r2
+/ mov +(sp),r3
+/ rts pc
+
+/pdinst:`Memorysize`Memorygrow`Memorycopy`Memoryfill!(0x3f00;0x4000;0xfc0a0000;0xfc0b00)
+/pdinst,:`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3!(0x3f01;0x4001;0xfc0a0001;0xfc0a0100)
+/pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"!,'0x67999f9ca6a4a5bfbd
+
 pu:4727 -99999            /jsr pc,#push
 po:4727 -88888            /jsr pc,#pop
 get:4727,-10000-          /e.g. -9996..-10002
@@ -212,8 +229,9 @@ pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#
 
 /               -44444(break) -55555(continue) -66666(return)
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
-                -88888;12604,(12600+     !4),104            /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
-		-77000;12604 10246 10146 10046 6303 6303 6303 5403 62703 11776 14300 14301 14302 14303 104 /get literal: store offset (rel to stack bottom) in r3;push r0..r3;load r0..r3 from stack
+                -88888;12604 12600 12601 12602 12603 104    /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
+		-77000;12604 10246 10146 10046 14300 14301 14302 14303 104 /get literal: store offset (rel to stack bottom) in r3;push r0..r3;load r0..r3 from stack
+                -75000;16604 2 10044 10144 10244 10344 12604 5206 12600 12601 12602 12603 104  /global assign: mov 2(sp),r4;..
 		-70000;12604 111000 6701 104                /load`b:movb (r0),r0;sxt r1
 		-70001;12604 10001 11000 16101 2 104        /load`i:mov r0,r1;mov (r0),r0;mov 2(r1),r1
 		-70002;12604 10003 11000 16301 2 16302 4 16303 6 104   /load`j
@@ -242,6 +260,15 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
 		-50022;99999 99999 104                      /todo cmp8
 		-50023;99999 99999 104)
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
+setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+
+/optimizations (before linking)
+/opt:{oppo oppu x}     /breaks missing clr for small literals
+/opt:{x}
+/oppu:{s:2_x,0 0;$[#i:&(-99999=s)&-88888=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove pop push   4727 -88888 4727 -99999
+/oppo:{s:2_x,0 0;$[#i:&(-88888=s)&-99999=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove push pop
+
 
 
 /mul32 r0..r3:[a b][c d]     ab*cd = [a*c +a*d+b*c]
@@ -257,17 +284,6 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 /  mov  r1,r0     10100
 /  mov  r2,r1     10201
 /  add  #8,sp     62706 10 
-
-
-getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
-setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
-
-/optimizations (before linking)
-/opt:{oppo oppu x}     /breaks missing clr for small literals
-opt:{x}
-oppu:{s:2_x,0 0;$[#i:&(-99999=s)&-88888=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove pop push   4727 -88888 4727 -99999
-oppo:{s:2_x,0 0;$[#i:&(-88888=s)&-99999=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove push pop
-
 
 
 /11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf

@@ -1,4 +1,4 @@
-package asn
+package main
 
 func main() {
 	h(5)
