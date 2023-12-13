@@ -73,23 +73,24 @@ let step=()=>{ let l=x=>console.log(x)
  case 0100:M[7]=M[d]   ;l("jmp"); return //jmp
  }
 
-// movb (r0),r0:  111000
-// movb (sp),(r0):111610
-
 
  s=A((x&07700)>>6,a);M[7]+=a[0]
  switch(x&0170000){ //mov,add,sub,cmp,bic,bis
- case 0110000:      //111000:movb(r0),r0  111610:movb(sp),(r0)
-  s=M[(x&0700)>>6];r=s&1;r=M[D+(s>>1)]>>(8*r)
-  if(!d)M[d]=F((r&0x80)?r|0xff00:r)  //dst:r0
-  else{if(M[0]&1)M[d]=(r<<8)|(M[d]&0xff)
-       else      M[d]= r    |(M[d]&0xff00)}        ;l("movb");return//movb
+ case 0110000:      //only 111000 111610 112021
+  if(x==0112021){M[0]-=2}
+  s=M[(x&0700)>>6];r=0xff&(M[D+(s>>1)]>>(8*(s&1)));d
+  switch(x){
+  case 0111000:         M[d]=F((r&0x80)?r|0xff00:r)                           ;break //movb(r0),r0   (sign-extend)
+  case 0111610:s=M[0]&1;M[d]=(s?(r<<8):r)|(M[d]&(s?0xff:0xff00))              ;break //movb(sp),(r0)
+  case 0112021:s=M[1]&1;M[d]=(s?(r<<8):r)|(M[d]&(s?0xff:0xff00));M[0]++;M[1]--;break //movb(r0)+,(r1)+
+  default: nyi()}                                  ;l("movb");return//movb
  case 0010000:M[d]=F(M[s]);                        ;l("mov");return //mov
  case 0060000:carry=(M[d]+M[s])>=0xffff;M[d]+=M[s] ;l("add");return //add
  case 0160000:carry=M[s]>M[d];M[d]-=M[s];l("sub")  ;l("sub");return //sub
  }
  switch(x&070000){ //mov,cmp,bit,bic,bis
  case 0020000:F(M[s]-M[d]);carry=M[s]<M[d]         ;l("cmp");return //cmp
+ case 0030000:F(M[d]&M[s])                         ;l("bit");return //bit
  case 0040000:M[d]&=~M[s];F(M[d])                  ;l("bic");return //bic
  case 0050000:M[d]|= M[s];F(M[d])                  ;l("bis");return //bis
  }

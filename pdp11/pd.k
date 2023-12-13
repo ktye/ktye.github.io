@@ -1,4 +1,4 @@
-/todo initmem indirect-call div(i) mod(i) intrinsics
+/todo indirect-call div(i) mod(i) system
 
 D:+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
 F:(0#`)!()
@@ -68,16 +68,31 @@ pdprg:{
  /elem:$[#t;s[9;(leb@#t),,/t:pdtbl y t];""]
  /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
- init: 12706,O 5118-8*#lits                  /mov #11776,sp (init sp: 1k reserved for kos) -literals
  c:1_&P=0;f:y fn:&`fun=T c
+ tabl:$[#i:&`tab=T c;62707,(O 6+4*#i),6300 6300 60007,,/y i;!0]
+ init: tabl,12706,O 5118-8*#lits             /mov #11776,sp (init sp: 1k reserved for kos) -literals
+ 
  d:(- 1_!#f)!O 512+2*1_-1_+\(#init),#'f      /-1 -2..!function start addresses
- @[r;i;d r i:&(r>-#f)&0>r:init,,/f]}         /link calls
+ @[r;i;d r i:&(r>-#f)&0>r:init,,/f]}
+ 
+ 
+/function table
+/ 01000 add #n,pc   /n:4+2*#table
+/ 01002 asl r0      /r0<<=1 
+/ 01004 asl r0
+/ 01006 add r0,pc
+/ function table:
+/ 01010 mov #f,pc
+/ 01012 mov #g,pc
+/ call with jsr #1002,pc
+
+ 
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
-pdmem:{y;""}
-pdcon:{y;*y}
-pdvar:{(pdtype S 1+x),0x01,(*y),0x0b}
-pdtab:{y;(I x;(!fsig)?S x)}
+pdmem:{*y}
+pdcon:{*y}
+pdvar:{*y}
+pdtab:{y;4727,afun S x}
 pdtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
 
 pdfun:{
@@ -92,7 +107,7 @@ pdfun:{
  
 ret:{x[i]:$[+/127<j:(#x)-1+i:&x=-66666;0+`ljmp;10/8\256+j];x,y}  /replace -66666 (return) with br +j (jump to epilog)
  
-pdarg:{y;pdtype S x}
+pdarg:{*y}
 pdsym:{y;S x}
 pdres:{y;S x}
 pdloc:{y;S x}
@@ -112,7 +127,7 @@ pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
 pdcal:{(,/|y),4727,$[0~r:pdinst S x;afun S x;r]}
 
 
-pdcli:{(,/(I x)#1_y),(*y),0x11,(leb sigs?(,/(1+I x)_y),pdtype S x),0x00 } 
+pdcli:{(,/|y),4727 4}
 pddfr:{y;!0}
 
 pddrp:{(*y),po}
@@ -185,15 +200,10 @@ nc:{(-1_x),$[512!c:*|x;c-256;c+256]}               /negate condition +/- 0400
 
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
-pdsign:`i`u`j`k`f!("_s";  "_u"; "_s"; "_u";   "")
 
-/todo: clz memcpy (replace grow with trap)
 pdinst:{$[0N~`Memorysize`Memorygrow`Memoryfill`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"?x;0;0+`nyi]
- $[`I32clz~x;0+`nyi;`Memorycopy~x;-55000;0]}
+ $[`I32clz~x;-55001;`Memorycopy~x;-55000;0]}
 
-/pdinst:`Memorysize`Memorygrow`Memorycopy`Memoryfill!(0x3f00;0x4000;0xfc0a0000;0xfc0b00)
-/pdinst,:`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3!(0x3f01;0x4001;0xfc0a0001;0xfc0a0100)
-/pdinst,:`I32clz`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"!,'0x67999f9ca6a4a5bfbd
 
 pu:4727 -99999            /jsr pc,#push
 po:4727 -88888            /jsr pc,#pop
@@ -208,7 +218,10 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
-memcpy:12604 16600 12 11602 5702 1403 112021 5302 4373 62716 10 12600 12601 12602 12603 104
+
+
+memcpy:12604 12601 16602 6 5702 1403 112021 5302 773 62706 16 12600 12601 12602 12603 104
+clz:   12604 10102 10003 5000 5702 1003 62700 20 10302 32702 100000 1003 5200 6302 772 5001 104
 
 /               -44444(break) -55555(continue) -66666(return)
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
@@ -221,14 +234,13 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-60000;12604 111610 62706 10 104                 /store`b:movb (sp),(r0);add #8,sp
 		-60001;12604 10003 12623 12623 62706 4 104       /store`i:mov r0,r3;mov (sp+),(r3)+;..;add #4;sp
 		-60002;12604 10003 12623 12623 12623 12623 104   /store`j:mov r0,r3;mov (sp)+,(r3)+;..
+		-55001;clz
 		-55000;memcpy
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
 		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
 		-50003;99999 99999 104                      /todo idiv
-		-50004;99999 99999 104                      /todo udiv
 		-50005;99999 99999 104                      /todo irem
-		-50006;99999 99999 104                      /todo urem
 		-50007;12604 5701 6702 6703 104             /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
 		-50010;12604 10003 10102 12600 73200 12600 12600 12600 10300 10201 104  /x<<y (ashc)
 		-50011;12604 10003 10102 12600 5400 73200 12600 12600 12600 10300 10201 104  /x>>y (neg;ashc)
@@ -248,22 +260,7 @@ getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 1
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
 
-/memcpy:
-/ mov (sp)+,r4
-/                /r0 src
-/ mov 12(sp),r0  /r1 dst
-/ mov (sp),r2    /r2 n
-/ tst r2
-/ beq +3
-/ movb (r0)+,(r1)+
-/ dec r2
-/ br -5
-/ add #10,(sp)
-/ mov +(sp),r0
-/ mov +(sp),r1
-/ mov +(sp),r2
-/ mov +(sp),r3
-/ rts pc
+
 
 
 /optimizations (before linking)
@@ -287,7 +284,40 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 /  mov  r1,r0     10100
 /  mov  r2,r1     10201
 /  add  #8,sp     62706 10 
-
+/
+/memcpy:
+/ mov (sp)+,r4
+/                /r0 src
+/ mov (sp+),r1   /r1 dst
+/ mov 6(sp),r2   /r2 n
+/ tst r2
+/ beq +3
+/ movb (r0)+,(r1)+
+/ dec r2
+/ br -5
+/ add #16,sp
+/ mov +(sp),r0
+/ mov +(sp),r1
+/ mov +(sp),r2
+/ mov +(sp),r3
+/ rts pc
+/
+/clz  x in r0,r1
+/ mov(sp)+,r4
+/ mov r1,r2
+/ mov r0,r3
+/ clr r0
+/ tst r2
+/ bne +3
+/ add #20,r0
+/ mov r3,r2
+/ bit #100000,r2
+/ bne +3
+/ inc r0
+/ asl r2
+/ br -5
+/ clr r1
+/ jmp r4
 
 /11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
 

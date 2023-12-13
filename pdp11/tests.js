@@ -38,6 +38,9 @@ let tests = {
  gl1:[-2147483648],
  gl2:[-2147483648],
  glo:[2147483635],
+ get:[-1097262461,28],
+ mem:[482253082,0],
+ clz:[43],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"
