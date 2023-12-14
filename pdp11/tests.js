@@ -21,6 +21,13 @@ let tests = {
  ks3:[21,0],
  ks4:[31,0],
  iff:[-26],
+ or1:[26],
+ or2:[14],
+ or3:[-13],
+ an1:[-13],
+ an2:[-13],
+ an3:[26],
+ if1:[26],
  ife:[39],
  ret:[26],
  slp:[1],
@@ -41,6 +48,10 @@ let tests = {
  get:[-1097262461,28],
  mem:[482253082,0],
  clz:[43],
+ cli:[4],
+ div:[19],
+ mod:[-8],
+ ibo:[8],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"

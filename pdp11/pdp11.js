@@ -1,5 +1,6 @@
 let M,D=32*1024 //M:I,D; D:data offset 
 let si=new Int16Array(1),S=x=>{si[0]=x;return si[0]}
+let I=new Int32Array(2)
 let carry=0,sign=0,zero=0 //Z(zero) N(negative) C(carry) V(overflow) T(trap)
 let wait=false
 let brk=0
@@ -64,6 +65,7 @@ let step=()=>{ let l=x=>console.log(x)
  switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
  case 0070000:r=M[s]*M[d];M[s]=r>>16;M[1+s]=r&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));l("mul");return //mul
+ case 0071000:s&=7;I[0]=M[s]|(M[1+s]<<16);I[1]=M[d]|(M[1+d]<<16);r=I[0]%I[1];M[d]=r;M[1+d]=r>>16;I[0]/=I[1];M[s]=I[0];M[1+s]=I[0]>>16;l("div");return //div/mod (simplified)
  case 0072000:s&=7;M[s]=(0x8000&M[d])?(M[s]>>(0xffff&-M[d])):(M[s]<<M[d]);F(M[s]); l("ash"); return //ash  todo:carry
  case 0073000:s&=7;let u=(M[s]<<16)|M[1+s];u=F((0x8000&M[d])?(u>>(0xffff&-M[d])):(u<<M[d]))
   M[s]=0xffff&(u>>16);M[1+s]=0xffff&u                     ;l("ashc");return //ashc
@@ -101,7 +103,7 @@ let po=()=>{M[6]+=2;return M[D+(M[6]>>1)-1]}       //mov (sp)+,r
 let xor=(x,y)=>((x||y)&&!(x&&y))
 
 let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
- if(x!="")return runtest(x)
+ //if(x!="")return runtest(x)
  let f=t=>{step();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
 }

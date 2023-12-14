@@ -1,4 +1,4 @@
-/todo indirect-call div(i) mod(i) system
+/todo system boolean-expr
 
 D:+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
 F:(0#`)!()
@@ -22,11 +22,12 @@ pd:{[o]opts::o
  F[`add`and`bnd`ant`asn`cal`cli`cnd`dfr`div`drp`eql`cst]:(pdadd;pdand;pdbnd;pdant;pdasn;pdcal;pdcli;pdcnd;pddfr;pddiv;pddrp;pdeql;pdcst)
  F[`for`get`Get`gte`jmp`les`lit`lte`mod`mor`mul`neg    ]:(pdfor;pdget;pdGet;pdgte;pdjmp;pdles;pdlit;pdlte;pdmod;pdmor;pdmul;pdneg)
  F[`neq`nop`not`orr`bor`xor`ret`shl`shr`stm`sub`swc`typ]:(pdneq;pdnop;pdnot;pdorr;pdbor;pdxor;pdret;pdshl;pdshr;pdstm;pdsub;pdswc;pdtyp)
- 
+ F[`i32b]:i32b
  
  $[1~#i:i@&`store=S P i:&T=`ast;T[&P=*i]:`nop;0]  /remove store/catch
  $[1~#i:i@&`catch=S P i:&T=`ast;T[&P=*i]:`nop;0]
  
+ T[i:&(S=`I32B)&T=`cal]:`i32b
  ifun::1_+\-1,T=`fun                              /function index for each node
  perfunc:!1+*|ifun
  fill:{x[i]:(#i:&~#'x@!n:+/T=`fun)#,!0}
@@ -69,7 +70,7 @@ pdprg:{
  /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
  /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
  c:1_&P=0;f:y fn:&`fun=T c
- tabl:$[#i:&`tab=T c;62707,(O 6+4*#i),6300 6300 60007,,/y i;!0]
+ tabl:$[#i:&`tab=T c;62707,(O 32+4*#i),10004 16600 02 16601 04 16602 06 16603 10 11666 10 62706 10 6304 6304 60407,,/y i;!0]
  init: tabl,12706,O 5118-8*#lits             /mov #11776,sp (init sp: 1k reserved for kos) -literals
  
  d:(- 1_!#f)!O 512+2*1_-1_+\(#init),#'f      /-1 -2..!function start addresses
@@ -78,21 +79,28 @@ pdprg:{
  
 /function table
 / 01000 add #n,pc   /n:4+2*#table
-/ 01002 asl r0      /r0<<=1 
-/ 01004 asl r0
-/ 01006 add r0,pc
+/ 01002 mov r0,r4
+/ mov  2(sp),r0
+/ mov  4(sp),r0
+/ mov  6(sp),r0
+/ mov 10(sp),r0
+/ mov(sp),10(sp)
+/ add #10,sp
+/ 01014 asl r4      /r0<<=1 
+/ 01016 asl r4
+/ 01020 add r4,pc
 / function table:
-/ 01010 mov #f,pc
-/ 01012 mov #g,pc
+/ 01022 mov #f,pc
+/ 01024 mov #g,pc
 / call with jsr #1002,pc
 
- 
+
 
 pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
 pdmem:{*y}
 pdcon:{*y}
 pdvar:{*y}
-pdtab:{y;4727,afun S x}
+pdtab:{y;127,afun S x}
 pdtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
 
 pdfun:{
@@ -127,7 +135,8 @@ pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
 pdcal:{(,/|y),4727,$[0~r:pdinst S x;afun S x;r]}
 
 
-pdcli:{(,/|y),4727 4}
+
+pdcli:{(,/|y),4727 1004}
 pddfr:{y;!0}
 
 pddrp:{(*y),po}
@@ -165,31 +174,32 @@ pdswc:{b:1_y,\-55555;brk@-1_,/(!0
  ,/of[,256]'(2*|-1_!#b)+-2_0,+\#'b  /branch offsets
  ,/-1_b)}                           /cases
 
-
+i32b:{`i32b \ of[,/|y;3],5000 5001 403 5000 5200 5001 }
 pdcnd:{(iff;ife)[3~#y].(x;y)}
 ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if  y0 then y1 [else y2]
 iff:{of[nc@*y;#b],b:y 1}                     /if !y0 then br
 
-of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
+of:{`of \(x;y);$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
 
-pdtyp:{y;S x}
-
-pddiv:{y;0+`div} /todo
-pdmod:{y;0+`mod} /todo
-
-pdadd:{$[2~pdw S x;(,/|y),4727 -50000;0+`nyiaddl]}
-pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyisubl]}
-pdmul:{$[2~pdw S x;(,/|y),4727 -50002;0+`nyimul]}
-pdshl:{$[2~pdw S x;(,/|y),4727 -50010; c32~y 1; (*y),4727 -50017; c59~y 1;(*y),4727 -50019;0+`nyishll]}
-pdshr:{$[`i~S x;(,/|y),4727 -50011;c32~y 1;4727 -50018;c59~y 1;4727 -50020;0+`nyishrl]}
-
-c59:4727 -99999 12700 73 12701 0 12702 0 12703 0
-c32:4727 -99999 12700 40 12701 0 12702 0 12703 0
 
 pd2:{(,/|z),(4727;-50000-x)}
-pdbnd:pdand:pd2 13;pdbor:pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
+pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
 
-/todo bor bnd receive boolean input: insert I32B
+pdbor:{of[y 1;#*y],*y}
+/pdbnd:{5004,of[nc@*y;1],5204,of[nc@y 1;1],5204 22704 2 1400}
+pdbnd:{x:of[nc@*y;1];of[nc y 1;1+#x],(-1_x),244,(*|x),264 1000}
+
+/x&&y
+/ !x
+/ br  :no
+/ !y
+/ br  :no
+/ clz
+/ br +1
+/no:
+/ sez
+/bb:
+/ bne    (both cases must end in a branch condition which can be negated)
 
 pdc:{(,/|z),(4727;-50020-(pdw t)%2),x(t:S y)?`u`k} /x:branch instruction without offset (decimal)
 pdneq:pdc  512 512  ;pdeql:pdc  768 768            /bne beq
@@ -198,11 +208,25 @@ pdlte:pdc 1792 33536;pdgte:pdc 1024 34304          /blt blos bge bhis
 nc:{(-1_x),$[512!c:*|x;c-256;c+256]}               /negate condition +/- 0400
 
 
+
+pdtyp:{y;S x}
+
+pdadd:{$[2~pdw S x;(,/|y),4727 -50000;0+`nyiaddl]}
+pdsub:{$[2~pdw S x;(,/|y),4727 -50001;0+`nyisubl]}
+pdmul:{$[2~pdw S x;(,/|y),4727 -50002;0+`nyimul]}
+pdshl:{$[2~pdw S x;(,/|y),4727 -50010; c32~y 1; (*y),4727 -50017; c59~y 1;(*y),4727 -50019;0+`nyishll]}
+pdshr:{$[`i~S x;(,/|y),4727 -50011;c32~y 1;4727 -50018;c59~y 1;4727 -50020;0+`nyishrl]}
+pddiv:{(,/|y),4727 -50003}
+pdmod:{(,/|y),4727 -50004}
+
+c59:4727 -99999 12700 73 12701 0 12702 0 12703 0
+c32:4727 -99999 12700 40 12701 0 12702 0 12703 0
+
 pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
 
 pdinst:{$[0N~`Memorysize`Memorygrow`Memoryfill`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"?x;0;0+`nyi]
- $[`I32clz~x;-55001;`Memorycopy~x;-55000;0]}
+ $[`Memorycopy~x;-55000;`I32clz~x;-55001;0]}
 
 
 pu:4727 -99999            /jsr pc,#push
@@ -239,8 +263,8 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 162601 62706 4 104 /sub32: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
 		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
-		-50003;99999 99999 104                      /todo idiv
-		-50005;99999 99999 104                      /todo irem
+		-50003;12604 12602 12603 62706 4 71002 104              /idiv(cheating slightly)
+		-50004;12604 12602 12603 62706 4 71002 10200 10301 104  /irem
 		-50007;12604 5701 6702 6703 104             /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
 		-50010;12604 10003 10102 12600 73200 12600 12600 12600 10300 10201 104  /x<<y (ashc)
 		-50011;12604 10003 10102 12600 5400 73200 12600 12600 12600 10300 10201 104  /x>>y (neg;ashc)
