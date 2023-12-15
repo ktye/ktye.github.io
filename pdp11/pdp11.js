@@ -7,7 +7,6 @@ let brk=0
 let rst=(c)=>{M=new Uint16Array(64*1024);M[7]=01000;c.forEach((x,i)=>M[256+i]=x)}
 
 let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
- //todo pc: if((m&7)==7){..}      //pc see 3-18
  if(x==027){a[0]=2;return M[7]>>1}
  a[0]=2*+(5<((x&070)>>3))
  switch((x&070)>>3){          //addressing mode
@@ -27,6 +26,12 @@ let step=()=>{ let l=x=>console.log(x)
  show(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
  M[7]+=2
 
+ switch(x){
+ case 0244:zero=0;l("clz");return //clz
+ case 0264:zero=1;l("sez");return //sez
+ case 0105727:M[7]+=4;ttw();l("tstb");return //tstb #177560
+ }
+ 
  let o=x&0xff
  switch(x&0177400){ //br before reading addr
  case 0000400:                              br(o);l("br") ;return //br
@@ -43,6 +48,7 @@ let step=()=>{ let l=x=>console.log(x)
  case 0103000:if(!carry)                    br(o);l("bcc");return //bcc bhis
  case 0103400:if( carry)                    br(o);l("bcs");return //bcs
  }
+ if(077000==(x&0177000)){if(--M[(x&0700)>>6])br(-o);l("sob");return}//sob
 
 
  let r,d=A(x&077,a);
@@ -62,7 +68,7 @@ let step=()=>{ let l=x=>console.log(x)
  }
 
  let s=(x&07700)>>6 //s:src/dest reg
- switch(x&0177000){ //jsr,mul,div,ash,ashc,xor,sob
+ switch(x&0177000){ //jsr,mul,div,ash,ashc,xor
  case 0004000:pu(((x&07700)==04700)?M[7]:nyi());M[7]=M[d] ;l("jsr"); return //jsr
  case 0070000:r=M[s]*M[d];M[s]=r>>16;M[1+s]=r&0xffff;sign=+((r&0x80000000)!=0);zero=+(r==0);carry=+((r<(1<<15))||r>=((1<<15)-1));l("mul");return //mul
  case 0071000:s&=7;I[0]=M[s]|(M[1+s]<<16);I[1]=M[d]|(M[1+d]<<16);r=I[0]%I[1];M[d]=r;M[1+d]=r>>16;I[0]/=I[1];M[s]=I[0];M[1+s]=I[0]>>16;l("div");return //div/mod (simplified)
@@ -75,16 +81,19 @@ let step=()=>{ let l=x=>console.log(x)
  case 0100:M[7]=M[d]   ;l("jmp"); return //jmp
  }
 
-
  s=A((x&07700)>>6,a);M[7]+=a[0]
  switch(x&0170000){ //mov,add,sub,cmp,bic,bis
- case 0110000:      //only 111000 111610 112021
+ case 0110000:      //only 111000 111610 112021 0112127
   if(x==0112021){M[0]-=2}
   s=M[(x&0700)>>6];r=0xff&(M[D+(s>>1)]>>(8*(s&1)));d
   switch(x){
   case 0111000:         M[d]=F((r&0x80)?r|0xff00:r)                           ;break //movb(r0),r0   (sign-extend)
   case 0111610:s=M[0]&1;M[d]=(s?(r<<8):r)|(M[d]&(s?0xff:0xff00))              ;break //movb(sp),(r0)
   case 0112021:s=M[1]&1;M[d]=(s?(r<<8):r)|(M[d]&(s?0xff:0xff00));M[0]++;M[1]--;break //movb(r0)+,(r1)+
+  case 0112127:M[1]-=2;s=M[1]&1;r=M[D+(M[1]>>1)];out(s?(r>>8):r&0xff);M[1]++  ;break //movb(r1+),#177566
+  case 0112721:s=M[1]&1;M[1]--;r=ttc();zero=r==0;
+   console.log("movb dsr", d, s, r)
+   M[d]=s?((M[d]&0xff)|(r<<8)):((M[d]&0xff00)|r); break //movb(r1)+,#177566
   default: nyi()}                                  ;l("movb");return//movb
  case 0010000:M[d]=F(M[s]);                        ;l("mov");return //mov
  case 0060000:carry=(M[d]+M[s])>=0xffff;M[d]+=M[s] ;l("add");return //add
@@ -108,6 +117,20 @@ let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
  if(!wait)requestAnimationFrame(f)
 }
 
+function ttc( ){if(!keybuf.length)return 0;let r=keybuf[0];keybuf=keybuf.slice(1);return r}
+function ttw( ){wait=1;console.log("ttw")}
+function out(x){tty.value+=String.fromCharCode(x)}
 function oct(x){return"0"+x.toString(8)}
 function Oct(x){let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
 function nyi(){throw("nyi")}
+
+let keybuf=[]
+function key(e){if(!wait)return false
+ let k=e.which,c=e.key.charCodeAt(0);
+ if(k==8){keybuf=keybuf.slice(0,-1);return true}
+ if(k==13){wait=0;run("");return true}
+ if(e.key.length!=1)return
+ console.log("c",c,e.key,"keybuf",keybuf,k)
+ if((c<32)||(c>126))return false
+ keybuf.push(c);return true
+}

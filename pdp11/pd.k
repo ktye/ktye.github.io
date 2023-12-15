@@ -132,7 +132,7 @@ pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
 
 
 /pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
-pdcal:{(,/|y),4727,$[0~r:pdinst S x;afun S x;r]}
+pdcal:{(,/|y),4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
 
 
 
@@ -174,32 +174,19 @@ pdswc:{b:1_y,\-55555;brk@-1_,/(!0
  ,/of[,256]'(2*|-1_!#b)+-2_0,+\#'b  /branch offsets
  ,/-1_b)}                           /cases
 
-i32b:{`i32b \ of[,/|y;3],5000 5001 403 5000 5200 5001 }
+i32b:{of[,/|y;3],5000 5001 403 5000 5200 5001}
 pdcnd:{(iff;ife)[3~#y].(x;y)}
 ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if  y0 then y1 [else y2]
 iff:{of[nc@*y;#b],b:y 1}                     /if !y0 then br
 
-of:{`of \(x;y);$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
+of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
 
 
 pd2:{(,/|z),(4727;-50000-x)}
 pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
-
 pdbor:{of[y 1;#*y],*y}
-/pdbnd:{5004,of[nc@*y;1],5204,of[nc@y 1;1],5204 22704 2 1400}
-pdbnd:{x:of[nc@*y;1];of[nc y 1;1+#x],(-1_x),244,(*|x),264 1000}
+pdbnd:{x:of[nc@*y;2];of[nc y 1;2+#x],x,244 401 264 512} /both cases must end in a branch condition which can be negated
 
-/x&&y
-/ !x
-/ br  :no
-/ !y
-/ br  :no
-/ clz
-/ br +1
-/no:
-/ sez
-/bb:
-/ bne    (both cases must end in a branch condition which can be negated)
 
 pdc:{(,/|z),(4727;-50020-(pdw t)%2),x(t:S y)?`u`k} /x:branch instruction without offset (decimal)
 pdneq:pdc  512 512  ;pdeql:pdc  768 768            /bne beq
@@ -226,7 +213,7 @@ pdw:`i`u`j`k`f!2 2 4 4 4   /type widths
 pdtype:`i`u`j`k`f`!0x7f7f7e7e7c00
 
 pdinst:{$[0N~`Memorysize`Memorygrow`Memoryfill`Memorysize2`Memorygrow2`Memorycopy2`Memorycopy3`F64abs`F64sqrt`F64floor`F64copysign`F64min`F64max`"F64reinterpret_i64"`"I64reinterpret_f64"?x;0;0+`nyi]
- $[`Memorycopy~x;-55000;`I32clz~x;-55001;0]}
+ $[`Memorycopy~x;-55000;`I32clz~x;-55001;`Write~x;-55002;`ReadIn~x;-55003;0]}
 
 
 pu:4727 -99999            /jsr pc,#push
@@ -242,6 +229,31 @@ leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)
 
 pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
+readin:12604 62706 10 10001 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
+/readin:
+/ add #10,sp         62706 10
+/ mov r0,r1          10001
+/ tstb #177560       105727 177560
+/ bpl -2             100375
+/ movb #177562,(r1)+ 112721 177562
+/ bne -3             1375
+/ sub r1,r0          160100
+/ neg r0             5400
+/ dec r0             5300
+/ clr r1             5001
+
+write:12604 62706 10 16600 10 5700 1404 11601 112127 177566 77003 62706 10 5000 5001 104
+/write:
+/ add #10,sp           62706 10
+/ mov 10(sp),r0        16600 10
+/ tst r0               5700
+/ beq +4               1404
+/ mov (sp),r1          11601
+/ movb (r1)+,#177566   112127 177566
+/ sob r0 -3            77003
+/ add #10,sp           62706 10
+/ clr r0               5000
+/ clr r1               5001
 
 
 memcpy:12604 12601 16602 6 5702 1403 112021 5302 773 62706 16 12600 12601 12602 12603 104
@@ -258,6 +270,8 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-60000;12604 111610 62706 10 104                 /store`b:movb (sp),(r0);add #8,sp
 		-60001;12604 10003 12623 12623 62706 4 104       /store`i:mov r0,r3;mov (sp+),(r3)+;..;add #4;sp
 		-60002;12604 10003 12623 12623 12623 12623 104   /store`j:mov r0,r3;mov (sp)+,(r3)+;..
+		-55003;readin
+		-55002;write
 		-55001;clz
 		-55000;memcpy
 		-50000;12604 62600 5501 62601 62706 4 104   /add32: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4

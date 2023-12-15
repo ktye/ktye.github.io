@@ -26,7 +26,7 @@ let tests = {
  or3:[-13],
  an1:[-13],
  an2:[-13],
- an3:[26],
+ an3:[-26],
  if1:[26],
  ife:[39],
  ret:[26],
@@ -52,6 +52,7 @@ let tests = {
  div:[19],
  mod:[-8],
  ibo:[8],
+ wrt:[0],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"
