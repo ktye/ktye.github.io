@@ -60,8 +60,8 @@ let step=()=>{ let l=x=>console.log(x)
  case 05200:M[d]++;F(M[d])                   ;l("inc");return //inc
  case 05300:M[d]--;F(M[d])                   ;l("dec");return //dec
  case 05400:M[d]=F(-M[d]);carry=M[d]!=0      ;l("neg");return //neg
- case 05500:M[d]+=carry                      ;l("adc");return //adc  //todo F..vv
- case 05600:M[d]-=carry                      ;l("sbc");return //sbc
+ case 05500:M[d]+=carry;F(M[d]);carry=(M[d]==0)&&carry; l("adc");return //adc  //todo F..vv
+ case 05600:r=M[d];M[d]-=carry;F(M[d]);carry=carry&&(0==r);l("sbc");return //sbc
  case 05700:sign=!!(M[d]&0x8000);zero=M[d]==0;l("tst");return //tst
  case 06300:M[d]<<=1;F(M[d])                 ;l("asl");return //asl
  case 06700:M[d]=sign?-1:0                   ;l("sxt");return //sxt
@@ -92,7 +92,6 @@ let step=()=>{ let l=x=>console.log(x)
   case 0112021:s=M[1]&1;M[d]=(s?(r<<8):r)|(M[d]&(s?0xff:0xff00));M[0]++;M[1]--;break //movb(r0)+,(r1)+
   case 0112127:M[1]-=2;s=M[1]&1;r=M[D+(M[1]>>1)];out(s?(r>>8):r&0xff);M[1]++  ;break //movb(r1+),#177566
   case 0112721:s=M[1]&1;M[1]--;r=ttc();zero=r==0;
-   console.log("movb dsr", d, s, r)
    M[d]=s?((M[d]&0xff)|(r<<8)):((M[d]&0xff00)|r); break //movb(r1)+,#177566
   default: nyi()}                                  ;l("movb");return//movb
  case 0010000:M[d]=F(M[s]);                        ;l("mov");return //mov
@@ -112,9 +111,10 @@ let po=()=>{M[6]+=2;return M[D+(M[6]>>1)-1]}       //mov (sp)+,r
 let xor=(x,y)=>((x||y)&&!(x&&y))
 
 let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
- //if(x!="")return runtest(x)
+ if(x!="")return runtest(x)
  let f=t=>{step();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
+ //let i=0;do{step();if(0==((++i)%10))console.log(i)}while((!wait)&&(M[7]!=brk))
 }
 
 function ttc( ){if(!keybuf.length)return 0;let r=keybuf[0];keybuf=keybuf.slice(1);return r}

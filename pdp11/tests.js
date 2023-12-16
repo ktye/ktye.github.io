@@ -2,6 +2,10 @@ let tests = {
  x  :[5],
  asn:[6],
  add:[9058058],
+ ad1:[1076181845, 54],
+ sub:[-6588926],
+ sb1:[-749138641,54],
+ sb2:[-1, -1],
  and:[2244932],
  ant:[66595],
  orr:[11782135],
@@ -68,8 +72,8 @@ let runtest=x=>{ge("tty").textContent="test "+x+"\n"
  let check=(w,e,l,h)=>{
   let g=l|(h<<16)
   console.log("e/l/h/g",e,l,h,g)
-  if(e==g)ge("tty").textContent+=w+" ok\n"
-  else    ge("tty").textContent+=w+" failed: got "+g+" expected "+e+"\n"
+  if(e==g)ge("tty").value+=w+" ok\n"
+  else    ge("tty").value+=w+" failed: got "+g+" expected "+e+"\n"
   return e==g
  }
  console.log("e/r",e,r)
