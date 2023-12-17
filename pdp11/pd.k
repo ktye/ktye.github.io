@@ -128,7 +128,7 @@ pdsto:{(,/|y),4727,-(60000+`b`i`j?S x)}
 
 
 pdasn:{(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x)]}
-pdget:{y;pu,get getbuiltin@(offs ifun x)S x}
+pdget:{y;get getbuiltin@(offs ifun x)S x}
 pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
 
 
@@ -181,8 +181,11 @@ pdswc:{b:1_y,\-55555;brk@-1_,/(!0
 
 i32b:{of[,/|y;3],5000 5001 403 5000 5200 5001}
 pdcnd:{(iff;ife)[3~#y].(x;y)}
-ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if  y0 then y1 [else y2]
-iff:{of[nc@*y;#b],b:y 1}                     /if !y0 then br
+/ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if y0 then y1 else y2
+ife:{bp[*y],62707,(O@2*#b),(b:(y 1),62707,O@2*#y 2),y 2}
+iff:{bp[*y],62707,(O@2*#y 1),y 1}            /if y0 then y1
+
+bp:{(-1_x),10/8\(*|x)+2}
 
 /of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
 of:{$[(y<-128)|y>127; (-1_x),10/8\(*|x)+256!`ojmp \y; (-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
@@ -190,7 +193,7 @@ of:{$[(y<-128)|y>127; (-1_x),10/8\(*|x)+256!`ojmp \y; (-1_x),10/8\(*|x)+256!y]} 
 
 pd2:{(,/|z),(4727;-50000-x)}
 pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
-pdbor:{of[y 1;#*y],*y}
+pdbor:{of[*y;#y 1],y 1}
 pdbnd:{x:of[nc@*y;2];of[nc y 1;2+#x],x,244 401 264 512} /both cases must end in a branch condition which can be negated
 
 
@@ -301,7 +304,7 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
 		-50022;99999 99999 104                      /todo cmp8
 		-50023;99999 99999 104)
-getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 16500 0 16501 0 16502 0 16503 0 104+0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
+getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 10346 10246 10146 10046 16500 0 16501 0 16502 0 16503 0 104+0 0 0 0 0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
 
