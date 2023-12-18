@@ -58,11 +58,12 @@ function disas(a,aa){
  case"r3":r+=rs[(x&0700)>>6];break}
  return   r
 }
-function disasm(O){let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
- pc=01000;do{ let id=pc.toString(8)
-  let p=[pc]
-  O(o(pc)+": "+o(M[pc>>1])+" [000000 000000 000000 000000][000000 000000 000000 000000 ---] "+disas(pc,p)+"\n",id)
+function disasm(pc,O){let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
+ do{ let id=pc.toString(8)
+  let p=[pc],q=M[pc>>1]
+  O(o(pc)+": "+o(q)+" [000000 000000 000000 000000][000000 000000 000000 000000 ---] "+disas(pc,p)+"\n",id)
   pc=p[0];pc+=2
+  if(q==0104)break
  }while(M[pc>>1])}
 
 

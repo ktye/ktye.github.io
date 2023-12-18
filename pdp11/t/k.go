@@ -2622,9 +2622,9 @@ func Srt(x K) K { // ^x
 	return atv(x, Asc(rx(x)))
 }
 func Asc(x K) K { // <x  <`file
-	if tp(x) == st {
-		return readfile(cs(x))
-	}
+	//if tp(x) == st {
+	//	return readfile(cs(x))
+	//}
 	return grade(x, 1)
 }
 func Dsc(x K) K { return grade(x, -1) } //254 // >x
@@ -2879,11 +2879,12 @@ func write(x K) {
 }
 func readfile(x K) K { // x C
 	var r K
-	if nn(x) == 0 {
+	//if nn(x) == 0 {
 		dx(x)
 		r = mk(Ct, 496)
 		r = ntake(ReadIn(int32(r), 496), r)
 		return r
+		/*
 	}
 	n := Read(int32(x), nn(x), 0)
 	if n < 0 {
@@ -2894,6 +2895,7 @@ func readfile(x K) K { // x C
 	Read(int32(x), nn(x), int32(r))
 	dx(x)
 	return r
+	*/
 }
 func writefile(x, y K) K { // x, y C
 	r := Write(int32(x), nn(x), int32(y), nn(y))

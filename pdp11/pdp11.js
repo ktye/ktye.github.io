@@ -21,7 +21,7 @@ let A=(x,a)=>{let r=x&7,y=(060==(x&070))?M[M[7]>>1]:0
 }}
 let F=x=>{sign=x&0x8000;zero=x==0;return x}
 
-let step=()=>{ let l=x=>console.log(x)
+let step=()=>{ let l=x=>hpush(x)
  let x=M[M[7]>>1],a=[0]
  show(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
  M[7]+=2
@@ -96,7 +96,7 @@ let step=()=>{ let l=x=>console.log(x)
   default: nyi()}                                  ;l("movb");return//movb
  case 0010000:M[d]=F(M[s]);                        ;l("mov");return //mov
  case 0060000:carry=(M[d]+M[s])>=0xffff;M[d]+=M[s] ;l("add");return //add
- case 0160000:carry=M[s]>M[d];M[d]-=M[s];l("sub")  ;l("sub");return //sub
+ case 0160000:carry=M[s]>M[d];M[d]-=M[s];F(M[d]);l("sub")  ;l("sub");return //sub
  }
  switch(x&070000){ //mov,cmp,bit,bic,bis
  case 0020000:F(M[s]-M[d]);carry=M[s]<M[d]         ;l("cmp");return //cmp
@@ -112,10 +112,12 @@ let xor=(x,y)=>((x||y)&&!(x&&y))
 
 let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
  if(x!="")return runtest(x)
- let f=t=>{step();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
+ let f=t=>{step();if(wait)showhist();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
  //let i=0;do{step();if(0==((++i)%10))console.log(i)}while((!wait)&&(M[7]!=brk))
 }
+let hist={}
+let hpush=x=>{hist[x]=(x in hist)?1+hist[x]:1}
 
 function ttc( ){if(!keybuf.length)return 0;let r=keybuf[0];keybuf=keybuf.slice(1);return r}
 function ttw( ){wait=1;console.log("ttw")}

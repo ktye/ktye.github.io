@@ -12,6 +12,7 @@ body{margin:0;height:100vh;display:flex;flex-flow:column;overflow:hidden}
 #tty{font-family:monospace;width:100%;height:7em;/*background:#920e5a;color:white;*/outline:none;resize:none}
 #stk{font-family: monospace;width:100%;height:7em;/*background:#ce082c;color:white;*/outline:none;overflow:auto}
 #asm{overflow:auto}
+#fun{position:absolute;right:20px;bottom:10px}
 #lights{border:2px solid black;border-radius:10px;display:flex;justify-content:center}
 legend{text-align:center}
 button{flex-grow:1;background:#333;color:white;height:2em}button:disabled{background:#888}
@@ -44,8 +45,11 @@ let blink=(u,y)=>{let x=470;y*=25
   ctx.fill();if(!((1+i)%3))x-=10
 }}
 let show=x=>{blink(x,0);blink(M[x>>1],1);
+ if(0104==M[x>>1])fpop(+x.toString(8))
  stack()
- let b=ge(x.toString(8));if((!x)||(!b)){trap((x==0)?"halt":"illegal addr "+Oct(x));return}
+ let b=ge(x.toString(8));
+ if(b===null)page(x);b=ge(x.toString(8))
+ if((!x)||(!b)){trap((x==0)?"halt":"illegal addr "+Oct(x));return}
  if(bold)bold.classList.remove("b");bold=b
  let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
  let t=bold.textContent,s=Array.from(M.slice(0,4)).map(o).join(" ")+"]["+Array.from(M.slice(4,8)).map(o).join(" ")+" "+flag()
@@ -66,13 +70,31 @@ let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disable
  ge("stk").textContent=""
  ge("tty").value="";ge("tty").onkeydown=key
  let asm=ge("asm")
- asm.textContent=" addr    inst     r0     r1     r2     r3      r4     fp     sp     pc\n"
+ fetch("t/k.map").then(r=>r.text()).then(r=>{fnames(eval(r))})
  fetch("t/"+prg+".out").then(r=>r.text()).then(r=>{
-  rst(eval("["+r+"]"));disasm((x,y)=>{let t=ce("span");t.textContent=x;hi(t);t.id=y;link(t);asm.appendChild(t)})
+  rst(eval("["+r+"]"));
+  page(01000)
   asm.ondblclick=setbrk
 })}
-let fnum=0,hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.borderTop="1px solid";t.textContent=t.textContent.slice(0,-1)+"  /"+fnum+"\n"}}
+let fnum=0
 
+let page=pc=>{let asm=ge("asm")
+ let o=+pc.toString(8);if(o in fileoff){fstack.unshift(fileoff[o]);fshow()}
+ asm.textContent=" addr    inst     r0     r1     r2     r3      r4     fp     sp     pc\n"
+ disasm(pc,(x,y)=>{let t=ce("span");t.textContent=x;/*hi(t)*/;t.id=y;/*link(t)*/;asm.appendChild(t)})
+}
+
+let fileoff={},faddr=[],fname=[]
+let fnames=d=>{for(const f in d){fileoff[d[f]]=f;faddr.push(d[f]);fname.push(f)}}
+let fstack=[]
+let fshow=()=>{ge("fun").textContent=fstack.join("\n")}
+let fpop=x=>{let i=faddr.findLastIndex(a=>x>a);if((i>0)&&fstack.length&&fname[i]==stack[0]){fstack.shift();fshow()}}
+let showhist=()=>{
+ ge("fun").textContent=Object.entries(hist).sort(([,a],[,b])=>b-a).map(x=>x[0]+" "+x[1]).join("\n")
+}
+
+/*
+let hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.borderTop="1px solid";t.textContent=t.textContent.slice(0,-1)+"  /"+fnum+"\n"}}
 let link=x=>{
  let s=x.textContent.replace(/jsr #([0-9]+),pc/,"jsr <span class='l' onclick='jmp(this)'>#$1</span>,pc")
  s=s.replace(/ \+([0-9]+)/," <span class='l' onclick='jmp(this)'>+$1</span>")
@@ -91,6 +113,8 @@ let jmp=x=>{let a=x.parentElement.id
  t.appendChild(b)
  if(bold)bold.classList.remove("b");bold=t;t.classList.add("b")
  bold.scrollIntoView({block:"center"})}
+*/
+
 
 </script>
 </head>
@@ -109,6 +133,7 @@ let jmp=x=>{let a=x.parentElement.id
  <div>
   <pre id="stk"></pre>
  </div>
- <pre id="asm"></pre>
+  <pre id="asm"></pre>
+  <pre id="fun"></pre>
 </body>
 </html>

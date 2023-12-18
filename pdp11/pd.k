@@ -24,6 +24,7 @@ pd:{[o]opts::o
  F[`neq`nop`not`orr`bor`xor`ret`shl`shr`stm`sub`swc`typ]:(pdneq;pdnop;pdnot;pdorr;pdbor;pdxor;pdret;pdshl;pdshr;pdstm;pdsub;pdswc;pdtyp)
  F[`i32b]:i32b
  
+ rwcnd'|&(~`=S)&(T=`cnd)|T=`swc
  $[1~#i:i@&`store=S P i:&T=`ast;T[&P=*i]:`nop;0]  /remove store/catch
  $[1~#i:i@&`catch=S P i:&T=`ast;T[&P=*i]:`nop;0]
  
@@ -52,47 +53,23 @@ link:{o:(!builtins)!512+2*-1_+\(#x),#'b:.builtins;@[x;i;O o x i:&x<0],,/b}
 stak:{D[(2558)-!n:4*#lits]:,/lits;x}   /embed literals/constants/gobals in stack
 imag:{@[&(2^15)-256;!`size \#x;x],D}          /fill disk image: code(32kw-01000) + data(32kw)
 
+INS:{[i;x]T::ins[i;T;*x];P::ins[i;@[P;&P>i-1;+;1];x 1];P[1+i]:i;I::ins[i;I;x 2];S::ins[i;S;x 3];S}
+ins:{[i;x;y](i#x),y,i_x}
+del:{T::T n:(!#P)_x;P::@[P n;&(P n)>x-1;-;1];I::I n;S::S n;S}
+rwcnd:{c:|1_&P=x;S[x]:`;P[x]:P x-1;c INS\(T x;1+x;I x; S x:x-1);del x;restm'|i@&(T P i:&`stm=T)?\`ret`asn}
+restm:{c:*|&P=x;INS[c;(T x-1;x;I x-1;S x-1)];P[x]:P[x-1];del[x-1]} /fix ret stm
+
 
 pdprg:{
- /s:{(_x),(leb@#y),y} /0(custom) 1(type) 2(import) 3(func) 4(table) 5(mem) 6(global) 7(export) 8(start) 9(element) 10(code) 11(data) 12(data count)
- /c:1_&P=0;f:y fn:&`fun=T c;
- /sysi:$[`nort?opts;"";s[2;(leb@#i),,/i:{0x03,"env",(leb@#x),x,0x00,(leb sigs?y)}'[$!pdsys;.pdsys]]]
- /fncs:$[#f;s[10;,/(,leb@#f),f];""]
- /fnsg:$[#f;s[3;,/(,leb@#f),leb'sigs?fsig S c fn];""]
- /typs:s[1;(leb@#t),,/t:pdsig'sigs]
- /cons:,/y@&`con=T c
- /vars:,/y@&`var=T c
- /mems:s[5;0x010001]
- /glbs:s[6;(leb@#glob),,/cons,vars]
- /expo:s[7;(leb@1+#n),0x06,"memory",0x0200,,/pdfex'[S i n;(#pdsys)+n:&I i:&`fun=T]]
- /tabl:$[#t:&`tab=T c;s[4;0x017000,(leb@1+|/I c t)];""]
- /elem:$[#t;s[9;(leb@#t),,/t:pdtbl y t];""]
- /data:$[#D;s[11;0x010041000b,(leb@#D),D];""]
- /0x0061736d01000000,typs,sysi,fnsg,tabl,mems,glbs,expo,elem,fncs,data}
  c:1_&P=0;f:y fn:&`fun=T c
  tabl:$[#i:&`tab=T c;62707,(O 32+4*#i),10004 16600 02 16601 04 16602 06 16603 10 11666 10 62706 10 6304 6304 60407,,/y i;!0]
  init: tabl,12706,O 5118-8*#lits             /mov #11776,sp (init sp: 1k reserved for kos) -literals
  
  d:(- 1_!#f)!O 512+2*1_-1_+\(#init),#'f      /-1 -2..!function start addresses
+ ($1_(S c)fn),$.d
+ `"k.map"<"({",(",\n"/(($1_(S c)fn),\":"),'$.d),"})"
  @[r;i;d r i:&(r>-#f)&0>r:init,,/f]}
  
- 
-/function table
-/ 01000 add #n,pc   /n:4+2*#table
-/ 01002 mov r0,r4
-/ mov  2(sp),r0
-/ mov  4(sp),r0
-/ mov  6(sp),r0
-/ mov 10(sp),r0
-/ mov(sp),10(sp)
-/ add #10,sp
-/ 01014 asl r4      /r0<<=1 
-/ 01016 asl r4
-/ 01020 add r4,pc
-/ function table:
-/ 01022 mov #f,pc
-/ 01024 mov #g,pc
-/ call with jsr #1002,pc
 
 
 
@@ -113,8 +90,7 @@ pdfun:{
  epi,:$[m;62706,O m;!0],104              /add #m,sp   ; jmp r4
  $[`main~S x;body,127 0;ret[pro,body;epi]]}
  
-/ret:{x[i]:$[+/127<j:(#x)-1+i:&x=-66666;0+`ljmp;10/8\256+j];x,y}  /replace -66666 (return) with br +j (jump to epilog)
-ret:{x[i]:$[+/127<j:(#x)-1+i:&x=-66666;10/8\256+`ljmp \j;10/8\256+j];x,y}  /replace -66666 (return) with br +j (jump to epilog)
+ret:{j:(#x)-1+i:&x=-66666; x[i]:62707;x[1+i]:O 2*j ;x,y}  /replace -66666 0 with add #n,pc (jump to epilog) 
  
 pdarg:{*y}
 pdsym:{y;S x}
@@ -129,10 +105,8 @@ pdsto:{(,/|y),4727,-(60000+`b`i`j?S x)}
 
 pdasn:{(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x)]}
 pdget:{y;get getbuiltin@(offs ifun x)S x}
-pdGet:{y;$[0N~r:cons S x;14603 12703,(glob S x),4727 -77000;r]}
+pdGet:{y;$[0N~r:cons S x;10346 12703,(glob S x),4727 -77000;r]}
 
-
-/pdcal:{$[`panic~s:S x;,0x00;`I32B~s;*y;(,/y),$[#c:pdinst s;c;0x10,leb@(!fsig)?s]]}
 pdcal:{(,/|y),4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
 
 
@@ -144,23 +118,18 @@ pddrp:{(*y),po}
 pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
 
 pdfor:{(pdlop;pdslp)[I x].(x;y)}                    /slp:do-while; lop:while-do
-pdlop:{cnt brk $[#*y;of[nc y 0;1+#b];!0],(b:,/1_y),-44444}    /cond,br+,body,post,cont
-pdslp:{b,of[*y;-(#*y)+#b:cnt brk(-1_y 2),y 1]}  /body,post,br? -n
+pdlop:{cnt brk $[#*y;(y 0),5700 1002 62707,(O@2*#b);!0],b:(,/1_y),-44444 0}
+pdslp:{c:(*y),5700 1402 162707;b:cnt brk(-2_y 2),y 1;  b,c,O -1+2*(#b)+#c}
 
-/brk:{x[i]:$[+/127<j:(#x)-1+i:&x=-55555;0+`ljmp;10/8\256+     j]}  /replace -55555 (break)    with br +j
-/cnt:{x[i]:$[+/128<j:     1+i:&x=-44444;0+`ljmp;10/8\256+256!-j]}  /replace -44444 (continue) with br -j
-
-brk:{x[i]:$[+/127<j:(#x)-1+i:&x=-55555;`lbrk \10/8\256+j;10/8\256+     j]}  /replace -55555 (break)    with br +j
-cnt:{x[i]:$[+/128<j:     1+i:&x=-44444;`lcnt \10/8\256+256!-j;10/8\256+256!-j]}  /replace -44444 (continue) with br -j
-
-
-pdjmp:{y;,$[I x;-55555;-44444]}         /no nested loops, just break/continue
+brk:{j:(#x)-2+i:&x=-55555;x[i]:62707;x[1+i]:O 2*j;x}   /replace -55555(break)    with add #n,pc
+cnt:{j:2+i:&x=-44444;x[i]:162707;x[1+i]:O 2*j;x}       /replace -44444(continue) with sub #n,pc
+pdjmp:{y;,$[I x;-55555 0;-44444 0]}                    /break/continue (no nested loops)
 
 
 
 /literals, constants and globals are embedded in the stack
-pdlit:{y;i:I x;$[2~pdw s:S x;lit1 I x;0x00000000~C i+4+!4;lit1@*`i C i+!4;14603 12703,lit[i;`k],4727 -77000]}    /push r3;mov #literal-offset to r3
-lit1:{$[0~x; pu;1~x; pu,5200;-1~x;pu,5300 5301;(x<32767)&x>0; pu,12700,O x; 14603 12703,lit[x;`i],4727 -77000]}            /0.. 1.. -1.. mov #small,r0 
+pdlit:{y;i:I x;$[2~pdw s:S x;lit1 I x;0x00000000~C i+4+!4;lit1@*`i C i+!4;10346 12703,lit[i;`k],4727 -77000]}    /push r3;mov #literal-offset to r3
+lit1:{$[0~x; pu;1~x; pu,5200;-1~x;pu,5300 5301;(x<32767)&x>0; pu,12700,O x; 10346 12703,lit[x;`i],4727 -77000]}            /0.. 1.. -1.. mov #small,r0 
 litl:{$[`i~y;O@,/(`i@,/(2^`c@,x),\0x0000),0 0;O@,/|'+65536 65536\(`i@C x+!4),`i@C x+4+!4]}
 lit: {O 5118-8*$[0N~r:lits?x:litl[x;y]; -1+#lits,:,x ;r]}
 
@@ -168,42 +137,39 @@ lit: {O 5118-8*$[0N~r:lits?x:litl[x;y]; -1+#lits,:,x ;r]}
 pdneg:{(*y),5401 5400 5601}             /neg32:neg r1;neg r0;sbc r1
 pdnot:{(*y),0+`not}                     /should not exist
 pdnop:{y;!0}
-pdret:{(*y),$[`ast~T P x;!0;-66666]}
+pdret:{(*y),$[`ast~T P x;!0;-66666 0]}
 
-pdswc:{b:1_y,\-55555;brk@-1_,/(!0
+pdswc:{b:(1_y),\-55555 0;brk@-2_,/(!0
  (*y)                               /switch-expr in r0
  22700,O@-1+#b                      /cmp #(n-1),r0
- of[,34304;#*|b]                    /bcc #def
+ 101402 62707,O@2*#*|b              /jump over default
  *|b                                /default
- 6300 60007                         /asl r0;add r0,pc (jump to case offset)
- ,/of[,256]'(2*|-1_!#b)+-2_0,+\#'b  /branch offsets
+ 6300 6300 60007                    /asl r0;add r0,pc (jump to case offset)
+ ,/62707,/'O(4*|-1_!#b)+2*-2_0,+#'b /branch offsets
  ,/-1_b)}                           /cases
 
-i32b:{of[,/|y;3],5000 5001 403 5000 5200 5001}
+
+i32b:{(*y),5001}
 pdcnd:{(iff;ife)[3~#y].(x;y)}
-/ife:{of[*y;1+#y 2],(y 2),of[,256;#y 1],y 1}  /if y0 then y1 else y2
-ife:{bp[*y],62707,(O@2*#b),(b:(y 1),62707,O@2*#y 2),y 2}
-iff:{bp[*y],62707,(O@2*#y 1),y 1}            /if y0 then y1
+iff:{(*y),5700 1401 402 62707,(O@2*#y 1),(y 1)}                         /if y0 then y1
+ife:{(*y),5700 1401 402 62707,(O@2*#b),(b:(y 1),62707,O@2*#y 2),(y 2)}  /if y0 then y1 else y2
 
 bp:{(-1_x),10/8\(*|x)+2}
 
-/of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
-of:{$[(y<-128)|y>127; (-1_x),10/8\(*|x)+256!`ojmp \y; (-1_x),10/8\(*|x)+256!y]} /add 8bit offset to branch instruction
+/of:{$[(y<-128)|y>127;0+`ljmp;(-1_x),10/8\(*|x)+256!y]}  /add 8bit offset to branch instruction
 
 
 pd2:{(,/|z),(4727;-50000-x)}
 pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
-pdbor:{of[*y;#y 1],y 1}
-pdbnd:{x:of[nc@*y;2];of[nc y 1;2+#x],x,244 401 264 512} /both cases must end in a branch condition which can be negated
+pdbnd:{(*y),10046,(y 1),5116 42600}   /com(sp);bis(sp)+,r0
+pdbor:{(*y),10046,(y 1),52600}        /bis (sp)+,r0
 
-
-pdc:{(,/|z),(4727;-50020-(pdw t)%2),x(t:S y)?`u`k} /x:branch instruction without offset (decimal)
-pdneq:pdc  512 512  ;pdeql:pdc  768 768            /bne beq
-pdles:pdc 1280 34560;pdmor:pdc 1536 33280          /blt blo  bgt bhi
-pdlte:pdc 1792 33536;pdgte:pdc 1024 34304          /blt blos bge bhis
-nc:{(-1_x),$[512!c:*|x;c-256;c+256]}               /negate condition +/- 0400
-
-
+pdc:{(,/|z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)} /x:branch instruction without offset (decimal)
+pdneq:pdc  512 512  ;pdeql:pdc  768 768                 /bne beq
+pdles:pdc 1280 34560;pdmor:pdc 1536 33280               /blt blo  bgt bhi
+pdlte:pdc 1792 33536;pdgte:pdc 1024 34304               /blt blos bge bhis
+nc:{(-1_x),$[512!c:*|x;c-256;c+256]}                    /negate condition +/- 0400
+ib:{(O x+2),5000 402 5000 5200}
 
 pdtyp:{y;S x}
 
@@ -302,13 +268,23 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50019;12701 13 72001 10003 5000 5001 5002 207     /u64<<59
 		-50020;12700 177765 72300 10300 5001 5002 5003 207 /u64>>59
 		-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
-		-50022;99999 99999 104                      /todo cmp8
+		-50022;12604 162600 162601 162602 162603 1010 5702 1006 5701 1004 5700 1002 5000 104 5000 5200 104 /cmp8                      /todo cmp8 (only for == and !=)
 		-50023;99999 99999 104)
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 10346 10246 10146 10046 16500 0 16501 0 16502 0 16503 0 104+0 0 0 0 0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 
-
-
+/bne :1  /1010
+/tst r2  /5702
+/bne :1  /1006
+/tst r1  /5701
+/bne :1  /1004
+/tst r0  /5700
+/bne :1  /1002
+/clr r0  /5000
+/jmp r4  /104
+/clr r0  /5000
+/inc r0  /5200
+/jmp r4  /104
 
 
 /optimizations (before linking)
