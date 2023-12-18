@@ -62,6 +62,7 @@ let tests = {
  mod:[-8],
  ibo:[8],
  wrt:[0],
+ max:[5],
 }
 let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n"

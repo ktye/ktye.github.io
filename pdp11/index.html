@@ -44,7 +44,7 @@ let blink=(u,y)=>{let x=470;y*=25
   ctx.arc(x, y+25, 10, 0, 2*Math.PI)
   ctx.fill();if(!((1+i)%3))x-=10
 }}
-let show=x=>{blink(x,0);blink(M[x>>1],1);
+let show=x=>{blink(x,0);blink(M[x>>1],1);play(M[x>>1])
  if(0104==M[x>>1])fpop(+x.toString(8))
  stack()
  let b=ge(x.toString(8));
@@ -88,10 +88,19 @@ let fileoff={},faddr=[],fname=[]
 let fnames=d=>{for(const f in d){fileoff[d[f]]=f;faddr.push(d[f]);fname.push(f)}}
 let fstack=[]
 let fshow=()=>{ge("fun").textContent=fstack.join("\n")}
-let fpop=x=>{let i=faddr.findLastIndex(a=>x>a);if((i>0)&&fstack.length&&fname[i]==stack[0]){fstack.shift();fshow()}}
+let fpop=x=>{
+ let i=faddr.findLastIndex(a=>x>a);
+ if((i>0)&&fstack.length&&fname[i]==fstack[0]){fstack.shift();fshow()}}
 let showhist=()=>{
  ge("fun").textContent=Object.entries(hist).sort(([,a],[,b])=>b-a).map(x=>x[0]+" "+x[1]).join("\n")
 }
+
+let oc,fr=0.334*22050/0177777
+let player=()=>{let au=new AudioContext()
+ oc=au.createOscillator();oc.frequency=440;oc.start(0)
+ let g=au.createGain();oc.connect(g);g.gain.value=0.1
+ g.connect(au.destination)}
+let play=x=>{oc.frequency.value=x*fr}
 
 /*
 let hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.borderTop="1px solid";t.textContent=t.textContent.slice(0,-1)+"  /"+fnum+"\n"}}

@@ -90,7 +90,7 @@ pdfun:{
  epi,:$[m;62706,O m;!0],104              /add #m,sp   ; jmp r4
  $[`main~S x;body,127 0;ret[pro,body;epi]]}
  
-ret:{j:(#x)-1+i:&x=-66666; x[i]:62707;x[1+i]:O 2*j ;x,y}  /replace -66666 0 with add #n,pc (jump to epilog) 
+ret:{j:(#x)-2+i:&x=-66666; x[i]:62707;x[1+i]:O 2*j ;x,y}  /replace -66666 0 with add #n,pc (jump to epilog) 
  
 pdarg:{*y}
 pdsym:{y;S x}

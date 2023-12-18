@@ -111,6 +111,7 @@ let po=()=>{M[6]+=2;return M[D+(M[6]>>1)-1]}       //mov (sp)+,r
 let xor=(x,y)=>((x||y)&&!(x&&y))
 
 let run=(x)=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
+ player()
  if(x!="")return runtest(x)
  let f=t=>{step();if(wait)showhist();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
