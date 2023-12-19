@@ -46,8 +46,8 @@ let blink=(u,y)=>{let x=470;y*=25
 }}
 let show=x=>{blink(x,0);blink(M[x>>1],1);play(M[x>>1])
  if(0104==M[x>>1])fpop(+x.toString(8))
- if(012623==M[x>>1])showheap()
- if(016101==M[x>>1])showgeti()
+// if(012623==M[x>>1])showheap()
+// if(016101==M[x>>1])showgeti()
  stack()
  let b=ge(x.toString(8));
  if(b===null)page(x);b=ge(x.toString(8))
@@ -99,6 +99,7 @@ let showhist=()=>{
 
 let showcall=()=>{
  let x=fstack[0]+" "+(M[0]|M[1]<<16)+" "+(M[2]|M[3]<<16)
+return
  ccall(x)}
 
 let ccall=x=>{
@@ -117,12 +118,13 @@ let showgeti=()=>{if(test)return
 }
 
 let oc,fr=0.334*22050/0177777
-let player=()=>{ return
+let player=()=>{// return
  let au=new AudioContext()
  oc=au.createOscillator();oc.frequency=440;oc.start(0)
  let g=au.createGain();oc.connect(g);g.gain.value=0.1
  g.connect(au.destination)}
-let play=x=>{return; oc.frequency.value=x*fr}
+let play=x=>{// return; 
+ oc.frequency.value=x*fr}
 
 /*
 let hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.borderTop="1px solid";t.textContent=t.textContent.slice(0,-1)+"  /"+fnum+"\n"}}

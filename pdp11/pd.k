@@ -118,7 +118,7 @@ pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
 
 pdfor:{(pdlop;pdslp)[I x].(x;y)}                    /slp:do-while; lop:while-do
 pdlop:{cnt brk $[#*y;(y 0),5700 1002 62707,(O@2*#b);!0],b:(,/|1_y),-44444 0}
-pdslp:{c:(*y),5700 1402 162707;b:cnt brk(-2_y 2),y 1;  b,c,O -1+2*(#b)+#c}
+pdslp:{c:(*y),5700 1402 162707;b:cnt brk(-2_y 2),y 1;  b,c,O 2+2*(#b)+#c}
 
 brk:{j:(#x)-2+i:&x=-55555;x[i]:62707;x[1+i]:O 2*j;x}   /replace -55555(break)    with add #n,pc
 cnt:{j:2+i:&x=-44444;x[i]:162707;x[1+i]:O 2*j;x}       /replace -44444(continue) with sub #n,pc
