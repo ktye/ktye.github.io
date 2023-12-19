@@ -2,7 +2,7 @@
 package main
 
 func main() {
-	maxi(5, 3) //5
+	maxi(5, 10) //5
 }
 func maxi(x, y int32) int32 {
 	if x > y {

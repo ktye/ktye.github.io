@@ -47,6 +47,9 @@ let tests = {
  swd:[4],
  st1:[1029],
  st2:[-1],
+ st3:[16384],
+ st4:[16384],
+ st5:[4096],
  lds:[1234435,-1],
  cns:[7],
  glg:[-2045800064,28744],
@@ -62,10 +65,20 @@ let tests = {
  mod:[-8],
  ibo:[8],
  wrt:[0],
- max:[5],
+ max:[10],
+ cal:[13],
+ lop:[13],
+ lp2:[48],
+ ble:[3],
+ bpl:[3],
+ blt:[5],
+ bgt:[5],
+ bge:[5],
+ sto:[16384],
+ buk:[10],
 }
-let test=x=>reset(x,runtest) //e.g. test("x")
-let runtest=x=>{ge("tty").textContent="test "+x+"\n"
+//let test=x=>reset(x,runtest) //e.g. test("x")
+let runtest=x=>{ge("tty").textContent="test "+x+"\n";
  do{step()}while((!wait)&&(M[7]!=brk))
  
  //program result are the register values r0..r4 before the last drop instruction.

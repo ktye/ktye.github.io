@@ -46,6 +46,8 @@ let blink=(u,y)=>{let x=470;y*=25
 }}
 let show=x=>{blink(x,0);blink(M[x>>1],1);play(M[x>>1])
  if(0104==M[x>>1])fpop(+x.toString(8))
+ if(012623==M[x>>1])showheap()
+ if(016101==M[x>>1])showgeti()
  stack()
  let b=ge(x.toString(8));
  if(b===null)page(x);b=ge(x.toString(8))
@@ -66,7 +68,7 @@ let setbrk=(e)=>{let x=e.target,y=parseInt(x.id,8);if("SPAN"!=x.nodeName)return;
  Array.from(ge("asm").children).forEach(x=>x.classList.remove("brk"));if(brk)x.classList.add("brk")
 }
 let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disabled=false;wait=false
- x=x.replace(/:.*/,"");prg=(""==x)?"k":x
+ x=x.replace(/:.*/,"");prg=(""==x)?"k":x;test=prg!="k"
  ge("stk").textContent=""
  ge("tty").value="";ge("tty").onkeydown=key
  let asm=ge("asm")
@@ -79,7 +81,7 @@ let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disable
 let fnum=0
 
 let page=pc=>{let asm=ge("asm")
- let o=+pc.toString(8);if(o in fileoff){fstack.unshift(fileoff[o]);fshow()}
+ let o=+pc.toString(8);if(o in fileoff){fstack.unshift(fileoff[o]);fshow();showcall()}
  asm.textContent=" addr    inst     r0     r1     r2     r3      r4     fp     sp     pc\n"
  disasm(pc,(x,y)=>{let t=ce("span");t.textContent=x;/*hi(t)*/;t.id=y;/*link(t)*/;asm.appendChild(t)})
 }
@@ -88,19 +90,39 @@ let fileoff={},faddr=[],fname=[]
 let fnames=d=>{for(const f in d){fileoff[d[f]]=f;faddr.push(d[f]);fname.push(f)}}
 let fstack=[]
 let fshow=()=>{ge("fun").textContent=fstack.join("\n")}
-let fpop=x=>{
+let fpop=x=>{if(test)return
  let i=faddr.findLastIndex(a=>x>a);
  if((i>0)&&fstack.length&&fname[i]==fstack[0]){fstack.shift();fshow()}}
 let showhist=()=>{
  ge("fun").textContent=Object.entries(hist).sort(([,a],[,b])=>b-a).map(x=>x[0]+" "+x[1]).join("\n")
 }
 
+let showcall=()=>{
+ let x=fstack[0]+" "+(M[0]|M[1]<<16)+" "+(M[2]|M[3]<<16)
+ ccall(x)}
+
+let ccall=x=>{
+ let c=calls[0];calls.shift()
+ if(x.startsWith(c))console.log(x, "ok")
+ else              {console.log(x, "expected", c); throw("calls")}
+}
+
+let showheap=()=>{if(test)return
+ if(      M[(M[7]-2)>>1]==010003){let sp=D+(M[6]>>1);
+  if(     M[(M[7]+4)>>1]==062706){ ccall("SetI32 "+M[3]+" "+(M[sp])) }
+  else if(M[(M[7]+4)>>1]==012623){ ccall("SetI64 "+M[3]+" "+(M[sp])) }
+ }}
+let showgeti=()=>{if(test)return
+ ccall("I32 "+M[1]+" "+M[0])
+}
+
 let oc,fr=0.334*22050/0177777
-let player=()=>{let au=new AudioContext()
+let player=()=>{ return
+ let au=new AudioContext()
  oc=au.createOscillator();oc.frequency=440;oc.start(0)
  let g=au.createGain();oc.connect(g);g.gain.value=0.1
  g.connect(au.destination)}
-let play=x=>{oc.frequency.value=x*fr}
+let play=x=>{return; oc.frequency.value=x*fr}
 
 /*
 let hi=t=>{if(t.textContent.endsWith("mov fp,-(sp)\n")){fnum++;t.style.borderTop="1px solid";t.textContent=t.textContent.slice(0,-1)+"  /"+fnum+"\n"}}
@@ -138,6 +160,7 @@ let jmp=x=>{let a=x.parentElement.id
   <button id="resetbut" onclick="reset(location.hash.slice(1))">reset</button>
   <button id="stepbut"  onclick="step()">step</button>
   <button id="runbut"   onclick="run(location.hash.slice(1))">run</button>
+  <button id="Runbut"   onclick="Run()">Run</button>
  </div>
  <div>
   <pre id="stk"></pre>

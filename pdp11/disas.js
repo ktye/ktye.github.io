@@ -63,7 +63,7 @@ function disasm(pc,O){let o=x=>{let r=x.toString(8);return"000000".slice(0,6-r.l
   let p=[pc],q=M[pc>>1]
   O(o(pc)+": "+o(q)+" [000000 000000 000000 000000][000000 000000 000000 000000 ---] "+disas(pc,p)+"\n",id)
   pc=p[0];pc+=2
-  if(q==0104)break
+  if((q==0104)&&(!test))break
  }while(M[pc>>1])}
 
 

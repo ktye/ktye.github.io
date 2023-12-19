@@ -2,7 +2,14 @@ set -e
 set -x
 
 if [ "$1" = "clean" ];then
-	rm *.k *.out
+	rm *.k *.out g.go gc g.exe
+	exit 0
+fi
+
+if [ "$1" = "g" ]; then
+	sed -f g.sed k.go > g.go
+	cat p.go         >> g.go
+	go build            g.go
 	exit 0
 fi
 

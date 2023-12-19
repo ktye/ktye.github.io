@@ -1,4 +1,3 @@
-/todo system boolean-expr
 
 D:+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
 F:(0#`)!()
@@ -118,7 +117,7 @@ pddrp:{(*y),po}
 pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
 
 pdfor:{(pdlop;pdslp)[I x].(x;y)}                    /slp:do-while; lop:while-do
-pdlop:{cnt brk $[#*y;(y 0),5700 1002 62707,(O@2*#b);!0],b:(,/1_y),-44444 0}
+pdlop:{cnt brk $[#*y;(y 0),5700 1002 62707,(O@2*#b);!0],b:(,/|1_y),-44444 0}
 pdslp:{c:(*y),5700 1402 162707;b:cnt brk(-2_y 2),y 1;  b,c,O -1+2*(#b)+#c}
 
 brk:{j:(#x)-2+i:&x=-55555;x[i]:62707;x[1+i]:O 2*j;x}   /replace -55555(break)    with add #n,pc
@@ -252,7 +251,7 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-55000;memcpy
 		-50000;12604 62600 5501 5502 5503 62601 5502 5503 62602 5503 62603 104  /add: mov (sp)+,r4;add (sp)+,r0;adc r1;add (sp)+,r1;add #4,sp;jmp r4
                 -50001;12604 162600 5601 5602 5603 162601 5602 5603 162602 5603 162603 104 /sub: mov (sp)+,r4;sub (sp)+,r0;sbc r1;sub (sp)+,r1;add #4,sp;jmp r4
-		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70216 60300 10002 10100 10201 62706 10 104 /mul32
+		-50002;12604 10102 10046 70066 2 70266 2 60300 16602 4 70226 60300 10002 10100 10201 62706 10 104 /mul32
 		-50003;12604 12602 12603 62706 4 71002 104              /idiv(cheating slightly)
 		-50004;12604 12602 12603 62706 4 71002 10200 10301 104  /irem
 		-50007;12604 5701 6702 6703 104             /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
@@ -302,7 +301,7 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 /  mul  2(sp),r2  70266 2    b*c in r2,r3
 /  add  r3,r0     60300      (hi ac)+lo bc
 /  mov  4(sp),r2  16602 4    d in r2
-/  mul  (sp),r2   70216      a*d in r2,r3
+/  mul  (sp+),r2  70226      a*d in r2,r3
 /  add  r3,r0     60300      (hi ac)+(lo bc)+lo ad
 /  mov  r0,r2     10002      swap r0 and r1
 /  mov  r1,r0     10100
