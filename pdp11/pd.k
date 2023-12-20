@@ -37,8 +37,10 @@ pd:{[o]opts::o
  a:fill i $[#j:ifun i:&T=`loc;=j;(!0)!()]
  ltyp::(S   a)perfunc     /loctypes
  lnam::(S 1+a)perfunc     /locnames                                     
- offs::({x!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
- @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`x`y`z`a`b!-8 16 24 0 8;..)
+ offs::({(|x)!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
+ `"k.off"<","/(($S@&T=`fun),\":"),'$#'anam            /k.off: number of args per func
+ 
+ @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`z`y`x`a`b!-8 16 24 0 8;..)
  glob::$[#s:S@&T=`var;s!O 5118-8*!#s;(0#`)!!0]
  lits::$[#glob;-4^&4*#glob;()];T[1+&T=`con]:`nop    /initial values for globals are assigned later
  cons::$[#cons;cons!pdlit'[1+&T=`con;0];(0#`)!!0]
@@ -106,7 +108,7 @@ pdasn:{(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x
 pdget:{y;get getbuiltin@(offs ifun x)S x}
 pdGet:{y;$[0N~r:cons S x;10346 12703,(glob S x),4727 -77000;r]}
 
-pdcal:{(,/|y),4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
+pdcal:{(,/y),4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
 
 
 
@@ -163,7 +165,7 @@ pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
 pdbnd:{(*y),10046,(y 1),5116 42600}   /com(sp);bis(sp)+,r0
 pdbor:{(*y),10046,(y 1),52600}        /bis (sp)+,r0
 
-pdc:{(,/|z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)} /x:branch instruction without offset (decimal)
+pdc:{(,/z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)}  /x:branch instruction without offset (decimal)
 pdneq:pdc  512 512  ;pdeql:pdc  768 768                 /bne beq
 pdles:pdc 1280 34560;pdmor:pdc 1536 33280               /blt blo  bgt bhi
 pdlte:pdc 1792 33536;pdgte:pdc 1024 34304               /blt blos bge bhis
@@ -172,9 +174,9 @@ ib:{(O x+2),5000 402 5000 5200}
 
 pdtyp:{y;S x}
 
-pdadd:{(,/|y),4727 -50000}
+pdadd:{(,/y),4727 -50000}
 pdsub:{(,/|y),4727 -50001}
-pdmul:{$[2~pdw S x;(,/|y),4727 -50002;0+`nyimul+ \y]}
+pdmul:{$[2~pdw S x;(,/y),4727 -50002;0+`nyimul+ \y]}
 pdshl:{$[2~pdw S x;(,/|y),4727 -50010; c32~y 1; (*y),4727 -50017; c59~y 1;(*y),4727 -50019;0+`nyishll+`shl \y]}
 pdshr:{$[`i~S x;(,/|y),4727 -50011;c32~y 1;4727 -50018;c59~y 1;4727 -50020;0+`nyishrl+ \y]}
 pddiv:{(,/|y),4727 -50003}
@@ -238,7 +240,7 @@ clz:   12604 10102 10003 5000 5702 1003 62700 20 10302 32702 100000 1003 5200 63
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604 12600 12601 12602 12603 104    /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
 		-77000;12604 10246 10146 10046 14300 14301 14302 14303 104 /get literal: store offset (rel to stack bottom) in r3;push r0..r3;load r0..r3 from stack
-                -75000;16604 2 10044 10144 10244 10344 12604 5206 12600 12601 12602 12603 104  /global assign: mov 2(sp),r4;..
+                -75000;16604 2 10044 10144 10244 10344 12604 5206 5206 12600 12601 12602 12603 104  /global assign: mov 2(sp),r4;..
 		-70000;12604 111000 6701 104                /load`b:movb (r0),r0;sxt r1
 		-70001;12604 10001 11000 16101 2 104        /load`i:mov r0,r1;mov (r0),r0;mov 2(r1),r1
 		-70002;12604 10003 11000 16301 2 16302 4 16303 6 104   /load`j
@@ -266,11 +268,15 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50018;10200 10301 5002 5003 207            /u64>>32
 		-50019;12701 13 72001 10003 5000 5001 5002 207     /u64<<59
 		-50020;12700 177765 72300 10300 5001 5002 5003 207 /u64>>59
-		-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
+		-50021;12604 12602 12603 62706 4 20200 5603 160103 1001 20200 104 /cmp4
 		-50022;12604 162600 162601 162602 162603 1010 5702 1006 5701 1004 5700 1002 5000 104 5000 5200 104 /cmp8                      /todo cmp8 (only for == and !=)
 		-50023;99999 99999 104)
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 10346 10246 10146 10046 16500 0 16501 0 16502 0 16503 0 104+0 0 0 0 0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
+
+/-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
+/-50021;12604 162600 5601 162601 62706 4 5401 1001 5400 104 /cmp4
+/-50021;12604 12602 12603 62706 4 20200 5603 160103 1001 20200 104 /cmp4
 
 /bne :1  /1010
 /tst r2  /5702
@@ -401,12 +407,12 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 
 /calling convention: overhead is 2 words for the caller (that's the minimum) and 12 for the callee.
 /there are about 6 times more calls than functions.
-/the first arg is not pushed but remains on r0..r3, it is pushed implicitly by the first leaf node.
+/the last arg is not pushed but remains on r0..r3, it is pushed implicitly by the first leaf node.
 /access is 4 word aligned on the stack. this requires fewer helper functions for get/set.
 /
 /caller                    count      stack
-/ push z y, x on r0..r3    (words)    z
-/                                     y
+/ push x y, z on r0..r3    (words)    y
+/                                     x
 / jsr pc,#f                2          ret addr              4727 -f
 /callee
 / mov fp,-(sp)             1      +-> old fp               10546 
@@ -422,8 +428,8 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 / jmp r4                   1                                 104
 /total:                           caller(2) callee(12)
 /access:
-/ arg0 x                          -8(fp)
-/ argi y(1),z(2)..                8*i+nloc(fp)
+/ arg0 z                          -8(fp)
+/ argi y(1),x(2)..                8*i+nloc(fp)
 / loci a(0),b(1)..                8*1+i(fp) 
 
 /see also: c-calling convention https://www.bell-labs.com/usr/dmr/www/clcs.html

@@ -56,6 +56,7 @@ let tests = {
  gls:[1,0],
  gl1:[-2147483648],
  gl2:[-2147483648],
+ gl3:[16,0],
  glo:[2147483635],
  get:[-1097262461,28],
  mem:[482253082,0],
@@ -76,6 +77,7 @@ let tests = {
  bge:[5],
  sto:[16384],
  buk:[10],
+ cl4:[6],
 }
 //let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n";

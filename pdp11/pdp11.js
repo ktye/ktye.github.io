@@ -59,7 +59,7 @@ let step=()=>{ let l=x=>hpush(x)
  case 05100:M[d]=F(~M[d]);over=0             ;l("com");return //com
  case 05200:M[d]++;F(M[d])                   ;l("inc");return //inc
  case 05300:M[d]--;F(M[d])                   ;l("dec");return //dec
- case 05400:M[d]=F(-M[d]);carry=M[d]!=0      ;l("neg");return //neg
+ case 05400:M[d]=F(-M[d]);carry=M[d]!=0;over=M[d]==0x8000 ;l("neg");return //neg
  case 05500:M[d]+=carry;F(M[d]);carry=(M[d]==0)&&carry; l("adc");return //adc  //todo F..vv
  case 05600:r=M[d];M[d]-=carry;F(M[d]);carry=carry&&(0==r);l("sbc");return //sbc
  case 05700:sign=!!(M[d]&0x8000);zero=M[d]==0;over=0;l("tst");return //tst
