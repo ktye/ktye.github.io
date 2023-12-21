@@ -48,7 +48,9 @@ let show=x=>{blink(x,0);blink(M[x>>1],1);play(M[x>>1])
  if(0104==M[x>>1])fpop(+x.toString(8))
  if(012623==M[x>>1])showheap()
  if(016101==M[x>>1])showgeti()
+ if(016301==M[x>>1])showgetk()
  if((010346==M[x>>1])&&(012703==M[1+(x>>1)])){showGet(x)}
+ if((010044==M[x>>1])&&(1)){showSet(x)}
  stack()
  let b=ge(x.toString(8));
  if(b===null)page(x);b=ge(x.toString(8))
@@ -73,6 +75,7 @@ let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disable
  ge("stk").textContent=""
  ge("tty").value="";ge("tty").onkeydown=key
  let asm=ge("asm")
+ fetch("t/gc").then(   r=>r.text()).then(r=>{calls=r.split("\n")})
  fetch("t/k.off").then(r=>r.text()).then(r=>{fargs=eval("({"+r+"})")})
  fetch("t/k.map").then(r=>r.text()).then(r=>{fnames(eval(r))})
  fetch("t/"+prg+".out").then(r=>r.text()).then(r=>{
@@ -104,13 +107,13 @@ let showhist=()=>{
 
 let showcall=()=>{
  let x=fstack[0],a=fargs[x],sp=(a==1)?0:((4*a)-7+D+(M[6]>>1))
- console.log("a",a,"off",(4*a)-7, "sp", sp)
  if(a>0){ x+=" "+(M[sp]|(M[sp+1]<<16))+" "+(M[sp+2]|(M[sp+3]<<16)) }
  ccall(x)}
 
-let ccall=x=>{
+let total=0
+let ccall=x=>{total++
  let c=calls[0];calls.shift()                  //; console.log(c);   return
- if(x.startsWith(c))console.log(x, "ok")
+ if(x.startsWith(c))console.log(x, "ok", total)
  else              {console.log(x, "expected", c); throw("calls")}
 }
 
@@ -122,8 +125,12 @@ let showheap=()=>{if(test)return
 let showgeti=()=>{if(test)return
  ccall("I32 "+M[1]+" "+M[0])
 }
+let showgetk=()=>{if(test)return;let p=D+(M[3]>>1)
+ ccall("I64 "+M[3]+" "+(M[p]|(M[1+p]<<16))+" "+(M[2+p]|(M[3+p]<<16)))
+}
 
 let showGet=(x)=>{ console.log("Get", M[2+(x>>1)]); }
+let showSet=(x)=>{ console.log("Set", M[4].toString(8)+":", M[0]|(M[1]<<16), M[2]|(M[3]<<16)) }
 
 let oc,fr=0.334*22050/0177777
 let player=()=>{// return

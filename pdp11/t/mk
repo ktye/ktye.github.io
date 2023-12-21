@@ -2,14 +2,14 @@ set -e
 set -x
 
 if [ "$1" = "clean" ];then
-	rm *.k *.out g.go gc g.exe
+	rm *.k *.out g.go gc k.map k.off
 	exit 0
 fi
 
 if [ "$1" = "g" ]; then
 	sed -f g.sed k.go > g.go
 	cat p.go         >> g.go
-	go build            g.go
+	go run g.go | sed -e 1,2d -e 10000q > gc
 	exit 0
 fi
 

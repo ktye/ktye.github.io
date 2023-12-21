@@ -1,13 +1,14 @@
 
-D:+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
+O:10/8\65536!
+D:O@+/1 256*+-2^@[`c@&2^14;!#D;D]  /convert data section to uint16 (and fill)
 F:(0#`)!()
 ifun:&#T                /function index of each node
-afun:s!-!#s:S@&T=`fun   /fname!-addr  first is 0(main), never called
+afun:(0#`)!!0           /fname!-addr  first is 0(main), never called
 locs:0            
 atyp:anam:()            /argtypes  argnames for each function
 ltyp:lnam:()            /loctypes  locnames for each function (args+locs)
 fsig:(0#`)!()
-cons:S@&T=`con          /constant!literal-offset
+cons:(0#`)!()           /constant!literal-offset
 sigs:()
 offs:0                  /`symbol!offset for get/set args+locals for each function
 lits:()
@@ -26,12 +27,15 @@ pd:{[o]opts::o
  rwcnd'|&(~`=S)&(T=`cnd)|T=`swc
  $[1~#i:i@&`store=S P i:&T=`ast;T[&P=*i]:`nop;0]  /remove store/catch
  $[1~#i:i@&`catch=S P i:&T=`ast;T[&P=*i]:`nop;0]
+
+ cons::S@&T=`con
+ afun::s!-!#s:S@&T=`fun   
  
  T[i:&(S=`I32B)&T=`cal]:`i32b
  ifun::1_+\-1,T=`fun                              /function index for each node
  perfunc:!1+*|ifun
  fill:{x[i]:(#i:&~#'x@!n:+/T=`fun)#,!0}
- a:fill i(=ifun i:&T=`arg)
+ a:fill i(=ifun i:i@&`fun=T P i:&T=`arg)
  atyp::(S   a)perfunc     /argtypes
  anam::(S 1+a)perfunc     /argnames
  a:fill i $[#j:ifun i:&T=`loc;=j;(!0)!()]
@@ -39,14 +43,15 @@ pd:{[o]opts::o
  lnam::(S 1+a)perfunc     /locnames                                     
  offs::({(|x)!$[#r:8*y+!#x;-8,1_r;!0]}'[anam;#'lnam]) /  main   ; xyz:args ab:locals
  `"k.off"<","/(($S@&T=`fun),\":"),'$#'anam            /k.off: number of args per func
- 
+
  @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`z`y`x`a`b!-8 16 24 0 8;..)
+
  glob::$[#s:S@&T=`var;s!O 5118-8*!#s;(0#`)!!0]
  lits::$[#glob;-4^&4*#glob;()];T[1+&T=`con]:`nop    /initial values for globals are assigned later
  cons::$[#cons;cons!pdlit'[1+&T=`con;0];(0#`)!!0]
  
  n:{x[y]+:1}/(,&#P),P;n[0]-:1
- s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ \ T y)[y;|c 1]}/[();|!#P;|n]
+ s:{c:(0,(#x)-z)^x;(c 0),,,/(F@ T y)[y;|c 1]}/[();|!#P;|n]
  lits[!#glob]:litl'[I i;S i:1+&T=`var]
 "0",",\n0"/$imag stak link@*s}
 
@@ -73,13 +78,12 @@ pdprg:{
  
 
 
-
-pdsig:{0x60,(,/(,leb@#a),a:-1_x),$[0x00~r:*|x;_0;(_1),r]} //pdsig args, ret
+pdsig:{*y}
 pdmem:{*y}
 pdcon:{*y}
 pdvar:{*y}
 pdtab:{y;127,afun S x}
-pdtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
+pdtbl:{*y}
 
 pdfun:{
  c:&x=P
@@ -103,16 +107,15 @@ pdast:pdstm
 pdlod:{(*y),4727,-(70000+`b`i`j?S x)}
 pdsto:{(,/|y),4727,-(60000+`b`i`j?S x)}
 
-
 pdasn:{(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x)]}
 pdget:{y;get getbuiltin@(offs ifun x)S x}
-pdGet:{y;$[0N~r:cons S x;10346 12703,(glob S x),4727 -77000;r]}
+pdGet:{y;$[`Lt~S x;4727 -55523;(S x)?!cons;cons S x;10346 12703,(glob S x),4727 -77000]}
 
-pdcal:{(,/y),4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
+pdcal:{(S x;y);(,/y),4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
 
 
 
-pdcli:{(,/|y),4727 1004}
+pdcli:{(,/1_y),(*y),4727 1004}
 pddfr:{y;!0}
 
 pddrp:{(*y),po}
@@ -130,7 +133,7 @@ pdjmp:{y;,$[I x;-55555 0;-44444 0]}                    /break/continue (no neste
 
 /literals, constants and globals are embedded in the stack
 pdlit:{y;i:I x;$[2~pdw s:S x;lit1 I x;0x00000000~C i+4+!4;lit1@*`i C i+!4;10346 12703,lit[i;`k],4727 -77000]}    /push r3;mov #literal-offset to r3
-lit1:{$[0~x; pu;1~x; pu,5200;-1~x;pu,5300 5301;(x<32767)&x>0; pu,12700,O x; 10346 12703,lit[x;`i],4727 -77000]}            /0.. 1.. -1.. mov #small,r0 
+lit1:{$[0~x; pu;1~x; pu,5200;-1~x;pu,5300 5301;8~x;4727 -55508;16~x;4727 -55516;(x<32767)&x>0; pu,12700,O x; 10346 12703,lit[x;`i],4727 -77000]}            /0.. 1.. -1.. mov #small,r0 
 litl:{$[`i~y;O@,/(`i@,/(2^`c@,x),\0x0000),0 0;O@,/|'+65536 65536\(`i@C x+!4),`i@C x+4+!4]}
 lit: {O 5118-8*$[0N~r:lits?x:litl[x;y]; -1+#lits,:,x ;r]}
 
@@ -165,7 +168,8 @@ pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
 pdbnd:{(*y),10046,(y 1),5116 42600}   /com(sp);bis(sp)+,r0
 pdbor:{(*y),10046,(y 1),52600}        /bis (sp)+,r0
 
-pdc:{(,/z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)}  /x:branch instruction without offset (decimal)
+/pdc:{(,/z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)}  /x:branch instruction without offset (decimal)
+pdc:{(,/z),(4727;$[4~pdw t;-50022;`u~t;-50023;-50021]),ib(x(t:S y)?`u`k)}
 pdneq:pdc  512 512  ;pdeql:pdc  768 768                 /bne beq
 pdles:pdc 1280 34560;pdmor:pdc 1536 33280               /blt blo  bgt bhi
 pdlte:pdc 1792 33536;pdgte:pdc 1024 34304               /blt blos bge bhis
@@ -199,12 +203,8 @@ get:4727,-10000-          /e.g. -9996..-10002
 set:4727,-20000-
 
 
-O:10/8\65536!
 
-leb:{leb8(`c@,x),4#$[x<0;0xff;0x00]}
-leb8:{s:*x:,/+(8#2)\256!256+|x;|_2/'(1&!#x),'x:-7^(((7*1+(#x)%7)-#x)#s),x:(x?~s)_x}
-
-pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
+/pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
 readin:12604 62706 10 10001 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
 /readin:
@@ -240,13 +240,16 @@ clz:   12604 10102 10003 5000 5702 1003 62700 20 10302 32702 100000 1003 5200 63
 builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4;push r3..r0;jmp r4
                 -88888;12604 12600 12601 12602 12603 104    /pop4 : mov (sp)+,r4;pop  r0..r3;jmp r4
 		-77000;12604 10246 10146 10046 14300 14301 14302 14303 104 /get literal: store offset (rel to stack bottom) in r3;push r0..r3;load r0..r3 from stack
-                -75000;16604 2 10044 10144 10244 10344 12604 5206 5206 12600 12601 12602 12603 104  /global assign: mov 2(sp),r4;..
+                -75000;16604 2 10044 10144 10244 10344 12604 62706 2 12600 12601 12602 12603 104  /global assign: mov 2(sp),r4;..
 		-70000;12604 111000 6701 104                /load`b:movb (r0),r0;sxt r1
 		-70001;12604 10001 11000 16101 2 104        /load`i:mov r0,r1;mov (r0),r0;mov 2(r1),r1
 		-70002;12604 10003 11000 16301 2 16302 4 16303 6 104   /load`j
 		-60000;12604 111610 62706 10 104                 /store`b:movb (sp),(r0);add #8,sp
 		-60001;12604 10003 12623 12623 62706 4 104       /store`i:mov r0,r3;mov (sp+),(r3)+;..;add #4;sp
 		-60002;12604 10003 12623 12623 12623 12623 104   /store`j:mov r0,r3;mov (sp)+,(r3)+;..
+		-55523;12604 10346 10246 10146 10046 12700 27 5001 5002 5003 104 /get constant Lt(23) used 70 times
+		-55516;12604 10346 10246 10146 10046 12700 20 5001 5002 5003 104 /get literal 16 used 94 times
+		-55508;12604 10346 10246 10146 10046 12700 10 5001 5002 5003 104 /get literal  8 used 90 times
 		-55003;readin
 		-55002;write
 		-55001;clz
@@ -270,7 +273,7 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50020;12700 177765 72300 10300 5001 5002 5003 207 /u64>>59
 		-50021;12604 12602 12603 62706 4 20200 5603 160103 1001 20200 104 /cmp4
 		-50022;12604 162600 162601 162602 162603 1010 5702 1006 5701 1004 5700 1002 5000 104 5000 5200 104 /cmp8                      /todo cmp8 (only for == and !=)
-		-50023;99999 99999 104)
+		-50023;12604 12602 12603 62706 4 20301 1001 20200 104)   /cmpu 32 bit unsigned
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 10346 10246 10146 10046 16500 0 16501 0 16502 0 16503 0 104+0 0 0 0 0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
 

@@ -15,26 +15,15 @@ func init() {
 	Data(227, ":+-*%&|<>=~!,^#_$?@.':/:\\:vbcisfzldtmdplx00BCISFZLDT0")
 	Export(main, Asn, Atx, Cal, cs, dx, Kc, Ki, kinit, l2, mk, nn, repl, rx, sc, src, tp, trap, Val)
 
-	//            0    :    +    -    *    %    &    |    <    >    =10   ~    !    ,    ^    #    _    $    ?    @    .20  '    ':   /    /:   \    \:                  30                       35                       40                       45
+	//            0    :    +    -    *    %    &    |    <    >    =10   ~    !    ,    ^    #    _    $    ?    @    .20  '    ':   /    /:   \    \:                  30                       35                       40                       45      
 	Functions(00, nul, Idy, Flp, Neg, Fst, Sqr, Wer, Rev, Asc, Dsc, Grp, Not, Til, Enl, Srt, Cnt, Flr, Str, Unq, Typ, Val, ech, nyi, rdc, nyi, scn, nyi, lst, Kst, Out, nyi, nyi, Abs, nyi, nyi, nyi, nyi, Uqs, nyi, Tok, Fwh, Las, nyi, nyi, nyi, nyi, Prs)
+	Functions(47, negi, absi, addi, subi, muli, divi, mini, maxi, modi, inC, inI, inI, nyi, nyi, nyi, nyi, nyi)
 	Functions(64, Asn, Dex, Add, Sub, Mul, Div, Min, Max, Les, Mor, Eql, Mtc, Key, Cat, Cut, Tak, Drp, Cst, Fnd, Atx, Cal, Ech, nyi, Rdc, nyi, Scn, nyi, com, prj, Otu, In, Find, nyi, nyi, fdl, nyi, Enc, Dec, nyi, nyi, Bin, Mod, Pow, nyi)
-	Functions(193, tchr, tnms, tvrb, tpct, tvar, tsym, pop)
-	Functions(211, Amd, Dmd)
-
-	Functions(220, negi)
-	Functions(223, absi)
-	Functions(226, addi)
-	Functions(229, subi)
-	Functions(232, muli)
-	Functions(235, divi)
-	Functions(238, mini)
-	Functions(241, maxi)
-	Functions(244, modi)
-
-	Functions(247, cmi, cmi, cmi, nyi, nyi, cmC, cmI, cmI, nyi, nyi, cmL)
-	Functions(258, sum, rd0, prd, rd0, min, max)
-	Functions(264, mtC, mtC, mtC, nyi, nyi, mtL)
-	Functions(270, inC, inI, inI)
+	Functions(108, cmi, cmi, cmi, nyi, nyi, cmC, cmI, cmI, nyi, nyi, cmL)
+	Functions(119, sum, rd0, prd, rd0, min, max)
+	Functions(125, mtC, mtC, mtC, nyi, nyi, mtL)
+	Functions(131, tchr, tnms, tvrb, tpct, tvar, tsym, pop)
+	Functions(138, Amd, Dmd)
 }
 
 func main() { // _start
@@ -42,8 +31,7 @@ func main() { // _start
 	write(Ku(2932601077199979)) // "ktye/k\n"
 	for {
 		write(Ku(32))
-		x := readfile(mk(Ct, 0))
-		repl(x)
+		repl(readfile(mk(Ct, 0)))
 	}
 }
 func trap() {
@@ -83,6 +71,7 @@ func trap() {
 // 2k....4k  stack
 
 func kinit() {
+	I64(136)
 	minit(12, 16) //4k..64k
 
 	//leak 1k at 4096..5120 that can be used as cpu stack for kos
@@ -170,6 +159,19 @@ func Ku(x uint64) K { // Ct
 	SetI32(p-12, idx(0, p, p+8)) //assume <8
 	return r
 }
+
+/* encode bytes for Ku(..) with: https://play.golang.org/p/4ethx6OEVCR
+func enc(x []byte) uint64 {
+	r := uint32(0)
+	var o uint64 = 1
+	for _, b := range x {
+		r += o * uint64(b)
+		o <<= 8
+	}
+	return r
+}
+*/
+
 func kx(u int32, x K) K { return cal(Val(Ks(u)), l1(x)) } //call k func from z.k
 func sc(c K) K { //symbol from chars
 	s := K(I64(0))
@@ -213,14 +215,17 @@ func minit(a, b int32) {
 func alloc(n, s int32) int32 {
 	size := n * s
 	t := bucket(size)
+
 	//if int64(n)*int64(s) > 2147483647 /*|| t > 31*/ {
-	//trap() //grow (oom)
+	//	trap() //grow (oom)
 	//}
+
 	i := 4 * t
 	m := 4 * I32(128)
 	for I32(i) == 0 {
 		if i >= m {
-			trap() //grow(i)
+			//m = 4 * grow(i)
+			trap()
 		} else {
 			i += 4
 		}
@@ -310,6 +315,8 @@ func rl(x K) { // ref list elements
 	p := int32(x)
 	for e > p {
 		e -= 8
+		li(e)
+		lk(K(I64(e)))
 		rx(K(I64(e)))
 	}
 }
@@ -442,7 +449,7 @@ func Rdc(f, x K) K { // x f/y   (x=0):f/y
 			if xt == Tt {
 				return Ech(rdc(f), l1(Flp(x)))
 			}
-			r := Func[256+fp].(rdf)(int32(x), xt, ep(x)) //365
+			r := Func[117+fp].(rdf)(int32(x), xt, ep(x)) //365
 			if r != 0 {
 				dx(x)
 				return r
@@ -694,9 +701,9 @@ func cal(f, x K) K {
 		case 1:
 			r = Func[fp+64].(f2)(x, r)
 		case 2:
-			r = Func[fp+192].(f4)(x, r, 1, z)
+			r = Func[fp+119].(f4)(x, r, 1, z)
 		case 3:
-			r = Func[fp+192].(f4)(x, r, z, y)
+			r = Func[fp+119].(f4)(x, r, z, y)
 		default:
 			trap() //rank
 			r = 0
@@ -997,7 +1004,7 @@ func exec(x K) K {
 			case 3: // 192..255  tetradic
 				b = pop()
 				c = pop()
-				a = Func[marksrc(u)].(f4)(a, b, c, pop())
+				a = Func[marksrc(u)-73].(f4)(a, b, c, pop())
 			case 4: // 256       drop
 				dx(a)
 				a = pop()
@@ -1203,7 +1210,7 @@ func fnd(x, y K, t T) int32 {
 		return nai
 	}
 	xp := int32(x)
-	r := Func[268+t].(f3i)(int32(y), xp, ep(x))
+	r := Func[54+t].(f3i)(int32(y), xp, ep(x))
 	if r == 0 {
 		return nai
 	}
@@ -1268,10 +1275,13 @@ func Mtc(x, y K) K {
 	return Ki(match(x, y))
 }
 func match(x, y K) int32 {
+	lk(y)
 	if x == y {
 		return 1
 	}
 	xt := tp(x)
+	li(int32(xt))
+	li(int32(tp(y)))
 	if xt != tp(y) {
 		return 0
 	}
@@ -1285,7 +1295,7 @@ func match(x, y K) int32 {
 		}
 		xp, yp := int32(x), int32(y)
 		if xt < Dt {
-			return Func[246+xt].(f3i)(xp, yp, ep(y))
+			return Func[107+xt].(f3i)(xp, yp, ep(y))
 		} else {
 			if match(K(I64(xp)), K(I64(yp))) != 0 {
 				return match(K(I64(xp+8)), K(I64(yp+8)))
@@ -1356,7 +1366,7 @@ func In(x, y K) K {
 		trap() //type
 	}
 	dxy(x, y)
-	return Ki(I32B(Func[268+xt].(f3i)(int32(x), int32(y), ep(y)) != 0))
+	return Ki(I32B(Func[54+xt].(f3i)(int32(x), int32(y), ep(y)) != 0))
 }
 func inC(x, yp, e int32) int32 {
 	for yp < e { // maybe splat x to int64
@@ -1575,6 +1585,8 @@ func stv(x, i, y K) K {
 }
 func sti(x K, i int32, y K) K {
 	xt := tp(x)
+	li(i)
+	li(nn(x))
 	if uint32(i) >= uint32(nn(x)) {
 		trap() //index
 	}
@@ -1619,6 +1631,7 @@ func atdepth(x, y K) K {
 	}
 	return atdepth(x, y)
 }
+
 func iipow(x, y int32) int32 {
 	r := int32(1)
 	for {
@@ -1761,7 +1774,7 @@ f:
 		} else if n == 91 { // [
 			verb = 0
 			n = plist(93)
-			p := K(84) + K(8*(int32(n)&1)) // 92(project) or call(84)
+			p := K(84 + 8*int32(n&1)) // 92(project) or call(84)
 			n &^= 1
 			s := pspec(r, n)
 			if s != 0 {
@@ -2227,7 +2240,7 @@ type f1i = func(int32) int32
 type f2i = func(int32, int32) int32
 type fi3 = func(int32, int32, int32)
 
-func Neg(x K) K          { return nm(220, x) } //220
+func Neg(x K) K          { return nm(47, x) }
 func negi(x int32) int32 { return -x }
 
 func Abs(x K) K {
@@ -2235,7 +2248,7 @@ func Abs(x K) K {
 	if xt > St {
 		return Ech(32, l1(x))
 	}
-	return nm(223, x) //227
+	return nm(48, x)
 }
 func absi(x int32) int32 {
 	if x < 0 {
@@ -2249,14 +2262,14 @@ func Sqr(x K) K {
 	return x
 }
 
-func Add(x, y K) K          { return nd(226, 2, x, y) } //234
+func Add(x, y K) K          { return nd(49, 2, x, y) }
 func addi(x, y int32) int32 { return x + y }
-func Sub(x, y K) K          { return nd(229, 3, x, y) } //245
+func Sub(x, y K) K          { return nd(50, 3, x, y) }
 func subi(x, y int32) int32 { return x - y }
-func Mul(x, y K) K          { return nd(232, 4, x, y) } //256
+func Mul(x, y K) K          { return nd(51, 4, x, y) }
 func muli(x, y int32) int32 { return x * y }
 
-func Mod(x, y K) K { return nd(244, 41, x, y) } //300
+func Mod(x, y K) K { return nd(55, 41, x, y) } //300
 func modi(x, y int32) int32 {
 	if y == 0 {
 		return x //for dec
@@ -2264,7 +2277,7 @@ func modi(x, y int32) int32 {
 	x = x % y
 	return x + y*I32B(x < 0) //euclidean, y>0
 }
-func Div(x, y K) K { return nd(235, 5, x, y) } //267
+func Div(x, y K) K { return nd(52, 5, x, y) }
 func divi(x, y int32) int32 {
 	if y == 0 {
 		return x //dec
@@ -2272,7 +2285,7 @@ func divi(x, y int32) int32 {
 	return (x - (y-1)*I32B(x < 0)) / y //euclidean, y>0
 }
 
-func Min(x, y K) K { return nd(238, 6, x, y) } //278
+func Min(x, y K) K { return nd(53, 6, x, y) }
 func mini(x, y int32) int32 {
 	if x < y {
 		return x
@@ -2280,7 +2293,7 @@ func mini(x, y int32) int32 {
 	return y
 }
 
-func Max(x, y K) K { return nd(241, 7, x, y) } //289
+func Max(x, y K) K { return nd(54, 7, x, y) }
 func maxi(x, y int32) int32 {
 	if x > y {
 		return x
@@ -2297,11 +2310,8 @@ func cmI(x, y int32) int32 { x, y = I32(x), I32(y); return I32B(x > y) - I32B(x 
 func Eql(x, y K) K { return nc(10, 0, x, y) } //308
 func Les(x, y K) K { // x<y   `file<c
 	if tp(x) == st && tp(y) == Ct {
-		if int32(x) == 0 {
-			write(rx(y))
-			return y
-		}
-		return writefile(cs(x), y)
+		write(rx(y))
+		return y
 	}
 	return nc(8, -1, x, y) //323
 }
@@ -2483,7 +2493,7 @@ func nc(ff, q int32, x, y K) K { //compare
 	if av == 0 { // atom-atom
 		dxy(x, y)
 		// 11(derived), 12(proj), 13(lambda), 14(native)?
-		return Ki(I32B(q == Func[245+t].(f2i)(xp, yp)))
+		return Ki(I32B(q == Func[106+t].(f2i)(xp, yp)))
 	}
 	ix := sz(t + 16)
 	iy := ix
@@ -2508,7 +2518,7 @@ func nc(ff, q int32, x, y K) K { //compare
 	rp := int32(r)
 	e := ep(r)
 	for rp < e {
-		SetI32(rp, I32B(q == Func[250+t].(f2i)(xp, yp)))
+		SetI32(rp, I32B(q == Func[111+t].(f2i)(xp, yp)))
 		xp += ix
 		yp += iy
 		rp += 4
@@ -2623,9 +2633,9 @@ func Srt(x K) K { // ^x
 	return atv(x, Asc(rx(x)))
 }
 func Asc(x K) K { // <x  <`file
-	//if tp(x) == st {
-	//	return readfile(cs(x))
-	//}
+	if tp(x) == st {
+		return readfile(cs(x))
+	}
 	return grade(x, 1)
 }
 func Dsc(x K) K { return grade(x, -1) } //254 // >x
@@ -2673,7 +2683,7 @@ func mrge(x, r, a, b, c, p, t, f int32) {
 	s := sz(T(t))
 	for k := a; k < b; k += 4 {
 		if i < c && j < b {
-			q = I32B(f == Func[234+t].(f2i)(p+s*I32(x+i), p+s*I32(x+j)))
+			q = I32B(f == Func[95+t].(f2i)(p+s*I32(x+i), p+s*I32(x+j)))
 		} else {
 			q = 0
 		}
@@ -2695,7 +2705,7 @@ func cmL(xp, yp int32) int32 { // compare lists lexically
 	}
 	if xt < 16 { // 11(derived), 12(proj), 13(lambda), 14(native)?
 		xp, yp := int32(x), int32(y)
-		return Func[245+xt].(f2i)(xp, yp)
+		return Func[106+xt].(f2i)(xp, yp)
 	}
 	if xt > Lt {
 		xp, yp := int32(x), int32(y)
@@ -2712,7 +2722,7 @@ func cmL(xp, yp int32) int32 { // compare lists lexically
 	s := sz(xt)
 	e := xp + n*s
 	for xp < e {
-		r = Func[234+xt].(f2i)(xp, xp+yp)
+		r = Func[95+xt].(f2i)(xp, xp+yp)
 		if r != 0 {
 			return r
 		}
@@ -2735,7 +2745,7 @@ func Str(x K) K {
 			rx(x)
 			r = Rdc(13, l1(Rev(Str(ti(Lt, xp)))))
 		case 1: // df
-			r = ucat(Str(x0(x)), Str(x1(x)+21))
+			r = ucat(Str(x0(x)), Str(21+x1(x)))
 		case 2: //pf
 			f := x0(x)
 			l := x1(x)
@@ -2879,32 +2889,9 @@ func write(x K) {
 	dx(x)
 }
 func readfile(x K) K { // x C
-	var r K
-	//if nn(x) == 0 {
-		dx(x)
-		r = mk(Ct, 496)
-		r = ntake(ReadIn(int32(r), 496), r)
-		return r
-		/*
-	}
-	n := Read(int32(x), nn(x), 0)
-	if n < 0 {
-		dx(x)
-		return mk(Ct, 0)
-	}
-	r = mk(Ct, n)
-	Read(int32(x), nn(x), int32(r))
 	dx(x)
-	return r
-	*/
-}
-func writefile(x, y K) K { // x, y C
-	r := Write(int32(x), nn(x), int32(y), nn(y))
-	if r != 0 {
-		trap() //io
-	}
-	dx(x)
-	return y
+	x = mk(Ct, 496)
+	return ntake(ReadIn(int32(x), 496), x)
 }
 
 type ftok = func() K
@@ -2921,7 +2908,7 @@ func tok(x K) K {
 		if pp == pe {
 			break
 		}
-		for i := int32(193); i < 200; i++ { // tchr, tnms, tvrb, tpct, tvar, tsym, trap
+		for i := int32(131); i < 138; i++ { // tchr, tnms, tvrb, tpct, tvar, tsym, trap
 			y := Func[i].(ftok)()
 			if y != 0 {
 				y |= K(int64(pp-int32(s)) << 32)
@@ -3056,14 +3043,14 @@ func tunm() K {
 	}
 	return Ki(r)
 }
-func pu() int32 { //no int64 mul
+func pu() int32 {
 	r := int32(0)
 	for pp < pe {
 		c := I8(pp)
 		if is(c, 4) == 0 {
 			break
 		}
-		r = 10*r + (c - '0')
+		r = 10*r + (c-'0')
 		pp++
 	}
 	return r
@@ -3838,3 +3825,6 @@ func zk() {
 	Memorycopy(int32(x), 280, zn)
 	dx(Val(x))
 }
+
+func li(x int32) {}
+func lk(x K) {}

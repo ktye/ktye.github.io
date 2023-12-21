@@ -116,12 +116,7 @@ let run=x=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
  let f=t=>{step();if(wait)showhist();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
  if(!wait)requestAnimationFrame(f)
 }
-let Run=x=>{
- fetch("t/gc").then(r=>r.text()).then(r=>{
-  calls=r.split("\n")
-  do{step()}while((!wait)&&(M[7]!=brk))
- })
-}
+let Run=x=>{ do{step()}while((!wait)&&(M[7]!=brk)) }
 let calls=[]
 let hist={}
 let hpush=x=>{hist[x]=(x in hist)?1+hist[x]:1}

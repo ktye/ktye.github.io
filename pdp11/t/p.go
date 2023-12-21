@@ -32,11 +32,17 @@ func setI32(x, y int32) {
  SetI32(x,y)
 }
 func setI64(x int32, y int64) {
+ //	if x == 5176 { panic("set5176") }
  fmt.Printf("SetI64 %d %d %d\n", int32(x), int32(y), int32(y>>32))
  SetI64(x, y)
 }
 func getI32(x int32) int32 {
  r := I32(x) 
  fmt.Printf("I32 %d %d\n", x, r)
+ return r
+}
+func getI64(x int32) int64 {
+ r := I64(x)
+ fmt.Printf("I64 %d %d %d\n", x, int32(r), int32(r>>32))
  return r
 }
