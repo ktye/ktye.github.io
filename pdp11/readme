@@ -18,6 +18,7 @@ t/k.go differences from i/k/_/ki/ki.go:
 - rm grow()
 - m = 4 * grow() => trap()
 - if int64(n)*int64(s)>.. /* no i64mul */
+- maxi: if(){return}else{return} => if(){return}return
 - pu: no i64mul: use int32
 - fix tunm
 - use i32mul:

@@ -46,3 +46,12 @@ func getI64(x int32) int64 {
  fmt.Printf("I64 %d %d %d\n", x, int32(r), int32(r>>32))
  return r
 }
+/*
+func init() {
+	b, e := os.ReadFile("k.img")
+        if e != nil {
+                panic(e)
+        }
+        copy(Bytes, b)
+}
+*/

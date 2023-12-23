@@ -29,7 +29,9 @@ let tests = {
  iff:[-26],
  if1:[26],
  if2:[5],
+ if3:[4],
  ife:[39],
+ ifl:[100],
  ret:[26],
  eql:[14],
  eq1:[13],
@@ -62,7 +64,7 @@ let tests = {
  glo:[-42949685],
  get:[-1097262461,28],
  ge1:[3],
- mem:[482253082,0],
+ mem:[-1726315776,7358],
  clz:[43],
  div:[19],
  mod:[-8],
@@ -70,7 +72,7 @@ let tests = {
  wrt:[0],
  max:[10],
  cal:[13],
- lop:[13],
+ lop:[30],
  lp2:[48],
  ble:[3],
  bpl:[3],
@@ -82,7 +84,8 @@ let tests = {
  cli:[4],
  cl1:[-8],
  cl4:[6],
- isf:[-12, -1],
+ isf:[2, 0],
+ tok:[45, 0],
 }
 //let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n";

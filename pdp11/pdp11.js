@@ -23,7 +23,7 @@ let F=x=>{sign=x&0x8000;zero=x==0;return x}
 
 let step=()=>{ let l=x=>hpush(x)
  let x=M[M[7]>>1],a=[0]
- show(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
+ track(M[7])             ;   //console.log("step", "pc", oct(M[7]), "inst", oct(x))
  M[7]+=2
 
  switch(x){

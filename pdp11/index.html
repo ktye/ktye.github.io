@@ -51,6 +51,7 @@ let show=x=>{blink(x,0);blink(M[x>>1],1);play(M[x>>1])
  if(016301==M[x>>1])showgetk()
  if((010346==M[x>>1])&&(012703==M[1+(x>>1)])){showGet(x)}
  if((010044==M[x>>1])&&(1)){showSet(x)}
+ //if((M[D+2588]!=0)&&(M[D+2588]!=5392))throw("corruption")
  stack()
  let b=ge(x.toString(8));
  if(b===null)page(x);b=ge(x.toString(8))
@@ -77,6 +78,7 @@ let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disable
  let asm=ge("asm")
  fetch("t/gc").then(   r=>r.text()).then(r=>{calls=r.split("\n")})
  fetch("t/k.off").then(r=>r.text()).then(r=>{fargs=eval("({"+r+"})")})
+ //fetch("t/k.img").then(r=>r.arrayBuffer()).then(r=>M.set(r,D))
  fetch("t/k.map").then(r=>r.text()).then(r=>{fnames(eval(r))})
  fetch("t/"+prg+".out").then(r=>r.text()).then(r=>{
   rst(eval("["+r+"]"));
@@ -91,29 +93,53 @@ let page=pc=>{let asm=ge("asm")
  disasm(pc,(x,y)=>{let t=ce("span");t.textContent=x;/*hi(t)*/;t.id=y;/*link(t)*/;asm.appendChild(t)})
 }
 
+let wss=0 // 4742 4630 4550 4438
+let track=x=>{
+ switch(M[x>>1]){
+ //case 0104:   if(x<=laddr)fpop(x);return
+ case 000207: 
+ case 000104: let b=fstack.pop(),c=fstack.pop();
+  if((b>addr0)&&(b<=laddr)){
+	  let f=fmap[b]
+	  if( M[6]-c != 8*fargs[f]-8 )
+ 	   console.log("r",c-M[6],f,M[6],c)
+  }
+  return
+ case 000127:
+ case 004727: let a=M[1+(x>>1)]; fstack.push(M[6]); fstack.push(a)
+  if(a==52250){console.log("ws stack", M[6]);if(++wss==4)throw("ws")}
+  if((a>addr0)&&(a<=laddr))showcall(fmap[a],+M[x>>1]==0127);return
+ case 012623: showheap();return
+ case 016101: showgeti();return
+ case 016301: showgetk();return
+ case 010346: if(012703==M[1+(x>>1)]){ /*showGet(x);*/ } return
+ case 010044: showSet(x);return
+ }}
+
 let fargs={}
-let fileoff={},faddr=[],fname=[]
-let fnames=d=>{for(const f in d){fileoff[d[f]]=f;faddr.push(d[f]);fname.push(f)}}
+let fileoff={},faddr=[],fname=[],laddr=0,addr0=1e10,fmap={}
+let fnames=d=>{for(const f in d){let a=parseInt(""+d[f],8);fmap[a]=f;fileoff[a]=f;faddr.push(a);if(a<addr0)addr0=a;if(a>laddr)laddr=a;fname.push(f)}}
 let fstack=[]
 let fshow=()=>{ge("fun").textContent=fstack.join("\n")}
 let fpop=x=>{if(test)return;
- let i=faddr.findLastIndex(a=>x>a);
- if((i>0)&&fstack.length&&fname[i]==fstack[0]){fstack.shift();fshow()
-  console.log("<"+fname[i])
-}}
+ fstack.shift()//;fshow()
+}
 let showhist=()=>{
  ge("fun").textContent=Object.entries(hist).sort(([,a],[,b])=>b-a).map(x=>x[0]+" "+x[1]).join("\n")
 }
 
-let showcall=()=>{
- let x=fstack[0],a=fargs[x],sp=(a==1)?0:((4*a)-7+D+(M[6]>>1))
- if(a>0){ x+=" "+(M[sp]|(M[sp+1]<<16))+" "+(M[sp+2]|(M[sp+3]<<16)) }
+let showcall=(x,y)=>{
+ let a=fargs[x],sp=D+(M[6]>>1)+4*(a-2)+y
+ if(a==1){ x+=" "+(M[ 0]|(M[   1]<<16))+" "+(M[   2]|(M[   3]<<16)) }
+ if(a> 1){ x+=" "+(M[sp]|(M[sp+1]<<16))+" "+(M[sp+2]|(M[sp+3]<<16)) }
  ccall(x)}
 
+let showicall=()=>{ /*console.log("icall", M[4], M[D+(M[6]>>1)]) */ }
+
 let total=0
-let ccall=x=>{total++
- let c=calls[0];calls.shift()                  //; console.log(c);   return
- if(x.startsWith(c))console.log(x, "ok", total)
+let ccall=x=>{  /*console.log("stack", M[6]);*/ if(M[6]<1000) throw("stack")
+ let c=calls[total];total++
+ if(x.startsWith(c)){} //console.log(x, "ok", total)
  else              {console.log(x, "expected", c); throw("calls")}
 }
 

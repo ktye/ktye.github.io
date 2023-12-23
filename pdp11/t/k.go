@@ -71,7 +71,6 @@ func trap() {
 // 2k....4k  stack
 
 func kinit() {
-	I64(136)
 	minit(12, 16) //4k..64k
 
 	//leak 1k at 4096..5120 that can be used as cpu stack for kos
@@ -849,6 +848,7 @@ func arity(f K) int32 {
 }
 
 func Cat(x, y K) K {
+	lk(y)
 	xt, yt := tp(x), tp(y)
 	if xt == Tt && yt == Dt {
 		return dcat(x, y)
@@ -2297,9 +2297,8 @@ func Max(x, y K) K { return nd(54, 7, x, y) }
 func maxi(x, y int32) int32 {
 	if x > y {
 		return x
-	} else {
-		return y
 	}
+	return y
 }
 
 // compare: 0(match) -1(x<y) 1(x>y)
