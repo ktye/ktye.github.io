@@ -132,7 +132,7 @@ let keybuf=[]
 function key(e){if(!wait)return false
  let k=e.which,c=e.key.charCodeAt(0);
  if(k==8){keybuf=keybuf.slice(0,-1);return true}
- if(k==13){wait=0;run("");return true}
+ if(k==13){wait=0;tty.value+="\n";Run("");return false}
  if(e.key.length!=1)return
  console.log("c",c,e.key,"keybuf",keybuf,k)
  if((c<32)||(c>126))return false
