@@ -88,6 +88,7 @@ let tests = {
  cl4:[6],
  isf:[2, 0],
  tok:[45, 0],
+ mis:[-30],
 }
 //let test=x=>reset(x,runtest) //e.g. test("x")
 let runtest=x=>{ge("tty").textContent="test "+x+"\n";

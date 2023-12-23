@@ -146,14 +146,14 @@ pdnop:{y;!0}
 pdret:{(*y),$[`ast~T P x;!0;-66666 0]}
 
 pdswc:{b:(1_y),\-55555 0;brk@-2_,/(!0
- (*y)                               /switch-expr in r0
- 22700,O@-1+#b                      /cmp #(n-1),r0
- 101402 62707,O@2*#*|b              /jump over default
- *|b                                /default
- 6300 6300 60007                    /asl r0;add r0,pc (jump to case offset)
- ,/62707,/'O(4*|-1_!#b)+2*-2_0,+#'b /branch offsets
- ,/-1_b                             /cases
- po)}                               /pop switch expr
+ (*y)                                /switch-expr in r0
+ 22700,O@-1+#b                       /cmp #(n-1),r0
+ 101402 62707,O@2*#*|b               /jump over default
+ *|b                                 /default
+ 70027 4 10100 60007                 /mul #4,r0;mov r1,r0;add r0,pc (jump to case offset)
+ ,/62707,/'O(4*|-1_!#b)+2*-2_0,+\#'b /branch offsets
+ ,/-1_b                              /cases
+ po)}                                /pop switch expr
 
 
 i32b:{(*y),5001}
@@ -171,12 +171,8 @@ bp:{(-1_x),10/8\(*|x)+2}
 
 pd2:{(,/|z),(4727;-50000-x)}
 pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
-pdbnd:{(,/y),11666 6 62706 6 5116 42600}            /mov(sp),6(sp);add #6,sp;com(sp);bic(sp)+,r0
-pdbor:{(,/y),11666 6 62706 6 52600}                 /mov(sp),6(sp);add #6,sp;bis(sp)+,r0
-
-/rewrite to short circuit:
-/bnd: (*y);tst r0;beq +#y1: add #4,sp; (y 1)
-/bor: (*y);tst r0;bne +#y1: add #4,sp; (y 1)
+pdbnd:{(*y),5700,(O 768+#r),r:12600 12601 12602 12603,y 1} /y0&&y1: y0;tst r0;bne +#r;po;y1
+pdbor:{(*y),5700,(O 512+#r),r:12600 12601 12602 12603,y 1} /y0||y1: y0;tst r0;beq +#r;po;y1
 
 /pdc:{(,/z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)}  /x:branch instruction without offset (decimal)
 pdc:{(,/z),(4727;$[4~pdw t;-50022;`u~t;-50023;-50021]),ib(x(t:S y)?`u`k)}
@@ -216,10 +212,11 @@ set:4727,-20000-
 
 /pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
 
-readin:12604 62706 10 10001 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
+/readin:12604 62706 10 10001 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
+readin:12604 11601 62706 10 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
 /readin:
+/ mov (sp),r1        11601
 / add #10,sp         62706 10
-/ mov r0,r1          10001
 / tstb #177560       105727 177560
 / bpl -2             100375
 / movb #177562,(r1)+ 112721 177562
@@ -229,8 +226,18 @@ readin:12604 62706 10 10001 105727 177560 100375 112721 177562 1375 160100 5400 
 / dec r0             5300
 / clr r1             5001
 
-write:12604 62706 10 16600 10 5700 1404 11601 112127 177566 77003 62706 10 5000 5001 104
-/write:
+
+write:12604 11601 62706 20 5700 1404 112127 177566 77003 5000 5001 104
+/write:  (r0:n, r1:addr)
+/mov (sp),r1          11601
+/add #20,sp           62706 20
+/tst r0               5700
+/beq +2               1404
+/movb (r1)+,#177566   112127 177566
+/sob r0 -3            77003
+/clr r0               5000
+/clr r1               5001
+
 / add #10,sp           62706 10
 / mov 10(sp),r0        16600 10
 / tst r0               5700

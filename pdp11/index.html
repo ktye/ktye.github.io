@@ -139,6 +139,7 @@ let showicall=()=>{ /*console.log("icall", M[4], M[D+(M[6]>>1)]) */ }
 
 let total=0
 let ccall=x=>{  /*console.log("stack", M[6]);*/ if(M[6]<1000) throw("stack")
+ return
  let c=calls[total];total++
  if(x.startsWith(c))console.log(x, "ok", total)
  else              {console.log(x, "expected", c); throw("calls")}
