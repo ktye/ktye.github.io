@@ -93,10 +93,11 @@ let page=pc=>{let asm=ge("asm")
  disasm(pc,(x,y)=>{let t=ce("span");t.textContent=x;/*hi(t)*/;t.id=y;/*link(t)*/;asm.appendChild(t)})
 }
 
-let wss=0 // 4742 4630 4550 4438
-let track=x=>{
+let instructions=0
+let track=x=>{instructions++
  switch(M[x>>1]){
  //case 0104:   if(x<=laddr)fpop(x);return
+ /*
  case 000207: 
  case 000104: let b=fstack.pop(),c=fstack.pop();
   if((b>addr0)&&(b<=laddr)){
@@ -105,14 +106,14 @@ let track=x=>{
  	   console.log("r",c-M[6],f,M[6],c)
   }
   return
+ */
  case 000127:
- case 004727: let a=M[1+(x>>1)]; fstack.push(M[6]); fstack.push(a)
-  if(a==52250){console.log("ws stack", M[6]);if(++wss==4)throw("ws")}
+ case 004727: let a=M[1+(x>>1)]; //fstack.push(M[6]); fstack.push(a)
   if((a>addr0)&&(a<=laddr))showcall(fmap[a],+M[x>>1]==0127);return
  case 012623: showheap();return
  case 016101: showgeti();return
  case 016301: showgetk();return
- case 010346: if(012703==M[1+(x>>1)]){ /*showGet(x);*/ } return
+ case 010346: if(012703==M[1+(x>>1)])showGet(x);return
  case 010044: showSet(x);return
  }}
 
@@ -139,7 +140,7 @@ let showicall=()=>{ /*console.log("icall", M[4], M[D+(M[6]>>1)]) */ }
 let total=0
 let ccall=x=>{  /*console.log("stack", M[6]);*/ if(M[6]<1000) throw("stack")
  let c=calls[total];total++
- if(x.startsWith(c)){} //console.log(x, "ok", total)
+ if(x.startsWith(c))console.log(x, "ok", total)
  else              {console.log(x, "expected", c); throw("calls")}
 }
 

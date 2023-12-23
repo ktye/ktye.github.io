@@ -7,11 +7,10 @@ afun:(0#`)!!0           /fname!-addr  first is 0(main), never called
 locs:0            
 atyp:anam:()            /argtypes  argnames for each function
 ltyp:lnam:()            /loctypes  locnames for each function (args+locs)
-fsig:(0#`)!()
 cons:(0#`)!()           /constant!literal-offset
-sigs:()
 offs:0                  /`symbol!offset for get/set args+locals for each function
 lits:()
+rtyp:(0#`)!!0
 
 /print table
 /print:{`<(`l@x_+`n`t`p`i`s!(!#T;T;P;I;S)),\"\n"}
@@ -45,6 +44,9 @@ pd:{[o]opts::o
  `"k.off"<","/(($S@&T=`fun),\":"),'$#'anam            /k.off: number of args per func
 
  @[`offs;i;,';{x!8*!#x}'lnam(i:&~~#'lnam)]         /((0#`)!!0;`z`y`x`a`b!-8 16 24 0 8;..)
+
+ rtyp:(!afun)!(#afun)#`
+ rtyp[S P r]:S r:&T=`res                           /funcs with empty results have no `res node
 
  glob::$[#s:S@&T=`var;s!O 5118-8*!#s;(0#`)!!0]
  lits::$[#glob;-4^&4*#glob;()];T[1+&T=`con]:`nop    /initial values for globals are assigned later
@@ -111,18 +113,18 @@ pdasn:{(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x
 pdget:{y;get getbuiltin@(offs ifun x)S x}
 pdGet:{y;$[`Lt~S x;4727 -55523;(S x)?!cons;cons S x;10346 12703,(glob S x),4727 -77000]}
 
-pdcal:{(S x;y);$[#y;(,/y);4727 -99999],4727,$[`panic~S x;0;0~r:pdinst S x;afun S x;r]}
+pdcal:{(S x;y);$[#y;(,/y);4727 -99999],4727,$[`panic~S x;0;0~r:pdinst S x;(afun S x),$[`~rtyp S x;po;!0];r]}
 
 
 
-pdcli:{$[1~#y;4727 -99999;,/1_y],(*y),4727 1004}
+pdcli:{$[1~#y;4727 -99999;,/1_y],(*y),4727 1004}    /there are no indirect calls of funcs without results
 pddfr:{y;!0}
 
 pddrp:{(*y),po}
-pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727 -50007;!0]}
+pdcst:{s:*y;d:S x;(y 1),$[(pdw d)>pdw s;4727,-50007-s~`u;!0]}
 
 pdfor:{(pdlop;pdslp)[I x].(x;y)}                    /slp:do-while; lop:while-do
-pdlop:{(cnt brk $[#*y;(y 0),5700 1002 62707,(O@2*#b);!0],b:(po,,/|1_y),-44444 0),po}
+pdlop:{p:$[#*y;po;!0];(cnt brk $[#*y;(y 0),5700 1002 62707,(O@2*#b);!0],b:(p,,/|1_y),-44444 0),p}
 pdslp:{c:(*y),5700 1402 162707;b:po,cnt brk(-2_y 2),y 1;  pu,b,c,O 2+2*(#b)+#c}
 
 brk:{j:(#x)-2+i:&x=-55555;x[i]:62707;x[1+i]:O 2*j;x}   /replace -55555(break)    with add #n,pc
@@ -169,8 +171,12 @@ bp:{(-1_x),10/8\(*|x)+2}
 
 pd2:{(,/|z),(4727;-50000-x)}
 pdand:pd2 13;pdorr:pd2 14;pdxor:pd2 15;pdant:pd2 16
-pdbnd:{(*y),10046,(y 1),5116 42600}   /com(sp);bis(sp)+,r0
-pdbor:{(*y),10046,(y 1),52600}        /bis (sp)+,r0
+pdbnd:{(,/y),11666 6 62706 6 5116 42600}            /mov(sp),6(sp);add #6,sp;com(sp);bic(sp)+,r0
+pdbor:{(,/y),11666 6 62706 6 52600}                 /mov(sp),6(sp);add #6,sp;bis(sp)+,r0
+
+/rewrite to short circuit:
+/bnd: (*y);tst r0;beq +#y1: add #4,sp; (y 1)
+/bor: (*y);tst r0;bne +#y1: add #4,sp; (y 1)
 
 /pdc:{(,/z),(4727;-50020-(pdw t)%2),ib (x(t:S y)?`u`k)}  /x:branch instruction without offset (decimal)
 pdc:{(,/z),(4727;$[4~pdw t;-50022;`u~t;-50023;-50021]),ib(x(t:S y)?`u`k)}
@@ -264,6 +270,7 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50003;12604 12602 12603 62706 4 71002 104              /idiv(cheating slightly)
 		-50004;12604 12602 12603 62706 4 71002 10200 10301 104  /irem
 		-50007;12604 5701 6702 6703 104             /int64: mov (sp)+,r4;tst r1;sxt r2;sxt r3;jmp r4
+		-50008;12604 5002 5003 104                  /int64u
 		-50010;12604 10003 10102 12600 73200 12600 12600 12600 10300 10201 104  /x<<y (ashc)
 		-50011;12604 10003 10102 12600 5400 73200 12600 12600 12600 10300 10201 104  /x>>y (neg;ashc)
 		-50012;99999 99999 104                      /todo x>>y unsigned

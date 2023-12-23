@@ -314,8 +314,6 @@ func rl(x K) { // ref list elements
 	p := int32(x)
 	for e > p {
 		e -= 8
-		li(e)
-		lk(K(I64(e)))
 		rx(K(I64(e)))
 	}
 }
@@ -848,7 +846,6 @@ func arity(f K) int32 {
 }
 
 func Cat(x, y K) K {
-	lk(y)
 	xt, yt := tp(x), tp(y)
 	if xt == Tt && yt == Dt {
 		return dcat(x, y)
@@ -1275,13 +1272,10 @@ func Mtc(x, y K) K {
 	return Ki(match(x, y))
 }
 func match(x, y K) int32 {
-	lk(y)
 	if x == y {
 		return 1
 	}
 	xt := tp(x)
-	li(int32(xt))
-	li(int32(tp(y)))
 	if xt != tp(y) {
 		return 0
 	}
@@ -1585,8 +1579,6 @@ func stv(x, i, y K) K {
 }
 func sti(x K, i int32, y K) K {
 	xt := tp(x)
-	li(i)
-	li(nn(x))
 	if uint32(i) >= uint32(nn(x)) {
 		trap() //index
 	}
