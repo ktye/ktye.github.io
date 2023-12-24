@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
-<!--link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png"-->
-<!--title>pdp11</title-->
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>pdp11</title>
 <title>pd</title>
 <style>
 body{margin:0;height:100vh;display:flex;flex-flow:column;overflow:hidden}
@@ -9,11 +9,14 @@ body{margin:0;height:100vh;display:flex;flex-flow:column;overflow:hidden}
 .b{font-weight:bold}
 .l{color:blue}.l:hover{cursor:pointer}
 .brk{border-left:1ch solid black}
-#tty{font-family:monospace;width:100%;height:7em;/*background:#920e5a;color:white;*/outline:none;resize:none}
-#stk{font-family: monospace;width:100%;height:7em;/*background:#ce082c;color:white;*/outline:none;overflow:auto}
+#tty{font-family:monospace;width:100%;min-height:8em;flex-grow:1;background:#920e5a;color:white;border:none;outline:none;resize:none}
+#stk{font-family:monospace;width:100%;min-height:8em;flex-grow:1;background:#ce082c;color:white;margin-top:0;margin-bottom:0;outline:none;overflow:auto}
 #asm{overflow:auto}
 #fun{position:absolute;right:20px;bottom:10px}
 #lights{border:2px solid black;border-radius:10px;display:flex;justify-content:center}
+#led{  position:absolute;top:15px;right:20px}
+#sound{position:absolute;top:40px;right:20px}
+#about{position:absolute;left:5px;bottom:5px}
 legend{text-align:center}
 button{flex-grow:1;background:#333;color:white;height:2em}button:disabled{background:#888}
 </style>
@@ -47,10 +50,10 @@ let blink=(u,y)=>{let x=470;y*=25
 let show=x=>{blink(x,0);blink(M[x>>1],1);play(M[x>>1])
  if(0104==M[x>>1])fpop(+x.toString(8))
  if(012623==M[x>>1])showheap()
- if(016101==M[x>>1])showgeti()
- if(016301==M[x>>1])showgetk()
- if((010346==M[x>>1])&&(012703==M[1+(x>>1)])){showGet(x)}
- if((010044==M[x>>1])&&(1)){showSet(x)}
+ //if(016101==M[x>>1])showgeti()
+ //if(016301==M[x>>1])showgetk()
+ //if((010346==M[x>>1])&&(012703==M[1+(x>>1)])){showGet(x)}
+ //if((010044==M[x>>1])&&(1)){showSet(x)}
  //if((M[D+2588]!=0)&&(M[D+2588]!=5392))throw("corruption")
  stack()
  let b=ge(x.toString(8));
@@ -76,8 +79,8 @@ let reset=(x)=>{lights()      ;ge("stepbut").disabled=false;ge("runbut").disable
  ge("stk").textContent=""
  ge("tty").value="";ge("tty").onkeydown=key
  let asm=ge("asm")
- fetch("t/gc").then(   r=>r.text()).then(r=>{calls=r.split("\n")})
- fetch("t/k.off").then(r=>r.text()).then(r=>{fargs=eval("({"+r+"})")})
+ //fetch("t/gc").then(   r=>r.text()).then(r=>{calls=r.split("\n")})
+ //fetch("t/k.off").then(r=>r.text()).then(r=>{fargs=eval("({"+r+"})")})
  //fetch("t/k.img").then(r=>r.arrayBuffer()).then(r=>M.set(r,D))
  fetch("t/k.map").then(r=>r.text()).then(r=>{fnames(eval(r))})
  fetch("t/"+prg+".out").then(r=>r.text()).then(r=>{
@@ -111,10 +114,10 @@ let track=x=>{instructions++
  case 004727: let a=M[1+(x>>1)]; //fstack.push(M[6]); fstack.push(a)
   if((a>addr0)&&(a<=laddr))showcall(fmap[a],+M[x>>1]==0127);return
  case 012623: showheap();return
- case 016101: showgeti();return
- case 016301: showgetk();return
- case 010346: if(012703==M[1+(x>>1)])showGet(x);return
- case 010044: showSet(x);return
+ //case 016101: showgeti();return
+ //case 016301: showgetk();return
+ //case 010346: if(012703==M[1+(x>>1)])showGet(x);return
+ //case 010044: showSet(x);return
  }}
 
 let fargs={}
@@ -129,7 +132,7 @@ let showhist=()=>{
  ge("fun").textContent=Object.entries(hist).sort(([,a],[,b])=>b-a).map(x=>x[0]+" "+x[1]).join("\n")
 }
 
-let showcall=(x,y)=>{
+let showcall=(x,y)=>{ return
  let a=fargs[x],sp=D+(M[6]>>1)+4*(a-2)+y
  if(a==1){ x+=" "+(M[ 0]|(M[   1]<<16))+" "+(M[   2]|(M[   3]<<16)) }
  if(a> 1){ x+=" "+(M[sp]|(M[sp+1]<<16))+" "+(M[sp+2]|(M[sp+3]<<16)) }
@@ -191,25 +194,34 @@ let jmp=x=>{let a=x.parentElement.id
 */
 
 
+let kimg=()=>{
+ let u=new Uint8Array(M.buffer)
+ let x=new Blob([u],{type:"application/octet-stream"})
+ dl.href=URL.createObjectURL(x);dl.download="k.img";dl.click()}
+
+let load=()=>{fetch("k.img").then(r=>r.arrayBuffer()).then(r=>{
+ M=new Uint16Array(r);zero=0;sign=0;carry=0;over=0;wait=true;
+ lights();
+ stk.textContent=""
+ tty.value="ktye/k\n ";tty.onkeydown=key
+ tty.focus()
+ })}
+
 </script>
 </head>
-<body onload="reset(location.hash.slice(1))">
- <div id="lights" >
+<body onload="load()">
+ <input type="checkbox" id="led"   title="blink">
+ <input type="checkbox" id="sound" title="sound">
+ <div id="lights" height="65">
   <canvas id="cnv" width="470" height="65"></canvas>
  </div>
- <div>
-  <textarea id="tty"></textarea>
+ <textarea id="tty" spellcheck="false" title="tty"></textarea>
+ <pre id="stk" title="stack"></pre>
+ <div style="height:50vh">
+  <pre id="asm" title="asm"></pre>
  </div>
- <div style="display:flex">
-  <button id="resetbut" onclick="reset(location.hash.slice(1))">reset</button>
-  <button id="stepbut"  onclick="step()">step</button>
-  <button id="runbut"   onclick="run(location.hash.slice(1))">run</button>
-  <button id="Runbut"   onclick="Run()">Run</button>
- </div>
- <div>
-  <pre id="stk"></pre>
- </div>
-  <pre id="asm"></pre>
-  <pre id="fun"></pre>
+ <pre id="fun"></pre>
+ <a id="about" href="about.html">about</a>
+ <a id="dl" style="display:none"></a>
 </body>
 </html>
