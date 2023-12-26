@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>k on pdp11</title>
+<link rel=icon href="../kelas16.png">
+<style>
+body{font-family:georgia,serif;font-size:large}
+ul{list-style-image:url("red.png")}
+/*h2{border-top:1px solid black}*/
+pre{margin-left:1em}
+.example{background-color:#f8f8f8}
+</style>
+</head>
+
+<body>
+<h2>contents</h2>
+
+<ul>
+<li><a href="#compiler">pd.k compiler</a></li>
+<li><a href="#arch">architecture</a></li>
+<li><a href="#size">size</a></li>
+<li><a href="#stack">stack</a></li>
+<li><a href="#memory">memory</a></li>
+<li><a href="#calls">calling convention</a></li>
+<li><a href="#table">indirect calls</a></li>
+<li><a href="#cond">cond</a></li>
+<li><a href="#switch">switch</a></li>
+<li><a href="#loop">loops</a></li>
+<li><a href="#64bit>64bit</a></li>
+<li><a href="#io">io</a></li>
+<li><a href="#link">link</a></li>
+<li><a href="#emulator">emulator</a></li>
+<br><li><a href="index.html">→ run</a></li>
+</ul>
+
+<h2 id=""></h2>
+
+<h2></h2>
+<img src="pdp11.png"/>
+
+<pre style="background:#ffe;font-size:x-large;border:2px solid;margin:3px;color:black;display:inline-block;position:absolute">
+ktye/k ktye.github.io/kdoc.htm
++ flp add  '  ech both bin lin
+- neg sub  /  ovr/fix echright
+* fst mul  \  scn/fix eachleft
+% sqr div      / join   decode
+! til key  mod \ split  encode
+& wer min  $[a;b;...]     cond
+| rev max  while[c;a;b;d;e;..]
+< asc les  f:{x+y}   [bl;o;ck]
+> dsc mor              "abc" c
+= grp eql  01234567   1 2 3  i
+~ not mtc   :+-*%&|   <s>4 5 6. f</s>
+, enl cat  <>=~!,^#   <s>2a300  z</s>
+^ srt cut  _$?@.     (1;2 3) L
+# cnt tak           `a`b!5 6 D
+_ flr drp  t,d t,t t,'t   join
+$ str cst           k!t    key
+? unq fnd  in       k?t  group
+@ typ atx  @[x;i;+;y]    amend
+. val cal  .[x;i;+;y]    dmend
+                              
+<s>abs sin cos exp log</s> find <s>angle</s>
+<s>imag conj</s>  types:cis<s>fz</s>LDTvcdl<s>x</s>
+<s>?n(uniform) ?-n(normal) ?z(bi)</s>
+n?n(with)   random   -n?n(w/o)
+</pre>
+
+
+<h2 id="compiler">pd.k</h2>
+<details><summary>pd.k (source)</summary>
+<pre style=background="#efe">
+<object data="pd.k" style="width:100%;height:20em;font-size:xx-large;background:#ffe"></object>
+</pre>
+</details>
+ps.k compiles k/os to pdp11 assembly instructions.
+the compiler translates an intermediate form of k's source to machine code.
+the intermediate form is given as a k table: <code>+`t`p`i`s!(T;P;I;S)</code>.
+
+<pre>
+ 907_+`id`t`p`i`s!(!#T;T;P;I;S)
+id  t   p   i  s
+-----------------
+907 fun 0   1  tp
+908 arg 907 0N k
+909 sym 908 0  x
+910 res 907 0N i
+911 ast 907 0N
+912 ret 911 0N i
+913 cst 912 0N i
+914 typ 913 0N k
+915 shr 913 2  k
+916 cst 915 0N k
+917 typ 916 0N k
+918 get 916 0N x
+919 lit 915 56 k
+</pre>
+
+it's relatively easy to query the table, e.g. what are the most used literals of type i?
+<pre>
+ |^#'=I@&(S=`i)&T=`lit
+0  |236
+1  |173
+8  |89
+16 |83
+4  |73
+2  |45
+15 |20
+..
+</pre>
+
+or what is the ratio between function calls and function definitions?
+<pre>
+ (#&T=`cal)%#&T=`fun
+7
+</pre>
+to save code, this suggests that the calling convention should minimize instructions on the call side but can spend some more for the callee.
+
+<h2 id="arch">architecture</h2>
+<p>the pdp11 is a 16bit machine while k uses mainly 32bit integer operations but stores k values in 64bit integers.</p>
+<p>there are 8 registers:</p>
+
+<table>
+<tr><td>r0 r1 r2 r3</td><td>accumulator for 64 bit values</td></tr>
+<tr><td>r4</td><td>return address in micro code</td></tr>
+<tr><td>r5(fp)</td><td>stack frame for function calls</td></tr>
+<tr><td>r6(sp)</td><td>stack pointer</td></tr>
+<tr><td>r7(pc)</td><td>instruction pointer</td></tr>
+</table><br/>
+
+<p>of which we use the first 4 as the stack top for both 32bit and 64bit integers.
+since 32bit operations need multiple 16bit instructions, we combine most operations in micro code stored at a fixed address.
+for the caller that needs 2 words <code>jsr pc,#addr</code>.
+the micro code stores the return address on r4, does it's operation and jumps back.
+as opposed to function calls, micro code generally has a stack effect.
+</p>
+
+<p>as an example, this is the code to call addition for both 32 and 64bit integers, assuming x is in r0..r4 and y the top 4 words of the stack: <code>jsr pc,#addr</code>. the code at <code>#addr</code> is:
+<pre>
+mov (sp)+, r4   12604
+add (sp)+, r0   62600
+adc r1           5501
+adc r2           5502
+adc r3           5503
+add (sp)+, r1   62601
+adc r2           5502
+adc r3           5503
+add (sp)+, r2   62602
+adc r3           5503
+add (sp)+, r3   62603
+jmp r4            104
+</pre>
+
+<h2 id="size">size</h2>
+<p>with 16bit words we can address 64kb or 32 kilo words.
+this is not enough for both code and data.
+the pdp11/45 has an operation mode that splits code and data which effectively doubles the address space.</p>
+
+all data is used for k memory and starts at 0.
+<h2 id="stack">stack</h2>
+<p>the stack also lives in the data section.
+k reserves a bucket within it's memory allocator for the cpu stack, that is not touched by k.</p>
+
+<p>the stack space is 1kb below 11776 growing downwards.</p>
+
+<p>stack operations usually use 4 words at a time, storing all first 4 registers.
+since calling push/pop microcodes uses 2 words already and it's a common operation, they are included in other microcodes where needed,
+e.g. any leaf node like get(local) or literal need to push the registers first, and all dyadic functions pop the second argument from the stack updating the first argument in the registers.
+</p>
+
+
+<h2 id="calls">calling convention</h2>
+<p>the calling convention is designed to use only two words for the caller and does most work within the function pro and epilogue.</p>
+<p>in pd.k the function call is generated by:</p>
+<pre>
+cal:{(,/y),4727,(afun S x)}
+</pre>
+<p>it evaluates the child nodes (function arguments) first than jumps the the function address that is calculated at <a href="link">linkage</a>.</p>
+<p>function arguments are evaluated in order which made debugging possible, where i compared function calls and arguments between the pdp11 and the go version.</p>
+
+<p>for the callee the last function argument is in the registers r0..r3 the others are on the stack in reverse order.</p>
+<p>the callee makes space for local variables on the stack and stores the old frame pointer.</p>
+<p>the new frame pointer points to the stack below the args and local variables.</p>
+<p>as the first argument is in the registers, it will be pushed first by any leaf node and can be referenced by -8(fp)</p> 
+
+<pre>
+caller                    count      stack
+ push x y, z on r0..r3    (words)    y
+                                     x
+ jsr pc,#f                2          ret addr              4727 -f
+callee
+ mov fp,-(sp)             1      +-> old fp               10546
+ sub 4+8*#loc,sp          2      |   gap(align)           162706 (4+8*#loc)
+                                 |   [locs]
+ mov sp,fp                1      |         ^-fp           10605
+ (body)                          |   z (body pushes z)
+ mov fp,sp                1                               10506
+ add (4+8*#loc),sp        2      sp                       62706 (4+8*#loc)
+ mov (sp)+,fp             1                               12605
+ mov (sp)+,r4             1                               12604
+ add 8*-1+#args,sp        2                               62706 (8*-1+#args)
+ jmp r4                   1                                 104
+total:                           caller(2) callee(12)
+access:
+ arg0 z                          -8(fp)
+ argi y(1),x(2)..                8*i+nloc(fp)
+ loci a(0),b(1)..                8*1+i(fp)
+</pre>
+
+<p>while functions always correct the stack pointer on exit, it is still necessary to keep the stack in balance.
+e.g. niladic functions still need to push the registers before the call, otherwise the first leaf node might overwrite the callers last argument.
+similar for functions that don't return a result: it still needs one pop after the call, or the stack would grow.</p>
+
+<h2 id="table">indirect calls</h2>
+<p>indirect function calls calculate the function to call at runtime.</p>
+<p>the compiler evaluates the arguments first, then calculates the function index and jumps to the fix address 1004 where the function table starts.</p>
+<pre>
+cli:{$[1~#y;4727 -99999;,/1_y],(*y),4727 1004}  /indirect call
+</pre>
+
+<p>the function stores the index in r4 and pops the first argument to the registers.
+it also moves the return addresss to the top stack position where the callee expects it.
+then the index is multiplied by 4 and added to the instruction pointer.</p>
+<pre>
+1004: mov r0, r4        10004         /store function index
+      mov 2(sp), r0     16600   2     /pop first argument
+      mov 4(sp), r1     16601   4
+      mov 6(sp), r2     16602   6
+      mov 10(sp), r3    16603  10
+      mov (sp), 10(sp)  11666  10     /move return address
+      add #10, sp       62706  10     /shrink stack
+      asl r4             6304         /multiply index
+      asl r4             6304
+      add r4, pc        60407         /index function table
+      jmp #f0             104  ..     /jump to function 
+      jmp #f1             104
+      ..
+</pre>
+
+<p>the intro is followed by jump instructions, one for each entry in the function table.</p>
+
+<h2 id="cond">cond</h2>
+<h2 id="switch">switch</h2>
+<h2 id="loop">loop</h2>
+
+<h2 id="64bit">64bit</h2>
+<p>most operations are on 32bit integers (which is called multi-precision in the pdp11 manuals).</p>
+<p>64bit integers are only needed to represent k values.
+only add, sub, and, or is fully implemented for 64bit integers.
+comparision is only needed for equality and shifts have are only available for the offsets 32 and 59.</p>
+
+<h2 id="io">io</h2>
+<h2 id="link">linking</h2>
+<h2 id="emulator">emulator</h2>
+<h2 id=""></h2>
+
+</body>
+</html>

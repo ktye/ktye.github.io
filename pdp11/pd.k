@@ -113,7 +113,7 @@ pdasn:{(y 0),$[I x;12746,(glob S x),4727 -75000;(set setbuiltin@(offs ifun x)S x
 pdget:{y;get getbuiltin@(offs ifun x)S x}
 pdGet:{y;$[`Lt~S x;4727 -55523;(S x)?!cons;cons S x;10346 12703,(glob S x),4727 -77000]}
 
-pdcal:{(S x;y);$[#y;(,/y);4727 -99999],4727,$[`panic~S x;0;0~r:pdinst S x;(afun S x),$[`~rtyp S x;po;!0];r]}
+pdcal:{$[#y;(,/y);4727 -99999],4727,$[`panic~S x;0;0~r:pdinst S x;(afun S x),$[`~rtyp S x;po;!0];r]}
 
 
 
@@ -208,49 +208,8 @@ po:4727 -88888            /jsr pc,#pop
 get:4727,-10000-          /e.g. -9996..-10002
 set:4727,-20000-
 
-
-
-/pdsys:`Exit`Args`Arg`Read`Write`ReadIn`Native!pdtype@/(`i`;,`i;3#`i;4#`i;5#`i;3#`i;3#`k)
-
-/readin:12604 62706 10 10001 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
-readin:12604 11600 10001 62706 10 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104 /todo
-/readin:
-/ mov (sp),r0        11600
-/ mov r0,r1          10001
-/ add #10,sp         62706 10
-/ tstb #177560       105727 177560
-/ bpl -2             100375
-/ movb #177562,(r1)+ 112721 177562
-/ bne -3             1375
-/ sub r1,r0          160100
-/ neg r0             5400
-/ dec r0             5300
-/ clr r1             5001
-
-
-write:12604 11601 62706 20 5700 1404 112127 177566 77003 5000 5001 104
-/write:  (r0:n, r1:addr)
-/mov (sp),r1          11601
-/add #20,sp           62706 20
-/tst r0               5700
-/beq +2               1404
-/movb (r1)+,#177566   112127 177566
-/sob r0 -3            77003
-/clr r0               5000
-/clr r1               5001
-
-/ add #10,sp           62706 10
-/ mov 10(sp),r0        16600 10
-/ tst r0               5700
-/ beq +4               1404
-/ mov (sp),r1          11601
-/ movb (r1)+,#177566   112127 177566
-/ sob r0 -3            77003
-/ add #10,sp           62706 10
-/ clr r0               5000
-/ clr r1               5001
-
-
+readin:12604 11600 10001 62706 10 105727 177560 100375 112721 177562 1375 160100 5400 5300 5001 104
+write: 12604 11601 62706 20 5700 1404 112127 177566 77003 5000 5001 104
 memcpy:12604 10002 12600 16601 6 5702 1403 112021 5302 773 62706 16 12600 12601 12602 12603 104
 clz:   12604 10102 10003 5000 5702 1003 62700 20 10302 32702 100000 1003 5200 6302 772 5001 104
 
@@ -295,31 +254,6 @@ builtins:!/+-2^(-99999;12604,(10046+100*|!4),(5000+!4),104  /push4: mov (sp)+,r4
 		-50023;12604 12602 12603 62706 4 20301 1001 20200 104)   /cmpu 32 bit unsigned
 getbuiltin:{$[#builtins i:-10000-x;x;builtins[i]:12604 10346 10246 10146 10046 16500 0 16501 0 16502 0 16503 0 104+0 0 0 0 0,(,/+2^(&4),O x+2*!4),0];x}  /e.g. mov 20(r5),r0 .. 26(r5),r3;jmp r4  (get x2)
 setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 10365 0 12600 12601 12602 12603 104+0,(,/+2^(&4),O x+2*!4),0 0 0 0 0];x}  /e.g. mov r0,50(r5) .. r3,56(r5);jmp r4  (set x5)
-
-/-50021;12604 162600 5601 162601 62706 4 5701 1001 5700 104 /cmp4
-/-50021;12604 162600 5601 162601 62706 4 5401 1001 5400 104 /cmp4
-/-50021;12604 12602 12603 62706 4 20200 5603 160103 1001 20200 104 /cmp4
-
-/bne :1  /1010
-/tst r2  /5702
-/bne :1  /1006
-/tst r1  /5701
-/bne :1  /1004
-/tst r0  /5700
-/bne :1  /1002
-/clr r0  /5000
-/jmp r4  /104
-/clr r0  /5000
-/inc r0  /5200
-/jmp r4  /104
-
-
-/optimizations (before linking)
-/opt:{oppo oppu x}     /breaks missing clr for small literals
-/opt:{x}
-/oppu:{s:2_x,0 0;$[#i:&(-99999=s)&-88888=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove pop push   4727 -88888 4727 -99999
-/oppo:{s:2_x,0 0;$[#i:&(-88888=s)&-99999=x;(*x),,/4_'1_x:(0,i-1)^x;x]} /remove push pop
-
 
 
 /mul32 r0..r3:[a b][c d]     ab*cd = [a*c +a*d+b*c]
@@ -369,113 +303,3 @@ setbuiltin:{$[#builtins i:-20000-x;x;builtins[i]:12604 10065 0 10165 0 10265 0 1
 / br -5
 / clr r1
 / jmp r4
-
-/11/45 mmu: www.bitsavers.org/www.computer.museum.uq.edu.au/pdf/DEC-11-HGKTCB-D%20PDP-1145%20Memory%20Management%20Reference%20Manual.pdf
-
-/ pdp11 refcard
-/ 
-/ register modes              pc(r7) addressing
-/  0    R     reg             2   #n  immediate
-/  1   (R)    deferred        3  @#A  absolute
-/  2   (R)+   increment       6    A  relative 
-/  3  @(R)+   def inc         7   @A  rel def
-/  4  -(R)    decrement
-/  5 @-(R)    def dec
-/  6  X(R)    index
-/  7 @X(R)    def ind
-/ 
-/ opcodes
-/  00 00 00 halt      00 60 dd ror     10 40 00
-/  00 00 01 wait      00 61 dd rol        ..    emt
-/  00 00 02 rti       00 62 dd asr     10 43 77
-/  00 00 03 bpt       00 63 dd asl
-/  00 00 04 iot       00 64 dd mark    10 44 00
-/  00 00 05 reset     00 65 dd mfpi       ..    trap
-/  00 00 06 rtt       00 66 dd mtpi    10 47 77
-/                     00 67 dd sxt
-/  00 01 dd jmp                        10 50 dd clrb
-/  00 02 or rts       01 ss dd mov     10 51 dd comb
-/                     02 ss dd cmp     10 52 dd decb
-/  00 02 3n spl       03 ss dd bit     10 53 dd necb
-/  00 02 40 nop       04 ss dd bic     10 54 dd negb
-/                     05 ss dd bis     10 55 dd adcb
-/  00 02 41 cond      06 ss dd add     10 56 dd sbcb
-/     ..    codes                      10 57 dd tstb
-/  00 02 77           
-/                     07 0r ss mul     10 60 dd rorb
-/  00 03 dd swab      07 1r ss div     10 61 dd rolb
-/                     07 2r ss ash     10 62 dd asrb
-/  00 04 xx br        07 3r ss ashc    10 63 dd aslb
-/  00 10 xx bne       07 4r dd xor 
-/  00 14 xx beq                        10 65 ss mfpd
-/  00 20 xx bge       07 7r nn sob     10 66 dd mtpd
-/  00 24 xx blt
-/  00 30 xx bgt       10 00 xx bpl     11 ss dd movb
-/  00 34 xx ble       10 04 xx bmi     12 ss dd cmpb
-/                     10 10 xx bhi     13 ss dd bitb
-/  00 4r dd jsr       10 14 xx blos    14 ss dd bicb
-/                     10 20 xx bvc     15 ss dd bisb
-/  00 50 dd clr       10 24 xx bcs     16 ss dd sub
-/  00 51 dd com       10 30 xx bcc,bhis 
-/  00 52 dd inc       10 34 xx bcs,blo  
-/  00 53 dd dec
-/  00 54 dd neg       00 02 41 clc  c  sec 00 02 61
-/  00 55 dd adc       00 02 42 clv  v  sev 00 02 62
-/  00 56 dd sbc       00 02 44 clz  z  sez 00 02 64
-/  00 57 dd tst       00 02 50 cln  n  sen 00 02 70
-/                     00 02 57 ccc all scc 00 02 77
-
-
-
-/calling convention: overhead is 2 words for the caller (that's the minimum) and 12 for the callee.
-/there are about 6 times more calls than functions.
-/the last arg is not pushed but remains on r0..r3, it is pushed implicitly by the first leaf node.
-/access is 4 word aligned on the stack. this requires fewer helper functions for get/set.
-/
-/caller                    count      stack
-/ push x y, z on r0..r3    (words)    y
-/                                     x
-/ jsr pc,#f                2          ret addr              4727 -f
-/callee
-/ mov fp,-(sp)             1      +-> old fp               10546 
-/ sub 4+8*#loc,sp          2      |   gap                 162706 (4+8*#loc)
-/                                 |   [locs]
-/ mov sp,fp                1      |         ^-fp           10605
-/ (body)                          |   x  (body pushes x)
-/ mov fp,sp                1                               10506
-/ add (4+8*#loc),sp        2      sp                       62706 (4+8*#loc)
-/ mov (sp)+,fp             1                               12605
-/ mov (sp)+,r4             1                               12604
-/ add 8*-1+#args,sp        2                               62706 (8*-1+#args)
-/ jmp r4                   1                                 104
-/total:                           caller(2) callee(12)
-/access:
-/ arg0 z                          -8(fp)
-/ argi y(1),x(2)..                8*i+nloc(fp)
-/ loci a(0),b(1)..                8*1+i(fp) 
-
-/see also: c-calling convention https://www.bell-labs.com/usr/dmr/www/clcs.html
-
-/pdp11 compiler
-/
-/ pd`` compiles the table in T P I S to integers (pdp11 instructions)
-/ representing u16 as octal numbers. e.g. 177775 means -3
-/
-/ we use r0,r1 to hold 32 bit integers and r0..r4 for i64.
-/ low bits are in r0, also comparison results.
-/ r6 is the stack pointer(sp), initially at 11776 growing downwards.
-/
-/
-/ pu/po from the stack replaces r0..r4.
-/ it takes 2 instructions: jsr pc,#push  or jsr pc,#pop
-/ #push/#pop are addresses of these operations that need 7 instructions each.
-/
-/ get[0..n] are instructions to jump to functions
-/ that copy local variables to the accumulator r0..r3
-/ set[0..n] do the reverse, they set locals to the values of r0..r3.
-/ 
-/
-/linking
-/ in the first pass all instructions are generated and unknown function
-/ addresses are replaced with negative numbers.
-/ when assembling, the function addresses are collected and offsets are adjusted

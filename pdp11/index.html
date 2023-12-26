@@ -43,7 +43,7 @@ let lights=()=>{let cnv=ge("cnv")
  ctx.clearRect(0,0,cnv.width,cnv.height)
  ctx.fillStyle="#ce082c";ctx.fillRect(5,0,455,10)
  ctx.fillStyle="#920e5a";ctx.fillRect(40,0,85,10);ctx.fillRect(210,0,85,10);ctx.fillRect(375,0,85,10)
- ctx.font="16px monospace";ctx.fillStyle="black";ctx.fillText("A",460,32);ctx.fillText("I",460,58)
+ ctx.font="16px monospace";ctx.fillStyle="white";ctx.fillText("A",460,32);ctx.fillText("I",460,58)
  blink(0,0);blink(0,1) }
 let blink=(u,y)=>{let x=460;y*=25
  for(let i=0;i<16;i++){x-=25;ctx.beginPath()
@@ -68,7 +68,7 @@ let stack=()=>{let sp=M[6],stk=ge("stk");if(0==sp)return
  stk.scrollTop=stk.scrollHeight}
 let trap=x=>{blink(0177777,1);ge("stepbut").disabled=true ;ge("runbut").disabled=true;ge("stk").textContent+="\n"+x;wait=true}
 
-let page=pc=>{let asm=ge("asm")
+let page=pc=>{let asm=ge("asm");
  let o=pc //+pc.toString(8);
  if(o in fileoff){fstack.unshift(fileoff[o]);fshow()}
  asm.textContent=" addr    inst     r0     r1     r2     r3      r4     fp     sp     pc   flag\n"

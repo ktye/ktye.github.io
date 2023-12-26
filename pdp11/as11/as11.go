@@ -17,11 +17,15 @@ import (
 )
 
 func main() {
-	//run: -f file
 	if len(os.Args) == 3 && os.Args[1] == "-r" {
 		run(os.Args[2])
 		return
 	}
+	if len(os.Args) == 3 && os.Args[1] == "-f" {
+		show(os.Args[2])
+		return
+	}
+
 
 	s := strings.Join(os.Args[1:], " ")
 
@@ -69,6 +73,46 @@ func fatal(e error) {
 	if e != nil {
 		fmt.Println(e)
 		os.Exit(1)
+	}
+}
+func show(file string) {
+	b, e := os.ReadFile(file)
+	fatal(e)
+	v := strings.Split(string(b), "\n")
+	c := make([]uint16, len(v))
+	if len(v) > 0 && v[len(v)-1] == "" {
+		v = v[:len(v)-1]
+	}
+	for i := range v {
+		v[i] = strings.TrimSuffix(v[i], ",")
+		j, e := strconv.ParseUint(v[i], 8, 16)
+		fatal(e)
+		c[i] = uint16(j)
+	}
+
+	cpu.R[7] = 0o01000
+	for i := range c {
+		cpu.Mem.WriteW(0o01000+2*uint16(i), c[i])
+	}
+
+	asm, next := "", uint16(0o01000)
+	for {
+		last := next
+		x, _ := cpu.Mem.ReadW(next)
+		y, _ := cpu.Mem.ReadW(2+next)
+		asm, next, _ = cpu.Disasm(next)
+		if asm[:4] == "halt" {
+			return
+		}
+		fmt.Printf("%s ", asm)
+		for i := len(asm); i<14; i++ {
+			fmt.Printf(" ")
+		}
+		if next - last == 2 {
+			fmt.Printf("%6o\n", x)
+		} else {
+			fmt.Printf("%6o %6o\n", x, y)
+		}
 	}
 }
 
