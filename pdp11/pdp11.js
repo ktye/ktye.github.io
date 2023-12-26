@@ -23,7 +23,7 @@ let F=x=>{sign=x&0x8000;zero=x==0;return x}
 
 let step=()=>{ let l=x=>hpush(x)
  let x=M[M[7]>>1],a=[0]
- test?show(M[7]):track(M[7])
+ if(beats<2)show(M[7])
  M[7]+=2
 
  switch(x){
@@ -110,20 +110,21 @@ let pu=x=>{M[6]-=2;M[D+(M[6]>>1)]=x}               //mov x,-(sp)
 let po=()=>{M[6]+=2;return M[D+(M[6]>>1)-1]}       //mov (sp)+,r
 let xor=(x,y)=>((x||y)&&!(x&&y))
 
-let run=x=>{ge("runbut").disabled=true;ge("stepbut").disabled=true;
- if(x!="")return runtest(x)
- player()
- let f=t=>{step();if(wait)showhist();if((!wait)&&(M[7]!=brk))requestAnimationFrame(f);else{ge("runbut").disabled=false;ge("stepbut").disabled=false}}
- if(!wait)requestAnimationFrame(f)
-}
-let Run=x=>{ do{step()}while((!wait)&&(M[7]!=brk)) }
+let beat=x=>{player()
+ let f=t=>{step();if((!wait)&&(M[7]!=brk)){
+  switch(beats){
+  case 0:setTimeout(f,1000);break
+  case 1:requestAnimationFrame(f);break
+  case 2:oc.stop();do{step()}while((!wait)&&(M[7]!=brk));break
+ };if(wait)showhist()}}
+ f()}
 let calls=[]
 let hist={}
 let hpush=x=>{hist[x]=(x in hist)?1+hist[x]:1}
 
 function ttc( ){if(!keybuf.length)return 0;let r=keybuf[0];keybuf=keybuf.slice(1);return r}
-function ttw( ){wait=1;console.log("ttw")}
-function out(x){tty.value+=String.fromCharCode(x)}
+function ttw( ){wait=1}
+function out(x){tty.value+=String.fromCharCode(x);tty.scrollTop=tty.scrollHeight}
 function oct(x){return"0"+x.toString(8)}
 function Oct(x){let r=x.toString(8);return"000000".slice(0,6-r.length)+r}
 function nyi(){throw("nyi")}
@@ -132,9 +133,8 @@ let keybuf=[]
 function key(e){if(!wait)return false
  let k=e.which,c=e.key.charCodeAt(0);
  if(k==8){keybuf=keybuf.slice(0,-1);return true}
- if(k==13){wait=0;tty.value+="\n";Run("");return false}
+ if(k==13){wait=0;tty.value+="\n";tty.scrollTop=tty.scrollHeight;beat();return false}
  if(e.key.length!=1)return
- console.log("c",c,e.key,"keybuf",keybuf,k)
  if((c<32)||(c>126))return false
  keybuf.push(c);return true
 }
