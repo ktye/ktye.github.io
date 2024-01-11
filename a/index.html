@@ -5,14 +5,36 @@
 <style>
 body{font-family:georgia,serif;font-size:large}
 pre{background:#eee}
-textarea{color:white;background:black;resize:none}
+#t{background:black;color:white;min-height:20em;padding:3px;outline:none}
+//textarea{color:white;background:black;resize:none}
 </style>
 </head><body onload="kinit()">
 
 <h1>the k incunabulum (2024)</h1>
 
-<textarea id="o" spellcheck="false" rows="20" cols="80" readonly="true"                      ></textarea>
-<textarea id="t" spellcheck="false" rows="1"  cols="80" onkeydown="key(event,this)"></textarea>
+<pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+
+<h2>a.c</h2>
+<pre>
+#include"a.h"//cc -Os -oa a.c -w
+F(w_,write(1,y,x))f(w,127>x?w_(1,(u)&x):w_(strlen(x),x))F(err,w(x);w(58);w(y);w(10);96)f(qz,Qz(1)0)
+G(m,(u)memcpy((void*)x,(void*)y,f))
+f(a,char*s=malloc(x+1);*s++=x;(u)s)
+f(ind,Qr(!ax)x=a(x);i(nx,xi=i)x)
+f(cat,Qr(!ax)u r=a(1);*sr=x;r)
+F(Cat,x=ax?cat(x):x;y=ay?cat(y):y;u r=a(nx+ny);m(ny,r+nx,y);m(nx,r,x))
+f(at,Qr(ax)*sx)
+F(At,Qr(ax||!ay)sx[y])
+f(cnt,Qr(ax)nx)
+F(Cnt,Qr(!ax||ay)x=a(x);m(nx,x,y))
+F(Add,ax?ay?x+y:Add(y,x):r(a(ny),i(nr,ri=(ax?x:xi)+yi)))
+u(*f[])()={0,qz,ind,cnt,cat,at},(*F[])()={0,Add,qz,Cnt,Cat,At};
+u U[26];f(n,10>x-48?x-48:U[x-97])
+char*V=" +!#,@";f(v,(strchr(V,x)?:V)-V)
+us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))
+us(ws,u x=*s?e(s):0;Q(x)ax?w(48+x):_(i(nx,w(48+xi);w(32))0);w(10))
+int main(){char s[99];while(1)w(32),s[read(0,s,99)-1]=0,ws(s);}
+</pre>
 
 <h2>a.h</h2>
 <pre>
@@ -43,30 +65,8 @@ typedef unsigned long u;
 #define ay x(y,ax)
 </pre>
 
-<h2>a.c</h2>
-<pre>
-#include"a.h"//cc -Os -oa a.c -w
-F(w_,write(1,y,x))f(w,127>x?w_(1,(u)&x):w_(strlen(x),x))F(err,w(x);w(58);w(y);w(10);96)f(qz,Qz(1)0)
-G(m,(u)memcpy((void*)x,(void*)y,f))
-f(a,char*s=malloc(x+1);*s++=x;(u)s)
-f(ind,Qr(!ax)x=a(x);i(nx,xi=i)x)
-f(cat,Qr(!ax)u r=a(1);*sr=x;r)
-F(Cat,x=ax?cat(x):x;y=ay?cat(y):y;u r=a(nx+ny);m(ny,r+nx,y);m(nx,r,x))
-f(at,Qr(ax)*sx)
-F(At,Qr(ax||!ay)sx[y])
-f(cnt,Qr(ax)nx)
-F(Cnt,Qr(!ax||ay)x=a(x);m(nx,x,y))
-F(Add,ax?ay?x+y:Add(y,x):r(a(ny),i(nr,ri=(ax?x:xi)+yi)))
-u(*f[])()={0,qz,ind,cnt,cat,at},(*F[])()={0,Add,qz,Cnt,Cat,At};
-u U[26];f(n,10>x-48?x-48:U[x-97])
-char*V=" +!#,@";f(v,(strchr(V,x)?:V)-V)
-us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))
-us(ws,u x=*s?e(s):0;Q(x)ax?w(48+x):_(i(nx,w(48+xi);w(32))0);w(10))
-int main(){char s[99];while(1)w(32),s[read(0,s,99)-1]=0,ws(s);}
-</pre>
 
-<h2>instructions</h2>
-it comes with instructions:
+<h2>it comes with instructions</h2>
 <pre>
 special k - just for you
 e is apl(noun verb)
@@ -91,32 +91,32 @@ i put in Qr(rank) Qz(todo) in the prims
 
 <h2>compile to wasm</h2>
 let's use this code as an example how to compile low level c to webassembly.</br>
-by low level, i mean programs that use no or very little libraries (which includes libc).</br>
-webassembly separates code and data. code is static. data lives in a single block of memory, called <i>linear memory</i>.</br>
-in wasm32 memory is indexed by an int32. what was a pointer in c is an integer in wasm.</p>
+by low level, i mean programs that use no or very little libraries calls (which includes libc).<p/>
 
-wasm can be written without using stack memory, only heap for application data. that is what i usually do when writing webassembly directly or with a custom compiler.</br>
-the reason that can be done, is that functions can use an unlimited number of local variables and include deep expression trees.<br/>
-how to map these to registers and when to spill is not of wasm's concern, but propagated to the virtual machine implementation which is often a jit compiler.<br/>
-c however often uses stack memory, e.g. passing a reference of a local variable or allocating an array.
-that's why c compilers, such as clang when targetting wasm use some space within the linear memory section for the c stack.
+webassembly separates code and data. code is static. data lives in a single block of memory, called <i>linear memory</i>.</br>
+in wasm32 memory is indexed by an int32. what was a pointer in c is an index (int32) in wasm.</p>
+
+wasm can be written without using stack memory, only heap for application data.
+that is what i usually do when writing webassembly directly or with a custom compiler.</br>
+the reason that can be done, is that functions can use an unlimited number of local variables and may include deep expression trees.<br/>
+how to map these to registers and when to spill is not of wasm's concern, but propagated to the virtual machine implementation which is often a jit compiler.<p/>
+c however, often uses stack memory, e.g. when passing a reference of a local variable or allocating a local array.
+that's why c compilers, such as clang when targetting wasm, use some space within the linear memory section for the c stack.</p>
+
+clang compiled (or wasm-ld linked to be more specific) programs use the following memory layout and defined some internal variables that can be accessed (or exported):
 <pre>
      |   data   |  <--- stack  |  heap --->  |
      0    __data_end     __heap_base       max
 </pre>
-for details see <a href="https://surma.dev/things/c-to-webassembly/">surma's article</a>.
+for details see <a href="https://surma.dev/things/c-to-webassembly/">surma's article</a>.</br>
+this is often not necessary to know, but we use it to implement <tt>malloc</tt><p/>
 
-the main function allocates an input buffer goes into a repl loop.
-for wasm on a webpage <tt>read()</tt> blocks the ui and the page is unresponsive.<br>
-we don't use main but add <tt>kinit</tt> that returns a pointer to a buffer and call <tt>ws()</tt> directly from javascript.
-<pre>
-char *kinit(){char s[99];return s;}
-</pre>
 
-wasm has only 4 types (int32, int64, float32 and float64).
-pointers are int32 which are indexes into it's linear memory section.
-code is separate from data.
-as wasm has an infinite number of local variables in functions, stack is not neccessarily needed, but 
+the <tt>main()</tt> function allocates a local input buffer and continues with a <i>read-eval-print-loop</i>.
+for wasm on a webpage <tt>read()</tt> blocks the ui and the page is unresponsive. we need somthing else.<br>
+we don't use <tt>main</tt> but allocate the input buffer using malloc from js where we implement it.</br>
+when the console receives a <tt>return</tt> key, it writes the string to the buffer and calls <tt>ws(s)</tt>.</p>
+
 
 
 to compile with clang we use
@@ -124,12 +124,15 @@ to compile with clang we use
 PATH="$PATH:/usr/lib/llvm-13/bin" # i need this for clang to find the linker
 
 clang-13 -Os --target=wasm32 -mbulk-memory \
- -Wl,--export=kinit,--export=ws,--export=__heap_base,-allow-undefined \
+ -Wl,--export=ws,--export=__heap_base,-allow-undefined \
  --no-standard-libraries -Wl,--no-entry -oa.wasm a.c
 </pre>
 
-we export the functions that we need to have available from js and <text>__heap_base</text> which clang uses to mark the end of the stackdefines separate 
+we export the functions we need to have available from js explicity and allow undefined function references.<br/>
+what the compiler cannot resolve will be an import to the wasm module. it needs to be provided by js, otherwise the module cannot be instantiated.</p>
 
+we can check what clang came up with, converting the wasm binary to text format. <tt>wasm2wat</tt> is part of <a href="https://github.com/WebAssembly/wabt/releases">wabt</a>.
+there are binaries to download, or it may be available as a package for your system.
 
 <pre>
 $wasm2wat a.wasm -o a.wat
@@ -156,9 +159,37 @@ $grep export a.wat
   (export "__heap_base" (global 1))
 </pre>
 
+we see that the module expects <tt>write strlen malloc strchr</tt> as inputs and exports <tt>memory ws __heap_base</tt>.</p>
+from the function type index you can conclude which parameters the function need (and return).
+int32 can be a js number, int64 needs to be a BigInt (e.g. 0n).
+
+<h2>malloc</h2>
+<tt>a.c</tt> uses <tt>malloc</tt> but never frees. that means we can implement it using a simple bump allocator.</br>
+initially the heap starts at <tt>__heap_base</tt> upto max memory which we can query:
+<pre>
+K.memory.buffer.byteLength //131072 two block of wasm memory (a block is 64kb)
+K.__heap_base              //66784 (global variable exported from wasm)
+</pre>
+to access memory, e.g. read from or write into we need a array view:
+<pre>
+c=new Uint8Array(K.memory.buffer)
+</pre>
+this way we can also slice the data part of an array if we know where it starts and how long it is, to convert it to js data.
+for other types just use <tt>Float64Array</tt> or <tt>Int32Array</tt> using the same underlying buffer.</p>
+however if we grow the linear memory section
+<pre>
+K.memory.grow(4) //grow by 4*64kb, it returns the old number of blocks
+</pre>
+the underlying memory is copied (similar to <tt>realloc</tt>) and the array view must be recreated (otherwise it is <i>detached</i>).
+
+<h2>js source</h2>
+<pre id="j"></pre>
+
 <script>
-let t=document.getElementById("t")
-let O=x=>{o.value+=x;o.scrollTo(0,o.scrollHeight)}
+let g=x=>document.getElementById(x)
+let t=g("t"),j=g("j") //t:console(content-editable pre element
+let O=s=>{t.textContent=(t.textContent+s).split("\n").slice(-20).join("\n");E()}
+let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.addRange(r);t.focus()}
 let lo=x=>Number(BigInt.asUintN(32,x))
 const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
 const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
@@ -169,32 +200,35 @@ const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 let /*there be*/ K
 let B //input buffer, returned from  (char*)kinit(){c s[99];return s;}
 let C=_=>new Uint8Array(K.memory.buffer)
+let M,ma=x=>{M+=x;return M-x}                          //todo check for max memory
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
- malloc:x=>{M+=x;return M-x},
- write:(x,y,z)=>{O(S(y,z));return z},
- strlen:x=>C().slice(x).indexOf(0),
- strchr:(x,y)=>C().indexOf(x=>(!x)||x==y),
+ malloc:ma,
+ write:(x,y,z)=>{
+  console.log("write",x,y,z,new Uint8Array(K.memory.buffer,y,z))
+  O(S(y,z));return z},
+ strlen:x=>{
+  //C().slice(x).indexOf(0)
+  let r=C().slice(x).indexOf(0)
+  console.log("strlen",x,r)
+  return r},
+ strchr:(x,y)=>{
+  let r=C().indexOf(x=>(!x)||x==y)
+  console.log("strchr",x,y,r)
+  //C().indexOf(x=>(!x)||x==y)
+  return r
+ },
 }}
 
-let key=(e,t,s)=>{v=t.value;if("Enter"==e.key){O(s);ws(us(s));t.value=" "}}
-let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=u);c[B+u.length]=0;K.ws(B)}
+let key=(e,t,s)=>{s=t.textContent;if("Enter"==e.key){t.textContent+="\n";console.log("ws",s);ws(us(s));t.textContent+=" ";E()}}
+let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=u);c[B+u.length]=0;K.ws(B)}  //fill buffer than call ws
 
-/*
-let repl=t=>{let c=C(),s=us(t.value)
- console.log(s)
- for(let i=0;i<s.length;i++)c[B+i]=s[i];C[B+s.length]=0;
- K.repl(B)
-}
-*/
 
 let kinit=()=>{
+ let s=document.documentElement.outerHTML;j.textContent=s.slice(9+s.indexOf("<"+"script>"),-25) //show src
  fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports
   M=K.__heap_base
-  B=K.kinit()
-  console.log("B",B)
-  t.focus()})}
-
+  B=ma(128);O(" ")})}
 
 </script></body></html>
