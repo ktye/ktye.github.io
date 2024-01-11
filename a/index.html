@@ -11,6 +11,9 @@ textarea{color:white;background:black;resize:none}
 
 <h1>the k incunabulum (2024)</h1>
 
+<textarea id="o" spellcheck="false" rows="20" cols="80" readonly="true"                      ></textarea>
+<textarea id="t" spellcheck="false" rows="1"  cols="80" onkeydown="key(event,this)"></textarea>
+
 <h2>a.h</h2>
 <pre>
 typedef unsigned long u;
@@ -62,10 +65,47 @@ us(ws,u x=*s?e(s):0;Q(x)ax?w(48+x):_(i(nx,w(48+xi);w(32))0);w(10))
 int main(){char s[99];while(1)w(32),s[read(0,s,99)-1]=0,ws(s);}
 </pre>
 
-<textarea id="o" spellcheck="false" rows="20" cols="80" readonly="true"                      ></textarea>
-<textarea id="t" spellcheck="false" rows="1"  cols="80" onkeydown="key(event,this)"></textarea>
+<h2>instructions</h2>
+it comes with instructions:
+<pre>
+special k - just for you
+e is apl(noun verb)
+
+a few prims. no checks. no refcount.
+</pre>
+<pre>
+i put the abbreviations in a.h
+[ans][rxy]  atom? num string
+[rxy]i   integer at i
+</pre>
+<pre>
+@x is 'at' x is first x
+
+in this implementation
+
+@2 is rank error
+
+
+i put in Qr(rank) Qz(todo) in the prims
+</pre>
 
 <h2>compile to wasm</h2>
+let's use this code as an example how to compile low level c to webassembly.</br>
+by low level, i mean programs that use no or very little libraries (which includes libc).</br>
+webassembly separates code and data. code is static. data lives in a single block of memory, called <i>linear memory</i>.</br>
+in wasm32 memory is indexed by an int32. what was a pointer in c is an integer in wasm.</p>
+
+wasm can be written without using stack memory, only heap for application data. that is what i usually do when writing webassembly directly or with a custom compiler.</br>
+the reason that can be done, is that functions can use an unlimited number of local variables and include deep expression trees.<br/>
+how to map these to registers and when to spill is not of wasm's concern, but propagated to the virtual machine implementation which is often a jit compiler.<br/>
+c however often uses stack memory, e.g. passing a reference of a local variable or allocating an array.
+that's why c compilers, such as clang when targetting wasm use some space within the linear memory section for the c stack.
+<pre>
+     |   data   |  <--- stack  |  heap --->  |
+     0    __data_end     __heap_base       max
+</pre>
+for details see <a href="https://surma.dev/things/c-to-webassembly/">surma's article</a>.
+
 the main function allocates an input buffer goes into a repl loop.
 for wasm on a webpage <tt>read()</tt> blocks the ui and the page is unresponsive.<br>
 we don't use main but add <tt>kinit</tt> that returns a pointer to a buffer and call <tt>ws()</tt> directly from javascript.
@@ -89,6 +129,7 @@ clang-13 -Os --target=wasm32 -mbulk-memory \
 </pre>
 
 we export the functions that we need to have available from js and <text>__heap_base</text> which clang uses to mark the end of the stackdefines separate 
+
 
 <pre>
 $wasm2wat a.wasm -o a.wat
