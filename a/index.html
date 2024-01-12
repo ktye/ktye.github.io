@@ -10,7 +10,7 @@ pre{background:#eee}
 </style>
 </head><body onload="kinit()">
 
-<h1>the k incunabulum (2024)</h1>
+<!--h1>the k incunabulum (2024)</h1-->
 
 <pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
 
@@ -99,11 +99,11 @@ in wasm32 memory is indexed by an int32. what was a pointer in c is an index (in
 wasm can be written without using stack memory, only heap for application data.
 that is what i usually do when writing webassembly directly or with a custom compiler.</br>
 the reason that can be done, is that functions can use an unlimited number of local variables and may include deep expression trees.<br/>
-how to map these to registers and when to spill is not of wasm's concern, but propagated to the virtual machine implementation which is often a jit compiler.<p/>
-c however, often uses stack memory, e.g. when passing a reference of a local variable or allocating a local array.
-that's why c compilers, such as clang when targetting wasm, use some space within the linear memory section for the c stack.</p>
+mapping these to registers or when to spill is not of wasm's concern, but propagated to the virtual machine implementation, often a jit compiler.<p/>
+c however, often uses stack memory, e.g. to pass a reference of a local variable or to allocate a local array.
+that's why c compilers, such as clang targetting wasm, use some space within the linear memory section for the c stack.</p>
 
-clang compiled (or wasm-ld linked to be more specific) programs use the following memory layout and define some internal variables that can be accessed (or exported):
+clang compiled programs use the following memory layout and define some internal variables that can be accessed (or exported):
 <pre>
      |   data   |  <--- stack  |  heap --->  |
      0    __data_end     __heap_base       max(can be grown at runtime)
@@ -112,10 +112,9 @@ for details see <a href="https://surma.dev/things/c-to-webassembly/">surma's art
 this is often not necessary to know, but we use it to implement <tt>malloc</tt><p/>
 
 
-in <tt>a.c</tt> the <tt>main()</tt> function allocates a local input buffer and continues with a <i>read-eval-print-loop</i>.
-for wasm on a webpage <tt>read()</tt> blocks the ui and the page is unresponsive. we need somthing else.<br>
-we don't use <tt>main</tt> but allocate the input buffer using malloc from js where we implement it.</br>
-when the console receives a <tt>return</tt> key, it writes the string to the buffer and calls <tt>ws(s)</tt>.</p>
+in <tt>a.c</tt> the <tt>main</tt> function allocates a local input buffer and continues with a <i>read-eval-print-loop</i>.
+for wasm on a webpage <tt>read</tt> would block the ui leaving the page unresponsive. we need somthing else.<br>
+instead of entering with <tt>main</tt>, we allocate the input buffer in js and call <tt>ws(s)</tt> directly with the input string when the terminal receives a return key.</p>
 
 
 let's compile <tt>a.c</tt> from arthur unmodified using clang:
@@ -130,7 +129,7 @@ clang-13 -Os --target=wasm32 -mbulk-memory \
 we export the functions explicitly, that we need to have available within js and allow undefined function references.<br/>
 what the compiler cannot resolve will be an import to the wasm module. it needs to be provided by js, otherwise the module cannot be instantiated.</p>
 
-we can check what clang came up with, converting the wasm binary to text format. <tt>wasm2wat</tt> is part of <a href="https://github.com/WebAssembly/wabt/releases">wabt</a>.
+let's check what clang came up with, converting the wasm binary to text format: <tt>wasm2wat</tt> is part of <a href="https://github.com/WebAssembly/wabt/releases">wabt</a>.
 there are binaries to download, or it may be available as a package for your system.
 
 <pre>
@@ -206,22 +205,22 @@ let kenv={env:{                                      //this is a.wasm's import m
  malloc:ma,                                          //which provides js functions called by wasm
  write:(x,y,z)=>{O(S(y,z));return z},
  strlen:x=>C().slice(x).indexOf(0),
- strchr:(x,y)=>{
-	 let r=C().slice(x).indexOf(x=>(!x)||x==y)
-	 console.log("strchr",x,y,"r",r,(r<0)?0:r+x)
-	 return(r<0)?0:x+r
- }
-}}
+ strchr:(x,y)=>{let c=C();while(c[x++])if(y==c[x])return x;return 0}}}
 
-let key=(e,t,s)=>{s=t.textContent;if("Enter"==e.key){t.textContent+="\n";ws(us(s));t.textContent+=" ";E()}}
+let key=(e,t)=>{if("Enter"==e.key){
+ let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
+ try{ws(us(s));t.textContent+=" "}catch(e){
+  O("segmentation fault\n");kinit()}                 //for authentic look and feel
+  E()}}
+ 
 let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=x);c[B+u.length]=0;K.ws(B)}  //fill buffer than call ws
 
 
 let kinit=()=>{
  let s=document.documentElement.outerHTML;j.textContent=s.slice(9+s.indexOf("<"+"script>"),-25) //show src
  fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
-  K=r.instance.exports
-  M=K.__heap_base
-  B=ma(128);O(" ")})}
+  K=r.instance.exports,M=K.__heap_base               //store all exports in K
+  B=ma(128);                                         //allocate input buffer
+  O(" ")})}
 
 </script></body></html>
