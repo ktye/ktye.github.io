@@ -5,7 +5,7 @@
 <style>
 body{font-family:georgia,serif;font-size:large}
 pre{background:#eee}
-#t{background:black;color:white;min-height:20em;padding:3px;outline:none}
+#t{background:black;color:white;height:20em;line-height:1;padding:3px;outline:none;font-size:xlarge}
 //textarea{color:white;background:black;resize:none}
 </style>
 </head><body onload="kinit()">
@@ -119,13 +119,13 @@ when the console receives a <tt>return</tt> key, it writes the string to the buf
 
 
 
-to compile with clang we use
+we compile the source unmodified using clang:
 <pre>
 PATH="$PATH:/usr/lib/llvm-13/bin" # i need this for clang to find the linker
 
 clang-13 -Os --target=wasm32 -mbulk-memory \
  -Wl,--export=ws,--export=__heap_base,-allow-undefined \
- --no-standard-libraries -Wl,--no-entry -oa.wasm a.c
+ --no-standard-libraries -Wl,--no-entry -oa.wasm a.c       #a.wasm is 1433 bytes
 </pre>
 
 we export the functions we need to have available from js explicity and allow undefined function references.<br/>
@@ -142,9 +142,8 @@ $head -15 a.wat
   (type (;1;) (func (param i32 i32) (result i32)))
   (type (;2;) (func (param i32)))
   (type (;3;) (func (param i32 i32)))
-  (type (;4;) (func (result i32)))
-  (type (;5;) (func (param i32 i32 i32) (result i32)))
-  (import "env" "write" (func (;0;) (type 5)))
+  (type (;4;) (func (param i32 i32 i32) (result i32)))
+  (import "env" "write" (func (;0;) (type 4)))
   (import "env" "strlen" (func (;1;) (type 0)))
   (import "env" "malloc" (func (;2;) (type 0)))
   (import "env" "strchr" (func (;3;) (type 1)))
@@ -152,16 +151,17 @@ $head -15 a.wat
     (local i32)
     global.get 0
     i32.const 16
+    i32.sub
 $grep export a.wat
   (export "memory" (memory 0))
   (export "ws" (func 16))
-  (export "kinit" (func 17))
   (export "__heap_base" (global 1))
 </pre>
 
-we see that the module expects <tt>write strlen malloc strchr</tt> as inputs and exports <tt>memory ws __heap_base</tt>.</p>
+we see that the module expects <tt>write strlen malloc strchr</tt> as imports and exports <tt>memory ws __heap_base</tt>.</p>
 from the function type index you can conclude which parameters the function need (and return).
-int32 can be a js number, int64 needs to be a BigInt (e.g. 0n).
+int32 can be a js number, int64 needs to be a BigInt (e.g. 0n).<br/>
+when a function returns an int64 clang used to compile it much more complicated, because initially the mapping int64 to js/bigint did not exist.
 
 <h2>malloc</h2>
 <tt>a.c</tt> uses <tt>malloc</tt> but never frees. that means we can implement it using a simple bump allocator.</br>
@@ -191,36 +191,22 @@ let t=g("t"),j=g("j") //t:console(content-editable pre element
 let O=s=>{t.textContent=(t.textContent+s).split("\n").slice(-20).join("\n");E()}
 let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.addRange(r);t.focus()}
 let lo=x=>Number(BigInt.asUintN(32,x))
-const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
-const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
-
-
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
+let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
  
 let /*there be*/ K
 let B //input buffer, returned from  (char*)kinit(){c s[99];return s;}
 let C=_=>new Uint8Array(K.memory.buffer)
-let M,ma=x=>{M+=x;return M-x}                          //todo check for max memory
+let M,ma=x=>{M+=x;return M-x}                        //todo check for max memory and grow
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
-let kenv={env:{
- malloc:ma,
- write:(x,y,z)=>{
-  console.log("write",x,y,z,new Uint8Array(K.memory.buffer,y,z))
-  O(S(y,z));return z},
- strlen:x=>{
-  //C().slice(x).indexOf(0)
-  let r=C().slice(x).indexOf(0)
-  console.log("strlen",x,r)
-  return r},
- strchr:(x,y)=>{
-  let r=C().indexOf(x=>(!x)||x==y)
-  console.log("strchr",x,y,r)
-  //C().indexOf(x=>(!x)||x==y)
-  return r
- },
-}}
+let kenv={env:{                                      //this is a.wasm's import module                
+ malloc:ma,                                          //which provides js functions called by wasm
+ write:(x,y,z)=>{O(S(y,z));return z},
+ strlen:x=>C().slice(x).indexOf(0),
+ strchr:(x,y)=>C().indexOf(x=>(!x)||x==y)}}
 
-let key=(e,t,s)=>{s=t.textContent;if("Enter"==e.key){t.textContent+="\n";console.log("ws",s);ws(us(s));t.textContent+=" ";E()}}
+let key=(e,t,s)=>{s=t.textContent;if("Enter"==e.key){t.textContent+="\n";ws(us(s));t.textContent+=" ";E()}}
 let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=u);c[B+u.length]=0;K.ws(B)}  //fill buffer than call ws
 
 

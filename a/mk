@@ -2,7 +2,7 @@
 PATH="$PATH:/usr/lib/llvm-13/bin"
 
 
-clang-13 -Os --target=wasm32 -mbulk-memory -Wl,--export=kinit,--export=ws,--export=__heap_base,-allow-undefined --no-standard-libraries -Wl,--no-entry -oa.wasm a.c
+clang-13 -Os --target=wasm32 -mbulk-memory -Wl,--export=ws,--export=__heap_base,-allow-undefined --no-standard-libraries -Wl,--no-entry -oa.wasm a.c
 
 
 # convert a.wasm to text (only needed to see what's inside a.wasm)

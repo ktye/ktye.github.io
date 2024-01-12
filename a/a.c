@@ -16,7 +16,3 @@ char*V=" +!#,@";f(v,(strchr(V,x)?:V)-V)
 us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))
 us(ws,u x=*s?e(s):0;Q(x)ax?w(48+x):_(i(nx,w(48+xi);w(32))0);w(10))
 int main(){char s[99];while(1)w(32),s[read(0,s,99)-1]=0,ws(s);}
-
-
-//wasm needs
-char *kinit(){char s[99];w(32);return s;}
