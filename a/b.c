@@ -25,8 +25,8 @@ F(w_,write(1,y,x))f(w,127>x?w_(1,(u)&x):w_(strlen(x),x))F(err,w(x);w(58);w(y);w(
  // #define Qr(e) if(e){return err((u)__func__,(u)"rank");}
  //__func__ is special, the preprocessor replaces it with the current function name.
  //so Qr(expr) writes an error message if the expression is nonzero.
- //it looks like that: a.c:rank<newline>
- //96 is the return message, it propagates the parse error back to the calling function.
+ //it looks like that: ind:rank<newline>
+ //96 is the return value, it propagates the parse error back to the calling function.
 
  
  f(qz,Qz(1)0)
