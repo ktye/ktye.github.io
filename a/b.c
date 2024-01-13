@@ -67,7 +67,7 @@ f(ind,Qr(!ax)x=a(x);i(nx,xi=i)x)
 f(cat,Qr(!ax)u r=a(1);*sr=x;r)
 //as above f(cat,..) defines a monadic function. arthur uses cat Cat for enlist,catenation.
 //later it's even worse: cnt,Cnt means take count,take.
-//enlist allocates a vector of length 1 and points the atom inside.
+//enlist allocates a vector of length 1 and puts the atom inside.
 
 F(Cat,x=ax?cat(x):x;y=ay?cat(y):y;u r=a(nx+ny);m(ny,r+nx,y);m(nx,r,x))
 //captial-F: defines a dyadic function. catenate.
