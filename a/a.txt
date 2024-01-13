@@ -19,11 +19,11 @@
 │F(Sub,Add(f,sub(x)))                                       #define Qr(e) if(e){return err((u)__func__,(u)"rank");}│
 │F(Ind,Qr(!f)r(nx,xi%f))                                    #define Qz(e) if(e){return err((u)__func__,(u)"nyi");} │
 │F(Cnt,Qr(!af)r(f,ax?x:xi))                                 #define sr x(r,sx)                                     │
-│F(Cat,f=af?cat(f):f;x=ax?cat(x):x;u r=a(nf+nx);m(nx,r+nf,x);m(nf,r,f))                                            │
-│F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))                                                                    │
-│char*V=" +-!#,@";u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];                  │
-│f(v,(strchr(V,x)?:V)-V)                                                                                           │
-│f(n,10>x-48?x-48:U[x-97])                                                                                         │
-│us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))                               │
-│int main(){char s[99];while(1)if(w(32),s[read(0,s,99)-1]=0,*s)w_(e(s));}                                          │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+│F(Cat,f=af?cat(f):f;x=ax?cat(x):x;u r=a(nf+nx);m(nx,r+nf,x);m(nf,r,f))                             ┌──────────────┤
+│F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))                                                     │ 1-2          │
+│char*V=" +-!#,@";u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];   │-1            │
+│f(v,(strchr(V,x)?:V)-V)                                                                            │ 3!!6         │
+│f(n,10>x-48?x-48:U[x-97])                                                                          │0 1 2 0 1 2   │
+│us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))                │ 1,!6         │
+│int main(){char s[99];while(1)if(w(32),s[read(0,s,99)-1]=0,*s)w_(e(s));}                           │1 0 1 2 3 4 5 │
+└───────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────┘
