@@ -1,0 +1,34 @@
+#include"a.h"//cc -Os -oa a.c -w
+F(w_,write(1,y,x))f(w,127>x?w_(1,(u)&x):w_(strlen(x),x))F(err,w(x);w(58);w(y);w(10);96)f(qz,Qz(1)0)
+G(m,(u)memcpy((void*)x,(void*)y,f))
+f(a,char*s=malloc(x+1);*s++=x;(u)s)
+f(ind,Qr(!ax)x=a(x);i(nx,xi=i)x)
+f(cat,Qr(!ax)u r=a(1);*sr=x;r)
+F(Cat,x=ax?cat(x):x;y=ay?cat(y):y;u r=a(nx+ny);m(ny,r+nx,y);m(nx,r,x))
+f(at,Qr(ax)*sx)
+F(At,Qr(ax||!ay)sx[y])
+f(cnt,Qr(ax)nx)
+F(Cnt,Qr(!ax||ay)x=a(x);m(nx,x,y))
+F(Add,ax?ay?x+y:Add(y,x):r(a(ny),i(nr,ri=(ax?x:xi)+yi)))
+u(*f[])()={0,qz,ind,cnt,cat,at},(*F[])()={0,Add,qz,Cnt,Cat,At};
+u U[26];f(n,10>x-48?x-48:U[x-97])
+char*V=" +!#,@";f(v,(strchr(V,x)?:V)-V)
+us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))
+us(ws,u x=*s?e(s):0;Q(x)ax?w(48+x):_(i(nx,w(48+xi);w(32))0);w(10))
+int main(){char s[99];while(1)w(32),s[read(0,s,99)-1]=0,ws(s);}
+
+typedef unsigned long u;                    #define Q(e) if(96==(e))return 96;                           
+#define _u(f,e,x...) u f(x){return _(e);}   #define Qr(e) if(e){return err((u)__func__,(u)"rank");}
+#define ax (10>x)                           #define Qz(e) if(e){return err((u)__func__,(u)"todo");}
+#define nx sx[-1]                           #define ri sr[i]
+#define sx ((char*)x)                       #define yi x(y,xi)
+#define xi sx[i]                            #define nr x(r,nx)
+#define _(e) ({e;})                         #define ny x(y,nx)
+#define r(a,e) _(u r=a;e;r)                 #define sr x(r,sx)
+#define x(a,e) _(u x=a;e)                   #define sy x(y,sx)
+#define y(a,e) _(u y=a;e)                   #define ay x(y,ax)                                         
+#define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}
+#define f(f,e) _u(f,e,u x)
+#define F(f,e) _u(f,e,u x,u y)
+#define G(g,e) _u(g,e,u f,u x,u y)
+#define us(f,e) _u(f,e,char*s)

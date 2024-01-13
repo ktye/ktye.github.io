@@ -10,7 +10,7 @@ pre{background:#eee}
 </style>
 </head><body onload="kinit()">
 
-<h1>the k incunabulum (2024)</h1>
+<h1>the k incunabulum (atw 2024.01.10)</h1>
 
 <pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
 
@@ -64,7 +64,7 @@ typedef unsigned long u;
 #define sy x(y,sx)
 #define ay x(y,ax)
 </pre>
-
+<a href="a.txt">one page</a>
 
 <h2>it comes with instructions</h2>
 <pre>
@@ -183,12 +183,26 @@ K.memory.grow(4) //grow by 4*64kb, it returns the old number of blocks
 </pre>
 the underlying memory is copied (similar to <tt>realloc</tt>) and the array view must be recreated (otherwise it is <i>detached</i>).
 
+<h2>bugs</h2>
+as an educational piece, it also includes bugs.
+when you play with the repl you quickly find out that it fails for <tt>1+!4</tt>, but the implementation for <tt>F(Add,...)</tt> seems to handle all 4 combinations (atom/vector+atom/vector). fix it.</p>
+
+a different class of problems when porting to wasm is this:
+<pre>
+(*F[])()={0,Add,qz,Cnt,Cat,At}
+</pre>
+this is an array of function pointers, indexed at runtime.
+in wasm they end up in the <i>function table</i> used with an <i>indirect call</i>.</br>
+however these functions have different signatures: most are dyadic, but <tt>qz</tt> only takes one argument.</br>
+c tolerates this and simply ignores the second argument, but in wasm this is a runtime error.<p/>
+i stumbled upon this as well, when compiling j42 to wasm, code from 30 years ago. see comments in <a href="../j/j42/au.c">au.c line 23</a>.
+
 <h2>js source</h2>
 <pre id="j"></pre>
 
 <script>
 let g=x=>document.getElementById(x)
-let t=g("t"),j=g("j") //t:console(content-editable pre element
+let t=g("t"),j=g("j") //t:console(content-editable pre element)
 let O=s=>{t.textContent=(t.textContent+s).split("\n").slice(-20).join("\n");E()}
 let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.addRange(r);t.focus()}
 let lo=x=>Number(BigInt.asUintN(32,x))
