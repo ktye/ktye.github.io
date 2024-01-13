@@ -101,7 +101,7 @@ F(Add,ax?ay?x+y:Add(y,x):r(a(ny),i(nr,ri=(ax?x:xi)+yi)))
 //the last expression r(...) assumes y is a vector now and does r[i]:$[ax;x;x i] looping over i.
 //i(..) is the loop (which you never wanted to see):
 // #define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}
-//arthur also built in an error for you to spot (the one 1 send yesterday).
+//arthur also built in an error for you to spot (the one 1 sent yesterday).
 
 u(*f[])()={0,qz,ind,cnt,cat,at},(*F[])()={0,Add,qz,Cnt,Cat,At};
 //this defines two lists of functions(pointers).
