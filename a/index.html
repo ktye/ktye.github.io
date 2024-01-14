@@ -4,251 +4,49 @@
 <title>a</title>
 <style>
 body{font-family:georgia,serif;font-size:large}
-pre{background:#eee}
+h1{text-align:center}
+table,tr,td{padding:0;margin:0;border-spacing:0}
+pre{margin:0}
 #t{background:black;color:white;height:20em;line-height:1;padding:3px;outline:none;font-size:xlarge}
-//textarea{color:white;background:black;resize:none}
 </style>
 </head><body onload="kinit()">
 
-<h1>the k incunabulum (atw 2024.01.13)</h1>
 
-<pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+<table>
+<tr><td><h1>the k incunabulum (atw 2024.01.13)</h1></td></tr>
+<tr><td><pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre></td></tr>
+<tr><td><pre style="background:white">
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│#include"a.h"//fF[+-!#,@] atom/vector 1byteint 1bytetoken  no(memmanage parser tokens ..) clang-13 -Os -oa a.c -w │
+│#define r(n,e) _(u r=a(n);i(n,ri=e)r)                      typedef unsigned char c;typedef unsigned long u;u Q=96;│
+│f(w,write(1,ax?(u)&x:x,ax?1:strlen(x)))                    #define $(a,b) if(a)b;else                             │
+│c b[12];                                                   #define ax (256>x)                                     │
+│f(si,sprintf(b,"%d ",128>x?x:x-256);b)                     #define xi (nx>i?sx[i]:0)                              │
+│f(wi,w(si(x)))                                             #define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}   │
+│f(w_,$(ax,wi(x))i(nx,wi(xi))w(10))                         #define _(e) ({e;})                                    │
+│                                      #define ri sr[i]     #define _u(f,e,x...) u f(x){return({e;});}             │
+│F(err,w(f);w(58);w(x);w(10);96)                            #define nx sx[-1]                                      │
+│G(m,(u)memcpy((void*)x,(void*)y,f))   #define af x(f,ax)   #define sx ((c*)x)                                     │
+│f(a,c*s=malloc(x+1);*s++=x;(u)s)      #define nf x(f,nx)   #define x(a,e) _(u x=a;e)                              │
+│f(foo,Qz(1)0)                         #define sf x(f,sx)   #define y(a,e) _(u y=a;e)                              │
+│f(sub,ax?(c)-x:r(nx,-xi))             #define fi x(f,xi)   #define f(g,e) _u(g,e,u x)                             │
+│f(ind,Qr(!ax)r(x,i))                                       #define F(g,e) _u(g,e,u f,u x)                         │
+│f(cnt,Qr(ax)nx)                                            #define G(g,e) _u(g,e,u f,u x,u y)                     │
+│f(cat,Qr(!ax)r(1,x))                                       #define us(f,e) _u(f,e,c*s)                            │
+│F(Add,ax?af?f+x:Add(x,f):r(nx,(af?f:fi)+xi))               #define Q(e) if(Q==(e))return Q;                       │
+│F(Sub,Add(f,sub(x)))                                       #define Qr(e) if(e){return err((u)__func__,(u)"rank");}│
+│F(Ind,Qr(!f)r(nx,xi%f))                                    #define Qz(e) if(e){return err((u)__func__,(u)"nyi");} │
+│F(Cnt,Qr(!af)r(f,ax?x:xi))                                 #define sr x(r,sx)                                     │
+│F(Cat,f=af?cat(f):f;x=ax?cat(x):x;u r=a(nf+nx);m(nx,r+nf,x);m(nf,r,f))                             ┌──────────────┤
+│F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))                                                     │ 1-2          │
+│char*V=" +-!#,@";u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];   │-1            │
+│f(v,(strchr(V,x)?:V)-V)                                                                            │ 3!!6         │
+│f(n,10>x-48?x-48:U[x-97])                                                                          │0 1 2 0 1 2   │
+│us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))                │ 1,!6         │
+│int main(){char s[99];while(1)if(w(32),s[read(0,s,99)-1]=0,*s)w_(e(s));}                           │1 0 1 2 3 4 5 │
+└───────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────┘
+</pre></td></tr>
+<tr><td style="display:flex;justify-content:space-between"><a href="intro.html">instructions</a> <a href="a.c">a.c</a> <a href="a.h">a.h</a> <a href="wasm.html">wasm</a> <a href="explain.html">explain</a></td></tr></table>
 
-<h2>a.c</h2>
-<pre>
-#include"a.h"//fF[+-!#,@] atom/vector 1byteint 1bytetoken  no(memmanage parser tokens ..) clang-13 -Os -oa a.c -w 
-#define r(n,e) _(u r=a(n);i(n,ri=e)r)
-f(w,write(1,ax?(u)&x:x,ax?1:strlen(x)))
-c b[12];
-f(si,sprintf(b,"%d ",128>x?x:x-256);b)
-f(wi,w(si(x)))
-f(w_,$(ax,wi(x))i(nx,wi(xi))w(10))
-
-F(err,w(f);w(58);w(x);w(10);96)
-G(m,(u)memcpy((void*)x,(void*)y,f))
-f(a,c*s=malloc(x+1);*s++=x;(u)s)
-f(foo,Qz(1)0)
-f(sub,ax?(c)-x:r(nx,-xi))
-f(ind,Qr(!ax)r(x,i))
-f(cnt,Qr(ax)nx)
-f(cat,Qr(!ax)r(1,x))
-F(Add,ax?af?f+x:Add(x,f):r(nx,(af?f:fi)+xi))
-F(Sub,Add(f,sub(x)))
-F(Ind,Qr(!f)r(nx,xi%f))
-F(Cnt,Qr(!af)r(f,ax?x:xi))
-F(Cat,f=af?cat(f):f;x=ax?cat(x):x;u r=a(nf+nx);m(nx,r+nf,x);m(nf,r,f))
-F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))
-char*V=" +-!#,@";u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];
-f(v,(strchr(V,x)?:V)-V)
-f(n,10>x-48?x-48:U[x-97])
-us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))
-int main(){char s[99];while(1)if(w(32),s[read(0,s,99)-1]=0,*s)w_(e(s));}
-</pre>
-
-<h2>a.h</h2>
-<pre>
-typedef unsigned char c;typedef unsigned long u;u Q=96;
-#define $(a,b) if(a)b;else
-#define ax (256>x)
-#define xi (nx>i?sx[i]:0)
-#define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}
-#define _(e) ({e;})
-#define _u(f,e,x...) u f(x){return({e;});}
-#define nx sx[-1]
-#define sx ((c*)x)
-#define x(a,e) _(u x=a;e)
-#define y(a,e) _(u y=a;e)
-#define f(g,e) _u(g,e,u x)
-#define F(g,e) _u(g,e,u f,u x)
-#define G(g,e) _u(g,e,u f,u x,u y)
-#define us(f,e) _u(f,e,c*s)
-#define Q(e) if(Q==(e))return Q;
-#define Qr(e) if(e){return err((u)__func__,(u)"rank");}
-#define Qz(e) if(e){return err((u)__func__,(u)"nyi");}
-#define sr x(r,sx)
-#define ri sr[i]
-
-#define af x(f,ax)
-#define nf x(f,nx)
-#define sf x(f,sx)
-#define fi x(f,xi)
-</pre>
-<a href="a.txt">one page</a> <a href="b.c">comments</a>
-
-<h2>it comes with instructions</h2>
-<pre>
-special k - just for you
-e is apl(noun verb)
-
-a few prims. no checks. no refcount.
-</pre>
-<pre>
-i put the abbreviations in a.h
-[ans][rxy]  atom? num string
-[rxy]i   integer at i
-</pre>
-<pre>
-@x is 'at' x is first x
-
-in this implementation
-
-@2 is rank error
-
-
-i put in Qr(rank) Qz(todo) in the prims
-</pre>
-<pre>
-better organized.
-12 primitives
-++ -- !! ## @@ ,,
-</pre>
-
-<h2>compile to wasm</h2>
-let's use this code as an example how to compile low level c to webassembly.</br>
-by low level, i mean programs that use no or very little libraries calls, which includes libc.<p/>
-
-webassembly separates code and data. code is static. data lives in a single block of memory, called <i>linear memory</i>.</br>
-in wasm32 memory is indexed by an int32. what was a pointer in c is an index (int32) in wasm.</p>
-
-wasm can be written without using stack memory, only heap for application data.
-that is what i usually do when writing webassembly directly or with a custom compiler.</br>
-the reason that can be done, is that functions can use an unlimited number of local variables and may include deep expression trees.<br/>
-mapping these to registers or when to spill is not of wasm's concern, but propagated to the virtual machine implementation, often a jit compiler.<p/>
-c however, often uses stack memory, e.g. to pass a reference of a local variable or to allocate a local array.
-that's why c compilers, such as clang targetting wasm, use some space within the linear memory section for the c stack.</p>
-
-clang compiled programs use the following memory layout and define some internal variables that can be accessed (or exported):
-<pre>
-     |   data   |  <--- stack  |  heap --->  |
-     0    __data_end     __heap_base       max(can be grown at runtime)
-</pre>
-for details see <a href="https://surma.dev/things/c-to-webassembly/">surma's article</a>.</br>
-this is often not necessary to know, but we use it to implement <tt>malloc</tt><p/>
-
-
-in <tt>a.c</tt> the <tt>main</tt> function allocates a local input buffer and continues with a <i>read-eval-print-loop</i>.
-for wasm on a webpage <tt>read</tt> would block the ui leaving the page unresponsive. we need somthing else.<br>
-instead of entering with <tt>main</tt>, we allocate the input buffer in js and call <tt>ws(s)</tt> directly with the input string when the terminal receives a return key.</p>
-
-
-let's compile <tt>a.c</tt> from arthur unmodified using clang:
-<pre>
-PATH="$PATH:/usr/lib/llvm-13/bin" # i need this for clang to find the linker:
-
-clang-13 -Os --target=wasm32 -mbulk-memory \
- -Wl,--export=w_,--export=e,--export=__heap_base,-allow-undefined \
- --no-standard-libraries -Wl,--no-entry -oa.wasm a.c       #a.wasm is 2065 bytes
-</pre>
-
-we export the functions explicitly, that we need to have available within js and allow undefined function references.<br/>
-what the compiler cannot resolve will be an import to the wasm module. it needs to be provided by js, otherwise the module cannot be instantiated.</p>
-
-let's check what clang came up with, converting the wasm binary to text format: <tt>wasm2wat</tt> is part of <a href="https://github.com/WebAssembly/wabt/releases">wabt</a>.
-there are binaries to download, or it may be available as a package for your system.
-
-<pre>
-$wasm2wat a.wasm -o a.wat
-$head -15 a.wat
-(module
-  (type (;0;) (func (param i32) (result i32)))
-  (type (;1;) (func (param i32 i32) (result i32)))
-  (type (;2;) (func (param i32 i32 i32) (result i32)))
-  (type (;3;) (func (param i32)))
-  (type (;4;) (func (param i32 i32)))
-  (import "env" "strlen" (func (;0;) (type 0)))
-  (import "env" "write" (func (;1;) (type 2)))
-  (import "env" "sprintf" (func (;2;) (type 2)))
-  (import "env" "malloc" (func (;3;) (type 0)))
-  (import "env" "strchr" (func (;4;) (type 1)))
-  (func (;5;) (type 3) (param i32)
-    (local i32)
-    global.get 0
-    i32.const 16
-$grep export a.wat
-  (export "memory" (memory 0))
-  (export "w_" (func 6))
-  (export "e" (func 20))
-  (export "__heap_base" (global 1))
-</pre>
-
-we see that the module expects <i>strlen write sprintf malloc strchr</i> as imports and exports <i>memory w_ e __heap_base</i>.</p>
-from the function type index you can conclude which parameters each function needs and returns.
-int32 can be a js number (int64 would need to be a BigInt, e.g. 0n).<br/>
-
-
-<h2>malloc</h2>
-<tt>a.c</tt> uses <tt>malloc</tt> but never frees. that means we can implement it using a simple bump allocator.</br>
-initially the heap starts at <tt>__heap_base</tt> upto max memory which we can query in the browser console (press F12):
-<pre>
-K.memory.buffer.byteLength //131072 two block of wasm memory (a block is 64kb)
-K.__heap_base              //66784 (global variable exported from wasm)
-</pre>
-to access memory, e.g. read from or write into we need a array view:
-<pre>
-c=new Uint8Array(K.memory.buffer)
-</pre>
-this way we can also slice the data part of vector, if we know where it starts and how long it is, to convert data between js and wasm.
-for other types just use <tt>Float64Array</tt> or <tt>Int32Array</tt> using the same underlying buffer.</p>
-however if we grow the linear memory section
-<pre>
-K.memory.grow(4) //grow by 4*64kb, it returns the old number of blocks
-</pre>
-the underlying memory is copied (similar to <tt>realloc</tt>) and the array view must be recreated (otherwise it is <i>detached</i>).
-
-<!--h2>bugs</h2>
-as an educational piece, it also includes bugs.
-when you play with the repl you quickly find out that it fails for <tt>1+!4</tt>, but the implementation for <tt>F(Add,...)</tt> seems to handle all 4 combinations (atom/vector+atom/vector). fix it.</p>
-
-a different class of problems when porting to wasm is this:
-<pre>
-(*F[])()={0,Add,qz,Cnt,Cat,At}
-</pre>
-this is an array of function pointers, indexed at runtime.
-in wasm they end up in the <i>function table</i> used with an <i>indirect call</i>.</br>
-however these functions have different signatures: most are dyadic, but <tt>qz</tt> only takes one argument.</br>
-c tolerates this and simply ignores the second argument, but in wasm this is a runtime error.<p/>
-i stumbled upon this as well, when compiling j42 to wasm, code from 30 years ago. see comments in <a href="../j/j42/au.c">au.c line 23</a>.
--->
-
-<h2>js source</h2>
-<pre id="j"></pre>
-
-<script>
-let g=x=>document.getElementById(x)
-let t=g("t"),j=g("j") //t:console(content-editable pre element)
-let O=s=>{t.textContent=(t.textContent+s).split("\n").slice(-20).join("\n");E()}
-let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.addRange(r);t.focus()}
-let lo=x=>Number(BigInt.asUintN(32,x))
-let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
-let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
-
- 
-let /*there be*/ K
-let B                                                //input buffer
-let C=_=>new Uint8Array(K.memory.buffer)
-let M,ma=x=>{M+=x;return M-x}                        //todo check for max memory and grow
-let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n)) //js string from wasm pointer,length
-let kenv={env:{                                      //this is a.wasm's import module                
- malloc:ma,                                          //which provides js functions called by wasm
- sprintf:(x,y,z)=>{c=C();z=c[z];z=us((z>128?z-256:z)+" .");y=z.length-1;z[y]=0;c.set(z,x);return y},
- write:(x,y,z)=>{O(S(y,z));return z},
- strlen:x=>C().slice(x).indexOf(0),
- strchr:(x,y)=>{let c=C();while(c[x++])if(y==c[x])return x;return 0}}}
-
-let key=(e,t)=>{if("Enter"==e.key){
- let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
- try{ws(us(s));t.textContent+=" "}catch(e){
-  O("segmentation fault\n");kinit()}                 //for authentic look and feel
-  E()}}
- 
-let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=x);c[B+u.length]=0;K.w_(K.e(B))}  //fill buffer then call w_(e(s))
-
-
-let kinit=()=>{
- let s=document.documentElement.outerHTML;j.textContent=s.slice(9+s.indexOf("<"+"script>"),-25) //show src
- fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
-  K=r.instance.exports,M=K.__heap_base               //store all exports in K
-  B=ma(128);                                         //allocate input buffer
-  O(" ")})}
-
+<script src="a.js"></script>
 </script></body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>a</title>
+<style>
+body{font-family:georgia,serif;font-size:large}
+table,tr,td{padding:0;margin:0;border-spacing:0}
+pre{margin:0;background:#eee}
+#t{background:black;color:white;height:20em;line-height:1;padding:3px;outline:none;font-size:xlarge}
+</style>
+</head><body onload="init()">
+
+<pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+
+<h1>compile to wasm</h1>
+let's use this code as an example how to compile low level c to webassembly.</br>
+by low level, i mean programs that use no or very little libraries calls, which includes libc.<p/>
+
+webassembly separates code and data. code is static. data lives in a single block of memory, called <i>linear memory</i>.</br>
+in wasm32 memory is indexed by an int32. what was a pointer in c is an index (int32) in wasm.</p>
+
+wasm can be written without using stack memory, only heap for application data.
+that is what i usually do when writing webassembly directly or with a custom compiler.</br>
+the reason that can be done, is that functions can use an unlimited number of local variables and may include deep expression trees.<br/>
+mapping these to registers or when to spill is not of wasm's concern, but propagated to the virtual machine implementation, often a jit compiler.<p/>
+c however, often uses stack memory, e.g. to pass a reference of a local variable or to allocate a local array.
+that's why c compilers, such as clang targetting wasm, use some space within the linear memory section for the c stack.</p>
+
+clang compiled programs use the following memory layout and define some internal variables that can be accessed (or exported):
+<pre>
+     |   data   |  <--- stack  |  heap --->  |
+     0    __data_end     __heap_base       max(can be grown at runtime)
+</pre>
+for details see <a href="https://surma.dev/things/c-to-webassembly/">surma's article</a>.</br>
+this is often not necessary to know, but we use it to implement <tt>malloc</tt><p/>
+
+
+in <tt>a.c</tt> the <tt>main</tt> function allocates a local input buffer and continues with a <i>read-eval-print-loop</i>.
+for wasm on a webpage <tt>read</tt> would block the ui leaving the page unresponsive. we need somthing else.<br>
+instead of entering with <tt>main</tt>, we allocate the input buffer in js and call <tt>ws(s)</tt> directly with the input string when the terminal receives a return key.</p>
+
+
+let's compile <tt>a.c</tt> from arthur unmodified using clang:
+<pre>
+PATH="$PATH:/usr/lib/llvm-13/bin" # i need this for clang to find the linker:
+
+clang-13 -Os --target=wasm32 -mbulk-memory \
+ -Wl,--export=w_,--export=e,--export=__heap_base,-allow-undefined \
+ --no-standard-libraries -Wl,--no-entry -oa.wasm a.c       #a.wasm is 2065 bytes
+</pre>
+
+we export the functions explicitly, that we need to have available within js and allow undefined function references.<br/>
+what the compiler cannot resolve will be an import to the wasm module. it needs to be provided by js, otherwise the module cannot be instantiated.</p>
+
+let's check what clang came up with, converting the wasm binary to text format: <tt>wasm2wat</tt> is part of <a href="https://github.com/WebAssembly/wabt/releases">wabt</a>.
+there are binaries to download, or it may be available as a package for your system.
+
+<pre>
+$wasm2wat a.wasm -o a.wat
+$head -15 a.wat
+(module
+  (type (;0;) (func (param i32) (result i32)))
+  (type (;1;) (func (param i32 i32) (result i32)))
+  (type (;2;) (func (param i32 i32 i32) (result i32)))
+  (type (;3;) (func (param i32)))
+  (type (;4;) (func (param i32 i32)))
+  (import "env" "strlen" (func (;0;) (type 0)))
+  (import "env" "write" (func (;1;) (type 2)))
+  (import "env" "sprintf" (func (;2;) (type 2)))
+  (import "env" "malloc" (func (;3;) (type 0)))
+  (import "env" "strchr" (func (;4;) (type 1)))
+  (func (;5;) (type 3) (param i32)
+    (local i32)
+    global.get 0
+    i32.const 16
+$grep export a.wat
+  (export "memory" (memory 0))
+  (export "w_" (func 6))
+  (export "e" (func 20))
+  (export "__heap_base" (global 1))
+</pre>
+
+we see that the module expects <i>strlen write sprintf malloc strchr</i> as imports and exports <i>memory w_ e __heap_base</i>.</p>
+from the function type index you can conclude which parameters each function needs and returns.
+int32 can be a js number (int64 would need to be a BigInt, e.g. 0n).<br/>
+
+
+<h2>malloc</h2>
+<tt>a.c</tt> uses <tt>malloc</tt> but never frees. that means we can implement it using a simple bump allocator.</br>
+initially the heap starts at <tt>__heap_base</tt> upto max memory which we can query in the browser console (press F12):
+<pre>
+K.memory.buffer.byteLength //131072 two block of wasm memory (a block is 64kb)
+K.__heap_base              //66784 (global variable exported from wasm)
+</pre>
+to access memory, e.g. read from or write into we need a array view:
+<pre>
+c=new Uint8Array(K.memory.buffer)
+</pre>
+this way we can also slice the data part of vector, if we know where it starts and how long it is, to convert data between js and wasm.
+for other types just use <tt>Float64Array</tt> or <tt>Int32Array</tt> using the same underlying buffer.</p>
+however if we grow the linear memory section
+<pre>
+K.memory.grow(4) //grow by 4*64kb, it returns the old number of blocks
+</pre>
+the underlying memory is copied (similar to <tt>realloc</tt>) and the array view must be recreated (otherwise it is <i>detached</i>).
+
+<!--h2>bugs</h2>
+as an educational piece, it also includes bugs.
+when you play with the repl you quickly find out that it fails for <tt>1+!4</tt>, but the implementation for <tt>F(Add,...)</tt> seems to handle all 4 combinations (atom/vector+atom/vector). fix it.</p>
+
+a different class of problems when porting to wasm is this:
+<pre>
+(*F[])()={0,Add,qz,Cnt,Cat,At}
+</pre>
+this is an array of function pointers, indexed at runtime.
+in wasm they end up in the <i>function table</i> used with an <i>indirect call</i>.</br>
+however these functions have different signatures: most are dyadic, but <tt>qz</tt> only takes one argument.</br>
+c tolerates this and simply ignores the second argument, but in wasm this is a runtime error.<p/>
+i stumbled upon this as well, when compiling j42 to wasm, code from 30 years ago. see comments in <a href="../j/j42/au.c">au.c line 23</a>.
+-->
+
+<h2>js source</h2>
+<pre id="j"></pre>
+
+<script src="a.js"></script>
+<script>function init(){fetch("a.js").then(r=>r.text()).then(r=>{document.getElementById("j").textContent=r;kinit()})}</script>
+</body></html>
