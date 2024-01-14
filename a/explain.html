@@ -33,13 +33,13 @@ this is not included here. vectors are allocated but never freed.
 k/simple includes a parser and tokenizer in a basic form.
 </span></span>
 <span class="s">#define r(n,e) _(u r=a(n);i(n,ri=e)r)<span class="e" id="r">
-<b>r</b> is defined as a macro.
+r is defined as a macro.
 it returns a vector of length n and assigns the expression e to each element.
 <span class="l">a</span> creates the result array and <span class="l">ri</span>=e assigned the e to the element r[i]</span></span>
 <span class="s">f(w,write(1,ax?(u)&x:x,ax?1:strlen(x)))<span class="e">
 f(w,..) defines the monadic function w(x).
-w uses the unix system call (see "man 2 <b>write</b>") and writes to stdout.
-<b>strlen</b> is a libc function that clang recognizes as a builtin.
+w uses the unix system call (see "man 2 write") and writes to stdout.
+strlen is a libc function that clang recognizes as a builtin.
 it returns the length of the string by counting until a 0 byte occurs in the data.
 strings in c are terminated by the sential value 0. they do not contain a length.
 but this is just a convention. we later define arrays, storing length and data.
@@ -63,23 +63,46 @@ the buffer as an argument.
 <span class="s">f(wi,w(si(x)))<span class="e">
 wi writes an integer, by calling w(si(x))</span></span>
 <span class="s">f(w_,$(ax,wi(x))i(nx,wi(xi))w(10))<span class="e">
-w_ writes ...</span></span>
-<span class="s"><span class="e">
-?</span></span>
+w_ writes a k value (atom or vector).
+ax tests if x is an atom calling wi directly, otherwise it calls
+wi in a loop for each element <span class="l">xi</span>.
+the conditonal form $(a,b)c is defined as a macro <span class="l">$</span>
+it is very similar to the ternary operator that c already has: a?b:c
+the difference is that in a ternary operator a b and c must be expressions.
+the operator itself is also an expression, it has a value.
+but the loop <span class="l">i</span>(nx,..) is a block and cannot be used
+in a ternary expression.</span></span>
+
 <span class="s">F(err,w(f);w(58);w(x);w(10);96)<span class="e">
-?</span></span>
+err(f,x) writes an error message. it is called by <span class="l">Qr</span> <span class="l">Qz</span>.
+the arguments are the current function and the error string "rank" or "nyi".
+the error message has the form (function):(error-type)(newline)</span></span>
 <span class="s">G(m,(u)memcpy((void*)x,(void*)y,f))<span class="e">
-?</span></span>
+m(f,x,y) moves/copies data by calling the builtin memcopy.
+it reorders the argument: the first arg is the number of elements to copy,
+followed by destination and source pointer.</span></span>
 <span class="s" id="a">f(a,c*s=malloc(x+1);*s++=x;(u)s)<span class="e">
-?</span></span>
+a(x) creates a vector. it allocates memory using the builtin malloc,
+which expects a length (number of bytes).
+it passes 1 element more than needed, stores the array length in the first
+element and increases the pointer to the result c before returning it.
+in this form c points to the data part of the vector and c[-1] is the length
+usually accessed by <span class="l">nx</span></span></span>
 <span class="s">f(foo,Qz(1)0)<span class="e">
-?</span></span>
+foo is a function that print the nyi error.
+it is a placeholder within the function <span class="l">table</span> for monadic primitives.</span></span>
 <span class="s">f(sub,ax?(c)-x:r(nx,-xi))<span class="e">
-?</span></span>
+sub is negate, a monadic function.
+it negates atoms and uses <span class="l">r</span> to negate all elements of a vector.
+in (c)-x, (c) is a type cast. this casts the type from a longer integer to char.
+both are unsigned, but the effect is that all but the lower byte remain 0 instead
+of 1 because of sign extension.</span></span>
 <span class="s">f(ind,Qr(!ax)r(x,i))<span class="e">
-?</span></span>
+ind is !x known as til x, iota, or index generation.
+it uses <span class="l">Qr</span> to check the rank of x and allows only atoms.
+<span class="l">r</span> creates a return array and assigns the loop variable i to each element.</span></span>
 <span class="s">f(cnt,Qr(ax)nx)<span class="e">
-?</span></span>
+cnt is #x, also known as ⍴ or tally. is fails for atoms and returns the length of vectors using <span class="l">nx</span></span></span>
 <span class="s">f(cat,Qr(!ax)r(1,x))<span class="e">
 ?</span></span>
 <span class="s">F(Add,ax?af?f+x:Add(x,f):r(nx,(af?f:fi)+xi))<span class="e">
@@ -96,7 +119,7 @@ w_ writes ...</span></span>
 ?</span></span>
 <span class="s">char*V=" +-!#,@";<span class="e">
 ?</span></span>
-<span class="s">u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];<span class="e">
+<span class="s">u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];<span class="e" id="table">
 ?</span></span>
 <span class="s">f(v,(strchr(V,x)?:V)-V)<span class="e">
 ?</span></span>
@@ -108,19 +131,19 @@ w_ writes ...</span></span>
 ?</span></span>
 </pre></td><td><pre>
 typedef unsigned char c;typedef unsigned long u;u Q=96;
-<span class="s">#define $(a,b) if(a)b;else<span class="e">
+<span class="s">#define $(a,b) if(a)b;else<span class="e" id="$">
 ?</span></span>
 <span class="s">#define ax (256>x)<span class="e" id="ax">
 ?</span></span>
-<span class="s">#define xi (nx>i?sx[i]:0)<span class="e">
+<span class="s">#define xi (nx>i?sx[i]:0)<span class="e" id="xi">
 ?</span></span>
-<span class="s">#define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}<span class="e">
+<span class="s">#define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}<span class="e" id="i">
 ?</span></span>
 <span class="s">#define _(e) ({e;})<span class="e">
 ?</span></span>
 <span class="s">#define _u(f,e,x...) u f(x){return({e;});}<span class="e">
 ?</span></span>
-<span class="s">#define nx sx[-1]<span class="e">
+<span class="s">#define nx sx[-1]<span class="e" id="nx">
 ?</span></span>
 <span class="s">#define sx ((c*)x)<span class="e">
 ?</span></span>
@@ -138,14 +161,14 @@ typedef unsigned char c;typedef unsigned long u;u Q=96;
 ?</span></span>
 <span class="s">#define Q(e) if(Q==(e))return Q;<span class="e">
 ?</span></span>
-<span class="s">#define Qr(e) if(e){return err((u)__func__,(u)"rank");}<span class="e">
+<span class="s">#define Qr(e) if(e){return err((u)__func__,(u)"rank");}<span class="e" id="Qr">
 ?</span></span>
-<span class="s">#define Qz(e) if(e){return err((u)__func__,(u)"nyi");}<span class="e">
+<span class="s">#define Qz(e) if(e){return err((u)__func__,(u)"nyi");}<span class="e" id="Qz">
 ?</span></span>
 <span class="s">#define sr x(r,sx)<span class="e">
 ?</span></span>
 <span class="s">#define ri sr[i]<span class="e" id="ri">
-<b>ri</b> accesses element i of r. it may be used for both:
+ri accesses element i of r. it may be used for both:
 to get the value and to assign to but is only used in <span class="l">r</span></span></span>
 
 <span class="s">#define af x(f,ax)<span class="e">
@@ -157,6 +180,11 @@ to get the value and to assign to but is only used in <span class="l">r</span></
 <span class="s">#define fi x(f,xi)<span class="e">
 ?</span></span>
 </pre></td></tr></table>
+
+<hr/>
+puzzle: find out why 1-2 works and returns -1 but 2-1 fails to produce the correct result.
+</p>
+
 
 
 <script>
@@ -173,7 +201,6 @@ let link=e=>{ let d=ge(e.target.textContent);d.style.display="block"; e.stopProp
 </script>
 
 <p/>
-<hr/>
 
 <pre>
 
