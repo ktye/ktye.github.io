@@ -34,18 +34,36 @@ k/simple includes a parser and tokenizer in a basic form.
 </span></span>
 <span class="s">#define r(n,e) _(u r=a(n);i(n,ri=e)r)<span class="e" id="r">
 <b>r</b> is defined as a macro.
-it returns a vector of length n and applies the expression e to each element.
+it returns a vector of length n and assigns the expression e to each element.
 <span class="l">a</span> creates the result array and <span class="l">ri</span>=e assigned the e to the element r[i]</span></span>
 <span class="s">f(w,write(1,ax?(u)&x:x,ax?1:strlen(x)))<span class="e">
-?</span></span>
+f(w,..) defines the monadic function w(x).
+w uses the unix system call (see "man 2 <b>write</b>") and writes to stdout.
+<b>strlen</b> is a libc function that clang recognizes as a builtin.
+it returns the length of the string by counting until a 0 byte occurs in the data.
+strings in c are terminated by the sential value 0. they do not contain a length.
+but this is just a convention. we later define arrays, storing length and data.
+
+w uses <span class="l">ax</span> to check if the argument is an atom.
+for atoms it calls write passing a pointer to the argument &x and the length 1.
+for vectors it passes x which in this case is interpreted as a pointer as it is.</span></span>
 <span class="s">c b[12];<span class="e">
-?</span></span>
+b is an array of type c with length 12. c definitions are type name.
+the length comes last and is not part of the type.
+b is only used locally as a buffer by the next function
+but is defined as a global variable.</span></span>
 <span class="s">f(si,sprintf(b,"%d ",128>x?x:x-256);b)<span class="e">
-?</span></span>
+si(x) prints/formats the number x into the buffer b including a space
+used for printing vectors (or atoms where we don't see it).
+the argument x is an unsigned integer but is used to format signed integers.
+the max value for the domain is 127 and we get negative number with x-256.
+si returns the buffer because the next function calls it as w(si(x)) and w expects
+the buffer as an argument.
+</span></span>
 <span class="s">f(wi,w(si(x)))<span class="e">
-?</span></span>
+wi writes an integer, by calling w(si(x))</span></span>
 <span class="s">f(w_,$(ax,wi(x))i(nx,wi(xi))w(10))<span class="e">
-?</span></span>
+w_ writes ...</span></span>
 <span class="s"><span class="e">
 ?</span></span>
 <span class="s">F(err,w(f);w(58);w(x);w(10);96)<span class="e">
@@ -92,7 +110,7 @@ it returns a vector of length n and applies the expression e to each element.
 typedef unsigned char c;typedef unsigned long u;u Q=96;
 <span class="s">#define $(a,b) if(a)b;else<span class="e">
 ?</span></span>
-<span class="s">#define ax (256>x)<span class="e">
+<span class="s">#define ax (256>x)<span class="e" id="ax">
 ?</span></span>
 <span class="s">#define xi (nx>i?sx[i]:0)<span class="e">
 ?</span></span>
