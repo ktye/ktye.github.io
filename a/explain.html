@@ -92,7 +92,7 @@ usually accessed by <span class="l">nx</span></span></span>
 foo is a function that print the nyi error.
 it is a placeholder within the function <span class="l">table</span> for monadic primitives.</span></span>
 <span class="s">f(sub,ax?(c)-x:r(nx,-xi))<span class="e">
-sub is negate, a monadic function.
+sub is arithmetic negate, a monadic function.
 it negates atoms and uses <span class="l">r</span> to negate all elements of a vector.
 in (c)-x, (c) is a type cast. this casts the type from a longer integer to char.
 both are unsigned, but the effect is that all but the lower byte remain 0 instead
@@ -104,17 +104,35 @@ it uses <span class="l">Qr</span> to check the rank of x and allows only atoms.
 <span class="s">f(cnt,Qr(ax)nx)<span class="e">
 cnt is #x, also known as ⍴ or tally. is fails for atoms and returns the length of vectors using <span class="l">nx</span></span></span>
 <span class="s">f(cat,Qr(!ax)r(1,x))<span class="e">
-?</span></span>
+cat is ,x the monadic form known as enlist.
+it allows only atoms, creates a length-1 vector putting x inside.</span></span>
 <span class="s">F(Add,ax?af?f+x:Add(x,f):r(nx,(af?f:fi)+xi))<span class="e">
-?</span></span>
+Add is the example for a scalar function that extends atoms to vectors for
+all 4 combinations of atom/vector arguments.
+it uses a nested ternary test for the arguments.
+note that f is the first arg and x the second.
+if x is an atom but f is a vector is switches the arguments and calls itself again.
+the final expression r(nx,..) handles the part where x is a vector and iterates
+over x. f is checked within the loop each time and either added directly or indexed
+with the loop variable.</span></span>
 <span class="s">F(Sub,Add(f,sub(x)))<span class="e">
-?</span></span>
+Sub is like Add but instead of implementing it again it negates the second argument
+and calls Add.</span></span>
 <span class="s">F(Ind,Qr(!f)r(nx,xi%f))<span class="e">
-?</span></span>
+Ind is f!x and takes the modulo.
+f is checked to be nonzero. it can only be an atom,
+since we have neither vector literals nor parens.
+the right argument x is not checked and assumed to be a vector.
+x is rank checked to be a vector (try 3!4 and see it crash).</span></span>
 <span class="s">F(Cnt,Qr(!af)r(f,ax?x:xi))<span class="e">
-?</span></span>
+Cnt is take: f#x.
+f is alywas atomic, x may be both.
+the return array is filled in a loop using <span class="l">r</span>.</span></span>
 <span class="s">F(Cat,f=af?cat(f):f;x=ax?cat(x):x;u r=a(nf+nx);m(nx,r+nf,x);m(nf,r,f))<span class="e">
-?</span></span>
+Cat is catenation: f,x.
+it rank checks both arguments and enlists each if it is an atom.
+it returns a vector explicitly with u r=a(..) giving it the catenated length 
+of both arguments.</span></span>
 <span class="s">F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))<span class="e">
 ?</span></span>
 <span class="s">char*V=" +-!#,@";<span class="e">
