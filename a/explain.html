@@ -14,14 +14,16 @@ th{border-bottom:1px solid}
 </style>
 </head><body onload="init()">
 
-<h1>introduction to atw/c</h1>
+<h1>a simplified k - introduction to atw/c</h1>
 
-<span style="cursor:pointer;color:blue" onclick="expand(this)">expand</span>
-<span style="float:right">(click on a line to show explanations)</span>
 
-<table>
-<tr><th><tt>a.c</tt></th><th><tt>a.h</tt></th></tr>
-<tr><td><pre>
+<div style="display:flex;justify-content:space-between">
+ <span style="cursor:pointer;color:blue" onclick="expand(this)">expand</span>
+ <span>(click on a line to show explanations)</span> 
+ <span><a href="index.html">back to a/</a></span>
+</div><p/>
+
+<div style="display:flex;flex-wrap:wrap"><pre><span style="border-bottom:1px solid">a.c</span>
 <span class="s">#include"a.h"//fF[+-!#,@] atom/vector 1byteint 1bytetoken  no(memmanage parser tokens ..)<span class="e">
 +-!#,@ are are the list of primitives that are implemented in simple/k
 fF means for both monadic and dyadic cases
@@ -62,7 +64,7 @@ the buffer as an argument.
 </span></span>
 <span class="s">f(wi,w(si(x)))<span class="e">
 wi writes an integer, by calling w(si(x))</span></span>
-<span class="s">f(w_,$(ax,wi(x))i(nx,wi(xi))w(10))<span class="e">
+<span class="s">f(w_,$(ax,wi(x))i(nx,wi(xi))w(10))<span class="e" id="w_">
 w_ writes a k value (atom or vector).
 ax tests if x is an atom calling wi directly, otherwise it calls
 wi in a loop for each element <span class="l">xi</span>.
@@ -77,7 +79,7 @@ in a ternary expression.</span></span>
 err(f,x) writes an error message. it is called by <span class="l">Qr</span> <span class="l">Qz</span>.
 the arguments are the current function and the error string "rank" or "nyi".
 the error message has the form (function):(error-type)(newline)</span></span>
-<span class="s">G(m,(u)memcpy((void*)x,(void*)y,f))<span class="e">
+<span class="s">G(m,(u)memcpy((void*)x,(void*)y,f))<span class="e" id="m">
 m(f,x,y) moves/copies data by calling the builtin memcopy.
 it reorders the argument: the first arg is the number of elements to copy,
 followed by destination and source pointer.</span></span>
@@ -101,12 +103,12 @@ of 1 because of sign extension.</span></span>
 ind is !x known as til x, iota, or index generation.
 it uses <span class="l">Qr</span> to check the rank of x and allows only atoms.
 <span class="l">r</span> creates a return array and assigns the loop variable i to each element.</span></span>
-<span class="s">f(cnt,Qr(ax)nx)<span class="e">
+<span class="s">f(cnt,Qr(ax)nx)<span class="e" id="cnt">
 cnt is #x, also known as ⍴ or tally. is fails for atoms and returns the length of vectors using <span class="l">nx</span></span></span>
 <span class="s">f(cat,Qr(!ax)r(1,x))<span class="e">
 cat is ,x the monadic form known as enlist.
 it allows only atoms, creates a length-1 vector putting x inside.</span></span>
-<span class="s">F(Add,ax?af?f+x:Add(x,f):r(nx,(af?f:fi)+xi))<span class="e">
+<span class="s">F(Add,ax?af?f+x:Add(x,f):r(nx,(af?f:fi)+xi))<span class="e" id="Add">
 Add is the example for a scalar function that extends atoms to vectors for
 all 4 combinations of atom/vector arguments.
 it uses a nested ternary test for the arguments.
@@ -130,74 +132,132 @@ f is alywas atomic, x may be both.
 the return array is filled in a loop using <span class="l">r</span>.</span></span>
 <span class="s">F(Cat,f=af?cat(f):f;x=ax?cat(x):x;u r=a(nf+nx);m(nx,r+nf,x);m(nf,r,f))<span class="e">
 Cat is catenation: f,x.
-it rank checks both arguments and enlists each if it is an atom.
-it returns a vector explicitly with u r=a(..) giving it the catenated length 
+it rank checks both arguments and enlists each if it's an atom.
+Cat returns a vector explicitly with u r=a(..) giving it the catenated length 
 of both arguments.</span></span>
-<span class="s">F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))<span class="e">
-?</span></span>
+<span class="s">F(At,Qr(af)ax?sf[x]:r(nx,sf[xi]))f(at,At(x,0))<span class="e" id="At">
+At(f,x) is indexing. f must be a vector but x can be both atom or vector.
+it uses sf[x] or sf[xi] to index into the array f.
+
+watch carefully, the line also defines the monadic funcion at(x).
+this is what we know as first, maybe as the value "at the location of x"
+or the "head of the list". it indexes with a 0 value.</span></span>
 <span class="s">char*V=" +-!#,@";<span class="e">
-?</span></span>
+V defines a character vector that is used by the parser.
+we also see which primitives are included in the demo implementation.</span></span>
 <span class="s">u(*f[])()={0,foo,sub,ind,cnt,cat,at},(*F[])()={0,Add,Sub,Ind,Cnt,Cat,At},U[26];<span class="e" id="table">
-?</span></span>
-<span class="s">f(v,(strchr(V,x)?:V)-V)<span class="e">
-?</span></span>
-<span class="s">f(n,10>x-48?x-48:U[x-97])<span class="e">
-?</span></span>
-<span class="s">us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))<span class="e">
-?</span></span>
+this line defines two arrays of function pointers.
+f holds our monadic function and F the dyadic counterparts.
+the first function (index 0) is a placeholder. it is never called.
+U is the storage space for variables. it holds 26 slots, one for each lower case letter.
+but we cannot make use of them, because there is no assignment.</span></span>
+<span class="s">f(v,(strchr(V,x)?:V)-V)<span class="e" id="v">
+v(x) is used by the parser for both: check if the x is a verb (a primitive function)
+and convert the character x to a function value.
+here we see why the function pointers start with a dummy value: a result of 0
+is not a function.
+the special case of the ternary expression a?:b is a shortcut for a?a:b
+strchr returns a pointer to the character, not an index, so the start pointer V is
+substracted to return the index. strchr returns 0 if x is not within V, so does the v.</span></span>
+<span class="s">f(n,10>x-48?x-48:U[x-97])<span class="e" id="n">
+n(x) parses nouns, both single character numbers and lower case variable names.
+the function converts the character values to numbers by substracting 48 (the ascii value for 0)
+or it substracts 97(a) if the value is not within '0' to '9'.
+note the special check 10>x-48. this works for unsigned comparison,
+because negative numbers are large when converting to unsigned and it's shorter then the
+equivalent (x>=48)&&x<48+10.
+</span></span>
+<span class="s">us(e,u i=*s++;v(i)?x(e(s),Q(x)f[v(i)](x)):x(n(i),*s?y(e(s+1),Q(y)F[v(*s)](x,y)):x))<span class="e" id="e">
+e(x) is the core of the interpreter. e may be short for expression, execute or evaluate.
+it parses an expression and exectues it directly, like apl.
+usually k parses into a parse tree or byte code and execute in a separate step.
+e takes an input string, tokenizes the first character and calls itself recursively.
+it implements only the minimal monadic/dyadic infix syntax. no parens, adverbs, function, etc.
+<span class="l">v</span>(i) tests if the current character is a verb, if yes
+it recursively parses the rest of the input. this is k/apl's left of right execution
+parsing left-to-right not backwards as many feel apl is doing.
+if the current character is not a verb, it is parsed as a noun <span class="l">n</span>(i)
+which is returned at the end of the input, or executed dyadically calling F[..] from the function <span class="l">table</span>.
+the dyadic case implies that a verb always follows a noun. two nouns in a row is not handled,
+which usually implies dyadic @ sometimes called juxtaposition.</span></span>
 <span class="s">int main(){char s[99];while(1)if(w(32),s[read(0,s,99)-1]=0,*s)w_(e(s));}<span class="e">
-?</span></span>
-</pre></td><td><pre>
-typedef unsigned char c;typedef unsigned long u;u Q=96;
+main is the program's entry point. it defines s, a local buffer for the input characters
+and goes directly into the read-eval-print-loop.
+within the loop it prints k's cursor, a single space (ascii 32), reads a line, terminates the input with a 0
+and <span class="l">w_</span> writes the output of the evaluated expression <span class="l">e</span>.</span></span>
+</pre><pre><span style="border-bottom:1px solid">a.h</span>
+<span class="s">typedef unsigned char c;typedef unsigned long u;u Q=96;<span class="e" id="u">
+type definitions for c and u that are used throughout the code.
+Q is used in the parser to indicate an error.
+</span></span>
 <span class="s">#define $(a,b) if(a)b;else<span class="e" id="$">
-?</span></span>
+$ is used as $(a,b)c like a ternary expression but accepts blocks.
+it is used by <span class="l">w_</span> with a loop block in the else clause.</span></span>
 <span class="s">#define ax (256>x)<span class="e" id="ax">
-?</span></span>
+ax tests if x is an atom. it is used directly as ax not like a call ax(x).
+atoms are integers with a value within the range of one byte.</span></span>
 <span class="s">#define xi (nx>i?sx[i]:0)<span class="e" id="xi">
-?</span></span>
+xi indexes the implicit x with i. it also check the range using <span class="l">nx</span>.</span></span>
 <span class="s">#define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}<span class="e" id="i">
-?</span></span>
+i(n,e) is the loop construct. loops are omnipresent in array languages
+but they are hidden in the implementation.
+n is the length and e an expression that is executed for every step.</span></span>
 <span class="s">#define _(e) ({e;})<span class="e">
-?</span></span>
+_ puts e into a block/scope.</span></span>
 <span class="s">#define _u(f,e,x...) u f(x){return({e;});}<span class="e">
-?</span></span>
+_u is the prototypes for other macros which defines a function that returns type <span class="l">u</span> an unsigned integer.
+the arguments are defined as the variadic macro x...
+e.g. <span class="l">f</span> uses it to define monadic functions and <span class="l">F</span> for dyadic functions.</span></span>
 <span class="s">#define nx sx[-1]<span class="e" id="nx">
-?</span></span>
+nx returns the length of a vector. it's not a function but uses x explicitly.
+the length is stored in the byte before the data section that x points to.
+it's not allowed to use nx on atoms, it must be checked before using <span class="l">ax</span>.</span></span>
 <span class="s">#define sx ((c*)x)<span class="e">
-?</span></span>
+sx interprets x as a char pointer</span></span>
 <span class="s">#define x(a,e) _(u x=a;e)<span class="e">
-?</span></span>
+x(a,e) assigns a to x in a local scope and executes the expression e</span></span>
 <span class="s">#define y(a,e) _(u y=a;e)<span class="e">
-?</span></span>
-<span class="s">#define f(g,e) _u(g,e,u x)<span class="e">
-?</span></span>
+y(a,e) assigns a to y in a local scope and executes the expression e</span></span>
+<span class="s">#define f(g,e) _u(g,e,u x)<span class="e" id="f">
+f(g,e) defines a monadic function with implicit argument x.
+g is the function name, and the expression e is the function body.
+an example is <span class="l">cnt</span>.</span></span>
 <span class="s">#define F(g,e) _u(g,e,u f,u x)<span class="e">
-?</span></span>
+F(g,e) defines a dyadic function with implicit arguments f and x.
+g is the function name, and the expression e is the function body.
+an example is <span class="l">Add</span>.</span></span>
 <span class="s">#define G(g,e) _u(g,e,u f,u x,u y)<span class="e">
-?</span></span>
+G(g,e) defines a triadic function with name g.
+the arguments are f,x,y and the body e.
+see e.g. <span class="l">m</span></span></span>
 <span class="s">#define us(f,e) _u(f,e,c*s)<span class="e">
-?</span></span>
+us(f,e) defines a function which takes a char pointer as an argument and body e.
+it is used only be <span class="l">e</span>.</span></span>
 <span class="s">#define Q(e) if(Q==(e))return Q;<span class="e">
-?</span></span>
+Q is used for error handling. it checks the argument and returns early if e is nonzero.
+it returns Q which is not the same as the macro but the constant 96.</span></span>
 <span class="s">#define Qr(e) if(e){return err((u)__func__,(u)"rank");}<span class="e" id="Qr">
-?</span></span>
+Qr returns a rank error if e is nonzero.</span></span>
 <span class="s">#define Qz(e) if(e){return err((u)__func__,(u)"nyi");}<span class="e" id="Qz">
-?</span></span>
+Qz returns an nyi error (not yet implemented), if e is nonzero</span></span>
 <span class="s">#define sr x(r,sx)<span class="e">
-?</span></span>
+sr is only used by the next macro <span class="l">ri</span></span></span>
 <span class="s">#define ri sr[i]<span class="e" id="ri">
-ri accesses element i of r. it may be used for both:
-to get the value and to assign to but is only used in <span class="l">r</span></span></span>
+ri assigns r to x, treats it as a char vector and indexes the i's element.
+it is used by <span class="l">r</span> to assign a value to the vector at index i.</span></span>
 
 <span class="s">#define af x(f,ax)<span class="e">
-?</span></span>
+af tests if f is an atom. f is the first argument for dyadic functions.</span></span>
 <span class="s">#define nf x(f,nx)<span class="e">
-?</span></span>
+nf treats f as an array and returns it's length.</span></span>
 <span class="s">#define sf x(f,sx)<span class="e">
-?</span></span>
+sf interprets the first function argument f as a vector,
+such that it can be indexed. it is used by <span class="l">At</span>.</span></span>
 <span class="s">#define fi x(f,xi)<span class="e">
-?</span></span>
-</pre></td></tr></table>
+fi accesses element i of the first argument f.
+see <span class="l">Add</span></span></span>
+</pre>
+</div>
 
 <hr/>
 puzzle: find out why 1-2 works and returns -1 but 2-1 fails to produce the correct result.
@@ -217,105 +277,5 @@ let toggle=e=>{let c=e.target.firstElementChild;if(!e.target.classList.contains(
 let link=e=>{ let d=ge(e.target.textContent);d.style.display="block"; e.stopPropagation();}
 
 </script>
-
-<p/>
-
-<pre>
-
-integrate notes from kelas:..
-
-//!\file a.h \brief less is more
-//!headers for syscalls and stdlib functions
-#include<unistd.h> //write(2)
-#include<string.h> //strlen memcpy strchr
-#include<stdlib.h> //malloc
-#include<stdio.h>  //sprintf
-
-//! type system
-typedef unsigned char c;typedef unsigned long long u;    //!< type c is just a shorthand for byte, type u requires more words:
-                                                         //!< although u is formally defined as ull (an unsigned 64bit integer),
-                                                         //!< it is in fact an *opaque type*, i.e. k/simple uses it for everything,
-                                                         //!< e.g. u can be: an atom (0..255), a vector pointer or a function pointer.
-                                                         //!< since k/simple only supports a single atom type (8bit integer),
-                                                         //!< atoms are expensive, since 7 out of 8 bytes of u are wasted. however,
-                                                         //!< vectors of atoms do not incur this tax, because they are allocated with
-                                                         //!< one extra leading byte which holds its length in bytes:
-
-                                                         //!< k/simple memory layout:
-                                                         //!<  vector x: |n|aaaaaaaaaaa....
-                                                         //!<             ^ ^
-                                                         //!<             | pointer to x points to its 0'th item, a's are 8bit wide
-                                                         //!<             byte prior to 0'th item of x is the length of x (max 255 items)
-
-//!minimal atwc
-#define R return
-#define $(a,b) if(a)b;else                               //!< handy shorthand for if-then-else. beware of dangling else!
-#define i(n,e) {int $n=n;int i=0;for(;i<$n;++i){e;}}     //!< execute expression e n times, loop counter i is accessible from e
-
-//!accessors for x
-#define ax (256>x)                                       //!< is x an atom? (atoms are 0..255, x presumed to be of type u)
-#define sx ((c*)x)                                       //!< reinterpret x as char pointer (ie as string or byte vector)
-#define xi (nx>i?sx[i]:0)                                //!< return i'th element of vector x or 0 if i is out of bounds
-#define nx sx[-1]                                        //!< length of vector x (stored in the byte preceding the actual data \see typedef u)
-
-//!functions
-#define _(e) ({e;})                                      //!< isolate expression e in its own lexical scope and clamp it with ;
-#define _u(f,e,x...) u f(x){R _(e);}                     //!< generic function definition: all functions return some u, f function name, x args, e body
-#define x(a,e) _(u x=a;e)                                //!< whatever a is, call it x and then execute some expression e in a separate lexical scope
-#define y(a,e) _(u y=a;e)                                //!< (ditto for y) idea of x()/y() is to make use of standard accessors eg ax xi etc
-#define f(g,e) _u(g,e,u x)                               //!< define a monadic function g: takes arg x of type u and returns some u, e is body
-#define F(g,e) _u(g,e,u f,u x)                           //!< define a dyadic function g: takes args f and x of type u, returns some u, or:
-                                                         //!< define an adverb g: takes function pointer f to some verb and its only arg x (nyi)
-#define G(g,e) _u(g,e,u f,u x,u y)                       //!< define an adverb g: takes function pointer f, x and y are the args, returns some u (nyi)
-#define us(f,e) _u(f,e,c*s)                              //!< define a function f which takes a string s as its only argument, e is body
-
-//!error handling
-u Q=96;                                                  //!< Q is magic number for error
-#define Q(e)  if(Q==(e))R Q;                             //!< if some e evaluates to Q, return error
-#define Qr(e) if(e){R err((u)__func__,(u)"rank");}       //!< if some e evaluates to true, throw rank error
-#define Qz(e) if(e){R err((u)__func__,(u)"nyi");}        //!< ditto for not yet implemented
-
-//!accessors for r
-#define sr x(r,sx)                                       //!< reinterpret r as char pointer (ie as string or byte vector) \see sx
-#define ri sr[i]                                         //!< get i'th element of vector r \todo consider using xi for bound check
-
-//!accessors for f
-</pre>
-<pre>
-#include"a.h"//fF[+-!#,@] atom/vector 1byteint 1bytetoken  no(memmanage parser tokens ..) cc -Os -oa a.c -w
-             //! a typical example how atw comments his code:
-             //! he says:       he means:
-             //! fF[+-!#,@]     we have 6 verbs [+ - ! # , @] in both monadic and dyadic contexts, total of 12
-             //!                (since monadic plus is nyi, we actually have 11, so roll your own f[+])
-             //! atom/vector    k/simple sports atoms and vectors!
-             //! 1byteint       only supported atom/vector type is 8bit integer
-             //! 1bytetoken     input tokenizer is spartan: a token can't be longer than one char
-             //! no(...)        no memory management, no parser and no tokenizer are implemented
-             //! cc -w ..       build it like so
-</pre>
-<pre>
-/! minimalistic type system
-typedef unsigned char c;typedef unsigned long long u;    //!< type c is just a shorthand for byte, but type u requires more words:
-                                                         //!< although u is formally defined as ull (an unsigned 64bit integer),
-                                                         //!< it is in fact an *opaque type*, i.e. k/simple uses it for everything,
-                                                         //!< e.g. u can be: an atom (0..255), a vector pointer or a function pointer.
-                                                         //!< since k/simple only supports a single atom type (8bit integer),
-                                                         //!< atoms are expensive, since 7 out of 8 bytes of u are wasted. however,
-                                                         //!< vectors of atoms do not incur this tax, because they are allocated with
-                                                         //!< one extra leading byte which holds its length in bytes:
-
-                                                         //!< k/simple memory layout for vectors:
-                                                         //!<  vector x: |n|aaaaaaaaaaa....
-                                                         //!<             ^ ^
-                                                         //!<             | pointer to x points to its 0'th item, all a's are 8bit wide
-                                                         //!<             byte prior to 0'th item of x holds the length of x (max 255 items)
-
-------------->                                           //!< \note it would make sense to redefine u as an alias for uintptr_t to reduce
-                                                         //!< pressure on 32bit targets, e.g. for wasm32 there seems no reason for u to
-                                                         //!< be 8 bytes wide. uintptr_t is basically sizeof(void*) and requires <stdint.h>.
-                                                         //!< for simplicity, we keep u as ull for now.
-
-it is not trivial to microbenchmark wasm32, especially on such a toy system, but my intuition is that uintptr_t would make quite a bit of a difference on something closer to a real dea
-</pre>
 </body></html>
 
