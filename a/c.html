@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>a/c</title>
+<style>
+.s:hover{font-weight:bold;text-decoration:underline}
+.r{color:red}
+</style>
+</head><body>
+
+<label for="ld">load/drop files .c/.h:</label>
+<input type="file" id="ld" multiple="true" onchange="load(this)"/>
+
+<script>
+let ge=x=>document.getElementById(x)
+let ce=x=>document.createElement(x)
+let tc=(t,x)=>{x.textContent=t;return x}
+let id=(i,x)=>{x.id=i;return x}
+let cl=(c,x)=>{x.classList.add(c);return x}
+let ac=(c,p)=>{p.appendChild(c);return c}
+let ti=(t,x)=>{x.title=t;return x}
+let rm=p=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
+
+let b=document.body
+let ht=[],hn=[]
+let hd=(n,t)=>{hn.push(...Array(t.length).fill(n));ht.push(...t)}
+
+let splits=(s,i)=>[0,...i].map((n,j,m)=>s.slice(n,m[1+j]))
+  
+let load=async t=>{rm(b);
+ for(let f of t.files){
+  let t=await f.text()
+  if(f.name.endsWith(".h"))hd(f.name,t.split("\n"))
+  else{
+   let p=ce("pre");
+   let g=x=>{
+    let a=x.indexOf("("),b=x.indexOf(","),s
+    if((a>0)&&(b>0)&&b>a){  let A=x.slice(0,1+a),B=x.slice(1+a,b),C=x.slice(b);s=ce("span")
+            ac(tc(A,ce("span") ),s)
+     ac(cl("r",tc(B,ce("span"))),s)
+            ac(tc(C,ce("span") ),s)
+    }else s=tc(x,ce("span"))
+    ac(cl("s",  s   ),p)
+   }
+   let l=t.split("\n").forEach((l,i)=>{
+    let a=[],q=0
+    Array.from(l).forEach((x,i)=>{if(x=="(")q++;if(x==")")if(1==q--)a.push(1+i)})
+    splits(l+"\n",a).forEach(g)
+   })
+   
+   ac(p,b)
+   ac(ce("hr"),b)
+  }
+ }
+}
+
+//find: select-text & right-click
+b.oncontextmenu=e=>{find(getSelection().toString(),1,0,1);e.preventDefault()}
+
+</script></body></html>
