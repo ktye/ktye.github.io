@@ -4,7 +4,9 @@
 <title>a/c</title>
 <style>
 .s:hover{font-weight:bold;text-decoration:underline}
+.c{display:block;border:2px solid;padding:1em;text-align:center}
 .r{color:red}
+#h.{background:green}
 </style>
 </head><body>
 
@@ -22,15 +24,15 @@ let ti=(t,x)=>{x.title=t;return x}
 let rm=p=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 
 let b=document.body
-let ht=[],hn=[]
-let hd=(n,t)=>{hn.push(...Array(t.length).fill(n));ht.push(...t)}
+let h={}
+let hd=x=>{if(x.slice(0,8)=="#define "){h[x.slice(8).split(/[\( ]/)[0]]=x}}
 
 let splits=(s,i)=>[0,...i].map((n,j,m)=>s.slice(n,m[1+j]))
   
 let load=async t=>{rm(b);
  for(let f of t.files){
   let t=await f.text()
-  if(f.name.endsWith(".h"))hd(f.name,t.split("\n"))
+  if(f.name.endsWith(".h"))t.split("\n").forEach(hd)     //{if(x.slice(0,8)=="#define ")h[x.slice(8).split(/[\( ]/)[0]]=x/*)*/})
   else{
    let p=ce("pre");
    let g=x=>{
@@ -40,9 +42,9 @@ let load=async t=>{rm(b);
      ac(cl("r",tc(B,ce("span"))),s)
             ac(tc(C,ce("span") ),s)
     }else s=tc(x,ce("span"))
-    ac(cl("s",  s   ),p)
+    ac(cl("s",  s   ),p);s.onmouseup=up
    }
-   let l=t.split("\n").forEach((l,i)=>{
+   let l=t.split("\n").forEach((l,i)=>{hd(l)
     let a=[],q=0
     Array.from(l).forEach((x,i)=>{if(x=="(")q++;if(x==")")if(1==q--)a.push(1+i)})
     splits(l+"\n",a).forEach(g)
@@ -52,9 +54,18 @@ let load=async t=>{rm(b);
    ac(ce("hr"),b)
   }
  }
+ id("h.",ac(ce("pre"),b)).onmouseup=Up
 }
+
+let Up=s=>{s=getSelection().toString();if((""!=s)&&(s in h))ge("h.").textContent+="\n"+h[s]}
+let up=e=>{if(e.button)return;let p=e.target.parentElement,t=(("SPAN"==p.tagName)?p:t),s=getSelection().toString()
+ console.log("up",e.button,"text",s)
+ if(""==s)t.classList.toggle("c")
+ else if(s in h)ge("h.").textContent=h[s]
+ e.stopPropagation()}
 
 //find: select-text & right-click
 b.oncontextmenu=e=>{find(getSelection().toString(),1,0,1);e.preventDefault()}
+
 
 </script></body></html>
