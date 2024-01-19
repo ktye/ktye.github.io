@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>k/fun doc</title>
+<style>
+body{font-family:georgia,serif}
+pre{margin:0}
+table{margin:1em}
+table,th{border:1px solid}td{border-right:1px solid}th{background:#eee}
+table,th,td{border-collapse:collapse}
+pre{background:#eee;margin:1em}
+</style>
+</head><body>
+
+<h2>nomen</h2>
+i use the name <i>vector</i> for unitype 1d arrays; <i>list</i> for general mixed-type lists which may be nested.
+
+<h2>k types and values</h2>
+<p>k-types are <tt>bcieg</tt></p>
+
+<table>
+<tr><th>type </th><th> num  </th><th> what         </th><th> log2 </th><th> bits/element </th></tr>
+<tr><td>     </td><td> 0    </td><td> list         </td><td> 3    </td><td> 64           </td></tr>
+<tr><td>b    </td><td> 1    </td><td> bool         </td><td> 0    </td><td> 8            </td></tr>
+<tr><td>c    </td><td> 2    </td><td> char         </td><td> 0    </td><td> 8            </td></tr>
+<tr><td>i    </td><td> 3    </td><td> int          </td><td> 2    </td><td> 32           </td></tr>
+<tr><td>e    </td><td> 4    </td><td> float        </td><td> 2    </td><td> 32           </td></tr>
+<tr><td>g    </td><td> 5    </td><td> geo(complex) </td><td> 3    </td><td> 64           </td></tr>
+</table>
+
+a k value is a 64bit integer (c-type <tt>u</tt>).
+the <b>type</b> is stored in the upper 4 bits of a k value. it is accessed with <tt>tx</tt>:
+
+<pre>
+#define <b>tx</b> (7&x>>60)    //7 not 15, high bit: 0(atom) 1(vector)
+</pre>
+
+<tt>t(i,e)</tt> type-tags a <b>scalar</b> value.
+it puts the type i in the upper 4 bits and e in the lower 60.
+
+<pre>
+iu(<b>t</b>,(u)i&lt;&lt;60|(5&gt;i?x:g_(x)|(u)g_(x&gt;&gt;32)&lt;&lt;30))
+//  i1(_g,i=(N/4&i)*4|B(29)&i;~N&i?g+i:0)    // g_ _g packs geo in 60bits todo..
+//  i1(g_,~N&i?(N&i)/4|B(29)&m(g,i)-g:0)
+</pre>
+
+it is used by the macros which create <b>atoms</b>.
+they live in the k-values themselves and do not need refcounts:
+
+<pre>
+#define <b>tb</b>(e) t(1,e)
+#define <b>ti</b>(e) t(3,e)
+#define <b>te</b>(e) t(4,ie(e))
+#define <b>tg</b>(e) t(5,e)
+</pre>
+
+
+<tt>t_(t,n)</tt> creates a vector with <b>type</b> and <b>length</b>:
+
+<pre>
+                  ⬐--------------data offset
+tn(<b>t_</b>,8L+t&lt;&lt;60|(u)O(bn(n&lt;&lt;lt[t]))&lt;&lt;32|n)
+      ⬑highest bit: vector            ⬑low-32bit:length
+</pre>
+
+k values for vectors store type, offset and length within the 64bit k-value.</p>
+
+<tt>lt</tt> contains the log2 sizes of the vector elements for each type: <tt>lt[]={3,0,0,2,2,3}</tt>.<br/>
+e.g. for an integer vector of length n, the size in bytes is <tt>2&lt;&lt;n</tt> (type 3, <tt>tn[3]</tt> is 2).
+
+<h2>memory/bucket system</h2>
+
+<tt>bn</tt> returns the <b>bucket type</b> from the required size in bytes for vector data:
+
+<pre>
+i1(<b>bn</b>,i+=4+63;128&lt;i?l(i)-7:0)
+#define <b>l</b>(e) (64-bu(clzl)((e)-1))      //log2
+</pre>
+
+<table>
+<tr><th>bucket type</th><th>data size(bytes)</th></tr>
+<tr><td>0</td><td>..61</td></tr>
+<tr><td>1</td><td>62..189</td></tr>
+<tr><td>2</td><td>190..445</td></tr>
+<tr><td>...</td><td>...</td></tr>
+</table>
+
+<i>why?</i> is there anything in the head besides 4 byte refcount?</br>
+vector data is 64byte aligned. why 67 bytes?
+</p>
+
+data lives in the workspace <tt><b>W</b></tt>: <tt>Zi W[1&lt;&lt;28]</tt> which can store 1GB of data.<br/>
+k values store the offset into the workspace at bits 32..57, <tt>ox</tt> returns the offset.<br/>
+<tt>sx</tt> returns the pointer withing the offset for a k value, scaling the offset by 32:
+
+<pre>
+#define <b>sx</b> ((i0*)(W+32*ox))
+#define <b>ox</b> (B(25)&x&gt;&gt;32)
+#define <b>B</b>(e) ((1L&lt;&lt;(e))-1)
+</pre>
+
+<b>free memory</b> is organized in a linked list.
+at the start of a free memory block, the offset to the next free block is stored.  
+<tt>Zi H[25]</tt> is the free list that points into <tt>W</tt>. <tt>Hi</tt>, short for <tt>H[i]</tt>, stores the workspace offset for the first free block of bucket size <tt>i</tt>.
+
+<p>
+<tt>O</tt> allocates memory.
+it returns the next free block offset, or recursively splits the next free larger block:
+
+<pre>
+i1(<b>O</b>,Hi?O_(i):r(_O(i,O(i+1))+(1&lt;&lt;i),W[32*r-1]=0))
+</pre>
+
+<tt>O_</tt> returns the offset of the next free block for a given bucket type and sets the next free block to <tt>H[i]</tt>.
+
+<pre>
+i1(<b>O_</b>,r(Hi,Hi=W[32*r]))
+</pre>
+
+<tt>_O(i,j)</tt> returns memory with offset j and bucket type i to the head of the free list.
+it stores the current head in the data part.
+
+<pre>
+di(<b>_O</b>,W[32*j]=Hi;Hi=j,ii,ij)
+</pre>
+
+
+<tt>r_</tt> refs k value. this means it increases it's refcount.
+
+<pre>
+f(<b>r_</b>,ax?x:(++xr,x))
+#define <b>xr</b> ((i2*)sx)[-1]      //refcount is stored in W just before the vector data
+</pre>
+
+<tt>_r</tt> unrefs a value. it decreases the refcount.
+if it drops to zero, the underlying memory is released to the memory system.
+
+<pre>
+f(<b>_r</b>,ax?x:xr?(--xr,x):(_t(x),x))
+</pre>
+
+<tt>_t(x)</tt> frees a k value once the refcount drops to zero. it's the counterpart to <tt>t_</tt>.
+if <tt>x</tt> is a generic list, if decreases the refcount of it's child elements which may free more memory:
+
+<pre>
+f(<b>_t</b>,if(!tx)N(_r(xu))_o(bn(Nx),ox))
+</pre>
+
+<h2>parse</h2>
+<h2>primitives</h2>
+as an example, let's look at the implementation for <tt>!x</tt>, known as iota, til or index generation:
+<pre>
+f(<b>n_</b>,Qr(!tx)qi?ax?n(ix):qb?ind(x):QT:qg?G_(x):QT)
+#define <b>qi</b> (3&gt;tx-1)                               //type is at least integer
+#define <b>ax</b> !(1L<<63&x)                            //is atom, highest bit is unset
+#define <b>ix</b> (i2)x                                  //convert k to integer (stored in lower 32bits)
+</pre>
+
+<tt>n(x)</tt> is the path taken for integers:
+<pre>
+ui(<b>n</b>,T(3,N&i?-i:i,16*i+NZ))
+#define <b>ui</b>(f,e) du(f,e,ii)                   //monadic function with integer argument i
+Zi N=1&lt;&lt;31;                                  //N& tests if bit 32(sign) is set: i is negative
+ZI NZ={q0,q1,q2,q3};                         //NZ are predeclared integer range 0..16 in vector register
+#define <b>T</b>(t,n,e) R(t,n,I(Nr,rz=(e)))         //create vector type t with length n initialize with expression e
+#define <b>R</b>(t,n,e) r(t_(t,n),e)                //create vector r of t and n
+#define <b>r</b>(b,e) _(typeof(b)r=b;e;r)           //locally store b in r, do e, return r
+#define <b>I</b>(n,e) i(n6(n),e)                    //loop 0..n using fewer iterators with wide vector steps
+#define <b>i</b>(n,e) {i2 $n=n;ii=-1;W(++i&lt;$n){e;}} //loop over i 0..n, do e for each iteration
+#define <b>n6</b>(n) (63+(n)&gt;&gt;6)                    //divide by 64 (rounded up) to return the number of iterations using wide registers
+#define <b>Nr</b> x(r,Nx)
+#define <b>x</b>(b,e) _(typeof(b)x=b;e)
+#define <b>Nx</b> (nx&lt;&lt;lx)                          //Nx returns the number of bytes required for the vector data
+#define <b>lx</b> lt[tx]
+#define <b>nx</b> ix
+#define <b>ix</b> (i2)x
+#define <b>rz</b> ((Z*)sr)[i]                       //load index i into vector register r
+#define <b>sr</b> x(r,sx)
+#define <b>sx</b> ((i0*)(W+32*ox))                  //return pointer into workspace at offset ox
+</pre>
+
+<tt>n(x)</tt> creates an integer vector of length x and fills the data by iterating over x in wide steps.
+it assigns 16 values at a time using the pre-defined sequence <tt>NZ</tt> 0..15.
+the core of the function is just <tt>ui(n,T(3,i,16*i+NZ))</tt> but it takes many levels of expanding definitions to understand what's it doing exactly.
+
+<h2>vector instructions</h2>
+<i>porting..</i><p/>
+
+type <tt><b>Z</b></tt> is a 512bit vector register, that stores e.g. 64 bytes or 16 integer values.
+the implementation uses primarily avx512 simd intrinsics that are ported/replaced by other architectures.
+
+<pre>
+bZ(<b>B_</b>,wo(compressqi512_mask)(x,x^x,b))
+</pre>
+<tt>B_</tt> selects byte values from x with corresponding bits set in mask <tt>b</tt>.
+values are stored at the front of the result filled with zeros.
+
+</body></html>
