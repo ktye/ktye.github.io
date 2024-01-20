@@ -85,8 +85,13 @@ i1(<b>bn</b>,i+=4+63;128&lt;i?l(i)-7:0)
 <tr><td>...</td><td>...</td></tr>
 </table>
 
-<i>why?</i> is there anything in the head besides 4 byte refcount?</br>
-vector data is 64byte aligned. why 67 bytes?
+<i>why?</i> is there anything in the header besides 4 byte refcount?</br>
+todo memory layout..
+<pre>
+ 4 for the refcount
+ 63 so that we can always write 64 bytes at the end-1 (for x,y)
+ (otherwise we could put special code into x,y)
+</pre>
 </p>
 
 data lives in the workspace <tt><b>W</b></tt>: <tt>Zi W[1&lt;&lt;28]</tt> which can store 1GB of data.<br/>
@@ -151,7 +156,7 @@ f(<b>_t</b>,if(!tx)N(_r(xu))_o(bn(Nx),ox))
 as an example, let's look at the implementation for <tt>!x</tt>, known as iota, til or index generation:
 <pre>
 f(<b>n_</b>,Qr(!tx)qi?ax?n(ix):qb?ind(x):QT:qg?G_(x):QT)
-#define <b>qi</b> (3&gt;tx-1)                               //type is at least integer
+#define <b>qi</b> (3&gt;tx-1)                               //type is at most integer
 #define <b>ax</b> !(1L<<63&x)                            //is atom, highest bit is unset
 #define <b>ix</b> (i2)x                                  //convert k to integer (stored in lower 32bits)
 </pre>
@@ -162,7 +167,7 @@ ui(<b>n</b>,T(3,N&i?-i:i,16*i+NZ))
 #define <b>ui</b>(f,e) du(f,e,ii)                   //monadic function with integer argument i
 Zi N=1&lt;&lt;31;                                  //N& tests if bit 32(sign) is set: i is negative
 ZI NZ={q0,q1,q2,q3};                         //NZ are predeclared integer range 0..16 in vector register
-#define <b>T</b>(t,n,e) R(t,n,I(Nr,rz=(e)))         //create vector type t with length n initialize with expression e
+#define <b>T</b>(t,n,e) R(t,n,I(Nr,rz=(e)))         //create vector type t with length n, set data to e
 #define <b>R</b>(t,n,e) r(t_(t,n),e)                //create vector r of t and n
 #define <b>r</b>(b,e) _(typeof(b)r=b;e;r)           //locally store b in r, do e, return r
 #define <b>I</b>(n,e) i(n6(n),e)                    //loop 0..n using fewer iterators with wide vector steps
@@ -189,10 +194,33 @@ the core of the function is just <tt>ui(n,T(3,i,16*i+NZ))</tt> but it takes many
 type <tt><b>Z</b></tt> is a 512bit vector register, that stores e.g. 64 bytes or 16 integer values.
 the implementation uses primarily avx512 simd intrinsics that are ported/replaced by other architectures.
 
+<table>
+<tr><th><tt>q </tt></th><td>apply sqrtf to each of 16 floats</td></tr>
+<tr><th><tt>z </tt></th><td>select bytes from x with index y (0 for out of range)</td></tr>
+<tr><th><tt>PG</tt></th><td>complex multiplication?</td></tr>
+<tr><th><tt>b_</tt></th><td>compress high bits in x to u</td></tr>
+<tr><th><tt>_b</tt></th><td>expand bitmask u to bytes 1 0. 1(last bit) not -1(all bits)?</td></tr>
+<tr><th><tt>B_</tt></th><td>selects byte values from x with corresponding bits set in mask <tt>b</tt>.<br/>values are stored at the front of the result filled with zeros</td></tr>
+</table>
+
+avx512 implementations:
+<table>
+<tr><th><tt>q</tt></th><td><tt>z1(q,zo(sqrtps)(x,4))</tt></td></tr>
+<tr><th><tt>z</tt></th><td><tt>z2(z,zo(pshufb)(x,y))</tt></td></tr>
+<tr><th><tt>PG</tt></th><td><tt>z2(PG,wo(vfmaddsubps512_mask3)(z4(x,0xa0),y,z4(x,0xf5)*z4(y,0xb1),-1,9))</tt></td></tr>
+<tr><th><tt>b_</tt></th><td><tt>du(b_,zo(cvtb2mask)(x),Zx)</tt></td></tr>
+<tr><th><tt>_b</tt></th><td><tt>zu(_b,zo(selectb_)(x,1+Z0,Z0))</tt></td></tr>
+<tr><th><tt>B_</tt></th><td><tt>bZ(B_,wo(compressqi512_mask)(x,x^x,b))</tt></td></tr>
+</table>
+
 <pre>
-bZ(<b>B_</b>,wo(compressqi512_mask)(x,x^x,b))
+r: __builtin_ia32_pshufb512(x,y) -> _mm512_shuffle_epi8(x,y)
+avx2: F2(z,z_) splits into 2 parts. how? it cannot shuffle from one part into the other? maybe the ranges do not exceed 32 if they only shuffle ascii ranges.
+wasm: i8x16.swizzle (+const?)  swizzle sets 0 when out of range 0..15, pshufb when 1bit is set
+
+b_ cvtb2mask movepi8_mask
+_b selectb   mask_mov_epi8
+
 </pre>
-<tt>B_</tt> selects byte values from x with corresponding bits set in mask <tt>b</tt>.
-values are stored at the front of the result filled with zeros.
 
 </body></html>
