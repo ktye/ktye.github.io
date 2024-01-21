@@ -10,7 +10,7 @@
 .l{color:darkgreen}
 .l:hover{cursor:pointer;text-decoration:underline}
 .x{text-decoration:line-through}
-#h.{background:green}
+#h-{margin:0}
 #T{background:#ffe;position:fixed;top:0;right:0;z-index:10;margin:0}
 </style>
 </head><body>
@@ -62,7 +62,8 @@ let load=async t=>{rm(b);
   p.id=f.name
   cb(f.name)
  }
- id("h.",ac(ce("pre"),T)).onmouseup=Up
+ let hh=id("h-",ac(ce("pre"),T));hh.onmouseup=Up
+ hh.ondblclick=e=>e.target.textContent=""
  ac(T,b)
 }
 
@@ -70,11 +71,10 @@ let cb=n=>{ ac(tc(n+" ",cl("l",ce("span"))),T).onclick=cs }
 let cs=e=>{let t=e.target,i=t.textContent.trim(),x=ge(i)
  t.classList.toggle("x");x.classList.toggle("n");if(!x.classList.contains("n")){x.scrollIntoView();x.focus()}}
 
-let Up=s=>{s=getSelection().toString();if((""!=s)&&(s in h))ge("h.").textContent+="\n"+h[s]}
+let Up=s=>{s=getSelection().toString();if((""!=s)&&(s in h))ge("h-").textContent+="\n"+h[s]}
 let up=e=>{if(e.button)return;let p=e.target.parentElement,t=(("SPAN"==p.tagName)?p:t),s=getSelection().toString()
- console.log("up",e.button,"text",s)
  if(""==s)t.classList.toggle("c")
- else if(s in h)ge("h.").textContent=h[s]
+ else if(s in h)ge("h-").textContent=h[s]
  e.stopPropagation()}
 
 //find: select-text & right-click
