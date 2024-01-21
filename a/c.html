@@ -6,7 +6,12 @@
 .s:hover{font-weight:bold;text-decoration:underline}
 .c{display:block;border:2px solid;padding:1em;text-align:center}
 .r{color:red}
+.n{display:none}
+.l{color:darkgreen}
+.l:hover{cursor:pointer;text-decoration:underline}
+.x{text-decoration:line-through}
 #h.{background:green}
+#T{background:#ffe;position:fixed;top:0;right:0;z-index:10;margin:0}
 </style>
 </head><body>
 
@@ -23,6 +28,7 @@ let ac=(c,p)=>{p.appendChild(c);return c}
 let ti=(t,x)=>{x.title=t;return x}
 let rm=p=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 
+let T=id("T",ce("pre"))
 let b=document.body
 let h={}
 let hd=x=>{if(x.slice(0,8)=="#define "){h[x.slice(8).split(/[\( ]/)[0]]=x}}
@@ -33,8 +39,9 @@ let load=async t=>{rm(b);
  for(let f of t.files){
   let t=await f.text()
   if(f.name.endsWith(".h"))t.split("\n").forEach(hd)     //{if(x.slice(0,8)=="#define ")h[x.slice(8).split(/[\( ]/)[0]]=x/*)*/})
+  let p=ce("pre");
+  if(f.name.endsWith(".h"))p.textContent=t
   else{
-   let p=ce("pre");
    let g=x=>{
     let a=x.indexOf("("),b=x.indexOf(","),s
     if((a>0)&&(b>0)&&b>a){  let A=x.slice(0,1+a),B=x.slice(1+a,b),C=x.slice(b);s=ce("span")
@@ -48,14 +55,20 @@ let load=async t=>{rm(b);
     let a=[],q=0
     Array.from(l).forEach((x,i)=>{if(x=="(")q++;if(x==")")if(1==q--)a.push(1+i)})
     splits(l+"\n",a).forEach(g)
-   })
-   
-   ac(p,b)
-   ac(ce("hr"),b)
-  }
+  })}
+  
+  ac(p,b)
+  ac(ce("hr"),b)
+  p.id=f.name
+  cb(f.name)
  }
- id("h.",ac(ce("pre"),b)).onmouseup=Up
+ id("h.",ac(ce("pre"),T)).onmouseup=Up
+ ac(T,b)
 }
+
+let cb=n=>{ ac(tc(n+" ",cl("l",ce("span"))),T).onclick=cs }
+let cs=e=>{let t=e.target,i=t.textContent.trim(),x=ge(i)
+ t.classList.toggle("x");x.classList.toggle("n");if(!x.classList.contains("n")){x.scrollIntoView();x.focus()}}
 
 let Up=s=>{s=getSelection().toString();if((""!=s)&&(s in h))ge("h.").textContent+="\n"+h[s]}
 let up=e=>{if(e.button)return;let p=e.target.parentElement,t=(("SPAN"==p.tagName)?p:t),s=getSelection().toString()
