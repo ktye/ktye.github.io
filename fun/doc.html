@@ -8,6 +8,7 @@ pre{margin:0}
 table{margin:1em}
 table,th{border:1px solid}td{border-right:1px solid}th{background:#eee}
 table,th,td{border-collapse:collapse}
+td{text-align:center}
 pre{background:#eee;margin:1em}
 </style>
 </head><body>
@@ -70,23 +71,58 @@ e.g. for an integer vector of length n, the size in bytes is <tt>2&lt;&lt;n</tt>
 
 <h2>memory/bucket system</h2>
 
-<tt>bn</tt> returns the <b>bucket type</b> from the required size in bytes for vector data:
+data lives in the workspace <tt><b>W</b></tt>: <tt>Zi W[1&lt;&lt;28]</tt> defined as an array of 32bit integers. it can store 1GB of data.<br/>
+k values store the offset into the workspace at bits 32..57, <tt>ox</tt> returns the offset.<br/>
+<tt>sx</tt> returns the pointer into <tt>W</tt> given the offset from a k value, by scaling it with 32:
+
+<pre>
+#define <b>sx</b> ((i0*)(W+32*ox))
+#define <b>ox</b> (B(25)&x&gt;&gt;32)
+#define <b>B</b>(e) ((1L&lt;&lt;(e))-1)
+</pre>
+
+at program start <tt>Ww</tt> initializes the free list <tt>H</tt> which contains offsets for free memory blocks for a bucket size given by index <tt>i</tt>.
+<pre>
+Zi <b>H</b>[25];
+f(<b>Ww</b>,i(25,Hi=1&lt;&lt;i)0)
+</pre>
+
+<tt>H</tt> contains the following values pointing into the workspace <tt>W</tt>
+<table>
+<tr><th>bucket type <tt>i</tt></th><th>free list <tt>H[i]</tt></th><th>byte offset to <tt>W</tt></th><th>block size(bytes)</th><th>max data size(bytes)</th></tr>
+<tr><td>0</td><td>1</td><td>128</td> <td>128</td><td>61</td> </tr>
+<tr><td>1</td><td>2</td><td>256</td> <td>256</td><td>189</td></tr>
+<tr><td>2</td><td>4</td><td>512</td> <td>512</td><td>445</td></tr>
+<tr><td>..</td><td>..</td><td>..</td> <td></td><td>..</td></tr>
+<tr><td>24</td><td>16 777 216</td><td>2 147 483 648</td><td>2 147 483 648</td><td>2 147 483 581</td></tr>
+</table>
+
+<pre>
+          ┌────┬─────┬─  ─┐                                           ┌────┬─────┬─  ─┐                                  
+          │H 0 │ H 1 │ .. │                                           │H 0 │ H 1 │ .. │                                  
+          ├────┼─────┼    ┤                                           ├────┼─────┼    ┤                                  
+          │  1 │  2  │    │                                           │  1 │  2  │    │                                  
+          └──┬─┴────┬┴─  ─┘                                           └──┬─┴────┬┴─  ─┘                                  
+             └────┐ └─────────────────────────────────┐                  └────┐ └─────────────────────────────────┐      
+         ┬─────┬──↓──┬─────┬─────┬  ┬─────┬  ┬─────┬──↓──┬           ┬─────┬──↓──┬─────┬─────┬  ┬─────┬  ┬─────┬──↓──┬   
+ W-index │  31 │  32 │     │     │..│  47 │..│     │  64 │ ..        │  31 │  32 │     │     │..│  47 │..│     │  64 │ ..
+         ┼─────┼─────┼─────┼─────┼  ┼─────┼  ┼─────┼─────┼           ┼─────┼─────┼─────┼─────┼  ┼─────┼  ┼─────┼─────┼   
+ W+byte  │ 124 │ 128 │     │     │..│ 189 │..│     │ 256 │ ..        │ 124 │ 128 │     │     │..│ 189 │..│     │ 256 │ ..
+         ┼─────┼─────┼─────┼─────┼  ┼─────┼  ┼─────┼─────┼           ┼─────┼─────┼─────┼─────┼  ┼─────┼  ┼─────┼─────┼   
+ value   │   1 │   0 │  1  │  2  │..│     │..│   1 │  -3 │ ..        │   1 │   0 │  1  │  2  │..│     │..│   1 │  -3 │ .. 
+         ┴─────┴─────┴─────┴─────┴  ┴─────┴  ┴─────┴─────┴           ┴─────┴─────┴─────┴─────┴  ┴─────┴  ┴─────┴─────┴   
+         ┼  rc ┼ data→             data-end┤ ├  rc ┼ data→                 ┼  rc ┼ data→             data-end┤ ├  rc ┼ data→   
+</pre>
+
+<tt>bn</tt> calculates the <b>bucket type</b> from the required size in bytes for vector data (this is the max data size in the table above):
 
 <pre>
 i1(<b>bn</b>,i+=4+63;128&lt;i?l(i)-7:0)
 #define <b>l</b>(e) (64-bu(clzl)((e)-1))      //log2
 </pre>
 
-<table>
-<tr><th>bucket type</th><th>data size(bytes)</th></tr>
-<tr><td>0</td><td>..61</td></tr>
-<tr><td>1</td><td>62..189</td></tr>
-<tr><td>2</td><td>190..445</td></tr>
-<tr><td>...</td><td>...</td></tr>
-</table>
 
 <i>why?</i> is there anything in the header besides 4 byte refcount?</br>
-todo memory layout..
 <pre>
  4 for the refcount
  63 so that we can always write 64 bytes at the end-1 (for x,y)
@@ -94,15 +130,6 @@ todo memory layout..
 </pre>
 </p>
 
-data lives in the workspace <tt><b>W</b></tt>: <tt>Zi W[1&lt;&lt;28]</tt> which can store 1GB of data.<br/>
-k values store the offset into the workspace at bits 32..57, <tt>ox</tt> returns the offset.<br/>
-<tt>sx</tt> returns the pointer withing the offset for a k value, scaling the offset by 32:
-
-<pre>
-#define <b>sx</b> ((i0*)(W+32*ox))
-#define <b>ox</b> (B(25)&x&gt;&gt;32)
-#define <b>B</b>(e) ((1L&lt;&lt;(e))-1)
-</pre>
 
 <b>free memory</b> is organized in a linked list.
 at the start of a free memory block, the offset to the next free block is stored.  
@@ -152,7 +179,30 @@ f(<b>_t</b>,if(!tx)N(_r(xu))_o(bn(Nx),ox))
 </pre>
 
 <h2>parse</h2>
+
+<tt>ws</tt> parses an input string, evaluates it and prints the result:
+
+<pre>
+us(<b>ws</b>,*s?wx(92==*s?ys(s):es(s)):0)
+ f(<b>wx</b>,Q(x)x?w(tx?s1(x):cC(10,e(s1,x))):0)
+us(<b>ys</b>,c3(iz(*++s==*(Z*)"ltw"),ls(s+2),ts(s+2),nw(0)))
+</pre>
+
+<tt>ys</tt> handles commands that follow a backslash <tt>\t</tt><i>(time)</i>, <tt>\l</tt><i>(load)</i>.
+<tt>es</tt> parses the string and <tt>wx</tt> writes the result.
+
+<pre>
+us(<b>es</b>,ux=ps(s);Q(x)_x(D(x)))
+</pre>
+
+<p/><i>todo..</i>
+
+<h2>print</h2>
+<tt>wx</tt>..
+<i>todo..</i>
+
 <h2>primitives</h2>
+<h3>iota <tt>n_</tt></h3>
 as an example, let's look at the implementation for <tt>!x</tt>, known as iota, til or index generation:
 <pre>
 f(<b>n_</b>,Qr(!tx)qi?ax?n(ix):qb?ind(x):QT:qg?G_(x):QT)
@@ -187,6 +237,18 @@ ZI NZ={q0,q1,q2,q3};                         //NZ are predeclared integer range 
 <tt>n(x)</tt> creates an integer vector of length x and fills the data by iterating over x in wide steps.
 it assigns 16 values at a time using the pre-defined sequence <tt>NZ</tt> 0..15.
 the core of the function is just <tt>ui(n,T(3,i,16*i+NZ))</tt> but it takes many levels of expanding definitions to understand what's it doing exactly.
+
+<h3>enlist <tt>l_</tt></h3>
+<tt>,x</tt> is enlist. in c the primitive is called <tt>l_</tt>
+
+<pre>
+f(<b>l_</b>,R(tx,1,*(u*)sr=5&gt;tx?x:gx))
+</pre>
+
+it creates a vector of length 1 of the same type as <tt>x</tt> and puts the value in the data part. geo types are handled differently <i>todo..</i>.<br/>
+even for smaller types that carry their value in the lower bytes, all 8 bytes are written to the data, the upper bytes can be ignored.
+
+<p/><i>todo..</i>
 
 <h2>vector instructions</h2>
 <i>porting..</i><p/>
