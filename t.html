@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="kelas16.png">
+<title>ktye/k</title>
+<style>
+*{background:#fafafa;font-family:monospace}
+pre{margin:0}
+</style>
+</head><body onload="kinit()">
+
+<pre id="o"></pre>
+<script>
+let g=x=>document.getElementById(x)
+let lo=x=>Number(BigInt.asUintN(32,x))
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
+let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+
+let O=s=>g("o").textContent+=s
+
+let /*there be*/ K
+let C=_=>new Uint8Array(K.memory.buffer)
+let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
+let kenv={env:{
+ Write:(a,b,c,d)=>O(S(c,d)),
+ Args:()=>0,Arg:()=>0,Exit:x=>0,
+ Read:(a,b,c,d)=>0,ReadIn:(a,b,c,d)=>0,Native:(a,b)=>0,
+}}
+
+/*
+let key=(e,t)=>{if("Enter"==e.key){
+ let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
+ try{ws(us(s));t.textContent+=" "}catch(e){
+  kinit()}
+  E()}}
+ */
+ 
+let ws=u=>{let x=K.mk(18,u.length);C().set(u,lo(x));K.dx(K.Val(x))}
+
+let sr=s=>fe(s,x=>{g("src").textContent=x})
+
+let t=x=>{
+ x="n:100000;while[n-:1;"+x+";0]";O(x+" /")
+ let a=performance.now();ws(us(x));O((performance.now()-a)+" ms\n")
+}
+
+let b=[ "2", "~~~~~~~~~~2", "*,*,*,*,*,2", "e:1000#2%3.", "-e", "2%e", "%e", "log e" ]
+
+let kinit=(w)=>{
+ fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
+  K=r.instance.exports,M=K.__heap_base
+  K.kinit()
+  b.forEach(t)})}
+
+</script></body></html>
