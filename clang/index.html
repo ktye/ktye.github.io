@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>clang</title>
+<style>
+*{background:#fafafa;font-family:monospace}
+pre{margin:0}
+.l{color:blue}
+.l:hover{cursor:pointer;text-decoration:underline}
+table,th,td{border:1px solid black;border-collapse:collapse}
+#t{background:black;color:white;height:25em;flex-grow:1;line-height:1;padding:3px;outline:none}
+</style>
+</head><body onload="kinit('k.wasm')">
+
+<div style="display:flex;gap:2px">
+<pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+<pre id="ref" style="background:#ffe;border:2px solid;line-height:1;color:black;display:inline-block;right:0;top:0">
+ktye/k ktye.github.io/kdoc.htm
++ flp add  '  ech both bin lin
+- neg sub  /  ovr/fix echright
+* fst mul  \  scn/fix eachleft
+% sqr div      / join   decode
+! til key  mod \ split  encode
+& wer min  $[a;b;...]     cond
+| rev max  while[c;a;b;d;e;..]
+< asc les  f:{x+y}   [bl;o;ck]
+> dsc mor              "abc" c
+= grp eql  01234567   1 2 3  i
+~ not mtc   :+-*%&|   <s>4 5 6. f</s>
+, enl cat  <>=~!,^#   <s>2a300  z</s>
+^ srt cut  _$?@.     (1;2 3) L
+# cnt tak           `a`b!5 6 D
+_ flr drp  t,d t,t t,'t   join
+$ str cst           k!t    key
+? unq fnd  in       k?t  group
+@ typ atx  @[x;i;+;y]    amend
+. val cal  .[x;i;+;y]    dmend
+                              
+<s>abs sin cos exp log</s> find <s>angle</s>
+<s>imag conj</s>  types:cis<s>fz</s>LDTvcdl<s>x</s>
+<s>?n(uniform) ?-n(normal) ?z(bi)</s>
+n?n(with)   random   -n?n(w/o)
+</pre>
+</div>
+
+<fieldset style="border:none;padding:0">
+<input type="radio" id="ktye"  onclick="sel(this)" name="ver" value="k" checked /><label for="ktye">ktye</label>
+<input type="radio" id="clang" onclick="sel(this)" name="ver" value="c"         /><label for="clang">clang</label>
+| <label id="w"></label>
+</fieldset>
+
+
+<h1>ktye vs clang - wasm binary size</h1>
+comparison of ktye/k (integer-version) compiled natively vs clang-14.</br>
+ktye/k source is available as a go ast.
+it is tranlated to wasm or to a k-table by <a href="https://github.com/ktye/wg" target="_blank">wg</a>.
+wg translates the ast (a go subset) directly, it is not a go compiler.
+
+<p/>
+<pre>
+                   wg                              wasm-opt -Oz
+    k.go ──────────────────────────────→ kk.wasm  ─────────────→  k.wasm
+    
+         wg -k       k cc.k                        wasm-opt -Oz
+    k.go ─────→  k.k ──────→ k.c ──────→ cc.wasm  ─────────────→  c.wasm
+    
+</pre>
+<p/>
+
+
+<div style="display:flex">
+<table>
+<tr><th>source</th><th>wasm</th><th>wasm-opt</th></tr>
+<tr><td>63889 k.go</td><td>24142 kk.wasm</td><td>22343 k.wasm</td></tr>
+<tr><td>77953 k.c </td><td>43002 cc.wasm</td><td>42850 c.wasm</td></tr>
+</table>
+<pre>
+    k.wasm
+   ──────── = 0.52
+    c.wasm
+</pre>
+</div>
+
+<p/>
+<div style="display:flex;justify-content:space-between"><span class="l" onclick="sr(this.textContent)">k.go</span> <span class="l" onclick="sr(this.textContent)">k.c</span> <span class="l" onclick="sr(this.textContent)">cc.k</span> <span class="l" onclick="sr(this.textContent)">mk</span></div>
+<hr/>
+<pre id="src" style="background:#ffe;overflow:auto">
+
+<script>
+let g=x=>document.getElementById(x)
+let fe=(x,y)=>fetch(x).then(r=>r.text()).then(r=>y(r))
+let t=g("t"),j=g("j") //t:console(content-editable pre element)
+let O=s=>{t.textContent=(t.textContent+s).split("\n").slice(-25).join("\n");E()}
+let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.addRange(r);t.focus()}
+let lo=x=>Number(BigInt.asUintN(32,x))
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
+let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+
+let sel=t=>{kinit(t.value+".wasm")}
+ 
+let /*there be*/ K
+//let C=_=>new Uint8Array(K.memory.buffer)
+let S=(x,n)=>su(C.slice(x,x+n))
+//let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
+let kenv={env:{Write:(a,b,c,d)=>O(S(c,d))}}
+
+let key=(e,t)=>{if("Enter"==e.key){
+ let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
+ try{ws(us(s));t.textContent+=" "}catch(e){
+  kinit()}
+  E()}}
+ 
+let ws=u=>{let x=K.mk(18,u.length);C.set(u,lo(x));K.repl(x)}
+
+let sz=(b,w)=>{g("w").textContent=w+" "+b.byteLength+" bytes";return b}
+let sr=s=>fe(s,x=>{g("src").textContent=x})
+
+let kinit=(w)=>{t.textContent=""
+ sr((w=="c.wasm")?"k.c":"k.go")
+ fetch(w).then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(sz(r,w),kenv)).then(r=>{
+  K=r.instance.exports,M=K.__heap_base
+  let of=0;
+  if(w==="c.wasm")of=K.init()
+  K.kinit()
+  C=new Uint8Array(K.memory.buffer,of)
+  console.log("of",of)
+  O("ktye/k\n ")})}
+
+</script></body></html>

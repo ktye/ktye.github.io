@@ -1,0 +1,23 @@
+# k.go → kk.wasm
+wg k.go  | grep -v Read | grep -v Exit | grep -v Arg | wat2wasm - -o kk.wasm
+
+# kk.wasm → k.wasm
+wasm-opt --enable-bulk-memory -Oz kk.wasm -o k.wasm
+
+# k.go → k.k (table form)
+wg -k k.go > k.k
+
+
+# k.k → k.c
+k k.k cc.k -e '`"k.c"<cc``lib'
+
+# k.c → cc.wasm (clang)
+W="--target=wasm32 -Os -mbulk-memory --no-standard-libraries"
+E="-Wl,--export=kinit,--export=repl,--export=mk,--export=init,-allow-undefined,--no-entry"
+/c/local/LLVM/bin/clang $W $E k.c -o cc.wasm
+
+# cc.wasm → c.wasm
+wasm-opt --enable-bulk-memory -Oz cc.wasm -o c.wasm
+
+wc -c k.go k.c kk.wasm k.wasm cc.wasm c.wasm
+rm cc.wasm kk.wasm
