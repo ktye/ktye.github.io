@@ -39,9 +39,13 @@ let kenv={env:{
 
 let key=(e,t)=>{if("Enter"==e.key){
  let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
- try{ws(us(s));t.textContent+=" "}catch(e){
-  O("segmentation fault\n");B=kinit()}
-  E()}}
+// try{
+  ws(us(s));t.textContent+=" "
+// }catch(e){
+//  O("segmentation fault\n");B=kinit()
+// }
+  E()
+}}
  
 let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=x);c[B+u.length]=0;K.keval(B,u.length)}  //fill buffer then call w_(e(s))
 
