@@ -258,31 +258,131 @@ the implementation uses primarily avx512 simd intrinsics that are ported/replace
 
 <table>
 <tr><th><tt>q </tt></th><td>apply sqrtf to each of 16 floats</td></tr>
-<tr><th><tt>z </tt></th><td>select bytes from x with index y (0 for out of range)</td></tr>
-<tr><th><tt>PG</tt></th><td>complex multiplication?</td></tr>
+<tr><th><tt>z </tt></th><td>select bytes from x with index y (0 for out of range).<br/>4 separate 16-element shuffles using 4-bit indices</td></tr>
+<tr><th><tt>PG</tt></th><td>complex multiplication</td></tr>
 <tr><th><tt>b_</tt></th><td>compress high bits in x to u</td></tr>
 <tr><th><tt>_b</tt></th><td>expand bitmask u to bytes 1 0. 1(last bit) not -1(all bits)?</td></tr>
 <tr><th><tt>B_</tt></th><td>selects byte values from x with corresponding bits set in mask <tt>b</tt>.<br/>values are stored at the front of the result filled with zeros</td></tr>
 </table>
 
-avx512 implementations:
+avx512 implementations. the code uses clang builtins which don't need headers. the intrinsics are easier to google, some have their arguments in different orders:
 <table>
-<tr><th><tt>q</tt></th><td><tt>z1(q,zo(sqrtps)(x,4))</tt></td></tr>
-<tr><th><tt>z</tt></th><td><tt>z2(z,zo(pshufb)(x,y))</tt></td></tr>
-<tr><th><tt>PG</tt></th><td><tt>z2(PG,wo(vfmaddsubps512_mask3)(z4(x,0xa0),y,z4(x,0xf5)*z4(y,0xb1),-1,9))</tt></td></tr>
-<tr><th><tt>b_</tt></th><td><tt>du(b_,zo(cvtb2mask)(x),Zx)</tt></td></tr>
-<tr><th><tt>_b</tt></th><td><tt>zu(_b,zo(selectb_)(x,1+Z0,Z0))</tt></td></tr>
-<tr><th><tt>B_</tt></th><td><tt>bZ(B_,wo(compressqi512_mask)(x,x^x,b))</tt></td></tr>
+<tr><th></th><th></th><th>builtin</th><th>instrinsic</th></tr>
+<tr><th><tt>q</tt></th><td><tt>z1(q,zo(sqrtps)(x,4))</tt></td><td>sqrtps</td><td>_mm512_sqrt_round_ps</td></tr>
+<tr><th><tt>z</tt></th><td><tt>z2(z,zo(pshufb)(x,y))</tt></td><td>pshufb</td><td>_mm512_shuffle_epi8</td></tr>
+<tr><th><tt>PG</tt></th><td><tt>z2(PG,wo(vfmaddsubps512_mask3)(z4(x,0xa0),y,z4(x,0xf5)*z4(y,0xb1),-1,9))</tt></td><td></td><td></td></tr>
+<tr><th><tt>b_</tt></th><td><tt>du(b_,zo(cvtb2mask)(x),Zx)</tt></td><td>cvtb2mask</td><td>_mm512_movepi8_mask</td></tr>
+<tr><th><tt>_b</tt></th><td><tt>zu(_b,zo(selectb_)(x,1+Z0,Z0))</tt></td><td>selectb_</td><td>_mm512_maskz_broadcastb_epi8</td></tr>
+<tr><th><tt>B_</tt></th><td><tt>bZ(B_,wo(compressqi512_mask)(x,x^x,b))</tt></td><td>compressqi512_mask</td><td>_mm512_maskz_compress_epi8</td></tr>
 </table>
 
 <pre>
 r: __builtin_ia32_pshufb512(x,y) -> _mm512_shuffle_epi8(x,y)
-avx2: F2(z,z_) splits into 2 parts. how? it cannot shuffle from one part into the other? maybe the ranges do not exceed 32 if they only shuffle ascii ranges.
-wasm: i8x16.swizzle (+const?)  swizzle sets 0 when out of range 0..15, pshufb when 1bit is set
+4 separate 16-element shuffles using 4-bit indices
 
 b_ cvtb2mask movepi8_mask
 _b selectb   mask_mov_epi8
 
 </pre>
+
+<h3>wasm replacements</h3>
+clang emits simd instructions for webassembly if we add <tt>-msimd128</tt>.
+it might be possible to use simd128 intrinsics in c but it seems to be complicated.
+instead we write replacement functions in text format. we can use <a href="wapatch.go">wapatch</a> to replace function bodies.
+<pre>
+#replace function bodies f g h with content of f.wat g.wat h.wat
+$clang --target=wasm32 [..] -oa.wasm && wasm2wat a.wasm | wapatch f g h | wat2wasm - -o b.wasm
+</pre>
+we need to have the c functions that we want to replace available in the text format. we can do that by exporting the function, or for debugging just <tt>--export-all</tt>.
+we also need to remove all static function declarations, otherwise no functions are exported.<br/>
+for the function signature <tt>Z f(Zx)</tt> the vector argument is replaced by 4 v128 arguments, but the result is not.
+it looks like clang inserts a pointer for the result, so that the function signature is now <tt>(func (param i32 v128 v128 v128 v128))</tt> with no result.</p>
+<details><summary><tt>q.wat</tt></summary>
+<pre>
+(func (param i32 v128 v128 v128 v128)
+ local.get 0
+ local.get 0
+ local.get 0
+ local.get 0
+ local.get 1
+ f32x4.sqrt
+ v128.store
+ local.get 2
+ f32x4.sqrt
+ v128.store offset=16
+ local.get 3
+ f32x4.sqrt
+ v128.store offset=32
+ local.get 4
+ f32x4.sqrt
+ v128.store offset=48)
+</pre></details>
+
+<details><summary><tt>z.wat</tt></summary>
+<pre>
+(func (param i32 v128 v128 v128 v128 v128 v128 v128 v128)
+ local.get 0
+ local.get 0
+ local.get 0
+ local.get 0
+
+ local.get 1
+ local.get 5
+ i8x16.swizzle
+ v128.store
+
+ local.get 2
+ local.get 6
+ i8x16.swizzle
+ v128.store offset=16
+
+ local.get 3
+ local.get 7
+ i8x16.swizzle
+ v128.store offset=32
+
+ local.get 4
+ local.get 8
+ i8x16.swizzle
+ v128.store offset=48)
+
+</pre></details>
+
+<details><summary><tt>b_.wat</tt></summary>
+<pre>
+(func (param v128 v128 v128 v128) (result i64)
+ (local $r i64)
+ local.get 0
+ i8x16.bitmask
+ i64.extend_i32_u
+ local.tee $r
+
+ local.get 1
+ i8x16.bitmask
+ i64.extend_i32_u
+ i64.const 8
+ i64.shl
+ i64.or
+ local.tee $r
+
+ local.get 2
+ i8x16.bitmask
+ i64.extend_i32_u
+ i64.const 16
+ i64.shl
+ i64.or
+ local.tee $r
+ 
+ local.get 3
+ i8x16.bitmask
+ i64.extend_i32_u
+ i64.const 24
+ i64.shl
+ i64.or
+ local.tee $r)
+</pre></details>
+
+for <tt>_b</tt> there seems to be no bits to bytes expansion. maybe multiplications can be used.
+
 
 </body></html>
