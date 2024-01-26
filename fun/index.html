@@ -34,7 +34,7 @@ let kenv={env:{
  nF:(x,Y)=>{console.log("nF",x,Y);return 0n},
  f_:(X,y)=>{console.log("f_",X,y);return 0},
  _f:(x)=>{console.log("_f",x);return 0},
- u_:()=>{console.log("_u");return 0}, //rdtsc
+ u_:()=>{return performance.now() /*ms*/}, //rdtsc
 }}
 
 let key=(e,t)=>{if("Enter"==e.key){

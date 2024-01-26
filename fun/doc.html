@@ -350,39 +350,140 @@ it looks like clang inserts a pointer for the result, so that the function signa
 
 <details><summary><tt>b_.wat</tt></summary>
 <pre>
-(func (param v128 v128 v128 v128) (result i64)
- (local $r i64)
- local.get 0
- i8x16.bitmask
- i64.extend_i32_u
- local.tee $r
-
- local.get 1
- i8x16.bitmask
- i64.extend_i32_u
- i64.const 8
- i64.shl
- i64.or
- local.tee $r
-
- local.get 2
- i8x16.bitmask
- i64.extend_i32_u
- i64.const 16
- i64.shl
- i64.or
- local.tee $r
- 
- local.get 3
- i8x16.bitmask
- i64.extend_i32_u
- i64.const 24
- i64.shl
- i64.or
- local.tee $r)
+  (func (param v128 v128 v128 v128) (result i64)
+   (local $r i64)
+   local.get 0
+   i8x16.bitmask
+   i64.extend_i32_u
+   local.tee $r
+  
+   local.get 1
+   i8x16.bitmask
+   i64.extend_i32_u
+   i64.const 8
+   i64.shl
+   i64.or
+   local.tee $r
+  
+   local.get 2
+   i8x16.bitmask
+   i64.extend_i32_u
+   i64.const 16
+   i64.shl
+   i64.or
+   local.tee $r
+  
+   local.get 3
+   i8x16.bitmask
+   i64.extend_i32_u
+   i64.const 24
+   i64.shl
+   i64.or
+   local.tee $r)
 </pre></details>
 
-for <tt>_b</tt> there seems to be no bits to bytes expansion. maybe multiplications can be used.
+<details><summary><tt>_b.wat</tt></summary>
+<pre>
+  (func (param $r i32) (param $x i64)
+   (local $i v128) (local $j v128) (local $m v128)
+   
+   local.get $r
+   local.get $x
+   i32.wrap_i64
+   i8x16.splat
+  
+   local.get $x
+   i64.const 8
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   v128.const i8x16 255 255 255 255 255 255 255 255 0 0 0 0 0 0 0 0
+   local.tee $i
+   v128.bitselect
+   
+   v128.const i8x16 1 2 4 8 16 32 64 128 1 2 4 8 16 32 64 128
+   local.tee $m
+   v128.and
+   
+   i32.const 1
+   i8x16.splat
+   local.tee $j
+   i8x16.min_u
+   v128.store
+   
+   local.get $r
+   local.get $x
+   i64.const 16
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   local.get $x
+   i64.const 24
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   local.get $i
+   v128.bitselect
+   local.get $m
+   v128.and
+   local.get $j
+   i8x16.min_u
+   v128.store offset=128
+   
+   local.get $r
+   local.get $x
+   i64.const 32
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   local.get $x
+   i64.const 40
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   local.get $i
+   v128.bitselect
+   local.get $m
+   v128.and
+   local.get $j
+   i8x16.min_u
+   v128.store offset=256
+   
+   local.get $r
+   local.get $x
+   i64.const 48
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   local.get $x
+   i64.const 56
+   i64.shr_u
+   i32.wrap_i64
+   i8x16.splat
+   
+   local.get $i
+   v128.bitselect
+   local.get $m
+   v128.and
+   local.get $j
+   i8x16.min_u
+   v128.store offset=384)
+</pre>
+<pre> or with multiplication
+//bytes from bits (expand)
+func expand(b uint8) (r uint64) {
+	u := uint64(b)
+	a := uint64(0x0102040810204080) //multiplier
+	m := uint64(0x8080808080808080) //mask
+	return (((u&0x7f)*a | (u << 56)) & m) >> 7
+}
+</pre></summary>
 
 
 </body></html>
