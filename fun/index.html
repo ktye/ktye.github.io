@@ -28,13 +28,14 @@ let /*there be*/ K
 let C=_=>new Uint8Array(K.memory.buffer)
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
- w_:(x,Y,Z)=>{console.log("w_",x,Y,Z);O(S(lo(Y),lo(Z)));return Z}, //console.log("w_",x,Y,Z);return 0n},
+ deb:x=>{console.log("deb",x);return x;},
+ w_:(x,Y,Z)=>{O(S(lo(Y),lo(Z)));return Z},
  _w:(x,Y,Z)=>{console.log("_w",x,Y,Z);return 0n},
  //write:(x,y,z)=>{O(S(y,z));return z},
  nF:(x,Y)=>{console.log("nF",x,Y);return 0n},
  f_:(X,y)=>{console.log("f_",X,y);return 0},
  _f:(x)=>{console.log("_f",x);return 0},
- u_:()=>{return performance.now() /*ms*/}, //rdtsc
+ u_:()=>{return BigInt(Math.floor(2.4e6*performance.now()))}, //rdtsc
 }}
 
 let key=(e,t)=>{if("Enter"==e.key){

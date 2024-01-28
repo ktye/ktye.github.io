@@ -276,16 +276,7 @@ avx512 implementations. the code uses clang builtins which don't need headers. t
 <tr><th><tt>B_</tt></th><td><tt>bZ(B_,wo(compressqi512_mask)(x,x^x,b))</tt></td><td>compressqi512_mask</td><td>_mm512_maskz_compress_epi8</td></tr>
 </table>
 
-<pre>
-r: __builtin_ia32_pshufb512(x,y) -> _mm512_shuffle_epi8(x,y)
-4 separate 16-element shuffles using 4-bit indices
-
-b_ cvtb2mask movepi8_mask
-_b selectb   mask_mov_epi8
-
-</pre>
-
-<h3>wasm replacements</h3>
+<h3 id="wasmsimd">wasm replacements</h3>
 clang emits simd instructions for webassembly if we add <tt>-msimd128</tt>.
 it might be possible to use simd128 intrinsics in c but it seems to be complicated.
 instead we write replacement functions in text format. we can use <a href="wapatch.go">wapatch</a> to replace function bodies.
