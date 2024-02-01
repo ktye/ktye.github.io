@@ -1,19 +1,68 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
-<title>k/fun doc</title>
+<title>k/fun</title>
 <style>
+*{background:#eee}
 body{font-family:georgia,serif}
-pre{margin:0}
 table{margin:1em}
 table,th{border:1px solid}td{border-right:1px solid}th{background:#eee}
 table,th,td{border-collapse:collapse}
 td{text-align:center}
 pre{background:#eee;margin:1em}
+#t{background:black;color:white;height:20em;line-height:1;padding:3px;margin:0;outline:none;font-size:xlarge}
 </style>
-</head><body>
+</head><body onload="kinit()">
 
-<h2>nomen</h2>
+<pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+<p/>
+<script>
+
+
+let g=x=>document.getElementById(x)
+let t=g("t"),j=g("j") //t:console(content-editable pre element)
+let O=s=>{t.textContent=(t.textContent+s).split("\n").slice(-20).join("\n");E()}
+let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createRange();r.selectNodeContents(t);r.collapse(false);s.addRange(r);t.focus()}
+let lo=x=>Number(BigInt.asUintN(32,x))
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
+let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+
+ 
+let /*there be*/ K
+let C=_=>new Uint8Array(K.memory.buffer)
+let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
+let kenv={env:{
+ deb:x=>{console.log("deb",x);return x;},
+ w_:(x,Y,Z)=>{O(S(lo(Y),lo(Z)));return Z},
+ _w:(x,Y,Z)=>{console.log("_w",x,Y,Z);return 0n},
+ //write:(x,y,z)=>{O(S(y,z));return z},
+ nF:(x,Y)=>{console.log("nF",x,Y);return 0n},
+ f_:(X,y)=>{console.log("f_",X,y);return 0},
+ _f:(x)=>{console.log("_f",x);return 0},
+ u_:()=>{return BigInt(Math.floor(2.4e6*performance.now()))}, //rdtsc
+}}
+
+let key=(e,t)=>{if("Enter"==e.key){
+ let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
+// try{
+  ws(us(s));t.textContent+=" "
+// }catch(e){
+//  O("segmentation fault\n");B=kinit()
+// }
+  E()
+}}
+ 
+let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=x);c[B+u.length]=0;K.keval(B,u.length)}  //fill buffer then call w_(e(s))
+
+
+let kinit=()=>{
+ fetch("b.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
+  K=r.instance.exports,M=K.__heap_base
+  B=K.kinit()
+  O(" ")})}
+
+</script>
+
 i use the name <i>vector</i> for unitype 1d arrays; <i>list</i> for general mixed-type lists which may be nested.
 
 <h2>k types and values</h2>
@@ -475,6 +524,5 @@ func expand(b uint8) (r uint64) {
 	return (((u&0x7f)*a | (u << 56)) & m) >> 7
 }
 </pre></summary>
-
 
 </body></html>

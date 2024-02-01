@@ -3,15 +3,19 @@
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
 <title>k/fun</title>
 <style>
-*{background:#eee;font-family:monospace}
-pre{margin:0}
-#t{background:black;color:white;height:20em;line-height:1;padding:3px;outline:none;font-size:xlarge}
+*{background:#eee}
+body{font-family:georgia,serif}
+table{margin:1em}
+table,th{border:1px solid}td{border-right:1px solid}th{background:#eee}
+table,th,td{border-collapse:collapse}
+td{text-align:center}
+pre{background:#eee;margin:1em}
+#t{background:black;color:white;height:20em;line-height:1;padding:3px;margin:0;outline:none;font-size:xlarge}
 </style>
 </head><body onload="kinit()">
 
 <pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
-<a href="doc.html">doc</a>
-
+<p/>
 <script>
 
 
@@ -26,16 +30,28 @@ let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  
 let /*there be*/ K
 let C=_=>new Uint8Array(K.memory.buffer)
+let M,B,ma=x=>{M+=x;return M-x}
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
- deb:x=>{console.log("deb",x);return x;},
- w_:(x,Y,Z)=>{O(S(lo(Y),lo(Z)));return Z},
- _w:(x,Y,Z)=>{console.log("_w",x,Y,Z);return 0n},
- //write:(x,y,z)=>{O(S(y,z));return z},
- nF:(x,Y)=>{console.log("nF",x,Y);return 0n},
- f_:(X,y)=>{console.log("f_",X,y);return 0},
- _f:(x)=>{console.log("_f",x);return 0},
- u_:()=>{return BigInt(Math.floor(2.4e6*performance.now()))}, //rdtsc
+ read:(X,y,Z)=>{console.log("read",X,y,Z);return 0},
+ write:(X,y,Z)=>{console.log("write",X,y,Z);O(S(y,lo(Z)));return lo(Z);},
+ free:(x)=>{console.log("free",x);},
+ malloc:(x)=>{console.log("malloc",x);return ma(x)},
+ uz:()=>{return BigInt(Math.floor(2.4e6*performance.now()))},
+ expf:x=>{return Math.exp(x)},
+ logf:x=>{return Math.log(x)},
+ csqrtf:(x,y)=>{console.log("csqrtf",x,y)},
+ clogf:(x,y)=>{console.log("clogf",x,y)},
+ cexpf:(x,y)=>{console.log("cexpf",x,y)},
+ sprintf:(x,y,z)=>{
+  let c=C(),i=new Int32Array(K.memory.buffer),f=new Float64Array(K.memory.buffer),s="?"
+  s=""+((100==c[1+y])?i[z>>2]:(103==c[1+y])?f[z>>3]:".?.") //todo %g+.%g
+  z=us(s);y=s.length;z[y]=0;c.set(z,x);return y},
+ stat:(x,y)=>{console.log("stat",x,y);return 0},
+ open:(x,Y)=>{console.log("open",x,Y);return 0},
+ close:(X)=>{console.log("close",X);return 0},
+ __mulsc3:(r,a,b,c,d)=>{console.log("__mulsc3",r,a,b,c,d)},
+ __divsc3:(r,a,b,c,d)=>{console.log("__divsc3",r,a,b,c,d)},
 }}
 
 let key=(e,t)=>{if("Enter"==e.key){
@@ -54,7 +70,12 @@ let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=x);c[B+u.length]=0;K.keval(B,u.leng
 let kinit=()=>{
  fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports,M=K.__heap_base
-  B=K.kinit()
+  K.kinit()
+  B=ma(64);
   O(" ")})}
 
-</script></body></html>
+</script>
+
+
+
+</body></html>
