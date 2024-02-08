@@ -26,26 +26,47 @@ let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createR
 let lo=x=>Number(BigInt.asUintN(32,x))
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
-
  
+ 
+let cexpf=(x,y)=>{let e=Math.exp(x);return[e*Math.cos(y),e*Math.sin(y)]}
+let clogf=(x,y)=>{let r=Math.hypot(x,y),p=Math.atan2(y,x);r=Math.log(r);return[r*Math.cos(p),r*Math.sin(p)]}
+let csqrtf=(x,y)=>{
+ if(x>=0){let t=Math.sqrt(( x+Math.hypot(x,y))*0.5);return[t,y/(2.0*t)]}
+ else    {let t=Math.sqrt((-x+Math.Hypot(x,y))*0.5);return[Math.abs(y)/(2.0*t),(y<0)?-t:t]}}
+
+
 let /*there be*/ K
+
+let II=x=>new Uint32Array(K.memory.buffer)   //malloc/free
+let BK=new Array(32).fill(0)
+let bk=x=>Math.max(6,32-Math.clz32(8+x))
+let mk=x=>{let I=II(),s=1<<x;if(s<K.memory.buffer.byteLength-M){I[M>>2]=x;x=M;M+=s;return x};K.memory.grow(Math.max(1,s/65536));return mk(x)}
+let ma=x=>{let I=II();let b=bk(x),p=BK[b];if(p){BK[b]=I[p>>2];I[p>>2]=b;return 8+p};return mk(b)}
+let fr=x=>{x-=8;let I=II(),b=I[x>>2];I[x>>2]=BK[b];BK[b]=x}
+
 let C=_=>new Uint8Array(K.memory.buffer)
-let M,B,ma=x=>{M+=x;return M-x}
+let s0=x=>{let u=new Uint8Array(K.memory.buffer,x,24);let n=u.indexOf(0);return su(u.slice(0,(n<0)?22:n))}
+let F2=x=>new Float32Array(K.memory.buffer,x,2)
+let zz=(r,x,f)=>{let F=F2(x),R=F2(r);r=f(F[0],F[1]);R[0]=r[0],R[1]=r[1]}
+let M,B /*,ma=x=>{M+=x;return M-x}*/
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
  read:(X,y,Z)=>{console.log("read",X,y,Z);return 0},
  write:(X,y,Z)=>{console.log("write",X,y,Z);O(S(y,lo(Z)));return lo(Z);},
- free:(x)=>{console.log("free",x);},
- malloc:(x)=>{console.log("malloc",x);return ma(x)},
- uz:()=>{return BigInt(Math.floor(2.4e6*performance.now()))},
+ free:x=>{console.log("free",x);fr(x)},
+ malloc:x=>{console.log("malloc",x);return ma(x)},
+ ut:()=>{return BigInt(Math.floor(2.4e6*performance.now()))},
+ atof:x=>{return Number(s0(x))},
+ atoi:x=>{return Number(s0(x))},
  expf:x=>{return Math.exp(x)},
  logf:x=>{return Math.log(x)},
- csqrtf:(x,y)=>{console.log("csqrtf",x,y)},
- clogf:(x,y)=>{console.log("clogf",x,y)},
- cexpf:(x,y)=>{console.log("cexpf",x,y)},
+ cabsf:x=>{let F=F2(x),r=Math.hypot(F[0],F[1]);return r},
+ csqrtf:(r,x)=>{zz(r,x,csqrtf)},
+ clogf: (r,x)=>{zz(r,x,clogf)},
+ cexpf: (r,x)=>{zz(r,x,cexpf)},
  sprintf:(x,y,z)=>{
   let c=C(),i=new Int32Array(K.memory.buffer),f=new Float64Array(K.memory.buffer),s="?"
-  s=""+((100==c[1+y])?i[z>>2]:(103==c[1+y])?f[z>>3]:".?.") //todo %g+.%g
+  s=""+((100==c[1+y])?i[z>>2]:(103==c[1+y])?f[z>>3]:".?.") //todo %g+.%g  %lx
   z=us(s);y=s.length;z[y]=0;c.set(z,x);return y},
  stat:(x,y)=>{console.log("stat",x,y);return 0},
  open:(x,Y)=>{console.log("open",x,Y);return 0},
