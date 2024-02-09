@@ -48,8 +48,6 @@ let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
 
-
- 
  
 let cexpf=(x,y)=>{let e=Math.exp(x);return[e*Math.cos(y),e*Math.sin(y)]}
 let clogf=(x,y)=>{let r=Math.hypot(x,y),p=Math.atan2(y,x);r=Math.log(r);return[r*Math.cos(p),r*Math.sin(p)]}
@@ -74,9 +72,9 @@ let zz=(r,x,f)=>{let F=F2(x),R=F2(r);r=f(F[0],F[1]);R[0]=r[0],R[1]=r[1]}
 let M,B /*,ma=x=>{M+=x;return M-x}*/
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
- write:(X,y,Z)=>{console.log("write",X,y,Z);O(S(y,lo(Z)));return lo(Z);},
- free:  x=>{/*console.log("free",  x);*/fr(x)},
- malloc:x=>{/*console.log("malloc",x);*/return ma(x)},
+ write:(X,y,Z)=>{O(S(y,lo(Z)));return lo(Z);},
+ free:  x=>{fr(x)},
+ malloc:x=>{return ma(x)},
  ut:()=>{return BigInt(Math.floor(2.4e6*performance.now()))},
  atof:x=>{return Number(s0(x))},
  atoi:x=>{return Number(s0(x))},
@@ -86,14 +84,12 @@ let kenv={env:{
  csqrtf:(r,x)=>{zz(r,x,csqrtf)},
  clogf: (r,x)=>{zz(r,x,clogf)},
  cexpf: (r,x)=>{zz(r,x,cexpf)},
- sprintf:(x,y,z)=>{
-  let c=C(),i=new Int32Array(K.memory.buffer),f=new Float64Array(K.memory.buffer),s="?"
-  s=""+((100==c[1+y])?i[z>>2]:(103==c[1+y])?f[z>>3]:".?.") //todo %g+.%g  %lx
-  z=us(s);y=s.length;z[y]=0;c.set(z,x);return y},
- stat:(x,y)=>{console.log("stat",x,y);return akstat(x,y)},
- open:(x,Y)=>{console.log("open",x,Y);return 12288},
- read:(X,y,Z)=>{console.log("read",X,y,Z);let u=us(sak());c=C();c.set(us(sak()),y);return lo(Z)},
- close:(X)=>{console.log("close",X);return 0},
+ sprintf:(x,y,z)=>{let c=C(),i=new Int32Array(K.memory.buffer),f=new Float64Array(K.memory.buffer),S=s0(y),s="?"
+  s=""+((c[1+y]==100)?i[z>>2]:f[z>>3]);z=us(s);y=s.length;z[y]=0;c.set(z,x);return y},
+ stat:(x,y)=>{return akstat(x,y)},
+ open:(x,Y)=>{return 12288},
+ read:(X,y,Z)=>{let u=us(sak());c=C();c.set(us(sak()),y);return lo(Z)},
+ close:(X)=>{return 0},
  __mulsc3:(r,a,b,c,d)=>{r=F2(r);r[0]=a*c-b*d;r[1]=a*d+b*d},
  __divsc3:(r,a,b,c,d)=>{r=F2(r);[r[0],r[1]]=cdiv(a,b,c,d)},
 }}
