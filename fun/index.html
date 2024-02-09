@@ -10,12 +10,32 @@ table,th{border:1px solid}td{border-right:1px solid}th{background:#eee}
 table,th,td{border-collapse:collapse}
 td{text-align:center}
 pre{background:#eee;margin:1em}
-#t{background:black;color:white;height:20em;line-height:1;padding:3px;margin:0;outline:none;font-size:xlarge}
+.l{color:blue}
+.l:hover{cursor:pointer}
+#t{background:black;color:white;height:20em;line-height:1;padding:3px;margin:0;outline:none;width:calc(100vw - 21em);overflow:hidden}
+#f{width:20em;background:#ffe;height:20em;line-height:1;margin:0;padding:3px;overflow:auto;outline:none}
 </style>
 </head><body onload="kinit()">
 
-<pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+<div style="display:flex">
+ <pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
+ <pre id="f" contenteditable="true" spellcheck="false"></pre>
+</div>
+<span style="float:right" class="l" onclick="ak()">load a.k</span>
 <p/>
+
+<h2>types</h2>
+<pre>lt[]={3,0,0,2,2,3,3}</pre>
+<table>
+<tr><th>type </th><th> num  </th><th> what         </th><th> log2 </th><th> bits/element </th></tr>
+<tr><td>     </td><td> 0    </td><td> list         </td><td> 3    </td><td> 64           </td></tr>
+<tr><td>b    </td><td> 1    </td><td> bool         </td><td> 0    </td><td> 8            </td></tr>
+<tr><td>c    </td><td> 2    </td><td> char         </td><td> 0    </td><td> 8            </td></tr>
+<tr><td>i    </td><td> 3    </td><td> int          </td><td> 2    </td><td> 32           </td></tr>
+<tr><td>e    </td><td> 4    </td><td> float        </td><td> 2    </td><td> 32           </td></tr>
+<tr><td>g    </td><td> 5    </td><td> geo(complex) </td><td> 3    </td><td> 64           </td></tr>
+<tr><td>?    </td><td> 6    </td><td> ?            </td><td> 3    </td><td> 64           </td></tr>
+</table>
 <script>
 
 
@@ -26,6 +46,9 @@ let E=_=>{let s=window.getSelection();s.removeAllRanges();let r=document.createR
 let lo=x=>Number(BigInt.asUintN(32,x))
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+
+
+
  
  
 let cexpf=(x,y)=>{let e=Math.exp(x);return[e*Math.cos(y),e*Math.sin(y)]}
@@ -33,14 +56,14 @@ let clogf=(x,y)=>{let r=Math.hypot(x,y),p=Math.atan2(y,x);r=Math.log(r);return[r
 let csqrtf=(x,y)=>{
  if(x>=0){let t=Math.sqrt(( x+Math.hypot(x,y))*0.5);return[t,y/(2.0*t)]}
  else    {let t=Math.sqrt((-x+Math.Hypot(x,y))*0.5);return[Math.abs(y)/(2.0*t),(y<0)?-t:t]}}
+let cdiv=(a,b,c,d)=>{if(Math.abs(c)>Math.abs(d)){let r=d/c,q=c+r*d;return[(a+b*r)/q,(b-a*r)/q]}else{let r=c/d,q=d+r*c;return[(a*r+b)/q,(b*r-a)/q]}}
 
 
 let /*there be*/ K
-
 let II=x=>new Uint32Array(K.memory.buffer)   //malloc/free
 let BK=new Array(32).fill(0)
 let bk=x=>Math.max(6,32-Math.clz32(8+x))
-let mk=x=>{let I=II(),s=1<<x;if(s<K.memory.buffer.byteLength-M){I[M>>2]=x;x=M;M+=s;return x};K.memory.grow(Math.max(1,s/65536));return mk(x)}
+let mk=x=>{let I=II(),s=1<<x;if(s<K.memory.buffer.byteLength-M){I[M>>2]=x;x=M;M+=s;return x};K.memory.grow(1+(s>>16));return mk(x)}
 let ma=x=>{let I=II();let b=bk(x),p=BK[b];if(p){BK[b]=I[p>>2];I[p>>2]=b;return 8+p};return mk(b)}
 let fr=x=>{x-=8;let I=II(),b=I[x>>2];I[x>>2]=BK[b];BK[b]=x}
 
@@ -51,10 +74,9 @@ let zz=(r,x,f)=>{let F=F2(x),R=F2(r);r=f(F[0],F[1]);R[0]=r[0],R[1]=r[1]}
 let M,B /*,ma=x=>{M+=x;return M-x}*/
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
- read:(X,y,Z)=>{console.log("read",X,y,Z);return 0},
  write:(X,y,Z)=>{console.log("write",X,y,Z);O(S(y,lo(Z)));return lo(Z);},
- free:x=>{console.log("free",x);fr(x)},
- malloc:x=>{console.log("malloc",x);return ma(x)},
+ free:  x=>{/*console.log("free",  x);*/fr(x)},
+ malloc:x=>{/*console.log("malloc",x);*/return ma(x)},
  ut:()=>{return BigInt(Math.floor(2.4e6*performance.now()))},
  atof:x=>{return Number(s0(x))},
  atoi:x=>{return Number(s0(x))},
@@ -68,11 +90,12 @@ let kenv={env:{
   let c=C(),i=new Int32Array(K.memory.buffer),f=new Float64Array(K.memory.buffer),s="?"
   s=""+((100==c[1+y])?i[z>>2]:(103==c[1+y])?f[z>>3]:".?.") //todo %g+.%g  %lx
   z=us(s);y=s.length;z[y]=0;c.set(z,x);return y},
- stat:(x,y)=>{console.log("stat",x,y);return 0},
- open:(x,Y)=>{console.log("open",x,Y);return 0},
+ stat:(x,y)=>{console.log("stat",x,y);return akstat(x,y)},
+ open:(x,Y)=>{console.log("open",x,Y);return 12288},
+ read:(X,y,Z)=>{console.log("read",X,y,Z);let u=us(sak());c=C();c.set(us(sak()),y);return lo(Z)},
  close:(X)=>{console.log("close",X);return 0},
- __mulsc3:(r,a,b,c,d)=>{console.log("__mulsc3",r,a,b,c,d)},
- __divsc3:(r,a,b,c,d)=>{console.log("__divsc3",r,a,b,c,d)},
+ __mulsc3:(r,a,b,c,d)=>{r=F2(r);r[0]=a*c-b*d;r[1]=a*d+b*d},
+ __divsc3:(r,a,b,c,d)=>{r=F2(r);[r[0],r[1]]=cdiv(a,b,c,d)},
 }}
 
 let key=(e,t)=>{if("Enter"==e.key){
@@ -89,11 +112,17 @@ let ws=u=>{let c=C();u.forEach((x,i)=>c[B+i]=x);c[B+u.length]=0;K.keval(B,u.leng
 
 
 let kinit=()=>{
+ fetch("a.k").then(r=>r.text()).then(r=>g("f").textContent=r)
  fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports,M=K.__heap_base
   K.kinit()
   B=ma(64);
   O(" ")})}
+
+let ak=()=>{let c=C();c[B]=97;c[1+B]=46;c[2+B]=107;c[3+B]=0;
+ K.kload(B)}
+let akstat=(x,y)=>{y>>=2;let I=II();I[6+y]=1<<15;I[12+y]=g("f").textContent.length;return 0}
+let sak=()=>g("f").textContent
 
 </script>
 
