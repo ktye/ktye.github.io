@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>xk</title>
+<link rel="icon" type="image/png" sizes="16x16" href="kelas16.png">
+<style>
+
+*{font-family:monospace;box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{width:100vw;height:100vh;overflow:hidden}
+option{margin:0;padding:0}
+.head{background:black;color:white}
+#list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
+#plot-cap{width:100%;min-height:50px;outline:none;border:none;overflow:auto}
+#plot-sld{width:100%}
+#list{height:calc(100vh - 1.5em)}
+#L{border-right:1px solid;resize:horizontal;position:absolute;height:100vh;overflow-x:none;overflow-y:auto;min-width:50px;max-width:calc(100vw - 50px)}
+#R{height:100vh;position:absolute;right:0;min-width:50px;background:#fcfcfc}
+#P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden}
+#T{max-height:50vh;overflow:auto;background:#f4f4f4}
+
+</style></head><body onload="init()">
+<div id="L">
+ <select id="list" ondblclick="listdblclick()" multiple></select>
+</div>
+<div id="R">
+ <div id="T">
+ </div>
+ <div id="P">
+  <canvas id="plot-cnv"></canvas>
+ </div>
+ <input  id="plot-sld" type="range"></input>
+ <select id="plot-cap" multiple>
+ </select>
+</div>
+
+
+<script>
+let ge=x=>document.getElementById(x)
+let ce=x=>document.createElement(x)
+let ac=(x,y)=>{x.appendChild(y);return y}
+let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}}
+let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
+let lo=x=>Number(BigInt.asUintN(32,x))
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
+let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+
+
+function init(){ge("L").style.width="50%"}
+
+window.ondragover=function(e){pd(e)}
+window.ondrop=function(e){pd(e);
+ let l=e.dataTransfer.files
+ for(let i=0;i<l.length;i++){
+  let f=l.item(i);
+  f.arrayBuffer().then(u=>{let n=f.name
+   if(n.endsWith(".csv")||n.endsWith(".txt"))addtable(n.slice(0,-4),maketable(su(u)))
+   else if(n.endsWith(".k"))                 console.log("load-prog",n)
+   else console.log("ignore file",n)
+})}}
+
+let tables={}
+function maketable(s){s=s.split(/\r?\n/)
+ let t={h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
+ t.d=Array(t.h.length)
+ t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
+ for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
+ return t}
+function listtable(t){let n=Math.min(100,t.n-t.top),v=Array(1+n).fill("")
+ for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i]
+  v[0]+=(i?"│":"")+trm(t.h[i])
+  for(let j=0;j<n;j++){let dij=String(di[t.top+j]);v[1+j]+=(i?"│":"")+trm(dij+((ti=="r")?String(t.d[1+i][j]):""))}
+  let m=Math.max(...v.map(s=>s.length))
+  for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length)
+  if(ti=="r")i++
+ }
+ console.log("v",v)
+ v.forEach((x,i)=>v[i]=escapeHtml(x)) // 
+ 
+ let li=ge("list");rm(li)
+ for(let i=0;i<v.length;i++){
+  let op=ce("option");op.innerHTML=v[i];if(!i)op.classList.add("head")
+  li.appendChild(op)
+ }
+ li.onchange=()=>{Array.from(li.selectedOptions).forEach(o=>{if(o.classList.contains("head"))o.selected=false})}
+}
+function addtable(s,t){tables[s]=t;listtable(t)}
+let trm=s=>(s.length<11)?s:s.slice(0,9)+"‥"
+let escapeHtml=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
+
+function debounce(f){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this, args)},200)}}
+let replot=null
+
+let obs=new ResizeObserver(function(m){
+ for(const e of m){
+  if(e.contentBoxSize){
+   let w=e.contentRect.width
+   console.log("id",e.target.id,"w",w)
+   if(e.target.id=="L")
+    ge("R").style.width="calc(100vw - "+(2+w)+"px)"
+   else{
+    let th=ge("T").getBoundingClientRect().height
+    let ph=ge("P").getBoundingClientRect().height
+    if(e.target.id=="T"){
+     e.target.style.maxHeight="calc(100vh - "+(ph+70)+"px)"
+    }
+    if(e.target.id=="P"){
+     e.target.style.maxHeight="calc(100vh - "+(th+70)+"px)"
+    }
+    if((e.target.id=="T")||(e.target.id=="P")){
+     let c=ge("plot-cap")
+     let r=c.getBoundingClientRect()
+     c.style.height="calc(100vh - "+r.top+"px)"
+    }
+   }
+  }
+ }
+ let p=ge("P"),s=p.getBoundingClientRect(),cnv=ge("plot-cnv");cnv.width=Math.floor(s.width),cnv.height=Math.floor(s.height)
+ if(replot===null&&"undefined"!=typeof plot)replot=debounce(plot.plot);if(replot)replot()
+})
+obs.observe(ge("L"))
+obs.observe(ge("T"))
+obs.observe(ge("P"))
+ 
+</script></body></html>
