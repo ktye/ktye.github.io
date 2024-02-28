@@ -7,11 +7,19 @@
 html,body{margin:0;padding:0}
 body{width:100vw;height:100vh;overflow:hidden}
 option{margin:0;padding:0}
+table{border-collapse:collapse}
 .head{background:black;color:white}
+.link{/*padding-left:0.2em;padding-right:0.2em*/}
+.link:hover{cursor:pointer}
+.pointer:hover{cursor:pointer}
+.bold{font-weight:bold}
+input:read-only{color:grey;font-style:italic}
+#sel{border:none;outline:none;background:#ffe;flex-grow:1;text-align:right;margin-right:1em}
 #list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
 #plot-cap{width:100%;min-height:50px;outline:none;border:none;overflow:auto}
 #plot-sld{width:100%}
 #list{height:calc(100vh - 1.5em)}
+#dict{height:calc(100vh - 1.5em)}
 #L{border-right:1px solid;resize:horizontal;position:absolute;height:100vh;overflow-x:none;overflow-y:auto;min-width:50px;max-width:calc(100vw - 50px)}
 #R{height:100vh;position:absolute;right:0;min-width:50px;background:#fcfcfc}
 #P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden}
@@ -19,7 +27,9 @@ option{margin:0;padding:0}
 
 </style></head><body onload="init()">
 <div id="L">
- <select id="list" ondblclick="listdblclick()" multiple></select>
+ <select id="list" multiple></select>
+ <div id="dict" style="display:none">abc</div>
+ <div id="foot" style="display:flex;gap:0.5em"></div>
 </div>
 <div id="R">
  <div id="T">
@@ -37,14 +47,21 @@ option{margin:0;padding:0}
 let ge=x=>document.getElementById(x)
 let ce=x=>document.createElement(x)
 let ac=(x,y)=>{x.appendChild(y);return y}
+let cl=(x,y)=>{y.classList.add(...x.split(" "));return y}
+let tc=(x,y)=>{y.textContent=x;return y}
+let id=(x,y)=>{y.id=x;return y}
+let oc=(f,x)=>{x.onclick=f;return x}
 let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}}
 let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 let lo=x=>Number(BigInt.asUintN(32,x))
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
-
-function init(){ge("L").style.width="50%"}
+let list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot")
+function init(){ge("L").style.width="50%"
+ addtable(maketable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
+ addtable(maketable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
+}
 
 window.ondragover=function(e){pd(e)}
 window.ondrop=function(e){pd(e);
@@ -52,14 +69,14 @@ window.ondrop=function(e){pd(e);
  for(let i=0;i<l.length;i++){
   let f=l.item(i);
   f.arrayBuffer().then(u=>{let n=f.name
-   if(n.endsWith(".csv")||n.endsWith(".txt"))addtable(n.slice(0,-4),maketable(su(u)))
+   if(n.endsWith(".csv")||n.endsWith(".txt"))addtable(maketable(n.slice(0,-4),su(u)))
    else if(n.endsWith(".k"))                 console.log("load-prog",n)
    else console.log("ignore file",n)
 })}}
 
 let tables={}
-function maketable(s){s=s.split(/\r?\n/)
- let t={h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
+function maketable(name,s){s=s.split(/\r?\n/)
+ let t={name:name,h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
  t.d=Array(t.h.length)
  t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
  for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
@@ -73,18 +90,55 @@ function listtable(t){let n=Math.min(100,t.n-t.top),v=Array(1+n).fill("")
   if(ti=="r")i++
  }
  console.log("v",v)
- v.forEach((x,i)=>v[i]=escapeHtml(x)) // 
- 
- let li=ge("list");rm(li)
+ v.forEach((x,i)=>v[i]=escapeHtml(x))
+ rm(list)
  for(let i=0;i<v.length;i++){
-  let op=ce("option");op.innerHTML=v[i];if(!i)op.classList.add("head")
-  li.appendChild(op)
+  let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head")}
+  list.appendChild(op)
  }
- li.onchange=()=>{Array.from(li.selectedOptions).forEach(o=>{if(o.classList.contains("head"))o.selected=false})}
+ let edt=e=>{editrows(t,Array.from(list.selectedOptions).map(x=>x.index-1));pd(e)}
+ list.onchange=()=>{let a=Array.from(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});ge("sel").value=rangestr(a.map(x=>x.index-1).filter(x=>x>=0))}
+ list.oncontextmenu=edt;list.ondblclick=edt
 }
-function addtable(s,t){tables[s]=t;listtable(t)}
+function addtable(t){tables[t.name]=t;listtable(t);rm(foot);let c=t.name
+ let bld=t=>{Array.from(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(t.name==x.textContent)x.classList.add("bold")})}
+ Object.values(tables).forEach(t=>{let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(t);bld(t)};foot.appendChild(sp)});bld(t)
+ let ip=id("sel",ce("input"));ip.onchange=e=>console.log("in put");foot.appendChild(ip)
+}
+function editrows(t,idx){rm(dict)
+ let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
+ h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i]
+  let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th)
+  let td=ce("td"),ip=ce("input");
+  if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
+  ip.style="border:none;outline:none";ip.setAttribute("readonly",rdo);ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)
+ })
+ ac(dict,ta)
+ list.style.display="none";dict.style.display="block" 
+ ac(dict,ce("hr"))
+ let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
+ ac(d,oc(()=>{list.style.display="block";dict.style.display="none"},tc("ok",ce("button"))))
+ ac(d,oc(()=>{list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))
+}
+function uniqs(t,idx){let h=[],s=[],tp=[],u=[],i0=idx[0]
+ t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];if(ti=="a")return;
+  h.push(x);s.push((ti=="s")?di[i0]:(ti=="i"||di=="f")?String(di[i0]):String(di[i0])+"a"+String(t.d[1+i][i0]));tp.push(ti);
+  u.push((ti!="r")?isuniq(at(di,idx)):isuniq(at(di,idx))&&isuniq(at(t.d[1+i],idx)))   
+ })
+ return[h,s,tp,u]
+}
+function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
+
+let ON=x=>x.replace("NaN","ON")
+let On=x=>x.replace("NaN","On")
+let isuniq=x=>x.every((x,i,a)=>x===a[0])
+let at=(x,i)=>x.filter((_,j)=>!i.includes(j))
 let trm=s=>(s.length<11)?s:s.slice(0,9)+"‥"
 let escapeHtml=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
+let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
+let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);
+ let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;
+ return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
 
 function debounce(f){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this, args)},200)}}
 let replot=null
