@@ -48,7 +48,7 @@ let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
 
-let abs=Math.abs,hypot=Math.hypot,sin=Math.sin,cos=Math.cos,exp=Math.exp,log=Math.log,atan2=Math.atan2,sqrt=Math.sqrt
+let abs=Math.abs,hypot=Math.hypot,sin=Math.sin,cos=Math.cos,exp=Math.exp,log=Math.log,log2=Math.log2,atan2=Math.atan2,sqrt=Math.sqrt
 let cexpf=(x,y)=>{let e=exp(x);return[e*cos(y),e*sin(y)]}
 let clogf=(x,y)=>{let r=hypot(x,y),p=atan2(y,x);r=log(r);return[r*cos(p),r*sin(p)]}
 let csqrtf=(x,y)=>{
@@ -77,8 +77,10 @@ let kenv={env:{
  atof:x=>{x=s0(x);return parseFloat(x)},
  atoi:x=>{x=s0(x);return parseInt(x)},
  atan2:atan2,
- expf:x=>{return exp(x)},
- logf:x=>{return log(x)},
+ expf:exp,
+ exp2f:x=>Math.pow(2,x),
+ logf:log,
+ log2f:log2,
  cabsf:x=>hypot(F[x],F[1+x]),
  csqrtf:(r,x)=>{zz(r,x,csqrtf)},
  clogf: (r,x)=>{zz(r,x,clogf)},
