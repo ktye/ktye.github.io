@@ -13,6 +13,7 @@ table{border-collapse:collapse}
 .link:hover{cursor:pointer}
 .pointer:hover{cursor:pointer}
 .bold{font-weight:bold}
+.large{font-size:large}
 input:read-only{color:grey;font-style:italic}
 #sel{border:none;outline:none;background:#ffe;flex-grow:1;text-align:right;margin-right:1em}
 #list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
@@ -29,11 +30,12 @@ input:read-only{color:grey;font-style:italic}
 <div id="L">
  <select id="list" multiple></select>
  <div id="dict" style="display:none">abc</div>
- <div id="foot" style="display:flex;gap:0.5em"></div>
+ <div id="foot" style="display:flex;gap:0.5em" class="large"></div>
 </div>
 <div id="R">
- <div id="T">
- </div>
+ <div id="T" class="large"><span class="link" onclick="edt.style.zIndex=1">* </span><div id="but" style='display:flex;gap:0.5em;float:right'></div></div>
+ <pre id="O"></pre>
+ <pre id="err" style="background:orange"></pre>
  <div id="P">
   <canvas id="plot-cnv"></canvas>
  </div>
@@ -41,6 +43,11 @@ input:read-only{color:grey;font-style:italic}
  <select id="plot-cap" multiple>
  </select>
 </div>
+
+<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:-1"><textarea id="ed" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false">
+xkalpha:1
+xkbeta:2
+</textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.zIndex=-1;kinit()'>✖</button></div>
 
 
 <script>
@@ -57,10 +64,11 @@ let lo=x=>Number(BigInt.asUintN(32,x))
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
-let list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot")
+let list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),O=ge("O")
 function init(){ge("L").style.width="50%"
  addtable(maketable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
  addtable(maketable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
+ kinit()
 }
 
 window.ondragover=function(e){pd(e)}
@@ -84,12 +92,11 @@ function maketable(name,s){s=s.split(/\r?\n/)
 function listtable(t){let n=Math.min(100,t.n-t.top),v=Array(1+n).fill("")
  for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i]
   v[0]+=(i?"│":"")+trm(t.h[i])
-  for(let j=0;j<n;j++){let dij=String(di[t.top+j]);v[1+j]+=(i?"│":"")+trm(dij+((ti=="r")?String(t.d[1+i][j]):""))}
+  for(let j=0;j<n;j++){let dij=String(di[t.top+j]);v[1+j]+=(i?"│":"")+trm(dij+((ti=="r")?"a"+String(t.d[1+i][t.top+j]):""))}
   let m=Math.max(...v.map(s=>s.length))
   for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length)
   if(ti=="r")i++
  }
- console.log("v",v)
  v.forEach((x,i)=>v[i]=escapeHtml(x))
  rm(list)
  for(let i=0;i<v.length;i++){
@@ -111,28 +118,34 @@ function editrows(t,idx){rm(dict)
   let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th)
   let td=ce("td"),ip=ce("input");
   if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
-  ip.style="border:none;outline:none";ip.setAttribute("readonly",rdo);ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)
+  ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)
  })
  ac(dict,ta)
  list.style.display="none";dict.style.display="block" 
  ac(dict,ce("hr"))
  let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
- ac(d,oc(()=>{list.style.display="block";dict.style.display="none"},tc("ok",ce("button"))))
- ac(d,oc(()=>{list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))
+ ac(d,oc(()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},tc("ok",    ce("button"))))
+ ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))
 }
 function uniqs(t,idx){let h=[],s=[],tp=[],u=[],i0=idx[0]
  t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];if(ti=="a")return;
-  h.push(x);s.push((ti=="s")?di[i0]:(ti=="i"||di=="f")?String(di[i0]):String(di[i0])+"a"+String(t.d[1+i][i0]));tp.push(ti);
-  u.push((ti!="r")?isuniq(at(di,idx)):isuniq(at(di,idx))&&isuniq(at(t.d[1+i],idx)))   
+  h.push(x);s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):String(di[i0])+"a"+String(t.d[1+i][i0]));tp.push(ti);
+  u.push((ti!="r")?isuniq(at(di,idx)):(isuniq(at(di,idx))&&isuniq(at(t.d[1+i],idx))))
  })
  return[h,s,tp,u]
 }
-function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
+function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
+function commit(ta,t,idx){
+ let inp=Array.from(ta.rows).map(x=>x.children[1].firstElementChild);
+ inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
+function update(t,i,idx,s){console.log("todo update",i,idx,s)}
+
+function addbut(x){ac(but,oc(x=>kinit(x),cl("link",tc(x,ce("span")))))}
 
 let ON=x=>x.replace("NaN","ON")
 let On=x=>x.replace("NaN","On")
-let isuniq=x=>x.every((x,i,a)=>x===a[0])
-let at=(x,i)=>x.filter((_,j)=>!i.includes(j))
+let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
+let at=(x,i)=>x.filter((_,j)=>i.includes(j))
 let trm=s=>(s.length<11)?s:s.slice(0,9)+"‥"
 let escapeHtml=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
 let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
@@ -147,7 +160,6 @@ let obs=new ResizeObserver(function(m){
  for(const e of m){
   if(e.contentBoxSize){
    let w=e.contentRect.width
-   console.log("id",e.target.id,"w",w)
    if(e.target.id=="L")
     ge("R").style.width="calc(100vw - "+(2+w)+"px)"
    else{
@@ -163,15 +175,67 @@ let obs=new ResizeObserver(function(m){
      let c=ge("plot-cap")
      let r=c.getBoundingClientRect()
      c.style.height="calc(100vh - "+r.top+"px)"
-    }
-   }
-  }
- }
+ }}}}
  let p=ge("P"),s=p.getBoundingClientRect(),cnv=ge("plot-cnv");cnv.width=Math.floor(s.width),cnv.height=Math.floor(s.height)
  if(replot===null&&"undefined"!=typeof plot)replot=debounce(plot.plot);if(replot)replot()
 })
 obs.observe(ge("L"))
 obs.observe(ge("T"))
 obs.observe(ge("P"))
- 
+
+//todo..
+function kout(x){O.textContent+=x;O.style.display="block"}
+function show(){}
+function axis(){}
+let plot={plot:x=>x}
+
+let E=s=>{ge("err").textContent=s}
+
+let /*there be*/ K
+let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer)
+let kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))}}}
+function kinit(x){
+ fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
+  K=r.instance.exports
+  K.kinit()
+  xcal=[];xreg("axis",axis);xreg("plot",plot);
+  //tables.forEach(t=>asn(t.name,KT(t)))
+  K.dx(K.Val(KC(ed.value)))
+  rm(but);syms().forEach(x=>addbut(x))
+  if(x!==undefined)show(K.Cal(K.Val(Ks(x)),K.mk(23,0)))
+  }).catch(e=>E(e.message+"\n\n"+e.stack))}
+
+
+let xcal=[],xreg=(name,g)=>{xcal.push(g)
+ let f=K.l2(BigInt(xcal.length-1),Ks(name))       //external function representation idx-as-verb,name
+ I()[(lo(f)>>>2)-3]=1                             //arity(here:monadic only)
+ f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))) //type tag xf
+ asn(name,f)}
+
+let
+KT=t=>K.Atx(K.Val(KC("+!/")),K.l2(KS(t.k),KL(t.v.map((x,i)=>("i"==t.t[i])?KI(x):("f"==t.t[i])?KF(x):KS(x))))),
+KC=x=>{let r=K.mk(18,x.length  );C().set(("string"===typeof x)?us(x):x,lo(r));return r},
+KF=x=>{let r=K.mk(21,x.length  );F().set(x,lo(r)>>>3);return r},
+KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
+KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},
+KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},
+IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},
+FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},
+ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},
+DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r}
+Ks=x=>K.sc(KC(x)),
+CK=x=>{let p=lo(x),r=su(C().slice(p,p+K.nn(x)));K.dx(x);return r},
+asn=(s,y)=>K.dx(K.Asn(Ks(s),y))
+
+
+let syms=()=>{let j=J(),l=j[0],p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));return r.filter(x=>x.startsWith("xk")).map(x=>x.slice(2))}
+
+
 </script></body></html>
