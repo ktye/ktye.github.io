@@ -24,11 +24,11 @@ input:read-only{color:grey;font-style:italic}
 #R{height:100vh;position:absolute;right:0;min-width:50px;background:#fcfcfc}
 #P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden}
 #T{max-height:50vh;overflow:auto;background:#f4f4f4}
-#O{background:#eee;margin:0;}
+#O{background:#f8f8f8;margin:0}
 #E{background:orange;margin:0}
 
 </style></head><body onload="init()">
-<div id="L">
+<div id="L" oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange()">
  <select id="list" multiple></select>
  <div id="dict" style="display:none">abc</div>
  <div id="foot" style="display:flex;gap:0.5em" class="large"><input id="sel" onchange='kinit("#selec#")'></input></div>
@@ -49,6 +49,8 @@ input:read-only{color:grey;font-style:italic}
 /preinitialized are [tables..]  n:#[maintable]  i:!n  sel:[selected indexes of maintable]  explode:{[t] ..assign t key/vals as globals.. }
 /for selection expression, the maintable is exploded
 /explode G
+xkdict:`sum`mean`count!(1.34;7.89;11)
+xktab:{[]G sel}
 xkalpha:1
 xkbeta:2
 xkrowcount:{[] `count \"number of selected rows";#sel}
@@ -66,6 +68,7 @@ let id=(x,y)=>{y.id=x;return y}
 let oc=(f,x)=>{x.onclick=f;return x}
 let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}}
 let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p},rm1=p=>{while(p.children.length>1)p.removeChild(p.firstChild);return p}
+let af=Array.from
 let lo=x=>Number(BigInt.asUintN(32,x))
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
@@ -88,6 +91,8 @@ window.ondrop=function(e){pd(e);
    else console.log("ignore file",n)
 })}}
 
+
+
 let tables={}
 function maketable(name,s){s=s.split(/\r?\n/)
  let t={name:name,h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
@@ -95,27 +100,23 @@ function maketable(name,s){s=s.split(/\r?\n/)
  t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
  for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
  return t}
-function listtable(t){let n=Math.min(100,t.n-t.top),v=Array(1+n).fill("")
+function fills(v){let m=Math.max(...v.map(s=>s.length));for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length);return v}
+function listtable(t,p){
+ let n=Math.min(100,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i"))
  for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i]
-  v[0]+=(i?"│":"")+trm(t.h[i])
-  for(let j=0;j<n;j++){let dij=String(di[t.top+j]);v[1+j]+=(i?"│":"")+trm(dij+((ti=="r")?"a"+String(t.d[1+i][t.top+j]):""))}
-  let m=Math.max(...v.map(s=>s.length))
-  for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length)
-  if(ti=="r")i++
- }
- v.forEach((x,i)=>v[i]=escapeHtml(x))
- rm(list)
- for(let i=0;i<v.length;i++){
-  let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head")}
-  list.appendChild(op)
- }
- let edt=e=>{editrows(t,Array.from(list.selectedOptions).map(x=>x.index-1));pd(e)}
- list.onchange=()=>{let a=Array.from(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});sel.value=rangestr(a.map(x=>x.index-1).filter(x=>x>=0))}
- list.oncontextmenu=edt;list.ondblclick=edt
+  v[0]+="│"+trm(t.h[i])
+  for(let j=0;j<n;j++){let dij=String(di[t.top+j]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+String(t.d[1+i][t.top+j]):""))}
+  v=fills(v)
+  if(ti=="r")i++}
+ v.forEach((x,i)=>v[i]=escapeHtml(x));rm(p)
+ for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head")};p.appendChild(op)}
+ return v
 }
-function addtable(t){tables[t.name]=t;listtable(t);let c=t.name
- let bld=t=>{Array.from(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(t.name==x.textContent)x.classList.add("bold")})}
- let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(t);bld(t)};foot.insertBefore(sp,foot.firstChild);bld(t)
+function listedit(e){let t=tables[maintable()];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
+function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});sel.value=rangestr(a.map(x=>x.index-1).filter(x=>x>=0));let c=curbut();if(c)kinit(c)}
+function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
+ let bld=t=>{af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(t.name==x.textContent)cl("bold",x)})}
+ let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(t,list);bld(t)};foot.insertBefore(sp,foot.firstChild);bld(t)
 }
 function editrows(t,idx){rm(dict)
  let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
@@ -141,7 +142,7 @@ function uniqs(t,idx){let h=[],s=[],tp=[],u=[],i0=idx[0]
 }
 function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
 function commit(ta,t,idx){
- let inp=Array.from(ta.rows).map(x=>x.children[1].firstElementChild);
+ let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);
  inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
 function update(t,i,idx,s){console.log("todo update",i,idx,s)}
 
@@ -157,9 +158,6 @@ let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[
  return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
 
 
-function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},200)}}
-
-
 let obs=new ResizeObserver(function(m){
  for(const e of m){let id=e.target.id
   if(e.contentBoxSize){let w=e.contentRect.width
@@ -169,17 +167,18 @@ let obs=new ResizeObserver(function(m){
     if(id=="T")e.target.style.maxHeight="calc(100vh - "+(ph+70)+"px)"
     if(id=="P")e.target.style.maxHeight="calc(100vh - "+(th+70)+"px)"
     if((id=="T")||(id=="P")){let r=pcap.getBoundingClientRect();pcap.style.height="calc(100vh - "+r.top+"px)"}}}}
- let p=ge("P"),s=p.getBoundingClientRect();pcnv.width=Math.floor(s.width),pcnv.height=Math.floor(s.height)
- if(plots){let p=debounce(scaleplot);p(plots,pcnv,psld,pcap)}})
-//               ^^^ todo: plots too often.
+ let p=ge("P"),s=p.getBoundingClientRect()/*,dpi=devicePixelRatio*/;pcnv.style.width=Math.floor(s.width)+"px",pcnv.style.height=s.height+"px"
+ if(plots){scaleplot(plots,pcnv,psld,pcap)}})
  
 obs.observe(ge("L"))
 obs.observe(ge("T"))
 obs.observe(ge("P"))
 
 
-function addbut(x){but.insertBefore(oc(e=>kinit(x),cl("link",tc(x,ce("span")))),but.firstChild)}
-function reset(){plots=0;E.textContent="";O.textContent=""}
+function addbut(x,b){let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
+function curbut(   ){let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
+function setbut( x ){af(but.childNodes).forEach(y=>{y.classList.remove("bold")});x.classList.add("bold")}
+function reset(    ){plots=0;E.textContent="";O.textContent=""}
 
 let plots=0
 let iota=n=>[...Array(n).keys()]
@@ -211,16 +210,27 @@ function noplot(){P.style.display="none";psld.style.display="none"}
 function plotk(x){P.style.display=""    ;psld.style.display=""
  plots=exampleplot;return x}
 
-function scaleplot(a,b,c,d){/*P.style.display="block"*/ ;plots=a; plot(a,b,c,d)}
+function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}}
+const scaleplot=debounce((a,b,c,d)=>{
+ let fs=small=>(parseFloat(getComputedStyle(small?document.body:but).fontSize)*devicePixelRatio)+"px monospace"
+ plots=a;plots.font1=fs(0);a.font2=fs(1);
+ plot(plots,b,c,d)})
 
 function maintable(){return foot.getElementsByClassName("bold")[0].textContent}
 function kout(x){O.textContent+=x}
-function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,psld,pcap):noplot();CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,tc(x,ce("option"))))}
+function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,psld,pcap):noplot();
+ //todo showtable: use listtable({top:0,h:..},pcap)
+ CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 function kdat( ){Object.keys(tables).forEach(s=>asn(s,KT(tables[s])));asn("n",K.Ki(tables[maintable()].n));asn("i",K.Val(KC("!n")));asn("sel",K.Val(KC((sel.value.trim()=="")?"!0":sel.value)))}
-function mark( ){expl(K.Val(Ks(maintable())));let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;Array.from(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)})}
-function axis( ){}
+function mark( ){expl(K.Val(Ks(maintable())));let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)})}
 function expl(t){console.log("explode..",t);K.dx(t)}
+function help( ){
+
+let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/")
+if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"   
+}
+function axis( ){}
 
 let err=s=>{E.textContent=s}
 
@@ -241,9 +251,10 @@ function kinit(x){reset()
   xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl)
   kdat()
   K.dx(K.Val(KC(ed.value)))
-  rm1(but);syms().reverse().forEach(x=>addbut(x))
+  rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
        if(x==="#selec#")mark()
   else if(x!==undefined)show(call(x))
+  else                  help()
   }).catch(e=>err(e.message+"\n\n"+e.stack))}
 
 

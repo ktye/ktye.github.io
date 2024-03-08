@@ -7,10 +7,11 @@ let vmin=x=>Math.min(...x),vmax=x=>Math.max(...x),min=Math.min,max=Math.max,floo
 
 function replot(canvas){plots(canvas.plots,canvas,canvas.slider,canvas.listbx)}
 
-function plots(p,canvas,slider,listbx){
- canvas.width=canvas.clientWidth;canvas.height=canvas.clientHeight
+function plots(p,canvas,slider,listbx){const z=devicePixelRatio //zoom scale
+ canvas.width=z*canvas.clientWidth;canvas.height=z*canvas.clientHeight
  let width,height;[width,height]=[canvas.width,canvas.height]
  let c=canvas.getContext("2d")
+
  
  p=(p===null)?{}:p
  p.equal  =("equal" in p)?p.equal :false
