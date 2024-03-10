@@ -18,7 +18,6 @@ input:read-only{color:grey;font-style:italic}
 #sel{border:none;outline:none;background:#ffe;flex-grow:1;text-align:right;margin-right:1em}
 #list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
 #pcap{width:100%;min-height:50px;outline:none;border:none;overflow:auto}
-#psld{width:100%}
 #list{height:calc(100vh - 1.5em)}
 #dict{height:calc(100vh - 1.5em)}
 #L{border-right:1px solid;resize:horizontal;position:absolute;height:100vh;overflow-x:none;overflow-y:auto;min-width:50px;max-width:calc(100vw - 50px)}
@@ -26,8 +25,8 @@ input:read-only{color:grey;font-style:italic}
 #T{max-height:50vh;overflow:auto;background:#f4f4f4}
 #E{background:orange;margin:0}
 #O{background:#f8f8f8;margin:0}
-#P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden}
-#B{background:black;color:white;border:none;outline:none;width:100%;font-size:large}
+#P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden;border-bottom:1px solid}
+#B{background:black;color:white;border:2px solid black;outline:none;flex-grow:1;font-size:large}
 
 </style></head><body onload="init()">
 <div id="L">
@@ -38,14 +37,16 @@ input:read-only{color:grey;font-style:italic}
 <div id="R">
  <div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span id="kbut" class="link" onclick="edt.style.display='block'" style="margin-left:auto">x.k</span></div></div>
  <pre id="E"></pre>
- <pre id="O"></pre>
+ <pre id="O" oncontextmenu="khid(event)"></pre>
  <div id="P">
   <canvas id="pcnv"></canvas>
  </div>
- <input  id="psld" type="range"></input>
  <select id="pcap" multiple>
  </select>
- <input id="B" onkeyup="kkey(event)"/>
+ <div style="display:flex"><input id="B" onkeyup="kkey(event)"/>
+ <span id="bac" class="large" style="background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
+ <span id="fwd" class="large" style="background:black;color:white">▶</span>
+ </div>
 </div>
 
 <div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false">
@@ -76,7 +77,7 @@ let lo=x=>Number(BigInt.asUintN(32,x))
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
-let plot=plotjs.plots,list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),psld=ge("psld"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
+let plot=plotjs.plots,list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
 function init(){L.style.width="50%"
  addtable(maketable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
  addtable(maketable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
@@ -112,16 +113,17 @@ function listtable(t,p){
   v=fills(v)
   if(ti=="r")i++}
  v.forEach((x,i)=>v[i]=escapeHtml(x));rm(p)
- for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head")};p.appendChild(op)}
+ for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)}
  return v
 }
 function listedit(e){let t=tables[maintable()];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
 function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});sel.value=rangestr(a.map(x=>x.index-1).filter(x=>x>=0));selbg(0);let c=curbut();if(c)kinit(c)}
 function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=t=>{af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(t.name==x.textContent)cl("bold",x)})}
- let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(t,list);bld(t)};foot.insertBefore(sp,foot.firstChild);bld(t)
-}
-function editrows(t,idx){rm(dict)
+ let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(t,list);bld(t)};sp.ondblclick=rentable;foot.insertBefore(sp,foot.firstChild);bld(t)}
+function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s}}
+function editrows(t,idx){rm(dict);
+ if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")}
  let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
  h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i]
   let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th)
@@ -169,9 +171,9 @@ let obs=new ResizeObserver(function(m){let rect=x=>x.getBoundingClientRect()
     let th=rect(T).height,ph=rect(P).height
     if(id=="T")e.target.style.maxHeight="calc(100vh - "+(ph+70)+"px)"
     if(id=="P")e.target.style.maxHeight="calc(100vh - "+(th+70)+"px)"
-    if((id=="T")||(id=="P")||(id=="O")){let b=rect(B),r=rect(pcap);pcap.style.height="calc(100vh - "+(r.top+b.height)+"px)"}}}}
+    if((id=="T")||(id=="P")||(id=="O")){let b=rect(B),r=rect(pcap);pcap.style.height="calc(100vh - "+(r.top+b.height-1)+"px)"}}}}
  let s=rect(P);pcnv.style.width=Math.floor(s.width)+"px",pcnv.style.height=s.height+"px"
- if(plots){scaleplot(plots,pcnv,psld,pcap)}})
+ if(plots){scaleplot(plots,pcnv,pcap)}})
 obs.observe(L);obs.observe(T);obs.observe(P);obs.observe(O)
 
 
@@ -206,20 +208,21 @@ let exampleplot={
   }
  ],
 }
-function noplot(){P.style.display="none";psld.style.display="none"}
-function plotk(x){P.style.display=""    ;psld.style.display=""
+function noplot(){P.style.display="none"}
+function plotk(x){P.style.display=""
  plots=exampleplot;return x}
 
 function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}}
-const scaleplot=debounce((a,b,c,d)=>{
+const scaleplot=debounce((a,b,d)=>{
  let fs=small=>(parseFloat(getComputedStyle(small?document.body:but).fontSize)*devicePixelRatio)+"px monospace"
  plots=a;plots.font1=fs(0);a.font2=fs(1);
- plot(plots,b,c,d)})
+ plot(plots,b,d)})
 
 function selbg(x){sel.style.background=x?"orangered":"#ffe"}
 function maintable(){return foot.getElementsByClassName("bold")[0].textContent}
-function kout(x){O.textContent+=x}
-function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,psld,pcap):noplot();
+function kout(x){O.textContent+=x;O.style.display=""}
+function khid(e){O.style.display="none";pd(e)}
+function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,pcap):noplot();
  //todo showtable: use listtable({top:0,h:..},pcap)
  CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
