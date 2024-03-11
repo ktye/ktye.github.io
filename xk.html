@@ -41,7 +41,7 @@ input:read-only{color:grey;font-style:italic}
  <div id="P">
   <canvas id="pcnv"></canvas>
  </div>
- <select id="pcap" multiple>
+ <select id="pcap" multiple oncontextmenu="copycap(event)">
  </select>
  <div style="display:flex"><input id="B" onkeyup="kkey(event)"/>
  <span id="bac" class="large" style="background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
@@ -94,7 +94,6 @@ window.ondrop=function(e){pd(e);
    else if(n.endsWith(".k"))                {ed.value=su(u);ge("kbut").textContent=n}
    else console.log("ignore file",n)
 })}}
-
 
 
 let tables={}
@@ -151,6 +150,15 @@ function commit(ta,t,idx){
  inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
 function update(t,i,idx,s){console.log("todo update",i,idx,s)}
 
+function copycap(e){pd(e)
+	let html="<span style='font-family:Consolas'>teletype</span> <span style='color:red'>red text</span> ok?"
+	//issues.chromium.org/issues/328477621
+	//navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob(["abc.."],{type:'text/plain'}),'text/html':new Blob(["html.."],{type:'text/html'})})]).then(r=>console.log("ok",r),r=>console.log("not ok",r))
+	//workaround:
+	copyCE("text/html", html); //workaround clipboard event & execCommand
+}
+function copyCE(t,v){let l=e=>{window.removeEventListener("copy",l);e.clipboardData.setData(t,v);pd(e)};window.addEventListener("copy",l);document.execCommand("copy");}
+
 let ON=x=>x.replace("NaN","ON")
 let On=x=>x.replace("NaN","On")
 let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
@@ -161,6 +169,7 @@ let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x
 let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);
  let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;
  return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
+
 
 
 let obs=new ResizeObserver(function(m){let rect=x=>x.getBoundingClientRect()
