@@ -231,14 +231,17 @@ function maintable(){return foot.getElementsByClassName("bold")[0].textContent}
 function kout(x){O.textContent+=x;O.style.display=""}
 function khid(e){O.style.display="none";pd(e)}
 function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,pcap):noplot();
- //todo showtable: use listtable({top:0,h:..},pcap)
- CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
+ let t=K.tp(x);(25==t)?listtable(tabk(x),pcap):CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 function kdat( ){Object.keys(tables).forEach(s=>asn(s,KT(tables[s])));asn("n",K.Ki(tables[maintable()].n));asn("i",K.Val(KC("!n")));asn("sel",K.Val(KC((sel.value.trim()=="")?"!0":sel.value)))}
 function mark( ){selbg(1);expl(K.Val(Ks(maintable())));let r=K.Val(KC(sel.value));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});selbg(0)}
 function expl(t){console.log("todo explode..",t,K.tp(t));K.dx(t);return 0n}
 function help( ){let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"}
 function kkey(e){let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");K.repl(KC(b))};if("Escape"==e.key)B.value=""}
+function tabk(x){let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
+ k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.n=K.nn(vi)
+  if(f==undefined){r.t.push("r");r.t.push("a");r.h.push("");r.d.push(FK(K.Atx(32n,K.rx(vi)))),r.d.push(FK(K.Atx(35n,vi)))}
+  else{r.t.push(f[0]);r.d.push(f[1](vi))}});return r}
 function axis( ){}
 
 
