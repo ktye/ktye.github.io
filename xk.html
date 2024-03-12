@@ -123,10 +123,10 @@ function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
 function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s}}
 function editrows(t,idx){rm(dict);
  if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")}
- let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
+ let ta=ce("table"),[h,s,tp,u,c]=uniqs(t,idx)
  h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i]
   let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th)
-  let td=ce("td"),ip=ce("input");
+  let td=ce("td"),ip=ce("input");ip.dataset.origcol=c[i]
   if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
   ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)
  })
@@ -137,27 +137,26 @@ function editrows(t,idx){rm(dict);
  ac(d,oc(()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},tc("ok",    ce("button"))))
  ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))
 }
-function uniqs(t,idx){let h=[],s=[],tp=[],u=[],i0=idx[0]
- t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];if(ti=="a")return;
+function uniqs(t,idx){let h=[],s=[],tp=[],u=[],c=[],i0=idx[0]
+ t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];if(ti=="a")return;c.push(i)
   h.push(x);s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):String(di[i0])+"a"+String(t.d[1+i][i0]));tp.push(ti);
   u.push((ti!="r")?isuniq(at(di,idx)):(isuniq(at(di,idx))&&isuniq(at(t.d[1+i],idx))))
  })
- return[h,s,tp,u]
+ return[h,s,tp,u,c]
 }
 function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
-function commit(ta,t,idx){
- let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);
- inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
-function update(t,i,idx,s){console.log("todo update",i,idx,s)}
+function commit(ta,t,idx){let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,Number(x.dataset.origcol),idx,x.value)})}
+function update(t,i,idx,s){let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i];t.d[i][j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s);if("r"==ti)t.d[1+i][j]=parseFloat(s.slice(1+s.indexOf("a")));listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
 
 function copycap(e){pd(e)
-	let html="<span style='font-family:Consolas'>teletype</span> <span style='color:red'>red text</span> ok?"
+	//let html="<span style='font-family:Consolas'>teletype</span> <span style='color:red'>red text</span> ok?"
+	let html="<span style='font-family:Consolas,monospace'>&nbsp; column│column│column<br/><span style='color:red'>●</span> 123.45│100.23│first<br/><span style='color:green'>●</span> 456.78│901.23│second<br/></span>"
 	//issues.chromium.org/issues/328477621
 	//navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob(["abc.."],{type:'text/plain'}),'text/html':new Blob(["html.."],{type:'text/html'})})]).then(r=>console.log("ok",r),r=>console.log("not ok",r))
-	//workaround:
-	copyCE("text/html", html); //workaround clipboard event & execCommand
+	//workaround clipboard event & execCommand
+	let l=e=>{window.removeEventListener("copy",l);e.clipboardData.setData("text/plain","plain text..");e.clipboardData.setData("text/html",html);pd(e)};window.addEventListener("copy",l);document.execCommand("copy");
 }
-function copyCE(t,v){let l=e=>{window.removeEventListener("copy",l);e.clipboardData.setData(t,v);pd(e)};window.addEventListener("copy",l);document.execCommand("copy");}
+
 
 let ON=x=>x.replace("NaN","ON")
 let On=x=>x.replace("NaN","On")
@@ -236,7 +235,7 @@ function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,pcap):noplot();
  CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 function kdat( ){Object.keys(tables).forEach(s=>asn(s,KT(tables[s])));asn("n",K.Ki(tables[maintable()].n));asn("i",K.Val(KC("!n")));asn("sel",K.Val(KC((sel.value.trim()=="")?"!0":sel.value)))}
-function mark( ){selbg(1);expl(K.Val(Ks(maintable())));let r=K.Val(KC(sel.value));console.log("r?",r,K.tp(r));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});selbg(0)}
+function mark( ){selbg(1);expl(K.Val(Ks(maintable())));let r=K.Val(KC(sel.value));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});selbg(0)}
 function expl(t){console.log("todo explode..",t,K.tp(t));K.dx(t);return 0n}
 function help( ){let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"}
 function kkey(e){let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");K.repl(KC(b))};if("Escape"==e.key)B.value=""}
