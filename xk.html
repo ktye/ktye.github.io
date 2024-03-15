@@ -5,7 +5,7 @@
 
 *{font-family:monospace;box-sizing:border-box}
 html,body{margin:0;padding:0}
-body{width:100vw;height:100vh;overflow:hidden}
+body{width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
 option{margin:0;padding:0}
 table{border-collapse:collapse}
 .head{background:black;color:white}
@@ -15,39 +15,45 @@ table{border-collapse:collapse}
 .large{font-size:large}
 .red{background:red}
 input:read-only{color:grey;font-style:italic}
-#sel{border:none;outline:none;background:#ffe;flex-grow:1;text-align:right;margin-right:1em}
+#sel{border:none;outline:none;background:#ffe;flex-grow:1;text-align:right}
 #list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
 #pcap{width:100%;min-height:50px;outline:none;border:none;overflow:auto}
 #list{height:calc(100vh - 1.5em)}
 #dict{height:calc(100vh - 1.5em)}
-#L{border-right:1px solid;resize:horizontal;position:absolute;height:100vh;overflow-x:none;overflow-y:auto;min-width:50px;max-width:calc(100vw - 50px)}
-#R{height:100vh;position:absolute;right:0;min-width:50px;background:#fcfcfc}
+#L{border-right:1px solid;resize:horizontal;/*position:absolute;height:100vh;*/overflow-x:none;overflow-y:auto;min-width:50px;max-width:calc(100vw - 50px)}
+#R{/*height:100vh;position:absolute;*/right:0;min-width:50px;background:#fcfcfc}
 #T{max-height:50vh;overflow:auto;background:#f4f4f4}
+#F{/*position:fixed;*/bottom:0;width:100vw;display:flex}
 #E{background:orange;margin:0}
 #O{background:#f8f8f8;margin:0}
 #P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden;border-bottom:1px solid}
 #B{background:black;color:white;border:2px solid black;outline:none;flex-grow:1;font-size:large}
 
 </style></head><body onload="init()">
-<div id="L">
- <select id="list" multiple oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange()"></select>
- <div id="dict" style="display:none">abc</div>
- <div id="foot" style="display:flex;gap:0.5em" class="large"><input id="sel" onchange='kinit("#selec#")'/></div>
-</div>
-<div id="R">
- <div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span id="kbut" class="link" onclick="edt.style.display='block'" style="margin-left:auto">x.k</span></div></div>
- <pre id="E"></pre>
- <pre id="O" oncontextmenu="khid(event)"></pre>
- <div id="P">
-  <canvas id="pcnv"></canvas>
+<div style="flex-grow:1;display:flex">
+ <div id="L">
+  <select id="list" multiple oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange()"></select>
+  <div id="dict" style="display:none">abc</div>
  </div>
- <select id="pcap" multiple oncontextmenu="copycap(event)">
- </select>
- <div style="display:flex"><input id="B" onkeyup="kkey(event)"/>
- <span id="bac" class="large" style="background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
- <span id="fwd" class="large" style="background:black;color:white">▶</span>
+ <div id="R">
+  <div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span id="kbut" class="link" onclick="edt.style.display='block'" style="margin-left:auto">x.k</span></div></div>
+  <pre id="E"></pre>
+  <pre id="O" oncontextmenu="khid(event)"></pre>
+  <div id="P">
+   <canvas id="pcnv"></canvas>
+  </div>
+  <select id="pcap" multiple oncontextmenu="copycap(event)">
+  </select>
  </div>
 </div>
+<div id="F">
+ <div id="foot" style="display:flex;gap:0.5em;flex-grow:1" class="large"><input id="sel" onchange='kinit("#selec#")' class="large"/></div>
+ <div style="display:flex;flex-grow:1"><input id="B" onkeyup="kkey(event)"/>
+  <span id="bac" class="large" style="background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
+  <span id="fwd" class="large" style="background:black;color:white">▶</span>
+ </div>
+</div>
+<a id="dl" style="display:none"></a>
 
 <div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false">
 /preinitialized are [tables..]  n:#[maintable]  i:!n  sel:[selected indexes of maintable]  explode:{[t] ..assign t key/vals as globals.. }
@@ -56,6 +62,7 @@ input:read-only{color:grey;font-style:italic}
 xkdict1:1 2 3!(4 5;7.;1.234a34)
 xkdict2:`sym`int`float`complex!(`abc;34;1.34;7.89a30.45)
 xktab:{[]G sel}
+xkgentab:{[]store[`T;+`a`b!(?100;?100)]}
 xkkeytab:`alpha`b`gamma!+`sym`int`float`complex!(`a`bb`ccc;3 22 1;1.23 -4.56 7.89;1a20 2a300 3.4a359)
 xkalpha:1
 xkbeta:2
@@ -120,8 +127,8 @@ function listtable(t,p){
 function listedit(e){let t=tables[maintable()];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
 function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});sel.value=rangestr(a.map(x=>x.index-1).filter(x=>x>=0));selbg(0);let c=curbut();if(c)kinit(c)}
 function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
- let bld=t=>{af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(t.name==x.textContent)cl("bold",x)})}
- let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(t,list);bld(t)};sp.ondblclick=rentable;foot.insertBefore(sp,foot.firstChild);bld(t)}
+ let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)x.classList.add("bold")}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
+ let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(tables[sp.textContent],list);bld(sp.textContent)};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name)}
 function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s}}
 function editrows(t,idx){rm(dict);
  if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")}
@@ -172,7 +179,7 @@ let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[
  return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
 
 
-
+/*
 let obs=new ResizeObserver(function(m){let rect=x=>x.getBoundingClientRect()
  for(const e of m){let id=e.target.id
   if(e.contentBoxSize){let w=e.contentRect.width
@@ -185,6 +192,7 @@ let obs=new ResizeObserver(function(m){let rect=x=>x.getBoundingClientRect()
  let s=rect(P);pcnv.style.width=Math.floor(s.width)+"px",pcnv.style.height=s.height+"px"
  if(plots){scaleplot(plots,pcnv,pcap)}})
 obs.observe(L);obs.observe(T);obs.observe(P);obs.observe(O)
+*/
 
 
 function addbut(x,b){let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
@@ -233,31 +241,32 @@ function maintable(){return foot.getElementsByClassName("bold")[0].textContent}
 function kout(x){O.textContent+=x;O.style.display=""}
 function khid(e){O.style.display="none";pd(e)}
 function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,pcap):noplot();
- let t=K.tp(x);(24==t)?showdict(x,pcap):(25==t)?listtable(tabk(x),pcap):showlst(x,pcap)}
+ let t=K.tp(x);(24==t)?showdict(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 function kdat( ){Object.keys(tables).forEach(s=>asn(s,KT(tables[s])));asn("n",K.Ki(tables[maintable()].n));asn("i",K.Val(KC("!n")));asn("sel",K.Val(KC((sel.value.trim()=="")?"!0":sel.value)))}
 function mark( ){selbg(1);expl(K.Val(Ks(maintable())));let r=K.Val(KC(sel.value));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});selbg(0)}
 function expl(t){console.log("todo explode..",t,K.tp(t));K.dx(t);return 0n}
 function help( ){let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"}
-function kkey(e){let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");K.repl(KC(b))};if("Escape"==e.key)B.value=""}
-function tabk(x){let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
- k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.n=K.nn(vi)
-  if(f==undefined){r.t.push("r");r.t.push("a");r.h.push("");r.d.push(FK(K.Atx(32n,K.rx(vi)))),r.d.push(FK(K.Atx(35n,vi)))}
-  else{r.t.push(f[0]);r.d.push(f[1](vi))}});return r}
+function kkey(e){let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.trim().startsWith("\\")?O.textContent+=khelp:K.repl(KC(b))};if("Escape"==e.key)B.value=""}
+
 function showlst(x,l){return CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
 function showdict(x,l){let j=J(),k=j[lo(x)>>>3],v=j[8+lo(x)>>>3],tk=K.tp(k),tv=K.tp(v);if(tk!=20)return showlst(x,l);k=fills(SK(k));if(25==K.tp(v))return keyt(k,v,l);
  k.forEach((x,i)=>{let vi=K.Atx(K.rx(v),K.Ki(i)),t=K.tp(vi);
   k[i]+="│"+((3==t)?iK(vi):(4==t)?sK(vi):(5==t)?sf(fK(vi)):(6==t)?sz(zK(vi)):"?")})
  k.forEach(x=>{let o=ce("option");o.innerHTML=escapeHtml(x);ac(l,o)})}
-function keyt(k,v,l){listtable(tabk(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>escapeHtml(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
+function keyt(k,v,l){listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>escapeHtml(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
+function stor(s,t){if(4!=K.tp(s)||25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);addtable(t);return 0n}
 
 function axis( ){}
+function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
 
 function sf(x){return x.toPrecision(4)} //todo precision/float maybe from k-calls fmt..
 function sa(x){return x.toFixed(0)}
 function sz(x){let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*Math.PI/180;return sf(r)+"a"+sa((a<0)?a+360:a)}
 
 let err=s=>{E.textContent=s}
+
+const khelp="store[`T;table] /store or overwrite computed table\n"
 
 let /*there be*/ K
 let C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer)
@@ -266,14 +275,14 @@ let kenv={env:{
  Args:  function(       ){return 0},
  Arg:   function(x,y    ){return 0},
  Read:  function(a,b,c  ){return -1},
- Write: function(a,b,c,d){kout(su(new Uint8Array(K.memory.buffer,c,d)));return 0},
+ Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):kout(su(v));return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](K.Atx(4n,y))}}}
+ Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](...LK(y))}}}
 function kinit(x){reset()
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports
   K.kinit()
-  xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl)
+  xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl);xreg("store",stor,2)
   kdat()
   K.dx(K.Val(KC(ed.value)))
   rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
@@ -283,13 +292,17 @@ function kinit(x){reset()
   }).catch(e=>err(e.message+"\n\n"+e.stack))}
 
 
-let xcal=[],xreg=(name,g)=>{xcal.push(g)
+let xcal=[],xreg=(name,g,arity)=>{xcal.push(g)
  let f=K.l2(BigInt(xcal.length-1),Ks(name))       //external function representation idx-as-verb,name
- I()[(lo(f)>>>2)-3]=1                             //arity(here:monadic only)
+ I()[(lo(f)>>>2)-3]=(arity===undefined)?1:arity
  f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))) //type tag xf
  asn(name,f)}
 
 let
+TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
+ k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.n=K.nn(vi)
+  if(f==undefined){r.t.push("r");r.t.push("a");r.h.push("");r.d.push(FK(K.Atx(32n,K.rx(vi)))),r.d.push(FK(K.Atx(35n,vi)))}
+  else{r.t.push(f[0]);r.d.push(f[1](vi))}});return r},
 KT=t=>K.Atx(K.Val(KC("+!/")),K.l2(KS(t.k),KL(t.v.map((x,i)=>("i"==t.t[i])?KI(x):("f"==t.t[i])?KF(x):KS(x))))),
 KC=x=>{let r=K.mk(18,x.length);C().set(("string"===typeof x)?us(x):x,lo(r));return r},
 KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r}
@@ -297,6 +310,7 @@ KZ=(r,a)=>{let x=r.map((r,i)=>r*Math.cos(a[i]*Math.PI/180)),y=r.map((r,i)=>r*Mat
 KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},
 KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},
+LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));K.dx(x);return r}
 IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>lo(x),
 FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0]
 ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},zK=x=>new Float64Array(K.memory.buffer,lo(x),2)
