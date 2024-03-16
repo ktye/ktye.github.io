@@ -6,7 +6,7 @@
 *{font-family:monospace;box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-option{margin:0;padding:0}
+option{margin:0;padding:0;min-height:1em}
 table{border-collapse:collapse}
 .head{background:black;color:white}
 .link:hover{cursor:pointer}
@@ -15,39 +15,39 @@ table{border-collapse:collapse}
 .large{font-size:large}
 .red{background:red}
 input:read-only{color:grey;font-style:italic}
-#sel{border:none;outline:none;background:#ffe;flex-grow:1;text-align:right}
+#sel{border:none;outline:none;/*background:#ffe*/;flex-grow:1;text-align:right}
 #list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
 #pcap{width:100%;min-height:50px;outline:none;border:none;overflow:auto}
-#list{height:calc(100vh - 1.5em)}
-#dict{height:calc(100vh - 1.5em)}
-#L{border-right:1px solid;resize:horizontal;/*position:absolute;height:100vh;*/overflow-x:none;overflow-y:auto;min-width:50px;max-width:calc(100vw - 50px)}
-#R{/*height:100vh;position:absolute;*/right:0;min-width:50px;background:#fcfcfc}
-#T{max-height:50vh;overflow:auto;background:#f4f4f4}
+#list{/*height:calc(100vh - 3em)*/}
+#dict{/*height:calc(100vh - 3em)*/}
+#L{border-right:1px solid;resize:horizontal;overflow-x:none;overflow-y:auto;min-width:10vw;max-width:90vw}
+#R{height:calc(100vh - 3em);right:0;min-width:10vw;background:#fcfcfc}
+#T{/*max-height:50vh;overflow:auto;background:#f4f4f4*/}
 #F{/*position:fixed;*/bottom:0;width:100vw;display:flex}
 #E{background:orange;margin:0}
 #O{background:#f8f8f8;margin:0}
-#P{resize:vertical;width:100%;height:60%;min-height:300px;overflow:hidden;border-bottom:1px solid}
-#B{background:black;color:white;border:2px solid black;outline:none;flex-grow:1;font-size:large}
+#P{resize:vertical;width:100%;height:60%;min-height:10vh;max-height:90vh;overflow:hidden;border-bottom:1px solid}
+#B{background:black;color:white;border:2px solid black;outline:none;flex-grow:1;text-align:right;font-size:large}
 
 </style></head><body onload="init()">
-<div style="flex-grow:1;display:flex">
+<div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span id="kbut" class="link" onclick="edt.style.display='block'" style="margin-left:auto">x.k</span></div></div>
+<div style="flex-grow:1;display:grid;grid-template-columns:auto 1fr">
  <div id="L">
   <select id="list" multiple oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange()"></select>
   <div id="dict" style="display:none">abc</div>
  </div>
  <div id="R">
-  <div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span id="kbut" class="link" onclick="edt.style.display='block'" style="margin-left:auto">x.k</span></div></div>
   <pre id="E"></pre>
   <pre id="O" oncontextmenu="khid(event)"></pre>
   <div id="P">
-   <canvas id="pcnv"></canvas>
+   <canvas id="pcnv" style="width:100%;height:100%"></canvas>
   </div>
   <select id="pcap" multiple oncontextmenu="copycap(event)">
   </select>
  </div>
 </div>
 <div id="F">
- <div id="foot" style="display:flex;gap:0.5em;flex-grow:1" class="large"><input id="sel" onchange='kinit("#selec#")' class="large"/></div>
+ <div id="foot" style="display:flex;gap:0.5em;flex-grow:1" class="large head"><span class="link">+</span><input id="sel" onchange='kinit("#selec#")' class="large head"/></div>
  <div style="display:flex;flex-grow:1"><input id="B" onkeyup="kkey(event)"/>
   <span id="bac" class="large" style="background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
   <span id="fwd" class="large" style="background:black;color:white">▶</span>
@@ -62,7 +62,7 @@ input:read-only{color:grey;font-style:italic}
 xkdict1:1 2 3!(4 5;7.;1.234a34)
 xkdict2:`sym`int`float`complex!(`abc;34;1.34;7.89a30.45)
 xktab:{[]G sel}
-xkgentab:{[]store[`T;+`a`b!(?100;?100)]}
+xkgentab:{[]T:+`a`b!(?100;?100);store`T}
 xkkeytab:`alpha`b`gamma!+`sym`int`float`complex!(`a`bb`ccc;3 22 1;1.23 -4.56 7.89;1a20 2a300 3.4a359)
 xkalpha:1
 xkbeta:2
@@ -87,7 +87,7 @@ let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
 let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
 let plot=plotjs.plots,list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
-function init(){L.style.width="50%"
+function init(){
  addtable(maketable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
  addtable(maketable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
  kinit()
@@ -108,7 +108,7 @@ window.ondrop=function(e){pd(e);
 let tables={}
 function maketable(name,s){s=s.split(/\r?\n/)
  let t={name:name,h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
- t.d=Array(t.h.length)
+ t.d=Array(t.h.length);t.sel="!0"
  t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
  for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
  return t}
@@ -120,16 +120,16 @@ function listtable(t,p){
   for(let j=0;j<n;j++){let dij=(ti=="s"||ti=="i")?String(di[t.top+j]):sf(di[t.top+j]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][t.top+j]):""))}
   v=fills(v)
   if(ti=="r")i++}
- v.forEach((x,i)=>v[i]=escapeHtml(x));rm(p)
+ v.forEach((x,i)=>v[i]=escapeHtml(x));rm(p);if(p==list)sel.value=t.sel
  for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)}
  return v
 }
-function listedit(e){let t=tables[maintable()];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
-function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});sel.value=rangestr(a.map(x=>x.index-1).filter(x=>x>=0));selbg(0);let c=curbut();if(c)kinit(c)}
+function listedit(e){let t=tables[maintable];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
+function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});let idx=a.map(x=>x.index-1).filter(x=>x>=0),t=tables[maintable];sel.value=rangestr(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
 function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)x.classList.add("bold")}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
- let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{listtable(tables[sp.textContent],list);bld(sp.textContent)};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name)}
-function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s}}
+ let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent;listtable(tables[s],list);bld(s);maintable=s;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name);maintable=t.name}
+function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
 function editrows(t,idx){rm(dict);
  if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")}
  let ta=ce("table"),[h,s,tp,u,c]=uniqs(t,idx)
@@ -179,21 +179,8 @@ let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[
  return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
 
 
-/*
-let obs=new ResizeObserver(function(m){let rect=x=>x.getBoundingClientRect()
- for(const e of m){let id=e.target.id
-  if(e.contentBoxSize){let w=e.contentRect.width
-   if(id=="L")R.style.width="calc(100vw - "+(2+w)+"px)"
-   else{
-    let th=rect(T).height,ph=rect(P).height
-    if(id=="T")e.target.style.maxHeight="calc(100vh - "+(ph+70)+"px)"
-    if(id=="P")e.target.style.maxHeight="calc(100vh - "+(th+70)+"px)"
-    if((id=="T")||(id=="P")||(id=="O")){let b=rect(B),r=rect(pcap);pcap.style.height="calc(100vh - "+(r.top+b.height-1)+"px)"}}}}
- let s=rect(P);pcnv.style.width=Math.floor(s.width)+"px",pcnv.style.height=s.height+"px"
- if(plots){scaleplot(plots,pcnv,pcap)}})
-obs.observe(L);obs.observe(T);obs.observe(P);obs.observe(O)
-*/
-
+let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots,pcnv,pcap)}})
+obs.observe(pcnv)
 
 function addbut(x,b){let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
 function curbut(   ){let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
@@ -236,15 +223,17 @@ const scaleplot=debounce((a,b,d)=>{
  plots=a;plots.font1=fs(0);a.font2=fs(1);
  plot(plots,b,d)})
 
-function selbg(x){sel.style.background=x?"orangered":"#ffe"}
-function maintable(){return foot.getElementsByClassName("bold")[0].textContent}
+let maintable
+function selbg(x){sel.style.background=x?"orangered":"black"}
 function kout(x){O.textContent+=x;O.style.display=""}
 function khid(e){O.style.display="none";pd(e)}
 function show(x){rm(pcap);plots?scaleplot(exampleplot,pcnv,pcap):noplot();
  let t=K.tp(x);(24==t)?showdict(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
-function kdat( ){Object.keys(tables).forEach(s=>asn(s,KT(tables[s])));asn("n",K.Ki(tables[maintable()].n));asn("i",K.Val(KC("!n")));asn("sel",K.Val(KC((sel.value.trim()=="")?"!0":sel.value)))}
-function mark( ){selbg(1);expl(K.Val(Ks(maintable())));let r=K.Val(KC(sel.value));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(sel.value))),o=tables[maintable()].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});selbg(0)}
+function kdat( ){Object.keys(tables).forEach(s=>asn(s,KT(tables[s])));asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.Val(KC((sel.value.trim()=="")?"!0":sel.value)))}
+function mark( ){
+	console.log("mark..")
+	let s=sel.value.trim();selbg(1);expl(K.Val(Ks(maintable)));let r=K.Val(KC(s.length?s:"!0"));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(sel.value))),o=tables[maintable].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});selbg(0)}
 function expl(t){console.log("todo explode..",t,K.tp(t));K.dx(t);return 0n}
 function help( ){let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"}
 function kkey(e){let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.trim().startsWith("\\")?O.textContent+=khelp:K.repl(KC(b))};if("Escape"==e.key)B.value=""}
@@ -255,7 +244,7 @@ function showdict(x,l){let j=J(),k=j[lo(x)>>>3],v=j[8+lo(x)>>>3],tk=K.tp(k),tv=K
   k[i]+="│"+((3==t)?iK(vi):(4==t)?sK(vi):(5==t)?sf(fK(vi)):(6==t)?sz(zK(vi)):"?")})
  k.forEach(x=>{let o=ce("option");o.innerHTML=escapeHtml(x);ac(l,o)})}
 function keyt(k,v,l){listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>escapeHtml(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
-function stor(s,t){if(4!=K.tp(s)||25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);addtable(t);return 0n}
+function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);addtable(t);return 0n}
 
 function axis( ){}
 function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
@@ -282,13 +271,13 @@ function kinit(x){reset()
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports
   K.kinit()
-  xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl);xreg("store",stor,2)
+  xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl);xreg("store",stor)
   kdat()
   K.dx(K.Val(KC(ed.value)))
   rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
-       if(x==="#selec#")mark()
+       if(x==="#selec#")mark(       )
   else if(x!==undefined)show(call(x))
-  else                  help()
+  else                  help(       )
   }).catch(e=>err(e.message+"\n\n"+e.stack))}
 
 
@@ -299,7 +288,7 @@ let xcal=[],xreg=(name,g,arity)=>{xcal.push(g)
  asn(name,f)}
 
 let
-TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
+TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
  k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.n=K.nn(vi)
   if(f==undefined){r.t.push("r");r.t.push("a");r.h.push("");r.d.push(FK(K.Atx(32n,K.rx(vi)))),r.d.push(FK(K.Atx(35n,vi)))}
   else{r.t.push(f[0]);r.d.push(f[1](vi))}});return r},
