@@ -67,7 +67,7 @@ xkkeytab:`alpha`b`gamma!+`sym`int`float`complex!(`a`bb`ccc;3 22 1;1.23 -4.56 7.8
 xkalpha:1
 xkbeta:2
 xkrowcount:{[] `count \"number of selected rows";#sel}
-xkplot:{[]plot 1;`PPP}
+xkplot:{[]plot(!100;sin@!100);`"sin x"}
 </textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.display="none";kinit()'>✖</button></div>
 
 <script src="plot.js"></script>
@@ -216,20 +216,22 @@ let exampleplot={
 function noplot(){P.style.display="none"}
 
 /*
-	plot 0                    /i:select current plot
-	plot`polar                /s: s in `xy`bar`polar`ampang
-	plot`xlabel`ylabel`title  /S: #x 1..3
+	plot 0                    / i:select current plot
+	plot`polar                / s: s in `xy`bar`polar`ampang
+	plot`xlabel`ylabel`title  /#S 1..3
 	plot(x;y)                 /x:i|f y:i|f|z
-	plot axis                 /x:I|F ymax  xmin,xmax  xmin,xmax,0,ymax  xmin,xmax,ymin,ymax
+	plot axis                 /x:I|F #x 1...4 y1|x0,x1|x0,x1,0,y1|x0,x1,y0,y1
  */
  
-function plotk(x){P.style.display=""
- if(plot===0){plotid=0;plots=[]};if(undefined===plots[plotid])plots[plotid]={}
- let t=K.tp(x);(3==t)?plotid=pn(lo(x)):(4==t)?plots[plotid].title=sK(x):(20==t)?labels(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(23==x)?lines(LK(x)):K.dx(x)
+function plotk(x){ //ZK
+// let pn=x=>{if(plots.length<=x)plots[x]={};return x},
+// lines=x=>{if(plot[plotid].lines===undefined)plot[plotid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(19==t)?IK(x):FK(x);x.shift()};x.forEach(y=>plots[plotid].lines.push({x:X,y:(22==K.tp(y)) })) }//plots 19,21,22  y|x,y|x,y0,y1..
+ if(plots===0){plotid=0;plots=[]};if(undefined===plots[plotid])plots[plotid]={}
+ let t=K.tp(x);(3==t)?plotid=pn(lo(x)):(4==t)?plots[plotid].title=sK(x):(20==t)?labels(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(23==t)?lines(LK(x)):K.dx(x)
  return K.Ki(plotid)}
 
 function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}}
-const scaleplot=debounce((a,b,d)=>{
+const scaleplot=debounce((a,b,d)=>{P.style.display=""
  let fs=small=>(parseFloat(getComputedStyle(small?document.body:but).fontSize)*devicePixelRatio)+"px monospace"
  plots=a;plots.font1=fs(0);a.font2=fs(1);
  plot(plots,b,d)})
