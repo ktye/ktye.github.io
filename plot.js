@@ -7,7 +7,7 @@ let vmin=x=>Math.min(...x),vmax=x=>Math.max(...x),min=Math.min,max=Math.max,floo
 
 function replot(canvas){plots(canvas.plots,canvas,canvas.slider,canvas.listbx)}
 
-function plots(p,canvas,slider,listbx){const z=devicePixelRatio //zoom scale
+function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom scale
  canvas.width=z*canvas.clientWidth;canvas.height=z*canvas.clientHeight
  let width,height;[width,height]=[canvas.width,canvas.height]
  let c=canvas.getContext("2d")
@@ -19,7 +19,7 @@ function plots(p,canvas,slider,listbx){const z=devicePixelRatio //zoom scale
  p.cols   =("cols"  in p)?p.cols  :0
  p.font1  =("font1" in p)?p.font1 :"16px monospace"
  p.font2  =("font2" in p)?p.font2 :"14px monospace"
- p.hi     =("hi"    in p)?p.hi    :{lines:[],point:null}
+ p.hi     =("hi"    in p)?p.hi    :{plot:null,lines:[],point:null}
  p=layout(c,p)
  
  let rects=[]
@@ -31,14 +31,14 @@ function plots(p,canvas,slider,listbx){const z=devicePixelRatio //zoom scale
    c.save()
    c.translate(w*(i%nc),j*h)
    let r=[w*(i%nc),j*h,w,h]
-   r.push(plot(p.plots[(p.cols<0)?j+nr*(i%nc):i],c,w,h,p))
+   r.push(plot(p.plots[/*(p.cols<0)?j+nr*(i%nc):i*/ i],i,c,w,h,p))
    rects.push(r)
    c.restore()
    if(0==(1+i)%nc)j++;if((j==nr-1)&&(np%nc))w=width/(np%nc)
   }
  }
  
- canvas.plots=p;canvas.slider=slider;canvas.listbx=listbx
+ canvas.plots=p;canvas.slider=slider;canvas.listbx=listbx;canvas.legend=legend
  //let replot=function(force){if((canvas.clientWidth!=width)||(canvas.clientHeight!=height)||force===true)plots(p,canvas,slider,listbx)}
  //{let r;window.addEventListener("resize",function(){clearTimeout(r);r=setTimeout(replot, 200)})}
  
@@ -47,7 +47,14 @@ function plots(p,canvas,slider,listbx){const z=devicePixelRatio //zoom scale
   let x=e.clientX-r.left, y=e.clientY-r.top
   let ri=targetRect(x,y,rects)
   let [line,point]=snapPoint(x,y,rects[ri],p.plots[ri])
-  p.hi={lines:[line],point:point}
+  p.hi={plot:ri,lines:[line],point:point}
+  let pl=p.plots[ri].lines[line]
+  // ? console.log("pl",pl)
+  let d={
+   x:("x"in pl)?pl.x[point]:null,
+   y:("y"in pl)?pl.y[point]:null,
+   z:("z"in pl)?pl.z[point]:null}
+  console.log(d)
   if(slider!==undefined){
    slider.min=0;slider.max=p.plots[ri].lines[line].y.length-1
    slider.value=point
@@ -76,7 +83,7 @@ function plots(p,canvas,slider,listbx){const z=devicePixelRatio //zoom scale
 
 
 
-function plot(p,c,w,h,plts){
+function plot(p,i,c,w,h,plts){p.i=i
  p.type  =("type"   in p)?p.type: "xy"
  p.title =("title"  in p)?p.title: ""
  p.xlabel=("xlabel" in p)?p.xlabel:""
@@ -101,7 +108,7 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;w=min(w,1.5*h),h=min(h,w);
    c.beginPath();c.moveTo(xx(x[0]),yy(y[0]));for(let j=0;j<x.length;j++){c.lineTo(xx(x[j]),yy(y[j]))}
    c.strokeStyle=plts.colors[i%plts.colors.length];c.lineWidth=hiline(plts,i)*(l.size?l.size:2)
    c.stroke()}
-  let hp=plts.hi.point;if((hp!==null)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill();mark(x[hp],y[hp])}
+  let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill();mark(x[hp],y[hp])}
  }
  c.strokeRect(plts.xyx,plts.xyy,aw,ah)
  align(c,1)
@@ -114,20 +121,20 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;w=min(w,1.5*h),h=min(h,w);
  align(c,5);ncTic(y0,y1).map(y=>{t=String(y);y=yy(y);c.beginPath();c.moveTo(-plts.tl,y);c.lineTo(0,y);c.stroke();c.fillText(t,-plts.tl,y)})
  c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.map(ln);return(l,j)=>[plts.xyx+xx(l.x[j]),ah+plts.xyy+yy(l.y[j])]
 }
-function polarplot(p,c,w,h,plts){if(!p.lines)return;c.translate(floor(w/2),floor(h/2))
+function polarplot(p,c,w,h,plts){if(!p.lines)return;
  let ra=floor(min(w-plts.pw,h-plts.ph-plts.tih)/2),raa=ra+plts.tl,al=[7,6,3,3,0,0,1,2,2,5,5,8],
  li=limits(p),r1=autop(p.lines,li[3]),sc=ra/r1,
  ln=(l,i)=>{let x=l.y,y=l.z;if(!x.length)return
   let mark=j=>{c.beginPath();c.fillText(absang(x[j],y[j]),sc*x[j],sc*y[j])}
   let s=hiline(plts,i)*(l.size?l.size:3);c.fillStyle=plts.colors[i%plts.colors.length]
-  let hp=j=>hipoint(plts,i,j)
+  let hp=j=>hipoint(plts,i,j,p.i)
   x.map((x,i)=>{c.beginPath();c.arc(sc*x,sc*y[i],s*hp(i),0,2*Math.PI);c.fill()})
   x.map((x,i)=>{if(hp(i)>1)mark(i)})}
- c.translate(0,floor(plts.tih/2))
+ c.translate(floor(w/2),floor(ra+plts.ph/2+plts.tih))
  circle(c,0,0,ra)
  c.textAlign="center";c.textBaseline="bottom"
  c.fillText(p.title,0,-ra-plts.tl-plts.tlh)
- align(c,0);c.fillText("⮤"+r1,floor(0.74*ra),floor(0.67*ra))
+ align(c,0);c.fillText("↖"/*"⮤"*/+r1,floor(0.74*ra),floor(0.67*ra))
  if(p.ylabel){align(c,0);c.fillText(p.ylabel,floor(0.74*ra),plts.tih+floor(0.67*ra))}
  c.font=plts.font2;iota(12).map(i=>{let p=30*i*Math.PI/180,x=Math.sin(p),y=-Math.cos(p);align(c,al[i]);c.beginPath();c.moveTo(ra*x,ra*y);c.lineTo(raa*x,raa*y);c.stroke();c.fillText(""+30*i,raa*x,raa*y)})
  c.strokeStyle="#ccc";ncTic(0,r1).slice(1,-1).map(t=>circle(c,0,0,sc*t))
@@ -142,7 +149,7 @@ function h1(plts){let h=parseFloat(plts.font1);return isNaN(h)?20:ceil(h)}
 function h2(plts){let h=parseFloat(plts.font2);return isNaN(h)?14:ceil(h)}
 function layout(c,plts){                           //computed sizes depending on fontsize
  plts.tih=ceil(1.2*h1(plts))                       //title height
- c.font=plts.font2;let t=c.measureText('-1.234');
+ c.font=plts.font2;let t=c.measureText('-1.23');
  plts.tlw=t.width                                  //tic label width (y-axis)
  plts.tlh=ceil(1.2*h2(plts))                       //tic label height e.g. x-axis
  plts.ylw=ceil(1.1*h1(plts))                       //y label width (rotated height)
@@ -159,7 +166,7 @@ function layout(c,plts){                           //computed sizes depending on
 }
 
 function hiline(p,i){return (p.hi.lines.includes(i)&&p.hi.point===null) ? 2 : 1}
-function hipoint(p,i,j){return (p.hi.lines.length==1&&p.hi.lines[0]==i&&p.hi.point==j) ? 2 : 1}
+function hipoint(p,i,j,k){return(k==p.hi.plot&&p.hi.lines.length==1&&p.hi.lines[0]==i&&p.hi.point==j) ? 2 : 1}
 function absang(x,y){let p=180/Math.PI*Math.atan2(x,-y);p=(p<0)?p+360:p;return Math.hypot(x,y).toPrecision(4)+"@"+p.toPrecision(4)}
 function targetRect(x,y,rects){for(let i=0;i<rects.length;i++){let R=rects[i];if((x>=R[0])&&(y>=R[1])&&(x<=R[0]+R[2])&&(y<=R[1]+R[3])){return i}};return null}
 function snapPoint(x,y,rect,p){x-=rect[0];y-=rect[1]
@@ -169,7 +176,6 @@ function snapPoint(x,y,rect,p){x-=rect[0];y-=rect[1]
   for(let j=0;j<l.y.length;j++){
    let [X,Y]=f(l,j);X-=x;Y-=y
    let d=X*X+Y*Y
-   if((i==0)&&(j==0))console.log("i/j",i,j,"XY",X,Y,"xy",x,y,"d",d)
    if(d<dist){dist=d;line=i;point=j}
   }
  }

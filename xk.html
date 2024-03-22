@@ -23,7 +23,7 @@ input:read-only{color:grey;font-style:italic}
 #L{border-right:1px solid;resize:horizontal;overflow-x:none;overflow-y:auto;min-width:10vw;max-width:90vw}
 #R{height:calc(100vh - 3em);right:0;min-width:10vw;background:#fcfcfc}
 #T{/*max-height:50vh;overflow:auto;background:#f4f4f4*/}
-#F{/*position:fixed;*/bottom:0;width:100vw;display:flex}
+#F{position:fixed;bottom:0;width:100vw;display:flex}
 #E{background:orange;margin:0}
 #O{background:#f8f8f8;margin:0;max-height:30vh;overflow:auto}
 #P{resize:vertical;width:100%;height:60%;min-height:10vh;max-height:90vh;overflow:hidden;border-bottom:1px solid}
@@ -67,7 +67,7 @@ xkkeytab:`alpha`b`gamma!+`sym`int`float`complex!(`a`bb`ccc;3 22 1;1.23 -4.56 7.8
 xkalpha:1
 xkbeta:2
 xkrowcount:{[] `count \"number of selected rows";#sel}
-xkplot:{[]plot(!100;sin@!100);`"sin x"}
+xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot'(1;```polartitle;3a30+?100a);`"abc"}
 </textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.display="none";kinit()'>✖</button></div>
 
 <script src="plot.js"></script>
@@ -120,7 +120,7 @@ function listtable(t,p){
   for(let j=0;j<n;j++){let dij=(ti=="s"||ti=="i")?String(di[t.top+j]):sf(di[t.top+j]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][t.top+j]):""))}
   v=fills(v)
   if(ti=="r")i++}
- v.forEach((x,i)=>v[i]=escapeHtml(x));rm(p);//if(p==list)sel.value=t.sel
+ v.forEach((x,i)=>v[i]=esc(x));rm(p);//if(p==list)sel.value=t.sel
  for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)}
  return v
 }
@@ -172,22 +172,22 @@ let On=x=>x.replace("NaN","On")
 let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
 let at=(x,i)=>x.filter((_,j)=>i.includes(j))
 let trm=s=>(s.length<11)?s:s.slice(0,9)+"‥"
-let escapeHtml=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
+let esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
 let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
 let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);
  let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;
  return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
 
 
-let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots,pcnv,pcap)}})
+let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}})
 obs.observe(pcnv)
 
 function addbut(x,b){let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
 function curbut(   ){let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
 function setbut( x ){af(but.childNodes).forEach(y=>{y.classList.remove("bold")});x.classList.add("bold")}
-function reset(    ){plots=0;plotid=0;E.textContent="";O.textContent=""}
+function reset(    ){plots=0;pid=0;E.textContent="";O.textContent=""}
 
-let plots=0,plotid=0
+let plots=0,pid=0
 let iota=n=>[...Array(n).keys()]
 let exampleplot={
  title:"xy plot",
@@ -219,29 +219,32 @@ function noplot(){P.style.display="none"}
 	plot 0                    / i:select current plot
 	plot`polar                / s: s in `xy`bar`polar`ampang
 	plot`xlabel`ylabel`title  /#S 1..3
-	plot(x;y)                 /x:i|f y:i|f|z
+	plot(x;y0;y1;..)          /[x:i|f] y:i|f|z  multiple lines
 	plot axis                 /x:I|F #x 1...4 y1|x0,x1|x0,x1,0,y1|x0,x1,y0,y1
  */
  
-function plotk(x){ //ZK
-// let pn=x=>{if(plots.length<=x)plots[x]={};return x},
-// lines=x=>{if(plot[plotid].lines===undefined)plot[plotid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(19==t)?IK(x):FK(x);x.shift()};x.forEach(y=>plots[plotid].lines.push({x:X,y:(22==K.tp(y)) })) }//plots 19,21,22  y|x,y|x,y0,y1..
- if(plots===0){plotid=0;plots=[]};if(undefined===plots[plotid])plots[plotid]={}
- let t=K.tp(x);(3==t)?plotid=pn(lo(x)):(4==t)?plots[plotid].title=sK(x):(20==t)?labels(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(23==t)?lines(LK(x)):K.dx(x)
- return K.Ki(plotid)}
+function plotk(x){
+ let pn=x=>{if(plots.length<=x)plots[x]={};return x}
+ let pt=x=>{plots[pid].type=x}
+ let ri=x=>{x=ZK(x);return[x.filter((_,i)=>~i&1),x.filter((_,i)=>i&1)]}
+ let la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
+ let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
+ if(plots===0){pid=0;plots=[]};if(undefined===plots[pid])plots[pid]={}
+ let t=K.tp(x);(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
+ return K.Ki(pid)}
 
 function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}}
-const scaleplot=debounce((a,b,d)=>{P.style.display=""
+const scaleplot=debounce(a=>{P.style.display=""
  let fs=small=>(parseFloat(getComputedStyle(small?document.body:but).fontSize)*devicePixelRatio)+"px monospace"
- plots=a;plots.font1=fs(0);a.font2=fs(1);
- plot(plots,b,d)})
+ let p={plots:a,font1:fs(0),font2:fs(1)/*,cols:1*/}
+ plot(p,pcnv,pcap,x=>B.value=x)})
 
 let maintable
 function selbg(x){sel.style.background=x?"orangered":"black"}
 function kout(x){O.textContent+=x;O.style.display="";kend()}
 function kend( ){O.scrollTop=O.scrollHeight}
 function khid(e){O.style.display="none";pd(e)}
-function show(x){rm(pcap);plots?scaleplot(plots,pcnv,pcap):noplot();
+function show(x){rm(pcap);plots?scaleplot(plots):noplot();
  let t=K.tp(x);(24==t)?showdict(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 function kdat( ){/*todo:explode maintable*/Object.keys(tables).forEach(s=>{asn(s,KT(tables[s]));asn(s+"sel",KI(tables[s].isel))});asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.rx(K.Val(Ks(maintable+"sel"))))}
@@ -250,12 +253,12 @@ function expl(t){console.log("todo explode..",t,K.tp(t));K.dx(t);return 0n}
 function help( ){let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"}
 function kkey(e){let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.startsWith("\\")?(b=="\\c")?O.textContent="":O.textContent+=khelp:K.repl(KC(b))};if("Escape"==e.key)B.value="";kend()}
 
-function showlst(x,l){return CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=escapeHtml(x))}
+function showlst(x,l){return CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=esc(x))}
 function showdict(x,l){let j=J(),k=j[lo(x)>>>3],v=j[8+lo(x)>>>3],tk=K.tp(k),tv=K.tp(v);if(tk!=20)return showlst(x,l);k=fills(SK(k));if(25==K.tp(v))return keyt(k,v,l);
  k.forEach((x,i)=>{let vi=K.Atx(K.rx(v),K.Ki(i)),t=K.tp(vi);
   k[i]+="│"+((3==t)?iK(vi):(4==t)?sK(vi):(5==t)?sf(fK(vi)):(6==t)?sz(zK(vi)):"?")})
- k.forEach(x=>{let o=ce("option");o.innerHTML=escapeHtml(x);ac(l,o)})}
-function keyt(k,v,l){listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>escapeHtml(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
+ k.forEach(x=>{let o=ce("option");o.innerHTML=esc(x);ac(l,o)})}
+function keyt(k,v,l){listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>esc(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
 function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);addtable(t);return 0n}
 
 function axis( ){}
