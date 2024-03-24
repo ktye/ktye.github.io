@@ -23,7 +23,7 @@ input:read-only{color:grey;font-style:italic}
 #L{border-right:1px solid;resize:horizontal;overflow-x:none;overflow-y:auto;min-width:10vw;max-width:90vw}
 #R{height:calc(100vh - 3em);right:0;min-width:10vw;background:#fcfcfc}
 #T{/*max-height:50vh;overflow:auto;background:#f4f4f4*/}
-#F{position:fixed;bottom:0;width:100vw;display:flex}
+#F{/*position:fixed;bottom:0;*/width:100vw;display:flex}
 #E{background:orange;margin:0}
 #O{background:#f8f8f8;margin:0;max-height:30vh;overflow:auto}
 #P{resize:vertical;width:100%;height:60%;min-height:10vh;max-height:90vh;overflow:hidden;border-bottom:1px solid}
@@ -49,8 +49,8 @@ input:read-only{color:grey;font-style:italic}
 <div id="F">
  <div id="foot" style="display:flex;gap:0.5em;flex-grow:1" class="large head"><span class="link">+</span><input id="sel" onchange='kinit("#selec#")' class="large head"/></div>
  <div style="display:flex;flex-grow:1"><input id="B" onkeyup="kkey(event)"/>
-  <span id="bac" class="large" style="background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
-  <span id="fwd" class="large" style="background:black;color:white">▶</span>
+  <span id="bac" class="large link" style="display:none;padding-top:2px;background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
+  <span id="fwd" class="large link" style="display:none;padding-top:2px;background:black;color:white;padding-left:0.2em;padding-right:0.2em">▶</span>
  </div>
 </div>
 <a id="dl" style="display:none"></a>
@@ -237,7 +237,7 @@ function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.ap
 const scaleplot=debounce(a=>{P.style.display=""
  let fs=small=>(parseFloat(getComputedStyle(small?document.body:but).fontSize)*devicePixelRatio)+"px monospace"
  let p={plots:a,font1:fs(0),font2:fs(1)/*,cols:1*/}
- plot(p,pcnv,pcap,x=>B.value=x)})
+ plot(p,pcnv,{b:bac,f:fwd},pcap,x=>B.value=x)})
 
 let maintable
 function selbg(x){sel.style.background=x?"orangered":"black"}

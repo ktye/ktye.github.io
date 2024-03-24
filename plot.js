@@ -5,14 +5,13 @@ let pd=function(e){e.preventDefault();e.stopPropagation()}
 //let ct=(x,y)=>x.classList.contains(y)
 let vmin=x=>Math.min(...x),vmax=x=>Math.max(...x),min=Math.min,max=Math.max,floor=Math.floor,ceil=Math.ceil
 
-function replot(canvas){plots(canvas.plots,canvas,canvas.slider,canvas.listbx)}
+function replot(canvas){plots(canvas.plots,canvas,canvas.slider,canvas.listbx,canvas.legend)}
 
 function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom scale
  canvas.width=z*canvas.clientWidth;canvas.height=z*canvas.clientHeight
  let width,height;[width,height]=[canvas.width,canvas.height]
  let c=canvas.getContext("2d")
 
- 
  p=(p===null)?{}:p
  p.equal  =("equal" in p)?p.equal :false
  p.colors =("colors"in p)?p.colors:"#003FFF,#03ED3A,#E8000B,#8A2BE2,#FFC400,#00D7FF".split(",")
@@ -41,6 +40,19 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
  canvas.plots=p;canvas.slider=slider;canvas.listbx=listbx;canvas.legend=legend
  //let replot=function(force){if((canvas.clientWidth!=width)||(canvas.clientHeight!=height)||force===true)plots(p,canvas,slider,listbx)}
  //{let r;window.addEventListener("resize",function(){clearTimeout(r);r=setTimeout(replot, 200)})}
+
+ if(p.hi.point!==null){
+  let pl=p.plots[p.hi.plot].lines[0],pt=p.hi.point
+  let d={
+   x:("undefined"!=typeof pl.x)?pl.x[pt]:null,
+   y:("undefined"!=typeof pl.y)?pl.y[pt]:null,
+   z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
+  d.r=Math.hypot(d.y,d.z);d.a=180/Math.PI*Math.atan2(d.z,d.y);if(d.a<0)d.a+=360
+  let s=((d.x!==null)?("x:"+d.x+";"):"")+((d.z!==null)?("z:"+d.r+"a"+d.a):("y:"+d.y))
+  console.log(typeof legend)
+  if("function"==typeof legend ) legend(s)
+  else console.log(s)
+ }
  
  canvas.ondblclick=function(e){
   let r=e.target.getBoundingClientRect()
@@ -48,13 +60,6 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   let ri=targetRect(x,y,rects)
   let [line,point]=snapPoint(x,y,rects[ri],p.plots[ri])
   p.hi={plot:ri,lines:[line],point:point}
-  let pl=p.plots[ri].lines[line]
-  // ? console.log("pl",pl)
-  let d={
-   x:("x"in pl)?pl.x[point]:null,
-   y:("y"in pl)?pl.y[point]:null,
-   z:("z"in pl)?pl.z[point]:null}
-  console.log(d)
   if(slider!==undefined){
    slider.min=0;slider.max=p.plots[ri].lines[line].y.length-1
    slider.value=point
@@ -62,10 +67,15 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   replot(canvas)
  }
  if(slider!==undefined){
-  slider.onchange=function(e){
-   p.hi.point=slider.value
-   replot(canvas)
-  }
+  let I=Math.ceil(slider.max/5)
+  slider.f.style.display=(p.hi.point===null)?"none":""
+  slider.b.style.display=(p.hi.point===null)?"none":""
+  let f=x=>e=>{p.hi.point+=x*(1+1000*(e.shiftKey||e.ctrlKey));p.hi.point=(p.hi.point<0)?0:(p.hi.point>slider.max)?slider.max:p.hi.point;replot(canvas)}
+  slider.f.onclick   =f( 1)
+  slider.b.onclick   =f(-1)
+  slider.f.ondblclick=f( I)
+  slider.b.ondblclick=f(-I)
+  /* slider.onchange=function(e){ p.hi.point=slider.value;replot(canvas) } */
  }
  if(listbx!==undefined){
   //rm(listbox)
