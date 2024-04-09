@@ -91,47 +91,31 @@ let parsetable=(name,s)=>{s=s.split(/\r?\n/)
  t.d=Array(t.h.length);t.sel="!0";t.isel=new Int32Array(0)
  t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
  for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
- t.h=t.h.filter((_,i)=>t.t[i]!="a");t.d.forEach((x,i)=>{if(t.t[i]=="r"){t.d[i]=zra(t.d[i],t.d[1+i]);t.t[i]="z"}});t.d=t.d.filter((_,i)=>t.t[i]!="a");t.t=t.t.filter((_,i)=>t.t[i]!="a") //Math.cos
+ t.h=t.h.filter((_,i)=>t.t[i]!="a");t.d.forEach((x,i)=>{if(t.t[i]=="r"){t.d[i]=zra(t.d[i],t.d[1+i]);t.t[i]="z"}});t.d=t.d.filter((_,i)=>t.t[i]!="a");t.t=t.t.filter((_,i)=>t.t[i]!="a")
  return t}
 let zra=(r,a)=>{let z=new Float64Array(2*r.length);a.forEach((p,i)=>{p*=Math.PI/180;z[2*i]=r[i]*Math.cos(p);z[2*i+1]=r[i]*Math.sin(p)});return z}
-function fills(v){let m=Math.max(...v.map(s=>s.length));for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length);return v}
-function listtable(t,p){
- let n=Math.min(100,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i"))
- for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i];v[0]+="│"+trm(t.h[i])
-  for(let j=0;j<n;j++){let tj=t.top+j;dij=(ti=="s"||ti=="i")?String(di[tj]):(ti=="f")?sf(di[tj]):sz([di[2*tj],di[1+2*tj]]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][tj]):""))}
-  v=fills(v);if(ti=="r")i++}
- v.forEach((x,i)=>v[i]=esc(x));rm(p);//if(p==list)sel.value=t.sel
- for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)}
- return v}
-function listedit(e){let t=tables[maintable];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
-function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});let idx=a.map(x=>x.index-1).filter(x=>x>=0),t=tables[maintable];sel.value=rangestr(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
-function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
+let sf=x=>{let a=Math.abs(x);return(a>=10000&&a<1e6)?x.toFixed(0):x.toPrecision(4)},sa=x=>x.toFixed(0),sz=x=>{let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*180/Math.PI;return sf(r)+"a"+sa((a<0)?a+360:a)},Sz=(x,y)=>{let r=Math.hypot(x,y),a=Math.atan2(y,x)*180/Math.PI;return String(r)+"a"+String((a<0)?a+360:a)},zs=s=>{let v=s.split("a").map(parseFloat);return(v.length==2)?[v[0]*Math.cos(v[1]/180*Math.PI),v[0]*Math.sin(v[1]/180*Math.PI)]:[NaN,NaN]}
+let fills=v=>{let m=Math.max(...v.map(s=>s.length));for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length);return v}
+let listtable=(t,p)=>{let n=Math.min(100,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i"))
+ for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i];v[0]+="│"+trm(t.h[i]);for(let j=0;j<n;j++){let tj=t.top+j;dij=(ti=="s"||ti=="i")?String(di[tj]):(ti=="f")?sf(di[tj]):sz([di[2*tj],di[1+2*tj]]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][tj]):""))};v=fills(v);if(ti=="r")i++}
+ v.forEach((x,i)=>v[i]=esc(x));rm(p);for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)};return v}
+let listedit=e=>{let t=tables[maintable];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
+let listchange=()=>{let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});let idx=a.map(x=>x.index-1).filter(x=>x>=0),t=tables[maintable];sel.value=rangestr(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
+let addtable=t=>{tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)x.classList.add("bold")}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
  let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name);maintable=t.name}
-function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
-function editrows(t,idx){rm(dict);
- if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")}
- let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
+let rentable=e=>{let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
+let editrows=(t,idx)=>{rm(dict);if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")};let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
  h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i]
-  let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th)
-  let td=ce("td"),ip=ce("input")
-  if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
-  ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)
- })
- ac(dict,ta)
- list.style.display="none";dict.style.display="block" 
- ac(dict,ce("hr"))
- let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
+  let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th);let td=ce("td"),ip=ce("input");if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
+  ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
+ ac(dict,ta);list.style.display="none";dict.style.display="block";ac(dict,ce("hr"));let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
  ac(d,oc(()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},tc("ok",    ce("button"))))
- ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))
-}
-function uniqs(t,idx){let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x)
- t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))})
- return[t.h,s,t.t,u]}
-function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
-function commit(ta,t,idx){let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
-function update(t,i,idx,s){let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i];if(ti=="z"){[t.d[i][2*j],t.d[i][1+2*j]]=zs(s)}else{t.d[i][j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s)};listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
-//todo: check zs
+ ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))}
+let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x);t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))});return[t.h,s,t.t,u]}
+let verify=t=>{return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
+let commit=(ta,t,idx)=>{let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
+let update=(t,i,idx,s)=>{let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i],di=t.d[i];if(ti=="z"){[di[2*j],di[1+2*j]]=zs(s)}else{di[j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s)};listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
 
 function copycap(e){pd(e)
 	//let html="<span style='font-family:Consolas'>teletype</span> <span style='color:red'>red text</span> ok?"
@@ -143,25 +127,20 @@ function copycap(e){pd(e)
 }
 
 
-let ON=x=>x.replace("NaN","ON")
-let On=x=>x.replace("NaN","On")
+let ON=x=>x.replace("NaN","ON"),On=x=>x.replace("NaN","On")
 let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
 let at=(x,i)=>x.filter((_,j)=>i.includes(j))
 let trm=s=>(s.length<11)?s:s.slice(0,9)+"‥"
 let esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
 let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
-let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);
- let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;
- return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",") }
+let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",")}
 
+let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}});obs.observe(pcnv)
 
-let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}})
-obs.observe(pcnv)
-
-function addbut(x,b){let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
-function curbut(   ){let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
-function setbut( x ){af(but.childNodes).forEach(y=>{y.classList.remove("bold")});x.classList.add("bold")}
-function reset(    ){plots=0;pid=0;E.textContent="";O.textContent=""}
+let addbut=(x,b)=>{let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
+let curbut=()=>{let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
+let setbut=x=>{af(but.childNodes).forEach(y=>{y.classList.remove("bold")});x.classList.add("bold")}
+let reset=()=>{plots=0;pid=0;E.textContent="";O.textContent=""}
 
 let plots=0,pid=0
 let iota=n=>[...Array(n).keys()]
@@ -240,8 +219,6 @@ function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t
 function axis( ){}
 function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
 
-let sf=x=>{let a=Math.abs(x);return(a>=10000&&a<1e6)?x.toFixed(0):x.toPrecision(4)},sa=x=>x.toFixed(0),
-sz=x=>{let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*Math.PI/180;return sf(r)+"a"+sa((a<0)?a+360:a)},Sz=(x,y)=>{let r=Math.hypot(x,y),a=Math.atan2(y,x)*Math.PI/180;return String(r)+"a"+String((a<0)?a+360:a)},zs=s=>{let v=s.split("a").map(parseFloat);return(v.length==2)?[v[0]*Math.cos(v[1]/180*Math.PI),v[0]*Math.sin(v[1]/180*Math.PI)]:[NaN,NaN]}
 
 let err=s=>{E.textContent=s}
 
