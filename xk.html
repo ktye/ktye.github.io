@@ -72,58 +72,37 @@ xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot'(1;```polartitle;3a30+?100a)
 
 <script src="plot.js"></script>
 <script>
-let ge=x=>document.getElementById(x)
-let ce=x=>document.createElement(x)
-let ac=(x,y)=>{x.appendChild(y);return y}
-let cl=(x,y)=>{y.classList.add(...x.split(" "));return y}
-let tc=(x,y)=>{y.textContent=x;return y}
-let id=(x,y)=>{y.id=x;return y}
-let oc=(f,x)=>{x.onclick=f;return x}
-let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}}
-let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p},rm1=p=>{while(p.children.length>1)p.removeChild(p.firstChild);return p}
-let af=Array.from
-let lo=x=>Number(BigInt.asUintN(32,x))
-let su=x=>t_.decode(x),t_=new TextDecoder("utf-8")
-let us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let ge=x=>document.getElementById(x),ce=x=>document.createElement(x),ac=(x,y)=>{x.appendChild(y);return y},cl=(x,y)=>{y.classList.add(...x.split(" "));return y},tc=(x,y)=>{y.textContent=x;return y},id=(x,y)=>{y.id=x;return y},oc=(f,x)=>{x.onclick=f;return x}
+let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}},rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p},rm1=p=>{while(p.children.length>1)p.removeChild(p.firstChild);return p},af=Array.from,lo=x=>Number(BigInt.asUintN(32,x))
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
 let plot=plotjs.plots,list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
-function init(){
- addtable(maketable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
- addtable(maketable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
- kinit()
-}
+let init=_=>{
+ addtable(parsetable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
+ addtable(parsetable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
+ kinit()}
 
-window.ondragover=function(e){pd(e)}
-window.ondrop=function(e){pd(e);
- let l=e.dataTransfer.files
- for(let i=0;i<l.length;i++){
-  let f=l.item(i);
-  f.arrayBuffer().then(u=>{let n=f.name
-   if(n.endsWith(".csv")||n.endsWith(".txt"))addtable(maketable(n.slice(0,-4),su(u)))
-   else if(n.endsWith(".k"))                {ed.value=su(u);ge("kbut").textContent=n}
-   else console.log("ignore file",n)
-})}}
+window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);ge("kbut").textContent=n}else console.log("ignore file",n)})}}
 
 
 let tables={}
-function maketable(name,s){s=s.split(/\r?\n/)
+let parsetable=(name,s)=>{s=s.split(/\r?\n/)
  let t={name:name,h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
  t.d=Array(t.h.length);t.sel="!0";t.isel=new Int32Array(0)
  t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
  for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
+ t.h=t.h.filter((_,i)=>t.t[i]!="a");t.d.forEach((x,i)=>{if(t.t[i]=="r"){t.d[i]=zra(t.d[i],t.d[1+i]);t.t[i]="z"}});t.d=t.d.filter((_,i)=>t.t[i]!="a");t.t=t.t.filter((_,i)=>t.t[i]!="a") //Math.cos
  return t}
+let zra=(r,a)=>{let z=new Float64Array(2*r.length);a.forEach((p,i)=>{p*=Math.PI/180;z[2*i]=r[i]*Math.cos(p);z[2*i+1]=r[i]*Math.sin(p)});return z}
 function fills(v){let m=Math.max(...v.map(s=>s.length));for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length);return v}
 function listtable(t,p){
  let n=Math.min(100,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i"))
- for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i]
-  v[0]+="│"+trm(t.h[i])
-  for(let j=0;j<n;j++){let dij=(ti=="s"||ti=="i")?String(di[t.top+j]):sf(di[t.top+j]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][t.top+j]):""))}
-  v=fills(v)
-  if(ti=="r")i++}
+ for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i];v[0]+="│"+trm(t.h[i])
+  for(let j=0;j<n;j++){let tj=t.top+j;dij=(ti=="s"||ti=="i")?String(di[tj]):(ti=="f")?sf(di[tj]):sz([di[2*tj],di[1+2*tj]]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][tj]):""))}
+  v=fills(v);if(ti=="r")i++}
  v.forEach((x,i)=>v[i]=esc(x));rm(p);//if(p==list)sel.value=t.sel
  for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)}
- return v
-}
+ return v}
 function listedit(e){let t=tables[maintable];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
 function listchange(){let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});let idx=a.map(x=>x.index-1).filter(x=>x>=0),t=tables[maintable];sel.value=rangestr(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
 function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
@@ -132,10 +111,10 @@ function addtable(t){tables[t.name]=t;listtable(t,list);let c=t.name
 function rentable(e){let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
 function editrows(t,idx){rm(dict);
  if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")}
- let ta=ce("table"),[h,s,tp,u,c]=uniqs(t,idx)
+ let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
  h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i]
   let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th)
-  let td=ce("td"),ip=ce("input");ip.dataset.origcol=c[i]
+  let td=ce("td"),ip=ce("input")
   if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
   ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)
  })
@@ -146,16 +125,13 @@ function editrows(t,idx){rm(dict);
  ac(d,oc(()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},tc("ok",    ce("button"))))
  ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))
 }
-function uniqs(t,idx){let h=[],s=[],tp=[],u=[],c=[],i0=idx[0]
- t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];if(ti=="a")return;c.push(i)
-  h.push(x);s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):String(di[i0])+"a"+String(t.d[1+i][i0]));tp.push(ti);
-  u.push((ti!="r")?isuniq(at(di,idx)):(isuniq(at(di,idx))&&isuniq(at(t.d[1+i],idx))))
- })
- return[h,s,tp,u,c]
-}
+function uniqs(t,idx){let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x)
+ t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))})
+ return[t.h,s,t.t,u]}
 function verify(t){return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
-function commit(ta,t,idx){let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,Number(x.dataset.origcol),idx,x.value)})}
-function update(t,i,idx,s){let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i];t.d[i][j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s);if("r"==ti)t.d[1+i][j]=parseFloat(s.slice(1+s.indexOf("a")));listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
+function commit(ta,t,idx){let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
+function update(t,i,idx,s){let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i];if(ti=="z"){[t.d[i][2*j],t.d[i][1+2*j]]=zs(s)}else{t.d[i][j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s)};listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
+//todo: check zs
 
 function copycap(e){pd(e)
 	//let html="<span style='font-family:Consolas'>teletype</span> <span style='color:red'>red text</span> ok?"
@@ -264,9 +240,8 @@ function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t
 function axis( ){}
 function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
 
-function sf(x){return x.toPrecision(4)} //todo precision/float maybe from k-calls fmt..
-function sa(x){return x.toFixed(0)}
-function sz(x){let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*Math.PI/180;return sf(r)+"a"+sa((a<0)?a+360:a)}
+let sf=x=>{let a=Math.abs(x);return(a>=10000&&a<1e6)?x.toFixed(0):x.toPrecision(4)},sa=x=>x.toFixed(0),
+sz=x=>{let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*Math.PI/180;return sf(r)+"a"+sa((a<0)?a+360:a)},Sz=(x,y)=>{let r=Math.hypot(x,y),a=Math.atan2(y,x)*Math.PI/180;return String(r)+"a"+String((a<0)?a+360:a)},zs=s=>{let v=s.split("a").map(parseFloat);return(v.length==2)?[v[0]*Math.cos(v[1]/180*Math.PI),v[0]*Math.sin(v[1]/180*Math.PI)]:[NaN,NaN]}
 
 let err=s=>{E.textContent=s}
 
@@ -308,27 +283,17 @@ TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:
  k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.n=K.nn(vi)
   if(f==undefined){r.t.push("r");r.t.push("a");r.h.push("");r.d.push(FK(K.Atx(32n,K.rx(vi)))),r.d.push(FK(K.Atx(35n,vi)))}
   else{r.t.push(f[0]);r.d.push(f[1](vi))}});return r},
-KT=t=>K.Atx(K.Val(KC("+!/")),K.l2(KS(t.k),KL(t.v.map((x,i)=>("i"==t.t[i])?KI(x):("f"==t.t[i])?KF(x):KS(x))))),
 KC=x=>{let r=K.mk(18,x.length);C().set(("string"===typeof x)?us(x):x,lo(r));return r},
-KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r}
-KZ=(r,a)=>{let x=r.map((r,i)=>r*Math.cos(a[i]*Math.PI/180)),y=r.map((r,i)=>r*Math.sin(a[i]*Math.PI/180.0));return K.Cal(33n,K.l2(KF(x),KF(y)))},
-KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},
-KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},
-KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},
-LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));K.dx(x);return r}
+KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
+KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},Ks=x=>K.sc(KC(x)),sK=x=>CK(K.cs(x)),
+KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));K.dx(x);return r},
 IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>lo(x),
-FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0]
-ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},zK=x=>new Float64Array(K.memory.buffer,lo(x),2)
-DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r}
-Ks=x=>K.sc(KC(x)),sK=x=>CK(K.cs(x))
-KT=T=>{let a=J(),t=T.t,ii=t.map((x,i)=>i).filter((x,i)=>t[i]!="a"),k=K.Atx(KS(T.h),KI(ii)),v=K.mk(23,ii.length),p=lo(v)>>>3;
- ii.forEach((i,j)=>{let ti=t[i],di=T.d[i];a[p+j]=("i"==ti)?KI(di):("s"==ti)?KS(di):("f"==ti)?KF(di):KZ(di,T.d[1+i])})
- return K.Atx(2n,K.Cal(12n,K.l2(k,v)))},
-SK=x=>CL(K.Atx(17n,x)),
-CK=x=>{K.dx(x);return su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))},
-CL=l=>{let j=J(),p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));K.dx(l);return r},
-asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
-syms=()=>CL(K.rx(J()[0])).filter(x=>x.startsWith("xk")).map(x=>x.slice(2))
+FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0],
+ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},zK=x=>new Float64Array(K.memory.buffer,lo(x),2),
+DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r},
+KT=T=>{let a=J(),t=T.t,k=KS(T.h),v=K.mk(23,T.h.length),p=lo(v)>>>3;t.forEach((ti,i)=>{let di=T.d[i];a[p+i]=("i"==ti)?KI(di):("s"==ti)?KS(di):("f"==ti)?KF(di):KZ(di)});return K.Atx(2n,K.Cal(12n,K.l2(k,v)))},
+SK=x=>CL(K.Atx(17n,x)),CK=x=>{K.dx(x);return su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))},CL=l=>{let j=J(),p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));K.dx(l);return r},
+asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),syms=()=>CL(K.rx(J()[0])).filter(x=>x.startsWith("xk")).map(x=>x.slice(2))
 
 
 </script></body></html>
