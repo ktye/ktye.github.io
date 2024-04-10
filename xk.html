@@ -82,7 +82,7 @@ let init=_=>{
  addtable(parsetable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
  kinit()}
 
-window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);ge("kbut").textContent=n}else console.log("ignore file",n)})}}
+window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);ge("kbut").textContent=n}else if(n.endsWith(".xk")){rbin(u)}else console.log("ignore file",n)})}}
 
 
 let tables={}
@@ -218,6 +218,16 @@ function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t
 
 function axis( ){}
 function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
+
+let save=s=>down(s,wbin()),wbin=()=>{let t=Object.keys(tables).map(x=>tables[x]),sym={};t.forEach(t=>{sym[t.name]=true;t.h.forEach(x=>sym[x]=true);t.t.forEach((tp,i)=>{if(tp[i]=="s")t.d[i].forEach(s=>sym[s]=true)})});Object.keys(sym).forEach((x,i)=>sym[x]=i);
+ let n=x=>new Uint8Array(new Int32Array([x]).buffer),o=[0,us(Object.keys(sym).join("\0"))],no=x=>o.push(n(x)),ot=t=>o.push(new Uint8Array([t.charCodeAt()])),sy=x=>o.push(new Uint8Array(new Int32Array(x.map(s=>sym[s])).buffer)),od=x=>o.push(new Uint8Array(x.buffer))
+ o[0]=n(o[1].length);o.push(n(t.length)); t.forEach(t=>{ no(sym[t.name]); no(t.h.length); no(t.n); sy(t.h); t.t.forEach((tp,i)=>{ot(tp); console.log(tp,o[o.length-1]); (tp=="s")?sy(t.d[i]):od(t.d[i]) }) })
+ let s=us(ed.value);no(s.length);o.push(s);let r=new Uint8Array(o.map(x=>x.length).reduce((x,y)=>x+y,0)),q=0;o.forEach(x=>{r.set(x,q);q+=x.length});return r}
+let rbin=u=>{Object.keys(tables).forEach(()=>foot.removeChild(foot.firstChild));tables={};let p=0
+ let I=n=>{p+=4*n;return new Int32Array(u.slice(p-4*n,p))},F=n=>{p+=8*n;return new Float64Array(u.slice(p-8*n,p))},n=()=>I(1)[0],un=n=>{p+=n;return new Uint8Array(u.slice(p-n,p))},tab=su(un(n())).split("\0"),sy=n=>{p+=4*n;return Array.from(new Int32Array(u.slice(p-4*n,p))).map(i=>tab[i])}
+ let tb=()=>{ let t={name:tab[n()],top:0,t:[],d:[],sel:"!0",isel:new Int32Array(0)},nc=n();t.n=n();t.h=sy(nc);t.h.forEach((_,i)=>{let tp=su(un(1));t.t[i]=tp;t.d[i]=(tp=="s")?sy(t.n):(tp=="i")?I(t.n):F(t.n*(1+(+(tp=="z"))))});addtable(t)}
+ let nt=n();while(nt--)tb();let s=su(un(n()));if(s.length)ed.value=s;kinit()}/*wbin,rbin see also xk.go*/
+
 
 
 let err=s=>{E.textContent=s}
