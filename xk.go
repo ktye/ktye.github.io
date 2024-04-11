@@ -43,6 +43,8 @@ func main() {
 	s := os.Args[2]
 	if s == "x.k" {
 		fmt.Println(d.prog)
+	} else if s == "test" {
+		test(d, b)
 	} else {
 		for _, t := range d.t {
 			if t.name == s {
@@ -102,18 +104,21 @@ func printab(t table) {
 		fmt.Println()
 	}
 }
-
-type data struct {
-	t    []table
-	prog string
-}
-
-type table struct {
-	name string
-	n    int32
-	t    []byte
-	h    []string
-	d    []interface{}
+func test(d data, b []byte) {
+	var u bytes.Buffer
+	d.encode(&u)
+	g := u.Bytes()
+	if len(g) != len(b) {
+		fmt.Printf("length differs: %d %d\n", len(b), len(g))
+		os.Exit(1)
+	}
+	for i := range b {
+		if b[i] != g[i] {
+			fmt.Printf("byte %d differs: %d %d\n", i, b[i], g[i])
+			os.Exit(1)
+		}
+	}
+	fmt.Println("test encode ok")
 }
 
 func decode(r io.Reader) (d data) {
@@ -177,5 +182,74 @@ func n(r io.Reader) (s int32) {
 	return s
 }
 
-func (d data) encode(w io.Writer) {
+func (d data) encode(ww io.Writer) {
+	w := func(x interface{}) { binary.Write(ww, binary.LittleEndian, x) }
+	m := make(map[string]int32) //symtab
+	p := func(s string) int32 {
+		i, o := m[s]
+		if !o {
+			i = int32(len(m))
+			m[s] = i
+		}
+		return i
+	}
+	for _, t := range d.t {
+		p(t.name)
+		for _, s := range t.h {
+			p(s)
+		}
+		for j, tp := range t.t {
+			if tp == 's' {
+				v := t.d[j].([]string)
+				for _, s := range v {
+					p(s)
+				}
+			}
+		}
+	}
+	mm := make(map[int32]string)
+	for k, v := range m {
+		mm[v] = k
+	}
+	v := make([][]byte, len(m))
+	for i := int32(0); i < int32(len(m)); i++ {
+		v[i] = []byte(mm[i])
+	}
+	syms := bytes.Join(v, []byte{0})
+	w(int32(len(syms)))
+	ww.Write(syms)
+	w(int32(len(d.t)))
+	sy := func(v []string) {
+		for _, s := range v {
+			w(m[s])
+		}
+	}
+	for _, t := range d.t {
+		w(int32(m[t.name]))
+		w(int32(len(t.h)))
+		w(t.n)
+		sy(t.h)
+		for i, d := range t.d {
+			ww.Write([]byte{t.t[i]})
+			if v, o := d.([]string); o {
+				sy(v)
+			} else {
+				w(d)
+			}
+		}
+	}
+	w(int32(len(d.prog)))
+	ww.Write([]byte(d.prog))
+}
+
+type data struct {
+	t    []table
+	prog string
+}
+type table struct {
+	name string
+	n    int32
+	t    []byte
+	h    []string
+	d    []interface{}
 }
