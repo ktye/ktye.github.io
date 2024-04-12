@@ -27,23 +27,29 @@ import (
 // i32  ns:size
 // u8*ns   text
 
+var wc io.Writer
+
 func main() {
 	var d data
-	if len(os.Args) < 2 || !strings.HasSuffix(os.Args[1], ".xk") {
+	a := os.Args[1:]
+	if len(a) < 1 {
 		fmt.Println("usage: xk file.xk [table]")
 		os.Exit(1)
 	}
-	b, e := os.ReadFile(os.Args[1])
+	wc = io.Discard
+	if len(a) > 1 && a[1] == "check" {
+		wc = os.Stdout
+	}
+	b, e := os.ReadFile(a[0])
 	fatal(e)
 	d = decode(bytes.NewReader(b))
-	if len(os.Args) == 2 {
+	if len(a) == 1 {
 		list(d)
 		return
 	}
-	s := os.Args[2]
-	if s == "x.k" {
+	if s := a[1]; s == "x.k" {
 		fmt.Println(d.prog)
-	} else if s == "test" {
+	} else if s == "test" { //roundtrip
 		test(d, b)
 	} else {
 		for _, t := range d.t {
@@ -123,34 +129,44 @@ func test(d data, b []byte) {
 
 func decode(r io.Reader) (d data) {
 	b := make([]byte, n(r))
+	fmt.Fprintf(wc, "symtab %d bytes ", len(b))
 	r.Read(b)
 	sym := bytes.Split(b, []byte{0})
+	fmt.Fprintf(wc, "%d symbols\n", len(sym))
 	tab := make(map[int32]string)
 	for i, s := range sym {
 		tab[int32(i)] = string(s)
 	}
 	d.t = make([]table, n(r))
+	fmt.Fprintf(wc, "tables: %d\n", len(d.t))
 	for i := range d.t {
+		fmt.Fprintf(wc, "[table %d]\n", i)
 		d.t[i] = decodeTable(r, tab)
 	}
 	b = make([]byte, n(r))
+	fmt.Fprintf(wc, "src: %d\n", len(b))
 	r.Read(b)
 	d.prog = string(b)
 	return d
 }
 func decodeTable(r io.Reader, tab map[int32]string) (t table) {
 	t.name = tab[n(r)]
+	fmt.Fprintf(wc, "name: %s\n", t.name)
 	t.h = make([]string, n(r))
+	fmt.Fprintf(wc, "columns: %d\n", len(t.h))
 	t.n = n(r)
+	fmt.Fprintf(wc, "rows: %d\n", t.n)
 	for i := range t.h {
 		t.h[i] = tab[n(r)]
 	}
+	fmt.Fprintf(wc, "header: %v\n", t.h)
 	t.t = make([]byte, len(t.h))
 	t.d = make([]interface{}, len(t.h))
 	for i := range t.h {
 		b := make([]byte, 1)
 		r.Read(b)
 		t.t[i] = b[0]
+		fmt.Fprintf(wc, "col %d type %c\n", i, b[0])
 		if tp := b[0]; tp == 's' || tp == 'i' {
 			v := make([]int32, t.n)
 			binary.Read(r, binary.LittleEndian, v)
@@ -229,12 +245,28 @@ func (d data) encode(ww io.Writer) {
 		w(int32(len(t.h)))
 		w(t.n)
 		sy(t.h)
+		ln := func(n int) {
+			if int(t.n) != n {
+				panic(fmt.Errorf("wrong length for table %s: %d %d\n", t.name, t.n, n))
+			}
+		}
 		for i, d := range t.d {
 			ww.Write([]byte{t.t[i]})
-			if v, o := d.([]string); o {
-				sy(v)
-			} else {
-				w(d)
+			switch t.t[i] {
+			case 's':
+				sy(d.([]string))
+				ln(len(d.([]string)))
+			case 'i':
+				w(d.([]int32))
+				ln(len(d.([]int32)))
+			case 'f':
+				w(d.([]float64))
+				ln(len(d.([]float64)))
+			case 'z':
+				w(d.([]complex128))
+				ln(len(d.([]complex128)))
+			default:
+				panic(fmt.Errorf("unknown type: %c %d", t.t[i], t.t[i]))
 			}
 		}
 	}
