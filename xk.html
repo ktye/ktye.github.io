@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>xk</title>
-<link rel="icon" type="image/png" sizes="16x16" href="kelas16.png">
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAArlBMVEUAAADxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSrxWSr///9FC+4XAAAAOHRSTlMAAGtt5IqV8W/ECCDi9vL7bONgNbSdBxfObgmRGgaMCg74CwVT7Y03d/3luA+9yC1fefTN0vnJ33qXflUAAAABYktHRDnXAJVAAAAAB3RJTUUH4wgfDRgVgxAgZQAAAHtJREFUGNNjYGBgZLKAAiZGBhDAFGBmYWVjRxbg4OTi5sEU4OXjF0ASEOQTEhbhQBYQFROXkIQLSHFLy8jKWSC0yIspMHIoIhmqxKjMqKKKJCCvoKbOqKGJbIuWto6OLtxQPXF9Fn4DMUNmqICAkbGJqQWLmTlOz6EIAABSBhJTH3DcmAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0wOC0zMVQxMzoyNDoyMSswMjowMB9Ymt4AAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMDgtMzFUMTM6MjQ6MjErMDI6MDBuBSJiAAAAV3pUWHRSYXcgcHJvZmlsZSB0eXBlIGlwdGMAAHic4/IMCHFWKCjKT8vMSeVSAAMjCy5jCxMjE0uTFAMTIESANMNkAyOzVCDL2NTIxMzEHMQHy4BIoEouAOoXEXTyQjWVAAAAAElFTkSuQmCC">
 <style>
 
 *{font-family:monospace;box-sizing:border-box}
@@ -30,10 +30,10 @@ input:read-only{color:grey;font-style:italic}
 #B{background:black;color:white;border:2px solid black;outline:none;flex-grow:1;text-align:right;font-size:large}
 
 </style></head><body onload="init()">
-<div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span id="kbut" class="link" onclick="edt.style.display='block'" style="margin-left:auto">x.k</span></div></div>
+<div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span class="link" style="margin-left:auto"><span onclick="bundle()">save </span><span id="kbut" onclick="edt.style.display='block'">x.k</span></span></div></div>
 <div style="flex-grow:1;display:grid;grid-template-columns:auto 1fr">
  <div id="L">
-  <select id="list" multiple oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange()"></select>
+  <select id="list" multiple oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange()" onkeydown="listkey(event)"></select>
   <div id="dict" style="display:none">abc</div>
  </div>
  <div id="R">
@@ -70,18 +70,20 @@ xkrowcount:{[] `count \"number of selected rows";#sel}
 xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot'(1;```polartitle;3a30+?100a);`"abc"}
 </textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.display="none";kinit()'>✖</button></div>
 
-<script src="plot.js"></script>
+<script src="plot.js" id="pjs"></script>
 <script>
 let ge=x=>document.getElementById(x),ce=x=>document.createElement(x),ac=(x,y)=>{x.appendChild(y);return y},cl=(x,y)=>{y.classList.add(...x.split(" "));return y},tc=(x,y)=>{y.textContent=x;return y},id=(x,y)=>{y.id=x;return y},oc=(f,x)=>{x.onclick=f;return x}
-let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}},rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p},rm1=p=>{while(p.children.length>1)p.removeChild(p.firstChild);return p},af=Array.from,lo=x=>Number(BigInt.asUintN(32,x))
+let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}},rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p},rm1=p=>{while(p.children.length>1)p.removeChild(p.firstChild);return p},af=Array.from,lo=x=>Number(BigInt.asUintN(32,x)),fe=(x,f)=>{fetch(x).then(r=>r.text()).then(f)}
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let s64u=u=>{let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))},u64s=s=>{let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
 
+let plotjsrc=null,kw=null,kw64=null,xk64=null
 let plot=plotjs.plots,list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
-let init=_=>{
+let init=_=>{if(ge("pjs").textContent=="")fe("plot.js",x=>plotjsrc=x);
  addtable(parsetable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
  addtable(parsetable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
- kinit()}
-
+ if(xk64)rbin(u64s(xk64).buffer);kinit()}
+ 
 window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);ge("kbut").textContent=n}else if(n.endsWith(".xk")){rbin(u)}else console.log("ignore file",n)})}}
 
 
@@ -101,10 +103,12 @@ let listtable=(t,p)=>{let n=Math.min(100,t.n-t.top),v=fills(Array(1+n).fill("").
  v.forEach((x,i)=>v[i]=esc(x));rm(p);for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)};return v}
 let listedit=e=>{let t=tables[maintable];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
 let listchange=()=>{let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});let idx=a.map(x=>x.index-1).filter(x=>x>=0),t=tables[maintable];sel.value=rangestr(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
+let listkey=e=>{if(e.key=="Delete"){if(confirm("delete rows from "+maintable+"?"))delrows()}else if(e.Key=="Enter")listchange()}
 let addtable=t=>{tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)x.classList.add("bold")}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
  let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name);maintable=t.name}
 let rentable=e=>{let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
+let delrows=()=>{ console.log("todo... isel?") }
 let editrows=(t,idx)=>{rm(dict);if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")};let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
  h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i]
   let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th);let td=ce("td"),ip=ce("input");if(rdo)th.onclick=()=>ip.removeAttribute("readonly")
@@ -126,7 +130,6 @@ function copycap(e){pd(e)
 	let l=e=>{window.removeEventListener("copy",l);e.clipboardData.setData("text/plain","plain text..");e.clipboardData.setData("text/html",html);pd(e)};window.addEventListener("copy",l);document.execCommand("copy");
 }
 
-
 let ON=x=>x.replace("NaN","ON"),On=x=>x.replace("NaN","On")
 let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
 let at=(x,i)=>x.filter((_,j)=>i.includes(j))
@@ -136,39 +139,11 @@ let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x
 let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",")}
 
 let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}});obs.observe(pcnv)
-
 let addbut=(x,b)=>{let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
 let curbut=()=>{let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
 let setbut=x=>{af(but.childNodes).forEach(y=>{y.classList.remove("bold")});x.classList.add("bold")}
 let reset=()=>{plots=0;pid=0;E.textContent="";O.textContent=""}
-
-let plots=0,pid=0
-let iota=n=>[...Array(n).keys()]
-let exampleplot={
- title:"xy plot",
- plots:[{
-   type:"xy",
-   title:"channel 1",
-   xlabel:"x",
-   ylabel:"y",
-   lines:[
-    {y:iota(100).map(x=>Math.sin(0.1*x))},
-    {y:iota(100).map(x=>Math.cos(0.09*x))},
-   ],
-  },
-  {
-   type:"xy",
-   title:"channel 2",
-   xlabel:"x",
-   ylabel:"y",
-   lines:[
-    {y:iota(100).map(x=>1.1+Math.sin(0.1*x))},
-    {y:iota(100).map(x=>0.4+Math.sin(0.1*x))},
-   ],
-  }
- ],
-}
-function noplot(){P.style.display="none"}
+let plots=0,pid=0,noplot=()=>{P.style.display="none"}
 
 /*
 	plot 0                    / i:select current plot
@@ -219,6 +194,7 @@ function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t
 function axis( ){}
 function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
 
+let bundle=()=>{let s=("<!DOCTYPE html>"+document.querySelector("html").innerHTML+"</"+"html>").replace("kw64=null",'kw64="'+kw64+'"').replace("<script src=\"plot.js\" id=\"pjs\">"+"</"+"script>","<script id=\"pjs\">"+plotjsrc+"</"+"script>").replace(/,xk64=.*\n/,";xk64=\""+s64u(wbin())+"\"\n");down("xk.html",us(s))}
 let save=s=>down(s,wbin()),wbin=()=>{let t=Object.keys(tables).map(x=>tables[x]),sym={};t.forEach(t=>{sym[t.name]=true;t.h.forEach(x=>sym[x]=true);t.t.forEach((tp,i)=>{if(tp[i]=="s")t.d[i].forEach(s=>sym[s]=true)})});Object.keys(sym).forEach((x,i)=>sym[x]=i);
  let n=x=>new Uint8Array(new Int32Array([x]).buffer),o=[0,us(Object.keys(sym).join("\0"))],no=x=>o.push(n(x)),ot=t=>o.push(new Uint8Array([t.charCodeAt()])),sy=x=>o.push(new Uint8Array(new Int32Array(x.map(s=>sym[s])).buffer)),od=x=>o.push(new Uint8Array(x.buffer))
  o[0]=n(o[1].length);o.push(n(t.length)); t.forEach(t=>{ no(sym[t.name]); no(t.h.length); no(t.n); sy(t.h); t.t.forEach((tp,i)=>{ot(tp); console.log(tp,o[o.length-1]); (tp=="s")?sy(t.d[i]):od(t.d[i]) }) })
@@ -245,19 +221,14 @@ let kenv={env:{
  Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):kout(su(v));return 0},
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](...LK(y))}}}
-function kinit(x){reset()
- fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
-  K=r.instance.exports
-  K.kinit()
-  xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl);xreg("store",stor)
-  kdat()
-  K.dx(K.Val(KC(ed.value)))
+let kinit=x=>{if(kw){kinst(kw,x)}else if(kw64){kinst(u64s(kw64),x)}else{fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>{kw=new Uint8Array(r);kw64=s64u(kw);kinst(kw,x)})}}
+let kinst=(u,x)=>{reset()
+ WebAssembly.instantiate(u,kenv).then(r=>{K=r.instance.exports;K.kinit();xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl);xreg("store",stor);kdat();K.dx(K.Val(KC(ed.value)))
   rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
        if(x==="#selec#")mark(       )
   else if(x!==undefined)show(call(x))
   else                  help(       )
   }).catch(e=>err(e.message+"\n\n"+e.stack))}
-
 
 let xcal=[],xreg=(name,g,arity)=>{xcal.push(g)
  let f=K.l2(BigInt(xcal.length-1),Ks(name))       //external function representation idx-as-verb,name
