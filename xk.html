@@ -68,6 +68,9 @@ xkalpha:1
 xkbeta:2
 xkrowcount:{[] `count \"number of selected rows";#sel}
 xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot'(1;```polartitle;3a30+?100a);`"abc"}
+xkrgb:{image 100^(200*100)?255*256*256}
+xkcmap:{image 100^_(200*100)?255}
+xkfmap:{image 100^?200*100}
 </textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.display="none";kinit()'>✖</button></div>
 
 <script src="plot.js" id="pjs"></script>
@@ -88,11 +91,11 @@ window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;fo
 
 
 let tables={}
-let parsetable=(name,s)=>{s=s.split(/\r?\n/)
- let t={name:name,h:s[0].split("\t"),t:s[1].split("\t"),top:0,n:s.length-2}
+let parsetable=(name,s)=>{s=s.split(/\r?\n/);let comma=s[1][1];if(comma!=",")s=s.map(x=>x.replaceAll(",","."));if((comma==" ")||(comma=="\t"))comma=/[ \t]+/;console.log("comma",comma)
+ let t={name:name,h:s[0].split(comma),t:s[1].split(comma),top:0,n:s.length-2}
  t.d=Array(t.h.length);t.sel="!0";t.isel=new Int32Array(0)
  t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
- for(let i=2;i<s.length;i++){let r=s[i].split("\t");r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
+ for(let i=2;i<s.length;i++){let r=s[i].split(comma);r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))}
  t.h=t.h.filter((_,i)=>t.t[i]!="a");t.d.forEach((x,i)=>{if(t.t[i]=="r"){t.d[i]=zra(t.d[i],t.d[1+i]);t.t[i]="z"}});t.d=t.d.filter((_,i)=>t.t[i]!="a");t.t=t.t.filter((_,i)=>t.t[i]!="a")
  return t}
 let zra=(r,a)=>{let z=new Float64Array(2*r.length);a.forEach((p,i)=>{p*=Math.PI/180;z[2*i]=r[i]*Math.cos(p);z[2*i+1]=r[i]*Math.sin(p)});return z}
@@ -103,7 +106,7 @@ let listtable=(t,p)=>{let n=Math.min(100,t.n-t.top),v=fills(Array(1+n).fill("").
  v.forEach((x,i)=>v[i]=esc(x));rm(p);for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){op.classList.add("head");op.onclick=listedit};p.appendChild(op)};return v}
 let listedit=e=>{let t=tables[maintable];editrows(t,af(list.selectedOptions).map(x=>x.index-1));pd(e)}
 let listchange=()=>{let a=af(list.selectedOptions);a.forEach(o=>{if(o.classList.contains("head"))o.selected=false});let idx=a.map(x=>x.index-1).filter(x=>x>=0),t=tables[maintable];sel.value=rangestr(idx);t.isel=new Int32Array(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
-let listkey=e=>{if(e.key=="Delete"){if(confirm("delete "+tables[maintable].isel.length+" rows from "+maintable+"?"))delrows()}else if(e.Key=="Enter"){let c=curbut();if(c)kinit(c)}}
+let listkey=e=>{if(e.key=="Delete"){if(confirm("delete "+tables[maintable].isel.length+" rows from "+maintable+"?"))delrows()}else if(e.key=="Enter"){listedit(e)}else if(e.ctrlKey&&e.key=="c"){copy(e)}else if(e.ctrlKey&&e.key=="v"){paste(e)};}
 let addtable=t=>{tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)x.classList.add("bold")}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
  let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name);maintable=t.name}
@@ -120,6 +123,18 @@ let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(
 let verify=t=>{return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
 let commit=(ta,t,idx)=>{let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
 let update=(t,i,idx,s)=>{let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i],di=t.d[i];if(ti=="z"){[di[2*j],di[1+2*j]]=zs(s)}else{di[j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s)};listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
+
+
+
+// copy&paste tabular data with separate r,a columns
+let copy=e=>{pd(e); let t=tables[maintable]; console.log( af(t.idx).map(t.t.map((tj,j)=>(tj=="s")?t.d[i]:(tj=="z")?Sz(t.d[i][j]).replace("a","\t"):String(t.d[i][j])).join("\t")).join("\n") )}
+let paste=e=>{pd(e);let t=tables[maintable];console.log("paste");navigator.clipboard.readText().then(r=>parsecols(t.t,flip(autosplit(r.replaceAll(",",".")))))}
+let parsecols=(t,x)=>{let tt=t.t.join("").replaceAll("z","ff").split(),j=0,jj=t.t.map((x,i)=>i+(("z"==x)?j++:j));
+ x=x.map( (v,i)=>("s"==tt[i])?v:("i"==tt[i])?(new Int32Array(v.map(Number))):new Float64Array(v.map(Number)) );
+ return t.t.map((ti,j)=>{j=jj[j];return(ti=="z")?zra(x[j],x[1+j]):x[j]})
+ }
+let autosplit=x=>{x=x.split(/\r?\n/).map(x=>x.split(/[ \t]+/)).filter(y=>y.length!=x[0].length)}
+let flip=x=>{let r=new Array(x[0].length).fill(0).map(_=>[]);x.forEach((x,i)=>x.forEach((y,j)=>r[j][i]=y));return r}
 
 function copycap(e){pd(e)
 	//let html="<span style='font-family:Consolas'>teletype</span> <span style='color:red'>red text</span> ok?"
@@ -138,12 +153,12 @@ let esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").rep
 let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
 let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",")}
 
-let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}});obs.observe(pcnv)
+let imgs=0,plots=0,pid=0,noplot=()=>{P.style.display="none"}
+let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}; if(imgs)setimg(imgs)   });obs.observe(pcnv)
 let addbut=(x,b)=>{let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
 let curbut=()=>{let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
 let setbut=x=>{af(but.childNodes).forEach(y=>{y.classList.remove("bold")});x.classList.add("bold")}
-let reset=()=>{plots=0;pid=0;E.textContent="";O.textContent=""}
-let plots=0,pid=0,noplot=()=>{P.style.display="none"}
+let reset=()=>{plots=0;pid=0;imgs=0;zmin=0;zmax=0;E.textContent="";O.textContent=""}
 
 /*
 	plot 0                    / i:select current plot
@@ -151,17 +166,20 @@ let plots=0,pid=0,noplot=()=>{P.style.display="none"}
 	plot`xlabel`ylabel`title  /#S 1..3
 	plot(x;y0;y1;..)          /[x:i|f] y:i|f|z  multiple lines
 	plot axis                 /x:I|F #x 1...4 y1|x0,x1|x0,x1,0,y1|x0,x1,y0,y1
+	image rows^x              /I:pixels,C:greyscale,F:colormap between zmin,zmax
  */
  
-function plotk(x){
- let pn=x=>{if(plots.length<=x)plots[x]={};return x}
- let pt=x=>{plots[pid].type=x}
- let ri=x=>{x=ZK(x);return[x.filter((_,i)=>~i&1),x.filter((_,i)=>i&1)]}
- let la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
+let zmin=0,zmax=0,axis=()=>{}
+let plotk=x=>{
+ let pn=x=>{if(plots.length<=x)plots[x]={};return x},pt=x=>{plots[pid].type=x},ri=x=>{x=ZK(x);return[x.filter((_,i)=>~i&1),x.filter((_,i)=>i&1)]},la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
  let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
  if(plots===0){pid=0;plots=[]};if(undefined===plots[pid])plots[pid]={}
  let t=K.tp(x);(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
  return K.Ki(pid)}
+let cmap=new Int32Array("0300000400000600000700010901010b01010e01021002021202031403041603041804051b04061d05071f060821060923070a26070b28080d2a080e2d090f2f0910320a12340a13360b14390b163b0b173e0b19400b1a430c1c450c1d470c1f4a0c204c0b224e0b24500b26520b27540b29560a2b580a2d5a0a2e5c0a305d09325f093460093561093762093964093b65093c66093e660940670941680a43690a45690a466a0b486a0b4a6b0c4b6b0c4d6c0d4f6c0d506c0e526d0e536d0f556d0f576d10586d115a6e115b6e125d6e125f6e13606e14626e14636e15656e15666e16686e176a6e176b6e186d6e186e6e19706d19726d1a736d1b756d1b766d1c786d1c7a6c1d7b6c1d7d6c1e7e6b1f806b1f816b20836a20856a21866a218869228969228b69238d68248e68249067259167259366269566269665279864289964289b63299c63299e622aa0612ba1612ba3602ca45f2ca65f2da75e2ea95d2eab5c2fac5b30ae5b31af5a31b15932b25833b45733b55634b75635b85536ba5437bb5337bd5238be5139bf503ac14f3bc24e3cc44d3dc54c3ec74b3ec84a3fc94940cb4841cc4742cd4644cf4445d04346d14247d24148d44049d53f4ad63e4bd73d4dd93b4eda3a4fdb3950dc3852dd3753de3654df3456e03357e23258e3315ae4305be52e5ce62d5ee62c5fe72b61e82a62e92864ea2765eb2667ec2568ed236aed226cee216def1f6ff01e70f01d72f11c74f21a75f21977f31879f3167af4157cf5147ef51280f61181f61083f70e85f70d87f80c88f80b8af8098cf9088ef90890f90791fa0693fa0695fa0697fa0699fb069bfb069dfb079efb07a0fb08a2fb0aa4fb0ba6fb0da8fb0eaafb10acfb12aefb14b0fb16b1fb18b3fb1ab5fb1cb7fb1eb9fb21bbfa23bdfa25bffa28c1fa2ac3f92cc5f92fc7f931c9f834cbf837cdf83acff73cd1f73fd3f642d5f645d7f548d9f54bdbf44fdcf452def356e0f359e2f35de4f260e6f264e8f168e9f16cebf170edf174eef179f0f17df2f181f3f285f4f289f6f38df7f491f8f595faf699fbf79dfcf9a0fdfaa4fefc00ff00".match(/....../g).map(x=>"0xff"+x).map(Number)),grey=cmap.map((_,i)=>i+256*i+256*256*i)
+let zscale=x=>{x=FK(x);if(zmin>=zmax){zmin=Math.min(...x);zmax=Math.max(...x)};x=x.map(x=>{x=255*(x-zmin)/(zmax-zmin);return(x>255)?255:(x<0)?0:x});return new Int32Array(x).map(x=>cmap[x])}
+let image=x=>{/*x:LC,LI,LF*/let h=K.nn(x),y=K.Atx(K.Val(KC(",/")),x),w=K.nn(y)/h,u=new Uint8ClampedArray(((18==K.tp(y))?(new Int32Array(BK(y)).map(x=>grey[x])):(21==K.tp(y))?zscale(y):IK(y)).buffer);for(let i=3;i<u.length;i+=4)u[i]=255;imgs=[u,w,h,K.tp(y)];return 0n}
+let setimg=x=>{let[I,w,h,t]=imgs,c=pcnv.getContext("2d"),rgb=i=>(i>=I.length)?[0,0,0]:I.slice(i,i+3),zz=(r,g,b)=>((r==g&&r==b)?r:zmin+(zmax-zmin)/255*cmap.indexOf(new Int32Array([0xff000000+65536*b+256*g+r])[0]));pcnv.width=pcnv.clientWidth;pcnv.height=pcnv.clientHeight;let m=c.createImageData(w,h);m.data.set(I);c.putImageData(m,0,0);P.style.display="";pcnv.onclick=e=>{let x=e.offsetX,y=e.offsetY,[r,g,b]=rgb(4*(x+w*y));B.value=("x:"+x+"; y:"+y)+((19==t)?("; r:"+r+"; g:"+g+"; b:"+b):("; z:"+zz(r,g,b)))}}
 
 function debounce(f){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}}
 const scaleplot=debounce(a=>{P.style.display=""
@@ -174,7 +192,7 @@ function selbg(x){sel.style.background=x?"orangered":"black"}
 function kout(x){O.textContent+=x;O.style.display="";kend()}
 function kend( ){O.scrollTop=O.scrollHeight}
 function khid(e){O.style.display="none";pd(e)}
-function show(x){rm(pcap);plots?scaleplot(plots):noplot();let t=K.tp(x);(24==t)?showdict(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
+function show(x){rm(pcap);plots?scaleplot(plots):imgs?setimg():noplot();let t=K.tp(x);(24==t)?showdict(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
 function call(x){x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 function kdat( ){Object.keys(tables).forEach(s=>{asn(s,KT(tables[s]));asn(s+"sel",KI(tables[s].isel))});asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.rx(K.Val(Ks(maintable+"sel"))))}
 function mark( ){let s=sel.value.trim();selbg(1);expl(K.Val(Ks(maintable)));let r=K.Val(KC(s.length?s:"!0"));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(s))),o=tables[maintable].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(i+o-1)});tables[maintable].isel=y;tables[maintable].sel=s;selbg(0)}
@@ -190,13 +208,12 @@ function showdict(x,l){let j=J(),k=j[lo(x)>>>3],v=j[8+lo(x)>>>3],tk=K.tp(k),tv=K
 function keyt(k,v,l){listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>esc(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
 function stor(s){if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);addtable(t);return 0n}
 
-function axis( ){}
 function down(f,u){let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
 
 let bundle=()=>{let s=("<!DOCTYPE html>"+document.querySelector("html").innerHTML+"</"+"html>").replace("kw64=null",'kw64="'+kw64+'"').replace("<script src=\"plot.js\" id=\"pjs\">"+"</"+"script>","<script id=\"pjs\">"+plotjsrc+"</"+"script>").replace(/,xk64=.*\n/,";xk64=\""+s64u(wbin())+"\"\n");down("xk.html",us(s))}
 let save=s=>down(s,wbin()),wbin=()=>{let t=Object.keys(tables).map(x=>tables[x]),sym={};t.forEach(t=>{sym[t.name]=true;t.h.forEach(x=>sym[x]=true);t.t.forEach((tp,i)=>{if(tp[i]=="s")t.d[i].forEach(s=>sym[s]=true)})});Object.keys(sym).forEach((x,i)=>sym[x]=i);
  let n=x=>new Uint8Array(new Int32Array([x]).buffer),o=[0,us(Object.keys(sym).join("\0"))],no=x=>o.push(n(x)),ot=t=>o.push(new Uint8Array([t.charCodeAt()])),sy=x=>o.push(new Uint8Array(new Int32Array(x.map(s=>sym[s])).buffer)),od=x=>o.push(new Uint8Array(x.buffer))
- o[0]=n(o[1].length);o.push(n(t.length)); t.forEach(t=>{ no(sym[t.name]); no(t.h.length); no(t.n); sy(t.h); t.t.forEach((tp,i)=>{ot(tp); console.log(tp,o[o.length-1]); (tp=="s")?sy(t.d[i]):od(t.d[i]) }) })
+ o[0]=n(o[1].length);o.push(n(t.length)); t.forEach(t=>{ no(sym[t.name]); no(t.h.length); no(t.n); sy(t.h); t.t.forEach((tp,i)=>{ot(tp);(tp=="s")?sy(t.d[i]):od(t.d[i]) }) })
  let s=us(ed.value);no(s.length);o.push(s);let r=new Uint8Array(o.map(x=>x.length).reduce((x,y)=>x+y,0)),q=0;o.forEach(x=>{r.set(x,q);q+=x.length});return r}
 let rbin=u=>{Object.keys(tables).forEach(()=>foot.removeChild(foot.firstChild));tables={};let p=0
  let I=n=>{p+=4*n;return new Int32Array(u.slice(p-4*n,p))},F=n=>{p+=8*n;return new Float64Array(u.slice(p-8*n,p))},n=()=>I(1)[0],un=n=>{p+=n;return new Uint8Array(u.slice(p-n,p))},tab=su(un(n())).split("\0"),sy=n=>{p+=4*n;return Array.from(new Int32Array(u.slice(p-4*n,p))).map(i=>tab[i])}
@@ -222,12 +239,12 @@ let kenv={env:{
  Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](...LK(y))}}}
 let kinit=x=>{if(kw){kinst(kw,x)}else if(kw64){kinst(u64s(kw64),x)}else{fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>{kw=new Uint8Array(r);kw64=s64u(kw);kinst(kw,x)})}}
 let kinst=(u,x)=>{reset()
- WebAssembly.instantiate(u,kenv).then(r=>{K=r.instance.exports;K.kinit();xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("explode",expl);xreg("store",stor);kdat();K.dx(K.Val(KC(ed.value)))
+ WebAssembly.instantiate(u,kenv).then(r=>{K=r.instance.exports;K.kinit();xcal=[];xreg("axis",axis);xreg("plot",plotk);xreg("image",image);xreg("explode",expl);xreg("store",stor);kdat();K.dx(K.Val(KC(ed.value)))
   rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
        if(x==="#selec#")mark(       )
   else if(x!==undefined)show(call(x))
   else                  help(       )
-  }).catch(e=>err(e.message+"\n\n"+e.stack))}
+  })/*.catch(e=>err(e.message+"\n\n"+e.stack))*/}
 
 let xcal=[],xreg=(name,g,arity)=>{xcal.push(g);let f=K.l2(BigInt(xcal.length-1),Ks(name));I()[(lo(f)>>>2)-3]=(arity===undefined)?1:arity;f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f)));asn(name,f)},
 TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
@@ -242,8 +259,8 @@ IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>
 FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0],
 ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},zK=x=>new Float64Array(K.memory.buffer,lo(x),2),
 DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r},
-KT=T=>{let a=J(),t=T.t,k=KS(T.h),v=K.mk(23,T.h.length),p=lo(v)>>>3;t.forEach((ti,i)=>{let di=T.d[i];a[p+i]=("i"==ti)?KI(di):("s"==ti)?KS(di):("f"==ti)?KF(di):KZ(di)});return K.Atx(2n,K.Cal(12n,K.l2(k,v)))},
-SK=x=>CL(K.Atx(17n,x)),CK=x=>{K.dx(x);return su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))},CL=l=>{let j=J(),p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));K.dx(l);return r},
+KT=T=>{let t=T.t,k=KS(T.h),v=K.mk(23,T.h.length),vi,p=lo(v)>>>3;t.forEach((ti,i)=>{let di=T.d[i];vi=("i"==ti)?KI(di):("s"==ti)?KS(di):("f"==ti)?KF(di):KZ(di);/*reattach*/J()[p+i]=vi});return K.Atx(2n,K.Cal(12n,K.l2(k,v)))},
+SK=x=>CL(K.Atx(17n,x)),BK=x=>{K.dx(x);return new Uint8Array(K.memory.buffer,lo(x),K.nn(x))},CK=x=>{K.dx(x);return su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))},CL=l=>{let j=J(),p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));K.dx(l);return r},
 asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),syms=()=>CL(K.rx(J()[0])).filter(x=>x.startsWith("xk")).map(x=>x.slice(2))
 
 
