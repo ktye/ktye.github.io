@@ -197,8 +197,8 @@ function center(x){return floor(x/2)}
 function circle(c,x,y,r){c.beginPath();c.arc(x,y,r,0,2*Math.PI);c.stroke()}
 function text90(c,x,y,t){c.save();c.translate(x,y);c.rotate(-Math.PI/2);c.fillText(t,0,0);c.restore()}
 function limits(p){let r=[0,0,0,0,0,0],l=p.limits;if("undefined"===typeof l)return r
- switch(l.length){case 0:return r;case 1:return[0,0,0,r[0],0,0];case 2:return[r[0],r[1],0,0,0,0];
- case 3:return[r[0],r[1],0,r[2],0,0];case 4:return l.concat([0,0]);default:return l}}
+ switch(l.length){case 0:return r;case 1:return[0,0,0,l[0],0,0];case 2:return[l[0],l[1],0,0,0,0];
+ case 3:return[l[0],l[1],0,l[2],0,0];case 4:return l.concat([0,0]);default:return l}}
 function autoxy(L,a){let r=a.slice(0,4)
  if(r[0]==r[1]){[r[0],r[1]]=ncLim(vmin(L.map(l=>vmin(l.x))),vmax(L.map(l=>vmax(l.x)))).slice(0,2)}
  if(r[2]==r[3]){[r[2],r[3]]=ncLim(vmin(L.map(l=>vmin(l.y))),vmax(L.map(l=>vmax(l.y)))).slice(0,2)}
