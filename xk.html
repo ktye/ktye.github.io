@@ -87,7 +87,7 @@ let init=_=>{if(ge("pjs").textContent=="")fe("plot.js",x=>plotjsrc=x);
  addtable(parsetable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
  if(xk64)rbin(u64s(xk64).buffer);kinit()}
  
-window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);ge("kbut").textContent=n}else if(n.endsWith(".xk")){rbin(u)}else console.log("ignore file",n)})}}
+window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);kbut.textContent=n;kinit()}else if(n.endsWith(".xk")){rbin(u)}else console.log("ignore file",n)})}}
 
 
 let tables={},tnm=100
@@ -108,14 +108,23 @@ let listkey=e=>{if(e.key=="Delete"){if(confirm("delete "+tables[maintable].isel.
 let addtable=t=>{tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)cl("bold",x)}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
  let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name);maintable=t.name}
-let rentable=e=>{let t=e.target.textContent,s=prompt("rename table "+t,t);if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
+let rentable=e=>{let t=e.target.textContent,s=prompt("rename table "+t,t);if(s===""){if(confirm("delete table "+t+"?"))deltable(t);return};if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
+let deltable=s=>{delete tables[s];let k=Object.keys(tables);foot.removeChild(af(foot.childNodes).filter(x=>x.textContent==s)[0]);let t=foot.firstElementChild;if(t.textContent!="+")t.onclick()}
 let delrows=()=>{let t=tables[maintable];t.d.forEach((d,i)=>t.d[i]=d.filter((t.t[i]=="z")?(_,i)=>!t.isel.includes(i>>1):(_,i)=>!t.isel.includes(i)));t.sel="!0";t.n-=t.isel.length;t.isel=new Int32Array(0);t.top=0;listtable(t,list)}
+let rencolumn=(t,c)=>{let s=prompt("new column name for "+c+" from "+t.name+"?");if(s===""){if(confirm("delete column?"))delcolumn(t,c);return};if(s&&t.h.indexOf(s)==-1){t.h[t.h.indexOf(c)]=s}}
 let editrows=(t,idx)=>{rm(dict);if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")};let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
- h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th);let td=ce("td"),ip=ce("input");if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
+ h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th);let td=ce("td"),ip=ce("input");th.onkeydown=e=>{console.log(e.key,"todo change order")};th.dataset.i=i;th.ondblclick=e=>{rencolumn(t,e.target.textContent);th.textContent=t.h[+th.dataset.i]};if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
  ac(dict,ta);list.style.display="none";dict.style.display="block";ac(dict,ce("hr"));ac(dict,tc((idx.length==1)?("update row "+idx[0]+"?\n"):("update "+idx.length+" rows?\n"),ce("span")));let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
  ac(d,oc(()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},tc("ok",    ce("button"))))
  ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))}
-let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x);t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))});return[t.h,s,t.t,u]}
+ 
+//[x]rename column
+//[x]delete column
+//[ ]change column type
+//[ ]add column (name, type, prototype)?
+//[ ]add row(s)
+ 
+let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x);t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))});if(idx.length==0)t.t.forEach((tp,i)=>s[i]=(tp=="s")?"":(tp=="f")?"0":(tp=="f")?"0.0":"0a0");return[t.h,s,t.t,u]}
 let verify=t=>{return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
 let commit=(ta,t,idx)=>{let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
 let update=(t,i,idx,s)=>{let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i],di=t.d[i];if(ti=="z"){[di[2*j],di[1+2*j]]=zs(s)}else{di[j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s)};listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
@@ -138,13 +147,13 @@ function copycap(e){pd(e)
 let ON=x=>x.replace("NaN","ON"),On=x=>x.replace("NaN","On")
 let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
 let at=(x,i)=>x.filter((_,j)=>i.includes(j))
-let trm=s=>(s.length<11)?s:s.slice(0,9)+"‥"
+let trm=s=>(s.length<11)?s:s.slice(0,5)+"‥"+s.slice(-4)
 let esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
 let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
 let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[]};t.push(y)});r.push(t);let em=(i,x)=>(i<r.length-1)?("("+x+")"):x;return r.map((x,i)=>(1==x.length)?String(x):(!x[0])?em(i,"!"+x.length):(4>x.length)?x.join(" "):em(i,x[0]+"+!"+x.length)).join(",")}
 
 let imgs=0,plots=0,pid=0,noplot=()=>{P.style.display="none"}
-let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)}; if(imgs)setimg(imgs)   });obs.observe(pcnv)
+let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)};pcap.style.height=(R.getBoundingClientRect().height-((plots)?pcnv.height:0))+"px"; if(imgs)setimg(imgs)   });obs.observe(pcnv)
 let addbut=(x,b)=>{let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
 let curbut=()=>{let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
 let setbut=x=>{af(but.childNodes).forEach(y=>{y.classList.remove("bold")});cl("bold",x)}
@@ -230,10 +239,7 @@ let kinst=(u,x)=>{reset()
   })/*.catch(e=>err(e.message+"\n\n"+e.stack))*/}
 
 let xcal=[],xreg=(name,g,arity)=>{xcal.push(g);let f=K.l2(BigInt(xcal.length-1),Ks(name));I()[(lo(f)>>>2)-3]=(arity===undefined)?1:arity;f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f)));asn(name,f)},
-TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:0},F={19:["i",IK],20:["s",SK],21:["f",FK]}
- k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.n=K.nn(vi)
-  if(f==undefined){r.t.push("r");r.t.push("a");r.h.push("");r.d.push(FK(K.Atx(32n,K.rx(vi)))),r.d.push(FK(K.Atx(35n,vi)))}
-  else{r.t.push(f[0]);r.d.push(f[1](vi))}});return r},
+TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:K.nn(x),isel:new Int32Array(0),sel:"!0"},F={19:["i",IK],20:["s",SK],21:["f",FK],22:["z",ZK]};k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.t.push(f[0]);r.d.push(f[1](vi))});return r},
 KC=x=>{let r=K.mk(18,x.length);C().set(("string"===typeof x)?us(x):x,lo(r));return r},
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
 KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},Ks=x=>K.sc(KC(x)),sK=x=>CK(K.cs(x)),
