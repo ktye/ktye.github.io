@@ -18,12 +18,9 @@ input:read-only{color:grey;font-style:italic}
 #sel{border:none;outline:none;/*background:#ffe*/;flex-grow:1;text-align:right}
 #list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
 #pcap{width:100%;min-height:50px;outline:none;border:none;border-radius:0;overflow:auto}
-#list{/*height:calc(100vh - 3em)*/}
-#dict{/*height:calc(100vh - 3em)*/}
 #L{border-right:1px solid;resize:horizontal;overflow-x:none;overflow-y:auto;min-width:10vw;max-width:90vw}
-#R{height:calc(100vh - 3em);right:0;min-width:10vw;background:#fcfcfc}
-#T{/*max-height:50vh;overflow:auto;background:#f4f4f4*/}
-#F{/*position:fixed;bottom:0;*/width:100vw;display:flex}
+#R{height:calc(100vh - 3.25em);right:0;min-width:10vw;background:#fcfcfc}
+#F{width:100vw;display:flex}
 #E{background:orange;margin:0}
 #O{background:#f8f8f8;margin:0;max-height:30vh;overflow:auto}
 #P{resize:vertical;width:100%;height:60%;min-height:10vh;max-height:90vh;overflow:hidden;border-bottom:1px solid}
@@ -47,7 +44,7 @@ input:read-only{color:grey;font-style:italic}
  </div>
 </div>
 <div id="F">
- <div id="foot" style="display:flex;gap:0.5em;flex-grow:1" class="large head"><span class="link">+</span><input id="sel" onchange='kinit("#selec#")' class="large head"/></div>
+ <div id="foot" style="display:flex;gap:0.5em;flex-grow:1" class="large head"><span id="newtab" class="link" onclick="newtable()">+</span><input id="sel" onchange='kinit("#selec#")' class="large head"/></div>
  <div style="display:flex;flex-grow:1"><input id="B" onkeyup="kkey(event)"/>
   <span id="bac" class="large link" style="display:none;padding-top:2px;background:black;color:white">◀</span><!--class link, color white when active, or use ◁▷-->
   <span id="fwd" class="large link" style="display:none;padding-top:2px;background:black;color:white;padding-left:0.2em;padding-right:0.2em">▶</span>
@@ -81,14 +78,14 @@ let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new Tex
 let s64u=u=>{let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fromCharCode(x[i]);return r};return btoa(c(u))},u64s=s=>{let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))}
 
 let plotjsrc=null,kw=null,kw64=null,xk64=null
-let plot=plotjs.plots,list=ge("list"),dist=ge("dict"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
+let plot=plotjs.plots,list=ge("list"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
 let init=_=>{if(ge("pjs").textContent=="")fe("plot.js",x=>plotjsrc=x);
- addtable(parsetable("T","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
- addtable(parsetable("G","alpha\tbeta\tgamma\tu1\t\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
+ addtable(parsetable("T","alpha\tbeta\tgamma\tu1\tu1\t\tu2\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
+ addtable(parsetable("G","alpha\tbeta\tgamma\tu1\tu1\tu2\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
  if(xk64)rbin(u64s(xk64).buffer);kinit()}
  
 window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);kbut.textContent=n;kinit()}else if(n.endsWith(".xk")){rbin(u)}else console.log("ignore file",n)})}}
-
+window.onscroll=()=>{window.scrollTo(0,0)}
 
 let tables={},tnm=100
 let parsetable=(name,s)=>{s=s.split(/\r?\n/);let comma=s[1][1];if(comma!=",")s=s.map(x=>x.replaceAll(",","."));if((comma==" ")||(comma=="\t"))comma=/[ \t]+/;
@@ -97,7 +94,7 @@ let parsetable=(name,s)=>{s=s.split(/\r?\n/);let comma=s[1][1];if(comma!=",")s=s
 let zra=(r,a)=>{let z=new Float64Array(2*r.length);a.forEach((p,i)=>{p*=Math.PI/180;z[2*i]=r[i]*Math.cos(p);z[2*i+1]=r[i]*Math.sin(p)});return z}
 let sf=x=>{let a=Math.abs(x);return(a>=10000&&a<1e6)?x.toFixed(0):x.toPrecision(4)},sa=x=>x.toFixed(0),sz=x=>{let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*180/Math.PI;return sf(r)+"a"+sa((a<0)?a+360:a)},Sz=(x,y)=>{let r=Math.hypot(x,y),a=Math.atan2(y,x)*180/Math.PI;return String(r)+"a"+String((a<0)?a+360:a)},zs=s=>{let v=s.split("a").map(parseFloat);return(v.length==2)?[v[0]*Math.cos(v[1]/180*Math.PI),v[0]*Math.sin(v[1]/180*Math.PI)]:[NaN,NaN]}
 let fills=v=>{let m=Math.max(...v.map(s=>s.length));for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length);return v}
-let listtable=(t,p)=>{let n=Math.min(tnm,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i")),head=null,tail=null; //isel
+let listtable=(t,p)=>{let n=Math.min(tnm,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i")),head=null,tail=null;
  if(t.top>0){head=oc(e=>{t.top=Math.max(0,t.top-tnm);listtable(t,p);pd(e)},tc(Math.max(0,t.top-tnm)+"‥"+(t.top-1)+" ↑",ce("option")));head.ondblclick=e=>{t.top=0;listtable(t,list);pd(e)}}
  if(tnm<t.n-t.top){tail=oc(e=>{t.top+=tnm;listtable(t,p);pd(e)},tc((t.top+tnm)+"‥"+Math.min(t.n,t.top+2*tnm)+" ↓",ce("option")));tail.ondblclick=e=>{t.top=tnm*(t.n/tnm>>0);listtable(t,list);pd(e)}}
  for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i];v[0]+="│"+trm(t.h[i]);for(let j=0;j<n;j++){let tj=t.top+j;dij=(ti=="s"||ti=="i")?String(di[tj]):(ti=="f")?sf(di[tj]):sz([di[2*tj],di[1+2*tj]]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][tj]):""))};v=fills(v);if(ti=="r")i++}
@@ -107,32 +104,29 @@ let listchange=e=>{let a=af(list.selectedOptions).filter(x=>"i"in x.dataset);let
 let listkey=e=>{if(e.key=="Delete"){if(confirm("delete "+tables[maintable].isel.length+" rows from "+maintable+"?"))delrows()}else if(e.key=="Enter"){listedit(e)}else if(e.ctrlKey&&e.key=="c"){copy(e)}else if(e.ctrlKey&&e.key=="x"){copy(e);delrows()}else if(e.ctrlKey&&e.key=="v"){paste(e)};}
 let addtable=t=>{tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)cl("bold",x)}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
- let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,foot.firstChild);bld(t.name);maintable=t.name}
-let rentable=e=>{let t=e.target.textContent,s=prompt("rename table "+t,t);if(s===""){if(confirm("delete table "+t+"?"))deltable(t);return};if(s){delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
+ let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,newtab);bld(t.name);maintable=t.name;listtable(t,list)}
+let rentable=e=>{let t=e.target.textContent,s=prompt("rename table "+t,t);if(s===""){if(confirm("delete table "+t+"?"))deltable(t);return};if(s){if(Object.keys(tables).includes(s))return;delete Object.assign(tables,{[s]:tables[t]})[t];e.target.textContent=s;if(t==maintable)maintable=s}}
 let deltable=s=>{delete tables[s];let k=Object.keys(tables);foot.removeChild(af(foot.childNodes).filter(x=>x.textContent==s)[0]);let t=foot.firstElementChild;if(t.textContent!="+")t.onclick()}
 let delrows=()=>{let t=tables[maintable];t.d.forEach((d,i)=>t.d[i]=d.filter((t.t[i]=="z")?(_,i)=>!t.isel.includes(i>>1):(_,i)=>!t.isel.includes(i)));t.sel="!0";t.n-=t.isel.length;t.isel=new Int32Array(0);t.top=0;listtable(t,list)}
-let rencolumn=(t,c)=>{let s=prompt("new column name for "+c+" from "+t.name+"?");if(s===""){if(confirm("delete column?"))delcolumn(t,c);return};if(s&&t.h.indexOf(s)==-1){t.h[t.h.indexOf(c)]=s}}
-let editrows=(t,idx)=>{rm(dict);if(!idx.length){console.log("add rows, ren/del cols, import/export, types?")};let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
- h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));ac(tr,th);let td=ce("td"),ip=ce("input");th.onkeydown=e=>{console.log(e.key,"todo change order")};th.dataset.i=i;th.ondblclick=e=>{rencolumn(t,e.target.textContent);th.textContent=t.h[+th.dataset.i]};if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
+let rencolumn=(t,c)=>{let s=prompt("new column name for "+c+" from "+t.name+"?\nleave empty to delete column");if(s===""){if(confirm("delete column?"))delcolumn(t,c);return};if(s&&t.h.indexOf(s)==-1){t.h[t.h.indexOf(c)]=s}}
+let addcolumn=(t,s)=>{let v=s.split(":");if(v.length!=2)return;let tp=v[1];if(t.h.includes(v[0])||(!"ifsz".split("").includes(tp)))return;t.h.push(v[0]);t.t.push(tp);t.d.push((tp=="s")?Array(t.n).fill(""):(tp=="i")?new Int32Array(t.n):new Float64Array((tp=="f")?t.n:2*t.n))}
+let addrows=(t,n)=>{t.n+=n;t.t.forEach((ti,i)=>{if("s"==ti){t.d[i].push(...Array(n).fill(""))}else{let r=t.d[i];t.d[i]=("i"==ti)?new Int32Array(t.n):new Float64Array((ti=="f")?t.n:2*t.n);t.d[i].set(r)}})}
+let dragcol=null,dragcolumn=e=>{dragcol=e.target},dropcolumn=e=>{pd(e);let p=e.target.parentNode,c=af(p.parentNode.children);if(c.indexOf(p)>c.indexOf(dragcol)){p.after(dragcol)}else{p.before(dragcol)};dragcol=null}
+let editrows=(t,idx)=>{rm(dict);let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
+ h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));tr.dataset.i=i;tr.draggable=true;tr.ondragstart=dragcolumn;tr.ondrop=dropcolumn;ac(tr,th);let td=ce("td"),ip=ce("input");th.onkeydown=e=>{console.log(e.key,"todo change order")};th.dataset.i=i;th.ondblclick=e=>{rencolumn(t,e.target.textContent);th.textContent=t.h[+th.dataset.i]};if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
  ac(dict,ta);list.style.display="none";dict.style.display="block";ac(dict,ce("hr"));ac(dict,tc((idx.length==1)?("update row "+idx[0]+"?\n"):("update "+idx.length+" rows?\n"),ce("span")));let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
- ac(d,oc(()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},tc("ok",    ce("button"))))
- ac(d,oc(()=>{                 list.style.display="block";dict.style.display="none"},tc("cancel",ce("button"))))}
- 
-//[x]rename column
-//[x]delete column
-//[ ]change column type
-//[ ]add column (name, type, prototype)?
-//[ ]add row(s)
- 
-let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x);t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))});if(idx.length==0)t.t.forEach((tp,i)=>s[i]=(tp=="s")?"":(tp=="f")?"0":(tp=="f")?"0.0":"0a0");return[t.h,s,t.t,u]}
+ let ok=()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},cancel=()=>{list.style.display="block";dict.style.display="none"};ac(d,oc(ok,tc("ok",    ce("button"))));ac(d,oc(cancel,tc("cancel",ce("button"))))
+ if(!idx.length){ac(d,oc(()=>{let s=prompt("add column\nname:type(ifsz)","name:s");if(s){addcolumn(t,s);cancel();listtable(t,list)}},tc("add column",ce("button"))));ac(d,oc(()=>{let s=prompt("add rows\nnumber of rows:","1"),n=parseInt(s);if(s&&n>0){idx=Array(n).fill().map((_,i)=>i+t.n);addrows(t,n);ok()}},tc("add rows",ce("button"))))}}
+let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x);t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))});if(idx.length==0)t.t.forEach((tp,i)=>s[i]=(tp=="s")?"":(tp=="i")?"0":(tp=="f")?"0.0":"0a0");return[t.h,s,t.t,u]}
 let verify=t=>{return e=>{let s=e.target.value,a=s.split("a");if(a.length<2)a.push("0");e.target.style.borderRight="1px solid";e.target.value=("s"==t)?s:("i"==t)?ON(String(Number(s))):("f"==t)?On(String(Number(s))):On(String(Number(a[0])))+"a"+On(String(Number(a[1])))}}
-let commit=(ta,t,idx)=>{let inp=af(ta.rows).map(x=>x.children[1].firstElementChild);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)})}
+let commit=(ta,t,idx)=>{let inp=af(ta.rows).map(x=>x.children[1].firstElementChild),c=af(ta.children),j=c.map(x=>+x.dataset.i);inp.forEach((x,i)=>{if(x.style.borderRight=="1px solid")update(t,i,idx,x.value)});t.h=reorder(t.h,j);t.d=reorder(t.d,j);t.t=reorder(t.t,j);listtable(t,list)}
 let update=(t,i,idx,s)=>{let old=af(list.selectedOptions).map(x=>x.index);idx.forEach(j=>{let ti=t.t[i],di=t.d[i];if(ti=="z"){[di[2*j],di[1+2*j]]=zs(s)}else{di[j]=("s"==ti)?s:("i"==ti)?parseInt(s):parseFloat(s)};listtable(t,list)});af(list.childNodes).forEach((x,i)=>x.selected=old.includes(i))}
 let copy=e=>{pd(e);let t=tables[maintable];navigator.clipboard.writeText(af(t.isel).map(i=>t.t.map((tj,j)=>{let dj=t.d[j];return((tj=="s")?dj[i]:(tj=="z")?Sz(dj[2*i],dj[1+2*i]).replace("a","\t"):String(dj[i]))}).join("\t")).join("\n")).then(r=>r)}
 let paste=e=>{pd(e);let t=tables[maintable];navigator.clipboard.readText().then(r=>merge(t,parsetable("paste",t.h.join(" ")+"\n"+(t.t.join("").replaceAll("z","ra")).split("").join(" ")+"\n"+r)))}
 let merge=(t,T)=>{if(t.h.join("")!=T.h.join(""))return;(t.isel.length==1)?insrows(t,T,t.isel[0]):(t.isel.length==T.n)?reprows(t,T):insrows(t,T,t.n);listtable(t,list)}
 let insrows=(t,T,ii)=>{t.t.forEach((ti,i)=>{if(ti=="s"){t.d[i].splice(1+ii,0,...T.d[i])}else{let j=(1+ii)*((ti=="z")?2:1),td=t.d[i],Td=T.d[i],d=new td.constructor(td.length+Td.length);d.set(td.subarray(0,j));d.set(Td,j);d.set(td.subarray(j),j+Td.length);t.d[i]=d}});t.n+=T.n;t.isel=new Int32Array(T.n).map((_,i)=>1+i+ii);t.sel=rangestr(t.isel)}
 let reprows=(t,T)=>{t.t.forEach((ti,i)=>t.isel.forEach((x,j)=>{if(ti=="z"){x*=2;j*=2};t.d[i][x]=T.d[i][j]}))}
+let newtable=()=>{let i=0;while(("t"+i)in tables)i++;addtable(parsetable("t"+i,"a\ni\n"))}
 
 
 function copycap(e){pd(e)
@@ -147,6 +141,7 @@ function copycap(e){pd(e)
 let ON=x=>x.replace("NaN","ON"),On=x=>x.replace("NaN","On")
 let isuniq=x=>x.every((x,i,a)=>a.length==1||x===a[0])
 let at=(x,i)=>x.filter((_,j)=>i.includes(j))
+let reorder=(v,i)=>{let y=Array(v.length);i.forEach((j,i)=>y[i]=v[j]);return y}
 let trm=s=>(s.length<11)?s:s.slice(0,5)+"‥"+s.slice(-4)
 let esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;").replace(/ /g,"&nbsp;")
 let rangestr=x=>(0==x.length)?"!0":(1==x.length)?(","+x[0]):(x[0]&&6>x.length)?x.join(" "):ranges(x)
