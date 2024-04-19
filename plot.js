@@ -30,7 +30,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
    c.save()
    c.translate(w*(i%nc),j*h)
    let r=[w*(i%nc),j*h,w,h]
-   r.push(plot(p.plots[/*(p.cols<0)?j+nr*(i%nc):i*/ i],i,c,w,h,p))
+   r.push(...plot(p.plots[/*(p.cols<0)?j+nr*(i%nc):i*/ i],i,c,w,h,p))
    rects.push(r)
    c.restore()
    if(0==(1+i)%nc)j++;if((j==nr-1)&&(np%nc))w=width/(np%nc)
@@ -53,11 +53,8 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   if("function"==typeof legend ) legend(s)
   else console.log(s)
  }
- 
- canvas.ondblclick=function(e){
-  let r=e.target.getBoundingClientRect()
-  let x=e.clientX-r.left, y=e.clientY-r.top
-  let ri=targetRect(x,y,rects)
+ let clickpos=e=>{let r=e.target.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,ri=targetRect(x,y,rects);return[x,y,ri]}
+ canvas.ondblclick=function(e){let[x,y,ri]=clickpos(e)
   let [line,point]=snapPoint(x,y,rects[ri],p.plots[ri])
   p.hi={plot:ri,lines:[line],point:point}
   if(slider!==undefined){
@@ -88,7 +85,21 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
    replot(canvas)
   }
  }
- //..
+ let zoom=null
+ let mousecoords=e=>{let[x,y,ri]=clickpos(e),rri=rects[ri],pi=p.plots[ri];if(pi.type!="polar"){let[X,Y]=rects[ri][5](x-rri[0],y-rri[1]);return[x,y,X,Y,ri]};return null}
+ let drawzoom=(x0,y0,x1,y1,ri)=>{ c.putImageData(zoom.d,0,0);c.strokeRect(x0,y0,x1-x0,y1-y0); console.log("drawzoom",x0,y0,x1,y1)}
+ let startzoom=(x0,y0,X,Y,ri)=>{zoom={x0:x0,y0:y0,X:X,Y:Y,ri:ri,d:c.getImageData(0,0,canvas.width,canvas.height)};c.strokeStyle="red";zoomconsole.log("startzoom")}
+ let endzoom=(_x,_y,X,Y,ri)=>{c.putImageData(zoom.d,0,0);if(zoom.ri!=ri){zoom=null;return}; let x=zoom.X,y=zoom.Y; p.plots[ri].limits=[min(x,X),max(x,X),min(y,Y),max(y,Y)];console.log("new limits",p.plots[ri].limits);zoom=null;replot(canvas)}
+ 
+ canvas.onmousemove=e=>{ if(1==e.which){return(zoom===null)?startzoom(...mousecoords(e)):drawzoom(zoom.x0,zoom.y0,...clickpos(e))};if(zoom===null)return;if(e.which==0)endzoom(...mousecoords(e)) }
+ canvas.onwheel=e=>{if(e.deltaY==0)return;let z=e.deltaY>0,[x,y,ri]=clickpos(e),rri=rects[ri],pi=p.plots[ri]
+  if(pi.type=="polar"){pi.limits[3]*=z?2:0.5}else{
+   //let x0=pi.limits[0],y0=pi.limits[2],[X,Y]=rects[ri][5](x-rri[0],y-rri[1])
+   let dx=(pi.limits[1]-pi.limits[0])/2,dy=(pi.limits[3]-pi.limits[2])/2,xm=(pi.limits[1]+pi.limits[0])/2,ym=(pi.limits[3]+pi.limits[2])/2
+   if(z){pi.limits=[xm-2*dx,xm+2*dx,ym-2*dy,ym+2*dy]}
+  }
+  replot(canvas)
+ }
 }
 
 
@@ -113,6 +124,7 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;w=min(w,1.5*h),h=min(h,w);
  let aw=max(0,w-plts.xyw),ah=max(0,h-plts.xyh),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li),
  xs=aw/(x1-x0),ys=ah/(y1-y0),xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),t,
  mark=(x,y)=>{align(c,6+2*+(xx(x)>w/2));c.beginPath();c.fillText(x+", "+y,xx(x),yy(y))}
+ p.limits=[x0,x1,y0,y1];
  ln=(l,i)=>{let x=l.x,y=l.y;if(!x.length)return
   if("undefined"==typeof l.style||l.style.includes("-")){
    c.beginPath();c.moveTo(xx(x[0]),yy(y[0]));for(let j=0;j<x.length;j++){c.lineTo(xx(x[j]),yy(y[j]))}
@@ -127,9 +139,9 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;w=min(w,1.5*h),h=min(h,w);
  align(c,1);text90(c,0,center(h),p.ylabel)
  c.translate(plts.xyx,ah+plts.xyy);
  c.lineWidth=2;c.font=plts.font2
- align(c,1);ncTic(x0,x1).map(x=>{t=String(x);x=xx(x);c.beginPath();c.moveTo(x,0);c.lineTo(x,plts.tl);c.stroke();c.fillText(t,x,plts.tl)})
- align(c,5);ncTic(y0,y1).map(y=>{t=String(y);y=yy(y);c.beginPath();c.moveTo(-plts.tl,y);c.lineTo(0,y);c.stroke();c.fillText(t,-plts.tl,y)})
- c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.map(ln);return(l,j)=>[plts.xyx+xx(l.x[j]),ah+plts.xyy+yy(l.y[j])]
+ align(c,1);ncTic(x0,x1).map(x=>{t=sn(x);x=xx(x);c.beginPath();c.moveTo(x,0);c.lineTo(x,plts.tl);c.stroke();c.fillText(t,x,plts.tl)})
+ align(c,5);ncTic(y0,y1).map(y=>{t=sn(y);y=yy(y);c.beginPath();c.moveTo(-plts.tl,y);c.lineTo(0,y);c.stroke();c.fillText(t,-plts.tl,y)})
+ c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.map(ln);return[(l,j)=>[plts.xyx+xx(l.x[j]),ah+plts.xyy+yy(l.y[j])],(x,y)=>[(x-plts.xyx)/xs-x0,y0-(y-ah-plts.xyy)/ys]]
 }
 function polarplot(p,c,w,h,plts){if(!p.lines)return;
  let ra=floor(min(w-plts.pw,h-plts.ph-plts.tih)/2),raa=ra+plts.tl,al=[7,6,3,3,0,0,1,2,2,5,5,8],
@@ -140,6 +152,7 @@ function polarplot(p,c,w,h,plts){if(!p.lines)return;
   let hp=j=>hipoint(plts,i,j,p.i)
   x.map((x,i)=>{c.beginPath();c.arc(sc*x,sc*y[i],s*hp(i),0,2*Math.PI);c.fill()})
   x.map((x,i)=>{if(hp(i)>1)mark(i)})}
+ p.limits=[0,0,0,r1],
  c.translate(floor(w/2),floor(ra+plts.ph/2+plts.tih))
  circle(c,0,0,ra)
  c.textAlign="center";c.textBaseline="bottom"
@@ -149,7 +162,7 @@ function polarplot(p,c,w,h,plts){if(!p.lines)return;
  c.font=plts.font2;iota(12).map(i=>{let p=30*i*Math.PI/180,x=Math.sin(p),y=-Math.cos(p);align(c,al[i]);c.beginPath();c.moveTo(ra*x,ra*y);c.lineTo(raa*x,raa*y);c.stroke();c.fillText(""+30*i,raa*x,raa*y)})
  c.strokeStyle="#ccc";ncTic(0,r1).slice(1,-1).map(t=>circle(c,0,0,sc*t))
  c.beginPath();c.moveTo(-ra,0);c.lineTo(ra,0);c.stroke();c.beginPath();c.moveTo(0,-ra);c.lineTo(0,ra);c.stroke()
- c.beginPath();c.arc(0,0,ra,0,2*Math.PI);c.clip();p.lines.map(ln);return(l,j)=>[floor(w/2)+sc*l.y[j],floor(h/2)+floor(plts.tih/2)+sc*l.z[j]]
+ c.beginPath();c.arc(0,0,ra,0,2*Math.PI);c.clip();p.lines.map(ln);return[(l,j)=>[floor(w/2)+sc*l.y[j],floor(h/2)+floor(plts.tih/2)+sc*l.z[j]]]
 }
 function ampangplot(p,c,w,h,plts){if(!p.lines)return;let l=p.lines
  for(let i=0;i<l.length;i++)if(l[i].z!==null){for(let j=0;j<l[i].y.length;j++)l[i].y[j]=Math.hypot(l[i].y[j],l[i].z[i]);l[i].z=null}
@@ -203,13 +216,13 @@ function autoxy(L,a){let r=a.slice(0,4)
  if(r[0]==r[1]){[r[0],r[1]]=ncLim(vmin(L.map(l=>vmin(l.x))),vmax(L.map(l=>vmax(l.x)))).slice(0,2)}
  if(r[2]==r[3]){[r[2],r[3]]=ncLim(vmin(L.map(l=>vmin(l.y))),vmax(L.map(l=>vmax(l.y)))).slice(0,2)}
  return r}
-function autop(L,r){return ncLim(0,vmax(L.map(l=>Math.sqrt( vmax(l.y.map((y,i)=>y*y+l.z[i]*l.z[i]))))))[1]}
+function autop(L,r){return(r>0)?r:ncLim(0,vmax(L.map(l=>Math.sqrt(vmax(l.y.map((y,i)=>y*y+l.z[i]*l.z[i]))))))[1]}
 function iota(n){return[...Array(n).keys()]}
 
-function ncNum(ext,rnd){let e=floor(Math.log10(ext)),f=ext/(10**e),r
- return (rnd?((f<1.5)?1:(f<3)?2:(f<7)?5:10):((f<=1)?1:(f<=2)?2:(f<=5)?5:10))*10**e}
+function sn(x){let a=Math.abs(x),r=(a==0)?"0":(a>10000||a<0.00009)?x.toExponential(2):String(Math.round(10000*x)/10000);return r.replace(/\.0+e/,"e")}
+function ncNum(ext,rnd){let e=floor(Math.log10(ext)),f=ext/(10**e),r;return(rnd?((f<1.5)?1:(f<3)?2:(f<7)?5:10):((f<=1)?1:(f<=2)?2:(f<=5)?5:10))*10**e}
 function ncLim(x,y){let e=ncNum(y-x,false),s=ncNum(e/4,true);return[s*floor(x/s),s*ceil(y/s),s]}
-function ncTic(x,y){let [p,_,s]=ncLim(x,y),r=[];while(p<=y){if(p>=x)r.push(p);p+=s};return r}
+function ncTic(x,y){let [p,_,s]=ncLim(x,y),r=[],i=0;while(p+i*s<=y){if(p+i*s>=x)r.push(p+i*s);i++};return r}
 //function ncTic(x,y){let i,t,e=ncNum(y-x,false),[m,_,s]=ncLim(x,y),p=m,n=ceil(e/s+0.5),r=[]
 // for(i=0;i<n;i++)if(((p=m+i*s)>=x)&&p<y)r.push(p);return r}
 
