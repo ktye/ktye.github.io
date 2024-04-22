@@ -36,9 +36,7 @@ input:read-only{color:grey;font-style:italic}
  <div id="R">
   <pre id="E"></pre>
   <pre id="O" oncontextmenu="khid(event)"></pre>
-  <div id="P">
-   <canvas id="pcnv" style="width:100%;height:100%"></canvas>
-  </div>
+  <div id="P"><canvas id="pcnv" style="width:100%;height:100%"></canvas></div>
   <select id="pcap" multiple oncontextmenu="copycap(event)">
   </select>
  </div>
@@ -64,10 +62,11 @@ xkkeytab:`alpha`b`gamma!+`sym`int`float`complex!(`a`bb`ccc;3 22 1;1.23 -4.56 7.8
 xkalpha:1
 xkbeta:2
 xkrowcount:{[] `count \"number of selected rows";#sel}
-xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot 0 200;plot'(1;```polartitle;3a30+?100a);`"abc"}
+/xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot 0 200;plot'(1;```polartitle;3a30+?100a);`"abc"}
 xkrgb:{image 100^(200*100)?255*256*256}
 xkcmap:{image 100^_(200*100)?255}
 xkfmap:{image 100^?200*100}
+xkplot:{plot 3.4+0.001*(1 2 2.1 3;2 0.9999 1.1 3);plot 1;plot(1 2 3.;1a10 2a20 3a30);plot(1 2 3 4 5.;1a11 2a22 3a33 4a44 5a55)}
 </textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.display="none";kinit()'>✖</button></div>
 
 <script src="plot.js" id="pjs"></script>
@@ -156,7 +155,7 @@ let reset=()=>{plots=0;pid=0;imgs=0;zmin=0;zmax=0;E.textContent="";O.textContent
 
 /*
 	plot 0                    / i:select current plot
-	plot`polar                / s: s in `xy`bar`polar`ampang
+	plot`polar                / s: s in `xy`bar`polar`ampang`square
 	plot`xlabel`ylabel`title  /#S 1..3
 	plot(x;y0;y1;..)          /[x:i|f] y:i|f|z  multiple lines
 	plot axis                 /x:I|F #x 1...4 y1|x0,x1|x0,x1,0,y1|x0,x1,y0,y1
@@ -165,7 +164,7 @@ let reset=()=>{plots=0;pid=0;imgs=0;zmin=0;zmax=0;E.textContent="";O.textContent
  
 let zmin=0,zmax=0,axis=x=>{if(6==x.length){zmin=x[4];zmax=x[5]};plots[pid].limits=af(x)}
 let plotk=x=>{
- let pn=x=>{if(plots.length<=x)plots[x]={};return x},pt=x=>{plots[pid].type=x},ri=x=>{x=ZK(x);return[x.filter((_,i)=>~i&1),x.filter((_,i)=>i&1)]},la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
+ let pn=x=>{if(plots.length<=x)plots[x]={};return x},pt=x=>{plots[pid].type=("square"==x)?"xy":x;plots[pid].square=x=="square"},ri=x=>{x=ZK(x);return[x.filter((_,i)=>~i&1),x.filter((_,i)=>i&1)]},la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
  let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
  if(plots===0){pid=0;plots=[]};if(undefined===plots[pid])plots[pid]={}
  let t=K.tp(x);(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
@@ -225,7 +224,7 @@ let kenv={env:{
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){let i=lo(x);K.dx(x);return xcal[i](...LK(y))}}}
 let kinit=x=>{if(kw){kinst(kw,x)}else if(kw64){kinst(u64s(kw64),x)}else{fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>{kw=new Uint8Array(r);kw64=s64u(kw);kinst(kw,x)})}}
-let kinst=(u,x)=>{reset()
+let kinst=(u,x)=>{reset();
  WebAssembly.instantiate(u,kenv).then(r=>{K=r.instance.exports;K.kinit();xcal=[];xreg("plot",plotk);xreg("image",image);xreg("explode",expl);xreg("store",stor);kdat();K.dx(K.Val(KC(ed.value)))
   rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
        if(x==="#selec#")mark(       )
@@ -246,6 +245,10 @@ DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r},
 KT=T=>{let t=T.t,k=KS(T.h),v=K.mk(23,T.h.length),vi,p=lo(v)>>>3;t.forEach((ti,i)=>{let di=T.d[i];vi=("i"==ti)?KI(di):("s"==ti)?KS(di):("f"==ti)?KF(di):KZ(di);/*reattach*/J()[p+i]=vi});return K.Atx(2n,K.Cal(12n,K.l2(k,v)))},
 SK=x=>CL(K.Atx(17n,x)),BK=x=>{K.dx(x);return new Uint8Array(K.memory.buffer,lo(x),K.nn(x))},CK=x=>{K.dx(x);return su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))},CL=l=>{let j=J(),p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));K.dx(l);return r},
 asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),syms=()=>CL(K.rx(J()[0])).filter(x=>x.startsWith("xk")).map(x=>x.slice(2))
+
+
+
+
 
 
 </script></body></html>
