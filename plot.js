@@ -2,7 +2,6 @@ let plotjs=(()=>{
 
 let ge=function(x){return document.getElementById(x)}
 let pd=function(e){e.preventDefault();e.stopPropagation()}
-//let ct=(x,y)=>x.classList.contains(y)
 let vmin=x=>Math.min(...x),vmax=x=>Math.max(...x),min=Math.min,max=Math.max,floor=Math.floor,ceil=Math.ceil
 
 function replot(canvas){plots(canvas.plots,canvas,canvas.slider,canvas.listbx,canvas.legend)}
@@ -25,28 +24,12 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
  c.fillStyle="white";c.fillRect(0,0,width,height);c.font=p.font1
  if(p.plots){
   let np=p.plots.length,nc=Math.abs(p.cols);nc=nc?nc:np
-  let nr=ceil(np/nc),w=width/nc,h=height/nr
-  for(let i=0,j=0;i<np;i++){
-   c.save()
-   c.translate(w*(i%nc),j*h)
-   let r=[w*(i%nc),j*h,w,h]
-   r.push(...plot(p.plots[/*(p.cols<0)?j+nr*(i%nc):i*/ i],i,c,w,h,p))
-   rects.push(r)
-   c.restore()
-   if(0==(1+i)%nc)j++;if((j==nr-1)&&(np%nc))w=width/(np%nc)
-  }
- }
- 
+  let nr=ceil(np/nc),w=width/nc,h=height/nr,r
+  for(let i=0,j=0;i<np;i++){c.save();c.translate(w*(i%nc),j*h);r=[w*(i%nc),j*h,w,h];r.push(...plot(p.plots[i],i,c,w,h,p));rects.push(r);c.restore();if(0==(1+i)%nc)j++;if((j==nr-1)&&(np%nc))w=width/(np%nc)}}
  canvas.plots=p;canvas.slider=slider;canvas.listbx=listbx;canvas.legend=legend
- //let replot=function(force){if((canvas.clientWidth!=width)||(canvas.clientHeight!=height)||force===true)plots(p,canvas,slider,listbx)}
- //{let r;window.addEventListener("resize",function(){clearTimeout(r);r=setTimeout(replot, 200)})}
-
  if(p.hi.point!==null){
   let pl=p.plots[p.hi.plot].lines[p.hi.lines[0]],pt=p.hi.point
-  let d={
-   x:("undefined"!=typeof pl.x)?pl.x[pt]:null,
-   y:("undefined"!=typeof pl.y)?pl.y[pt]:null,
-   z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
+  let d={x:("undefined"!=typeof pl.x)?pl.x[pt]:null,y:("undefined"!=typeof pl.y)?pl.y[pt]:null,z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
   d.r=Math.hypot(d.y,d.z);d.a=180/Math.PI*Math.atan2(d.z,d.y);if(d.a<0)d.a+=360
   let s=((d.x!==null)?("x:"+sn(d.x)+";"):"")+((d.z!==null)?("z:"+sn(d.r)+"a"+d.a.toFixed(0)):("y:"+sn(d.y)))
   if("function"==typeof legend ) legend(s)
@@ -87,11 +70,9 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
  let zoom=null
  let outside=(l,x,y)=>x<l[0]||x>l[1]||y<l[2]||y>l[3]
  let mousecoords=e=>{let[x,y,ri]=clickpos(e);if(ri==null){zoom=null;return[]};let rri=rects[ri],pi=p.plots[ri],[X,Y]=rects[ri][5](x-rri[0],y-rri[1]);return[x,y,X,Y,ri,false]}
- let drawzoom=(x0,y0,x1,y1,ri)=>{ c.putImageData(zoom.d,0,0);if(zoom.pan){c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}else c.strokeRect(x0,y0,x1-x0,y1-y0)}
+ let drawzoom=(x0,y0,x1,y1,ri)=>{ c.putImageData(zoom.d,0,0);zoom.pan?LN(c,x0,y0,x1,y1):c.strokeRect(x0,y0,x1-x0,y1-y0)}
  let startzoom=(pan,x0,y0,X,Y,ri)=>{if(ri==undefined)return;zoom={x0:x0,y0:y0,X:X,Y:Y,ri:ri,d:c.getImageData(0,0,canvas.width,canvas.height),pan:pan};c.strokeStyle="red";canvas.style.cursor=pan?"grab":"crosshair"}
  let endzoom=(_x,_y,X,Y,ri)=>{canvas.style.cursor="";c.putImageData(zoom.d,0,0);if(zoom.ri!=ri){zoom=null;return}; let x=zoom.X,y=zoom.Y,dx=x-X,dy=y-Y,l=p.plots[ri].limits;if(outside(l,x,y)&&outside(l,X,Y)){zoom=null;return};if(zoom.pan){l[0]+=dx;l[1]+=dx;l[2]+=dy;l[3]+=dy}else p.plots[ri].limits=[min(x,X),max(x,X),min(y,Y),max(y,Y)];zoom=null;replot(canvas)}
- 
- //canvas.onmousedown=e=>{console.log(mousecoords(e))}
  canvas.onmousemove=e=>{pd(e);if(1==e.which){return(zoom===null)?startzoom(e.shiftKey||e.ctrlKey,...mousecoords(e)):drawzoom(zoom.x0,zoom.y0,...clickpos(e))};if(zoom===null)return;if(e.which==0)endzoom(...mousecoords(e)) }
  canvas.onwheel=e=>{let[x,y,X,Y,ri]=mousecoords(e);if(e.deltaY==0)return;let z=(e.deltaY>0)?2:0.5,pi=p.plots[ri],l=pi.limits,xm=(l[0]+l[1])/2,ym=(l[2]+l[3])/2,DX=(l[1]-l[0])/2*z,DY=(l[3]-l[2])/2*z
   if(pi.type=="polar"){if(DX>Math.abs(xm)&&DY>Math.abs(ym)){xm=0;ym=0};l[0]=xm-DX;l[1]=xm+DX;l[2]=ym-DY;l[3]=ym+DY}else{let xo=(X-xm)*z,yo=(Y-ym)*z;if(X>l[0]){l[0]=X-xo-DX;l[1]=X-xo+DX};if(Y>l[2]){l[2]=Y-yo-DY;l[3]=Y-yo+DY}}
@@ -101,13 +82,12 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
 
 
 function plot(p,i,c,w,h,plts){p.i=i
- p.type  =("type"   in p)?p.type: "xy"
+ p.type  =("type"   in p)?p.type:(p.lines.length>0&&"z"in p.lines[0]&&p.lines[0].z)?"ampang":"xy"
  p.title =("title"  in p)?p.title: ""
  p.xlabel=("xlabel" in p)?p.xlabel:""
  p.ylabel=("ylabel" in p)?p.ylabel:""
  p.square=("square" in p)?p.square:false
  
- //c.translate(floor(w/2),floor(h/2))
  c.fillStyle=c.strokeStyle="black";c.lineWidth=2
  switch(p.type){
  case"xy":    return     xyplot(p,c,w,h,plts)
@@ -116,27 +96,28 @@ function plot(p,i,c,w,h,plts){p.i=i
  default:throw new Error("unknown plot type: "+p.type)
 }}
 
-function xyplot(p,c,w,h,plts){if(!p.lines)return;w=min(w,1.5*h),h=min(1.5*w,h)
+function xyplot(p,c,w,h,plts){if(!p.lines)return;let z=(p.lines[0].z)?true:false;w=min(w,1.5*h),h=min((z?2:1.5)*w,h) //ah clip
  p.lines=p.lines.map(l=>{l.x=("undefined"==typeof l.x)?iota(l.y.length):l.x;return l})
- let sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li),xs=aw/(x1-x0),ys=ah/(y1-y0),xx=x=>xs*(x-x0),yy=y=>ys*(y0-y)
+ let sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li),aH=z?Math.round(0.3*ah):0;ah-=aH
+ let xs=aw/(x1-x0),ys=ah/(y1-y0),zs=aH/360,xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),zz=z=>zs*z
  p.limits=[x0,x1,y0,y1];
- let ln=(l,i)=>{let x=l.x,y=l.y;if(!x.length)return
-  if("undefined"==typeof l.style||l.style.includes("-")){
-   c.beginPath();c.moveTo(xx(x[0]),yy(y[0]));for(let j=0;j<x.length;j++){c.lineTo(xx(x[j]),yy(y[j]))}
-   c.strokeStyle=plts.colors[i%plts.colors.length];c.lineWidth=hiline(plts,i)*(l.size?l.size:2)
-   c.stroke()}
-  let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}
- }
- c.strokeRect(plts.xyx,plts.xyy,aw,ah)
+ let a=true,ln=(l,i)=>{let x=l.x,y=l.y;if(!x.length)return
+  if("undefined"==typeof l.style||l.style.includes("-")){c.strokeStyle=plts.colors[i%plts.colors.length];c.lineWidth=hiline(plts,i)*(l.size?l.size:2);c.beginPath()
+   if(a){c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>c.lineTo(xx(x),yy(y[j])))}else{c.moveTo(xx(x[0]),zz(l.z[0]));x.forEach((x,j)=>c.lineTo(xx(x),zz(l.z[j])))}c.stroke()}
+  let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}}
+ c.strokeRect(plts.xyx,plts.xyy,aw,ah);if(z)c.strokeRect(plts.xyx,plts.xyy+ah,aw,aH)
  align(c,1)
  c.fillText(p.title, plts.xyx+center(aw),0)
- align(c,7);c.fillText(p.xlabel,plts.xyx+center(aw),h)
- align(c,1);text90(c,0,center(h),p.ylabel)
+ align(c,7);c.fillText(p.xlabel,plts.xyx+center(aw),plts.xyy+ah+aH+plts.tl+plts.tlh+plts.tih)
+ align(c,1);text90(c,0,center(plts.xyy+ah+aH),p.ylabel)
  c.translate(plts.xyx,ah+plts.xyy);
  c.lineWidth=2;c.font=plts.font2
- align(c,1);ncTic(x0,x1).map(x=>{let t=sn(x);x=xx(x);c.beginPath();c.moveTo(x,0);c.lineTo(x,plts.tl);c.stroke();c.fillText(t,x,plts.tl)})
- align(c,5);ncTic(y0,y1).map(y=>{let t=sn(y);y=yy(y);c.beginPath();c.moveTo(-plts.tl,y);c.lineTo(0,y);c.stroke();c.fillText(t,-plts.tl,y)})
- c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.map(ln);return[(l,j)=>[plts.xyx+xx(l.x[j]),ah+plts.xyy+yy(l.y[j])],(x,y)=>[(x-plts.xyx)/xs+x0,y0-(y-ah-plts.xyy)/ys]]
+ align(c,1);ncTic(x0,x1).map(x=>{let t=sn(x);x=xx(x);LN(c,x,  -plts.tl/2,x,   plts.tl/2);c.fillText(t,x,aH+plts.tl)})
+       if(z)ncTic(x0,x1).map(x=>{let t=sn(x);x=xx(x);LN(c,x,aH-plts.tl/2,x,aH+plts.tl/2)                           })
+ align(c,5);ncTic(y0,y1).map(y=>{let t=sn(y);y=yy(y);LN(c,-plts.tl/2,y,plts.tl/2,y);c.fillText(t,-plts.tl,y)})
+ if(z){let t=["0","180"],y=[aH,aH/2];y.map((y,i)=>{LN(c,-plts.tl/2,y,plts.tl/2,y);c.fillText(t[i],-plts.tl,y)})}
+ c.save();c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.map(ln);c.restore();if(z){a=false;c.beginPath();c.rect(0,0,aw,aH);c.clip();p.lines.map(ln)}
+ return[(l,j)=>[plts.xyx+xx(l.x[j]),ah+plts.xyy+yy(l.y[j])],(x,y)=>[(x-plts.xyx)/xs+x0,y0-(y-ah-plts.xyy)/ys]]
 }
 function polarplot(p,c,w,h,plts){if(!p.lines)return;
  let ra=floor(min(w-plts.pw,h-plts.ph-plts.tih)/2),raa=ra+plts.tl,al=[7,6,3,3,0,0,1,2,2,5,5,8],
@@ -157,10 +138,7 @@ function polarplot(p,c,w,h,plts){if(!p.lines)return;
  c.beginPath();c.moveTo(-ra,0);c.lineTo(ra,0);c.stroke();c.beginPath();c.moveTo(0,-ra);c.lineTo(0,ra);c.stroke()
  c.beginPath();c.arc(0,0,ra,0,2*Math.PI);c.clip();p.lines.map(ln);return[(l,j)=>[floor(w/2)+sc*l.y[j],floor(h/2)+floor(plts.tih/2)+sc*l.z[j]],(x,y)=>[X+(x-xm)/sc,Y+(y-ym)/sc]]
 }
-function ampangplot(p,c,w,h,plts){if(!p.lines)return;let l=p.lines
- for(let i=0;i<l.length;i++)if(l[i].z!==null){for(let j=0;j<l[i].y.length;j++)l[i].y[j]=Math.hypot(l[i].y[j],l[i].z[i]);l[i].z=null}
- p.lines=l;xyplot(p,c,w,h,plts)
-}
+function ampangplot(p,c,w,h,plts){p.lines.forEach((l,i)=>{l.y.forEach((y,j)=>{let z=l.z[j],a=Math.atan2(y,z)*180/Math.PI;l.y[j]=Math.hypot(y,z);l.z[j]=(a<0)?a+360:a});p.lines[i]=l});p.type="xy";return xyplot(p,c,w,h,plts)}
 function h1(plts){let h=parseFloat(plts.font1);return isNaN(h)?20:ceil(h)}
 function h2(plts){let h=parseFloat(plts.font2);return isNaN(h)?14:ceil(h)}
 function layout(c,plts){                           //computed sizes depending on fontsize
@@ -180,7 +158,7 @@ function layout(c,plts){                           //computed sizes depending on
  plts.ph =2*plts.tl+2*plts.tlh                     //polar sum of v margins (sym without tih)
  return plts
 }
-
+function LN(c,x0,y0,x1,y1){c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
 function hiline(p,i){return(p.hi.lines.includes(i)&&p.hi.point===null)?2:1}
 function hipoint(p,i,j,k){return(k==p.hi.plot&&p.hi.lines.length==1&&p.hi.lines[0]==i&&p.hi.point==j)?2:1}
 function absang(x,y){let p=180/Math.PI*Math.atan2(x,-y);p=(p<0)?p+360:p;return Math.hypot(x,y).toPrecision(4)+"@"+p.toPrecision(4)}
