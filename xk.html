@@ -16,7 +16,7 @@ table{border-collapse:collapse}
 .red{background:red}
 input:read-only{color:grey;font-style:italic}
 #sel{border:none;outline:none;/*background:#ffe*/;flex-grow:1;text-align:right}
-#list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:none;overflow-y:auto;background:#fcfcfc}
+#list{border-top:none;border-right:none;border-radius:0;outline:none;width:100%;height:100%;overflow-x:auto;overflow-y:auto;background:#fcfcfc}
 #pcap{width:100%;min-height:50px;outline:none;border:none;border-radius:0;overflow:auto}
 #L{border-right:1px solid;resize:horizontal;overflow-x:none;overflow-y:auto;min-width:10vw;max-width:90vw}
 #R{height:calc(100vh - 3.25em);right:0;min-width:10vw;background:#fcfcfc}
@@ -231,7 +231,7 @@ let kinst=(u,x)=>{reset();
        if(x==="#selec#")mark(       )
   else if(x!==undefined)show(call(x))
   else                  help(       )
-  })/*.catch(e=>err(e.message+"\n\n"+e.stack))*/}
+  }).catch(e=>err(e.message+"\n\n"+e.stack))}
 
 let xcal=[],xreg=(name,g,arity)=>{xcal.push(g);let f=K.l2(BigInt(xcal.length-1),Ks(name));I()[(lo(f)>>>2)-3]=(arity===undefined)?1:arity;f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f)));asn(name,f)},
 TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:K.nn(x),isel:new Int32Array(0),sel:"!0"},F={19:["i",IK],20:["s",SK],21:["f",FK],22:["z",ZK]};k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.t.push(f[0]);r.d.push(f[1](vi))});return r},
