@@ -27,13 +27,14 @@ input:read-only{color:grey;font-style:italic}
 #B{background:black;color:white;border:2px solid black;outline:none;flex-grow:1;text-align:right;font-size:large}
 
 </style></head><body onload="init()">
-<div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span class="link" style="margin-left:auto"><span onclick="bundle()">save </span><span id="kbut" onclick="edt.style.display='block'">x.k</span></span></div></div>
+<div id="T" class="large"><div id="but" style='display:flex;gap:0.5em'><span class="link" style="margin-left:auto"><span onclick="bundle()">save </span><span id="kbut" onclick="showed(1)" ondblclick="showed(2)">x.k</span></span></div></div>
 <div style="flex-grow:1;display:grid;grid-template-columns:auto 1fr">
  <div id="L">
   <select id="list" multiple oncontextmenu="listedit(event)" ondblclick="listedit(event)" onchange="listchange(event)" onkeydown="listkey(event)"></select>
   <div id="dict" style="display:none">abc</div>
  </div>
  <div id="R">
+  <div id="D"></div>
   <pre id="E"></pre>
   <pre id="O" oncontextmenu="khid(event)"></pre>
   <div id="P"><canvas id="pcnv" style="width:100%;height:100%"></canvas></div>
@@ -50,7 +51,7 @@ input:read-only{color:grey;font-style:italic}
 </div>
 <a id="dl" style="display:none"></a>
 
-<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false">
+<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" wrap="off" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false">
 /preinitialized are [tables..]  n:#[maintable]  i:!n  sel:[selected indexes of maintable]  explode:{[t] ..assign t key/vals as globals.. }
 /for selection expression, the maintable is exploded
 /explode G
@@ -68,10 +69,13 @@ xkcmap:{image 100^_(200*100)?255}
 xkfmap:{image 100^?200*100}
 xkplot:{plot 3.4+0.001*(1 2 2.1 3;2 0.9999 1.1 3);plot`time`value`title;plot 1;plot`xlabel`ylabel`title;plot(1 2 3.;1a10 2a20 3a30);plot(0 1 2 3 4 5.;1a181 1.1a11 2.1a22 3.2a33 4.1a44 5a55);plot 2;plot@?10a}
 xkbar:{plot`bar;plot(3 4 5;8 3 7);plot 1;plot`bar;plot(0 1 2;8 3 7);plot(0 1 2;2 -2 4)}
-</textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick='edt.style.display="none";kinit()'>✖</button></div>
+</textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick="showed(0)">✖</button></div>
 
 <script src="plot.js" id="pjs"></script>
 <script>
+
+
+
 let ge=x=>document.getElementById(x),ce=x=>document.createElement(x),ac=(x,y)=>{x.appendChild(y);return y},cl=(x,y)=>{y.classList.add(...x.split(" "));return y},tc=(x,y)=>{y.textContent=x;return y},id=(x,y)=>{y.id=x;return y},oc=(f,x)=>{x.onclick=f;return x}
 let pd=(e)=>{if(e){e.preventDefault();e.stopPropagation()}},rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p},rm1=p=>{while(p.children.length>1)p.removeChild(p.firstChild);return p},af=Array.from,lo=x=>Number(BigInt.asUintN(32,x)),fe=(x,f)=>{fetch(x).then(r=>r.text()).then(f)}
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
@@ -112,9 +116,9 @@ let rencolumn=(t,c)=>{let s=prompt("new column name for "+c+" from "+t.name+"?\n
 let addcolumn=(t,s)=>{let v=s.split(":");if(v.length!=2)return;let tp=v[1];if(t.h.includes(v[0])||(!"ifsz".split("").includes(tp)))return;t.h.push(v[0]);t.t.push(tp);t.d.push((tp=="s")?Array(t.n).fill(""):(tp=="i")?new Int32Array(t.n):new Float64Array((tp=="f")?t.n:2*t.n))}
 let addrows=(t,n)=>{t.n+=n;t.t.forEach((ti,i)=>{if("s"==ti){t.d[i].push(...Array(n).fill(""))}else{let r=t.d[i];t.d[i]=("i"==ti)?new Int32Array(t.n):new Float64Array((ti=="f")?t.n:2*t.n);t.d[i].set(r)}})}
 let dragcol=null,dragcolumn=e=>{dragcol=e.target},dropcolumn=e=>{pd(e);let p=e.target.parentNode,c=af(p.parentNode.children);if(c.indexOf(p)>c.indexOf(dragcol)){p.after(dragcol)}else{p.before(dragcol)};dragcol=null}
-let editrows=(t,idx)=>{rm(dict);let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx)
+let editrows=(t,idx)=>{rm(dict);let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx),hdrhlp="hdr help.."
  h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));tr.dataset.i=i;tr.draggable=true;tr.ondragstart=dragcolumn;tr.ondrop=dropcolumn;ac(tr,th);let td=ce("td"),ip=ce("input");th.onkeydown=e=>{console.log(e.key,"todo change order")};th.dataset.i=i;th.ondblclick=e=>{rencolumn(t,e.target.textContent);th.textContent=t.h[+th.dataset.i]};if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
- ac(dict,ta);list.style.display="none";dict.style.display="block";ac(dict,ce("hr"));ac(dict,tc((idx.length==1)?("update row "+idx[0]+"?\n"):("update "+idx.length+" rows?\n"),ce("span")));let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
+ ac(dict,ta);list.style.display="none";dict.style.display="block";ac(dict,ce("hr"));ac(dict,tc((idx.length==1)?("update row "+idx[0]+"?\n"):(idx.length?("update "+idx.length+" rows?\n"):hdrhlp),ce("span")));let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
  let ok=()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},cancel=()=>{list.style.display="block";dict.style.display="none"};ac(d,oc(ok,tc("ok",    ce("button"))));ac(d,oc(cancel,tc("cancel",ce("button"))))
  if(!idx.length){ac(d,oc(()=>{let s=prompt("add column\nname:type(ifsz)","name:s");if(s){addcolumn(t,s);cancel();listtable(t,list)}},tc("add column",ce("button"))));ac(d,oc(()=>{let s=prompt("add rows\nnumber of rows:","1"),n=parseInt(s);if(s&&n>0){idx=Array(n).fill().map((_,i)=>i+t.n);addrows(t,n);ok()}},tc("add rows",ce("button"))))}}
 let uniqs=(t,idx)=>{let s=[],tp=[],u=[],i0=idx[0],i2=idx.map(x=>2*x),i3=idx.map(x=>1+2*x);t.h.forEach((x,i)=>{let ti=t.t[i],di=t.d[i];s.push((ti=="s")?di[i0]:(ti=="i"||ti=="f")?String(di[i0]):Sz(di[2*i0],di[1+2*i0]));u.push((ti!="z")?isuniq(at(di,idx)):(isuniq(at(di,i2))&&isuniq(at(di,i3))))});if(idx.length==0)t.t.forEach((tp,i)=>s[i]=(tp=="s")?"":(tp=="i")?"0":(tp=="f")?"0.0":"0a0");return[t.h,s,t.t,u]}
@@ -149,7 +153,7 @@ let ranges=x=>{let r=[],t=[];x.forEach((y,i)=>{if(i&&(y-x[i-1])>1){r.push(t);t=[
 
 let imgs=0,plots=0,pid=0,noplot=()=>{P.style.display="none"}
 let obs=new ResizeObserver(m=>{let e=m[0];if(plots){pcnv.width=e.contentRect.width;pcnv.height=e.contentRect.height;scaleplot(plots)};pcap.style.height=(R.getBoundingClientRect().height-((plots)?pcnv.height:0))+"px"; if(imgs)setimg(imgs)   });obs.observe(pcnv)
-let addbut=(x,b)=>{let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));but.insertBefore(f,but.firstChild);if(b)setbut(f)}
+let addbut=(x,b)=>{let f=oc(e=>kinit(x),cl("link",tc(x,ce("span"))));f.ondblclick=e=>showed(x);but.insertBefore(f,but.firstChild);if(b)setbut(f)}
 let curbut=()=>{let b=af(but.childNodes).find(x=>x.classList.contains("bold"));return(b)?b.textContent:null}
 let setbut=x=>{af(but.childNodes).forEach(y=>{y.classList.remove("bold")});cl("bold",x)}
 let reset=()=>{plots=0;pid=0;imgs=0;zmin=0;zmax=0;E.textContent="";O.textContent=""}
@@ -207,7 +211,8 @@ let rbin=u=>{Object.keys(tables).forEach(()=>foot.removeChild(foot.firstChild));
  let tb=()=>{ let t={name:tab[n()],top:0,t:[],d:[],sel:"!0",isel:new Int32Array(0)},nc=n();t.n=n();t.h=sy(nc);t.h.forEach((_,i)=>{let tp=su(un(1));t.t[i]=tp;t.d[i]=(tp=="s")?sy(t.n):(tp=="i")?I(t.n):F(t.n*(1+(+(tp=="z"))))});addtable(t)}
  let nt=n();while(nt--)tb();let s=su(un(n()));if(s.length)ed.value=s;kinit()}/*wbin,rbin see also xk.go*/
 
-
+let showed=x=>{if("string"==typeof x){showed(1);edmark("xk"+x+":")}else if(1==x){ac(D,ed);D.style.height="30%"}else if(2==x){edt.style.display="block";ac(edt,ed)}else{D.style.height="";edt.style.display="none";kinit()}}
+let edmark=x=>{ed.focus();let i=ed.value.indexOf(x);if(0>i)return;ed.setSelectionRange(i,i+x.length);let l=0;for(let j=0;j<i;j++)if(ed.value[j]=="\n")l++;ed.scrollTop=18*(l-3)}
 
 let err=s=>{E.textContent=s}
 
