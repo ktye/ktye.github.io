@@ -51,7 +51,7 @@ input:read-only{color:grey;font-style:italic}
 </div>
 <a id="dl" style="display:none"></a>
 
-<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" wrap="off" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false">
+<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" wrap="off" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false" oncontextmenu="pd(event);edmark(7)">
 /preinitialized are [tables..]  n:#[maintable]  i:!n  sel:[selected indexes of maintable]  explode:{[t] ..assign t key/vals as globals.. }
 /for selection expression, the maintable is exploded
 /explode G
@@ -211,8 +211,8 @@ let rbin=u=>{Object.keys(tables).forEach(()=>foot.removeChild(foot.firstChild));
  let tb=()=>{ let t={name:tab[n()],top:0,t:[],d:[],sel:"!0",isel:new Int32Array(0)},nc=n();t.n=n();t.h=sy(nc);t.h.forEach((_,i)=>{let tp=su(un(1));t.t[i]=tp;t.d[i]=(tp=="s")?sy(t.n):(tp=="i")?I(t.n):F(t.n*(1+(+(tp=="z"))))});addtable(t)}
  let nt=n();while(nt--)tb();let s=su(un(n()));if(s.length)ed.value=s;kinit()}/*wbin,rbin see also xk.go*/
 
-let showed=x=>{if("string"==typeof x){showed(1);edmark("xk"+x+":")}else if(1==x){ac(D,ed);D.style.height="30%"}else if(2==x){edt.style.display="block";ac(edt,ed)}else{D.style.height="";edt.style.display="none";kinit()}}
-let edmark=x=>{ed.focus();let i=ed.value.indexOf(x);if(0>i)return;ed.setSelectionRange(i,i+x.length);let l=0;for(let j=0;j<i;j++)if(ed.value[j]=="\n")l++;ed.scrollTop=18*(l-3)}
+let showed=x=>{if("string"==typeof x){showed(1);edmark("xk"+x+":",0)}else if(1==x){ac(D,ed);D.style.height="30%"}else if(2==x){edt.style.display="block";ac(edt,ed)}else{D.style.height="";edt.style.display="none";kinit()}}
+let edmark=(x,o)=>{if(7===x){o=ed.selectionEnd;x=ed.value.slice(ed.selectionStart,ed.selectionEnd)};ed.focus();let i=ed.value.slice(o).indexOf(x);console.log("i/o",i,o);if(0>i&&!o)return edmark(x,0);if(0>i)return;i+=o;ed.setSelectionRange(i,i+x.length);let l=0;for(let j=0;j<i;j++)if(ed.value[j]=="\n")l++;ed.scrollTop=18*(l-3)}
 
 let err=s=>{E.textContent=s}
 
