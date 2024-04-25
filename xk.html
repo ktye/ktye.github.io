@@ -92,11 +92,11 @@ let parsetable=(name,s)=>{s=s.split(/\r?\n/);let comma=s[1][1];if(comma!=",")s=s
  let t={name:name,h:s[0].split(comma),t:s[1].split(comma),top:0,n:s.length-2};t.d=Array(t.h.length);t.sel="!0";t.isel=new Int32Array(0);t.t.forEach((x,i)=>t.d[i]=(t.t[i]=="s")?(Array(t.n).fill("")):(t.t[i]=="i")?new Int32Array(t.n):new Float64Array(t.n))
  for(let i=2;i<s.length;i++){let r=s[i].split(comma);r.forEach((x,j)=>t.d[j][i-2]=(t.t[j]=="s")?x:Number(x))};t.h=t.h.filter((_,i)=>t.t[i]!="a");t.d.forEach((x,i)=>{if(t.t[i]=="r"){t.d[i]=zra(t.d[i],t.d[1+i]);t.t[i]="z"}});t.d=t.d.filter((_,i)=>t.t[i]!="a");t.t=t.t.filter((_,i)=>t.t[i]!="a");return t}
 let zra=(r,a)=>{let z=new Float64Array(2*r.length);a.forEach((p,i)=>{p*=Math.PI/180;z[2*i]=r[i]*Math.cos(p);z[2*i+1]=r[i]*Math.sin(p)});return z}
-let sf=x=>{let a=Math.abs(x);return(a>=10000&&a<1e6)?x.toFixed(0):x.toPrecision(4)},sa=x=>x.toFixed(0),sz=x=>{let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*180/Math.PI;return sf(r)+"a"+sa((a<0)?a+360:a)},Sz=(x,y)=>{let r=Math.hypot(x,y),a=Math.atan2(y,x)*180/Math.PI;return String(r)+"a"+String((a<0)?a+360:a)},zs=s=>{let v=s.split("a").map(parseFloat);return(v.length==2)?[v[0]*Math.cos(v[1]/180*Math.PI),v[0]*Math.sin(v[1]/180*Math.PI)]:[NaN,NaN]}
+let sf=x=>{let a=Math.abs(x);return(a>=10000&&a<1e6)?x.toFixed(0):x.toPrecision(4)},sr=x=>(x<0.01|10000<x)?x.toExponential(1):x.toFixed(4).slice(0,6),sa=x=>x.toFixed(0),sz=x=>{let r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*180/Math.PI; a=sa((a<0)?a+360:a);return sr(r)+"a"+" ".repeat(3-a.length)+a},Sz=(x,y)=>{let r=Math.hypot(x,y),a=Math.atan2(y,x)*180/Math.PI;return String(r)+"a"+String((a<0)?a+360:a)},zs=s=>{let v=s.split("a").map(parseFloat);return(v.length==2)?[v[0]*Math.cos(v[1]/180*Math.PI),v[0]*Math.sin(v[1]/180*Math.PI)]:[NaN,NaN]}
 let fills=v=>{let m=Math.max(...v.map(s=>s.length));for(let j=0;j<v.length;j++)v[j]+=" ".repeat(m-v[j].length);return v}
 let listtable=(t,p)=>{let n=Math.min(tnm,t.n-t.top),v=fills(Array(1+n).fill("").map((x,i)=>i?String(i+t.top-1):"i")),head=null,tail=null;
  if(t.top>0){head=oc(e=>{t.top=Math.max(0,t.top-tnm);listtable(t,p);pd(e)},tc(Math.max(0,t.top-tnm)+"‥"+(t.top-1)+" ↑",ce("option")));head.ondblclick=e=>{t.top=0;listtable(t,list);pd(e)}}
- if(tnm<t.n-t.top){tail=oc(e=>{t.top+=tnm;listtable(t,p);pd(e)},tc((t.top+tnm)+"‥"+Math.min(t.n,t.top+2*tnm)+" ↓",ce("option")));tail.ondblclick=e=>{t.top=tnm*(t.n/tnm>>0);listtable(t,list);pd(e)}}
+ if(tnm<t.n-t.top){tail=oc(e=>{t.top+=tnm;listtable(t,p);pd(e)},tc((t.top+tnm)+"‥"+Math.min(t.n,t.top+2*tnm)+" #"+t.n+" ↓",ce("option")));tail.ondblclick=e=>{t.top=tnm*(t.n/tnm>>0);listtable(t,list);pd(e)}}
  for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i];v[0]+="│"+trm(t.h[i]);for(let j=0;j<n;j++){let tj=t.top+j;dij=(ti=="s"||ti=="i")?String(di[tj]):(ti=="f")?sf(di[tj]):sz([di[2*tj],di[1+2*tj]]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][tj]):""))};v=fills(v);if(ti=="r")i++}
  v.forEach((x,i)=>v[i]=esc(x));rm(p);for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){cl("head",op);op.onclick=listedit}else{op.dataset.i=t.top+i-1;op.selected=t.isel.includes(t.top+i-1)};ac(p,op);if(head&&!i)ac(p,head)};if(tail)ac(p,tail);return v}
 let listedit=e=>{let t=tables[maintable];editrows(t,af(list.selectedOptions).filter(x=>"i"in x.dataset).map(x=>Number(x.dataset.i)));pd(e)}
@@ -237,7 +237,7 @@ let xcal=[],xreg=(name,g,arity)=>{xcal.push(g);let f=K.l2(BigInt(xcal.length-1),
 TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:K.nn(x),isel:new Int32Array(0),sel:"!0"},F={19:["i",IK],20:["s",SK],21:["f",FK],22:["z",ZK]};k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.t.push(f[0]);r.d.push(f[1](vi))});return r},
 KC=x=>{let r=K.mk(18,x.length);C().set(("string"===typeof x)?us(x):x,lo(r));return r},
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
-KS=x=>{let r=K.mk(20,x.length);I().set(x.map(x=>lo(Ks(x))),lo(r)>>>2);return r},Ks=x=>K.sc(KC(x)),sK=x=>CK(K.cs(x)),
+KS=x=>{let v=(x.map(x=>lo(Ks(x))))/*needs temporary*/,r=K.mk(20,x.length);I().set(v,lo(r)>>>2);return r},Ks=x=>K.sc(KC(x)),sK=x=>CK(K.cs(x)),
 KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));K.dx(x);return r},
 IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>lo(x),
 FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0],
@@ -246,8 +246,6 @@ DK=x=>{let j=J(),p=lo(x)>>>3,r=[K.rx(j[p]),K.rx(j[1+p])];K.dx(x);return r},
 KT=T=>{let t=T.t,k=KS(T.h),v=K.mk(23,T.h.length),vi,p=lo(v)>>>3;t.forEach((ti,i)=>{let di=T.d[i];vi=("i"==ti)?KI(di):("s"==ti)?KS(di):("f"==ti)?KF(di):KZ(di);/*reattach*/J()[p+i]=vi});return K.Atx(2n,K.Cal(12n,K.l2(k,v)))},
 SK=x=>CL(K.Atx(17n,x)),BK=x=>{K.dx(x);return new Uint8Array(K.memory.buffer,lo(x),K.nn(x))},CK=x=>{K.dx(x);return su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))},CL=l=>{let j=J(),p=lo(l)>>>3,n=K.nn(l),r=[];for(let i=0;i<n;i++)r.push(CK(K.rx(j[p+i])));K.dx(l);return r},
 asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),syms=()=>CL(K.rx(J()[0])).filter(x=>x.startsWith("xk")).map(x=>x.slice(2))
-
-
 
 
 
