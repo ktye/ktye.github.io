@@ -212,7 +212,7 @@ let rbin=u=>{Object.keys(tables).forEach(()=>foot.removeChild(foot.firstChild));
  let nt=n();while(nt--)tb();let s=su(un(n()));if(s.length)ed.value=s;kinit()}/*wbin,rbin see also xk.go*/
 
 let showed=x=>{if("string"==typeof x){showed(1);edmark("xk"+x+":",0)}else if(1==x){ac(D,ed);D.style.height="30%"}else if(2==x){edt.style.display="block";ac(edt,ed)}else{D.style.height="";edt.style.display="none";kinit()}}
-let edmark=(x,o)=>{if(7===x){o=ed.selectionEnd;x=ed.value.slice(ed.selectionStart,ed.selectionEnd)};ed.focus();let i=ed.value.slice(o).indexOf(x);console.log("i/o",i,o);if(0>i&&!o)return edmark(x,0);if(0>i)return;i+=o;ed.setSelectionRange(i,i+x.length);let l=0;for(let j=0;j<i;j++)if(ed.value[j]=="\n")l++;ed.scrollTop=18*(l-3)}
+let edmark=(x,o)=>{if(7===x){o=ed.selectionEnd;x=ed.value.slice(ed.selectionStart,ed.selectionEnd)};ed.focus();let i=ed.value.slice(o).indexOf(x);if((0>i)&&(o>0))return edmark(x,0);if(0>i)return;i+=o;ed.setSelectionRange(i,i+x.length);let l=0;for(let j=0;j<i;j++)if(ed.value[j]=="\n")l++;ed.scrollTop=18*(l-3)}
 
 let err=s=>{E.textContent=s}
 
