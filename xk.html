@@ -51,7 +51,7 @@ input:read-only{color:grey;font-style:italic}
 </div>
 <a id="dl" style="display:none"></a>
 
-<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" wrap="off" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false" oncontextmenu="pd(event);edmark(7)">
+<div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" wrap="off" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false" onchange="kinit()" oncontextmenu="pd(event);edmark(7)">
 /preinitialized are [tables..]  n:#[maintable]  i:!n  sel:[selected indexes of maintable]  explode:{[t] ..assign t key/vals as globals.. }
 /for selection expression, the maintable is exploded
 /explode G
@@ -69,7 +69,7 @@ xkcmap:{image 100^_(200*100)?255}
 xkfmap:{image 100^?200*100}
 xkplot:{plot 3.4+0.001*(1 2 2.1 3;2 0.9999 1.1 3);plot`time`value`title;plot 1;plot`xlabel`ylabel`title;plot(1 2 3.;1a10 2a20 3a30);plot(0 1 2 3 4 5.;1a181 1.1a11 2.1a22 3.2a33 4.1a44 5a55);plot 2;plot@?10a}
 xkbar:{plot`bar;plot(3 4 5;8 3 7);plot 1;plot`bar;plot(0 1 2;8 3 7);plot(0 1 2;2 -2 4)}
-</textarea><button class="large" style="position:absolute;right:0;top:0;border-radius:20px;background:aliceblue;z-index:2" onclick="showed(0)">✖</button></div>
+</textarea></div><button id="edx" class="large" style="position:absolute;right:0;top:20px;border-radius:20px;background:aliceblue;z-index:2;display:none" onclick="showed(0)">✖</button>
 
 <script src="plot.js" id="pjs"></script>
 <script>
@@ -192,7 +192,7 @@ let call=x=>{x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 let kdat=_=>{Object.keys(tables).forEach(s=>{asn(s,KT(tables[s]));asn(s+"sel",KI(tables[s].isel))});asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.rx(K.Val(Ks(maintable+"sel"))))}
 let mark=_=>{let s=sel.value.trim();selbg(1);expl(K.Val(Ks(maintable)));let r=K.Val(KC(s.length?s:"!0"));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(s))),o=tables[maintable].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(("i"in x.dataset)?Number(x.dataset.i):-1)});tables[maintable].isel=y;tables[maintable].sel=s;selbg(0)}
 let expl=t=>{if(25!=K.tp(t)){K.dx(t);return 0n};asn("i",K.Atx(12n,K.Atx(15n,K.rx(t))));let s=SK(K.Atx(12n,K.rx(t))),l=LK(K.Val(t));s.forEach((x,i)=>asn(x,l[i]));return 0n}
-let help=_=>{let v=ed.value.split("\n"),i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n"}
+let help=_=>{let v=ed.value.split("\n"),a,i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n";a=ac(O,tc("xk documentation",ce("a")));a.href="xkdoc.html";a.target="_blank"}
 let kkey=e=>{let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.startsWith("\\")?(b=="\\c")?O.textContent="":O.textContent+=khelp:K.repl(KC(b))};if("Escape"==e.key)B.value="";kend()}
 
 let showlst=(x,l)=>{return CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=esc(x))}
@@ -211,7 +211,7 @@ let rbin=u=>{Object.keys(tables).forEach(()=>foot.removeChild(foot.firstChild));
  let tb=()=>{ let t={name:tab[n()],top:0,t:[],d:[],sel:"!0",isel:new Int32Array(0)},nc=n();t.n=n();t.h=sy(nc);t.h.forEach((_,i)=>{let tp=su(un(1));t.t[i]=tp;t.d[i]=(tp=="s")?sy(t.n):(tp=="i")?I(t.n):F(t.n*(1+(+(tp=="z"))))});addtable(t)}
  let nt=n();while(nt--)tb();let s=su(un(n()));if(s.length)ed.value=s;kinit()}/*wbin,rbin see also xk.go*/
 
-let showed=x=>{if("string"==typeof x){showed(1);edmark("xk"+x+":",0)}else if(1==x){ac(D,ed);D.style.height="30%"}else if(2==x){edt.style.display="block";ac(edt,ed)}else{D.style.height="";edt.style.display="none";kinit()}}
+let showed=x=>{edx.style.display="";if("string"==typeof x){showed(1);edmark("xk"+x+":",0)}else if(1==x){ac(D,ed);D.style.height="30%"}else if(2==x){edt.style.display="block";ac(edt,ed)}else{D.style.height=0;edt.style.display="none";edx.style.display="none"}}
 let edmark=(x,o)=>{if(7===x){o=ed.selectionEnd;x=ed.value.slice(ed.selectionStart,ed.selectionEnd)};ed.focus();let i=ed.value.slice(o).indexOf(x);if((0>i)&&(o>0))return edmark(x,0);if(0>i)return;i+=o;ed.setSelectionRange(i,i+x.length);let l=0;for(let j=0;j<i;j++)if(ed.value[j]=="\n")l++;ed.scrollTop=18*(l-3)}
 
 let err=s=>{E.textContent=s}
