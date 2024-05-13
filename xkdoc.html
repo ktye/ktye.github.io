@@ -5,43 +5,75 @@
 body{font-family:georgia,serif}
 .inv{background:black;color:white}
 h2{border-top:1px solid}
-</style></head><body><h1>xk: analytic ui</h1>
+</style></head><body><h1>xk analytic ui</h1>
 <a href="#about">•about</a> <a href="#tables">•tables</a> <a href="#import">•data import</a> <a href="#select">•selection</a> <a href="edit">•k code/editor</a> <a href="#plot">•plot</a> <a href="#export">•save/export</a>
 <pre>
 ┌──────────────────────────────────────────────────────────────────┬────────────┐
-│ fn1 fn2 ..  ← buttons are functions defined as xkfn1:{[]..} etc  │ save   x.k │  ← save:download bundle(data+code+ui) x.k:edit code
+│ fn1 fn2.. ←buttons are functions defined in x.k as xkfn1:{[]..}  │ save   x.k │
 ├──────────┬───────────────────────────────────────────────────────┴────────────┤
-│<span class="inv">i│a  │b   </span>│ ←table header                                                      │
+│<span class="inv">i│a  │b   </span>│←table header                                                       │
 │0│abc│1.23│                                                                    │ 
-│1│def│4.56│                                                                    │
-│2│ghi│7.89│             editor     ..                                          │
-│ │...│    │             k-output   ..                                          │
-│ │   │    │             plot area  ..                                      drag│
-│ │   │    │                                                                   ↓│
+│1│def│4.56│           ┌~─────────────┐                                         │
+│2│ghi│7.89│           │ editor    .. │                                         │
+│ │...│    │           │ k-output  .. │                                         │
+│ │   │    │           │ plot area .. │                                     drag│
+│ │   │    │           └─────────────~┘                                        ↓│
 │ │   │    ├────────────────────────────────────────────────────────────────────┤
 │ │   │    │                                                                    │
 │ │   │    │←drag                                                               │
 ├─┴───┴────┴─────┬────────────────────────┬─────────────────────────────────────┤
 │<span class="inv">A B + ← tables  │  (select by k-expr)    │   k-console input                   </span>│
 └────────────────┴────────────────────────┴─────────────────────────────────────┘
-
-
-┌──────┬──────┐
-│ col1 │ col2 │
-├──────┼──────┤
-│ val1 │ val2 │
-└──────┴──────┘
 </pre>
 <h2 id="about">about</h2>
- xk contains data organized in tables, code written in k and a ui in html/js.<br/>
+ <a href="xk.html">xk</a> contains data organized in tables, code written in k and a ui in html/js.<br/>
 calculation results are displayed in text, tables or line graphics and images.
 <h2 id="tables">tables</h2>
- tables use uniform columns only. types are isfz: 32-bit integers, symbols/strings, 64-bit floats, 128-bit complex numbers.</br>
+ tables use uniform columns only. types are isfz: 32-bit integers, symbols, 64-bit floats, 128-bit complex numbers.</br>
  for k every cell it atomic, use symbols instead of chars; booleans are ints 0 and 1.</br>
  multiple tables may be present. their name is in the bottom left corner. always one table is displayed at a time, called the current table.</br>
  double-click on the name to rename the table.
-<h2 id="import">data import</h2>...
- <h3>binary format</h3>...
+<h2 id="import">data import</h2>
+ there's 3 ways to import data: use the ui to create and manipulate tables, drop a csv file, drop a binary file which may contain multiple tables and code.</br>
+ once imported, data lives in js typed arrays. k is restarted from scratch at each click of a button and the data transferred to the new k/wasm instance.
+ <h3>text format</h3>
+ drag and drop files with names ending in csv or txt. the table is called like the file without the extension.</br>
+ the first row is the header with column names, the second row indicates the column types.
+ column separators may be comma or space/tabs.</br>
+ column types are single characters i f s r a where r a are radius/angle of a complex number that are combined to a single column for k.</br>
+ see <i>parsetable</i> in the xk page source.</a>
+ example:
+ <pre>
+ a,b,c,z,
+ i,s,f,r,a
+ 0,abc,1.2,1.2,30
+ 1,de,3.4,4.5,336.8
+ </pre>
+
+ <h3>binary format</h3>
+ the binary format can be used if the data is generated/exported from another program.</br>
+ it contains multiple tables and the k program:
+ <pre>
+ ┌────┬─symtab───────────────────────┐ 
+ │i32 │read next n bytes for symtab  │ 
+ │u8  │symbols(utf-8) 0-joined       │ symbols are indexes into this array
+ │i32 │number of tables           nt │ 
+ ├────┼─table────────────────────────┤←──────┐
+ │i32 │table name(as a symbol index) │       │ 
+ │i32 │number of columns          nc │    *nt│
+ │i32 │number of rows             nr │       │
+ │i32*│header symbol vector      #nc │       │
+ ├────┼─column───────────────────────┤←─┐    │
+ │u8  │column type: one of c i f z   │  │    │
+ ├────┼─data─────────────────────────┤  │*nc │
+ │*   │(i32│f64)*nr  z:2*nr real/imag│  │    │ 
+ ├────┼─k program────────────────────┤──┘────┘
+ │i32 │ number of bytes           nk │
+ │u8* │ program source               │
+ └────┴──────────────────────────────┘</pre>
+
+ a js implementation is in the page source (see <i>wbin</i>), or a Go implementation in <a href="xk.go">xk.go</a>.
+
 <h2 id="select">selection</h2>
  tables are rendered in a listbox (multi select element). multiple rows can be selected with the mouse or by a k-expression.</br>
  the k-expression must evaluate to a list of integers. the columns of the current table are exploded and assigned to global variables, e.g.</br>
@@ -51,9 +83,45 @@ calculation results are displayed in text, tables or line graphics and images.
  selections can be used to restrict an analysis to a subset of rows. e.g. for k, the selected index list of table A is stored in a variable called <code>Asel</code>.</br>
  selections are also used to interactively edit multiple rows at a time: select rows than right click on the table to switch to the data edit ui.
  <h3>data edit ui</h3>...
-<h2 id="edit">k code/editor</h2>...
-<h2 id="plot">plot</h2>...
-<h2 id="export">save/export</h2>...
-<h2></h2>...
+<h2 id="edit">k code/editor</h2>
+ a k program file can be dropped to the application.</br>
+ click on <code>x.k</code> in the top right corner to show it in the editor, double-click <code>x.k</code> for full screen editing.</br>
+ double-click on a function button to show the k program with the xk-function highlighted.</p>
+ k is restarted at each button click, and all code runs after the tables are assigned to variables.</br>
+ ui functions are prefixed with "xk" and are niladic, e.g. <code>xkone:{[]1}</code> shows up as with the title <code>one</code>.</br>
+ when the code is modified, the title bar updates automatically.</p>
+
+ <h3>special functions</h3>
+ 4 monadic functions are built-in that interact with the js environment and have side effects:
+ <pre>
+ plot     see <a href="#plot">plot</a>
+ image    shows an image in a canvas, 3 methods rows^I  rows^C  rows^F
+          I stores rgb values in an integer, C uses a grayscale and F a built-in colormap between zmin,zmax (see plot/axis)
+ explode  explode`T explodes columns of table T and assignes each column vector to a global variable. it also assigns i:!#T
+ store    store`T overwrites table T within the js data, e.g. with additional columns. it can be used for preprocessing.
+ </pre>
+
+<h2 id="plot">plot</h2>
+ plot functions are all monadic and dispatch on the argument type:
+ <pre>
+ plot 0                     i   current plot index, they are displayed side-by-side
+ plot`polar                 s   plot type: `xy`bar`polar`ampang`square
+ plot`xlabel`ylabel`title   S   labels
+ plot(x;y0;y1;..)           L   x:I|F y:I|F|Z  multiple lines
+ plot 0 1 -10 10            I|F axis limits, length 1..6: y1 x0,x1 x0,x1,y1 x0,x1,y0,y1 x0,y1,y0,y1,z0,z1
+ </pre>
+ plot functions have side effects, state is stored in js until the next button is clicked.</b>
+ all plot functions return the plot index, thus can be chained and e.g. index into a multi-dimensional data structure.
+
+ <h3>typs hist examples...</h3>
+ <h3>interaction...</h3>
+ zoom pan mark measure walk...
+
+<h2 id="export">save/export</h2>
+click on <code>save</code> to download the current state of the application <code>xk.html</code>.</br>
+the file contains everything: data+code+k.wasm+plot.js embedded in the html file.</br>
+file size may be <100kb for little data.
+it runs in a browser from a file url, e.g. double-click in a file manager.
+
 
 </body></html>
