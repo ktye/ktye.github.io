@@ -52,23 +52,32 @@ input:read-only{color:grey;font-style:italic}
 <a id="dl" style="display:none"></a>
 
 <div id="edt" style="position:absolute;left:0;top:0;width:100vw;height:100vh;z-index:1;display:none"><textarea id="ed" wrap="off" style="left:0;top:0;width:100%;height:100%;resize:none;border:none;outline:none" spellcheck="false" onchange="kinit()" oncontextmenu="pd(event);edmark(7)">
-/preinitialized are [tables..]  n:#[maintable]  i:!n  sel:[selected indexes of maintable]  explode:{[t] ..assign t key/vals as globals.. }
-/for selection expression, the maintable is exploded
-/explode G
-xkdict1:1 2 3!(4 5;7.;1.234a34)
-xkdict2:`sym`int`float`complex!(`abc;34;1.34;7.89a30.45)
-xktab:{[]G sel}
-xkgentab:{[]T:+`a`b!(?100;?100);store`T}
-xkkeytab:`alpha`b`gamma!+`sym`int`float`complex!(`a`bb`ccc;3 22 1;1.23 -4.56 7.89;1a20 2a300 3.4a359)
-xkalpha:1
-xkbeta:2
-xkrowcount:{[] `count \"number of selected rows";#sel}
-/xkplot:{[]plot`x`y`xytitle;plot(!100;sin@!100);plot 0 200;plot'(1;```polartitle;3a30+?100a);`"abc"}
-xkrgb:{image 100^(200*100)?255*256*256}
-xkcmap:{image 100^_(200*100)?255}
-xkfmap:{image 100^?200*100}
-xkplot:{plot 3.4+0.001*(1 2 2.1 3;2 0.9999 1.1 3);plot`time`value`title;plot 1;plot`xlabel`ylabel`title;plot(1 2 3.;1a10 2a20 3a30);plot(0 1 2 3 4 5.;1a181 1.1a11 2.1a22 3.2a33 4.1a44 5a55);plot 2;plot@?10a}
-xkbar:{plot`bar;plot(3 4 5;8 3 7);plot 1;plot`bar;plot(0 1 2;8 3 7);plot(0 1 2;2 -2 4)}
+/leading comments in x.k show up as help text
+/click on the example functions in the top row:
+/ rowcount: show number of rows from table A
+/ countsel: show the number of selected rows (once clicked it's re-evaluated after each new selection)
+/ addcol  : add column dp to table A
+/
+/click or double-click on x.k to edit code
+avg:{(+/x)%0.+#x}
+var:{(+/x*x:(x-avg x))%-1+#x}
+std:{%var x}
+med: **|2^^
+mavg:{(y-(-#y)#(-x)_y:+\y)%x}
+pct95:{1.97*(((std@_x)^b)+(std imag x)^b)^1%b:3.2}
+
+/dp:p-avg p:A`pressure;A:(`dp_A),'+`dp!,dp;store`A  /a dependend column is recalculated on each button click
+
+/these functions are displayed as buttons in the ui:
+xkrowcount:{[]#A}
+xkcountsel:{[]#Asel}
+
+/           plot two lines: plot(x;y0;y1)     ;     symbols are labels            ;axis limits   ; returned dict is shown in a listbox
+xkxyplot:{[]plot(0.001*!#A;t;mavg[10]t:A`temp);plot`seconds`temperature`timeseries;plot 0 1 20 25;`min`max`average`median!(&/;|/;avg;med)@\t}
+xksquare:{[]plot`square;xkxyplot[]}                      /plot type square is like xy, but keeps axis in a square box.
+xkpolar: {[]plot v:A`vel;`offset`pct95!(avg v;pct95 v)}  /plot`polar is implicit if data is complex
+
+
 </textarea></div><button id="edx" class="large" style="position:absolute;right:0;top:20px;border-radius:20px;background:aliceblue;z-index:2;display:none" onclick="showed(0)">✖</button>
 
 <script src="plot.js" id="pjs"></script>
@@ -84,9 +93,8 @@ let s64u=u=>{let c=function(x){let r='';for(let i=0;i<x.length;i++)r+=String.fro
 let plotjsrc=null,kw=null,kw64=null,xk64=null
 let plot=plotjs.plots,list=ge("list"),head=ge("head"),foot=ge("foot"),sel=ge("sel"),ed=ge("ed"),edt=ge("edt"),but=ge("but"),E=ge("E"),O=ge("O"),pcnv=ge("pcnv"),pcap=ge("pcap"),L=ge("L"),R=ge("R"),T=ge("T"),P=ge("P")
 let init=_=>{if(ge("pjs").textContent=="")fe("plot.js",x=>plotjsrc=x);
- addtable(parsetable("T","alpha\tbeta\tgamma\tu1\tu1\t\tu2\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t1.23\t40\t2.34\t50\nboverlongsymbol\t2\t2.43\t2.45\t55\t3.44\t56\nc\t1\t4.31\t3.13\t57\t5.89\t86"))
- addtable(parsetable("G","alpha\tbeta\tgamma\tu1\tu1\tu2\tu2\ns\ti\tf\tr\ta\tr\ta\na\t3\t3.14\t5.34\t41\t1.34\t52\n\t3\t4.43\t3.45\t65\t1.44\t26\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36\nc\t2\t4.31\t5.13\t17\t2.89\t36"))
- if(xk64)rbin(u64s(xk64).buffer);kinit()}
+ addtable(parsetable("A","id temp pressure vel \ns f i r a\n3 27.5 1002 2.1 33")) //overwritten with exam()
+ if(xk64)rbin(u64s(xk64).buffer);else kinit("#examp#");kinit()}
  
 window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{let n=f.name;if(n.endsWith(".csv")||n.endsWith(".txt")){addtable(parsetable(n.slice(0,-4),su(u)))}else if(n.endsWith(".k")){ed.value=su(u);kbut.textContent=n;kinit()}else if(n.endsWith(".xk")){rbin(u)}else console.log("ignore file",n)})}}
 window.onscroll=()=>{window.scrollTo(0,0)}
@@ -191,6 +199,7 @@ let show=x=>{rm(pcap);plots?scaleplot(plots):imgs?setimg():noplot();let t=K.tp(x
 let call=x=>{x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 let kdat=_=>{Object.keys(tables).forEach(s=>{asn(s,KT(tables[s]));asn(s+"sel",KI(tables[s].isel))});asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.rx(K.Val(Ks(maintable+"sel"))))}
 let mark=_=>{let s=sel.value.trim();selbg(1);expl(K.Val(Ks(maintable)));let r=K.Val(KC(s.length?s:"!0"));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(s))),o=tables[maintable].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(("i"in x.dataset)?Number(x.dataset.i):-1)});tables[maintable].isel=y;tables[maintable].sel=s;selbg(0)}
+let exam=_=>{K.Val(KC("n:1078;A:+`class`temp`pressure`vel!(`a`b`c`d n?4;22.7+?n;1002+_10*?n;10.23a33+?0a+n);store`A"))}
 let expl=t=>{if(25!=K.tp(t)){K.dx(t);return 0n};asn("i",K.Atx(12n,K.Atx(15n,K.rx(t))));let s=SK(K.Atx(12n,K.rx(t))),l=LK(K.Val(t));s.forEach((x,i)=>asn(x,l[i]));return 0n}
 let help=_=>{let v=ed.value.split("\n"),a,i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n";a=ac(O,tc("xk documentation",ce("a")));a.href="xkdoc.html";a.target="_blank"}
 let kkey=e=>{let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.startsWith("\\")?(b=="\\c")?O.textContent="":O.textContent+=khelp:K.repl(KC(b))};if("Escape"==e.key)B.value="";kend()}
@@ -198,7 +207,7 @@ let kkey=e=>{let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.startsWith("\\"
 let showlst=(x,l)=>{return CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=esc(x))}
 let showdct=(x,l)=>{let j=J(),k=j[lo(x)>>>3],v=j[8+lo(x)>>>3],tk=K.tp(k),tv=K.tp(v);if(tk!=20)return showlst(x,l);k=fills(SK(k));if(25==K.tp(v))return keyt(k,v,l);k.forEach((x,i)=>{let vi=K.Atx(K.rx(v),K.Ki(i)),t=K.tp(vi);k[i]+="│"+((3==t)?iK(vi):(4==t)?sK(vi):(5==t)?sf(fK(vi)):(6==t)?sz(zK(vi)):"?")});k.forEach(x=>{let o=ce("option");o.innerHTML=esc(x);ac(l,o)})}
 let keyt=(k,v,l)=>{listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>esc(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
-let stor=s=>{if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);addtable(t);return 0n}
+let stor=s=>{if(4!=K.tp(s))return 0;let t=K.Val(s);if(25!=K.tp(t))return 0;t=TK(t);t.name=sK(s);if(t.name in tables)t.isel=tables[t.name]["isel"];addtable(t);return 0n}
 let down=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
 
 let bundle=()=>{let s=("<!DOCTYPE html>"+document.querySelector("html").innerHTML+"</"+"html>").replace("kw64=null",'kw64="'+kw64+'"').replace("<script src=\"plot.js\" id=\"pjs\">"+"</"+"script>","<script id=\"pjs\">"+plotjsrc+"</"+"script>").replace(/,xk64=.*\n/,";xk64=\""+s64u(wbin())+"\"\n");down("xk.html",us(s))}
@@ -234,6 +243,7 @@ let kinst=(u,x)=>{reset();
  WebAssembly.instantiate(u,kenv).then(r=>{K=r.instance.exports;K.kinit();xcal=[];xreg("plot",plotk);xreg("image",image);xreg("explode",expl);xreg("store",stor);kdat();K.dx(K.Val(KC(ed.value)))
   rm1(but);syms().reverse().forEach(s=>addbut(s,s===x))
        if(x==="#selec#")mark(       )
+  else if(x==="#examp#")exam(       )
   else if(x!==undefined)show(call(x))
   else                  help(       )
   }).catch(e=>err(e.message+"\n\n"+e.stack))}

@@ -6,7 +6,7 @@ body{font-family:georgia,serif}
 .inv{background:black;color:white}
 h2{border-top:1px solid}
 </style></head><body><h1>xk analytic ui</h1>
-<a href="#about">•about</a> <a href="#tables">•tables</a> <a href="#import">•data import</a> <a href="#select">•selection</a> <a href="edit">•k code/editor</a> <a href="#plot">•plot</a> <a href="#export">•save/export</a>
+<a href="#about">•about</a> <a href="#tables">•tables</a> <a href="#import">•data import</a> <a href="#dataui">•data ui</a> <a href="#select">•selection</a> <a href="edit">•k code/editor</a> <a href="#plot">•plot</a> <a href="#export">•save/export</a>
 <pre>
 ┌──────────────────────────────────────────────────────────────────┬────────────┐
 │ fn1 fn2.. ←buttons are functions defined in x.k as xkfn1:{[]..}  │ save   x.k │
@@ -25,17 +25,29 @@ h2{border-top:1px solid}
 │<span class="inv">A B + ← tables  │  (select by k-expr)    │   k-console input                   </span>│
 └────────────────┴────────────────────────┴─────────────────────────────────────┘
 </pre>
+
+<h2>todo</h2>
+ <pre>
+ Home/End instead of dbl-click
+ data-ui allow text selection w/o moving the row
+ polar plot has wrong angle
+ </pre>
+
 <h2 id="about">about</h2>
  <a href="xk.html">xk</a> contains data organized in tables, code written in k and a ui in html/js.<br/>
-calculation results are displayed in text, tables or line graphics and images.
+ calculation results are displayed in text, tables or line graphics and images.</p>
+ the ui is fixed, k is used for data analysis only and exports functions as buttons in the top row.
+
 <h2 id="tables">tables</h2>
- tables use uniform columns only. types are isfz: 32-bit integers, symbols, 64-bit floats, 128-bit complex numbers.</br>
- for k every cell it atomic, use symbols instead of chars; booleans are ints 0 and 1.</br>
+ tables use uniform columns only. types are <i>isfz</i>: 32-bit integers, symbols, 64-bit floats, 128-bit complex numbers.</br>
+ for k every cell it atomic, so columns are unitype vectors. use symbols instead of chars; booleans are ints 0 and 1.</br>
  multiple tables may be present. their name is in the bottom left corner. always one table is displayed at a time, called the current table.</br>
- double-click on the name to rename the table.
+ double-click on the name to rename the table.</p>
+ data lives in js typed arrays. the k engine is restarted on each click of a button.</i>
+ during the initialization, the tables are transferred to k/wasm memory and the k program is executed.
+
 <h2 id="import">data import</h2>
- there's 3 ways to import data: use the ui to create and manipulate tables, drop a csv file, drop a binary file which may contain multiple tables and code.</br>
- once imported, data lives in js typed arrays. k is restarted from scratch at each click of a button and the data transferred to the new k/wasm instance.
+ there's 3 ways to import data: <a href="#dataui">use the ui</a> to create and manipulate tables, drop a csv file, drop a binary file which may contain multiple tables and code.</br>
  <h3>text format</h3>
  drag and drop files with names ending in csv or txt. the table is called like the file without the extension.</br>
  the first row is the header with column names, the second row indicates the column types.
@@ -73,34 +85,77 @@ calculation results are displayed in text, tables or line graphics and images.
  └────┴──────────────────────────────┘</pre>
 
  a js implementation is in the page source (see <i>wbin</i>), or a Go implementation in <a href="xk.go">xk.go</a>.
+ 
+ <h3>js representation</h3>
+ in js all data is stored in the variable <i>tables</i>, press F12 for the js-console:
+ <pre>
+ tables
+  {A:{...}}
+ tables.A
+  {top:0, sel:'!0', h:Array(4), t:Array(4), d:Array(4), n:1078, name:"A", sel:'!0', isel:Int32Array(0)}
+ tables.A.h                                                   //header
+  ['class', 'temp', 'pressure', 'vel']
+ tables.A.t                                                   //column type
+  ['s', 'f', 'i', 'z']
+ tables.A.d                                                   //data
+  [Array(1078), Float64Array(1078), Int32Array(1078), Float64Array(2156)]
+ </pre>
+
+<h2 id="dataui">data ui</h2>
+ <ul>
+  <li><b>create table</b> click on the <code>+</code> in the bottom left corner next to the table list.</li>
+  <li><b>rename table</b> double-click the table name in the bottom left corner</li>
+  <li><b>delete table</b> double-click to rename, then remove the name</li>
+  <li><b>edit values of a single row</b> double click the row, edit cells, press ok</li>
+  <li><b>edit multiple rows</b> select multiple rows, then right-click on the table. the same data-edit ui appears but unequal column values are protected. double-click on the column name to explicitly edit them which gives all selected rows the same value for that column.</li>
+  <li><b>add column</b></li> click on the table header, click on add column, enter name and type, e.g. <code>id:s</code>
+  <li><b>rename columns</b> click on the table header, double-click on the column name</li>
+  <li><b>delete columns</b> click on the table header, double-click on the column name to rename, remove the name</li>
+  <li><b>reorder columns</b> click on the table header, drag column to new position with the mouse</li>
+  <li><b>add rows</b> click on the table header, click on <code>add rows</code>, enter the number of rows to add.</li>
+  <li><b>delete rows</b> select rows, press the delete key</li>
+  <li><b>move rows</b> select rows and use copy-paste keyboard commands: ctrl-c ctrl-x ctrl-v. data is stored as tab-separated text in the buffer. it may also be possible to copy paste from excel.</li>
+ </ul>
+ 
+ table data can also be modified from k, e.g. for one-time postprocessing. see the <a href="#builtins"><code>store</code> built-in</a>.
 
 <h2 id="select">selection</h2>
- tables are rendered in a listbox (multi select element). multiple rows can be selected with the mouse or by a k-expression.</br>
- the k-expression must evaluate to a list of integers. the columns of the current table are exploded and assigned to global variables, e.g.</br>
+ tables are rendered in a listbox (multi select element) which is paged if the table is large. multiple rows can be selected with mouse, keyboard or by a k-expression.</br>
+ the k-expression must evaluate to a list of integers.</br>
+ for the selection expression, the columns of the current table are exploded (see <a href="#builtins"><code>explode</code> built-in</a>) and assigned to global variables, e.g.</br>
  <code>&b>5</code> can be used to select rows with values of column b > 5.
  Columns of other tables must be reference by their name, e.g. <code>C`a</code><p/>
  
  selections can be used to restrict an analysis to a subset of rows. e.g. for k, the selected index list of table A is stored in a variable called <code>Asel</code>.</br>
- selections are also used to interactively edit multiple rows at a time: select rows than right click on the table to switch to the data edit ui.
- <h3>data edit ui</h3>...
+ selections are also used to interactively edit multiple rows at a time: select rows then right click on the table to switch to the <a href="#dataui">data edit ui</a>.
+ 
 <h2 id="edit">k code/editor</h2>
  a k program file can be dropped to the application.</br>
  click on <code>x.k</code> in the top right corner to show it in the editor, double-click <code>x.k</code> for full screen editing.</br>
  double-click on a function button to show the k program with the xk-function highlighted.</p>
  k is restarted at each button click, and all code runs after the tables are assigned to variables.</br>
- ui functions are prefixed with "xk" and are niladic, e.g. <code>xkone:{[]1}</code> shows up as with the title <code>one</code>.</br>
+ ui functions are prefixed with "xk" and are niladic, e.g. <code>xkone:{[]1}</code> shows up as a button with title <code>one</code>.</br>
  when the code is modified, the title bar updates automatically.</p>
 
- <h3>special functions</h3>
+ <h3>dependend columns</h3>
+ dependend columns can be calculated in the k program directly which runs for each button click. use <code>store</code> to update the ui.
+
+ <h3 id="builtins">special functions/built-ins</h3>
  4 monadic functions are built-in that interact with the js environment and have side effects:
  <pre>
  plot     see <a href="#plot">plot</a>
  image    shows an image in a canvas, 3 methods rows^I  rows^C  rows^F
           I stores rgb values in an integer, C uses a grayscale and F a built-in colormap between zmin,zmax (see plot/axis)
- explode  explode`T explodes columns of table T and assignes each column vector to a global variable. it also assigns i:!#T
- store    store`T overwrites table T within the js data, e.g. with additional columns. it can be used for preprocessing.
+ explode  explode t explodes columns of table t and assigns each column vector to a global variable. it also assigns i:!#t
+ store    store`T overwrites table T within the js data from k, e.g. add a column: T::T,'+`f!,?#T;store`T
+          store is the only command that modifies data from k. everything else does not persist.
  </pre>
 
+ <h3 id="kcons">k console</h3>
+ the right part of the bottom bar serves a the k console input. click on it and enter text.</br>
+ the expression is evaluated in the last running instance and useful for debugging. it does not restart k and does not update k tables from changes in the ui.</br>
+ generally debug prints can be inserted with space-backslash <code>1+ \!10</code> or with a label: <code>1+`seq \!10</code>
+ 
 <h2 id="plot">plot</h2>
  plot functions are all monadic and dispatch on the argument type:
  <pre>
@@ -112,8 +167,14 @@ calculation results are displayed in text, tables or line graphics and images.
  </pre>
  plot functions have side effects, state is stored in js until the next button is clicked.</b>
  all plot functions return the plot index, thus can be chained and e.g. index into a multi-dimensional data structure.
-
- <h3>typs hist examples...</h3>
+ 
+ <h3 id="xy">xy</h3>
+ <h3 id="square">square</h3>
+ <h3 id="polar">polar</h3>
+ <h3 id="ampang">amplitude/angle over x</h3>
+ <h3 id="bar">bar plot/histogram</h3>
+ <h3 id="multiple side-by-side</h3>
+ <h3>types hist examples...</h3>
  <h3>interaction...</h3>
  zoom pan mark measure walk...
 
