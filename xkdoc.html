@@ -30,13 +30,14 @@ h2{border-top:1px solid}
  <pre>
  Home/End instead of dbl-click
  data-ui allow text selection w/o moving the row
- polar plot has wrong angle
  </pre>
 
 <h2 id="about">about</h2>
  <a href="xk.html">xk</a> contains data organized in tables, code written in k and a ui in html/js.<br/>
  calculation results are displayed in text, tables or line graphics and images.</p>
  the ui is fixed, k is used for data analysis only and exports functions as buttons in the top row.
+ 
+ 
 
 <h2 id="tables">tables</h2>
  tables use uniform columns only. types are <i>isfz</i>: 32-bit integers, symbols, 64-bit floats, 128-bit complex numbers.</br>
@@ -173,10 +174,19 @@ h2{border-top:1px solid}
  <h3 id="polar">polar</h3>
  <h3 id="ampang">amplitude/angle over x</h3>
  <h3 id="bar">bar plot/histogram</h3>
- <h3 id="multiple side-by-side</h3>
+ <h3>multiple side-by-side</h3>
  <h3>types hist examples...</h3>
- <h3>interaction...</h3>
- zoom pan mark measure walk...
+ <h3>interaction</h3>
+ <ul>
+  <li><b>zoom</b> by drawing a rectangle: click and move the mouse. it redraws on release with new limits.</li>
+  <li><b>mouse wheel zooms</b> both x and y axis if the pointer is inside. it zooms <b>horizontal</b> or <b>vertical</b> only, if the pointer is over the x or y axis outside the drawing area. the new center is at the current position of the pointer.
+  <li><b>reset zoom</b> to include all data, by double-clicking outside the square drawing area, e.g. over the axis.</li>
+  <li><b>pan</b> the axis, hold shift, click and move the mouse. it draws a line/vector and updates the shifted plot on release.</li>
+  <li><b>pan horizontal/vertical</b>: hold ctrl, click and move the mouse.
+  <li><b>measure</b>: hold shift&cntrl, click and move the mouse to draw a horizontal or vertical line. the distance is written to the k-console as dx:.. dy:.. or (dz:.. complex for polar)</li>
+  <li><b>pick</b> a datapoint by double-click. the point is highlighted and the value written to the <a href="#kcons">k-console</a> ready to do further calculations.</li>
+  <li><b>move</b> the datapoint: after picking a datapoint, two arrows appear on the bottom right corner. click on the arrow to move by one step, or use the mouse wheel to over it to move in larger steps.</li>
+ </ul>
 
 <h2 id="export">save/export</h2>
 click on <code>save</code> to download the current state of the application <code>xk.html</code>.</br>
