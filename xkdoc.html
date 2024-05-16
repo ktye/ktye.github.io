@@ -4,15 +4,18 @@
 <style>
 body{font-family:georgia,serif}
 .inv{background:black;color:white}
+.ctr{width:fit-content;margin:auto}
 h2{border-top:1px solid}
-</style></head><body><h1>xk analytic ui</h1>
-<a href="#about">•about</a> <a href="#tables">•tables</a> <a href="#import">•data import</a> <a href="#dataui">•data ui</a> <a href="#select">•selection</a> <a href="edit">•k code/editor</a> <a href="#plot">•plot</a> <a href="#export">•save/export</a>
-<pre>
+</style></head><body><h1 class="ctr">xk analytic ui</h1>
+</p>
+<div class="ctr"><a href="#about">•about</a> <a href="#tables">•tables</a> <a href="#import">•data import</a> <a href="#dataui">•data ui</a> <a href="#select">•selection</a> <a href="edit">•k code/editor</a> <a href="#plot">•plot</a> <a href="#export">•save/export</a></div>
+</p>
+<a href="xk.html" style="text-decoration:none;color:black" title="xk.html"><pre class="ctr">
 ┌──────────────────────────────────────────────────────────────────┬────────────┐
 │ fn1 fn2.. ←buttons are functions defined in x.k as xkfn1:{[]..}  │ save   x.k │
 ├──────────┬───────────────────────────────────────────────────────┴────────────┤
 │<span class="inv">i│a  │b   </span>│←table header                                                       │
-│0│abc│1.23│                                                                    │ 
+│0│abc│1.23│                                                                    │
 │1│def│4.56│           ┌~─────────────┐                                         │
 │2│ghi│7.89│           │ editor    .. │                                         │
 │ │...│    │           │ k-output  .. │                                         │
@@ -24,12 +27,13 @@ h2{border-top:1px solid}
 ├─┴───┴────┴─────┬────────────────────────┬─────────────────────────────────────┤
 │<span class="inv">A B + ← tables  │  (select by k-expr)    │   k-console input                   </span>│
 └────────────────┴────────────────────────┴─────────────────────────────────────┘
-</pre>
+</pre></a>
 
 <h2>todo</h2>
  <pre>
- Home/End instead of dbl-click
  data-ui allow text selection w/o moving the row
+ k:init()
+ link caption only if count matches lines and all plot have the same number of lines, add colors. dict/table/keytable/list/arrays e.g symbols
  </pre>
 
 <h2 id="about">about</h2>

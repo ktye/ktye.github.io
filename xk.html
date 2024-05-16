@@ -60,27 +60,34 @@ input:read-only{color:grey;font-style:italic}
 /           it returns a dict with statistics shown below the plot.
 / square  : keep the axes square
 / polar   : plot complex values in a polar diagram. only selected rows are included. update the plot by selecting other rows.
-/
+/ ampang  : shows amplitude/phase and a polar diagram side-by-side
+/ tby     : plot table with lines grouped by class, returns an aggregated keytable
 /click or double-click on x.k to edit code
+mavg:{(y-(-#y)#(-x)_y:+\y)%x}
 avg:{(+/x)%0.+#x}
 var:{(+/x*x:(x-avg x))%-1+#x}
 std:{%var x}
 med: **|2^^
-mavg:{(y-(-#y)#(-x)_y:+\y)%x}
-pct95:{1.97*(((std@_x)^b)+(std imag x)^b)^1%b:3.2}
+r95:{1.97*(((std@_x)^b)+(std imag x)^b)^1%b:3.2}
+
+tplot:{[d;c;t]{[i]plot t plot``,c plot i;{plot@.(c i)#x}'d}'!#c;d}
 
 /dp:p-avg p:A`pressure;A:(`dp_A),'+`dp!,dp;store`A  /a dependend column is recalculated on each button click
 
 /these functions are displayed as buttons in the ui:
-xkrowcount:{[]#A}
-xkcountsel:{[]#Asel}
+xkrowcount:{[]"table A has ",($#A)," rows"}
+xkcountsel:{[]"number of selected rows: ",($#Asel)," (change selection to update)"}
 
 /           plot two lines: plot(x;y0;y1)     ;     symbols are labels            ;axis limits   ; returned dict is shown in a listbox
 xkxy:    {[]plot(0.001*!#A;t;mavg[10]t:A`temp);plot`seconds`temperature`timeseries;plot 0 1 20 25;`min`max`average`median!(&/;|/;avg;med)@\t}
 xksquare:{[]plot`square;xkxy[]}                             /plot type square is like xy, but keeps axis in a square box.
-xkpolar: {[]plot v:A[Asel]`vel;`offset`pct95!(avg v;pct95 v)}  /plot`polar is implicit if data is complex
-xktwo:{[]xkxyplot[];plot 1;xkxyplot[]}
+xkpolar: {[]plot v:A[Asel]`vel;`offset`r95!(avg v;r95 v)}   /plot`polar is implicit if data is complex
+xkampang:{[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a15;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
+xktby:   {`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
 
+xksym:{[]`alpha}
+xksyms:{[]`alpha`beta`gamma}
+xklistofstr:{[]("alpha";"beta";"gamma")}
 </textarea></div><button id="edx" class="large" style="position:absolute;right:0;top:20px;border-radius:20px;background:aliceblue;z-index:2;display:none" onclick="showed(0)">✖</button>
 
 <script src="plot.js" id="pjs"></script>
@@ -113,10 +120,14 @@ let listtable=(t,p)=>{let n=Math.min(tnm,t.n-t.top),v=fills(Array(1+n).fill("").
  if(t.top>0){head=oc(e=>{t.top=Math.max(0,t.top-tnm);listtable(t,p);pd(e)},tc(Math.max(0,t.top-tnm)+"‥"+(t.top-1)+" ↑",ce("option")));head.ondblclick=e=>{t.top=0;listtable(t,list);pd(e)}}
  if(tnm<t.n-t.top){tail=oc(e=>{t.top+=tnm;listtable(t,p);pd(e)},tc((t.top+tnm)+"‥"+Math.min(t.n,t.top+2*tnm)+" #"+t.n+" ↓",ce("option")));tail.ondblclick=e=>{t.top=tnm*(t.n/tnm>>0);listtable(t,list);pd(e)}}
  for(let i=0;i<t.h.length;i++){let ti=t.t[i],di=t.d[i];v[0]+="│"+trm(t.h[i]);for(let j=0;j<n;j++){let tj=t.top+j;dij=(ti=="s"||ti=="i")?String(di[tj]):(ti=="f")?sf(di[tj]):sz([di[2*tj],di[1+2*tj]]);v[1+j]+="│"+trm(dij+((ti=="r")?"a"+sa(t.d[1+i][tj]):""))};v=fills(v);if(ti=="r")i++}
- v.forEach((x,i)=>v[i]=esc(x));rm(p);for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){cl("head",op);op.onclick=listedit}else{op.dataset.i=t.top+i-1;op.selected=t.isel.includes(t.top+i-1)};ac(p,op);if(head&&!i)ac(p,head)};if(tail)ac(p,tail);return v}
+ v.forEach((x,i)=>v[i]=esc(x));rm(p);for(let i=0;i<v.length;i++){let op=ce("option");op.innerHTML=v[i];if(!i){cl("head",op);if(p==list)op.onclick=listedit}else{op.dataset.i=t.top+i-1;op.selected=t.isel.includes(t.top+i-1)};ac(p,op);if(head&&!i)ac(p,head)};if(tail)ac(p,tail);return v}
 let listedit=e=>{let t=tables[maintable];editrows(t,af(list.selectedOptions).filter(x=>"i"in x.dataset).map(x=>Number(x.dataset.i)));pd(e)}
 let listchange=e=>{let a=af(list.selectedOptions).filter(x=>"i"in x.dataset);let t=tables[maintable],idx=a.map(x=>Number(x.dataset.i));if(!idx.length){pd(e);return};sel.value=rangestr(idx);t.isel=new Int32Array(idx);t.sel=sel.value;selbg(0);let c=curbut();if(c)kinit(c)}
-let listkey=e=>{if(e.key=="Delete"){if(confirm("delete "+tables[maintable].isel.length+" rows from "+maintable+"?"))delrows()}else if(e.key=="Enter"){listedit(e)}else if(e.ctrlKey&&e.key=="c"){copy(e)}else if(e.ctrlKey&&e.key=="x"){copy(e);delrows()}else if(e.ctrlKey&&e.key=="v"){paste(e)};}
+let listkey=e=>{let t=tables[maintable];if(e.key=="Delete"){if(confirm("delete "+t.isel.length+" rows from "+maintable+"?"))delrows()}else if(e.key=="Enter"){listedit(e)}
+ else if(e.ctrlKey&&e.key=="c"){copy(e)}else if(e.ctrlKey&&e.key=="x"){copy(e);delrows()}else if(e.ctrlKey&&e.key=="v"){paste(e)}
+ else if(e.key=="Home"){t.top=0;listtable(t,list)}else if(e.key=="End"){t.top=Math.max(0,t.n-tnm);listtable(t,list)}
+ else if(e.key=="PageDown"||e.key=="ArrowDown"){let l=list.options[list.options.length-1];if(l.selected&&l.dataset.i===undefined){t.top=Math.min(t.n-1,t.top+tnm);listtable(t,list);list.scrollTop=0}}
+ else if((e.key=="PageUp"||e.key=="ArrowUp")&&0==list.selectedIndex){t.top=Math.max(0,t.top-tnm);listtable(t,list);list.selectedIndex=0}}
 let addtable=t=>{tables[t.name]=t;listtable(t,list);let c=t.name
  let bld=s=>af(foot.childNodes).forEach(x=>{x.classList.remove("bold");if(x.textContent==s)cl("bold",x)}),exists=s=>af(foot.getElementsByTagName("span")).map(x=>x.textContent).includes(s)
  let sp=tc(t.name,cl("link",ce("span")));sp.onclick=()=>{let s=sp.textContent,t=tables[s];listtable(t,list);bld(s);maintable=s;sel.value=t.sel;mark()};sp.ondblclick=rentable;if(!exists(t.name))foot.insertBefore(sp,newtab);bld(t.name);maintable=t.name;listtable(t,list)}
@@ -128,7 +139,7 @@ let addcolumn=(t,s)=>{let v=s.split(":");if(v.length!=2)return;let tp=v[1];if(t.
 let addrows=(t,n)=>{t.n+=n;t.t.forEach((ti,i)=>{if("s"==ti){t.d[i].push(...Array(n).fill(""))}else{let r=t.d[i];t.d[i]=("i"==ti)?new Int32Array(t.n):new Float64Array((ti=="f")?t.n:2*t.n);t.d[i].set(r)}})}
 let dragcol=null,dragcolumn=e=>{dragcol=e.target},dropcolumn=e=>{pd(e);let p=e.target.parentNode,c=af(p.parentNode.children);if(c.indexOf(p)>c.indexOf(dragcol)){p.after(dragcol)}else{p.before(dragcol)};dragcol=null}
 let editrows=(t,idx)=>{rm(dict);let ta=ce("table"),[h,s,tp,u]=uniqs(t,idx),hdrhlp="hdr help.."
- h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));tr.dataset.i=i;tr.draggable=true;tr.ondragstart=dragcolumn;tr.ondrop=dropcolumn;ac(tr,th);let td=ce("td"),ip=ce("input");th.onkeydown=e=>{console.log(e.key,"todo change order")};th.dataset.i=i;th.ondblclick=e=>{rencolumn(t,e.target.textContent);th.textContent=t.h[+th.dataset.i]};if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
+ h.forEach((x,i)=>{let ti=tp[i],rdo=!u[i];let tr=ce("tr"),th=tc(x,cl("head pointer",ce("th")));tr.dataset.i=i;tr.draggable=!idx.length;tr.ondragstart=dragcolumn;tr.ondrop=dropcolumn;ac(tr,th);let td=ce("td"),ip=ce("input");th.onkeydown=e=>{console.log(e.key,"todo change order")};th.dataset.i=i;th.ondblclick=e=>{if(idx.length)return;rencolumn(t,e.target.textContent);th.textContent=t.h[+th.dataset.i]};if(rdo)th.onclick=()=>ip.removeAttribute("readonly");ip.style="border:none;outline:none";if(rdo)ip.setAttribute("readonly","true");ip.onchange=verify(tp[i]);ip.value=s[i];ip.style.background=(ti=="s")?"#ffe":(ti=="i")?"#efe":"#eee";ac(td,ip);ac(tr,td);ac(ta,tr)})
  ac(dict,ta);list.style.display="none";dict.style.display="block";ac(dict,ce("hr"));ac(dict,tc((idx.length==1)?("update row "+idx[0]+"?\n"):(idx.length?("update "+idx.length+" rows?\n"):hdrhlp),ce("span")));let d=ce("div");ac(dict,d);d.style="display:flex;justify-content:space-around"
  let ok=()=>{commit(ta,t,idx);list.style.display="block";dict.style.display="none"},cancel=()=>{list.style.display="block";dict.style.display="none"};ac(d,oc(ok,tc("ok",    ce("button"))));ac(d,oc(cancel,tc("cancel",ce("button"))))
  if(!idx.length){ac(d,oc(()=>{let s=prompt("add column\nname:type(ifsz)","name:s");if(s){addcolumn(t,s);cancel();listtable(t,list)}},tc("add column",ce("button"))));ac(d,oc(()=>{let s=prompt("add rows\nnumber of rows:","1"),n=parseInt(s);if(s&&n>0){idx=Array(n).fill().map((_,i)=>i+t.n);addrows(t,n);ok()}},tc("add rows",ce("button"))))}}
@@ -198,7 +209,7 @@ const scaleplot=debounce(a=>{P.style.display=""
 
 let maintable
 let kout=x=>{O.textContent+=x;O.style.display="";kend()},kend=_=>{O.scrollTop=O.scrollHeight},khid=e=>{O.style.display="none";pd(e)},selbg=x=>{sel.style.background=x?"orangered":"black"}
-let show=x=>{rm(pcap);plots?scaleplot(plots):imgs?setimg():noplot();let t=K.tp(x);(24==t)?showdct(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
+let show=x=>{rm(pcap);plots?scaleplot(plots):imgs?setimg():noplot();let t=K.tp(x);console.log("tp",t);(4==t)?showtxt(sK(x),pcap):(18==t)?showtxt(CK(x),pcap):(20==t)?showtxt(SK(x).join("\n"),pcap):(24==t)?showdct(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
 let call=x=>{x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 let kdat=_=>{Object.keys(tables).forEach(s=>{asn(s,KT(tables[s]));asn(s+"sel",KI(tables[s].isel))});asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.rx(K.Val(Ks(maintable+"sel"))))}
 let mark=_=>{let s=sel.value.trim();selbg(1);expl(K.Val(Ks(maintable)));let r=K.Val(KC(s.length?s:"!0"));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(s))),o=tables[maintable].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(("i"in x.dataset)?Number(x.dataset.i):-1)});tables[maintable].isel=y;tables[maintable].sel=s;selbg(0)}
@@ -207,6 +218,7 @@ let expl=t=>{if(25!=K.tp(t)){K.dx(t);return 0n};asn("i",K.Atx(12n,K.Atx(15n,K.rx
 let help=_=>{let v=ed.value.split("\n"),a,i=v.findIndex(x=>(x.length==0)||x[0]!="/");if(i>0)O.textContent="\n\n"+v.slice(0,i).map(x=>x.slice(1)).join("\n")+"\n\n";a=ac(O,tc("xk documentation",ce("a")));a.href="xkdoc.html";a.target="_blank"}
 let kkey=e=>{let b=B.value;if("Enter"==e.key){kout(" "+b+"\n");b.startsWith("\\")?(b=="\\c")?O.textContent="":O.textContent+=khelp:K.repl(KC(b))};if("Escape"==e.key)B.value="";kend()}
 
+let showtxt=(x,l)=>{x.split("\n").forEach(x=>ac(pcap,ce("option")).innerHTML=esc(x))}
 let showlst=(x,l)=>{return CL(K.Atx(Ks("l"),x)).forEach(x=>ac(pcap,ce("option")).innerHTML=esc(x))}
 let showdct=(x,l)=>{let j=J(),k=j[lo(x)>>>3],v=j[8+lo(x)>>>3],tk=K.tp(k),tv=K.tp(v);if(tk!=20)return showlst(x,l);k=fills(SK(k));if(25==K.tp(v))return keyt(k,v,l);k.forEach((x,i)=>{let vi=K.Atx(K.rx(v),K.Ki(i)),t=K.tp(vi);k[i]+="│"+((3==t)?iK(vi):(4==t)?sK(vi):(5==t)?sf(fK(vi)):(6==t)?sz(zK(vi)):"?")});k.forEach(x=>{let o=ce("option");o.innerHTML=esc(x);ac(l,o)})}
 let keyt=(k,v,l)=>{listtable(TK(v),pcap);k.unshift(k.length?" ".repeat(k[0].length):" ");k=k.map(x=>esc(x)+"║");af(pcap.childNodes).forEach((o,i)=>o.innerHTML=k[i]+o.innerHTML)}
