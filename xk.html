@@ -63,14 +63,22 @@ input:read-only{color:grey;font-style:italic}
 / ampang  : shows amplitude/phase and a polar diagram side-by-side
 / tby     : plot table with lines grouped by class, returns an aggregated keytable
 /click or double-click on x.k to edit code
+
 mavg:{(y-(-#y)#(-x)_y:+\y)%x}
+mmax:{while[x-:1;y:{x|(*x),-1_x}y];y}
+mmin:{while[x-:1;y:{x&(*x),-1_x}y];y}
 avg:{(+/x)%0.+#x}
 var:{(+/x*x:(x-avg x))%-1+#x}
 std:{%var x}
 med: **|2^^
 r95:{1.97*(((std@_x)^b)+(std imag x)^b)^1%b:3.2}
 
-tplot:{[d;c;t]{[i]plot t plot``,c plot i;{plot@.(c i)#x}'d}'!#c;d}
+/least squares, e.g.  A:(3 5 -8 12.;-2 3 3 0.;7 -8 2 1.);b:dot[+A;x:1 2 3];0.00001>|/abs x-solve[A;b]   /A:list of columns
+dot:  (+/*)\
+qr:   {K:!m:#*x;I:!n:#x;j:0;r:n#0a;turn:$[`Z~@*x;{(-x)@angle y};{x*1. -1@y>0}];while[j<n;I:1_I;r[j]:turn[s:abs@abs/j_x j;xx:x[j;j]];x[j;j]-:r[j];x[j;K]%:%s*(s+abs xx);x[I;K]-:{+/x*y}/[(conj x[j;K]);x[I;K]]*\x[j;K];K:1_K;j+:1];(x;r;n;m)}
+solve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m;while[j<n;y[K]-:(+/(conj H[j;K])*y K)*H[j;K];K:1_K;j+:1];i:n-1;J:!n;y[i]%:r@i;while[i;j:i_J;i-:1;y[i]:(y[i]-+/H[j;i]*y@j)%r@i];n#y};q:$[`i~@*|x;x;qr x];$[`L~@y;qslv/[q;y];qslv[q;y]]}
+
+tplot:{[d;c;t]{[i]plot t plot``,c plot i;{plot@.(c i)#x}'d}'!#c;d}  /todo(maybe better): tplot[`group; ( (`x`y;`xlabel`ylabel`title); (,`vel;`polar;``velocity;,20); ) ]
 
 /dp:p-avg p:A`pressure;A:(`dp_A),'+`dp!,dp;store`A  /a dependend column is recalculated on each button click
 
@@ -85,9 +93,6 @@ xkpolar: {[]plot v:A[Asel]`vel;`offset`r95!(avg v;r95 v)}   /plot`polar is impli
 xkampang:{[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a15;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
 xktby:   {`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
 
-xksym:{[]`alpha}
-xksyms:{[]`alpha`beta`gamma}
-xklistofstr:{[]("alpha";"beta";"gamma")}
 </textarea></div><button id="edx" class="large" style="position:absolute;right:0;top:20px;border-radius:20px;background:aliceblue;z-index:2;display:none" onclick="showed(0)">✖</button>
 
 <script src="plot.js" id="pjs"></script>
@@ -209,7 +214,7 @@ const scaleplot=debounce(a=>{P.style.display=""
 
 let maintable
 let kout=x=>{O.textContent+=x;O.style.display="";kend()},kend=_=>{O.scrollTop=O.scrollHeight},khid=e=>{O.style.display="none";pd(e)},selbg=x=>{sel.style.background=x?"orangered":"black"}
-let show=x=>{rm(pcap);plots?scaleplot(plots):imgs?setimg():noplot();let t=K.tp(x);console.log("tp",t);(4==t)?showtxt(sK(x),pcap):(18==t)?showtxt(CK(x),pcap):(20==t)?showtxt(SK(x).join("\n"),pcap):(24==t)?showdct(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
+let show=x=>{rm(pcap);plots?scaleplot(plots):imgs?setimg():noplot();let t=K.tp(x);(4==t)?showtxt(sK(x),pcap):(18==t)?showtxt(CK(x),pcap):(20==t)?showtxt(SK(x).join("\n"),pcap):(24==t)?showdct(x,pcap):(25==t)?listtable(TK(x),pcap):showlst(x,pcap)}
 let call=x=>{x=K.Val(Ks("xk"+x));return(13==K.tp(x))?K.Cal(x,K.mk(23,0)):x}
 let kdat=_=>{Object.keys(tables).forEach(s=>{asn(s,KT(tables[s]));asn(s+"sel",KI(tables[s].isel))});asn("n",K.Ki(tables[maintable].n));asn("i",K.Val(KC("!n")));asn("sel",K.rx(K.Val(Ks(maintable+"sel"))))}
 let mark=_=>{let s=sel.value.trim();selbg(1);expl(K.Val(Ks(maintable)));let r=K.Val(KC(s.length?s:"!0"));if(K.tp(r)!=19){cl("red",sel);return};let y=IK(K.Val(KC(s))),o=tables[maintable].top;af(list.childNodes).forEach((x,i)=>{x.selected=y.includes(("i"in x.dataset)?Number(x.dataset.i):-1)});tables[maintable].isel=y;tables[maintable].sel=s;selbg(0)}

@@ -54,6 +54,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   //let empty=(!"table"in p)
   //listbox.style.hidden==empty
   //if(empty)return
+  let o=listbx.options,n=-1;if(o.length>1&&o[o.length-1].dataset.i!==undefined){n=1+Number(o[o.length-1].dataset.i);if(n==p.plots[0].lines.length)Array.from(o).forEach(x=>{x.style.borderLeft="0.5em solid "+((x.dataset.i!==undefined)?p.colors[(+x.dataset.i)%p.colors.length]:"black");x.style.paddingLeft="0.2em"})}
   listbx.onchange=function(e){
    p.hi.lines=Array.from(e.target.selectedOptions).filter(x=>x.dataset.i!==undefined).map(x=>+x.dataset.i)
    p.hi.point=null
