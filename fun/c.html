@@ -3,6 +3,8 @@
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
 <title>a/c</title>
 <style>
+body{margin:0}
+pre{margin:0}
 .s:hover{font-weight:bold;text-decoration:underline}
 .c{display:block;border:2px solid;padding:1em;text-align:center}
 .r{color:red}
@@ -13,7 +15,7 @@
 #h-{margin:0}
 #T{background:#ffe;position:fixed;top:0;right:0;z-index:10;margin:0}
 </style>
-</head><body>
+</head><body onload="init()">
 
 <label for="ld">load/drop files .c/.h:</label>
 <input type="file" id="ld" multiple="true" onchange="load(this)"/>
@@ -35,8 +37,10 @@ let hd=x=>{if(x.slice(0,8)=="#define "){h[x.slice(8).split(/[\( ]/)[0]]=x}}
 
 let splits=(s,i)=>[0,...i].map((n,j,m)=>s.slice(n,m[1+j]))
   
+let init=async _=>{let a=await fetch("a.c"),h=await fetch("a.h");a.name="a.c",h.name="a.h";load({files:[a,h]})}
 let load=async t=>{rm(b);
  for(let f of t.files){
+	 console.log("f",f)
   let t=await f.text()
   let p=ce("pre");
   let g=x=>{

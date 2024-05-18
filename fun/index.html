@@ -3,29 +3,25 @@
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
 <title>k/fun</title>
 <style>
-*{background:#f0f0f0}
-body{font-family:georgia,serif}
+body{font-family:georgia,serif;margin:0;width:100vw;overflow:hidden}
 table{margin:1em}
 table,th{border:1px solid}td{border-right:1px solid}th{background:#eee}
 table,th,td{border-collapse:collapse}
 td{text-align:center}
+h2{margin:0}
 pre{background:#eee;margin:1em}
 .l{color:blue}
 .l:hover{cursor:pointer}
-#t{background:black;color:white;height:20em;line-height:1;padding:3px;margin:0;outline:none;width:calc(100vw - 21em);overflow:hidden}
-#f{width:20em;background:#ffe;height:20em;line-height:1;margin:0;padding:3px;overflow:auto;outline:none}
+#t{background:black;color:white;height:10em;line-height:1;padding:3px;margin:0;outline:none;overflow:hidden}
 </style>
 </head><body onload="kinit()">
 
-<div style="display:flex">
- <pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)"></pre>
- <pre id="f" contenteditable="true" spellcheck="false"></pre>
-</div>
-<span style="float:right" class="l" onclick="ak()">load a.k</span>
-<p/>
+<iframe src="c.html" style="width:100vw;height:30vh;resize:vertical"></iframe>
 
-<h2>types</h2>
-<pre>lt[]={3,0,0,2,2,3,3}</pre>
+<div style="display:flex;flex-direction:row;width:100vw">
+
+<div style="width:calc(70vw - 10px);height:70vh;overflow:auto">
+<h2 id="typ">types</h2>
 <table>
 <tr><th>type </th><th> num  </th><th> what         </th><th> log2 </th><th> bits/element </th></tr>
 <tr><td>     </td><td> 0    </td><td> list         </td><td> 3    </td><td> 64           </td></tr>
@@ -34,8 +30,78 @@ pre{background:#eee;margin:1em}
 <tr><td>i    </td><td> 3    </td><td> int          </td><td> 2    </td><td> 32           </td></tr>
 <tr><td>e    </td><td> 4    </td><td> float        </td><td> 2    </td><td> 32           </td></tr>
 <tr><td>g    </td><td> 5    </td><td> geo(complex) </td><td> 3    </td><td> 64           </td></tr>
-<tr><td>?    </td><td> 6    </td><td> ?            </td><td> 3    </td><td> 64           </td></tr>
 </table>
+<pre>L[]={3,0,0,2,2,3}      log2 sizes are stored in L</pre>
+
+<h2 id="lay">memory layout</h2>
+the k value is a 64-bit pointer type called <code>U</code>.
+small atoms are stored in the k value itself:
+<pre>
+#define t(t,x) ((U)(t)<<61|(x))     the type is stored in the high bits
+</pre>
+the functions <code>tb,tc,ti,te</code> (types 1 to 4) create bool, char, int and float atoms.</p>
+
+for larger types the pointer in the k value points to the array part and the type is stored in the header 5 bytes before.
+<pre>
+-32      -8    -4     0            array layout in memory
+[padding][rrit][nnnn][array data]  rr: 16bit refcout
+                      ↑pointer      i: bucket type,  t:k-type,  nnnn:32bit element count
+</pre>
+
+the type is accessed by the macros
+<pre>
+#define tx (x>>61)   /for tagged atoms
+#define Tx sx[-5]    /for values stored in memory
+</pre>
+<code>tx</code> returns 0 if the values are stored in memory and is also used to check if it's a small or large value.
+
+<h2 id="mem">bucket allocator</h2>
+<pre>
+          4   1k    14   1m    24  1g
+          5   2k    15   2m    25  2g
+          6   4k    16   4m    26  4g
+          7   8k    17   8m    27  8g
+          8  16k    18  16m    28 16g
+          9  32k    19  32m    29 32g
+0  64    10  64k    20  64m
+1 128    11 128k    21 128m    
+2 256    12 256k    22 256m    bucket type
+3 512    13 512k    23 512m    and space(bytes)
+</pre>
+memory is managed in blocks. there is only one allocation(mmap) at the start of the program of 32gb of virtual memory.
+the memory is stored in the free list <code>M[29]</code>. all other buckets <code>M[0..]</code> are initially empty(zero value).</p>
+
+when a block of memory is requested, the required bucket type is calculated and the first free block of that type is returned.
+if there is none, the next larger block is requested and split into two.
+this is done by the function <code>M_</code> recursively. the function takes the bucket type as argument <code>x</code> and returns a pointer.
+<pre>
+Ui(M_,Ux=M[i];x?(W+=1&lt;&lt;i,M[i]=xx,x):30>i?_M(i,M_(i+1))+(2*n0&lt;&lt;i):OO())
+</pre>
+<code>W</code> stores the total allocated memory.
+a free block of memory contains a pointer to the next free block at the start.
+splitting is done by freeing the next larger block as a smaller one (half size).
+<code>_M</code> releases memory, it has two arguments bucket type and pointer: <code>f</code> and <code>x</code> and returns the input pointer:
+<pre>
+g(_M,W-=1&lt;&lt;f;xx=M[f];M[f]=x)
+</pre>
+in fact when a larger block is split, the lower part is used and the upper part is not touched only referenced in the free list, such that the operating system can lazily allocate memory.
+
+<h2 id="ref">reference counting</h2>
+large k values are refcounted. the refcount 0 when the value is used once and freed when a value with refcount 0 is no longer used.
+<code>r_</code> checks if the k value lives in memory and increases the refcount. it aborts if the refcount overflows 16bits.
+<pre>
+f(r_,px||tx?x:M1&++rx?x:OO())
+f(_r,P(px||tx,x)P(M1&rx,--rx;x)if(!Tx)n(_r(xU))_M(mx,x-n0);x)</pre>
+<code>_r</code> decreases the refcount.
+if it was used only once, it frees memory.
+if the value is compound (e.g. a general list) it recursively unrefs it's elements before freeing the block.</br>
+the macros <code>Tx rx mx</code> access type, refcount and bucket type from the array header.
+
+<h2 id="prs">parse</h2>
+<h2 id="exe">execute</h2>
+<h2 id="vrb">verbs</h2>
+<h2 id="sys">syscalls</h2>
+<h2 id="smd">vector instructions</h2>
 <script>
 
 
@@ -121,4 +187,19 @@ let sak=()=>g("f").textContent
 
 
 
-</body></html>
+</div>
+<div style="width:30vw">
+ <div style="display:flex;flex-direction:column">
+  <pre id="t" contenteditable="true" spellcheck="false" onkeyup="key(event,this)">todo..</pre>
+ </div>
+ <p/>
+ <pre style="background:white">
+ <a href="#typ">types</a>  <a href="#lay">memory layout</a> <a href="#mem">allocator</a> <a href="#ref">refcount</a>
+ <a href="#prs">parse</a>         <a href="#exe">execute</a>
+ <a href="#vrb">verbs</a> 
+ <a href="#sys">syscalls</a>
+ <a href="#smd">vector instructions</a>
+ </pre>
+</div>
+
+</div></body></html>
