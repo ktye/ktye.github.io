@@ -230,6 +230,7 @@ let kinit=()=>{t.textContent=""
  fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports,M=K.__heap_base
   B=K.kinit();
+  console.log("B",B);
   C=new Uint8Array(K.memory.buffer);
   O(" ")})}
 
