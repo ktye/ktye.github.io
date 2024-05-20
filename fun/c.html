@@ -40,7 +40,6 @@ let splits=(s,i)=>[0,...i].map((n,j,m)=>s.slice(n,m[1+j]))
 let init=async _=>{let a=await fetch("a.c"),h=await fetch("a.h");a.name="a.c",h.name="a.h";load({files:[a,h]})}
 let load=async t=>{rm(b);
  for(let f of t.files){
-	 console.log("f",f)
   let t=await f.text()
   let p=ce("pre");
   let g=x=>{

@@ -115,6 +115,42 @@ wx  print a k value
  i0&i2 are indexing(byte int)
  a0 is at-size-0. i.e. indexing into byte array.
 </pre>
+<h2 id="wsm">wasm</h2>
+changes for webassembly(wasm32):
+<pre>
+32bit ints:
+ typedef unsigned long → typedef unsigned long long
+ ctzl zlzl → ctzll zlzll
+scalar replacements for vector instructions
+ U b_(Va){U r=0;for(int i=0;i<32;i++)r|=a[i]?(1<<i):0;return r;}
+ U b2(Va){U r=0;for(int i=0;i<8;i++)r|=a[4*i]?(1<<i):0;return r;}
+ V a0(Va,Vb){V r;for(int i=0;i<32;i++)r[i]=a[b[i]];return r;}
+ V sq(Va){Ve b=(Ve)a;Ve r;for(int i=0;i<8;i++)r[i]=__builtin_sqrtf(b[i]);return(Ve)r;}
+ VF(gg,a) //nyi
+ static U X9(unsigned f,U xx){u x=(unsigned)xx;u r=0;for(int i=0;i<32;i++){f^=1&(x>>i);r|=f<<i;}return r;}
+ V li(Va,Vb){V r;for(int i=0;i<8;i++)r[i]=a[i]<b[i]?a[i]:b[i];return r;}
+ V mi(Va,Vb){V r;for(int i=0;i<8;i++)r[i]=a[i]>b[i]?a[i]:b[i];return r;}
+ V pmaxub(Va,Vb){V r;for(int i=0;i<32;i++)r[i]=a[i]>b[i]?a[i]:b[i];return r;} //for _0
+import syscalls (only predeclare functions, missing functions are imported from js)
+ U _w(Ux,Ua,Un); U w_(Ux,Ua,Un);U f_(Ux,Ua);U _f(Ux);U _l(Ux,Ua);U m_(Ux);U _k(Ux);
+ U ut(void){return 0;}
+remove asm
+function signature mismatch
+ all functions in the function tables h,H must have the same signature
+ otherwise wasm cannot call indirectly. e.g. this affects gi
+todo
+ indirect function call mismatch for 1=1 2 in fr?
+replace main with kinit
+ char CC[256];
+ char *kinit(){A=0;M[13]=65536;M_(0);W=0;return CC;}
+ //make sure 65536 is smaller than __heap_base, our memory starts there, c's is below
+the repl is is handled in js calling os(c) directly
+compile with
+ -DWASM --target=wasm32 -mbulk-memory -fno-inline-functions
+ -Wl,--export=kinit,--export=os,--export=__heap_base,-allow-undefined
+ --no-standard-libraries -Wl,--no-entry
+ -Wl,--initial-memory=1048576
+</pre>
 <h2 id="mai">main</h2>
 <pre>
 int main(int n,char**_){A=(U)$>N;M[29]=m_(0,n0&lt;&lt;30,3,A?0x1042:0x4022,0,0);M_(0);W=0;
@@ -139,9 +175,8 @@ then start the repl, a while loop: write the prompt, read the next line of input
  <a href="#prs">parse</a>         <a href="#exe">execute</a>
  <a href="#vrb">verbs</a> 
  <a href="#prt">print</a>
- <a href="#sys">syscalls</a>
- <a href="#smd">vector instructions</a>
- <a href="#mai">main</a>
+ <a href="#sys">syscalls</a>  <a href="#smd">vector instructions</a>
+ <a href="#wsm">wasm</a>                     <a href="#mai">main</a>
  </pre>
 </div>
 
@@ -168,7 +203,8 @@ let /*there be*/ K,C,B
 
 let S=(x,n)=>su(new Uint8Array(K.memory.buffer,x,n))
 let kenv={env:{
- w_:(x,y,z)=>{console.log("w_",x,y,z);O(S(lo(y),lo(z)));return z;}, //write
+ Oi:(x,y)=>{console.log(S(x,2),y);return y},
+ w_:(x,y,z)=>{O(S(lo(y),lo(z)));return z;}, //write
  _w:(x,y,z)=>0n,                        //read
  _k:x=>x,                               //exit
  _l:x=>1n,                              //stat
@@ -181,7 +217,6 @@ let kenv={env:{
 let key=(e,t)=>{if("Enter"==e.key){
  let s="\n"+t.textContent;s=s.slice(1+s.lastIndexOf("\n")).trim();t.textContent+="\n"
 // try{
-	console.log("exec s:"+s)
   ws(us(s));t.textContent+=" "
 // }catch(e){
 //  O("segmentation fault\n");B=kinit()
@@ -194,7 +229,7 @@ let ws=u=>{u.forEach((x,i)=>C[B+i]=x);C[B+u.length]=0;K.os(B)}
 let kinit=()=>{t.textContent=""
  fetch("a.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{
   K=r.instance.exports,M=K.__heap_base
-  B=K.kinit();console.log("B:",B)
+  B=K.kinit();
   C=new Uint8Array(K.memory.buffer);
   O(" ")})}
 
