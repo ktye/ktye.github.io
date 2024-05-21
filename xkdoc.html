@@ -160,7 +160,7 @@ h2{border-top:1px solid}
  plot 0                     i   current plot index, they are displayed side-by-side
  plot`polar                 s   plot type: `xy`bar`polar`ampang`square
  plot`xlabel`ylabel`title   S   labels
- plot(x;y0;y1;..)           L   x:I|F y:I|F|Z  multiple lines
+ plot(x;y0;y1;..)           L   x:i|f|I|F y:I|F|Z  multiple lines  (atom x:sampling rate)
  plot 0 1 -10 10            I|F axis limits, length 1..6: y1 x0,x1 x0,x1,y1 x0,x1,y0,y1 x0,y1,y0,y1,z0,z1
  
  /or use each (multiple calls to a list, add a line each time):
@@ -200,8 +200,7 @@ it runs in a browser from a file url, e.g. double-click in a file manager.
 
 <h2>todo</h2>
  <pre>
- k:init()
- plot x:xf sampling rate
+ barplot side-by-side
  envelope plot minmax-reduce
  hist stacked/side-by-side
  wbl/reduction ratio
