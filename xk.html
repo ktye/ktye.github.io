@@ -89,7 +89,8 @@ xkcountsel:{[]"number of selected rows: ",($#Asel)," (change selection to update
 /           plot two lines: plot(x;y0;y1)     ;     symbols are labels            ;axis limits   ; returned dict is shown in a listbox
 xkxy:    {[]plot(1000;t;mavg[10]t:A`temp);plot`seconds`temperature`timeseries;plot 0 1 20 25;`min`max`average`median!(&/;|/;avg;med)@\t}
 xksquare:{[]plot`square;xkxy[]}                             /plot type square is like xy, but keeps axis in a square box.
-xkbar:{[]plot'(`stacked;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7);`class`count)}
+xkbar:{[]plot'(`bar;      (1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"bar plot")}
+xkstack:{[]plot'(`stacked;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"stacked bar plot")}
 xkpolar: {[]plot v:A[Asel]`vel;`offset`r95!(avg v;r95 v)}   /plot`polar is implicit if data is complex
 xkampang:{[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a15;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
 xktby:   {`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
