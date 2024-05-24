@@ -2,7 +2,11 @@ let plotjs=(()=>{
 
 let ge=function(x){return document.getElementById(x)}
 let pd=function(e){e.preventDefault();e.stopPropagation()}
-let vmin=x=>Math.min(...x.filter(x=>!isNaN(x))),vmax=x=>Math.max(...x.filter(x=>!isNaN(x))),min=Math.min,max=Math.max,floor=Math.floor,ceil=Math.ceil,abs=Math.abs
+let vmin=x=>{x=x.filter(x=>!isNaN(x));let r=Infinity;x.forEach(x=>r=(x<r)?x:r);return r},vmax=x=>{x=x.filter(x=>!isNaN(x));let r=-Infinity;x.forEach(x=>r=(x>r)?x:r);return r},min=Math.min,max=Math.max,floor=Math.floor,ceil=Math.ceil,abs=Math.abs
+
+let half=x=>x.filter((_,i)=>!(i%2))
+let minmax=(x,y,Y,x0,x1)=>{let n=x.length,dx=x[n-1]-x[0],i0=max(0,Math.floor(n*(x0-x[0])/dx)),ni=min(n,Math.ceil(n*(x1-x0)/dx));x=x.slice(i0,i0+ni),y=y.slice(i0,i0+ni),Y=Y.slice(i0,i0+ni)
+ n=x.length;if(n<=512)return[x,y,null];while(n>512){x=half(x);for(let i=1;i<n;i+=2){y[i-1]=min(y[i],y[i-1]);Y[i-1]=max(Y[i],Y[i-1])};y=half(y);Y=half(Y);n/=2};return[x,y,Y]}
 
 function replot(canvas){plots(canvas.plots,canvas,canvas.slider,canvas.listbx,canvas.legend)}
 
@@ -28,8 +32,8 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   for(let i=0,j=0;i<np;i++){c.save();c.translate(w*(i%nc),j*h);r=[w*(i%nc),j*h,w,h];r.push(...plot(p.plots[i],i,c,w,h,p));rects.push(r);c.restore();if(0==(1+i)%nc)j++;if((j==nr-1)&&(np%nc))w=width/(np%nc)}}
  canvas.plots=p;canvas.slider=slider;canvas.listbx=listbx;canvas.legend=legend
  if(p.hi.point!==null){
-  let pl=p.plots[p.hi.plot].lines[p.hi.lines[0]],pt=p.hi.point,po=p.plots[p.hi.plot].type=="polar"
-  let d={x:("undefined"!=typeof pl.x)?pl.x[pt]:null,y:("undefined"!=typeof pl.y)?pl.y[pt]:null,z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
+  let hip=p.plots[p.hi.plot],li=p.hi.lines[0],pl=hip.lines[li],pt=p.hi.point,po=hip.type=="polar",st=hip.stacked
+  let d={x:("undefined"!=typeof pl.x)?pl.x[pt]:null,y:("undefined"!=typeof pl.y)?(pl.y[pt]-((st&&li)?hip.lines[li-1].y[pt]:0)):null,z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
   d.r=po?Math.hypot(d.y,d.z):d.y;d.a=po?(180/Math.PI*Math.atan2(d.y,d.z)):d.z;if(d.a<0)d.a+=360
   let s=((d.x!==null)?("x:"+sn(d.x)+";"):"")+((d.z!==null)?("z:"+sn(d.r)+"a"+d.a.toFixed(0)):("y:"+sn(d.y)))
   legend(s)
@@ -54,7 +58,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   //let empty=(!"table"in p)
   //listbox.style.hidden==empty
   //if(empty)return
-  let o=listbx.options,n=-1;if(o.length>1&&o[o.length-1].dataset.i!==undefined){n=1+Number(o[o.length-1].dataset.i);if(n==p.plots[0].lines.length)Array.from(o).forEach(x=>{x.style.borderLeft="0.5em solid "+((x.dataset.i!==undefined)?p.colors[(+x.dataset.i)%p.colors.length]:"black");x.style.paddingLeft="0.2em"})}
+  let o=listbx.options,nl=p.plots[0].lines.length,n=-1;if(o.length>1&&o[o.length-1].dataset.i!==undefined){n=1+Number(o[o.length-1].dataset.i);if(n==nl)Array.from(o).forEach(x=>{x.style.borderLeft="0.5em solid "+((x.dataset.i!==undefined)?color((+x.dataset.i),nl,p):"black");x.style.paddingLeft="0.2em"})}
   listbx.onchange=function(e){
    p.hi.lines=Array.from(e.target.selectedOptions).filter(x=>x.dataset.i!==undefined).map(x=>+x.dataset.i)
    p.hi.point=null
@@ -89,25 +93,28 @@ function plot(p,i,c,w,h,plts){p.i=i
  
  c.fillStyle=c.strokeStyle="black";c.lineWidth=2
  switch(p.type){
- case"xy":     return      xyplot(p,c,w,h,plts)
- case"polar":  return   polarplot(p,c,w,h,plts)
- case"ampang": return  ampangplot(p,c,w,h,plts)
- case"bar":    return     barplot(p,c,w,h,plts)
- case"stacked":return stackedplot(p,c,w,h,plts)
+ case"xy":      return       xyplot(p,c,w,h,plts)
+ case"envelope":return envelopeplot(p,c,w,h,plts)
+ case"polar":   return    polarplot(p,c,w,h,plts)
+ case"ampang":  return   ampangplot(p,c,w,h,plts)
+ case"bar":     return      barplot(p,c,w,h,plts)
+ case"stacked": return  stackedplot(p,c,w,h,plts)
  default:throw new Error("unknown plot type: "+p.type)
 }}
 
-function barwidth(L){let x=L[0].x,dx=x[x.length-1]-x[0],n=x.length;return(n<2)?1:dx/(n-1)}
-function xyplot(p,c,w,h,plts){if(!p.lines)return;let z=(p.lines[0].z)?true:false;w=min(w,1.5*h),h=min((z?2:1.5)*w,h) //ah clip bw wb
- p.lines=p.lines.map(l=>{l.x=("undefined"==typeof l.x)?iota(l.y.length):l.x;return l})
- let sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li,p.bar||p.stacked),aH=z?Math.round(0.3*ah):0;ah-=aH;if(z)y0=max(0,y0)
- let xs=aw/(x1-x0),ys=ah/(y1-y0),zs=aH/360,xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),zz=z=>aH-zs*z,bw=barwidth(p.lines);p.limits=[x0,x1,y0,y1]
+function barwidth(L,st){let x=L[0].x,dx=x[x.length-1]-x[0],n=x.length*(st?L.length:1);return(n<2)?1:dx/(n-1)}
+function xyplot(p,c,w,h,plts){if(!p.lines)return;let nl=p.lines.length,z=(p.lines[0].z)?true:false;w=min(w,1.5*h),h=min((z?2:1.5)*w,h) //ah clip bw wb nl xs hp hi
+ p.lines=p.lines.map(l=>{l.x=("undefined"==typeof l.x)?iota(l.y.length):("number"==typeof l.x)?rate(l.x,l.y.length):l.x;return l})
+ if((p.bar||p.stacked)&&"undefined"==typeof p.lines[0].senti)p.lines.map((l,i)=>{l.senti=true; l.y=l.y.map((y,j)=>y+((i&&p.stacked)?p.lines[i-1].y[j]:0));return l})
+ let lnc=i=>color(i,p.lines.length,plts),sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li,p.bar||p.stacked),aH=z?Math.round(0.3*ah):0;ah-=aH;if(z)y0=max(0,y0)
+ let xs=aw/(x1-x0),ys=ah/(y1-y0),zs=aH/360,xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),zz=z=>aH-zs*z,bw=barwidth(p.lines,!p.stacked);p.limits=[x0,x1,y0,y1]
+ let pt=(i,x,y)=>{let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}}
  let a=true,ln=(l,i)=>{let x=l.x,y=l.y;if(!x.length)return
-  if("undefined"==typeof l.style||l.style.includes("-")){c.strokeStyle=plts.colors[i%plts.colors.length];c.lineWidth=hiline(plts,i)*(l.size?l.size:2);c.beginPath()
-   if(a){c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>c.lineTo(xx(x),yy(y[j])))}else{c.moveTo(xx(x[0]),zz(l.z[0]));x.forEach((x,j)=>c.lineTo(xx(x),zz(l.z[j])))}c.stroke()}
-  let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}},
- br=(l,i)=>{ c.fillStyle=plts.colors[i%plts.colors.length];l.x.forEach((x,j)=>{c.fillRect(xx(x-bw/2),-1,bw*xs,yy(l.y[j]))}) },
- st=(l,i)=>{}
+  if("undefined"==typeof l.style||l.style.includes("-")){c.strokeStyle=lnc(i);c.lineWidth=hiline(plts,i)*(l.size?l.size:2);c.beginPath()
+   if(a){c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>c.lineTo(xx(x),yy(y[j])))}else{c.moveTo(xx(x[0]),zz(l.z[0]));x.forEach((x,j)=>c.lineTo(xx(x),zz(l.z[j])))}c.stroke()};pt(i,p.lines[i].x,p.lines[i].y)},
+ br=(l,i)=>{ let hp=j=>hipoint(plts,i,j,p.i); c.fillStyle=lnc(i);c.strokeStyle=c.fillStyle;l.x.forEach((x,j)=>{let a=[1+xx(p.stacked?(x-bw/2):(x+(i-nl/2)*bw)),1+yy((p.stacked&&i)?p.lines[i-1].y[j]:0),bw*xs-2,2+yy(l.y[j])-yy((p.stacked&&i)?p.lines[i-1].y[j]:0)];(2==hp(j))?c.strokeRect(...a):c.fillRect(...a)}) },
+ st=(l,i)=>{ br(l,i) },
+ le=(l,i)=>{ let[x,y,Y]=minmax(l.x,l.y,l.y,x0,x1),n=x.length;if(Y===null)return ln({x:x,y:y},i);let pa=new Path2D;x=x.map(xx);y=y.map(yy);Y=Y.map(yy);pa.moveTo(x[0],y[0]);for(let i=1;i<n;i++)pa.lineTo(x[i],y[i]);while(n--)pa.lineTo(x[n],Y[n]);pa.closePath();c.strokeStyle=lnc(i);c.fillStyle=lnc(i);c.stroke(pa);c.fill(pa);pt(i,l.x,l.y)}
  c.strokeRect(plts.xyx,plts.xyy,aw,ah);if(z)c.strokeRect(plts.xyx,plts.xyy+ah,aw,aH)
  align(c,1)
  c.fillText(p.title, plts.xyx+center(aw),0)
@@ -119,14 +126,15 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;let z=(p.lines[0].z)?true:false
        if(z)ncTic(x0,x1).map(x=>{let t=sn(x);x=xx(x);LN(c,x,aH-plts.tl/2,x,aH+plts.tl/2)                           })
  align(c,5);ncTic(y0,y1).map(y=>{let t=sn(y);y=yy(y);LN(c,-plts.tl/2,y,plts.tl/2,y);c.fillText(t,-plts.tl,y)})
  if(z){let t=["0°","180°"],y=[aH,aH/2];y.map((y,i)=>{LN(c,-plts.tl/2,y,plts.tl/2,y);c.fillText(t[i],-plts.tl,y)})}
- c.save();c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.forEach(p.bar?br:p.stacked?sk:ln);c.restore();if(z){a=false;c.beginPath();c.rect(0,0,aw,aH);c.clip();p.lines.map(ln)}
+ c.save();c.beginPath();c.rect(0,-ah,aw,ah);c.clip();p.lines.forEach(p.bar?br:p.stacked?st:p.ep?le:ln);c.restore();if(z){a=false;c.beginPath();c.rect(0,0,aw,aH);c.clip();p.lines.map(ln)}
  return[(l,j)=>[plts.xyx+xx(l.x[j]),ah+plts.xyy+yy(l.y[j])],(x,y)=>[(x-plts.xyx)/xs+x0,y0-(y-ah-plts.xyy)/ys]]
 }
+function envelopeplot(p,c,w,h,plts){p.ep=true;p.type="xy";return xyplot(p,c,w,h,plts)}
 function polarplot(p,c,w,h,plts){if(!p.lines)return;
  let ra=floor(min(w-plts.pw,h-plts.ph-plts.tih)/2),raa=ra+plts.tl,al=[7,6,3,3,0,0,1,2,2,5,5,8],
  li=autop(p.lines,limits(p)),r1=(li[1]-li[0])/2,sc=ra/r1,xm=floor(w/2),ym=floor(ra+plts.ph/2+plts.tih),X,Y
  ln=(l,i)=>{let x=l.y,y=l.z;if(!x.length)return
-  let s=hiline(plts,i)*(l.size?l.size:3);c.fillStyle=plts.colors[i%plts.colors.length]
+  let s=hiline(plts,i)*(l.size?l.size:3);c.fillStyle=color(i,p.lines.length,plts)
   let hp=j=>hipoint(plts,i,j,p.i)
   x.map((x,i)=>{c.beginPath();c.arc(sc*(x-X),-sc*(y[i]-Y),s*hp(i),0,2*Math.PI);c.fill()})}
  p.limits=li;X=(li[0]+li[1])/2,Y=(li[2]+li[3])/2
@@ -179,6 +187,7 @@ function snapPoint(x,y,rect,p){x-=rect[0];y-=rect[1]
    if(d<dist){dist=d;line=i;point=j}}}
  return[line,point]}
 
+function color(i,n,plts){return(n>1)?plts.colors[i%n]:"black"}
 function align(c,x){c.textBaseline=["top","middle","bottom"][floor(x/3)];c.textAlign=["left","center","right"][x%3]}
 function center(x){return floor(x/2)}
 function circle(c,x,y,r){c.beginPath();c.arc(x,y,r,0,2*Math.PI);c.stroke()}
@@ -193,13 +202,12 @@ function autoxy(L,a,bar){let r=a.slice(0,4);
 function autop(L,r){if(r[1]!=r[0])return squarelimits(r);r=ncLim(0,vmax(L.map(l=>Math.sqrt(vmax(l.y.map((y,i)=>y*y+l.z[i]*l.z[i]))))))[1];return[-r,r,-r,r]}
 function squarelimits(l){let dx=(l[1]-l[0])/2,dy=(l[3]-l[2])/2,xm=(l[0]+l[1])/2,ym=(l[2]+l[3])/2;dx=max(dx,dy),dy=dx;return[xm-dx,xm+dx,ym-dy,ym+dy]}
 function iota(n){return[...Array(n).keys()]}
+function rate(r,n){r=1/r;return iota(n).map(x=>r*x)}
 
 function sn(x){let a=abs(x),r=(a==0)?"0":(a>10000||a<0.00009)?x.toExponential(2):String(Math.round(10000*x)/10000);return r.replace(/\.0+e/,"e")}
 function ncNum(ext,rnd){let e=floor(Math.log10(ext)),f=ext/(10**e),r;return(rnd?((f<1.5)?1:(f<3)?2:(f<7)?5:10):((f<=1)?1:(f<=2)?2:(f<=5)?5:10))*10**e}
 function ncLim(x,y){let e=ncNum(y-x,false),s=ncNum(e/4,true);return[s*floor(x/s),s*ceil(y/s),s]}
 function ncTic(x,y){let [p,_,s]=ncLim(x,y),r=[],i=0;while(p+i*s<=y){if(p+i*s>=x)r.push(p+i*s);i++};return r}
-//function ncTic(x,y){let i,t,e=ncNum(y-x,false),[m,_,s]=ncLim(x,y),p=m,n=ceil(e/s+0.5),r=[]
-// for(i=0;i<n;i++)if(((p=m+i*s)>=x)&&p<y)r.push(p);return r}
 
 function rm(p){while(p.firstChild)p.removeChild(p.firstChild);return p}
 
