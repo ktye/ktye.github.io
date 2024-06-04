@@ -110,8 +110,9 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;let nl=p.lines.length,z=(p.line
  let xs=aw/(x1-x0),ys=ah/(y1-y0),zs=aH/360,xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),zz=z=>aH-zs*z,bw=barwidth(p.lines,!p.stacked);p.limits=[x0,x1,y0,y1]
  let pt=(i,x,y)=>{let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}}
  let a=true,ln=(l,i)=>{let x=l.x,y=l.y;if(!x.length)return
-  if("undefined"==typeof l.style||l.style.includes("-")){c.strokeStyle=lnc(i);c.lineWidth=hiline(plts,i)*(l.size?l.size:2);c.beginPath()
-   if(a){c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>c.lineTo(xx(x),yy(y[j])))}else{c.moveTo(xx(x[0]),zz(l.z[0]));x.forEach((x,j)=>c.lineTo(xx(x),zz(l.z[j])))}c.stroke()};pt(i,p.lines[i].x,p.lines[i].y)},
+  if(1+".oO8".indexOf(l.style)){let r=[1,2,5,10,20][".oO08".indexOf(l.style)];x.forEach((x,j)=>{c.beginPath();c.arc(xx(x),yy(y[j])),r,0,2*Math.PI;c.fillStyle=lnc(i);c.fill()})}
+  else{c.strokeStyle=lnc(i);c.lineWidth=hiline(plts,i)*(l.size?l.size:2);c.beginPath()
+   if(a){c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>c.lineTo(xx(x),yy(y[j])))}else{c.moveTo(xx(x[0]),zz(l.z[0]));x.forEach((x,j)=>{let z=l.z[j],s=z-l.z[j-1],d=((s>180)?-360:(s<-180)?360:0);c.lineTo(xx(x),zz(z+d));if(d){c.stroke();c.beginPath();c.moveTo(xx(x),zz(z))}})}c.stroke()};pt(i,p.lines[i].x,p.lines[i].y)},
  br=(l,i)=>{ let hp=j=>hipoint(plts,i,j,p.i); c.fillStyle=lnc(i);c.strokeStyle=c.fillStyle;l.x.forEach((x,j)=>{let a=[1+xx(p.stacked?(x-bw/2):(x+(i-nl/2)*bw)),1+yy((p.stacked&&i)?p.lines[i-1].y[j]:0),bw*xs-2,2+yy(l.y[j])-yy((p.stacked&&i)?p.lines[i-1].y[j]:0)];(2==hp(j))?c.strokeRect(...a):c.fillRect(...a)}) },
  st=(l,i)=>{ br(l,i) },
  le=(l,i)=>{ let[x,y,Y]=minmax(l.x,l.y,l.y,x0,x1),n=x.length;if(Y===null)return ln({x:x,y:y},i);let pa=new Path2D;x=x.map(xx);y=y.map(yy);Y=Y.map(yy);pa.moveTo(x[0],y[0]);for(let i=1;i<n;i++)pa.lineTo(x[i],y[i]);while(n--)pa.lineTo(x[n],Y[n]);pa.closePath();c.strokeStyle=lnc(i);c.fillStyle=lnc(i);c.stroke(pa);c.fill(pa);pt(i,l.x,l.y)}

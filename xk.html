@@ -73,12 +73,18 @@ std:{%var x}
 med: **|2^^
 r95:{1.97*(((std@_x)^b)+(std imag x)^b)^1%b:3.2}
 
+fit:{n:#x;u:+/x*x;v:+/x*y;((u*y)-x*v;(n*v)-x*y:+/y)%(n*u)-x*x:+/x}   /(a;b) line-fit y:a+b*x
+wbl:{(-10|log x;log log 1%1-cdf:(-1_(1+!n)*d),1-0.5*d:1.%n:#x:^x)}   /(X;Y) weibull transform
+qwbl:{[p;k;l]l*(-log 1-p)^1%k}                                       /quantile for p from k l
+klwbl:{[XY]ab:fit.XY;(k;exp(-*ab)%k:ab 1)}
+wblplot:{plot xy:wbl x;+`shape`scale`q95!,'kl,(qwbl 0.95).kl:klwbl xy}
+
 /least squares, e.g.  A:(3 5 -8 12.;-2 3 3 0.;7 -8 2 1.);b:dot[+A;x:1 2 3];0.00001>|/abs x-solve[A;b]   /A:list of columns
 dot:  (+/*)\
 qr:   {K:!m:#*x;I:!n:#x;j:0;r:n#0a;turn:$[`Z~@*x;{(-x)@angle y};{x*1. -1@y>0}];while[j<n;I:1_I;r[j]:turn[s:abs@abs/j_x j;xx:x[j;j]];x[j;j]-:r[j];x[j;K]%:%s*(s+abs xx);x[I;K]-:{+/x*y}/[(conj x[j;K]);x[I;K]]*\x[j;K];K:1_K;j+:1];(x;r;n;m)}
 solve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m;while[j<n;y[K]-:(+/(conj H[j;K])*y K)*H[j;K];K:1_K;j+:1];i:n-1;J:!n;y[i]%:r@i;while[i;j:i_J;i-:1;y[i]:(y[i]-+/H[j;i]*y@j)%r@i];n#y};q:$[`i~@*|x;x;qr x];$[`L~@y;qslv/[q;y];qslv[q;y]]}
 
-hist:{plot'(`bar;(x;(#'=x'y)@!#x))}
+hist:{n:_0.+*x:(0.+x),(&/y;|/y);a:x 1;b:x 2;x:a+(w:(b-a)%n)*!n;d:#'=x'y;d[0]+:0|d@-1;plot'(`bar;(x+0.5*w;0|d@!#x))}
 tplot:{[d;c;t]{[i]plot t plot``,c plot i;{plot@.(c i)#x}'d}'!#c;d}  /todo(maybe better): tplot[`group; ( (`x`y;`xlabel`ylabel`title); (,`vel;`polar;``velocity;,20); ) ]
 
 /dp:p-avg p:A`pressure;A:(`dp_A),'+`dp!,dp;store`A  /a dependend column is recalculated on each button click
@@ -88,15 +94,20 @@ xkrowcount:{[]"table A has ",($#A)," rows"}
 xkcountsel:{[]"number of selected rows: ",($#Asel)," (change selection to update)"}
 
 /           plot two lines: plot(x;y0;y1)     ;     symbols are labels            ;axis limits   ; returned dict is shown in a listbox
-xkxy:      {[]plot(1000;t;mavg[10]t:A`temp);plot`seconds`temperature`timeseries;plot 0 1 20 25;`min`max`average`median!(&/;|/;avg;med)@\t}
-xksquare:  {[]plot`square;xkxy[]}                             /plot type square is like xy, but keeps axis in a square box.
-xkenvelope:{[]plot'(`envelope;(100000;(0.1*?-#t)+(sin 0.01*t)+cos t:.1*!100000);`samples`y`"timeseries envelope(min/max reduction)");"envelope fills a downsampled min/max polygon if there are more then 512 points\nzoom will resample"}
-xkbar:     {[]plot'(`bar;    (1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"bar plot")}
-xkstack:   {[]plot'(`stacked;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"stacked bar plot")}
-xkhist:    {[]hist[0.1*!40;abs@?10000a];plot```"rayleigh distribution"}
-xkpolar:   {[]plot v:A[Asel]`vel;`<"select values from the list to update";`offset`r95!(avg v;r95 v)}   /plot`polar is implicit if data is complex
-xkampang:  {[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a15;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
-xktby:     {[]`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
+xkxy:       {[]plot(1000;t;mavg[10]t:A`temp);plot`seconds`temperature`timeseries;plot 0 1 20 25;`min`max`average`median!(&/;|/;avg;med)@\t}
+xkenvelope: {[]plot'(`envelope;(100000;(0.1*?-#t)+(sin 0.01*t)+cos t:.1*!100000);`samples`y`"timeseries envelope(min/max reduction)");"envelope fills a downsampled min/max polygon if there are more then 512 points\nzoom will resample"}
+xkbar:      {[]plot'(`bar;    (1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"bar plot")}
+xkstack:    {[]plot'(`stacked;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"stacked bar plot")}
+xkhist:     {[]hist[20 0 4;abs@?10000a];plot```"rayleigh distribution"}
+xkwbl:      {[]plot`"ln x"`"ln ln(1/1-F)"`"weibull plot";,/wblplot'(abs@?1000a;abs@2*?1000a)}
+
+xkreduction:{[]b:(10*?1000)+a-0.95a5*a:20*?1000a;plot'(`square;abs(a;b);0 80 0 80;`initial`residual`reduction)} /square is like xy, but keeps axis in a square box
+
+xkpolar:    {[]plot v:A[Asel]`vel;`<"select values from the list to update";`offset`r95!(avg v;r95 v)}   /plot`polar is implicit if data is complex
+xkampang:   {[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a165;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
+xktby:      {[]`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
+
+
 
 /init is called when the page loads and can create tables.
 init:{[]n:1078;A:+`class`temp`pressure`vel!(`a`b`c`d n?4;22.7+?n;1002+_10*?n;10.23a33+?0a+n);store`A}
