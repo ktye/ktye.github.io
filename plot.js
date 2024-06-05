@@ -90,6 +90,7 @@ function plot(p,i,c,w,h,plts){p.i=i
  p.xlabel=("xlabel" in p)?p.xlabel:""
  p.ylabel=("ylabel" in p)?p.ylabel:""
  p.square=("square" in p)?p.square:false
+ p.styles=("styles" in p)?p.styles:" " // "-=#>.oO08"
  
  c.fillStyle=c.strokeStyle="black";c.lineWidth=2
  switch(p.type){
@@ -109,9 +110,9 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;let nl=p.lines.length,z=(p.line
  let lnc=i=>color(i,p.lines.length,plts),sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li,p.bar||p.stacked),aH=z?Math.round(0.3*ah):0;ah-=aH;if(z)y0=max(0,y0)
  let xs=aw/(x1-x0),ys=ah/(y1-y0),zs=aH/360,xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),zz=z=>aH-zs*z,bw=barwidth(p.lines,!p.stacked);p.limits=[x0,x1,y0,y1]
  let pt=(i,x,y)=>{let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}}
- let a=true,ln=(l,i)=>{let x=l.x,y=l.y;if(!x.length)return
-  if(1+".oO8".indexOf(l.style)){let r=[1,2,5,10,20][".oO08".indexOf(l.style)];x.forEach((x,j)=>{c.beginPath();c.arc(xx(x),yy(y[j])),r,0,2*Math.PI;c.fillStyle=lnc(i);c.fill()})}
-  else{c.strokeStyle=lnc(i);c.lineWidth=hiline(plts,i)*(l.size?l.size:2);c.beginPath()
+ let a=true,ln=(l,i)=>{let x=l.x,y=l.y,ps=pointsize(p,i),lw=linewidth(p,i);if(!x.length)return
+  if(ps){x.forEach((x,j)=>{c.beginPath();c.arc(xx(x),yy(y[j]),ps,0,2*Math.PI);c.fillStyle=lnc(i);c.fill()})}
+  else{c.strokeStyle=lnc(i);c.lineWidth=hiline(plts,i)*(lw?lw:2);c.beginPath()
    if(a){c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>c.lineTo(xx(x),yy(y[j])))}else{c.moveTo(xx(x[0]),zz(l.z[0]));x.forEach((x,j)=>{let z=l.z[j],s=z-l.z[j-1],d=((s>180)?-360:(s<-180)?360:0);c.lineTo(xx(x),zz(z+d));if(d){c.stroke();c.beginPath();c.moveTo(xx(x),zz(z))}})}c.stroke()};pt(i,p.lines[i].x,p.lines[i].y)},
  br=(l,i)=>{ let hp=j=>hipoint(plts,i,j,p.i); c.fillStyle=lnc(i);c.strokeStyle=c.fillStyle;l.x.forEach((x,j)=>{let a=[1+xx(p.stacked?(x-bw/2):(x+(i-nl/2)*bw)),1+yy((p.stacked&&i)?p.lines[i-1].y[j]:0),bw*xs-2,2+yy(l.y[j])-yy((p.stacked&&i)?p.lines[i-1].y[j]:0)];(2==hp(j))?c.strokeRect(...a):c.fillRect(...a)}) },
  st=(l,i)=>{ br(l,i) },
@@ -132,12 +133,15 @@ function xyplot(p,c,w,h,plts){if(!p.lines)return;let nl=p.lines.length,z=(p.line
 }
 function envelopeplot(p,c,w,h,plts){p.ep=true;p.type="xy";return xyplot(p,c,w,h,plts)}
 function polarplot(p,c,w,h,plts){if(!p.lines)return;
- let ra=floor(min(w-plts.pw,h-plts.ph-plts.tih)/2),raa=ra+plts.tl,al=[7,6,3,3,0,0,1,2,2,5,5,8],
- li=autop(p.lines,limits(p)),r1=(li[1]-li[0])/2,sc=ra/r1,xm=floor(w/2),ym=floor(ra+plts.ph/2+plts.tih),X,Y
- ln=(l,i)=>{let x=l.y,y=l.z;if(!x.length)return
-  let s=hiline(plts,i)*(l.size?l.size:3);c.fillStyle=color(i,p.lines.length,plts)
+ let ra=floor(min(w-plts.pw,h-plts.ph-plts.tih)/2),raa=ra+plts.tl,al=[7,6,3,3,0,0,1,2,2,5,5,8],lnc=i=>color(i,p.lines.length,plts),
+ li=autop(p.lines,limits(p)),r1=(li[1]-li[0])/2,sc=ra/r1,xm=floor(w/2),ym=floor(ra+plts.ph/2+plts.tih),X,Y,xx=x=>sc*(x-X),yy=y=>-sc*(y-Y)
+ ln=(l,i)=>{let x=l.y,y=l.z,ps=pointsize(p,i),lw=linewidth(p,i);if(!x.length)return
+  let s=hiline(plts,i)*(ps?ps:3);c.fillStyle=lnc(i) //color(i,p.lines.length,plts)
   let hp=j=>hipoint(plts,i,j,p.i)
-  x.map((x,i)=>{c.beginPath();c.arc(sc*(x-X),-sc*(y[i]-Y),s*hp(i),0,2*Math.PI);c.fill()})}
+  if(lw){c.beginPath();c.strokeStyle=lnc(i);c.lineWidth=lw;c.moveTo(xx(x[0]),yy(y[0]));x.forEach((x,j)=>{if(j)c.lineTo(xx(x),yy(y[j]))});c.stroke();
+   if(arrow(p,i)){let x0=xx(x[0]),y0=yy(y[0]),x1=xx(x[1]),y1=yy(y[1]),dx=x1-x0,dy=y1-y0,d=0.05*Math.hypot(dx,dy);dx/=d;dy/=d;c.beginPath();c.fillStyle=lnc(i);c.moveTo(x1,y1);c.lineTo(x1-dx+0.25*dy,y1-dy-0.25*dx);c.lineTo(x1-dx-0.25*dy,y1-dy+0.25*dx);c.closePath();c.fill()  }}
+  else x.map((x,i)=>{c.beginPath();c.arc(xx(x),yy(y[i]),s*hp(i),0,2*Math.PI);c.fill()}
+ )}
  p.limits=li;X=(li[0]+li[1])/2,Y=(li[2]+li[3])/2
  c.translate(xm,ym)
  circle(c,0,0,ra)
@@ -174,6 +178,9 @@ function layout(c,plts){                           //computed sizes depending on
  plts.ph =2*plts.tl+2*plts.tlh                     //polar sum of v margins (sym without tih)
  return plts
 }
+function pointsize(p,i){return[0,1,3,5,7,10][1+".oO08".indexOf(p.styles[i%p.styles.length])]}
+function linewidth(p,i){return[0,2,2,3,4][1+"->=#".indexOf(p.styles[i%p.styles.length])]}
+function arrow(p,i){return">"==p.styles[i%p.styles.length]}
 function LN(c,x0,y0,x1,y1){c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
 function hiline(p,i){return(p.hi.lines.includes(i)&&p.hi.point===null)?2:1}
 function hipoint(p,i,j,k){return(k==p.hi.plot&&p.hi.lines.length==1&&p.hi.lines[0]==i&&p.hi.point==j)?2:1}
