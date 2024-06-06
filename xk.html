@@ -80,7 +80,7 @@ klwbl:{[XY]ab:fit.XY;(k;exp(-*ab)%k:ab 1)}
 wblplot:{plot xy:wbl x;+`shape`scale`q95!,'kl,(qwbl 0.95).kl:klwbl xy}
 
 idx:{[a;u]solve[(1@0.+a;1a0+&#a);u]}  /(nominal;offset)
-idxplot:{[a;u]o:*|r:idx[a;u];plot'(`polar;,'u);r}
+idxplot:{[t;i;sa;su]o:*|r:idx[a:0.+t sa;u:t su];q:*r;plot'(i;">>-",(#u)#"o";``,su;`polar;0a,o;o,o+q;o+q*1a@a;,'u);+(,su)!,r}
 
 /least squares, e.g.  A:(3 5 -8 12.;-2 3 3 0.;7 -8 2 1.);b:dot[+A;x:1 2 3];0.00001>|/abs x-solve[A;b]   /A:list of columns
 dot:  (+/*)\
@@ -103,13 +103,12 @@ xkbar:      {[]plot'(`bar;    (1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class
 xkstack:    {[]plot'(`stacked;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"stacked bar plot")}
 xkhist:     {[]hist[20 0 4;abs@?10000a];plot```"rayleigh distribution"}
 xkwbl:      {[]plot`"ln x"`"ln ln(1/1-F)"`"weibull plot";,/wblplot'(abs@?1000a;abs@2*?1000a)}
-xkreduction:{[]b:(10*?1000)+a-0.95a5*a:20*?1000a;plot'(`square;"o";abs(a;b);0 80 0 80;`initial`residual`reduction)} /square is like xy, but keeps axis in a square box
+xkreduction:{[]b:(10*?1000)+a-0.95a5*a:20*?1000a;r:r95'(a;b);plot'(`square;"--",(#a)#"o";(0 80;r1,r1:*|r);(r0,r0:*r;0 80);abs(a;b);0 80 0 80;`initial`residual`reduction);`initial`residual`reduction!r,(r0-r1)%r0} /square is like xy, but keeps axis in a square box
 xkpolar:    {[]plot v:A[Asel]`vel;`<"select values from the list to update";`offset`r95!(avg v;r95 v)}   /plot`polar is implicit if data is complex
 
 xkidx:      {[]
  t:+`a`u`v!(0 90 180 270;6.69a35 7.45a79 4.52a126 1.66a334;9.49a309 8.11a329 5.38a319 7.60a293)
- plot'(0;`polar;,'t`u);plot'(1;`polar;,'t`v)
- `nominal`offset!+`u`v!(idx[t`a;t`u];idx[t`a;t`v])}
+ `nominal`offset!,'/{idxplot[t;x;`a;y]}'[0 1;`u`v]}
 
 xkampang:   {[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a165;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
 xktby:      {[]`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
