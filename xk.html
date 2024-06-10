@@ -81,6 +81,7 @@ wblplot:{plot xy:wbl x;+`shape`scale`q95!,'kl,(qwbl 0.95).kl:klwbl xy}
 
 idx:{[a;u]solve[(1@0.+a;1a0+&#a);u]}  /(nominal;offset)
 idxplot:{[t;i;sa;su]o:*|r:idx[a:0.+t sa;u:t su];q:*r;plot'(i;">>-",(#u)#"o";``,su;`polar;0a,o;o,o+q;o+q*1a@a;,'u);+(,su)!,r}
+cal:{[s;t]+-1_'solve[+t,'1a;+s]}
 
 /least squares, e.g.  A:(3 5 -8 12.;-2 3 3 0.;7 -8 2 1.);b:dot[+A;x:1 2 3];0.00001>|/abs x-solve[A;b]   /A:list of columns
 dot:  (+/*)\
@@ -112,6 +113,11 @@ xkidx:      {[]
 
 xkampang:   {[]x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a165;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1));"amplitude/angle and polar diagram"}
 xktby:      {[]`<"select rows from the keytable below the plot to highlight lines";avg'tplot[`class?A;`temp`pressure`vel;`xy`xy`polar]}
+
+
+
+xkcal:{u:+solve[qr cal[s;t:-2^0a0 0a0 16.7a0 0a0 16.7a60 0a0 16.7a300 0a0 0a0 16.7a0 0a0 16.7a60 0a0 16.7a300];s:-2^5.81a23 1.07a327 4.62a16 0.73a324 5.97a9 0.98a309 4.87a33 0.89a346 5.48a20 1.12a326 5.93a16 1.08a330 5.61a26 1.05a323];plot'(`polar;,'*u;1;`polar;,'u 1);+`u1`u2!u}
+
 
 
 
