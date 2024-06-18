@@ -300,7 +300,7 @@ let kinst=(u,x)=>{reset();
 
 let xcal=[],xreg=(name,g,arity)=>{xcal.push(g);let f=K.l2(BigInt(xcal.length-1),Ks(name));I()[(lo(f)>>>2)-3]=(arity===undefined)?1:arity;f=(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f)));asn(name,f)},
 TK=x=>{let j=J(),k=SK(K.rx(j[lo(x)>>>3])),v=K.rx(j[1+(lo(x)>>>3)]),r={top:0,sel:"!0",h:[],t:[],d:[],n:K.nn(x),isel:new Int32Array(0),sel:"!0"},F={19:["i",IK],20:["s",SK],21:["f",FK],22:["z",ZK]};k.forEach((x,i)=>{let vi=j[i+(lo(v)>>>3)],t=K.tp(vi),f=F[t];r.h.push(x);r.t.push(f[0]);r.d.push(f[1](vi))});return r},
-KC=x=>{let r=K.mk(18,x.length);C().set(("string"===typeof x)?us(x):x,lo(r));return r},
+KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
 KS=x=>{let v=(x.map(x=>lo(Ks(x))))/*needs temporary*/,r=K.mk(20,x.length);I().set(v,lo(r)>>>2);return r},Ks=x=>K.sc(KC(x)),sK=x=>CK(K.cs(x)),
 KL=x=>{let r=K.mk(23,x.length);J().set(x,lo(r)>>>3,new BigInt64Array(x));return r},LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));K.dx(x);return r},
