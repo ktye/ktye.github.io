@@ -4,34 +4,39 @@
 *{margin:0;overflow:hidden;font-family:monospace}
 svg{display:block;margin:auto}
 .ln:hover{cursor:pointer}
+.ul{border-bottom:1px solid}
+table{border-collapse:collapse}
 textarea{background:#efe;border:none;outline:none}
 input{width:5em}
 th{text-align:left}
 
 
+
 </style>
 <body>
-<svg id="svg" width="800" height="100" xmlns="http://www.w3.org/2000/svg"></svg><pre id="massprop" style="float:right"></pre>
+<svg id="svg" width="800" height="200" xmlns="http://www.w3.org/2000/svg"></svg><pre id="massprop" style="float:right"></pre>
 <details id="details"><div  style="display:flex;flex-direction:row">
 <div>units: <select id="units" onchange="changeunits()"><option>iso</option><option>large</option><option>medium</option><option>small</option></select></div>
-<table id="nodeedit" style="display:none">
- <caption id="nodecaption" data-node="0">node</caption>
- <tr><th>disc Da</th><td><input type="number"    id="edDa" /></td><td class="unitL">m</td></tr>
- <tr><th>disc Di</th><td><input type="number"    id="edDa" /></td><td class="unitL">m</td></tr>
- <tr><th>support cx</th><td><input type="number" id="edCx" /></td><td class="unitC">N/m</td></tr>
- <tr><th>support cy</th><td><input type="number" id="edCy" /></td><td class="unitC">N/m</td></tr>
- <tr><th>unbalance</th><td><input type="number"  id="edU"  /></td><td class="unitU">kgm</td></tr>
- <tr><th>angle</th><td><input type="number"      id="edA" min="0" max="360" /></td><td>degree</td></tr>
- <tr><th>sensor direction</th><td><select        id="edSen"><option>none</option><option>x</option><option>y</option></select></td></tr>
- <tr><th>cal direction</th><td><select           id="edCal"><option>none</option><option>x</option><option>y</option></select></td></tr>
+<table id="nodeedit" data-i="0" style="display:none">
+ <caption id="nodecaption" data-i="0">node</caption>
+ <tr><th>disc Da</th><td><input type="number"    id="edDa" onchange='ed(this,"D","L","disc")' /></td><td class="unitL">m</td></tr>
+ <tr><th>disc Di</th><td><input type="number"    id="edDi" onchange='ed(this,"d","L","disc")' /></td><td class="unitL">m</td></tr>
+ <tr class="ul"><th>mass</th><td><input type="number"       id="edM"  onchange='ed(this,"m","M","disc")' /></td><td class="unitM">kg</td></tr>
+ <tr><th>support cx</th><td><input type="number" id="edCx" onchange='ed(this,"cx","C","spring")' /></td><td class="unitC">N/m</td></tr>
+ <tr class="ul"><th>support cy</th><td><input type="number" id="edCy" onchange='ed(this,"cy","C","spring")' /></td><td class="unitC">N/m</td></tr>
+ <tr><th>unbalance</th><td><input type="number"  id="edU"  onchange='ed(this,"u","U","unbal")' /></td><td class="unitU">kgm</td></tr>
+ <tr class="ul"><th>angle</th><td><input type="number"      id="edA"  onchange='ed(this,"a","","unbal")' min="0" max="360" /></td><td>degree</td></tr>
+ <tr><th>sensor direction</th><td><select        id="edSen"><option>none</option><option>x</option><option>y</option><option>both</option></select></td></tr>
+ <tr><th>cal direction</th><td><select           id="edCal"><option>none</option><option>x</option><option>y</option><option>both</option></select></td></tr>
 </table>
-<table id="shaftedit" data-shaft="0" style="display:none">
+<table id="shaftedit" data-i="0" style="display:none">
  <caption id="shaftcaption">shaft</caption>
- <tr><th>length</th><td><input type="number"  id="edl"/></td><td class="unitL">m</td></tr>
- <tr><th>Da</th><td><input type="number"      id="edda"/></td><td class="unitL">m</td></tr>
- <tr><th>Di</th><td><input type="number"      id="eddi" /></td><td class="unitL">m</td></tr>
- <tr><th>density</th><td><input type="number" id="edrho" /></td><td class="unitR">kg/m^3</td></tr>
- <tr><th>mass</th><td><input type="number"    id="edm" /></td><td class="unitM">kg</td></tr>
+ <tr><th>length</th><td><input type="number"  id="edl"   onchange='ed(this,"L","L")' /></td><td class="unitL">m</td></tr>
+ <tr><th>Da</th><td><input type="number"      id="edda"  onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
+ <tr><th>Di</th><td><input type="number"      id="eddi"  onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
+ <tr><th>density</th><td><input type="number" id="edrho" onchange='ed(this,"rho","R")'  /></td><td class="unitR">kg/m^3</td></tr>
+ <tr><th>mass</th><td><input type="number"    id="edm"   onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
+ <tr><td><button onclick="splitshaft()">split into</button></td><td><input id="splitinto" type="number" min="2" max="20" value="2"></td></tr>
 </table>
 <textarea id="ta" style="resize:none" onchange="modelT(this.value)" spellcheck="false"></textarea></div></details>
 
@@ -66,12 +71,8 @@ node=x=>{
 },
 */
 shafts=m=>m.filter(x=>x.type=="shaft"),
-addxnr=m=>{let n=0,X=0,r=shafts(m).map(x=>x.D/2);r.unshift(0);r.push(0);return m.map(x=>((x.type=="shaft")?(x.X=X,X+=x.L,n++,x):(x.X=X,x.node=n,x.r=Math.max(r[n],r[1+n]),x)))},
-discs=m=>m.filter(x=>x.type=="disc"),
-unbals=m=>m.filter(x=>x.type=="unbal"),
-sensors=m=>m.filter(x=>x.type=="sensor"),
-cals=m=>m.filter(x=>x.type=="cal"),
-springs=m=>m.filter(x=>x.type=="spring"),
+addxnr=m=>{let n=0,X=0,r=shafts(m).map(x=>x.D/2);r.unshift(0);r.push(0);return m.map((x,j)=>((x.type=="shaft")?(x.X=X,X+=x.L,n++,x):(x.X=X,x.node=n,x.r=Math.max(r[n],r[1+n]),x)))},
+discs=m=>m.filter(x=>x.type=="disc"),unbals=m=>m.filter(x=>x.type=="unbal"),sensors=m=>m.filter(x=>x.type=="sensor"),cals=m=>m.filter(x=>x.type=="cal"),springs=m=>m.filter(x=>x.type=="spring"),
 
 svgmod=m=>{let D=0,L=0,M=0,r="";addxnr(m);let sh=shafts(m)
  sh.forEach((x,i)=>{
@@ -81,23 +82,33 @@ svgmod=m=>{let D=0,L=0,M=0,r="";addxnr(m);let sh=shafts(m)
   r+=`<rect x="${x.X}" y="${-x.D/2}"   width="${x.L}" height="${x.D}" fill="none" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`;
   D=Math.max(D,x.D);L+=x.L;M+=x.rho*area(x)*x.L})
  
-                           
- sh.forEach((x,i)=>{r+=`<circle cx="${x.X}" cy="0" r="${D/10}" fill="black" class="ln" onclick="clicknode(${    i    })"/>`})
-                    r+=`<circle cx="${ L }" cy="0" r="${D/10}" fill="black" class="ln" onclick="clicknode(${sh.length})"/>`
+ sh.forEach((x,i)=>{
+  r+=`<circle cx="${x.X}" cy="0" r="${D/10}" fill="black" class="ln" onclick="clicknode(${    i    })"/>`})
+  r+=`<circle cx="${ L }" cy="0" r="${D/10}" fill="black" class="ln" onclick="clicknode(${sh.length})"/>`
+ 
+ discs(m).forEach((x,i)=>{
+  r+=`<line x1="${x.X}" y1="${-x.D/2}" x2="${x.X}" y2="${-x.d/2}" stroke="black" stroke-width="7px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${x.node})"/>`
+  r+=`<line x1="${x.X}" y1="${ x.D/2}" x2="${x.X}" y2="${ x.d/2}" stroke="black" stroke-width="7px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${x.node})"/>`
+ })
  
  D*=2
  sensors(m).forEach((x,i)=>{
   r+=`<line x1="${x.X}" y1="${-D/2}" x2="${x.X}" y2="${-1.1*x.r}"" stroke="red" stroke-width="2px" vector-effect="non-scaling-stroke" />`
   r+=`<rect x="${x.X-D/20}" y="${-D/2}" width="${D/10}" height="${D/10}" fill="lightgrey" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${x.node})"/>`
+  if(x.dir.includes("x"))r+=`<line x1="${x.X-D/20}" y1="${-D/2}" x2="${x.X+D/20}" y2="${D/10-D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`
+  if(x.dir.includes("y"))r+=`<line x1="${x.X+D/20}" y1="${-D/2}" x2="${x.X-D/20}" y2="${D/10-D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`
  })
  
  cals(m).forEach((x,i)=>{
   r+=`<line x1="${x.X}" y1="${D/2}" x2="${x.X}" y2="${1.1*x.r}"" stroke="green" stroke-width="2px" vector-effect="non-scaling-stroke" />`
   r+=`<rect x="${x.X-D/20}" y="${D/2-D/9.5}" width="${D/10}" height="${D/10}" fill="lightgrey" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${x.node})"/>`
+  if(x.dir.includes("x"))r+=`<line x1="${x.X-D/20}" y1="${D/2-D/9.5}" x2="${x.X+D/20}" y2="${D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`
+  if(x.dir.includes("y"))r+=`<line x1="${x.X+D/20}" y1="${D/2-D/9.5}" x2="${x.X-D/20}" y2="${D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`
  })
  
  springs(m).forEach((x,i)=>{
-  r+=`<polygon points="${x.X},${x.r} ${x.X+D/20},${x.r+D/10} ${x.X-D/20},${x.r+D/10}" fill="black"/>`
+  if(x.cx!=0)r+=`<polygon points="${x.X},${x.r} ${x.X},${x.r+D/10} ${x.X-D/20},${x.r+D/10}" fill="black" class="ln" onclick="clicknode(${x.node})"/>`
+  if(x.cy!=0)r+=`<polygon points="${x.X},${x.r} ${x.X+D/20},${x.r+D/10} ${x.X},${x.r+D/10}" fill="black" class="ln" onclick="clicknode(${x.node})"/>`
  })
  
  unbals(m).forEach((x,i)=>{
@@ -120,20 +131,42 @@ svgmod=m=>{let D=0,L=0,M=0,r="";addxnr(m);let sh=shafts(m)
 },
 area=x=>0.25*Math.PI*(x.D*x.D-x.d*x.d),
 
-clicknode=i=>{details.open=true;shaftedit.style.display="none";nodeedit.style.display="block";console.log("todo.. click node",i)},
-clickshaft=i=>{details.open=true;shaftedit.style.display="block";nodeedit.style.display="none";
+
+clicknode=i=>{details.open=true;shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="node "+i;nodeedit.dataset.i=i;addxnr(model);
+ af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none";edCal.value="none"
+ discs(  model).filter(x=>i==x.node).forEach(e=>{edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m)});
+ springs(model).filter(x=>i==x.node).forEach(e=>{edCx.value=scC(e.cx);edCy.value=scC(e.cy)});                 
+ unbals( model).filter(x=>i==x.node).forEach(e=>{edU.value=scU(e.u);edA.value=e.a});
+ sensors(model).filter(x=>i==x.node).forEach(e=>{edSen.value=e.dir})
+ cals(   model).filter(x=>i==x.node).forEach(e=>{edCal.value=e.dir})
+ },
+clickshaft=i=>{details.open=true;shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="shaft "+i;shaftedit.dataset.i=i;
  let sh=shafts(model),e=sh[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);edrho.value=scR(e.rho);edm.value=scM(e.rho*area(e)*e.L)
 },
 changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.dataset.shaft)
  gc("unitL").forEach(x=>x.textContent=uni("L")[0])
  gc("unitM").forEach(x=>x.textContent=uni("M")[0])
  gc("unitR").forEach(x=>x.textContent=uni("R")[0])
+ gc("unitC").forEach(x=>x.textContent=uni("C")[0])
  gc("unitU").forEach(x=>x.textContent=uni("U")[0])
  update()
 }
 addshaft=_=>{let v=shafts(model);model.push({...v[v.length-1]});update()},
+addnode=(j,v)=>{for(let i=0;i<model.length;i++)if(model[i].type=="shaft"&&0==j--){model.splice(i,0,v);return v};model.push(v);return v}
+delnode=(j,g)=>{for(let i=0;i<model.length;i++){if(g==model[i].type&&!j){model.splice(i,1);return};if(model[i].type=="shaft")j--}}
+delshaft=j=>{for(let i=0;i<model.length;i++)if(model[i].type=="shaft")if(0==j--)model.splice(i,1);update()}
+ed=(inp,s,u,g)=>{let c=1/((""!=u)?uni(u)[1]:1),t=inp.closest("table"),i=+t.dataset.i,v=c*(+inp.value);
+ if("shaftedit"==t.id){let e=shafts(model)[i]; if(s=="mass"){s="rho";v=v/area(e)*e.L};e[s]=v;clickshaft(i) }
+ else{addxnr(model);
+  let e=(("disc"==g)?discs(model):("spring"==g)?springs(model):unbals(model)).filter(x=>i==x.node)[0]; 
+  if(e===undefined)e=addnode(i,("disc"==g)?{type:"disc",D:0,d:0,m:1,node:i}:("spring"==g)?{type:"spring",cx:1,cy:1,node:i}:{type:"unbal",u:1,a:0,node:i})
+  e[s]=v
+  if(v==0){if((s=="m"&&g=="disc")||(s=="u"&&g=="unbal"))delnode(i,g);if(g=="spring"&&(e.cx==0&&e.cy==0))delnode(i,g)}
+  clicknode(i)  }
+ update()},
 
 update=_=>{svgmod(model);tamod(model)},
+splitshaft=_=>{let i=+shaftedit.dataset.i,n=+splitinto.value,sh=shafts(model)[i];sh.L/=n;if(n==0)return delshaft(i);for(let j=0;j<model.length;j++)if(model[j].type=="shaft")if(0==i--){for(let k=1;k<n;k++)model.splice(j,0,{type:"shaft",L:sh.L,D:sh.D,d:sh.d,rho:sh.rho});update();return}},
 
 uni=x=>{let t={
   iso:   {M:["kg",1],  L:["m",1],   R:["kg/m^3",1],U:["kgm",1],   C:["N/m",1]},
@@ -150,7 +183,7 @@ model=[
  {type:"shaft",L:0.020,D:0.015,d:0.005,rho:7850},
  {type:"disc",m:0.2,D:0.010,d:0.005},
  {type:"unbal",u:15,a:30},
- {type:"sensor",dir:"xy"},
+ {type:"sensor",dir:"both"},
  {type:"cal",dir:"x"},
 ]
 
