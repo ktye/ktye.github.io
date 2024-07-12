@@ -2,6 +2,6 @@ sed '/kw/q' index.html | head -n -1
 echo -n 'kw=u64s("'
 base64 -w0 ../k.wasm
 echo -n '"),rk=u64s("'
-base64 -w0 r.k
+sed -e '/^\//d' -e 's/ \/.*//' -e '/^$/d' r.k | base64 -w0 -
 echo '"),'
 sed -n '/kw=/{n;p;}' index.html
