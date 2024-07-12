@@ -5,7 +5,7 @@
 / matrix size: 16x16 (for K M G)
 
 /per shaft element: L D d E rho
-/per node:          m J cx cy u a U
+/per node:          m J Q cx cy U
 
 
 A:0.25p*(D2:D*D)-d2:(d*d)
@@ -32,7 +32,7 @@ G:{[g;i;ri;l]@[g;i+i0;+;Gi[ri;l]]}/[n0;o;ri;L] /gyroscopic matrix
 Jq:0.5*J                                       /equatorial/polar moments of inertia, thin disc:neglect (m%12)*l*l in Jq
 K[0+(n*i)+i:4*!n]+:cx                          /add spring support to nodes i on diagonal. 
 K[1+(n*i)+i:4*!n]+:cy                          /add spring support to nodes i on diagonal. 
-M[(!m)+m*!m  ]+:,/+(m;m;Jq;Jq)                 /add mass and equatorial moment of inertia of disc elements to diagonal
+M[(!m)+m*!m  ]+:,/+(m;m;J;Q)                   /add mass and equatorial moment of inertia of disc elements to diagonal
 G[1+i+m*i:2+4*!n]+:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
 G[i+m*1+i:2+4*!n]-:J
 B:0.01*K                                       /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
@@ -45,3 +45,4 @@ solve:{lusolve[lu x;y]}
 
 f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[imag[K-M*w2;G*w+B];u]}
    
+

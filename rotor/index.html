@@ -188,8 +188,8 @@ rigid=m=>{ //rigid rotor properties
  let z=[0];shafts(m).forEach((x,i)=>z.push(z[i]+x.L))
  let M=shafts(m).reduce((s,e)=>s+mass(e),0)+nodes(m).reduce((s,e)=>s+e.M,0),
      Z=shafts(m).reduce((s,e,i)=>s+0.5*(z[i]+z[1+i])*mass(e)/M,0)+nodes(m).reduce((s,e,i)=>s+z[i]*e.M/M,0),
-     J=shafts(m).reduce((s,e,i)=>s+mass(e)*(e.D*e.D+e.d*e.d)/8,0)                                           +nodes(m).reduce((s,e,i)=>s+e.M*(e.D*e.D+e.d*e.d)/ 8,                0),
-     Q=shafts(m).reduce((s,e,i)=>s+mass(e)*((0.75*(e.D*e.D+e.d*e.d)+e.L*e.L)/12+(0.5*(z[i]+z[1+i])-Z)**2),0)+nodes(m).reduce((s,e,i)=>s+e.M*(e.D*e.D+e.d*e.d)/16+e.M*(z[i]-Z)**2,0),
+     J=shafts(m).reduce((s,e,i)=>s+mass(e)*(e.D*e.D+e.d*e.d)/8,0)                                       +nodes(m).reduce((s,e,i)=>s+e.M*(e.D*e.D+e.d*e.d)/ 8,                0),
+     Q=shafts(m).reduce((s,e,i)=>s+mass(e)*((0.75*(e.D*e.D+e.d*e.d)+e.L*e.L)/12+((z[i]+z[1+i])-Z)**2),0)+nodes(m).reduce((s,e,i)=>s+e.M*(e.D*e.D+e.d*e.d)/16+e.M*(z[i]-Z)**2,0),
      nx=eig(m,M,Z,z,Q,"cx"),ny=eig(m,M,Z,z,Q,"cy")
  return{M:M,Z:Z,J:J,Q:1,iJ:Math.sqrt(J/M),iQ:Math.sqrt(Q/M),nx:nx,ny:ny}},
 eig=(m,M,Z,z,Q,dir)=>{let c0=nodes(m).reduce((s,e,i)=>s+e[dir],0),c1=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z),0),c2=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z)**2,0),a=c0/M,b=c1/M,c=c1/Q,d=c2/Q,me=0.5*(a+d),det=a*d-b*c,rpm=30/pi;return[rpm*(me-Math.sqrt(me*me-det)),rpm*(me+Math.sqrt(me*me-det))]},
