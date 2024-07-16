@@ -7,6 +7,29 @@
 /per shaft element: L D d E rho
 /per node:          m J Q cx cy U
 
+/ `L \L:0.02 0.02
+/ `D \D:0.01 0.015
+/ `d \d:0.005 0.005
+/ `E \E:200 200.
+/ `rho \rho:7850 7850.
+/ `m \m:0 0 0.2
+/ `J \J:0 0 0.000003125
+/ `Q \Q:0 0 0.0000015625
+/ `cx \cx:1000 1000 0.
+/ `cy \cy:1000 1000 0.
+/ `U \U:0 0 15a30
+
+/`L \L
+/`D \D
+/`d \d
+/`E \E
+/`rho \`rho
+/`m \m
+/`J \J
+/`Q \Q
+/`cx \cx
+/`cy \cy
+/`U \U
 
 A:0.25p*(D2:D*D)-d2:(d*d)
 I:0.015625p*(D2*D2)-d2*d2
@@ -38,12 +61,10 @@ G[i+k*1+i:2+4*!n]-:J
 B:0.01*K                                       /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
 u:,/1 1a90 0 0*/U                              /unbalance excitation vector
 
-
 lu:{[A]i:0;k:!#A;P:!#A;while[1<#k;j:i+*&a=m:|/a:abs A[k;i];P[(i;j)]:P[(j;i)];A[(i;j)]:A[(j;i)];A[k:1_k;i]%:A[i;i];A[k;k]-:A[k;i]*\A[i;k];i+:1];(A;P)}
 lusolve:{[LUP;b];A:*LUP;P:*|LUP;r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A];{[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 solve:{lusolve[lu x;y]}
 
-f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[imag[K-M*w2;G*w+B];u][,/0 1+/4*!n]}
-F:{[RPM],/RPM'f}
-   
+f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;G*w+B];u][,/0 1+/4*!n]}
+F:{[RPM],/f'RPM}
 
