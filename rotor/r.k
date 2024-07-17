@@ -34,8 +34,8 @@
 A:0.25p*(D2:D*D)-d2:(d*d)
 I:0.015625p*(D2*D2)-d2*d2
 ei:E*I
-ra:r*A
-ri:r*I
+ra:rho*A
+ri:rho*I
 
 /element matrix 8x8: K(stiffness) M(mass) G(gyroscopic), K M symmertric, G antimetric
 Ki:{[ei;l]a:6*l;b:2*l*l;(ei%l*l*l)*sy(6;0;0;a;-12;0;0;a;6;-a;0;0;-12;-a;0;b;0;0;a;b;0;b;-a;0;0;b;6;0;0;-a;6;a;0;b;0;b)}
