@@ -42,8 +42,8 @@ load example:<select id="selex" onchange="chex(this)" style="width:auto">
  <tr><th>length</th><td><input type="number"  id="edl"   onchange='ed(this,"L","L")' /></td><td class="unitL">m</td></tr>
  <tr><th>Da</th><td><input type="number"      id="edda"  onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
  <tr><th>Di</th><td><input type="number"      id="eddi"  onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
- <tr><th>E </th><td><input type="number"      id="ede"   onchange='ed(this,"E","")'  /></td><td>GPa</td></tr>
- <tr><th>density</th><td><input type="number" id="edrho" onchange='ed(this,"rho","R")'  /></td><td class="unitR">kg/m^3</td></tr>
+ <tr><th>E </th><td><input type="number"      id="ede"   onchange='ed(this,"E","P")' /></td><td>GPa</td></tr>
+ <tr><th>density</th><td><input type="number" id="edrho" onchange='ed(this,"rho","R")' /></td><td class="unitR">kg/m^3</td></tr>
  <tr><th>mass</th><td><input type="number"    id="edm"   onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
  <tr><td><button onclick="splitshaft()">split into</button></td><td><input id="splitinto" type="number" min="2" max="20" value="2"></td></tr>
 </table>
@@ -174,7 +174,7 @@ clicknode=i=>{rotordetails.open=true;shaftedit.style.display="none";nodeedit.sty
  af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none";edCal.value="none"
  let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen;edCal.value=e.cal},
 clickshaft=i=>{rotordetails.open=true;shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
- let e=model[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);ede.value=e.E,edrho.value=scR(e.rho);edm.value=scM(mass(e))},
+ let e=model[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);ede.value=scP(e.E),edrho.value=scR(e.rho);edm.value=scM(mass(e))},
 changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.dataset.i);else clicknode(+nodeedit.dataset.i);"LMRCUNE".split("").forEach(x=>gc("unit"+x).forEach(e=>e.textContent=uni(x)[0]))},
 addshaft=_=>{let n=model.length; model.push({...model[n-2]},emptynode());clickshaft(model.length-2)},
 delelem=i=>{ if(0==i%2){model[i]=emptynode();return update(i)};if(i==0||model.length<4)return; model.splice(i-1,2); update(model.length-2)},
@@ -192,7 +192,7 @@ rigid=m=>{ //rigid rotor properties
  let z=[0];shafts(m).forEach((x,i)=>z.push(z[i]+x.L))
  let M=shafts(m).reduce((s,e)=>s+mass(e),0)+nodes(m).reduce((s,e)=>s+e.m,0),
      Z=shafts(m).reduce((s,e,i)=>s+0.5*(z[i]+z[1+i])*mass(e)/M,0)+nodes(m).reduce((s,e,i)=>s+z[i]*e.m/M,0),
-     J=shafts(m).reduce((s,e,i)=>s+mass(e)*(e.D*e.D+e.d*e.d)/8,0)                                       +nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/ 8,                0),
+     J=shafts(m).reduce((s,e,i)=>s+mass(e)*(e.D*e.D+e.d*e.d)/8,0)                                           +nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/ 8,                0),
      Q=shafts(m).reduce((s,e,i)=>s+mass(e)*((0.75*(e.D*e.D+e.d*e.d)+e.L*e.L)/12+(0.5*(z[i]+z[1+i])-Z)**2),0)+nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/16+e.m*(z[i]-Z)**2,0),
      nx=crit(m,M,Z,z,Q,"cx"),ny=crit(m,M,Z,z,Q,"cy")
  return{M:M,Z:Z,J:J,Q:1,iJ:sqrt(J/M),iQ:sqrt(Q/M),nx:nx,ny:ny}},
@@ -204,12 +204,12 @@ calculate=_=>{if(kw&&rk)kinit(1);else setTimeout(calculate,500)},
 
 
 uni=x=>{let t={
-  iso:   {M:["kg",1],  L:["m",1],   R:["kg/m^3",1],U:["kgm",1],   C:["N/m",1],    N:["rpm",1]    },
-  large: {M:["t",1e-3],L:["mm",1e3],R:["kg/m^3",1],U:["kgmm",1e3],C:["N/µm",1e-6],N:["rpm",1]    },
-  medium:{M:["kg",1],  L:["mm",1e3],R:["kg/m^3",1],U:["gmm",1e6], C:["N/µm",1e-6],N:["rpm",1]    },
-  small: {M:["g",1e3], L:["mm",1e3],R:["kg/m^3",1],U:["mgmm",1e9],C:["N/µm",1e-6],N:["krpm",1e-3]}
+  iso:   {M:["kg",1],  L:["m",1],   R:["kg/m^3",1],U:["kgm",1],   C:["N/m",1],    P:["GPa",1e-9],N:["rpm",1]    },
+  large: {M:["t",1e-3],L:["mm",1e3],R:["kg/m^3",1],U:["kgmm",1e3],C:["N/µm",1e-6],P:["GPa",1e-9],N:["rpm",1]    },
+  medium:{M:["kg",1],  L:["mm",1e3],R:["kg/m^3",1],U:["gmm",1e6], C:["N/µm",1e-6],P:["GPa",1e-9],N:["rpm",1]    },
+  small: {M:["g",1e3], L:["mm",1e3],R:["kg/m^3",1],U:["mgmm",1e9],C:["N/µm",1e-6],P:["GPa",1e-9],N:["krpm",1e-3]}
  };return t[units.value][x]},
-scL=x=>x*uni("L")[1],scM=x=>x*uni("M")[1],scR=x=>x*uni("R")[1],scU=x=>x*uni("U")[1],scC=x=>x*uni("C")[1],scN=x=>x*uni("N")[1],
+scL=x=>x*uni("L")[1],scM=x=>x*uni("M")[1],scR=x=>x*uni("R")[1],scU=x=>x*uni("U")[1],scC=x=>x*uni("C")[1],scP=x=>x*uni("P")[1],scN=x=>x*uni("N")[1],
 
 examples={
  empty:{model:[
@@ -219,25 +219,25 @@ examples={
  ],speed:{min:1,max:100,steps:100}},
  shaft:{model:[
   {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none",cal:"none"},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none",cal:"none"},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
-  {L:0.1,D:0.1,d:0,E:200,rho:7850},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x",cal:"none"}
  ],speed:{min:1000,max:300000,steps:100}},
  resonance:{model:[

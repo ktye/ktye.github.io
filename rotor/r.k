@@ -7,29 +7,29 @@
 /per shaft element: L D d E rho
 /per node:          m J Q cx cy U
 
-/ `L \L:0.02 0.02
-/ `D \D:0.01 0.015
-/ `d \d:0.005 0.005
-/ `E \E:200 200.
-/ `rho \rho:7850 7850.
-/ `m \m:0 0 0.2
-/ `J \J:0 0 0.000003125
-/ `Q \Q:0 0 0.0000015625
-/ `cx \cx:1000 1000 0.
-/ `cy \cy:1000 1000 0.
-/ `U \U:0 0 15a30
+/ L:10#0.01
+/ D:10#0.01
+/ d:10#0.
+/ E:10#2e11
+/ rho:10#7850.
+/ m:11#0.
+/ J:11#0.
+/ Q:11#0.
+/ cx:103100 0 0 0 0 0 0 0 0 0 103100.
+/ cy:103100 0 0 0 0 0 0 0 0 0 103100.
+/ U:0 0 1.e-6a30 0 0 0 0 0 1.e-6a30 0 0
 
-/`L \L
-/`D \D
-/`d \d
-/`E \E
-/`rho \`rho
-/`m \m
-/`J \J
-/`Q \Q
-/`cx \cx
-/`cy \cy
-/`U \U
+/ `L \L
+/ `D \D
+/ `d \d
+/ `E \E
+/ `rho \rho
+/ `m \m
+/ `J \J
+/ `Q \Q
+/ `cx \cx
+/ `cy \cy
+/ `U \U
 
 A:0.25p*(D2:D*D)-d2:(d*d)
 I:0.015625p*(D2*D2)-d2*d2
@@ -51,20 +51,28 @@ K:{[k;i;ei;l]@[k;i+i0;+;Ki[ei;l]]}/[n0;o;ei;L] /assemble stiffness matrix from o
 M:{[m;i;ra;l]@[m;i+i0;+;Mi[ra;l]]}/[n0;o;ra;L] /mass matrix
 G:{[g;i;ri;l]@[g;i+i0;+;Gi[ri;l]]}/[n0;o;ri;L] /gyroscopic matrix
 
-
-Jq:0.5*J                                       /equatorial/polar moments of inertia, thin disc:neglect (m%12)*l*l in Jq
-K[0+(n*i)+i:4*!n]+:cx                          /add spring support to nodes i on diagonal. 
-K[1+(n*i)+i:4*!n]+:cy                          /add spring support to nodes i on diagonal. 
-M[(!k)+k*!k  ]+:,/+(m;m;J;Q)                   /add mass and equatorial moment of inertia of disc elements to diagonal
+diag:(!k)+k*!k
+K[diag]+:,/+(cx;cy;0;0)                        /add spring support to digonal
+M[diag]+:,/+(m;m;J;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
 G[1+i+k*i:2+4*!n]+:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
 G[i+k*1+i:2+4*!n]-:J
-B:0.01*K                                       /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
+B:-0.02*K                                      /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
 u:,/1 1a90 0 0*/U                              /unbalance excitation vector
+
+
+/test:{[x;xx]dx:x-,/xx;nz:&~dx=0.;dx[nz]:dx[nz]%x[nz];|/abs dx}
+/`dK \test[K;KK]
+/`dM \test[M;MM]
+/`dG \|/abs G+,/GG /G has different sign
 
 lu:{[A]i:0;k:!#A;P:!#A;while[1<#k;j:i+*&a=m:|/a:abs A[k;i];P[(i;j)]:P[(j;i)];A[(i;j)]:A[(j;i)];A[k:1_k;i]%:A[i;i];A[k;k]-:A[k;i]*\A[i;k];i+:1];(A;P)}
 lusolve:{[LUP;b];A:*LUP;P:*|LUP;r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A];{[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 solve:{lusolve[lu x;y]}
 
-f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;G*w+B];u][,/0 1+/4*!n]}
+f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;B+w2*G];w2*u][,/0 1+/4*!n]}
 F:{[RPM],/f'RPM}
 
+/system:{[rpm]w2:w*w:0.10471975511965978*rpm; `A`f!(k^imag[K-M*w2;B+w2*G];w2*u)}
+/s3:system 300000.
+/A:s3`A
+/f:s3`f
