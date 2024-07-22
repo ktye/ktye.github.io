@@ -1,0 +1,177 @@
+                                                                    ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+                                                                     finite elements in k
+                                                                    ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+to calculate the response of a rotating shaft to unbalance forces, we start with the Euler-Bernoulli beam model, a 4th order partial differential equation:
+
+     ∂²w      ∂⁴w
+  ρA ⎯⎯⎯ + EI ⎯⎯⎯ = 𝑓(z,t).
+     ∂t²      ∂z⁴
+     
+ getting rid of physical parameters with appropriate rescaling, the operator has the form ∂²/∂t² + ∂⁴/∂z⁴, which applies to the unidirection case with only
+ one spacial dimension. the second term is a left-over from the biharmonic(laplace) operator ∆∆.
+ the nature of the equation is an oscillation equation, e.g. how initial conditions propagate over time and space and/or how the system reacts to external
+ excitation combined on the right hand side.
+ 
+ we are only interested in the shape of the structure as it rotates with the speed of the rotor, e.g. the deflection(bending) due to the forces of concentrated
+ unbalances at discrete positions. we do not consider the general multi-frequency response due to impacts.
+ as such the equation is misleading: it is not a vibration problem, but rather an equilibrium between the unbalance forces at a fixed revolutionary speed
+ and the restoring forces of the bend shaft due to it's elastic properties. there is no oscillation involved at all, it is just a bend shaft (like a banana) that
+ rotates along it's axis defined by the bearings. however the equation has the same form and we can replace ∂²/∂t² with -Ω².
+ 
+ 
+ ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+ t time
+ z length coordinate (axis of rotation)
+ x y perpendicular coordinates that measure the displacement
+ ρ density                                                    ⎱  ρA mass per length of a short cut through the rotor
+ A cross section area                                         ⎰  
+ E young's modulus of elasicity                               ⎱  EI bending stiffness
+ I areal moment of inertia (only geometric, no mass involved) ⎰ 
+ L element length
+ ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+ 
+ - analytic solutions -
+ ..
+ 
+ - finite elements -
+ to solve general shaft geometries we use finite elements to discretize the rotor and end up with some matrices:
+
+
+       stiffness matrix K                     mass matrix M                       state vector q
+
+     EI ⎡ 12   6L   -12   6L ⎤         ρAL ⎡156  22L   54  -13L ⎤        ⎡w₀⎤   φ₀↶              φ₁↶    
+ K = ⎯⎯ ⎢ 6L   4L²  -6L   2L²⎥     M = ⎯⎯⎯ ⎢22L   4L²  13L  -3L²⎥    q = ⎢φ₀⎥      ↑w₀              ↑w₁ 
+     L³ ⎢-12  -6L    12  -6L ⎥         420 ⎢ 54  13L   156 -22L ⎥        ⎢w₁⎥      ██████████████████   
+        ⎣ 6L   2L²  -6L   4L²⎦             ⎣-13L -3L² -22L   4L²⎦        ⎣φ₁⎦     z₀  shaft element  z₁   
+ 
+these are the matrices for one element only. multiple elements are assembled together and form a larger matrix:
+
+    ██████████████━━━━━━━━━━   ⋯
+    z₀           z₁        z²
+    
+ each element has different parameters for EIρAL. as you can see the right coordinate of one element is the left coordinate for the next element.
+ for a single element we have two end nodes, 4x4 system matrices and a length-4 state vector.
+ for a three element model, we have 4 nodes, a state vector of length 16 and accordingly 16x16 system matrices.
+ the matrices overlap by two rows and columns, the elements are simply added:
+ 
+
+  ┌───────┐      assembly process
+  │       │
+  │   ┌───┼───┐
+  │   │ + │   │
+  └───┼───┼───┼─
+      │   │ + │
+      └───┼───┘ ⋱
+      
+
+the final equation to solve is   -MΩ² q + K q = rhs   which is a linear system of equations for each speed Ω
+and reveals the shape of the rotor by it's displacements w₀,w₁,.. at the nodal positions z₀,z₁,..
+
+
+- xy-asymmetry -
+so far we only consider one spacial dimension x besides the axial coordinate z. this is ok as long as the model is symmetric for x and y, e.g.
+only contains circular cross section elements.
+however we want to demonstrate at least the incluence of anisotropic bearings which are very common, e.g. the stiffness in vertical direction
+towards the ground is practically alwasy different from the stiffness in horizontal direction.
+
+another reason to extend the model is to study the influence of gyroscopic forces to the system.
+gyroscopic forces are effective only for (relatively) high speeds and large cross section areas, such as concentrated discs, flywheels, turbine blades, etc.
+the key feature is that if the shaft line has a slope φ in the x-z plance, because it is bend and rotates, it introduces forces (moments to be more specific)
+in the plane perpendicular to it: y-z, that have to tendency to bend it as well.
+gyroscopic forces couple the two directions.
+
+unfortunately this means we have to double the system order, get 4 times as many matrix elements and need to compute 8 times as much to solve the system.
+
+                      stiffness                                               mass                                                gyroscopic
+
+       ⎡ 12    0    0   6L  -12    0    0   6L ⎤            ⎡156    0     0   22L   54     0    0  -13L ⎤            ⎡   0    g1   -g2   0    0   -g1  -g2   0 ⎤
+       ⎢  0   12  -6L    0    0  -12  -6L    0 ⎥            ⎢  0  156  -22L     0    0    54  13L     0 ⎥            ⎢  -g1   0     0   -g2   g1   0    0   -g2⎥
+    EI ⎢  0  -6L   4L²   0    0   6L   2L²   0 ⎥        ρAL ⎢  0 -22L    4L²    0    0  -13L  -3L²    0 ⎥        ρI  ⎢   g2   0     0    g3  -g2   0    0    g4⎥
+K = ⎯⎯ ⎢ 6L    0    0   4L² -6L    0    0   2L²⎥,   M = ⎯⎯⎯ ⎢22L    0     0    4L²  13L    0    0   -3L²⎥,   G = ⎯⎯  ⎢   0    g2  -g3    0    0   -g2  -g4   0 ⎥
+    L³ ⎢-12    0    0  -6L   12    0    0  -6L ⎥        420 ⎢ 54    0     0   13L   156    0    0  -22L ⎥        15L ⎢   0   -g1   g2    0    0    g1   g2   0 ⎥
+       ⎢  0  -12   6L    0    0   12   6L    0 ⎥            ⎢ 0    54   -13L    0    0   156  22L     0 ⎥            ⎢   g1   0    0     g2  -g1   0    0    g2⎥
+       ⎢  0  -6L   2L²   0    0   6L   4L²   0 ⎥            ⎢ 0   13L    -3L²   0    0   22L   4L²    0 ⎥            ⎢   g2   0    0     g4  -g2   0    0    g3⎥
+       ⎣ 6L    0    0   2L² -6L    0    0   4L²⎦            ⎣-13L   0     0   -3L² -22L    0    0    4L²⎦            ⎣   0    g2  -g4    0    0   -g2  -g3   0 ⎦
+
+
+both K and M are symmetric, while G is antimetric.
+
+in k we define functions that return these element matrices for given parameters:
+
+k) Ki:{[ei;l]a:6*l;b:2*l*l;(ei%l*l*l)*sy(6;0;0;a;-12;0;0;a;6;-a;0;0;-12;-a;0;b;0;0;a;b;0;b;-a;0;0;b;6;0;0;-a;6;a;0;b;0;b)}
+   Mi:{[ra;l]a:156;b:44*l;c:108;d:-26*l;e:4*l*l;f:-6*l*l;(ra*l%840)*sy(a;0;0;b;c;0;0;d;a;-b;0;0;c;-d;0;e;0;0;d;f;0;e;-d;0;0;f;a;0;0;-b;a;b;0;e;0;e)}
+   Gi:{[ri;l]a:36;b:3*l;c:4*l*l;d:-l*l;(ri%15*l)*ys(-a;b;0;0;a;b;0;0;b;-a;0;0;b;-c;b;0;0;-d;0;b;d;0;-a;-b;0;0;-b;-c)}
+   sy:{,/x++x:((!8)#'0.),'(-1_+\0,8-!8)^x};ys:{,/x-+x:((1+!8)#'0.),'(+\0,7-!7)^x}
+
+
+to assemble the system matrices from the element matrices we do:
+
+k) A:0.25p*(D2:D*D)-d2:(d*d)                      /inputs L D d E rho are real vectors with the length of the number of shaft elements
+   I:0.015625p*(D2*D2)-d2*d2                      /       m J Q cx cy are real vectors with the length of the number of nodes (1 more than elements)
+   ei:E*I                                         /input  U       is a complex vector of the number of nodes
+   ra:rho*A
+   ri:rho*I
+   
+   k:4*n:1+#L                                     /n:nodes, k:system matrix dimensions (4 dofs per node)
+   i0:,/(!8)+/k*!8                                /submatrix for element j has 64 indexes  i0+o j
+   o:(1+k)*4*!#L                                  /offset for element i
+   n0:(k*k)#0.                                    /zero initial matrix
+   K:{[k;i;ei;l]@[k;i+i0;+;Ki[ei;l]]}/[n0;o;ei;L] /assemble stiffness matrix from overlapping element matrices
+   M:{[m;i;ra;l]@[m;i+i0;+;Mi[ra;l]]}/[n0;o;ra;L] /mass matrix
+   G:{[g;i;ri;l]@[g;i+i0;+;Gi[ri;l]]}/[n0;o;ri;L] /gyroscopic matrix
+
+matrices are represented as vectors in ravel order, instead of using 2d indexing which should also be possible.
+
+- rigid elements, elastic bearings -
+once the system matrices KMG are assembled, they can be modified to account for further details:
+elastic support (e.g. a spring) at the location of a node adds it's stiffness directly to a single element of matrix K
+
+k) diag:(!k)+k*!k
+   K[diag]+:,/+(cx;cy;0;0)                        /add spring support to digonal
+   M[diag]+:,/+(m;m;J;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
+   G[1+i+k*i:2+4*!n]+:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
+   G[i+k*1+i:2+4*!n]-:J
+   B:-0.02*K                                      /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
+
+the stiffness input vectors cx and cy are mostly 0 except for the location of discrete springs.
+more complicated bearing models are not considered, but many exist: spring-mass-damper systems, hydrodynamic bearings, roller bearing details, ...
+other boundary conditions which are often done are to define a bearing to allow only bending or forcing the slope to be zero.
+this needs more consideration and typically cancels degrees of freedom which leads to a slightly smaller system of equations.
+
+discrete mass or disc elements are placed at node locations. they do not deform but contribute the the mass and gyroscopic properties in the case of discs.
+m is the vector of mass elements, and J and Q are vectors moments of inertia for each node, J around the axis of rotation 
+and Q around the axes perpendicular to it (assuming rotational symmetric cross sections only).
+
+all KMG matrices are real valued, but the system is not.
+the right hand side U is a vector of unbalances with one value per node. it is complex and the phase indicates the angle around the shaft axis of the location
+of a discrete unbalance mass attached at distance r from the shaft. only mass times radius is important hence U has dimension mass times length.
+
+k) u:,/1 1a90 0 0*/U                              /unbalance excitation vector
+
+u spreads the excitation around two degrees of freedom, taking the rotation of the shaft into account: the excitation in x and y direction is 90 degree appart,
+and is has no direct contribution to the moment (slope coordinates).
+
+
+- solving the system matrix -
+the system equation combines all matrices to form a complex valued matrix A which unfortunately is dependend on speed.
+the right hand side depends only on the unbalance excitations:
+
+k) f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;B+w2*G];w2*u][,/0 1+/4*!n]}
+
+this means for a given model, we assembly the real valued shaft model matrices K M G, combined them for each speed value to a complex system matrix A
+and solve it for each set of unbalances applied to the shaft.
+from the result vector we can take the nodes that we are interested and use the displacements only @,/0 1+/4*!n
+the displacements in x and y direction are complex valued and can be combined with sin and cos Ωt to retrieve real valued displacments, periodic with each revolution.
+
+solving the quadratic system A x = b can be done with LU decomposition and partial pivoting:
+
+k) lu:{[A]i:0;k:!#A;P:!#A;while[
+    1<#k;j:i+*&a=m:|/a:abs A[k;i]
+    P[(i;j)]:P[(j;i)];A[(i;j)]:A[(j;i)];A[k:1_k;i]%:A[i;i];A[k;k]-:A[k;i]*\A[i;k];i+:1]
+    (A;P)}
+   lusolve:{[LUP;b];A:*LUP;P:*|LUP
+    r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A]
+    {[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
+   solve:{lusolve[lu x;y]}
+
