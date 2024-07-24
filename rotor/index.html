@@ -2,6 +2,7 @@
 <head><meta charset="utf-8"><link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAE0lEQVR42mNk+M+AFzCOKhhJCgBrLxABLz0PwwAAAABJRU5ErkJggg=="><title>rotor</title>
 <style>
 *{margin:0;overflow:hidden;font-family:monospace}
+body{overflow-y:auto}
 svg{display:block;margin:auto}
 svg:focus{outline:none}
 .ln:hover{cursor:pointer}
@@ -21,7 +22,7 @@ load example:<select id="selex" onchange="chex(this)" style="width:auto">
 <svg id="svg" width="800" height="200" xmlns="http://www.w3.org/2000/svg" onkeydown="svgkey(event)" tabindex="0"></svg>
 
 <pre id="massprop" ></pre>
-<details id="rotordetails" ontoggle="togrotor(this)"><summary>rotor</summary><div  style="display:flex;flex-direction:row;justify-content:space-between">
+<details id="modeldetails" ontoggle="togmodel(this)"><summary>model</summary><div  style="display:flex;flex-direction:row;justify-content:space-between">
 <div>units&nbsp;&nbsp;&nbsp;:<select id="units" onchange="changeunits()"><option>iso</option><option>large</option><option>medium</option><option>small</option></select><br/>
 
 </div>
@@ -72,34 +73,33 @@ load example:<select id="selex" onchange="chex(this)" style="width:auto">
 </table>
 </div></details>
 
-<details id="unbaldetails" ontoggle="togunbal(this)"><summary>unbalances</summary>
+<details id="simuldetails" ontoggle="togsimul(this)"><summary>simulation</summary>
 <div style="display:flex;justify-content:space-around">
 <table id="utab">
 <tr><td></td><td colspan="2">initial</td><td colspan="3">correction</td></tr>
 <tr><th>node</th><th class="unitU">kgm</th><th>deg</th><th>cor</th><th class="unitU">kgm</th><th>deg</th></tr>
 </table>
 <table><caption>speed range</caption>
-<tr><th>min</th><td><input id="minspeed" type="number"/></td><td class="unitN">rpm</td></tr>
-<tr><th>max</th><td><input id="maxspeed" type="number"/></td><td class="unitN">rpm</td></tr>
-<tr><th>steps</th><td><input id="steps" type="number" min="2" max="1000"/></td></tr>
+<tr><th>min</th><td><input id="minspeed" type="number" onchange="calculate()"/></td><td class="unitN">rpm</td></tr>
+<tr><th>max</th><td><input id="maxspeed" type="number" onchange="calculate()"/></td><td class="unitN">rpm</td></tr>
+<tr><th>steps</th><td><input id="steps" type="number" min="2" max="1000" onchange="calculate()"/></td></tr>
 </table>
+<div><label for="angle">angle<label><br/><input type="number" id="angle" min="0" max="360" onchange="animationangle(this)" title="clear to animate"></div>
+<div><input id="asp" type="range" min="0" max="13" style="writing-mode:vertical-lr;direction:rtl;width:20px" /><label for="asp" style="position:fixed">fast</label><label for="asp">slow</label></div>
 </div>
-</details>
 
-<details id="animationdetails"><summary>animation</summary>
-abc
-</details>
+<canvas id="cnv" style="width:100%;height:30vh;background:#aaa"></canvas>
 
-<details id="respdetails" open><summary>frequence response</summary>
-def
-<canvas id="pcnv" style="width:100%;height:300px;background:blue"></canvas>
+<span id="bac" class="ln" style="display:none"> ◀ </span><span id="fwd" class="ln" style="display:none">▶ </span><span id="legend" style="background:#efe"></span>
+
+<canvas id="pcnv" style="width:100%;height:30vh;background:blue"></canvas>
 </details>
 
 
 <script src="../plot.js" id="pjs"></script>
 <script>
 const pi=Math.PI
-let sqrt=Math.sqrt,cos=Math.cos,sin=Math.sin,max=Math.max,
+let sqrt=Math.sqrt,cos=Math.cos,sin=Math.sin,min=Math.min,max=Math.max,floor=Math.floor,
 ge=x=>document.getElementById(x),ce=x=>document.createElement(x),af=x=>Array.from(x),tc=(t,e)=>{e.textContent=t;return e},lo=x=>Number(BigInt.asUintN(32,x)),gc=x=>af(document.getElementsByClassName(x)),cE=x=>document.createElementNS("http://www.w3.org/2000/svg",x),
 sA=(x,...y)=>{for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i]);return x},
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),u64s=s=>{let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))},
@@ -170,18 +170,18 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
 area=x=>0.25*pi*(x.D*x.D-x.d*x.d),mass=x=>area(x)*x.rho*x.L,
 
 emptynode=_=>{return{m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"}},
-clicknode=i=>{rotordetails.open=true;shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="element "+i+" (node)";nodeedit.dataset.i=i;svgmod(model,i)
+clicknode=i=>{modeldetails.open=true;shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="element "+i+" (node)";nodeedit.dataset.i=i;svgmod(model,i)
  af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none";edCal.value="none"
  let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen;edCal.value=e.cal},
-clickshaft=i=>{rotordetails.open=true;shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
+clickshaft=i=>{modeldetails.open=true;shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
  let e=model[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);ede.value=scP(e.E),edrho.value=scR(e.rho);edm.value=scM(mass(e))},
 changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.dataset.i);else clicknode(+nodeedit.dataset.i);"LMRCUNE".split("").forEach(x=>gc("unit"+x).forEach(e=>e.textContent=uni(x)[0]))},
 addshaft=_=>{let n=model.length; model.push({...model[n-2]},emptynode());clickshaft(model.length-2)},
 delelem=i=>{ if(0==i%2){model[i]=emptynode();return update(i)};if(i==0||model.length<4)return; model.splice(i-1,2); update(model.length-2)},
 ed=(inp,s,u,j)=>{let c=1/((""!=u)?uni(u)[1]:1),t=inp.closest("table"),i=((j==undefined)?+t.dataset.i:j),v=c*(+inp.value),e=model[i];if("shaftedit"==t.id){if(s=="m"){s="rho";v*=e.rho/mass(e)};e[s]=v}else{e[s]=v}update(i)},
 
-togrotor=d=>{unbaldetails.open=!d.open},
-togunbal=d=>{rotordetails.open=!d.open},
+togmodel=d=>{simuldetails.open=!d.open},
+togsimul=d=>{modeldetails.open=!d.open},
 
 splitshaft=_=>{let i=+shaftedit.dataset.i,n=+splitinto.value;if(n<2||n>100)return;let sh=model[i];sh.L/=n;while(--n>0){model.splice(i,0,{L:sh.L,D:sh.D,d:sh.d,E:sh.E,rho:sh.rho},emptynode()  )};update(i)},
 svgkey=e=>{if(e.key=="Delete")delelem(+svg.dataset.i)},
@@ -198,8 +198,8 @@ rigid=m=>{ //rigid rotor properties
  return{M:M,Z:Z,J:J,Q:1,iJ:sqrt(J/M),iQ:sqrt(Q/M),nx:nx,ny:ny}},
 crit=(m,M,Z,z,Q,dir)=>{let c0=nodes(m).reduce((s,e,i)=>s+e[dir],0),c1=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z),0),c2=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z)**2,0),a=c0/M,b=c1/M,c=c1/Q,d=c2/Q,me=0.5*(a+d),det=a*d-b*c,rpm=30/pi;return[rpm*sqrt((me-sqrt(me*me-det))),rpm*sqrt(me+sqrt(me*me-det))]},
 
-speedrange=_=>{let a=+minspeed.value,b=+maxspeed.value,n=+steps.value,d=(b-a)/(n-1);return new Array(n).fill(0).map((_,i)=>a+i*d)},
-update=x=>{if(!unbaldetails.open){if(x%2)clickshaft(x);else clicknode(x)};tamod(model);ubmod(model);calculate()},
+speedrange=_=>{let c=1/uni("N")[1],a=c*(+minspeed.value),b=c*(+maxspeed.value),n=+steps.value,d=(b-a)/(n-1);return new Array(n).fill(0).map((_,i)=>a+i*d)},
+update=x=>{if(modeldetails.open){if(x%2)clickshaft(x);else clicknode(x)};tamod(model);ubmod(model);calculate()},
 calculate=_=>{if(kw&&rk)kinit(1);else setTimeout(calculate,500)},
 
 
@@ -210,6 +210,55 @@ uni=x=>{let t={
   small: {M:["g",1e3], L:["mm",1e3],R:["kg/m^3",1],U:["mgmm",1e9],C:["N/µm",1e-6],P:["GPa",1e-9],N:["krpm",1e-3]}
  };return t[units.value][x]},
 scL=x=>x*uni("L")[1],scM=x=>x*uni("M")[1],scR=x=>x*uni("R")[1],scU=x=>x*uni("U")[1],scC=x=>x*uni("C")[1],scP=x=>x*uni("P")[1],scN=x=>x*uni("N")[1],
+
+animate=(ang)=>{cancelAnimationFrame(req)
+ let I=0,P=0,phi=(ang==undefined)?0:ang/180*pi,h
+ L=[0.1,0.5,0.2],                          //shafts(model).map(e=>e.L),
+ R=[0.4,0.1,0.6],                          //shafts(model).map(e=>e.D/2),
+ VX=[[[0.01,0.8,0.7,0.1]]],
+ VY=[[[0,-0.05,0.05,0]]],
+ WX=[[[0,0.05,-0.05,0]]],
+ WY=[[VX[0][0].slice()]],
+ UI=[[1,2,3]],                             //nodes(model).map(e=>e.u),
+ UA=[[30,60,90].map(x=>x*pi/180)],         //nodes(model).map(e=>e.a*pi/180),
+ X=new Array(1+L.length).fill(0);X.forEach((_,i)=>{if(i)X[i]=X[i-1]+L[i-1]}),NP=UI.length
+
+ let frame=()=>{h=floor(cnv.clientHeight/NP)
+  let w=cnv.clientWidth,o=min(w/4,h/2),xo=w-o,yo=o,l=w-o,r=o/2,A=0.95,B=-0.1,C=0.7,D=0.4,E=-1;cnv.width=w;cnv.height=NP*h
+  let c=cnv.getContext("2d")
+  c.clearRect(0,0,w,h);
+  let p=function(){
+   c.save()
+   c.fillStyle="#eee";c.beginPath();c.moveTo(xo,yo);c.lineTo(xo,0);c.lineTo(w,0);c.lineTo(w,yo+o*D/C);c.closePath();c.fill()
+   c.fillStyle="#fff";c.beginPath();c.moveTo(xo,yo);c.lineTo(xo-A*w,yo-B*w);c.lineTo(0,0);c.lineTo(xo,0);c.closePath();c.fill()
+   let fg=x=>c.strokeStyle=x,lw=x=>c.lineWidth=x,an=(x,y,z)=>("number"==typeof x)?new Array(("number"==typeof y)?z.length:y.length).fill(x):x
+   
+   c.translate(xo,yo);c.translate(-A*l+C*r,-B*l+D*r+E*r)
+   let L0=(x,y,z)=>{x=an(x,y,z);y=an(y,x,z);z=an(z,x,y);c.beginPath();c.moveTo(A*x[0]+C*y[0],B*x[0]+D*y[0]+E*z[0]);for(let i=1;i<x.length;i++)c.lineTo(A*x[i]+C*y[i],B*x[i]+D*y[i]+E*z[i]);c.stroke()},
+   L1=(x,y,z)=>L0(l,y,z),L2=(x,y,z)=>L0(x,-r,z),L3=(x,y,z)=>L0(x,y,-r),L23=(x,y,z)=>{L2(x,y,z);L3(x,y,z)},L123=(x,y,z)=>{L1(x,y,z);L2(x,y,z);L3(x,y,z)}
+   
+   let xp,Q=(l,r)=>{L3(xp,[-r,r],-r);L3(xp+l,[-r,r],-r);L23([xp,xp+l],-r,-r);L23([xp,xp+l],r,r);L2(xp,-r,[-r,r]);L2(xp+l,-r,[-r,r])}
+   
+   lw(1)
+   fg("#ddd");L1(0,-r,[-r,r]);L1(0,0,[-r,r]);L1(0,r,[-r,r]);L1(0,[-r,r],-r);L1(0,[-r,r],0);L1(0,[-r,r],r)
+   fg("#ccc");xp=l*X[0];L.forEach((v,i)=>{Q(l*L[i],r*R[i]);xp+=l*v}) 
+   
+   let cs=cos(phi),sn=sin(phi),vx=VX[P][I].map((x,i)=>r*(x*cs+VY[P][I][i]*sn)),vy=WX[P][I].map((x,i)=>r*(x*cs+WY[P][I][i]*sn)),xx=X.map(x=>l*x),
+   uu=UI[P].map(i=>[xx[i],xx[i]])
+   ux=UI[P].map((i,j)=>[vx[i],vx[i]+20*cos(phi-UA[P][j])]),
+   uy=UI[P].map((i,j)=>[vy[i],vy[i]+20*sin(phi-UA[P][j])]),
+   
+   fg("#000");lw(5);L0(xx,vx,vy);lw(1);L123(xx,vx,vy)
+   fg("#f00");lw(3);ux.forEach((_,i)=>L0(uu[i],ux[i],uy[i]))
+   lw(2);ux.forEach((_,i)=>L123(uu[i],ux[i],uy[i]))
+   c.restore()
+  }
+  for(P=0;P<NP;P++){p();c.translate(0,h)}
+  
+  phi+=(0.001*1.5**Number(asp.value))-((phi>2*pi)?2*pi:0)
+  if(simuldetails.open&&angle.value=="")req=requestAnimationFrame(frame)
+ };frame()},
+animationangle=x=>{if(x.value=="")animate();else animate(+x.value)},
 
 examples={
  empty:{model:[
@@ -249,7 +298,7 @@ examples={
  ],speed:{min:1,max:100,steps:100}}
 },model,chex=x=>{let e=examples[x.value];model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0)},
 
-
+req,
 
 
 kw=null,rk=null,jp=null, //embed
@@ -282,22 +331,23 @@ kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
  if(x){
   let p=[],t=[],y=[],z=[]
   let sr=speedrange(),ns=sr.length
-  let r=ZK(kx("F",KF(sr)))
-  let r1=i=>new Array(ns).fill(0).map((_,j)=>{ return r[j+2*ns*i] })
+  let r=ZK(kx("F",KF(sr))),stride=r.length/ns
+  let r1=off=>new Array(ns).fill(0).map((_,j)=>1e6*r[j*stride+off])
   //let isen=no.map((e,i)=>e.sen.includes("x")?2*i:e.sen.includes("y")?1+2*i:null).filter(x=>x!=null)
   
-  let p1=(i,s)=>{y.push(r1(2*i));z.push(r1(2*i));t.push(s)}
-  no.forEach((e,i)=>{(e.sen.includes("x"))?p1(i,"x node "+i):e.sen.includes("y")?p1(i,"y node "+i):null})
+  let p1=(i,s)=>{y.push(r1(2*i));z.push(r1(1+2*i));t.push(s)}
+  no.forEach((e,i)=>{(e.sen.includes("x"))?p1(2*i,"x node "+i):e.sen.includes("y")?p1(1+2*i,"y node "+i):null})
   
   //let Y=isen.map(slice),Z=isen.map(x=>slice(1+x))
-  t.forEach((t,i)=>p.push({type:"ampang",title:t,lines:[{x:sr,y:y[i],z:z[i]}]}))
+  t.forEach((t,i)=>p.push({type:"ampang",title:t,xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:[{x:sr,y:y[i],z:z[i]}]}))
   
-  plotjs.plots({plots:p},pcnv)
+  legend.textContent=""
+  plotjs.plots({plots:p,colors:["red","green"]},pcnv,{b:bac,f:fwd},undefined/*listbox*/,x=>legend.textContent=x)
   
   //pcnv.getContext("2d").clearRect(0,0,pcnv.width,pcnv.height)
   //plotjs.plots(dummyplots,pcnv)
   
-  
+  animate()
   
  }
  
@@ -307,7 +357,7 @@ kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
 Object.keys(examples).forEach(x=>selex.appendChild(tc(x,ce("option"))))
 if(!kw)fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=new Uint8Array(r))
 if(!rk)fetch("r.k").then(r=>r.text()).then(r=>rk=r)
-units.value="medium";selex.value="shaft";chex(selex);changeunits()
+units.value="medium";selex.value="shaft";chex(selex);changeunits();togsimul({open:true})
 
 dummyplots={plots:[{
  type:"ampang",

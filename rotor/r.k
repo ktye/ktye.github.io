@@ -76,3 +76,4 @@ F:{[RPM],/f'RPM}
 /s3:system 300000.
 /A:s3`A
 /f:s3`f
+/ e@&~0n~e:,/(abs A-AA)%abs A
