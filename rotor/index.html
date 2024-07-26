@@ -11,95 +11,111 @@ table{border-collapse:collapse}
 textarea{background:#efe;border:none;outline:none}
 input,select{width:5em}
 th{text-align:left}
-
+dialog::backdrop{background-color:grey;opacity:0.75}
 
 
 </style>
 <body>
-load example:<select id="selex" onchange="chex(this)" style="width:auto">
- <!--option>empty</option><option>resonance</option><option>anisotropic</option><option>lpt</option><option>gyroscopic critical</option><option>turbocharger</option-->
- </select><br/>
+<select id="selex" onchange="chex(this)" style="width:auto"></select> <span id="extitle" style="color:#0000ee" class="ln" onclick="hlp.showModal()"></span><br/>
 <svg id="svg" width="800" height="200" xmlns="http://www.w3.org/2000/svg" onkeydown="svgkey(event)" tabindex="0"></svg>
 
-<pre id="massprop" ></pre>
-<details id="modeldetails" ontoggle="togmodel(this)"><summary>model</summary><div  style="display:flex;flex-direction:row;justify-content:space-between">
-<div>units&nbsp;&nbsp;&nbsp;:<select id="units" onchange="changeunits()"><option>iso</option><option>large</option><option>medium</option><option>small</option></select><br/>
-
-</div>
-<table id="nodeedit" data-i="0" style="display:none">
- <caption id="nodecaption" data-i="0">node</caption>
- <tr><th>disc Da</th><td><input type="number"    id="edDa" onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
- <tr><th>disc Di</th><td><input type="number"    id="edDi" onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
- <tr class="ul"><th>mass</th><td><input type="number"       id="edM"  onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
- <tr><th>support cx</th><td><input type="number" id="edCx" onchange='ed(this,"cx","C")' /></td><td class="unitC">N/m</td></tr>
- <tr class="ul"><th>support cy</th><td><input type="number" id="edCy" onchange='ed(this,"cy","C")' /></td><td class="unitC">N/m</td></tr>
- <tr><th>unbalance</th><td><input type="number"  id="edU"  onchange='ed(this,"u","U")' /></td><td class="unitU">kgm</td></tr>
- <tr class="ul"><th>angle</th><td><input type="number"      id="edA"  onchange='ed(this,"a","")' min="0" max="360" /></td><td>deg</td></tr>
- <tr><th>sensor direction</th><td><select        id="edSen" onchange='ed(this,"sen")'><option>none</option><option>x</option><option>y</option><option>xy</option></select></td></tr>
- <tr><th>cal direction</th><td><select           id="edCal" onchange='ed(this,"cal")'><option>none</option><option>x</option><option>y</option><option>xy</option></select></td></tr>
-</table>
-<table id="shaftedit" data-i="0" style="display:none">
- <caption id="shaftcaption">shaft</caption>
- <tr><th>length</th><td><input type="number"  id="edl"   onchange='ed(this,"L","L")' /></td><td class="unitL">m</td></tr>
- <tr><th>Da</th><td><input type="number"      id="edda"  onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
- <tr><th>Di</th><td><input type="number"      id="eddi"  onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
- <tr><th>E </th><td><input type="number"      id="ede"   onchange='ed(this,"E","P")' /></td><td>GPa</td></tr>
- <tr><th>density</th><td><input type="number" id="edrho" onchange='ed(this,"rho","R")' /></td><td class="unitR">kg/m^3</td></tr>
- <tr><th>mass</th><td><input type="number"    id="edm"   onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
- <tr><td><button onclick="splitshaft()">split into</button></td><td><input id="splitinto" type="number" min="2" max="20" value="2"></td></tr>
-</table>
-<textarea id="ta" style="resize:none" onchange="modelT(this.value)" spellcheck="false"></textarea>
-<table style="display:block"><caption>legend</caption>
- <tr><th>●</th><td>node</td></tr>
- <tr><th>○</th><td>center of mass</td></tr>
- <tr><th style="color:blue">()</th><td>radius of inertia</td></tr>
- <tr><th>¦</th><td>mass/disc element</td></tr>
- <tr><th>■</th><td>unbalance</td></tr>
- <tr><th>▲</th><td>isotropic bearing</td></tr>
- <tr><th>△</th><td>anisotropic bearing</td></tr>
- <tr><th>◺</th><td>support (x-only)</td></tr>
- <tr><th>◿</th><td>support (y-only)</td></tr>
- <tr><th>⧅</th><td>sensor x-direction</td></tr>
- <tr><th>⧄</th><td>sensor y-direction</td></tr>
- <tr><th style="color:red">|</th><td>sensor for monitor only</td></tr>
- <tr class="ul"><th style="color:green">|</th><td>sensor for balancing</td></tr>
- <tr><th>length</th><td id="rotorlength"></td></tr>
- <tr><th>mass</th><td id="rotormass"></td></tr>
- <tr><th>center of mass</th><td id="rotorcom"></td></tr>
- <tr><th>rotatorial inertia</th><td id="rotorjr"></td></tr>
- <tr><th>equatorial inertia</th><td id="rotorjq"></td></tr>
- <tr><th>x-bearing critical</th><td id="xbearing"></td></tr>
- <tr><th>y-bearing critical</th><td id="ybearing"></td></tr>
-</table>
-</div></details>
-
-<details id="simuldetails" ontoggle="togsimul(this)"><summary>simulation</summary>
-<div style="display:flex;justify-content:space-around">
-<table id="utab">
-<tr><td></td><td colspan="2">initial</td><td colspan="3">correction</td></tr>
-<tr><th>node</th><th class="unitU">kgm</th><th>deg</th><th>cor</th><th class="unitU">kgm</th><th>deg</th></tr>
-</table>
-<table><caption>speed range</caption>
-<tr><th>min</th><td><input id="minspeed" type="number" onchange="calculate()"/></td><td class="unitN">rpm</td></tr>
-<tr><th>max</th><td><input id="maxspeed" type="number" onchange="calculate()"/></td><td class="unitN">rpm</td></tr>
-<tr><th>steps</th><td><input id="steps" type="number" min="2" max="1000" onchange="calculate()"/></td></tr>
-</table>
-<div><label for="angle">angle<label><br/><input type="number" id="angle" min="0" max="360" onchange="animationangle(this)" title="clear to animate"></div>
-<div><input id="asp" type="range" min="0" max="13" style="writing-mode:vertical-lr;direction:rtl;width:20px" /><label for="asp" style="position:fixed">fast</label><label for="asp">slow</label></div>
+<div style="display:inline">
+ <input type="radio" id="butmod" name="modelradios" style="width:20px"         onchange="showmod()"/><label for="butmod">model</label></div>
+ <input type="radio" id="butsim" name="modelradios" style="width:20px" checked onchange="showsim()"/><label for="butsim">simulation</label></div>
 </div>
 
-<canvas id="cnv" style="width:100%;height:30vh;background:#aaa"></canvas>
+<div id="modpanel" style="display:none">
+ <pre id="massprop" ></pre>
+ <div  style="display:flex;flex-direction:row;justify-content:space-between">
+ <div>units&nbsp;&nbsp;&nbsp;:<select id="units" onchange="changeunits()"><option>iso</option><option>large</option><option>medium</option><option>small</option></select><br/>
+ 
+ </div>
+ <table id="nodeedit" data-i="0" style="display:none">
+  <caption id="nodecaption" data-i="0">node</caption>
+  <tr><th>disc Da</th><td><input type="number"    id="edDa" onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
+  <tr><th>disc Di</th><td><input type="number"    id="edDi" onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
+  <tr class="ul"><th>mass</th><td><input type="number"       id="edM"  onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
+  <tr><th>support cx</th><td><input type="number" id="edCx" onchange='ed(this,"cx","C")' /></td><td class="unitC">N/m</td></tr>
+  <tr class="ul"><th>support cy</th><td><input type="number" id="edCy" onchange='ed(this,"cy","C")' /></td><td class="unitC">N/m</td></tr>
+  <tr><th>unbalance</th><td><input type="number"  id="edU"  onchange='ed(this,"u","U")' /></td><td class="unitU">kgm</td></tr>
+  <tr class="ul"><th>angle</th><td><input type="number"      id="edA"  onchange='ed(this,"a","")' min="0" max="360" /></td><td>deg</td></tr>
+  <tr><th>sensor direction</th><td><select        id="edSen" onchange='ed(this,"sen","dir")'><option>none</option><option>x</option><option>y</option><option>xy</option></select></td></tr>
+  <tr><th>cal direction</th><td><select           id="edCal" onchange='ed(this,"cal","dir")'><option>none</option><option>x</option><option>y</option><option>xy</option></select></td></tr>
+ </table>
+ <table id="shaftedit" data-i="0" style="display:none">
+  <caption id="shaftcaption">shaft</caption>
+  <tr><th>length</th><td><input type="number"  id="edl"   onchange='ed(this,"L","L")' /></td><td class="unitL">m</td></tr>
+  <tr><th>Da</th><td><input type="number"      id="edda"  onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
+  <tr><th>Di</th><td><input type="number"      id="eddi"  onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
+  <tr><th>E </th><td><input type="number"      id="ede"   onchange='ed(this,"E","P")' /></td><td>GPa</td></tr>
+  <tr><th>density</th><td><input type="number" id="edrho" onchange='ed(this,"rho","R")' /></td><td class="unitR">kg/m^3</td></tr>
+  <tr><th>mass</th><td><input type="number"    id="edm"   onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
+  <tr><td><button onclick="splitshaft()">split into</button></td><td><input id="splitinto" type="number" min="2" max="20" value="2"></td></tr>
+ </table>
+ <textarea id="ta" style="resize:none" onchange="modelT(this.value)" spellcheck="false"></textarea>
+ <table style="display:block"><caption>legend</caption>
+  <tr><th>●</th><td>node</td></tr>
+  <tr><th>○</th><td>center of mass</td></tr>
+  <tr><th style="color:blue">()</th><td>radius of inertia</td></tr>
+  <tr><th>¦</th><td>mass/disc element</td></tr>
+  <tr><th>■</th><td>unbalance</td></tr>
+  <tr><th>▲</th><td>isotropic bearing</td></tr>
+  <tr><th>△</th><td>anisotropic bearing</td></tr>
+  <tr><th>◺</th><td>support (x-only)</td></tr>
+  <tr><th>◿</th><td>support (y-only)</td></tr>
+  <tr><th>⧅</th><td>sensor x-direction</td></tr>
+  <tr><th>⧄</th><td>sensor y-direction</td></tr>
+  <tr><th style="color:red">|</th><td>sensor for monitor only</td></tr>
+  <tr class="ul"><th style="color:green">|</th><td>sensor for balancing</td></tr>
+  <tr><th>length</th><td id="rotorlength"></td></tr>
+  <tr><th>mass</th><td id="rotormass"></td></tr>
+  <tr><th>center of mass</th><td id="rotorcom"></td></tr>
+  <tr><th>rotatorial inertia</th><td id="rotorjr"></td></tr>
+  <tr><th>equatorial inertia</th><td id="rotorjq"></td></tr>
+  <tr><th>x-bearing critical</th><td id="xbearing"></td></tr>
+  <tr><th>y-bearing critical</th><td id="ybearing"></td></tr>
+ </table>
+ </div>
+</div>
 
-<span id="bac" class="ln" style="display:none"> ◀ </span><span id="fwd" class="ln" style="display:none">▶ </span><span id="legend" style="background:#efe"></span>
+<div id="simpanel">
+ <div style="display:flex;justify-content:space-around">
+ <table id="utab">
+ <tr><td></td><td colspan="2">initial</td><td colspan="3">correction</td></tr>
+ <tr><th>node</th><th class="unitU">kgm</th><th>deg</th><th>cor</th><th class="unitU">kgm</th><th>deg</th></tr>
+ </table>
+ <table><caption>speed range</caption>
+ <tr><th>min</th><td><input id="minspeed" type="number" onchange="calculate()"/></td><td class="unitN">rpm</td></tr>
+ <tr><th>max</th><td><input id="maxspeed" type="number" onchange="calculate()"/></td><td class="unitN">rpm</td></tr>
+ <tr><th>steps</th><td><input id="steps" type="number" min="2" max="1000" onchange="calculate()"/></td></tr>
+ </table>
+ <div>
+  <label for="angle">angle </label><br/><input type="number" id="angle" min="0" max="360" onchange="animate(this.value)" title="clear to animate"/><br/><br/>
+  <span id="time"></time>
+ </div>
+ <div><input id="asp" type="range" min="0" max="13" style="writing-mode:vertical-lr;direction:rtl;width:20px" /><label for="asp" style="position:fixed">fast</label><label for="asp">slow</label></div>
+ </div>
+ 
+ <canvas id="cnv" style="width:100%;height:30vh;background:#aaa"></canvas>
+ 
+ <span id="bac" class="ln" style="display:none" title="speed down"> ◀ </span><span id="fwd" class="ln" style="display:none" title="speed up">▶ </span><span id="legend" style="background:#efe"></span>
+ 
+ <div style="display:flex;justify-content:space-between">
+  <div><input type="radio" id="butdis" name="radios" style="width:20px" checked/><label for="butdis">displacement</label></div>
+  <div><input type="radio" id="butifc" name="radios" style="width:20px"/><label for="butifc">ic</label></div>
+  <div><input type="radio" id="buticp" name="radios" style="width:20px"/><label for="buticp">ic(polar)</label></div>
+  <div><input type="radio" id="butunb" name="radios" style="width:20px"/><label for="butunb">unbalance</label></div>
+  <div><input type="radio" id="butprm" name="radios" style="width:20px"/><label for="butprm">unbalance(perm)</label></div>
+ </div>
+ <canvas id="pcnv" style="width:100%;height:30vh;background:blue"></canvas>
+</div>
 
-<canvas id="pcnv" style="width:100%;height:30vh;background:blue"></canvas>
-</details>
-
+<dialog id="hlp" style="margin:auto"><p id="hlptitle"></p><pre id="hlptxt" style="margin:2em">help text..</pre><form method="dialog"><button>OK</button></form></dialog>
 
 <script src="../plot.js" id="pjs"></script>
 <script>
 const pi=Math.PI
-let sqrt=Math.sqrt,cos=Math.cos,sin=Math.sin,min=Math.min,max=Math.max,floor=Math.floor,hypot=Math.hypot,
+let sqrt=Math.sqrt,cos=Math.cos,sin=Math.sin,min=Math.min,max=Math.max,floor=Math.floor,hypot=Math.hypot,abs=Math.abs,
 ge=x=>document.getElementById(x),ce=x=>document.createElement(x),af=x=>Array.from(x),tc=(t,e)=>{e.textContent=t;return e},lo=x=>Number(BigInt.asUintN(32,x)),gc=x=>af(document.getElementsByClassName(x)),cE=x=>document.createElementNS("http://www.w3.org/2000/svg",x),
 sA=(x,...y)=>{for(let i=0;i<y.length;i+=2)x.setAttributeNS(null,y[i],y[1+i]);return x},
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),u64s=s=>{let c=function(x){const r=new Uint8Array(x.length);for(let i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r};return c(atob(s))},
@@ -170,22 +186,24 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
 area=x=>0.25*pi*(x.D*x.D-x.d*x.d),mass=x=>area(x)*x.rho*x.L,
 
 emptynode=_=>{return{m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"}},
-clicknode=i=>{modeldetails.open=true;shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="element "+i+" (node)";nodeedit.dataset.i=i;svgmod(model,i)
+clicknode=i=>{showmod();shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="element "+i+" (node)";nodeedit.dataset.i=i;svgmod(model,i)
  af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none";edCal.value="none"
  let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen;edCal.value=e.cal},
-clickshaft=i=>{modeldetails.open=true;shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
+clickshaft=i=>{showmod();shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
  let e=model[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);ede.value=scP(e.E),edrho.value=scR(e.rho);edm.value=scM(mass(e))},
 changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.dataset.i);else clicknode(+nodeedit.dataset.i);"LMRCUNE".split("").forEach(x=>gc("unit"+x).forEach(e=>e.textContent=uni(x)[0]))},
 addshaft=_=>{let n=model.length; model.push({...model[n-2]},emptynode());clickshaft(model.length-2)},
 delelem=i=>{ if(0==i%2){model[i]=emptynode();return update(i)};if(i==0||model.length<4)return; model.splice(i-1,2); update(model.length-2)},
-ed=(inp,s,u,j)=>{let c=1/((""!=u)?uni(u)[1]:1),t=inp.closest("table"),i=((j==undefined)?+t.dataset.i:j),v=c*(+inp.value),e=model[i];if("shaftedit"==t.id){if(s=="m"){s="rho";v*=e.rho/mass(e)};e[s]=v}else{e[s]=v}update(i)},
+ed=(inp,s,u,j)=>{let t=inp.closest("table"),i=((j==undefined)?+t.dataset.i:j)
+ if(u=="dir"){model[i][s]=inp.value;update(i);return}
+ let c=1/((""!=u)?uni(u)[1]:1),v=c*(+inp.value),e=model[i];if("shaftedit"==t.id){if(s=="m"){s="rho";v*=e.rho/mass(e)};e[s]=v}else{e[s]=v}update(i)},
 
-togmodel=d=>{simuldetails.open=!d.open},
-togsimul=d=>{modeldetails.open=!d.open},
+showmod=()=>{butmod.checked=true;modpanel.style.display="block";simpanel.style.display="none"                                  },modshown=()=>butmod.checked,
+showsim=()=>{butsim.checked=true;modpanel.style.display="none" ;simpanel.style.display="block";calculate();animate(angle.value)},simshown=()=>butsim.checked,
 
 splitshaft=_=>{let i=+shaftedit.dataset.i,n=+splitinto.value;if(n<2||n>100)return;let sh=model[i];sh.L/=n;while(--n>0){model.splice(i,0,{L:sh.L,D:sh.D,d:sh.d,E:sh.E,rho:sh.rho},emptynode()  )};update(i)},
 svgkey=e=>{if(e.key=="Delete")delelem(+svg.dataset.i)},
-urow=(u,a,i)=>utab.innerHTML+=`<tr><td>${i}</td><td><input type="number" value="${scU(u)}" onchange='ed(this,"u","U",${i})'/></td><td><input type="number" value="${a}" onchange='ed(this,"a","",${i})' min="0" max="360"/></td><td><input type="checkbox" style="width:1em"/></td><td id="coru"+i></td><td id="cora"+i></td></tr>`,
+urow=(u,a,i)=>utab.innerHTML+=`<tr><td>${i}</td><td><input type="number" value="${scU(u)}" onchange='ed(this,"u","U",${i});calculate()'/></td><td><input type="number" value="${a}" onchange='ed(this,"a","",${i});calculate()' min="0" max="360"/></td><td><input type="checkbox" style="width:1em"/></td><td id="coru"+i></td><td id="cora"+i></td></tr>`,
 ubmod=m=>{while(utab.rows.length>2)utab.deleteRow(2);nodes(model).forEach((x,i)=>{if(x.u!=0||x.a!=0)urow(x.u,x.a,2*i)})},
 
 rigid=m=>{ //rigid rotor properties
@@ -199,33 +217,30 @@ rigid=m=>{ //rigid rotor properties
 crit=(m,M,Z,z,Q,dir)=>{let c0=nodes(m).reduce((s,e,i)=>s+e[dir],0),c1=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z),0),c2=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z)**2,0),a=c0/M,b=c1/M,c=c1/Q,d=c2/Q,me=0.5*(a+d),det=a*d-b*c,rpm=30/pi;return[rpm*sqrt((me-sqrt(me*me-det))),rpm*sqrt(me+sqrt(me*me-det))]},
 
 speedrange=_=>{let c=1/uni("N")[1],a=c*(+minspeed.value),b=c*(+maxspeed.value),n=+steps.value,d=(b-a)/(n-1);return new Array(n).fill(0).map((_,i)=>a+i*d)},
-update=x=>{if(modeldetails.open){if(x%2)clickshaft(x);else clicknode(x)};tamod(model);ubmod(model);calculate()},
-calculate=_=>{if(kw&&rk)kinit(1);else setTimeout(calculate,500)},
+update=x=>{if(modshown()){if(x%2)clickshaft(x);else clicknode(x)};tamod(model);ubmod(model);svgmod(model)},
+
+//changespeed=x=>{let s=+x.value,t=Infinity; console.log("s,t",s,t); if(isNaN(s)){x.value=minspeed.value}else{speedrange().forEach(x=>{if(abs(x-s)<abs(t-s))t=x});x.value=t;console.log("new t",t)}},
+
+speedidx=0,
+
+calculate=_=>{
+ if(speedidx>(+steps.value)-1)speedidx=(+steps.value)-1;
+ if(kw&&rk)kinit(1);else setTimeout(calculate,500)},
 
 
 uni=x=>{let t={
-  iso:   {M:["kg",1],  L:["m",1],   R:["kg/m^3",1],U:["kgm",1],   C:["N/m",1],    P:["GPa",1e-9],N:["rpm",1]    },
-  large: {M:["t",1e-3],L:["mm",1e3],R:["kg/m^3",1],U:["kgmm",1e3],C:["N/µm",1e-6],P:["GPa",1e-9],N:["rpm",1]    },
-  medium:{M:["kg",1],  L:["mm",1e3],R:["kg/m^3",1],U:["gmm",1e6], C:["N/µm",1e-6],P:["GPa",1e-9],N:["rpm",1]    },
-  small: {M:["g",1e3], L:["mm",1e3],R:["kg/m^3",1],U:["mgmm",1e9],C:["N/µm",1e-6],P:["GPa",1e-9],N:["krpm",1e-3]}
+  iso:   {M:["kg",1],  L:["m",1],   R:["kg/m^3",1],U:["kgm",1],   C:["N/m",1],    P:["GPa",1e-9],N:["rpm",1]    ,dir:["",1]},
+  large: {M:["t",1e-3],L:["mm",1e3],R:["kg/m^3",1],U:["kgmm",1e3],C:["N/µm",1e-6],P:["GPa",1e-9],N:["rpm",1]    ,dir:["",1]},
+  medium:{M:["kg",1],  L:["mm",1e3],R:["kg/m^3",1],U:["gmm",1e6], C:["N/µm",1e-6],P:["GPa",1e-9],N:["rpm",1]    ,dir:["",1]},
+  small: {M:["g",1e3], L:["mm",1e3],R:["kg/m^3",1],U:["mgmm",1e9],C:["N/µm",1e-6],P:["GPa",1e-9],N:["krpm",1e-3],dir:["",1]}
  };return t[units.value][x]},
 scL=x=>x*uni("L")[1],scM=x=>x*uni("M")[1],scR=x=>x*uni("R")[1],scU=x=>x*uni("U")[1],scC=x=>x*uni("C")[1],scP=x=>x*uni("P")[1],scN=x=>x*uni("N")[1],
 
-animate=(ang)=>{cancelAnimationFrame(req)
- let phi=(ang==undefined)?0:ang/180*pi,h //P NP I xx l
+animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
+ let phi=(ang=="")?0:(+ang)/180*pi,h //P NP I xx l
  
- /*
- L=[0.1,0.5,0.2],                          //shafts(model).map(e=>e.L),
- R=[0.4,0.1,0.6],                          //shafts(model).map(e=>e.D/2),
- VX=[0.01,0.8,0.7,0.1],
- VY=[0,-0.05,0.05,0],
- WX=[0,0.05,-0.05,0],
- WY=VX.slice(),
- UI=[1,2,3],                             //nodes(model).map(e=>e.u),
- UA=[30,60,90].map(x=>x*pi/180),         //nodes(model).map(e=>e.a*pi/180),
- X=new Array(1+L.length).fill(0);X.forEach((_,i)=>{if(i)X[i]=X[i-1]+L[i-1]})
- */
- 
+ //L=[0.1,0.5,0.2],R=[0.4,0.1,0.6],VX=[0.01,0.8,0.7,0.1],VY=[0,-0.05,0.05,0],WX=[0,0.05,-0.05,0],WY=VX.slice(),UI=[1,2,3],UA=[30,60,90].map(x=>x*pi/180),
+ //X=new Array(1+L.length).fill(0);X.forEach((_,i)=>{if(i)X[i]=X[i-1]+L[i-1]})
  L=shafts(model).map(e=>e.L),suml=1.1*L.reduce((x,y)=>x+y,0),
  R=shafts(model).map(e=>e.D/2),rmax=1.5*max(...R),
  VX=shaftline[0],VY=shaftline[1],WX=shaftline[2],WY=shaftline[3],wmax=max(max(...VX.map((x,i)=>hypot(x,VY[i]))), max(...WX.map((x,i)=>hypot(x,WY[i]))))
@@ -270,16 +285,15 @@ animate=(ang)=>{cancelAnimationFrame(req)
   lw(2);ux.forEach((_,i)=>L123(uu[i],ux[i],uy[i]))
   
   phi+=(0.001*1.5**Number(asp.value))-((phi>2*pi)?2*pi:0)
-  if(simuldetails.open&&angle.value=="")req=requestAnimationFrame(frame)
+  if(simshown()&&angle.value=="")req=requestAnimationFrame(frame)
  };frame()},
-animationangle=x=>{if(x.value=="")animate();else animate(+x.value)},
 
 examples={
  empty:{model:[
   {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none",cal:"none"},
   {L:0.100,D:0.010,d:0.005,E:200,rho:7850},
   {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none",cal:"none"}
- ],speed:{min:1,max:100,steps:100}},
+ ],speed:{min:1,max:100,steps:100},title:"new model"},
  shaft:{model:[
   {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x",cal:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
@@ -302,18 +316,24 @@ examples={
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x",cal:"none"}
- ],speed:{min:1000,max:300000,steps:100}},
+ ],speed:{min:1000,max:300000,steps:100},title:"uniform shaft"},
  resonance:{model:[
   {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none",cal:"none"},
   {L:0.020,D:0.010,d:0.005,E:200,rho:7850},
   {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none",cal:"none"},
   {L:0.020,D:0.015,d:0.005,E:200,rho:7850},
   {m:0.2,D:0.010,d:0.005,cx:0,cy:0,u:15,a:30,sen:"xy",cal:"x"}
- ],speed:{min:1,max:100,steps:100}}
-},model,chex=x=>{let e=examples[x.value];model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0)},
+ ],speed:{min:1,max:100,steps:100},title:"three elements.."}
+},model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptitle.textContent=e.title;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0)},
 
-req,shaftline=[],
+req,shaftline=[],result=[],
+setspeed=()=>{if(result.length==0)return
+ let sr=speedrange(),ns=sr.length,n=result.length/ns,rs=result.slice(speedidx*n,(1+speedidx)*n),nz=rs.length/4
+ shaftline=[];for(let i=0;i<4;i++){let ii=4*i;shaftline[i]=new Array(nz).fill(0);for(let j=0;j<nz;j++)shaftline[i][j]=rs[i+4*j]}
+ animate("")
+},
 
+setlegend=(s,idx)=>{speedidx=idx;legend.textContent="µm: "+s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
 kw=null,rk=null,jp=null, //embed
 K,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
@@ -330,7 +350,7 @@ kenv={env:{
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){return 0}}},
 kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
- console.log("kinit>");let t0=Date.now()
+ let t0=Date.now()
  K.kinit()
  
  let no=nodes(model),n=no.length,p=no.map(x=>x.a*pi/180),ur=no.map((x,i)=>x.u*cos(p[i])),ui=no.map((x,i)=>x.u*sin(p[i])),
@@ -352,20 +372,18 @@ kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
   no.forEach((e,i)=>{(e.sen.includes("x"))?p1(2*i,"x node "+i):e.sen.includes("y")?p1(1+2*i,"y node "+i):null})
   t.forEach((t,i)=>p.push({type:"ampang",title:t,xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:[{x:sr,y:y[i],z:z[i]}]}))
   legend.textContent=""
-  plotjs.plots({plots:p,colors:["red","green"]},pcnv,{b:bac,f:fwd},undefined/*listbox*/,x=>legend.textContent=x)
+  plotjs.plots({plots:p,colors:["red","green"],hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined/*listbox*/,setlegend)
   
-  let n=r.length/ns,rs=r.slice(0,n),nz=rs.length/4
-  shaftline=[];for(let i=0;i<4;i++){let ii=4*i;shaftline[i]=new Array(nz).fill(0);for(let j=0;j<nz;j++)shaftline[i][j]=rs[i+4*j]}
-  animate()
+  result=r;setspeed()
  }
  
- let dt=Date.now()-t0;console.log("kinit!", dt+"ms")
+ time.textContent="t: "+(Date.now()-t0)+" ms"
 })}
 
 Object.keys(examples).forEach(x=>selex.appendChild(tc(x,ce("option"))))
 if(!kw)fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=new Uint8Array(r))
 if(!rk)fetch("r.k").then(r=>r.text()).then(r=>rk=r)
-units.value="medium";selex.value="shaft";chex(selex);changeunits();togsimul({open:true})
+units.value="medium";selex.value="shaft";chex(selex);changeunits();showsim()
 
 dummyplots={plots:[{
  type:"ampang",
