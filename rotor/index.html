@@ -100,11 +100,11 @@ dialog::backdrop{background-color:grey;opacity:0.75}
  <span id="bac" class="ln" style="display:none" title="speed down"> ◀ </span><span id="fwd" class="ln" style="display:none" title="speed up">▶ </span><span id="legend" style="background:#efe"></span>
  
  <div style="display:flex;justify-content:space-between">
-  <div><input type="radio" id="butdis" name="radios" style="width:20px" checked/><label for="butdis">displacement</label></div>
-  <div><input type="radio" id="butifc" name="radios" style="width:20px"/><label for="butifc">ic</label></div>
-  <div><input type="radio" id="buticp" name="radios" style="width:20px"/><label for="buticp">ic(polar)</label></div>
-  <div><input type="radio" id="butunb" name="radios" style="width:20px"/><label for="butunb">unbalance</label></div>
-  <div><input type="radio" id="butprm" name="radios" style="width:20px"/><label for="butprm">unbalance(perm)</label></div>
+  <div><input type="radio" id="butdis" name="radios" onchange="plotdis()" style="width:20px" checked/><label for="butdis">displacement</label></div>
+  <div><input type="radio" id="butifc" name="radios" onchange="plotifc()" style="width:20px"/><label for="butifc">ic</label></div>
+  <div><input type="radio" id="buticp" name="radios" onchange="ploticp()" style="width:20px"/><label for="buticp">ic(polar)</label></div>
+  <div><input type="radio" id="butunb" name="radios" onchange="plotunb()" style="width:20px"/><label for="butunb">unbalance</label></div>
+  <div><input type="radio" id="butprm" name="radios" onchange="plotprm()" style="width:20px"/><label for="butprm">unbalance(perm)</label></div>
  </div>
  <canvas id="pcnv" style="width:100%;height:30vh;background:blue"></canvas>
 </div>
@@ -125,7 +125,9 @@ modelT=x=>{try{model=JSON.parse("["+x.split("\n").map(x=>"{"+x.trim().replace(/ 
 fmt=v=>{v.forEach((x,i)=>{v[i]=x.split(" ");v[i].push(..." ".repeat(9-v[i].length).split(""))});let col=j=>v.map(x=>x[j]);for(let j=0;j<v[0].length;j++){let c=col(j),m=max(...c.map(x=>x.length));v.forEach((x,i)=>v[i][j]+=" ".repeat(m-x[j].length)) };return v.map((x,i)=>v[i]=x.join(" "))},
 
 shafts=m=>m.filter((_,i)=>i%2),nodes =m=>m.filter((_,i)=>(1+i)%2),
-discs=m=>nodes(m).filter(x=>x.D!=0),springs=m=>nodes(m).filter(x=>x.cx!=0&&x.cy!=0),unbals=m=>m.filter(x=>x.u!=0),sensors=m=>nodes(m).filter(x=>x.sen!="none"),
+discs=m=>nodes(m).filter(x=>x.D!=0),springs=m=>nodes(m).filter(x=>x.cx!=0&&x.cy!=0),
+ipln=()=>nodes(model).map((x,i)=>(x.u!=0||x.a!=0)?i:-1).filter(x=>x>=0),
+isen=()=>{let n=nodes(model);return Array(4*n.length).fill(0).map((_,i)=>i).filter(i=>n[floor(i/4)].sen.includes((0==i%4)?"x":(1==i%4)?"y":"never"))},
 
 svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.i=a
  sh.forEach((x,i)=>{let st=(a==1+2*i)?"darkorange":"black"; let xi=L;
@@ -289,23 +291,23 @@ examples={
   {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none"}
  ],speed:{min:1,max:100,steps:100},title:"new model"},
  shaft:{model:[
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x"},
+  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"none"}, //{m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"}, //{m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"}, //{m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"}, 
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
@@ -320,21 +322,62 @@ examples={
  ],speed:{min:1,max:100,steps:100},title:"three elements.."}
 },model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptitle.textContent=e.title;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0)},
 
-req,shaftline=[],result=[],
+req,shaftline=[],ic=[],
+
+/*
 setspeed=()=>{if(result.length==0)return
  let sr=speedrange(),ns=sr.length,n=result.length/ns,rs=result.slice(speedidx*n,(1+speedidx)*n),nz=rs.length/4
- shaftline=[];for(let i=0;i<4;i++){let ii=4*i;shaftline[i]=new Array(nz).fill(0);for(let j=0;j<nz;j++)shaftline[i][j]=rs[i+4*j]}
+ shaftline=[];for(let i=0;i<4;i++){shaftline[i]=new Array(nz).fill(0);for(let j=0;j<nz;j++)shaftline[i][j]=rs[i+4*j]}
  animate("")
 },
+*/
+
+setspeed=()=>{
+ let w=speedrange()[speedidx]*pi/30,no=nodes(model).length,n=Array(4*no).fill(0).map((_,i)=>(i%4<2)?i:-1).filter(x=>x>=0) //0 1 4 5 8 9..
+ let r=ZK(kxy("f",K.Kf(w),KI(n)));for(let i=0;i<4;i++){shaftline[i]=new Array(no).fill(0);for(let j=0;j<no;j++)shaftline[i][j]=r[i+4*j]}
+ animate("")},
+
+re=v=>v.filter((_,i)=>~i&1),im=v=>v.filter((_,i)=>i&1),
+showplot=()=>af(document.getElementsByName("radios")).filter(x=>x.checked)[0].onchange(),
+plotdis=()=>{ 
+ //let p=[],t=[],y=[],z=[]
+ //let sr=speedrange(),ns=sr.length
+ //let r=ZK(kx("F",KF(sr))),stride=r.length/ns
+ //let r1=off=>new Array(ns).fill(0).map((_,j)=>1e6*r[j*stride+off])
+ //
+ //let p1=(i,s)=>{y.push(r1(2*i));z.push(r1(1+2*i));t.push(s)}
+ //no.forEach((e,i)=>{(e.sen.includes("x"))?p1(2*i,"x node "+i):e.sen.includes("y")?p1(1+2*i,"y node "+i):null})
+ //t.forEach((t,i)=>p.push({type:"ampang",title:t,xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:[{x:sr,y:y[i],z:z[i]}]}))
+ //legend.textContent=""
+ //plotjs.plots({plots:p,colors:["red","green"],hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined/*listbox*/,setlegend)
+},
+plotifc=()=>{console.log("plotifc..") //nsp
+ let pl=ipln(),nse=isen().length,sr=speedrange(),nsr=sr.length
+ let p=[],t=pl.map(x=>"plane at node "+x),y=[],z=[],sc=1/uni("U")[1]
+ console.log("sc",sc)
+ pl.forEach((pnode,i)=>{let off=i*nse*nsr*2,r=ic.slice(ic.slice(off,off+2*nsr)),lines=[]
+  for(let j=0;j<nse;j++){let rj=r.slice(off,off+2*nsr).map(x=>x*sc);
+  console.log("ij",i,j,"off",off,off+2*nsr)
+  lines.push({x:sr,y:re(rj),z:im(rj)});off+=2*nsr}
+  p.push({type:"ampang",title:"plane node"+pnode,xlabel:"speed "+uni("N")[0],ylabel:"µm/"+uni("U")[0],lines:lines})
+ })
+ plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined,setlegend)
+},
+ploticp=()=>{console.log("ploticp..")},
+plotunb=()=>{console.log("plotunb..")},
+plotprm=()=>{console.log("plotprm..")},
 
 setlegend=(s,idx)=>{speedidx=idx;legend.textContent="µm: "+s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
 kw=null,rk=null,jp=null, //embed
 K,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
 KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=x=>K.sc(KC(x)),
-KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
-ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},
-kx=(f,x)=>K.Atx(K.Val(Ks(f)),x),asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
+KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
+ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},l3=(x,y,z)=>K.Cal(13n,K.l2(K.l2(x,y),K.Atx(13n,z))),asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
+kx=(f,x)=>K.Atx(K.Val(Ks(f)),x),
+kxy=(f,x,y)=>K.Cal(K.Val(Ks(f)),K.l2(x,y)),
+kxyz=(f,x,y,z)=>K.Cal(K.Val(Ks(f)),l3(x,y,z)),
+
 kenv={env:{ 
  Exit:  function(x      ){},
  Args:  function(       ){return 0},
@@ -356,19 +399,24 @@ kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
  "m cx cy".split(" ").forEach(s=>asn(s,KF(no.map(x=>x[s]))))
  asn("J",KF(J));asn("Q",KF(Q));asn("U",KZ(U))
  K.dx(K.Val(KC(rk)))
+ console.log("k!")
  if(x){
-  let p=[],t=[],y=[],z=[]
-  let sr=speedrange(),ns=sr.length
-  let r=ZK(kx("F",KF(sr))),stride=r.length/ns
-  let r1=off=>new Array(ns).fill(0).map((_,j)=>1e6*r[j*stride+off])
+  //let p=[],t=[],y=[],z=[]
+  //let sr=speedrange(),ns=sr.length
+  //let r=ZK(kx("F",KF(sr))),stride=r.length/ns
+  //let r1=off=>new Array(ns).fill(0).map((_,j)=>1e6*r[j*stride+off])
+  //
+  //let p1=(i,s)=>{y.push(r1(2*i));z.push(r1(1+2*i));t.push(s)}
+  //no.forEach((e,i)=>{(e.sen.includes("x"))?p1(2*i,"x node "+i):e.sen.includes("y")?p1(1+2*i,"y node "+i):null})
+  //t.forEach((t,i)=>p.push({type:"ampang",title:t,xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:[{x:sr,y:y[i],z:z[i]}]}))
+  //legend.textContent=""
+  //plotjs.plots({plots:p,colors:["red","green"],hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined/*listbox*/,setlegend)
+  //
+  //result=r;
   
-  let p1=(i,s)=>{y.push(r1(2*i));z.push(r1(1+2*i));t.push(s)}
-  no.forEach((e,i)=>{(e.sen.includes("x"))?p1(2*i,"x node "+i):e.sen.includes("y")?p1(1+2*i,"y node "+i):null})
-  t.forEach((t,i)=>p.push({type:"ampang",title:t,xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:[{x:sr,y:y[i],z:z[i]}]}))
-  legend.textContent=""
-  plotjs.plots({plots:p,colors:["red","green"],hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined/*listbox*/,setlegend)
-  
-  result=r;setspeed()
+  ic=ZK(kxyz("IC",KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))))
+  setspeed()
+  showplot()
  }
  
  time.textContent="t: "+(Date.now()-t0)+" ms"

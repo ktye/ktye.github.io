@@ -69,8 +69,21 @@ lu:{[A]i:0;k:!#A;P:!#A;while[1<#k;j:i+*&a=m:|/a:abs A[k;i];P[(i;j)]:P[(j;i)];A[(
 lusolve:{[LUP;b];A:*LUP;P:*|LUP;r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A];{[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 solve:{lusolve[lu x;y]}
 
-f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;B+w2*G];w2*u][,/0 1+/4*!n]}
-F:{[RPM],/f'RPM}
+luA:{[w2];lu k^imag[K-M*w2;B+w2*G]}
+f:{[omega;nodes];lusolve[luA w2;u*w2:omega*omega]nodes}
+
+la:{[l;isen;u];lusolve[l;u]isen}
+ic:{[ipln;isen;w2],/la[luA w2;isen]'w2*@[0a+&k;;1a 1a90]'0 1+/2*ipln}
+IC:{[ipln;isen;W ](rs.#'(ipln;isen;W))@,/ic[ipln;isen]'W*W}
+rs:{[npl;nse;nsp;x]x@(`npl \npl;`nse \nse;`nsp \nsp)/((nsp;npl;nse)\!#x)1 2 0}
+
+
+/f:{[omega;nodes];w2:omega*omega;solve[k^imag[K-M*w2;B+w2*G];w2*u]nodes}
+/ic:{[Omega;isen;ipln]} Omega'
+
+
+/f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;B+w2*G];w2*u][,/0 1+/4*!n]}
+/F:{[RPM],/f'RPM}
 
 /system:{[rpm]w2:w*w:0.10471975511965978*rpm; `A`f!(k^imag[K-M*w2;B+w2*G];w2*u)}
 /s3:system 300000.
