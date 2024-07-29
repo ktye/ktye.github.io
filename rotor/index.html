@@ -40,7 +40,6 @@ dialog::backdrop{background-color:grey;opacity:0.75}
   <tr><th>unbalance</th><td><input type="number"  id="edU"  onchange='ed(this,"u","U")' /></td><td class="unitU">kgm</td></tr>
   <tr class="ul"><th>angle</th><td><input type="number"      id="edA"  onchange='ed(this,"a","")' min="0" max="360" /></td><td>deg</td></tr>
   <tr><th>sensor direction</th><td><select        id="edSen" onchange='ed(this,"sen","dir")'><option>none</option><option>x</option><option>y</option><option>xy</option></select></td></tr>
-  <tr><th>cal direction</th><td><select           id="edCal" onchange='ed(this,"cal","dir")'><option>none</option><option>x</option><option>y</option><option>xy</option></select></td></tr>
  </table>
  <table id="shaftedit" data-i="0" style="display:none">
   <caption id="shaftcaption">shaft</caption>
@@ -126,7 +125,7 @@ modelT=x=>{try{model=JSON.parse("["+x.split("\n").map(x=>"{"+x.trim().replace(/ 
 fmt=v=>{v.forEach((x,i)=>{v[i]=x.split(" ");v[i].push(..." ".repeat(9-v[i].length).split(""))});let col=j=>v.map(x=>x[j]);for(let j=0;j<v[0].length;j++){let c=col(j),m=max(...c.map(x=>x.length));v.forEach((x,i)=>v[i][j]+=" ".repeat(m-x[j].length)) };return v.map((x,i)=>v[i]=x.join(" "))},
 
 shafts=m=>m.filter((_,i)=>i%2),nodes =m=>m.filter((_,i)=>(1+i)%2),
-discs=m=>nodes(m).filter(x=>x.D!=0),springs=m=>nodes(m).filter(x=>x.cx!=0&&x.cy!=0),unbals=m=>m.filter(x=>x.u!=0),sensors=m=>nodes(m).filter(x=>x.sen!="none"),cals=m=>nodes(m).filter(x=>x.cal!="none"),
+discs=m=>nodes(m).filter(x=>x.D!=0),springs=m=>nodes(m).filter(x=>x.cx!=0&&x.cy!=0),unbals=m=>m.filter(x=>x.u!=0),sensors=m=>nodes(m).filter(x=>x.sen!="none"),
 
 svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.i=a
  sh.forEach((x,i)=>{let st=(a==1+2*i)?"darkorange":"black"; let xi=L;
@@ -154,11 +153,6 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
    r+=`<rect x="${xi-D/20}" y="${-D/2}" width="${D/10}" height="${D/10}" fill="lightgrey" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`
    if(x.sen.includes("x"))r+=`<line x1="${xi-D/20}" y1="${-D/2}" x2="${xi+D/20}" y2="${D/10-D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`
    if(x.sen.includes("y"))r+=`<line x1="${xi+D/20}" y1="${-D/2}" x2="${xi-D/20}" y2="${D/10-D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`}
-  if(x.cal!="none"){ //cals
-   r+=`<line x1="${xi}" y1="${D/2}" x2="${xi}" y2="${1.1*xr}"" stroke="green" stroke-width="2px" vector-effect="non-scaling-stroke" />`
-   r+=`<rect x="${xi-D/20}" y="${D/2-D/9.5}" width="${D/10}" height="${D/10}" fill="lightgrey" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`
-   if(x.cal.includes("x"))r+=`<line x1="${xi-D/20}" y1="${D/2-D/9.5}" x2="${xi+D/20}" y2="${D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`
-   if(x.cal.includes("y"))r+=`<line x1="${xi+D/20}" y1="${D/2-D/9.5}" x2="${xi-D/20}" y2="${D/2}" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" />`}
   if(x.cx!=0||x.cy!=0){ //springs 
    let st=((x.cx==x.cy)?'fill="black"':'fill="none" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke"')
    if(x.cx!=0)r+=`<polygon points="${xi},${xr} ${xi+D/20},${xr+D/10} ${xi},${xr+D/10}" ${st} class="ln" onclick="clicknode(${2*i})"/>`
@@ -185,10 +179,10 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
 },
 area=x=>0.25*pi*(x.D*x.D-x.d*x.d),mass=x=>area(x)*x.rho*x.L,
 
-emptynode=_=>{return{m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"}},
+emptynode=_=>{return{m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"}},
 clicknode=i=>{showmod();shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="element "+i+" (node)";nodeedit.dataset.i=i;svgmod(model,i)
- af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none";edCal.value="none"
- let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen;edCal.value=e.cal},
+ af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none"
+ let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen},
 clickshaft=i=>{showmod();shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
  let e=model[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);ede.value=scP(e.E),edrho.value=scR(e.rho);edm.value=scM(mass(e))},
 changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.dataset.i);else clicknode(+nodeedit.dataset.i);"LMRCUNE".split("").forEach(x=>gc("unit"+x).forEach(e=>e.textContent=uni(x)[0]))},
@@ -290,39 +284,39 @@ animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
 
 examples={
  empty:{model:[
-  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none"},
   {L:0.100,D:0.010,d:0.005,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none",cal:"none"}
+  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none"}
  ],speed:{min:1,max:100,steps:100},title:"new model"},
  shaft:{model:[
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x",cal:"none"},
+  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x",cal:"none"}
+  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x"}
  ],speed:{min:1000,max:300000,steps:100},title:"uniform shaft"},
  resonance:{model:[
-  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none"},
   {L:0.020,D:0.010,d:0.005,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none",cal:"none"},
+  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none"},
   {L:0.020,D:0.015,d:0.005,E:200,rho:7850},
-  {m:0.2,D:0.010,d:0.005,cx:0,cy:0,u:15,a:30,sen:"xy",cal:"x"}
+  {m:0.2,D:0.010,d:0.005,cx:0,cy:0,u:15,a:30,sen:"xy"}
  ],speed:{min:1,max:100,steps:100},title:"three elements.."}
 },model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptitle.textContent=e.title;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0)},
 
