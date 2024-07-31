@@ -49,6 +49,12 @@ u:,/1 1a90 0 0*/U                              /unbalance excitation vector
 
 flip:,/+^                                      /dyadic transpose: {z@<(y x)/(!y)x}[1 2 0;shape;vector]
 
+qr:{K:!m:#*x;I:!n:#x;j:0;r:n#0a;turn:{(-x)@angle y}
+ while[j<n;I:1_I;r[j]:turn[s:abs@abs/j_x j;xx:x[j;j]]
+  x[j;j]-:r[j];x[j;K]%:%s*(s+abs xx);x[I;K]-:{+/x*y}/[(conj x[j;K]);x[I;K]]*\x[j;K];K:1_K;j+:1];(x;r;n;m)}
+qrsolve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m;while[j<n;y[K]-:(+/(conj H[j;K])*y K)*H[j;K];K:1_K;j+:1]
+ i:n-1;J:!n;y[i]%:r@i;while[i;j:i_J;i-:1;y[i]:(y[i]-+/H[j;i]*y@j)%r@i];n#y};q:qr x;$[`L~@y;qslv/[q;y];qslv[q;y]]}
+
 lu:{[A]i:0;k:!#A;P:!#A;while[1<#k;j:i+*&a=m:|/a:abs A[k;i];P[(i;j)]:P[(j;i)];A[(i;j)]:A[(j;i)];A[k:1_k;i]%:A[i;i];A[k;k]-:A[k;i]*\A[i;k];i+:1];(A;P)}
 lusolve:{[LUP;b];A:*LUP;P:*|LUP;r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A];{[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 solve:{lusolve[lu x;y]}
@@ -59,6 +65,27 @@ f:{[omega;nodes];lusolve[luA w2;u*w2:omega*omega]nodes}
 la:{[l;isen;u];lusolve[l;u]isen}
 ic:{[ipln;isen;w2],/la[luA w2;isen]'w2*@[0a+&k;;1a 1a90]'0 1+/2*ipln}
 IC:{[ipln;isen;W ]flip[#W;,/ic[ipln;isen]'W*W]}
+
+
+/plots
+sig:{+/*[(#u)^x;u:U@&~U=0a]}                                                    /displacement: mmul ic with unbals
+dis:{sig x}                                                                     /todo initial,residual
+fil:{(*x;*|x)}                                                                  /first,last
+tus:{Z:0.,+\L;zs:Z fil@&~0=cx;zu:Z fil@&~0a=U;T:(1%--/u)*1 -1*|zu-\zs;T(+/*)\x} /transform unbals from spring nodes to outer unbal nodes
+st3:{x;(x 0;+/x;x 1)}                                                           /a,static,b
+pln:{x;fil@&~0a=U}                                                              /node index of outer unbalance planes
+prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^dis[x])i}            /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
+unb:{s:dis[x];u:U@&~0a=U;c:@[(#u)#0na;&y;qrsolve[((#u)^x)@&y;dis[x]]];+u,c}     /unbals and corrections
+
+
+
+
+
+
+
+
+
+
 
 
 

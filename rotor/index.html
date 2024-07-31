@@ -192,7 +192,7 @@ changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.datas
 addshaft=_=>{let n=model.length; model.push({...model[n-2]},emptynode());clickshaft(model.length-2)},
 delelem=i=>{ if(0==i%2){model[i]=emptynode();return update(i)};if(i==0||model.length<4)return; model.splice(i-1,2); update(model.length-2)},
 ed=(inp,s,u,j)=>{let t=inp.closest("table"),i=((j==undefined)?+t.dataset.i:j)
- if(u=="dir"){model[i][s]=inp.value;update(i);return}
+ if(u=="dir"){model[i][s]=inp.value;update(i);return};if(s=="cor"){model[i][s]=inp.checked;update(i);return}
  let c=1/((""!=u)?uni(u)[1]:1),v=c*(+inp.value),e=model[i];if("shaftedit"==t.id){if(s=="m"){s="rho";v*=e.rho/mass(e)};e[s]=v}else{e[s]=v}update(i)},
 
 showmod=()=>{butmod.checked=true;modpanel.style.display="block";simpanel.style.display="none"                                  },modshown=()=>butmod.checked,
@@ -200,8 +200,8 @@ showsim=()=>{butsim.checked=true;modpanel.style.display="none" ;simpanel.style.d
 
 splitshaft=_=>{let i=+shaftedit.dataset.i,n=+splitinto.value;if(n<2||n>100)return;let sh=model[i];sh.L/=n;while(--n>0){model.splice(i,0,{L:sh.L,D:sh.D,d:sh.d,E:sh.E,rho:sh.rho},emptynode()  )};update(i)},
 svgkey=e=>{if(e.key=="Delete")delelem(+svg.dataset.i)},
-urow=(u,a,i)=>utab.innerHTML+=`<tr><td>${i}</td><td><input type="number" value="${scU(u)}" onchange='ed(this,"u","U",${i});calculate()'/></td><td><input type="number" value="${a}" onchange='ed(this,"a","",${i});calculate()' min="0" max="360"/></td><td><input type="checkbox" style="width:1em"/></td><td id="coru"+i></td><td id="cora"+i></td></tr>`,
-ubmod=m=>{while(utab.rows.length>2)utab.deleteRow(2);nodes(model).forEach((x,i)=>{if(x.u!=0||x.a!=0)urow(x.u,x.a,2*i)})},
+urow=(u,a,c,i)=>utab.innerHTML+=`<tr><td>${i}</td><td><input type="number" value="${scU(u)}" onchange='ed(this,"u","U",${i});calculate()'/></td><td><input type="number" value="${a}" onchange='ed(this,"a","",${i});calculate()' min="0" max="360"/></td><td><input type="checkbox" ${c} style="width:1em" onchange='ed(this,"cor","",${i});calculate()'/></td><td id="coru"+i></td><td id="cora"+i></td></tr>`,
+ubmod=m=>{while(utab.rows.length>2)utab.deleteRow(2);nodes(model).forEach((x,i)=>{if(x.u!=0||x.a!=0)urow(x.u,x.a,(x.cor?"checked":""),2*i)})},
 
 rigid=m=>{ //rigid rotor properties
  let z=[0];shafts(m).forEach((x,i)=>z.push(z[i]+x.L))
@@ -287,39 +287,39 @@ animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
 
 examples={
  empty:{model:[
-  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,cor:false,sen:"none"},
   {L:0.100,D:0.010,d:0.005,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,sen:"none"}
+  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,cor:false,sen:"none"}
  ],speed:{min:1,max:100,steps:100},title:"new model"},
  shaft:{model:[
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x"},
+  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,cor:false,sen:"x"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,cor:true,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,cor:true,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,sen:"x"}
+  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,cor:false,sen:"x"}
  ],speed:{min:1000,max:300000,steps:100},title:"uniform shaft"},
  resonance:{model:[
-  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,cor:false,sen:"none"},
   {L:0.020,D:0.010,d:0.005,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,sen:"none"},
+  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,cor:false,sen:"none"},
   {L:0.020,D:0.015,d:0.005,E:200,rho:7850},
-  {m:0.2,D:0.010,d:0.005,cx:0,cy:0,u:15,a:30,sen:"xy"}
+  {m:0.2,D:0.010,d:0.005,cx:0,cy:0,u:15,a:30,cor:false,sen:"xy"}
  ],speed:{min:1,max:100,steps:100},title:"three elements.."}
 },model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptitle.textContent=e.title;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0)},
 
@@ -330,11 +330,10 @@ setspeed=()=>{
  let r=ZK(kxy(Ks("f"),K.Kf(w),KI(n)));for(let i=0;i<4;i++){shaftline[i]=new Array(no).fill(0);for(let j=0;j<no;j++)shaftline[i][j]=r[i+4*j]}
  animate("")},
 
-re=v=>v.filter((_,i)=>~i&1),im=v=>v.filter((_,i)=>i&1),uforce=(c,v)=>{let w=speedrange().map(x=>x*pi/30);return v.map((x,i)=>c*x/(w[i]*w[i]))},
+re=v=>v.filter((_,i)=>~i&1),im=v=>v.filter((_,i)=>i&1),
 showplot=()=>af(document.getElementsByName("radios")).filter(x=>x.checked)[0].onchange(),
 plotdis=()=>{
- let u=[],no=nodes(model).filter(x=>x.u!=0||x.a!=0),n=no.length;no.forEach(x=>{u.push(x.u*cos(x.a*pi/180));u.push(x.u*sin(x.a*pi/180))})
- let r=ZK(kxy(KC("+/*"),kut(n,KZ(ic)),KZ(u))),sr=speedrange(),lines=Array(isen().length).fill([]),stride=r.length/lines.length
+ let r=ZK(kx(Ks("dis"),KZ(ic))),sr=speedrange(),lines=Array(isen().length).fill([]),stride=r.length/lines.length
  lines.forEach((_,i)=>{let ri=r.slice(i*stride,(1+i)*stride);lines[i]={x:sr,y:re(ri),z:im(ri)}})
  let p=[{type:["ampang","polar"][+polar.checked],title:"displacement",xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:lines}]
  plotcaption(isen().map(i=>("xy"[i%2])+" node "+floor(i/2)))
@@ -350,43 +349,37 @@ plotifc=()=>{ //pnode
  plotcaption(isen().map(i=>("xy"[i%2])+" node "+floor(i/2)))
  plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},pcap,setlegend)
 },
-plotunb=()=>{perr("todo plotunb..")},
-plotprm=()=>{console.log("plotprm..")
-
- let no=nodes(model),iped=no.map((x,i)=>(x.cx!=0&&x.sen.includes("x"))?i:-1).filter(x=>x>=0);if(2!=iped.length)return perr("perm needs pedestal nodes with cx>0 and sensors in x direction")
- let cx=[no[iped[0]].cx,no[iped[1]].cx],pl=ipln(),np=pl.length;if(2>np)return perr("perm needs at least 2 unbalance planes")
- let u=[];no.filter(x=>x.u!=0||x.a!=0).forEach(x=>{u.push(x.u*cos(x.a*pi/180));u.push(x.u*sin(x.a*pi/180))})
- //let Is=isen().map((x,i)=>(~x&1)?i:-1).filter(x=>x>=0),
-
- let r=kxy(KC("+/*"),kut(np,KZ(ic)),KZ(u)),y=K.Cal(18n,K.l2(KI(isen()),KI(iped.map(x=>2*x)))) //unbal response
- r=ZK(kxyz(KC("{,/(x^z)y}"),K.Ki(isen().length),y,r)),stride=r.length/2                       //restrict to pedestal displacements
- let p=[0,0].map((_,i)=>{
-  let ri=r.slice(i*stride,(1+i)*stride)
-  return{type:["ampang","polar"][+polar.checked],title:"plane node"+[pl[0],pl[pl.length-1]][i],xlabel:"speed "+uni("N")[0],ylabel:uni("U")[0],lines:[{x:sr,y:uforce(cx[i],re(ri)),z:uforce(cx[i],im(ri))}]}
+plotunb=()=>{
+ let cor=nodes(model).map((x,i)=>(x.u!=0||x.a!=0)?+x.cor:-1).filter(x=>x>=0) //1 0 1
+ let r=ZK(kxy(Ks("unb"),KZ(ic),KI(cor))),n=r.length/4,stride=r.length/n,ip=ipln()
+ let p=[];for(let i=0;i<n;i++){let ri=r.slice(i*stride,(1+i)*stride),lines=[{y:[ri[0]],z:[ri[1]]},{y:[ri[2]],z:[ri[3]]}]
+  p.push({type:"polar",title:"plane node "+ip[i],ylabel:uni("U")[0],lines:lines})
+ }
+ plotcaption(["initial","residual"])
+ plotjs.plots({plots:p},pcnv,undefined,pcap,setlegend)
+},
+plotprm=()=>{
+ let ip=IK(kx(Ks("pln"),K.Ki(0)));if(ip[0]==ip[1])return perr("perm needs at least 2 unbalance planes")
+ let ix=nodes(model).map((x,i)=>x.sen.includes('x')?i:-1).filter(x=>x>=0)
+ let iX=nodes(model).map((x,i)=>(x.cx!=0)?i:-1).filter(x=>x>=0)
+ if(2!=ix.length||2!=iX.length||ix[0]!=iX[0]||ix[1]!=iX[1])return perr("perm needs 2 sensors in x direction and springs with cx>0 at the same nodes")
+ let si=isen().map((x,i)=>(~x&1)?i:-1).filter(x=>x>=0),sr=speedrange()
+ let r=ZK(kxyz(Ks("prm"),KZ(ic),KI(si),KF(sr.map(x=>x*pi/30)))),stride=r.length/3,t=["plane node "+ip[0],"static","plane node "+ip[1]]
+ let p=[0,0,0].map((_,i)=>{let ri=r.slice(i*stride,(1+i)*stride)
+  return{type:["ampang","polar"][+polar.checked],title:t[i],xlabel:"speed "+uni("N")[0],ylabel:uni("U")[0],lines:[{x:sr,y:re(ri),z:im(ri)}]}
  })
- plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},pcap,setlegend)
- 
- //let u=[],no=nodes(model).filter(x=>x.u!=0||x.a!=0),n=no.length;no.forEach(x=>{u.push(x.u*cos(x.a*pi/180));u.push(x.u*sin(x.a*pi/180))})
- //let r=kxy(KC("+/*"), kut(n,KZ(ic)), KZ(u)),sr=speedrange()
- //r=ZK(kxyz(KC("{,/(x^z)y}"),K.Ki(isen().length),KI(Is),r)),stride=r.length/2
- //
- //let p=[0,0].map((_,i)=>{
- // let ri=r.slice(i*stride,(1+i)*stride)
- // return{type:["ampang","polar"][+polar.checked],title:"plane node"+[pl[0],pl[pl.length-1]][i],xlabel:"speed "+uni("N")[0],ylabel:uni("U")[0],lines:[{x:sr,y:byw2(re(ri)),z:byw2(im(ri))}]}
- //})
- //
- //plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},pcap,setlegend)
+ rm(pcap);plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined,setlegend)
 },
 plotcaption=x=>{rm(pcap);x.forEach((s,i)=>tc(s,ac(ce("option"),pcap)).dataset.i=i)},
 perr=s=>{let c=pcnv.getContext("2d");c.clearRect(0,0,pcnv.width,pcnv.height);rm(pcap);c.fillText(s,20,20)},
 
-setlegend=(s,idx)=>{speedidx=idx;legend.textContent="µm: "+s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
+setlegend=(s,idx)=>{if(s.startsWith("z:")){legend.textContent="u:"+s.slice(2);return};speedidx=idx;legend.textContent="µm: "+s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
 kw=null,rk=null,jp=null, //embed
 K,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
 KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=x=>K.sc(KC(x)),
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
-ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},l3=(x,y,z)=>K.Cal(13n,K.l2(K.l2(x,y),K.Atx(13n,z))),asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
+IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},l3=(x,y,z)=>K.Cal(13n,K.l2(K.l2(x,y),K.Atx(13n,z))),asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
 kx=(f,x)=>K.Atx(K.Val(f),x),
 kxy=(f,x,y)=>K.Cal(K.Val(f),K.l2(x,y)),
 kxyz=(f,x,y,z)=>K.Cal(K.Val(f),l3(x,y,z)),
@@ -408,31 +401,11 @@ kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
  J=no.map(x=>x.m*(x.D*x.D+x.d*x.d)/8),Q=J.map(x=>x/2),
  U=new Array(2*no.length).fill(0);for(let i=0;i<no.length;i++){U[2*i]=ur[i];U[1+2*i]=ui[i]}
 
-
  "L D d E rho".split(" ").forEach(s=>asn(s,KF(shafts(model).map(x=>x[s]))))
  "m cx cy".split(" ").forEach(s=>asn(s,KF(no.map(x=>x[s]))))
  asn("J",KF(J));asn("Q",KF(Q));asn("U",KZ(U))
  K.dx(K.Val(KC(rk)))
- console.log("k!")
- if(x){
-  //let p=[],t=[],y=[],z=[]
-  //let sr=speedrange(),ns=sr.length
-  //let r=ZK(kx("F",KF(sr))),stride=r.length/ns
-  //let r1=off=>new Array(ns).fill(0).map((_,j)=>1e6*r[j*stride+off])
-  //
-  //let p1=(i,s)=>{y.push(r1(2*i));z.push(r1(1+2*i));t.push(s)}
-  //no.forEach((e,i)=>{(e.sen.includes("x"))?p1(2*i,"x node "+i):e.sen.includes("y")?p1(1+2*i,"y node "+i):null})
-  //t.forEach((t,i)=>p.push({type:"ampang",title:t,xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:[{x:sr,y:y[i],z:z[i]}]}))
-  //legend.textContent=""
-  //plotjs.plots({plots:p,colors:["red","green"],hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined/*listbox*/,setlegend)
-  //
-  //result=r;
-  
-  ic=ZK(kxyz(Ks("IC"),KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))))
-  setspeed()
-  showplot()
- }
- 
+ if(x){ic=ZK(kxyz(Ks("IC"),KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))));setspeed();showplot()}
  time.textContent="t: "+(Date.now()-t0)+" ms"
 })}
 
@@ -440,16 +413,6 @@ Object.keys(examples).forEach(x=>selex.appendChild(tc(x,ce("option"))))
 if(!kw)fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=new Uint8Array(r))
 if(!rk)fetch("r.k").then(r=>r.text()).then(r=>rk=r)
 units.value="medium";selex.value="shaft";chex(selex);changeunits();showsim()
-
-dummyplots={plots:[{
- type:"ampang",
- title:"example",
- lines:[{
-  x:[1,2,3],
-  y:[1.1,2.1,1.3],
-  z:[0.1,-1.2,-0.3],
- }]
-}]}
 
 </script>
 </body></html>
