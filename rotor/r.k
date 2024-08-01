@@ -46,8 +46,7 @@ G[i+k*1+i:2+4*!n]-:J
 B:-0.02*K                                      /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
 u:,/1 1a90 0 0*/U                              /unbalance excitation vector
 
-
-flip:,/+^                                      /dyadic transpose: {z@<(y x)/(!y)x}[1 2 0;shape;vector]
+flip:,/+^                                      /flip[*y;z] same as dyadic transpose {z@<(y x)/(!y)x}[1 2 0;y;z]
 
 qr:{K:!m:#*x;I:!n:#x;j:0;r:n#0a;turn:{(-x)@angle y}
  while[j<n;I:1_I;r[j]:turn[s:abs@abs/j_x j;xx:x[j;j]]
@@ -68,14 +67,23 @@ IC:{[ipln;isen;W ]flip[#W;,/ic[ipln;isen]'W*W]}
 
 
 /plots
-sig:{+/*[(#u)^x;u:U@&~U=0a]}                                                    /displacement: mmul ic with unbals
-dis:{sig x}                                                                     /todo initial,residual
+uin:U@&~U=0a
+
+dis:{sig[x;uin],sig[x;uin-cor[x;y]]}                                            /displacement initial,residual per sensor
+
+cor:{@[(#u)#0a;&y;qrsolve[((#u)^x)@&y;sig[x;u:uin]]]}                           /correction unbal at selected planes y
+
+unb:{,/+2^uin,cor[x;y]}                                                         /unbals and corrections
+prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^sig[x;uin])i}        /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
+
+
+sig:{+/*[(#y)^x;y]}                                                             /displacement: mmul ic with unbals
 fil:{(*x;*|x)}                                                                  /first,last
 tus:{Z:0.,+\L;zs:Z fil@&~0=cx;zu:Z fil@&~0a=U;T:(1%--/u)*1 -1*|zu-\zs;T(+/*)\x} /transform unbals from spring nodes to outer unbal nodes
 st3:{x;(x 0;+/x;x 1)}                                                           /a,static,b
 pln:{x;fil@&~0a=U}                                                              /node index of outer unbalance planes
-prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^dis[x])i}            /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
-unb:{s:dis[x];u:U@&~0a=U;c:@[(#u)#0na;&y;qrsolve[((#u)^x)@&y;dis[x]]];+u,c}     /unbals and corrections
+
+
 
 
 

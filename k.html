@@ -1,41 +1,37 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel=icon href="kelas16.png">
-<link rel="manifest" href="/k.webmanifest">
 <title>ktye/k</title>
 <style>body{font-family:monospace;white-space:pre}</style>
 
-<script type="module">
-import {K} from './k.js'
+<script>
 
-if('serviceWorker'in navigator)navigator.serviceWorker.register("/k.sw.js")
+let K,B,lo=x=>Number(BigInt.asUintN(32,x)),C=()=>new Int8Array(K.memory.buffer),U=()=>new Uint32Array(K.memory.buffer),KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=s=>K.sc(KC(s)),
+su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
+save=()=>{B=C().slice(0,1<<U()[32])},restore=()=>{C().set(B)},cw,
 
-window.init=function(){
- let b=document.body
- let  ext={}
- ext.init= function(){b.textContent="ktye/k "+K.n+"\n ";end()}
- ext.read= function(){return new Uint8Array(0)}
- ext.write=function(f,x){if(f==="")b.textContent+=new TextDecoder("utf-8").decode(x)}
- K.kinit(ext)}
-
-function krep(s){
+kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);document.body.textContent+=su(v);return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y    ){return 0}}},
+kinit=()=>{let n,nk=x=>{n=x.byteLength;return x}
+ fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
+ K=r.instance.exports;K.kinit()
+ cw=banner.getBoundingClientRect().width/10
+ document.body.textContent="ktye/k "+n+"\n ";end()
+ window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
+})},
+cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
+krep=s=>{
  if(s.startsWith(" "))s=s.slice(1)
- try     {K._.repl(K.KC(s));K.save()}
- catch(e){console.log(e);K.restore()}
- document.body.textContent+=" ";end()}
-
-window.onkeydown=function(e){if(e.key=="Enter"){
- e.preventDefault()
- let b=document.body
- let r=getSelection().getRangeAt(0)
- let t=b.textContent.slice(0,r.endOffset)
- b.textContent=t
- let i=t.lastIndexOf("\n")
- t=t.slice(i>0?1+i:0)
- b.textContent+="\n"
- if(t.trim()!=""){krep(t)}}}
-
-function end(){
+ try     {K.repl(KC(s));save()}
+ catch(e){console.log(e);restore()}
+ document.body.textContent+=" ";end()},
+end=()=>{
  let b=document.body
  let s=window.getSelection()
  s.removeAllRanges()
@@ -44,9 +40,30 @@ function end(){
  r.collapse(false)
  s.addRange(r)
  window.scrollTo(0,b.scrollHeight)
- b.focus()}
+ b.focus()},
+pos=()=>getSelection().getRangeAt(0).endOffset
+
+window.init=()=>{
+ let b=document.body
+ let  ext={}
+ ext.init= function(){b.textContent="ktye/k "+K.n+"\n ";end()}
+ ext.read= function(){return new Uint8Array(0)}
+ ext.write=function(f,x){if(f==="")b.textContent+=new TextDecoder("utf-8").decode(x)}
+ kinit()}
+window.onresize=e=>{K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))},
+window.onkeydown=e=>{if(e.key=="Enter"){
+ e.preventDefault() 
+ let b=document.body,o=pos(),j=b.textContent.indexOf("\n",o)
+ if(j>=0)o=j
+ let t=b.textContent.slice(0,o)
+ b.textContent=t
+ let i=t.lastIndexOf("\n")
+ t=t.slice(i>0?1+i:0)
+ b.textContent+="\n"
+ if(t.trim()!=""){krep(t)}}}
+
 
 </script>
 </head>
 
-<body contenteditable="true" spellcheck="false" onload="window.init()"></body></html>
+<body contenteditable="true" spellcheck="false" onload="window.init()"><span id="banner">0123456789</span></body></html>

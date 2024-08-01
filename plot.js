@@ -36,7 +36,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   let d={x:("undefined"!=typeof pl.x)?pl.x[pt]:null,y:("undefined"!=typeof pl.y)?(pl.y[pt]-((st&&li)?hip.lines[li-1].y[pt]:0)):null,z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
   d.r=po?Math.hypot(d.y,d.z):d.y;d.a=po?(180/Math.PI*Math.atan2(d.y,d.z)):d.z;if(d.a<0)d.a+=360
   let s=((d.x!==null)?("x:"+sn(d.x)+";"):"")+((d.z!==null)?("z:"+sn(d.r)+"a"+d.a.toFixed(0)):("y:"+sn(d.y)))
-  legend(s)
+  legend(s,pt)
  }
  let clickpos=e=>{let r=e.target.getBoundingClientRect(),z=devicePixelRatio,x=z*(e.clientX-r.left),y=z*(e.clientY-r.top),ri=targetRect(x,y,rects);return[x,y,ri]}
  canvas.ondblclick=function(e){pd(e);zoom=null;canvas.style.cursor="";let[x,y,ri]=clickpos(e),l=p.plots[ri].limits,rri=rects[ri],[X,Y]=rects[ri][5](x-rri[0],y-rri[1])
