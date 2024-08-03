@@ -1,151 +1,130 @@
 // lu decomposition for wasm
 //
-// fixed memory layout: initialize memory with:
-// bytes
-// 16*n*n   input matrix A(nxn), row-major-double-complex: A[0;0].re A[0;0].im A[0;1].re .. A[n-1;n-1].im
-// 16*n     temporary row storage & result vector
-// 4*n      free space (permutation vector)
-// 16*n     rhs
+// memory(bytes)
+// 16*n*n   input matrix A(nxn), row-major-double-complex
+// +4*n     row index vector
+// +4*n     permutation vector
+// +16*n    rhs
+// +16*n    result
 //
-// the caller is reponsible to grow memory as required before calling lu.
-// - set A to the start of the memory
-// - call lu(n). on exit A is overwritten with the decomposition
-// - for multiple rhs:
-//	- fill memory with rhs starting at 16*n*(1+n)+4*n
-//	- call solve(n), on exit 16*n*n.. is overwritten with the result
+// use from js(lu is exports of wasm instance):
+// lu.mk(n);F=new Float64Array(lu.memory);F.set(A);b=lu.lu(n);rhs.forEach(y=>{F.set(y,b);x=lu.solve(n);r=F.slice(x,x+2*n))}
 package lu
 
-import (
-	. "github.com/ktye/wg/module"
-)
+import . "github.com/ktye/wg/module"
 
 func init() {
 	Memory(1)
-	Export(lu, solve)
+	Export(mk, lu, solve)
 }
-func lu(n int32) {
-	r := 16 * n * n //start of storage for temporary row
-	p := r + 16*n   //start of permutation vector
-	s := 16 * n     //row bytes (stride)
-
-	// calculate lu decomposition of A
-	i := int32(0)
-	for i < n {
-		SetI32(p+i, i) //p[i]=i
-		i += 1
+func mk(n int32)       { Memorygrow((n * (40 + 16*n)) >> 12) }
+func ap(n int32) int32 { return 16 * n * n }
+func pp(n int32) int32 { return ap(n) + 4*n }
+func sw(x, i, j int32) { t := I32(x + i); SetI32(x+i, I32(x+j)); SetI32(x+j, t) }
+func lu(n int32) int32 {
+	N, A, p, i, j := 4*n, ap(n), pp(n), int32(0), int32(0)
+	for i < N {
+		SetI32(p+i, i<<2)
+		SetI32(A+i, i>>2)
+		i += 4
 	}
 
-	var a, b, c, d, x, y float64
-	var j, k, t, ik, ki, ji, jk int32
-	ii := int32(0)
+	var t, aii, aik, ajk int32
+	var a, b, c, d float64
 	i = 0
-	for i < n {
+	for i < N {
 		b = 0.0
-		j = 0
-		k = i
-		ki = ii
-		for k < n { //for k:=i; k<n; k++
-			a = F64abs(F64(ki)) + F64abs(F64(8+ki))
+		j = i
+		aik = I32(A+i) + 4*i
+		t = aik + 4*(N-i)
+		for aik < t {
+			a = F64abs(F64(aik)) + F64abs(F64(aik+8))
 			if a > b {
-				b = a
-				j = k
+				b, j = a, i
 			}
-			ki += s
-			k++
+			aik += 16
 		}
 		if j != i {
-			t = I32(p + 4*i) //swap permutation
-			SetI32(p+4*i, p+4*j)
-			SetI32(p+4*j, t)
-			Memorycopy(r, i*s, s) //swap rows
-			Memorycopy(i*s, j*s, s)
-			Memorycopy(j*s, r, s)
+			sw(p, i, j)
+			sw(A, i, j)
 		}
 
-		x = F64(ii) // 1/Aii  1/z=[x/(x2+x2);-y/(x2+y2)]
-		y = F64(8 + ii)
-		a = x*x + y*y
-		x /= a
-		y /= -a
-		j = 1 + i
-		ji = ii
-		for j < n { //for j:=1+i; j<n; j++
-			ji += s
-			t = 16 * (j*s + i)
-			a, b = F64(t), F64(8+t)
-			SetF64(t, a*x-b*y) // A[j][i] /= A[i][i]
-			SetF64(8+t, a*y+b*x)
-			k = 1 + i
-			ik = ii
-			jk = j * s
-			for k < n { //for k := 1 + i; k < n; k++
-				// A[j][k] -= A[j][i]*A[i][k]
-				ik += 16
-				a, b = F64(ji), F64(8+ji)
-				c, d = F64(ki), F64(8+ki)
-				SetF64(jk, F64(jk)-a*c+b*d)
-				SetF64(8+jk, F64(8+jk)-a*d-b*c)
-				k++
+		aii = I32(A+i) + 4*i
+		a, b = F64(aii), F64(aii+8)          // Aii
+		c, d = 1.0/(a+b*b/a), -1.0/(b+a*a/b) // 1/Aii
+		j = 4 + i
+		for j < N { //j=1+i;j<n;j++
+			ajk = I32(A+j) + 4*i //ajk=aji
+			a, b = F64(ajk), F64(ajk+8)
+			SetF64(ajk, a*c-b*d) // Aji /= Aii
+			SetF64(ajk+8, a*d+b*c)
+			a, b = F64(ajk), F64(ajk+8) // Aji
+			ajk += 16
+			aik = aii + 16
+			t = aik + 4*N
+			for aik < t { //k=1+i;k<n;k++
+				c, d = F64(aik), F64(aik+8)
+				SetF64(ajk, F64(ajk)-a*c+b*d) // Ajk-=Aji*Aik
+				SetF64(ajk+8, F64(ajk+8)-a*d-b*c)
+				ajk += 16
+				aik += 16
 			}
-			j++
+			j += 4
 		}
-		ii += s + 16
+		i += 4
 	}
+	return p + N //rhs
 }
-func solve(n int32) {
-	n4 := 4 * n
-	x := 4 * n4 * n //start of workspace
-	p := x + 4*n4   //start of permutation vector
-	r := p + n4     //start of rhs
-	s := 16 * n     //row bytes (stride)
+func solve(n int32) int32 {
+	A := ap(n)
+	p := pp(n)
+	N := 4 * n
+	h := p + N
+	r := h + 4*N
+	i, aii, aik, rk, t := int32(0), int32(0), int32(0), int32(0), int32(0)
+	var x, y, a, b, c, d float64
 
-	var c, d, e, f float64
-	var k int32
-	i := int32(0)
-	ik := int32(0)
-	a, b := 0.0, 0.0
-	for i < s {
-		j := 8 * I32(p+(i>>1))
-		a = F64(r + j) // x[i] = rhs[P[i]]
-		b = F64(8 + r + j)
-		k = 0
-		for k < i { //for k := 0; k < i; k++ { x[i] -= A[i][k] * x[k] }
-			c, d = F64(ik), F64(8+ik)
-			e, f = F64(x+k), F64(8+x+k)
-			a -= c*e - d*f
-			b -= c*f + d*e
-			ik += 16
-			k += 16
+	ri := r
+	for i < N {
+		t = h + I32(p+i)
+		x, y = F64(t), F64(t+8)
+		aik = I32(A + i)
+		rk = rk
+		for rk < ri { //k=0;k<i;k++   xi-=Aik*xk
+			a, b = F64(aik), F64(aik+8)
+			c, d = F64(rk), F64(rk+8)
+			x -= a*c - b*d
+			y -= a*d + b*c
+			aik += 16
+			rk += 16
 		}
-		SetF64(x+i, a)
-		SetF64(x+i+8, b)
-		ik += s
-		i += 16
+		SetF64(ri, x)
+		SetF64(ri+8, y)
+		ri += 16
+		i += 4
 	}
 
-	ii := n * n
-	ik = 0
-	i = 16 * (n - 1)
-	ai := i
-	for i >= 0 { //for i := n - 1; i >= 0; i--
-		ii -= s + 16
-		ai -= s
-		a, b = F64(x+i), F64(8+x+i)
-
-		k = 16 + i
-		for k < s { //for k := 1 + i; k < n; k++ {x[i] -= A[i][k] * x[k]}
-			c, d = F64(ai+k), F64(8+ai+k)
-			e, f = F64(x+k), F64(8+x+k)
-			a -= c*e - e*f
-			b -= c*f + d*e
-			k += 16
+	i = N - 4
+	for i >= 0 { //for i=n-1;i>=0;i--
+		ri = r + 4*i
+		rk = 16 + ri
+		aii = I32(A+i) + 4*i
+		aik = aii + 16
+		t = ri + 4*N
+		for rk < t { //for k=1+i;k<n;k++  xi-=Aik*xk
+			a, b = F64(aik), F64(aik+8)
+			c, d = F64(rk), F64(rk+8)
+			SetF64(ri, F64(ri)-a*c+b*d)
+			SetF64(ri+8, F64(ri+8)-a*d-b*c)
+			aik += 16
+			rk += 16
 		}
-		c, d = F64(ii), F64(8+ii) //x[i] /= A[i][i]
-		e = c*c + d*d
-		c /= e
-		d /= -e
-		SetF64(x+i, a*c-b*d)
-		SetF64(8+x+i, a*d+b*c)
-		i -= 16
+		a, b = F64(aii), F64(aii+8)
+		c, d = 1.0/(a+b*b/a), -1.0/(b+a*a/b) // 1/Aii
+		a, b = F64(ri), F64(ri+8)
+		SetF64(ri, a*c-b*d) // xi/=Aii
+		SetF64(ri+8, a*d+b*c)
+		i -= 4
 	}
+	return r
 }
