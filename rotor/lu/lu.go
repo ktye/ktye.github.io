@@ -29,19 +29,19 @@ func lu(n int32) int32 {
 		i += 4
 	}
 
-	var t, aii, aik, ajk int32
-	var a, b, c, d float64
+	var t, aii, aki, aik, ajk int32
+	var a, b, c, d, e, f float64
 	i = 0
 	for i < N {
 		b, j = 0.0, i
-		aik = I32(A+i) + 4*i
-		t = aik + 4*(N-i)
-		for aik < t {
-			a = F64abs(F64(aik)) + F64abs(F64(aik+8))
+		t = i
+		for t < N {
+			aki = I32(A+t) + 4*i
+			a = F64abs(F64(aki)) + F64abs(F64(aki+8))
 			if a > b {
-				b, j = a, (t-aik)>>2
+				b, j = a, t
 			}
-			aik += 16
+			t += 4
 		}
 		if j != i {
 			sw(p, i, j)
@@ -62,9 +62,9 @@ func lu(n int32) int32 {
 			aik = aii + 16
 			t = aii + 4*(N-i)
 			for aik < t { //k=1+i;k<n;k++
-				c, d = F64(aik), F64(aik+8)
-				SetF64(ajk, F64(ajk)-a*c+b*d) // Ajk-=Aji*Aik
-				SetF64(ajk+8, F64(ajk+8)-a*d-b*c)
+				e, f = F64(aik), F64(aik+8)
+				SetF64(ajk, F64(ajk)-a*e+b*f) // Ajk-=Aji*Aik
+				SetF64(ajk+8, F64(ajk+8)-a*f-b*e)
 				ajk += 16
 				aik += 16
 			}
@@ -107,12 +107,12 @@ func solve(n int32) int32 {
 		x, y = F64(ri), F64(ri+8)
 		aii = I32(A+i) + 4*i
 		aik = aii + 16
-		t = ri + 4*N
+		t = ri + 4*(N - i)
 		for rk < t { //for k=1+i;k<n;k++  xi-=Aik*xk
 			a, b = F64(aik), F64(aik+8)
 			c, d = F64(rk), F64(rk+8)
-			x -= F64(ri) - a*c + b*d
-			y -= F64(ri+8) - a*d - b*c
+			x -= a*c - b*d
+			y -= a*d + b*c
 			aik += 16
 			rk += 16
 		}

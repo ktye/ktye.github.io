@@ -1,1 +1,3 @@
+go test
 wg lu.go | grep -v import > lu.wat && wat2wasm lu.wat -o lu.wasm
+
