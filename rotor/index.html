@@ -377,8 +377,8 @@ perr=s=>{let c=pcnv.getContext("2d");c.clearRect(0,0,pcnv.width,pcnv.height);rm(
 
 setlegend=(s,idx)=>{if(s.startsWith("z:")){legend.textContent="u:"+s.slice(2);return};speedidx=idx;legend.textContent="µm: "+s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
-kw=null,rk=null,jp=null, //embed
-K,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
+kw=null,lw=null,rk=null,jp=null, //embed
+K,LU,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
 KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=x=>K.sc(KC(x)),
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
 IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},l3=(x,y,z)=>K.Cal(13n,K.l2(K.l2(x,y),K.Atx(13n,z))),asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),
@@ -394,28 +394,47 @@ kenv={env:{
  Read:  function(a,b,c  ){return -1},
  Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);console.log("k:",su(v));return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y    ){return 0}}},
-kinit=(x)=>{WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
- let t0=Date.now()
- K.kinit()
+ Native:function(x,y    ){K.dx(x);return lucal(y)}}},
+lucal=x=>{let j=J(),f=F(),lp=lo(x)>>>3,A=j[lp],an=K.nn(A),ap=lo(A)>>>3,n=lo(j[lp+1]),b=j[lp+2],bp=lo(b)>>>3,bn=K.nn(b),m=bn/n,r=K.mk(22,bn),rp=lo(r)>>>3
+ j=J();let M=new Float64Array(LU.memory.buffer),p;M.set(f.subarray(ap,ap+2*an));p=LU.lu(n)>>>3
+ console.log("n/m/p",n,m,p)
+ for(let i=0;i<m;i++){
+  console.log("b",f.subarray(bp,bp+2*n))
+  M.set(p,f.subarray(bp,bp+2*n))
+  let x=LU.solve(n),xp=x>>>3
+  console.log("result", "x/xp",x,xp, M.subarray(xp,xp+2*n))
+  f.set(rp+i*2*n,M.subarray(xp,xp+2*n))
+ }
+ K.dx(x);return r
+},
+kinit=(x)=>{
+ WebAssembly.instantiate(lw,{env:{}}).then(r=>{LU=r.instance.exports;
+  WebAssembly.instantiate(kw,kenv).then(r=>{K=r.instance.exports;
+  let t0=Date.now()
+  K.kinit()
+  
+  let f=K.l2(1n,Ks("LU"));I()[(lo(f)>>>2)-3]=3 //arity
+  asn("LU",(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))))
+  
+  let no=nodes(model),n=no.length,p=no.map(x=>x.a*pi/180),ur=no.map((x,i)=>x.u*cos(p[i])),ui=no.map((x,i)=>x.u*sin(p[i])),
+  J=no.map(x=>x.m*(x.D*x.D+x.d*x.d)/8),Q=J.map(x=>x/2),
+  U=new Array(2*no.length).fill(0);for(let i=0;i<no.length;i++){U[2*i]=ur[i];U[1+2*i]=ui[i]}
  
- let no=nodes(model),n=no.length,p=no.map(x=>x.a*pi/180),ur=no.map((x,i)=>x.u*cos(p[i])),ui=no.map((x,i)=>x.u*sin(p[i])),
- J=no.map(x=>x.m*(x.D*x.D+x.d*x.d)/8),Q=J.map(x=>x/2),
- U=new Array(2*no.length).fill(0);for(let i=0;i<no.length;i++){U[2*i]=ur[i];U[1+2*i]=ui[i]}
-
- "L D d E rho".split(" ").forEach(s=>asn(s,KF(shafts(model).map(x=>x[s]))))
- "m cx cy".split(" ").forEach(s=>asn(s,KF(no.map(x=>x[s]))))
- asn("J",KF(J));asn("Q",KF(Q));asn("U",KZ(U))
- K.dx(K.Val(KC(rk)))
- if(x){
-  ic=ZK(kxyz(Ks("IC"),KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))))
-  let co=cors(),cor=ZK(kxy(Ks("cor"),KZ(ic),KI(co))),ip=ipln()
-  for(let i=0;i<cor.length/2;i++){let[r,a]=absang(cor[2*i],cor[2*i+1]);tc(co[i]?scU(r).toPrecision(4):"",ge("coru"+ip[i]));tc(co[i]?(a.toFixed()+"°"):"",ge("cora"+ip[i]))}
-  setspeed();showplot()}
- time.textContent="t: "+(Date.now()-t0)+" ms"
-})}
+  "L D d E rho".split(" ").forEach(s=>asn(s,KF(shafts(model).map(x=>x[s]))))
+  "m cx cy".split(" ").forEach(s=>asn(s,KF(no.map(x=>x[s]))))
+  asn("J",KF(J));asn("Q",KF(Q));asn("U",KZ(U))
+  K.dx(K.Val(KC(rk)))
+  LU.mk(4*n)
+  if(x){
+   ic=ZK(kxyz(Ks("IC"),KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))))
+   let co=cors(),cor=ZK(kxy(Ks("cor"),KZ(ic),KI(co))),ip=ipln()
+   for(let i=0;i<cor.length/2;i++){let[r,a]=absang(cor[2*i],cor[2*i+1]);tc(co[i]?scU(r).toPrecision(4):"",ge("coru"+ip[i]));tc(co[i]?(a.toFixed()+"°"):"",ge("cora"+ip[i]))}
+   setspeed();showplot()}
+  time.textContent="t: "+(Date.now()-t0)+" ms"
+ })})}
 
 Object.keys(examples).forEach(x=>selex.appendChild(tc(x,ce("option"))))
+if(!lw)fetch("lu/lu.wasm").then(r=>r.arrayBuffer()).then(r=>lw=new Uint8Array(r))
 if(!kw)fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=new Uint8Array(r))
 if(!rk)fetch("r.k").then(r=>r.text()).then(r=>rk=r)
 units.value="medium";selex.value="shaft";chex(selex)

@@ -65,6 +65,11 @@ la:{[l;isen;u];lusolve[l;u]isen}
 ic:{[ipln;isen;w2],/la[luA w2;isen]'w2*@[0a+&k;;1a 1a90]'0 1+/2*ipln}
 IC:{[ipln;isen;W ]flip[#W;,/ic[ipln;isen]'W*W]}
 
+AA:3^?9a
+xx:?3a
+yy:`yy \+/*[AA;xx]
+ \LU[,/AA;3;yy]
+ \xx
 
 /plots
 uin:U@&~U=0a
