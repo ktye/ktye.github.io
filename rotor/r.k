@@ -57,48 +57,27 @@ qrsolve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m;while[j<n;y[K]-:(+/(conj H[j;K])
 lu:{[A]i:0;k:!#A;P:!#A;while[1<#k;j:i+*&a=m:|/a:abs A[k;i];P[(i;j)]:P[(j;i)];A[(i;j)]:A[(j;i)];A[k:1_k;i]%:A[i;i];A[k;k]-:A[k;i]*\A[i;k];i+:1];(A;P)}
 lusolve:{[LUP;b];A:*LUP;P:*|LUP;r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A];{[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 solve:{lusolve[lu x;y]}
+/LU:{[A;n;b],/lusolve/[lu k^A;((#b)%n)^b]}     /overwritten with native version
 
-luA:{[w2];lu k^imag[K-w2*M;B+w2*G]}
-f:{[omega;nodes];lusolve[luA w2;u*w2:omega*omega]nodes}
+Aw2:{[w2];imag[K-w2*M;B+w2*G]}
+sh:{[omega;nodes];LU[Aw2 w2;k;u*w2:omega*omega]nodes}
 
 la:{[l;isen;u];lusolve[l;u]isen}
-ic:{[ipln;isen;w2],/la[luA w2;isen]'w2*@[0a+&k;;1a 1a90]'0 1+/2*ipln}
+ic:{[ipln;isen;w2]r:LU[Aw2 w2;k;,/w2*@[0a+&k;;1a 1a90]'0 1+/2*ipln];,/((#ipln)^r)@\isen}
 IC:{[ipln;isen;W ]flip[#W;,/ic[ipln;isen]'W*W]}
 
-AA:3^?9a
-xx:?3a
-yy:`yy \+/*[AA;xx]
- \LU[,/AA;3;yy]
- \xx
 
 /plots
 uin:U@&~U=0a
-
 dis:{sig[x;uin],sig[x;uin-cor[x;y]]}                                            /displacement initial,residual per sensor
-
 cor:{@[(#u)#0a;&y;qrsolve[((#u)^x)@&y;sig[x;u:uin]]]}                           /correction unbal at selected planes y
-
 unb:{,/+2^uin,cor[x;y]}                                                         /unbals and corrections
 prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^sig[x;uin])i}        /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
-
 
 sig:{+/*[(#y)^x;y]}                                                             /displacement: mmul ic with unbals
 fil:{(*x;*|x)}                                                                  /first,last
 tus:{Z:0.,+\L;zs:Z fil@&~0=cx;zu:Z fil@&~0a=U;T:(1%--/u)*1 -1*|zu-\zs;T(+/*)\x} /transform unbals from spring nodes to outer unbal nodes
 st3:{x;(x 0;+/x;x 1)}                                                           /a,static,b
 pln:{x;fil@&~0a=U}                                                              /node index of outer unbalance planes
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
