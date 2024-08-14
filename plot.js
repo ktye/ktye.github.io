@@ -34,7 +34,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
  if(p.hi.point!==null){
   let hip=p.plots[p.hi.plot],li=p.hi.lines[0],pl=hip.lines[li],pt=p.hi.point,po=hip.type=="polar",st=hip.stacked
   let d={x:("undefined"!=typeof pl.x)?pl.x[pt]:null,y:("undefined"!=typeof pl.y)?(pl.y[pt]-((st&&li)?hip.lines[li-1].y[pt]:0)):null,z:("undefined"!=typeof pl.z)?pl.z[pt]:null}
-  d.r=po?Math.hypot(d.y,d.z):d.y;d.a=po?(180/Math.PI*Math.atan2(d.y,d.z)):d.z;if(d.a<0)d.a+=360
+  d.r=po?Math.hypot(d.y,d.z):d.y;d.a=po?(180/Math.PI*Math.atan2(d.z,d.y)):d.z;if(d.a<0)d.a+=360
   let s=((d.x!==null)?("x:"+sn(d.x)+";"):"")+((d.z!==null)?("z:"+sn(d.r)+"a"+d.a.toFixed(0)):("y:"+sn(d.y)))
   legend(s,pt)
  }
@@ -107,7 +107,7 @@ function barwidth(L,st){let x=L[0].x,dx=x[x.length-1]-x[0],n=x.length*(st?L.leng
 function xyplot(p,c,w,h,plts){if(!p.lines)return;let nl=p.lines.length,z=(p.lines[0].z)?true:false;w=min(w,1.5*h),h=min((z?2:1.5)*w,h) //ah clip bw wb nl xs hp hi
  p.lines=p.lines.map(l=>{l.x=("undefined"==typeof l.x)?iota(l.y.length):("number"==typeof l.x)?rate(l.x,l.y.length):l.x;return l})
  if((p.bar||p.stacked)&&"undefined"==typeof p.lines[0].senti)p.lines.map((l,i)=>{l.senti=true; l.y=l.y.map((y,j)=>y+((i&&p.stacked)?p.lines[i-1].y[j]:0));return l})
- let lnc=i=>color(i,p.lines.length,plts),sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li,p.bar||p.stacked),aH=z?Math.round(0.3*ah):0;ah-=aH;if(z)y0=max(0,y0)
+ let lnc=i=>color(i,p.lines.length,plts),sq=(w,h)=>p.square?[min(w,h),min(w,h)]:[w,h],[aw,ah]=sq(max(0,w-plts.xyw),max(0,h-plts.xyh)),li=limits(p),[x0,x1,y0,y1]=autoxy(p.lines,li,p.bar||p.stacked,z),aH=z?Math.round(0.3*ah):0;ah-=aH;if(z)y0=max(0,y0)
  let xs=aw/(x1-x0),ys=ah/(y1-y0),zs=aH/360,xx=x=>xs*(x-x0),yy=y=>ys*(y0-y),zz=z=>aH-zs*z,bw=barwidth(p.lines,!p.stacked);p.limits=[x0,x1,y0,y1]
  let pt=(i,x,y)=>{let hp=plts.hi.point;if((hp!==null)&&(p.i==plts.hi.plot)&&(i==plts.hi.lines[0])&&(hp>=0)&&(hp<x.length)){c.beginPath();c.arc(xx(x[hp]),yy(y[hp]),5,0,2*Math.PI);c.fillStyle=c.strokeStyle;c.fill()}}
  let a=true,ln=(l,i)=>{let x=l.x,y=l.y,ps=pointsize(p,i),lw=linewidth(p,i);if(!x.length)return
@@ -155,7 +155,7 @@ function polarplot(p,c,w,h,plts){if(!p.lines)return;
  c.beginPath();c.arc(0,0,ra,0,2*Math.PI);c.clip();p.lines.map(ln);return[(l,j)=>[xm+sc*(l.y[j]-X),ym-sc*(l.z[j]-Y)],(x,y)=>[X+(x-xm)/sc,Y+(ym-y)/sc]]
 }
 function ampangplot(p,c,w,h,plts){
- p.lines.forEach((l,i)=>{l.y.forEach((y,j)=>{let z=l.z[j],a=Math.atan2(y,z)*180/Math.PI;l.y[j]=Math.hypot(y,z);l.z[j]=(a<0)?(a+360):a});p.lines[i]=l});p.type="xy";return xyplot(p,c,w,h,plts)
+ p.lines.forEach((l,i)=>{l.y.forEach((y,j)=>{let z=l.z[j],a=Math.atan2(z,y)*180/Math.PI;l.y[j]=Math.hypot(y,z);l.z[j]=(a<0)?(a+360):a});p.lines[i]=l});p.type="xy";return xyplot(p,c,w,h,plts)
 }
 function barplot(p,c,w,h,plts){p.bar=true;p.type="xy";return xyplot(p,c,w,h,plts)}
 function stackedplot(p,c,w,h,plts){p.stacked=true;p.type="xy";return xyplot(p,c,w,h,plts)}
@@ -203,9 +203,9 @@ function text90(c,x,y,t){c.save();c.translate(x,y);c.rotate(-Math.PI/2);c.fillTe
 function limits(p){let r=[0,0,0,0,0,0],l=p.limits;if("undefined"===typeof l)return r
  switch(l.length){case 0:return r;case 1:return[0,0,0,l[0],0,0];case 2:return[l[0],l[1],0,0,0,0];
  case 3:return[l[0],l[1],0,l[2],0,0];case 4:return l.concat([0,0]);default:return l}}
-function autoxy(L,a,bar){let r=a.slice(0,4);
+function autoxy(L,a,bar,z){let r=a.slice(0,4);
  if(r[0]==r[1]){[r[0],r[1]]=ncLim(vmin(L.map(l=>vmin(l.x))),vmax(L.map(l=>vmax(l.x)))).slice(0,2);if(bar){let bw=barwidth(L);r[0]-=bw/2;r[1]+=bw/2}}
- if(r[2]==r[3]){[r[2],r[3]]=ncLim(vmin(L.map(l=>vmin(l.y))),vmax(L.map(l=>vmax(l.y)))).slice(0,2);if(bar){r[2]=min(0,r[2]);r[3]=max(0,r[3])}}
+ if(r[2]==r[3]){[r[2],r[3]]=ncLim(z?0:vmin(L.map(l=>vmin(l.y))),vmax(L.map(l=>vmax(l.y)))).slice(0,2);if(bar){r[2]=min(0,r[2]);r[3]=max(0,r[3])}}
  return r}
 function autop(L,r){if(r[1]!=r[0])return squarelimits(r);r=ncLim(0,vmax(L.map(l=>Math.sqrt(vmax(l.y.map((y,i)=>y*y+l.z[i]*l.z[i]))))))[1];return[-r,r,-r,r]}
 function squarelimits(l){let dx=(l[1]-l[0])/2,dy=(l[3]-l[2])/2,xm=(l[0]+l[1])/2,ym=(l[2]+l[3])/2;dx=max(dx,dy),dy=dx;return[xm-dx,xm+dx,ym-dy,ym+dy]}

@@ -344,7 +344,7 @@ plotdis=()=>{
 },
 plotifc=()=>{ //pnode
  let pl=ipln(),nse=isen().length,sr=speedrange(),nsr=sr.length,stride=ic.length/pl.length
- let p=[],t=pl.map(x=>"plane at node "+x),y=[],z=[],sc=1/uni("U")[1]
+ let p=[],t=pl.map(x=>"plane at node "+x),y=[],z=[],sc=1e6/uni("U")[1]
  pl.forEach((pnode,i)=>{let r=ic.slice(i*stride,(1+i)*stride),s=r.length/nse,lines=[]
   for(let j=0;j<nse;j++){let rj=r.slice(j*s,(1+j)*s).map(x=>x*sc);lines.push({x:sr.slice(),y:re(rj),z:im(rj)})}
   p.push({type:["ampang","polar"][+polar.checked],title:"plane node"+pnode,xlabel:"speed "+uni("N")[0],ylabel:"µm/"+uni("U")[0],lines:lines})
@@ -353,8 +353,8 @@ plotifc=()=>{ //pnode
  plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},pcap,setlegend)
 },
 plotunb=()=>{
- let r=ZK(kxy(Ks("unb"),KZ(ic),KI(cors()))),ip=ipln(),stride=r.length/ip.length
- let p=[];for(let i=0;i<ip.length;i++){let ri=r.slice(i*stride,(1+i)*stride),lines=[{y:[ri[0]],z:[ri[1]]},{y:[ri[2]],z:[ri[3]]}]
+ let r=ZK(kxy(Ks("unb"),KZ(ic),KI(cors()))),ip=ipln(),stride=r.length/ip.length,sc=uni("U")[1]
+ let p=[];for(let i=0;i<ip.length;i++){let ri=r.slice(i*stride,(1+i)*stride).map(x=>sc*x),lines=[{y:[ri[0]],z:[ri[1]]},{y:[ri[2]],z:[ri[3]]}]
   p.push({type:"polar",title:"plane node "+ip[i],ylabel:uni("U")[0],lines:lines})
  }
  plotcaption(["initial","correction"])
@@ -365,9 +365,9 @@ plotprm=()=>{
  let ix=nodes(model).map((x,i)=>x.sen.includes('x')?i:-1).filter(x=>x>=0)
  let iX=nodes(model).map((x,i)=>(x.cx!=0)?i:-1).filter(x=>x>=0)
  if(2!=ix.length||2!=iX.length||ix[0]!=iX[0]||ix[1]!=iX[1])return perr("perm needs 2 sensors in x direction and springs with cx>0 at the same nodes")
- let si=isen().map((x,i)=>(~x&1)?i:-1).filter(x=>x>=0),sr=speedrange()
+ let si=isen().map((x,i)=>(~x&1)?i:-1).filter(x=>x>=0),sr=speedrange(),sc=uni("U")[1]
  let r=ZK(kxyz(Ks("prm"),KZ(ic),KI(si),KF(sr.map(x=>x*pi/30)))),stride=r.length/3,t=["plane node "+ip[0],"static","plane node "+ip[1]]
- let p=[0,0,0].map((_,i)=>{let ri=r.slice(i*stride,(1+i)*stride)
+ let p=[0,0,0].map((_,i)=>{let ri=r.slice(i*stride,(1+i)*stride).map(x=>x*sc)
   return{type:["ampang","polar"][+polar.checked],title:t[i],xlabel:"speed "+uni("N")[0],ylabel:uni("U")[0],lines:[{x:sr,y:re(ri),z:im(ri)}]}
  })
  rm(pcap);plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},undefined,setlegend)
@@ -375,7 +375,7 @@ plotprm=()=>{
 plotcaption=x=>{rm(pcap);x.forEach((s,i)=>tc(s,ac(ce("option"),pcap)).dataset.i=i)},
 perr=s=>{let c=pcnv.getContext("2d");c.clearRect(0,0,pcnv.width,pcnv.height);rm(pcap);c.fillText(s,20,20)},
 
-setlegend=(s,idx)=>{if(s.startsWith("z:")){legend.textContent="u:"+s.slice(2);return};speedidx=idx;legend.textContent="µm: "+s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
+setlegend=(s,idx)=>{legend.textContent=s;if(s.startsWith("z:"))return;speedidx=idx;legend.textContent=s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
 kw=null,lw=null,rk=null,jp=null, //embed
 K,LU,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
@@ -417,7 +417,6 @@ kinit=(x)=>{
   asn("J",KF(J));asn("Q",KF(Q));asn("U",KZ(U))
   K.dx(K.Val(KC(rk)))
   if(!fastsim.checked)asn("LU",K.Val(KC("{[A;n;b],/lusolve/[lu k^A;((#b)%n)^b]}"))) //overwrite LU with k version
-  
   LU.mk(4*n)
   if(x){
    ic=ZK(kxyz(Ks("IC"),KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))))
