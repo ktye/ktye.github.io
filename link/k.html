@@ -35,13 +35,11 @@ kinit=()=>{let n,nk=x=>{n=x.byteLength;return x}
  cw=banner.getBoundingClientRect().width/10
  document.body.textContent="ktye/k++ "+n+"\n ";end()
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
- let kexp={ext:{
-  memory:K.memory,
-  tp:K.tp,
- }}
+ let kexp={ext:{memory:K.memory,tp:K.tp,nn:K.nn,mk:K.mk,trap:K.trap}}
  fetch("type.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kexp)).then(r=>{
   register("type",r.instance.exports.type)
  })
+ //fetch("x.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kexp)).then(r=>{register("lu",r.instance.exports.lu)})
 })},
 cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
 krep=s=>{
