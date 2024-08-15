@@ -89,7 +89,7 @@ dialog::backdrop{background-color:grey;opacity:0.75}
  <tr><th>steps</th><td><input id="steps" type="number" min="2" max="1000" onchange="calculate()"/></td></tr>
  </table>
  <div>
-  <label for="angle">angle </label><br/><input type="number" id="angle" min="0" max="360" onchange="animate(this.value)" title="clear to animate"/><br/><br/>
+  <label for="angle">angle </label><br/><input type="number" id="angle" min="0" max="360" onchange="anim(this.value)" title="clear to animate"/><br/><br/>
   <span id="time"></span><input type="checkbox" id="fastsim" style="margin-left:1em;width:20px" onchange="calculate()" checked /><label for="fastsim">fast</label>
  </div>
  <div><input id="asp" type="range" min="0" max="13" style="writing-mode:vertical-lr;direction:rtl;width:20px" /><label for="asp" style="position:fixed">fast</label><label for="asp">slow</label></div>
@@ -219,7 +219,7 @@ update=x=>{if(modshown()){if(x%2)clickshaft(x);else clicknode(x)};tamod(model);u
 
 //changespeed=x=>{let s=+x.value,t=Infinity; console.log("s,t",s,t); if(isNaN(s)){x.value=minspeed.value}else{speedrange().forEach(x=>{if(abs(x-s)<abs(t-s))t=x});x.value=t;console.log("new t",t)}},
 
-speedidx=0,
+speedidx=0,phi=0,
 
 calculate=_=>{
  if(speedidx>(+steps.value)-1)speedidx=(+steps.value)-1;
@@ -235,7 +235,7 @@ uni=x=>{let t={
 scL=x=>x*uni("L")[1],scM=x=>x*uni("M")[1],scR=x=>x*uni("R")[1],scU=x=>x*uni("U")[1],scC=x=>x*uni("C")[1],scP=x=>x*uni("P")[1],scN=x=>x*uni("N")[1],
 
 animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
- let phi=(ang=="")?0:(+ang)/180*pi,h //P NP I xx l
+ let h;if(ang="")phi=(+ang)/180*pi
  
  //L=[0.1,0.5,0.2],R=[0.4,0.1,0.6],VX=[0.01,0.8,0.7,0.1],VY=[0,-0.05,0.05,0],WX=[0,0.05,-0.05,0],WY=VX.slice(),UI=[1,2,3],UA=[30,60,90].map(x=>x*pi/180),
  //X=new Array(1+L.length).fill(0);X.forEach((_,i)=>{if(i)X[i]=X[i-1]+L[i-1]})
@@ -284,7 +284,7 @@ animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
   
   phi+=(0.001*1.5**Number(asp.value))-((phi>2*pi)?2*pi:0)
   if(simshown()&&angle.value=="")req=requestAnimationFrame(frame)
- };frame()},
+ };frame()},anim=animate,
 
 examples={
  empty:{model:[
