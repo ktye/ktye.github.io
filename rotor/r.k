@@ -5,17 +5,19 @@
 /per shaft element: L D d E rho
 /per node:          m J Q cx cy U
 
-/ L:10#0.01
-/ D:10#0.01
-/ d:10#0.
-/ E:10#2e11
-/ rho:10#7850.
-/ m:11#0.
-/ J:11#0.
-/ Q:11#0.
-/ cx:103100 0 0 0 0 0 0 0 0 0 103100.
-/ cy:103100 0 0 0 0 0 0 0 0 0 103100.
-/ U:0 0 1.e-6a30 0 0 0 0 0 1.e-6a30 0 0
+/L:10#0.01
+/D:10#0.01
+/d:10#0.
+/E:10#2e11
+/rho:10#7850.
+/m:11#0.
+/J:11#0.
+/Q:11#0.
+/cx:103100 0 0 0 0 0 0 0 0 0 103100.
+/cy:103100 0 0 0 0 0 0 0 0 0 103100.
+/U:0 0 1.e-6a30 0 0 1.e-6a30 0 0 1.e-6a30 0 0
+
+
 
 
 A:0.25p*(D2:D*D)-d2:(d*d)
@@ -41,8 +43,8 @@ G:{[g;i;ri;l]@[g;i+i0;+;Gi[ri;l]]}/[n0;o;ri;L] /gyroscopic matrix
 diag:(!k)+k*!k
 K[diag]+:,/+(cx;cy;0;0)                        /add spring support to digonal
 M[diag]+:,/+(m;m;J;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
-G[1+i+k*i:2+4*!n]+:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
-G[i+k*1+i:2+4*!n]-:J
+G[1+i+k*i:2+4*!n]-:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
+G[i+k*1+i:2+4*!n]+:J
 B:-0.02*K                                      /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
 u:,/1 1a90 0 0*/U                              /unbalance excitation vector
 
@@ -57,43 +59,26 @@ qrsolve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m;while[j<n;y[K]-:(+/(conj H[j;K])
 lu:{[A]i:0;k:!#A;P:!#A;while[1<#k;j:i+*&a=m:|/a:abs A[k;i];P[(i;j)]:P[(j;i)];A[(i;j)]:A[(j;i)];A[k:1_k;i]%:A[i;i];A[k;k]-:A[k;i]*\A[i;k];i+:1];(A;P)}
 lusolve:{[LUP;b];A:*LUP;P:*|LUP;r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A];{[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 solve:{lusolve[lu x;y]}
+/LU:{[A;n;b],/lusolve/[lu k^A;((#b)%n)^b]}     /overwritten with native version
 
-luA:{[w2];lu k^imag[K-w2*M;B+w2*G]}
-f:{[omega;nodes];lusolve[luA w2;u*w2:omega*omega]nodes}
+Aw2:{[w2];imag[K-w2*M;B+w2*G]}
+sh:{[omega;nodes];LU[Aw2 w2;k;u*w2:omega*omega]nodes}
 
 la:{[l;isen;u];lusolve[l;u]isen}
-ic:{[ipln;isen;w2],/la[luA w2;isen]'w2*@[0a+&k;;1a 1a90]'0 1+/2*ipln}
-IC:{[ipln;isen;W ]flip[#W;,/ic[ipln;isen]'W*W]}
+ic:{[ipln;isen;w2]r:LU[Aw2 w2;k;,/w2*@[0a+&k;;1a 1a90]'0 1+/4*ipln];,/((#ipln)^r)@\isen}
+IC:{[ipln;isen;W ]uin::U ipln;flip[#W;,/ic[ipln;isen]'W*W]}
 
 
 /plots
-uin:U@&~U=0a
+dis:{1e6*sig[x;uin],sig[x;uin-cor[x;y]]}                                         /displacement initial,residual per sensor
+cor:{@[(#u)#0a;&y;qrsolve[((#u)^x)@&y;sig[x;u:uin]]]}                            /correction unbal at selected planes y
+unb:{,/+2^uin,cor[x;y]}                                                          /unbals and corrections
+prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^sig[x;uin])i}         /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
 
-dis:{sig[x;uin],sig[x;uin-cor[x;y]]}                                            /displacement initial,residual per sensor
-
-cor:{@[(#u)#0a;&y;qrsolve[((#u)^x)@&y;sig[x;u:uin]]]}                           /correction unbal at selected planes y
-
-unb:{,/+2^uin,cor[x;y]}                                                         /unbals and corrections
-prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^sig[x;uin])i}        /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
-
-
-sig:{+/*[(#y)^x;y]}                                                             /displacement: mmul ic with unbals
-fil:{(*x;*|x)}                                                                  /first,last
-tus:{Z:0.,+\L;zs:Z fil@&~0=cx;zu:Z fil@&~0a=U;T:(1%--/u)*1 -1*|zu-\zs;T(+/*)\x} /transform unbals from spring nodes to outer unbal nodes
-st3:{x;(x 0;+/x;x 1)}                                                           /a,static,b
-pln:{x;fil@&~0a=U}                                                              /node index of outer unbalance planes
-
-
-
-
-
-
-
-
-
-
-
-
-
+sig:{+/*[(#y)^x;y]}                                                              /displacement: mmul ic with unbals
+fil:{(*x;*|x)}                                                                   /first,last
+tus:{Z:0.,+\L;zs:Z fil@&~0=cx;zu:Z fil@&~0a=U;T:(1%--/zu)*1 -1*|zu-\zs;T(+/*)\x} /transform unbals from spring nodes to outer unbal nodes
+st3:{x;(x 0;+/x;x 1)}                                                            /a,static,b
+pln:{x;fil@&~0a=U}                                                               /node index of outer unbalance planes
 
 
