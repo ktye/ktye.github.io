@@ -1,0 +1,11 @@
+golub kahan lanczos
+ www.netlib.org/utk/people/JackDongarra/etemplates/node198.html
+ github.com/zeryabmoussaoui/SVD-Golub-Kahan/blob/master/GOLUB-KAHAN-1965.pdf
+
+alaff chapter 11
+ www.cs.utexas.edu/~flame/laff/alaff/chapter11-reduction-to-bidirectional-form.html
+ github.com/ULAFF/ALAFF/blob/master/Assignments/Week11/matlab
+
+ function[u,tau]=Housev1(x);n=size(x,1);[r,u2,tau]=Housev(x(1,1),x(2:n,1));u=[r u2]
+ function[r,u2,tau]=Housev(c,x2);normx=sqrt(c*c+x2'*x2);r=-sign(c)*normx;nu1=c-r;u2=x2/nu1;tau=(1+u2'*u2)/2
+
