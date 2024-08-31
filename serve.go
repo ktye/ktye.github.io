@@ -10,7 +10,11 @@ import (
 var F http.Handler
 
 func main() {
-	F = http.FileServer(http.Dir("."))
+	if len(os.Args) == 2 {
+		F = http.FileServer(http.Dir(os.Args[1]))
+	} else {
+		F = http.FileServer(http.Dir("."))
+	}
 	//http.Handle("/", http.FileServer(http.Dir(".")))
 	http.HandleFunc("/", handle)
 	fmt.Println(http.ListenAndServe(":3000", nil))
