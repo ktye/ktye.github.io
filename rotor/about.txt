@@ -34,7 +34,18 @@ however the equation has the same form and we can replace ∂²/∂t² with -Ω�
  L element length
  ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
 
+
 - analytic solutions -
+
+consider a uniform shaft with two springs as support on both sides. critical speeds are the eigenvalues λ=ω² of the homogenous system.
+they increase with the stiffness c of the springs from unsupported c=0 to rigid support c=∞.
+
+      √(ω√(L⁴ρA/EI))
+mode  free   fixed
+0     0      1π        mode 0 and 1 are rigid body modes (translation and rotation) for the free b.c.
+1     0      2π        for fixed, mode 0 has the shape of half a sine wave, 1 of a full wave and so on.
+2     1.5π   3π        the increasing harmonics 1 2 3.. times π are factors to √ω, not to the frequency ω as for a guitar string,
+3     2.5π   4π        which is 2nd order ∂²/∂t²-∂²/∂z² instead of 4th. that's why hitting a beam does not sound as good.
 ..
 
 - finite elements -
@@ -70,13 +81,14 @@ the matrices overlap by two rows and columns, the elements are simply added:
   │   │ + │   │
   └───┼───┼───┼─
       │   │ + │
-      └───┼───┘ ⋱
+      └───┼───┘⋱
 
 the final equation to solve is   -MΩ² q + K q = rhs   which is a linear system of equations for each speed Ω.
 it reveals the shape of the rotor by it's displacements w₀,w₁,.. (every other element of q) at the nodal positions z₀,z₁,..
 
 
 - xy-asymmetry -
+
 so far we only consider one spacial dimension x besides the axial coordinate z. this is ok as long as the model is symmetric
 for x and y, e.g. only contains shaft elements with circular cross sections and isotropic bearings (same stiffness in both directions).
 however we want to demonstrate at least the influence of anisotropic bearings which are very common, e.g. the stiffness in vertical
@@ -101,23 +113,25 @@ K = ⎯⎯ ⎢ 6L   0   0  4L² -6L   0   0  2L²⎥, M = ⎯⎯⎯ ⎢22L    0 
        ⎢  0 -12  6L   0    0  12  6L   0 ⎥          ⎢ 0    54  -13L   0    0  156 22L    0 ⎥         ⎢ g1  0   0    g2 -g1  0   0   g2⎥
        ⎢  0 -6L  2L²  0    0  6L  4L²  0 ⎥          ⎢ 0   13L   -3L²  0    0  22L  4L²   0 ⎥         ⎢ g2  0   0    g4 -g2  0   0   g3⎥
        ⎣ 6L   0   0  2L² -6L   0   0  4L²⎦          ⎣-13L   0    0  -3L² -22L   0   0   4L²⎦         ⎣ 0   g2 -g4   0   0  -g2 -g3  0 ⎦
-
-both K and M are symmetric, while G is antimetric.
+                                                                                                     (g3=36, g2=-3L, g3=-4L², g4=-L²)
+												     
+both K and M are symmetric, while G is antimetric. the state vector now has 2 displacements and 2 angles: q = [v₀ w₀ φ₀ ψ₀ ..]
                  ⎯⎯⎯⎯⎯⎯⎯⎯⎯             ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯               
                                                                  (let there be k)
 in k we define functions that return these element matrices for given parameters:
-
+                                                                                            (who can make these shorter?)
 k) Ki:{[ei;l]a:6*l;b:2*l*l;(ei%l*l*l)*sy(6;0;0;a;-12;0;0;a;6;-a;0;0;-12;-a;0;b;0;0;a;b;0;b;-a;0;0;b;6;0;0;-a;6;a;0;b;0;b)}
    Mi:{[ra;l]a:156;b:44*l;c:108;d:-26*l;e:4*l*l;f:-6*l*l;(ra*l%840)*sy(a;0;0;b;c;0;0;d;a;-b;0;0;c;-d;0;e;0;0;d;f;0;e;-d;0;0;f;a;0;0;-b;a;b;0;e;0;e)}
    Gi:{[ri;l]a:36;b:3*l;c:4*l*l;d:-l*l;(ri%15*l)*ys(-a;b;0;0;a;b;0;0;b;-a;0;0;b;-c;b;0;0;-d;0;b;d;0;-a;-b;0;0;-b;-c)}
-   sy:{,/x++x:((!8)#'0.),'(-1_+\0,8-!8)^x};ys:{,/x-+x:((1+!8)#'0.),'(+\0,7-!7)^x}        /who can make these shorter?
+   sy:{,/x++x:((!8)#'0.),'(-1_+\0,8-!8)^x};ys:{,/x-+x:((1+!8)#'0.),'(+\0,7-!7)^x}
 
 
 to assemble the system matrices from the element matrices we do:
 
+
 k) A:0.25p*(D2:D*D)-d2:(d*d)                      /inputs L D d E rho are real vectors with the length of the number of shaft elements
-   I:0.015625p*(D2*D2)-d2*d2                      /       m J Q cx cy are real vectors with the length of the number of nodes (1 more than elements)
-   ei:E*I                                         /input  U       is a complex vector of the number of nodes
+   I:0.015625p*(D2*D2)-d2*d2                      /       m J Q cx cy are real vectors with the length of the number of nodes (1+#L)
+   ei:E*I                                         /input  U       is a complex vector  with the length of the number of nodes
    ra:rho*A
    ri:rho*I
    
@@ -131,46 +145,51 @@ k) A:0.25p*(D2:D*D)-d2:(d*d)                      /inputs L D d E rho are real v
 
 matrices are represented as vectors in ravel order, instead of using 2d indexing which should also be possible.
 
+
 - rigid elements, elastic bearings -
+
 once the system matrices KMG are assembled, they can be modified to account for further details:
 elastic support (e.g. a spring) at the location of a node adds it's stiffness directly to a single element of matrix K
 
 k) diag:(!k)+k*!k
    K[diag]+:,/+(cx;cy;0;0)                        /add spring support to digonal
    M[diag]+:,/+(m;m;J;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
-   G[1+i+k*i:2+4*!n]+:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
-   G[i+k*1+i:2+4*!n]-:J
-   B:-0.02*K                                      /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
+   G[1+i+k*i:2+4*!n]-:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
+   G[i+k*1+i:2+4*!n]+:J
+   B:-0.02*K                                      /damping proportional to K*ω
 
 the stiffness input vectors cx and cy are mostly 0 except for the location of discrete springs.
-more complicated bearing models are not considered, but many exist: spring-mass-damper systems, hydrodynamic bearings, roller bearing details, ...
-other boundary conditions which are often done are to define a bearing to allow only bending or forcing the slope to be zero.
+more complicated bearing models are not considered, but many exist: spring-mass-damper systems, hydrodynamic bearings, rollers, ...
+classic boundary conditions are achieved by define a bearing to allow only bending or forcing the slope to be zero.
 this needs more consideration and typically cancels degrees of freedom which leads to a slightly smaller system of equations.
 
-discrete mass or disc elements are placed at node locations. they do not deform but contribute the the mass and gyroscopic properties in the case of discs.
-m is the vector of mass elements, and J and Q are vectors moments of inertia for each node, J around the axis of rotation 
-and Q around the axes perpendicular to it (assuming rotational symmetric cross sections only).
+discrete mass or disc elements are placed at node locations. these elements do not deform but contribute the the mass and gyroscopic
+properties in the case of discs.  m is the vector of mass elements, and J and Q are vectors of moments of inertia for each node,
+J around the axis of rotation and Q around the axes perpendicular to it (rotational symmetric cross sections only, e.g. cylindric).
 
-all KMG matrices are real valued, but the system is not.
-the right hand side U is a vector of unbalances with one value per node. it is complex and the phase indicates the angle around the shaft axis of the location
-of a discrete unbalance mass attached at distance r from the shaft. only mass times radius is important hence U has dimension mass times length.
+all three KMG matrices are real valued, but the system is not.
+the right hand side U is a vector of unbalances with one value per node. it is complex and the phase indicates the angle around the
+shaft axis of the location of a discrete unbalance mass attached at distance r from the shaft. only mass times radius is important
+hence U has dimension mass times length.
 
 k) u:,/1 1a90 0 0*/U                              /unbalance excitation vector
 
-u spreads the excitation around two degrees of freedom, taking the rotation of the shaft into account: the excitation in x and y direction is 90 degree appart,
-and is has no direct contribution to the moment (slope coordinates).
+u spreads the excitation around two degrees of freedom, taking the rotation of the shaft into account: the excitation in x and y
+direction is 90 degree appart, and is has no direct contribution to the moment (slope coordinates are 2 3 6 7..).
 
 
 - solving the system matrix -
-the system equation combines all matrices to form a complex valued matrix A which unfortunately is dependend on speed.
+the system equation combines all matrices to form a complex valued matrix A which unfortunately is dependend on speed Ω.
 the right hand side depends only on the unbalance excitations:
 
-k) f:{[rpm]w2:w*w:0.10471975511965978*rpm;solve[k^imag[K-M*w2;B+w2*G];w2*u][,/0 1+/4*!n]}
+k) f:{[w]solve[k^imag[K-w2*M;B+w2*G];w2:w*w*u][,/0 1+/4*!n]}
+               ╰───── matrix───────╯ ╰─ rhs ─╯ displacements
 
-this means for a given model, we assembly the real valued shaft model matrices K M G, combined them for each speed value to a complex system matrix A
-and solve it for each set of unbalances applied to the shaft.
-from the result vector we can take the nodes that we are interested and use the displacements only @,/0 1+/4*!n
-the displacements in x and y direction are complex valued and can be combined with sin and cos Ωt to retrieve real valued displacments, periodic with each revolution.
+this means for a given model, we assembly the real valued shaft model matrices KMG, combined them for each speed value to a large
+complex system matrix and solve it for each set of unbalances applied to the shaft.
+from the result vector we can take the nodes that we are interested and use the displacements only.
+the displacements in x and y direction are complex valued and can be combined with sin and cos Ωt to retrieve real valued displacments,
+periodic with each revolution.
 
 solving the quadratic system A x = b can be done with LU decomposition and partial pivoting:
 
@@ -183,3 +202,77 @@ k) lu:{[A]i:0;k:!#A;P:!#A;while[
     {[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
    solve:{lusolve[lu x;y]}
 
+it turn's out it's too slow for this version of k for an interactive ui. the lu decomposition is rewritten in wasm which is 20x faster.
+
+
+- examples: ktye.github.io/rotor/index.html -
+┌─────────────────────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────────────────────┐
+│                       uniform shaft                             │ │                            resonance                            │
+├─────────────────────────────────────────────────────────────────┤ ├─────────────────────────────────────────────────────────────────┤
+│the example shows a shaft of 1m length and a diameter of 10cm.   │ │the rotor has a single unbalance at the center.                  │
+│it has springs on both ends which are relatively soft:           │ │                                                                 │
+│                                                                 │ │at low speed the unbalance points outwards.                      │
+│                    cL³/EI is 1%                                 │ │increase the speed (click on the diagram or on ▶) until it       │
+│                                                                 │ │approaches the resonance 270rpm.                                 │
+│which is a measure between support and shaft stiffness.          │ │the animation is always scaled to max but the actual orbits      │
+│                                                                 │ │are large.                                                       │
+│the rigid rotor critical speeds are at 172 and 297 rpm,          │ │                                                                 │
+│click on model to see the exact solution for a rigid shaft.      │ │                                                                 │
+│                                                                 │ │observe how the unbalance turns forwards.                        │
+│verify the peaks in the displacment curves.                      │ │at the peak of the critical speed it has an angle of 90 degree.  │
+│                                                                 │ │                                                                 │
+│now increase the max speed until you see the first bending       │ │increase further to high speeds.                                 │
+│critical. it appears at around 30krpm.                           │ │the unbalance points inwards now and the displacement reaches    │
+│click into the displacement curve close to the critical to see   │ │a small constant value.                                          │
+│the defomed mode shape in the animation.                         │ │                                                                 │
+│                                                                 │ │this is called self-centering.                                   │
+│                                                                 │ │                                                                 │
+│                                                                 │ │at high speed the body rotates around it's principal axis of     │
+│                                                                 │ │inertia. the force distribution of the springs is negligible.    │
+│                                                                 │ │the center of mass is displaced (excentric) by the unbalance by  │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                        e = u / m                                │
+│                                                                 │ │                                                                 │
+│                                                                 │ │where m is the mass of the rotor.                                │
+│                                                                 │ │                                                                 │
+│                                                                 │ │this is typically a small value, measured in µm                  │
+│                                                                 │ │                                                                 │
+│                                                                 │ │  1 µm (excentricity)  =  1 gmm (unbalance) / 1kg (rotor mass)   │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                                                                 │
+└─────────────────────────────────────────────────────────────────┘ └─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────────────────────┐
+│                    anisotropic bearings                         │ │                            gyroscopic                           │
+├─────────────────────────────────────────────────────────────────┤ ├─────────────────────────────────────────────────────────────────┤
+│if the bearings have a different stiffness in their principal    │ │  p170                                                           │
+│directions, e.g. horizontal and vertial, the system is called    │ │                                                                 │
+│anisotropic.                                                     │ │                                                                 │
+│                                                                 │ │                                                                 │
+│in this example the stiffness in x direction is 4 times smaller  │ │                                                                 │
+│than in y direction.                  (x:horizontal, y:vertical) │ │                                                                 │
+│                                                                 │ │                                                                 │
+│observe the orbit at low speed:                                  │ │                                                                 │
+│it is elliptic now: small in vertical but large in horizontal    │ │                                                                 │
+│direction.                                                       │ │                                                                 │
+│                                                                 │ │                                                                 │
+│the displacements are at the center measured in both directions. │ │                                                                 │
+│you can see in the displacements that the resonance in x         │ │                                                                 │
+│direction comes first, at 270 rpm vs 540 rpm in y direction.     │ │                                                                 │
+│                                                                 │ │                                                                 │
+│increase the speed:                                              │ │                                                                 │
+│just before 270 rpm the orbit is very thin: the horizontal       │ │                                                                 │
+│oscillation dominates.                                           │ │                                                                 │
+│                                                                 │ │                                                                 │
+│between the two criticals the orbit moves backwards.             │ │                                                                 │
+│                                                                 │ │                                                                 │
+│at high speed after the second critical the unbalance points     │ │                                                                 │
+│inwards again as in the isotropic case.                          │ │                                                                 │
+│the forces of the springs (and their differences) are no longer  │ │                                                                 │
+│relevant.                                                        │ │                                                                 │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                                                                 │
+│                                                                 │ │                                                                 │
+└─────────────────────────────────────────────────────────────────┘ └─────────────────────────────────────────────────────────────────┘

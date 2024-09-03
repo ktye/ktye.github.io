@@ -70,7 +70,7 @@ IC:{[ipln;isen;W ]uin::U ipln;flip[#W;,/ic[ipln;isen]'W*W]}
 
 
 /plots
-dis:{1e6*sig[x;uin],sig[x;uin-cor[x;y]]}                                         /displacement initial,residual per sensor
+dis:{1e6*sig[x;uin],sig[x;uin-$[+/y;cor[x;y];0]]}                                         /displacement initial,residual per sensor
 cor:{@[(#u)#0a;&y;qrsolve[((#u)^x)@&y;sig[x;u:uin]]]}                            /correction unbal at selected planes y
 unb:{,/+2^uin,cor[x;y]}                                                          /unbals and corrections
 prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^sig[x;uin])i}         /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes

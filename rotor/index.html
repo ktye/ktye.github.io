@@ -110,7 +110,7 @@ dialog::backdrop{background-color:grey;opacity:0.75}
  <select id="pcap" style="width:100%;min-height:50px;outline:none;border:none;border-radius:0;overflow:auto" multiple></select>
 </div>
 
-<dialog id="hlp" style="margin:auto"><p id="hlptitle"></p><pre id="hlptxt" style="margin:2em">help text..</pre><form method="dialog"><button>OK</button></form></dialog>
+<dialog id="hlp" style="margin:auto"><pre id="hlptxt">help text..</pre><form method="dialog"><button style="margin-left:45%">ok</button></form></dialog>
 
 <script src="../plot.js" id="pjs"></script>
 <script>
@@ -287,42 +287,158 @@ animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
  };frame()},anim=animate,
 
 examples={
- empty:{model:[
-  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,cor:false,sen:"none"},
-  {L:0.100,D:0.010,d:0.005,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:1e6,cy:1e6,u:0,a:0,cor:false,sen:"none"}
- ],speed:{min:1,max:100,steps:100},title:"new model"},
  shaft:{model:[
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,cor:false,sen:"x"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,cor:true,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:90,cor:true,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:30,cor:true,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:180,cor:true,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
   {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.01,D:0.01,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:103100,cy:103100,u:0,a:0,cor:false,sen:"x"}
- ],speed:{min:1000,max:300000,steps:100},title:"uniform shaft"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"}
+ ],speed:{min:200,max:2000,steps:100},title:"uniform shaft",help:`
+┌─────────────────────────────────────────────────────────────────┐
+│                       uniform shaft                             │
+├─────────────────────────────────────────────────────────────────┤
+│the example shows a shaft of 1m length and a diameter of 10cm.   │
+│it has springs on both ends which are relatively soft:           │
+│                                                                 │
+│                    cL³/EI is 1%                                 │
+│                                                                 │
+│which is a measure between support and shaft stiffness.          │
+│                                                                 │
+│the rigid rotor critical speeds are at 172 and 297 rpm,          │
+│click on model to see the exact solution for a rigid shaft.      │
+│                                                                 │
+│verify the peaks in the displacment curves.                      │
+│                                                                 │
+│now increase the max speed until you see the first bending       │
+│critical. it appears at around 30krpm.                           │
+│click into the displacement curve close to the critical to see   │
+│the defomed mode shape in the animation.                         │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘`},
  resonance:{model:[
-  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,cor:false,sen:"none"},
-  {L:0.020,D:0.010,d:0.005,E:200,rho:7850},
-  {m:0,D:0,d:0,cx:1000,cy:1000,u:0,a:0,cor:false,sen:"none"},
-  {L:0.020,D:0.015,d:0.005,E:200,rho:7850},
-  {m:0.2,D:0.010,d:0.005,cx:0,cy:0,u:15,a:30,cor:false,sen:"xy"}
- ],speed:{min:1,max:100,steps:100},title:"three elements.."}
-},model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptitle.textContent=e.title;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0);changeunits();showsim()},
+  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"}
+ ],speed:{min:200,max:400,steps:400},title:"resonance",help:`
+┌─────────────────────────────────────────────────────────────────┐
+│                            resonance                            │
+├─────────────────────────────────────────────────────────────────┤
+│the rotor has a single unbalance at the center.                  │
+│                                                                 │
+│at low speed the unbalance points outwards.                      │
+│increase the speed (click on the diagram or on ▶) until it       │
+│approaches the resonance 270rpm.                                 │
+│the animation is always scaled to max but the actual orbits      │
+│are large.                                                       │
+│                                                                 │
+│                                                                 │
+│observe how the unbalance turns forwards.                        │
+│at the peak of the critical speed it has an angle of 90 degree.  │
+│                                                                 │
+│increase further to high speeds.                                 │
+│the unbalance points inwards now and the displacement reaches    │
+│a small constant value.                                          │
+│                                                                 │
+│this is called self-centering.                                   │
+│                                                                 │
+│at high speed the body rotates around it's principal axis of     │
+│inertia. the force distribution of the springs is negligible.    │
+│the center of mass is displaced (excentric) by the unbalance by  │
+│                                                                 │
+│                        e = u / m                                │
+│                                                                 │
+│where m is the mass of the rotor.                                │
+│                                                                 │
+│this is typically a small value, measured in µm                  │
+│                                                                 │
+│  1 µm (excentricity)  =  1 gmm (unbalance) / 1kg (rotor mass)   │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘`},
+ anisotropic:{model:[
+  {m:0,D:0,d:0,cx:10000,cy:40000,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"xy"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:10000,cy:40000,u:0,a:0,cor:false,sen:"none"}
+ ],speed:{min:100,max:1000,steps:400},title:"anisotropic bearings",help:`
+┌─────────────────────────────────────────────────────────────────┐
+│                    anisotropic bearings                         │
+├─────────────────────────────────────────────────────────────────┤
+│if the bearings have a different stiffness in their principal    │
+│directions, e.g. horizontal and vertial, the system is called    │
+│anisotropic.                                                     │
+│                                                                 │
+│in this example the stiffness in x direction is 4 times smaller  │
+│than in y direction.                  (x:horizontal, y:vertical) │
+│                                                                 │
+│observe the orbit at low speed:                                  │
+│it is elliptic now: small in vertical but large in horizontal    │
+│direction.                                                       │
+│                                                                 │
+│the displacements are at the center measured in both directions. │
+│you can see in the displacements that the resonance in x         │
+│direction comes first, at 270 rpm vs 540 rpm in y direction.     │
+│                                                                 │
+│increase the speed:                                              │
+│just before 270 rpm the orbit is very thin: the horizontal       │
+│oscillation dominates.                                           │
+│                                                                 │
+│between the two criticals the orbit moves backwards.             │
+│                                                                 │
+│at high speed after the second critical the unbalance points     │
+│inwards again as in the isotropic case.                          │
+│the forces of the springs (and their differences) are no longer  │
+│relevant.                                                        │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+`},
+},model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptxt.textContent=e.help;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0);changeunits();showsim()},
 
 req,shaftline=[],ic=[],
 
@@ -377,7 +493,7 @@ perr=s=>{let c=pcnv.getContext("2d");c.clearRect(0,0,pcnv.width,pcnv.height);rm(
 
 setlegend=(s,idx)=>{legend.textContent=s;if(s.startsWith("z:"))return;speedidx=idx;legend.textContent=s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
-kw=null,lw=null,rk=null,jp=null, //embed
+kw=null,lw=null,rk=null, //embed
 K,LU,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
 KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=x=>K.sc(KC(x)),
 KI=x=>{let r=K.mk(19,x.length);I().set(x,lo(r)>>>2);return r},KF=x=>{let r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},KZ=x=>{let r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
@@ -420,7 +536,7 @@ kinit=(x)=>{
   LU.mk(4*n)
   if(x){
    ic=ZK(kxyz(Ks("IC"),KI(ipln()),KI(isen()),KF(speedrange().map(x=>x*pi/30))))
-   let co=cors(),cor=ZK(kxy(Ks("cor"),KZ(ic),KI(co))),ip=ipln()
+   let co=cors(),cor=(co.some(x=>x)?ZK(kxy(Ks("cor"),KZ(ic),KI(co))):[]),ip=ipln()
    for(let i=0;i<cor.length/2;i++){let[r,a]=absang(cor[2*i],cor[2*i+1]);tc(co[i]?scU(r).toPrecision(4):"",ge("coru"+ip[i]));tc(co[i]?(a.toFixed()+"°"):"",ge("cora"+ip[i]))}
    setspeed();showplot()}
   time.textContent="t: "+(Date.now()-t0)+" ms"
@@ -431,6 +547,9 @@ if(!lw)fetch("lu/lu.wasm").then(r=>r.arrayBuffer()).then(r=>lw=new Uint8Array(r)
 if(!kw)fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>kw=new Uint8Array(r))
 if(!rk)fetch("r.k").then(r=>r.text()).then(r=>rk=r)
 units.value="medium";selex.value="shaft";chex(selex)
+
+
+examples
 
 </script>
 </body></html>
