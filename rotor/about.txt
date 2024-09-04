@@ -8,18 +8,17 @@ differential equation:
                                                        ρA ⎯⎯⎯ + EI ⎯⎯⎯ = 𝑓(z,t).
                                                           ∂t²      ∂z⁴
 
-with appropriate rescaling we can get rid of physical parameters. then the operator has the form ∂²/∂t² + ∂⁴/∂z⁴, which handles one
-spacial direction only. the second term is a left-over from the biharmonic(laplace) operator ∆∆.
+with appropriate rescaling we can get rid of physical parameters. the operator has the form ∂²/∂t² + ∂⁴/∂z⁴, which handles one
+spatial direction only. the second term is a left-over from the biharmonic(laplace) operator ∆∆.
 the nature of the equation is an oscillation equation, e.g. how initial conditions propagate over time and space and/or how the system
 reacts to external excitation combined on the right hand side.
  
-
-for now, we are only interested in the shape of the 1d structure as it rotates, and deforms (deflection/bending) due to due to the
-forces of concentrated unbalances at discrete positions. we do not consider the general multi-frequency response due to impacts.
+for now, we are only interested in the shape of the 1d structure as it rotates, and deforms (deflection/bending) due to the forces of
+concentrated unbalances at discrete positions. we do not consider the general multi-frequency response, e.g. due to impacts.
 
 as such the equation is misleading: it is not a vibration problem, but rather an equilibrium between the unbalance forces at a fixed
-revolutionary speed and the restoring forces of the bend shaft due to it's elastic properties. there is no oscillation involved at all,
-it is just a bend shaft (like a banana) that rotates along it's axis defined by the bearings.
+rotational speed and the restoring forces of the bent shaft due to it's elastic properties. there is no oscillation involved at all,
+the shaft is simply bent (like a banana) and rotates around the axis defined by the bearings.
 however the equation has the same form and we can replace ∂²/∂t² with -Ω².
 
 
@@ -153,7 +152,7 @@ elastic support (e.g. a spring) at the location of a node adds it's stiffness di
 
 k) diag:(!k)+k*!k
    K[diag]+:,/+(cx;cy;0;0)                        /add spring support to digonal
-   M[diag]+:,/+(m;m;J;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
+   M[diag]+:,/+(m;m;Q;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
    G[1+i+k*i:2+4*!n]-:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
    G[i+k*1+i:2+4*!n]+:J
    B:-0.02*K                                      /damping proportional to K*ω

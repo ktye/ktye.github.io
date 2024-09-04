@@ -438,6 +438,66 @@ examples={
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 `},
+ gyroscopic:{model:[
+  {m:0,D:0,d:0,cx:100000,cy:100000,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:100000,cy:100000,u:0,a:0,cor:true,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:180,cor:true,sen:"none"},
+  {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
+  {m:5,D:0.1,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.05,D:0.02,d:0,E:2e11,rho:7850},
+  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {L:0.05,D:0.02,d:0,E:2e11,rho:7850},
+  {m:5,D:0.1,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"xy"}
+ ],speed:{min:10,max:4000,steps:400},title:"gyroscopic effect",help:`
+┌─────────────────────────────────────────────────────────────────┐
+│                        gyroscopic effect                        │
+├─────────────────────────────────────────────────────────────────┤
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘`},
 },model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptxt.textContent=e.help;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0);changeunits();showsim()},
 
 req,shaftline=[],ic=[],

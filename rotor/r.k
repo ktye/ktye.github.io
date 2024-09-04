@@ -42,7 +42,7 @@ G:{[g;i;ri;l]@[g;i+i0;+;Gi[ri;l]]}/[n0;o;ri;L] /gyroscopic matrix
 
 diag:(!k)+k*!k
 K[diag]+:,/+(cx;cy;0;0)                        /add spring support to digonal
-M[diag]+:,/+(m;m;J;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
+M[diag]+:,/+(m;m;Q;Q)                          /add mass and equatorial moment of inertia of disc elements to diagonal
 G[1+i+k*i:2+4*!n]-:J                           /add polar moments of inertia to gyroscopic matrix counter diagonal
 G[i+k*1+i:2+4*!n]+:J
 B:-0.02*K                                      /damping proportional to K*ω   /D:0.5*(α%ω)*⁠β*ω   d:(α*M)+β*K
