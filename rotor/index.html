@@ -34,6 +34,7 @@ dialog::backdrop{background-color:grey;opacity:0.75}
   <caption id="nodecaption" data-i="0">node</caption>
   <tr><th>disc Da</th><td><input type="number"    id="edDa" onchange='ed(this,"D","L")' /></td><td class="unitL">m</td></tr>
   <tr><th>disc Di</th><td><input type="number"    id="edDi" onchange='ed(this,"d","L")' /></td><td class="unitL">m</td></tr>
+  <tr><th>disc thickness</th><td><input type="number"    id="edT" onchange='ed(this,"t","L")' /></td><td class="unitL">m</td></tr>
   <tr class="ul"><th>mass</th><td><input type="number"       id="edM"  onchange='ed(this,"m","M")' /></td><td class="unitM">kg</td></tr>
   <tr><th>support cx</th><td><input type="number" id="edCx" onchange='ed(this,"cx","C")' /></td><td class="unitC">N/m</td></tr>
   <tr class="ul"><th>support cy</th><td><input type="number" id="edCy" onchange='ed(this,"cy","C")' /></td><td class="unitC">N/m</td></tr>
@@ -123,10 +124,10 @@ su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEnc
 
 tamod=_=>{ let v=fmt(model.map(x=>JSON.stringify(x).slice(1,-1).replaceAll(`"`,"").replaceAll(","," "))) ;ta.cols=2+max(...v.map(x=>x.length));ta.rows=v.length;ta.value=v.join("\n")},
 modelT=x=>{try{model=JSON.parse("["+x.split("\n").map(x=>"{"+x.trim().replace(/ +/g,",").replace(/[a-zA-Z]+/g,x=>'"'+x+'"')+"}").join(",")+"]")}catch(e){};update(0)},
-fmt=v=>{v.forEach((x,i)=>{v[i]=x.split(" ");v[i].push(..." ".repeat(9-v[i].length).split(""))});let col=j=>v.map(x=>x[j]);for(let j=0;j<v[0].length;j++){let c=col(j),m=max(...c.map(x=>x.length));v.forEach((x,i)=>v[i][j]+=" ".repeat(m-x[j].length)) };return v.map((x,i)=>v[i]=x.join(" "))},
+fmt=v=>{v.forEach((x,i)=>{v[i]=x.split(" ");v[i].push(..." ".repeat(10-v[i].length).split(""))});let col=j=>v.map(x=>x[j]);for(let j=0;j<v[0].length;j++){let c=col(j),m=max(...c.map(x=>x.length));v.forEach((x,i)=>v[i][j]+=" ".repeat(m-x[j].length)) };return v.map((x,i)=>v[i]=x.join(" "))},
 
 shafts=m=>m.filter((_,i)=>i%2),nodes =m=>m.filter((_,i)=>(1+i)%2),
-discs=m=>nodes(m).filter(x=>x.D!=0),springs=m=>nodes(m).filter(x=>x.cx!=0&&x.cy!=0),
+discs=m=>nodes(m).filter(x=>x.D!=0),
 ipln=()=>nodes(model).map((x,i)=>(x.u!=0||x.a!=0)?i:-1).filter(x=>x>=0),
 isen=()=>{let n=nodes(model);return Array(4*n.length).fill(0).map((_,i)=>i).filter(i=>n[floor(i/4)].sen.includes((0==i%4)?"x":(1==i%4)?"y":"never"))},
 absang=(x,y)=>[hypot(x,y),(y=atan2(y,x)*180/pi,(y<0)?y+360:y)],
@@ -144,14 +145,14 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
   r+=`<circle cx="${  L }" cy="0" r="${D/10}" fill="black" stroke="${(a==(2*sh.length))?"darkorange":"black"}" stroke-width="2px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*sh.length})"/>`
  
  r+=`<circle cx="${rig.Z}" cy="0" r="${D/14}" fill="white" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke"/>` //com
- r+=`<circle cx="${rig.Z}" cy="0" r="${rig.iJ}" stroke="blue" fill="none" stroke-width="${D/40}" stroke-dasharray="${0.2*pi*rig.iJ} ${0.8*pi*rig.iJ}" stroke-dashoffset="${0.6*pi*rig.iJ}"/>` // radius of inertia
- r+=`<circle cx="${rig.Z}" cy="0" r="${rig.iQ}" stroke="blue" fill="none" stroke-width="${D/40}" stroke-dasharray="${0.1*pi*rig.iQ} ${0.9*pi*rig.iQ}" stroke-dashoffset="${0.05*pi*rig.iQ}"/>` // radius of inertia
  
  D=(8*D<L)?L/4:2*D
  nodes(m).forEach((x,i)=>{let xi=X[i],xr=max(x.D,i?m[2*i-1].D:0,(2*i+1<m.length)?m[2*i+1].D:0)/2;
   if(x.m!=0){ //discs
-   r+=`<line x1="${xi}" y1="${-x.D/2}" x2="${xi}" y2="${-x.d/2}" stroke="black" stroke-width="7px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`
-   r+=`<line x1="${xi}" y1="${ x.D/2}" x2="${xi}" y2="${ x.d/2}" stroke="black" stroke-width="7px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`}
+   //r+=`<line x1="${xi}" y1="${-x.D/2}" x2="${xi}" y2="${-x.d/2}" stroke="black" stroke-width="7px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`
+   //r+=`<line x1="${xi}" y1="${ x.D/2}" x2="${xi}" y2="${ x.d/2}" stroke="black" stroke-width="7px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`}
+   r+=`<rect x="${xi-x.t/2}" y="${-x.D/2}" width="${x.t}" height="${(x.D-x.d)/2}" fill="black" class="ln" onclick="clicknode(${2*i})"/>`
+   r+=`<rect x="${xi-x.t/2}" y="${x.d/2}"  width="${x.t}" height="${(x.D-x.d)/2}" fill="black" class="ln" onclick="clicknode(${2*i})"/>`}
   if(x.sen!="none"){ //sensors
    r+=`<line x1="${xi}" y1="${-D/2}" x2="${xi}" y2="${-1.1*xr}"" stroke="red" stroke-width="2px" vector-effect="non-scaling-stroke" />`
    r+=`<rect x="${xi-D/20}" y="${-D/2}" width="${D/10}" height="${D/10}" fill="lightgrey" stroke="black" stroke-width="2px" vector-effect="non-scaling-stroke" class="ln" onclick="clicknode(${2*i})"/>`
@@ -163,6 +164,10 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
    if(x.cy!=0)r+=`<polygon points="${xi},${xr} ${xi},${xr+D/10} ${xi-D/20},${xr+D/10}" ${st} class="ln" onclick="clicknode(${2*i})"/>`}
   if(x.u!=0)r+=`<rect x="${xi-D/20}" y="${-xr-D/10}" width="${D/10}" height="${D/10}" fill="black" class="ln" onclick="clicknode(${2*i})"/>` //unbals
  })
+ 
+ r+=`<circle cx="${rig.Z}" cy="0" r="${rig.iJ}" stroke="blue" fill="none" stroke-width="${D/40}" stroke-dasharray="${0.2*pi*rig.iJ} ${0.8*pi*rig.iJ}" stroke-dashoffset="${0.6*pi*rig.iJ}"/>` // radius of inertia
+ r+=`<circle cx="${rig.Z}" cy="0" r="${rig.iQ}" stroke="blue" fill="none" stroke-width="${D/40}" stroke-dasharray="${0.1*pi*rig.iQ} ${0.9*pi*rig.iQ}" stroke-dashoffset="${0.05*pi*rig.iQ}"/>` // radius of inertia
+ 
  
  X=L+D/5
  r+=`<line x1="${X}" x2="${X+D/5}" y1="0" y2="0" stroke-width="3px" stroke="black" vector-effect="non-scaling-stroke" class="ln" onclick="addshaft()"/>`
@@ -181,12 +186,12 @@ svgmod=(m,a)=>{let D=0,L=0,X=[0],r="",rig=rigid(m);let sh=shafts(m);svg.dataset.
  xbearing.textContent   =`${scN(rig.nx[0]).toPrecision(5)}, ${scN(rig.nx[1]).toPrecision(6)} ${uni("N")[0]}`
  ybearing.textContent   =`${scN(rig.ny[0]).toPrecision(5)}, ${scN(rig.ny[1]).toPrecision(6)} ${uni("N")[0]}`
 },
-area=x=>0.25*pi*(x.D*x.D-x.d*x.d),mass=x=>area(x)*x.rho*x.L,
+area=x=>0.25*pi*(x.D*x.D-x.d*x.d),mass=x=>area(x)*x.rho*x.L,moiQ=(m,R,r,t)=>m*(3*R*R+3*r*r+t*t)/12,
 
-emptynode=_=>{return{m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,sen:"none"}},
+emptynode=_=>{return{m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,sen:"none"}},
 clicknode=i=>{showmod();shaftedit.style.display="none";nodeedit.style.display="block";nodecaption.textContent="element "+i+" (node)";nodeedit.dataset.i=i;svgmod(model,i)
  af([edDa,edDi,edM,edCx,edCy,edU,edA]).forEach(x=>x.value=null);edSen.value="none"
- let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen},
+ let e=model[i];edDa.value=scL(e.D);edDi.value=scL(e.d);edM.value=scM(e.m);edT.value=scL(e.t),edCx.value=scC(e.cx);edCy.value=scC(e.cy);edU.value=scU(e.u);edA.value=e.a;edSen.value=e.sen},
 clickshaft=i=>{showmod();shaftedit.style.display="block";nodeedit.style.display="none"; shaftcaption.textContent="element "+i+" (shaft)";shaftedit.dataset.i=i;svgmod(model,i)
  let e=model[i];edl.value=scL(e.L);edda.value=scL(e.D);eddi.value=scL(e.d);ede.value=scP(e.E),edrho.value=scR(e.rho);edm.value=scM(mass(e))},
 changeunits=()=>{if(shaftedit.style.display=="block")clickshaft(+shaftedit.dataset.i);else clicknode(+nodeedit.dataset.i);"LMRCUNE".split("").forEach(x=>gc("unit"+x).forEach(e=>e.textContent=uni(x)[0]))},
@@ -208,8 +213,9 @@ rigid=m=>{ //rigid rotor properties
  let z=[0];shafts(m).forEach((x,i)=>z.push(z[i]+x.L))
  let M=shafts(m).reduce((s,e)=>s+mass(e),0)+nodes(m).reduce((s,e)=>s+e.m,0),
      Z=shafts(m).reduce((s,e,i)=>s+0.5*(z[i]+z[1+i])*mass(e)/M,0)+nodes(m).reduce((s,e,i)=>s+z[i]*e.m/M,0),
-     J=shafts(m).reduce((s,e,i)=>s+mass(e)*(e.D*e.D+e.d*e.d)/8,0)                                           +nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/ 8,                0),
-     Q=shafts(m).reduce((s,e,i)=>s+mass(e)*((0.75*(e.D*e.D+e.d*e.d)+e.L*e.L)/12+(0.5*(z[i]+z[1+i])-Z)**2),0)+nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/16+e.m*(z[i]-Z)**2,0),
+     J=shafts(m).reduce((s,e,i)=>s+mass(e)*(e.D*e.D+e.d*e.d)/8,0)                            +nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/ 8,                0),
+     Q=shafts(m).reduce((s,e,i)=>s+moiQ(mass(e),e.D/2,e.d/2,e.L)+mass(e)*(0.5*(z[i]+z[1+i])-Z)**2,0)+nodes(m).reduce((s,e,i)=>s+moiQ(e.m,e.D/2,e.d/2,e.t)+e.m*(z[i]-Z)**2,0),
+     //Q=shafts(m).reduce((s,e,i)=>s+mass(e)*((0.75*(e.D*e.D+e.d*e.d)+e.L*e.L)/12+(0.5*(z[i]+z[1+i])-Z)**2),0)+nodes(m).reduce((s,e,i)=>s+e.m*(e.D*e.D+e.d*e.d)/16+e.m*(z[i]-Z)**2,0), //thin, without t
      nx=crit(m,M,Z,z,Q,"cx"),ny=crit(m,M,Z,z,Q,"cy")
  return{M:M,Z:Z,J:J,Q:1,iJ:sqrt(J/M),iQ:sqrt(Q/M),nx:nx,ny:ny}},
 crit=(m,M,Z,z,Q,dir)=>{let c0=nodes(m).reduce((s,e,i)=>s+e[dir],0),c1=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z),0),c2=nodes(m).reduce((s,e,i)=>s+e[dir]*(z[i]-Z)**2,0),a=c0/M,b=c1/M,c=c1/Q,d=c2/Q,me=0.5*(a+d),det=a*d-b*c,rpm=30/pi;return[rpm*sqrt((me-sqrt(me*me-det))),rpm*sqrt(me+sqrt(me*me-det))]},
@@ -288,28 +294,28 @@ animate=(ang)=>{cancelAnimationFrame(req);if(0==shaftline.length)return
 
 examples={
  shaft:{model:[
-  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"},
+  {m:0,D:0,d:0,t:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:90,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:1e-6,a:90,cor:true,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:180,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:1e-6,a:180,cor:true,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"}
- ],speed:{min:200,max:2000,steps:100},title:"uniform shaft",help:`
+  {m:0,D:0,d:0,t:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"}
+ ],speed:{min:100,max:2000,steps:100},title:"uniform shaft",help:`
 ┌─────────────────────────────────────────────────────────────────┐
 │                       uniform shaft                             │
 ├─────────────────────────────────────────────────────────────────┤
@@ -346,15 +352,15 @@ examples={
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘`},
  resonance:{model:[
-  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"},
+  {m:0,D:0,d:0,t:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"}
+  {m:0,D:0,d:0,t:0,cx:10000,cy:10000,u:0,a:0,cor:false,sen:"x"}
  ],speed:{min:200,max:400,steps:400},title:"resonance",help:`
 ┌─────────────────────────────────────────────────────────────────┐
 │                            resonance                            │
@@ -392,15 +398,15 @@ examples={
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘`},
  anisotropic:{model:[
-  {m:0,D:0,d:0,cx:10000,cy:40000,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:10000,cy:40000,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"xy"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:1e-6,a:0,cor:true,sen:"xy"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.1,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:10000,cy:40000,u:0,a:0,cor:false,sen:"none"}
+  {m:0,D:0,d:0,t:0,cx:10000,cy:40000,u:0,a:0,cor:false,sen:"none"}
  ],speed:{min:100,max:1000,steps:400},title:"anisotropic bearings",help:`
 ┌─────────────────────────────────────────────────────────────────┐
 │                    anisotropic bearings                         │
@@ -439,29 +445,25 @@ examples={
 └─────────────────────────────────────────────────────────────────┘
 `},
  gyroscopic:{model:[
-  {m:0,D:0,d:0,cx:100000,cy:100000,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:100000,cy:100000,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:100000,cy:100000,u:0,a:0,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:100000,cy:100000,u:0,a:0,cor:true,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"x"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:1e-6,a:180,cor:true,sen:"none"},
+  {m:0,D:0,d:0,t:0,cx:0,cy:0,u:0,a:0,cor:true,sen:"none"},
   {L:0.1,D:0.02,d:0,E:2e11,rho:7850},
-  {m:5,D:0.1,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.05,D:0.02,d:0,E:2e11,rho:7850},
-  {m:0,D:0,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"none"},
-  {L:0.05,D:0.02,d:0,E:2e11,rho:7850},
-  {m:5,D:0.1,d:0,cx:0,cy:0,u:0,a:0,cor:false,sen:"xy"}
+  {m:5,D:0.1,d:0,t:0.05,cx:0,cy:0,u:1e-6,a:0,cor:false,sen:"x"}
  ],speed:{min:10,max:4000,steps:400},title:"gyroscopic effect",help:`
 ┌─────────────────────────────────────────────────────────────────┐
 │                        gyroscopic effect                        │
@@ -585,7 +587,7 @@ kinit=(x)=>{
   asn("LU",(BigInt(14)<<BigInt(59))+BigInt(lo(BigInt(f))))
   
   let no=nodes(model),n=no.length,p=no.map(x=>x.a*pi/180),ur=no.map((x,i)=>x.u*cos(p[i])),ui=no.map((x,i)=>x.u*sin(p[i])),
-  J=no.map(x=>x.m*(x.D*x.D+x.d*x.d)/8),Q=J.map(x=>x/2),
+  J=no.map(x=>x.m*(x.D*x.D+x.d*x.d)/8),Q=no.map(x=>moiQ(x.m,x.D/2,x.d/2,x.t)),
   U=new Array(2*no.length).fill(0);for(let i=0;i<no.length;i++){U[2*i]=ur[i];U[1+2*i]=ui[i]}
  
   "L D d E rho".split(" ").forEach(s=>asn(s,KF(shafts(model).map(x=>x[s]))))

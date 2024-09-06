@@ -2,8 +2,8 @@
 / 4 nodes, 3 elements: +--+--+--+
 / matrix size: 16x16 (for K M G)
 
-/per shaft element: L D d E rho
-/per node:          m J Q cx cy U
+/per shaft element: L D d E rho        length outerDiameter innerDiameter youngs-modulous density
+/per node:          m J Q cx cy U      mass polar-moment-of-inertia equatorial-moi stiffness-x stiffness-y unbalance
 
 /L:10#0.01
 /D:10#0.01
@@ -11,6 +11,7 @@
 /E:10#2e11
 /rho:10#7850.
 /m:11#0.
+/t:11#0.
 /J:11#0.
 /Q:11#0.
 /cx:103100 0 0 0 0 0 0 0 0 0 103100.
@@ -70,7 +71,7 @@ IC:{[ipln;isen;W ]uin::U ipln;flip[#W;,/ic[ipln;isen]'W*W]}
 
 
 /plots
-dis:{1e6*sig[x;uin],sig[x;uin-$[+/y;cor[x;y];0]]}                                         /displacement initial,residual per sensor
+dis:{1e6*sig[x;uin],sig[x;uin-$[+/y;cor[x;y];0]]}                                /displacement initial,residual per sensor
 cor:{@[(#u)#0a;&y;qrsolve[((#u)^x)@&y;sig[x;u:uin]]]}                            /correction unbal at selected planes y
 unb:{,/+2^uin,cor[x;y]}                                                          /unbals and corrections
 prm:{[x;i;w]c:fil cx@&~0=cx;,/st3 tus (1%w*w)*/c*fil((-#w)^sig[x;uin])i}         /unbal by force measurement: use outer springs/sensors, transform from spring to unbal planes
