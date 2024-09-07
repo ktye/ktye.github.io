@@ -326,16 +326,16 @@ examples={
 │                                                                 │
 │which is a measure between support and shaft stiffness.          │
 │                                                                 │
-│the rigid rotor critical speeds are at 172 and 297 rpm,          │
-│click on model to see the exact solution for a rigid shaft.      │
+│the rigid rotor critical speeds are at 172 and 297 rpm, click    │
+│on 'model' to see the exact values from an analytic solution.    │
 │                                                                 │
-│verify the peaks in the displacment curves.                      │
+│verify the peaks in the displacment curves:                      │
+│double-click on the blue displacement curve.                     │
 │                                                                 │
-│now increase the max speed until you see the first bending       │
+│now increase the 'max speed' until you see the first bending     │
 │critical. it appears at around 30krpm.                           │
 │click into the displacement curve close to the critical to see   │
-│the defomed mode shape in the animation.                         │
-│                                                                 │
+│the deformed mode shape in the animation.                        │
 │                                                                 │
 │                                                                 │
 │                                                                 │
@@ -369,13 +369,14 @@ examples={
 │                                                                 │
 │at low speed the unbalance points outwards.                      │
 │increase the speed (click on the diagram or on ▶) until it       │
-│approaches the resonance 270rpm.                                 │
+│approaches the resonance at 270 rpm.                             │
 │the animation is always scaled to max but the actual orbits      │
 │are large.                                                       │
 │                                                                 │
 │                                                                 │
-│observe how the unbalance turns forwards.                        │
+│observe how the unbalance (short red line) turns forwards.       │
 │at the peak of the critical speed it has an angle of 90 degree.  │
+│look at the right wall projection to see the angle.              │
 │                                                                 │
 │increase further to high speeds.                                 │
 │the unbalance points inwards now and the displacement reaches    │
@@ -394,7 +395,6 @@ examples={
 │this is typically a small value, measured in µm                  │
 │                                                                 │
 │  1 µm (excentricity)  =  1 gmm (unbalance) / 1kg (rotor mass)   │
-│                                                                 │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘`},
  anisotropic:{model:[
@@ -422,8 +422,8 @@ examples={
 │it is elliptic now: small in vertical but large in horizontal    │
 │direction.                                                       │
 │                                                                 │
-│the displacements are at the center measured in both directions. │
-│you can see in the displacements that the resonance in x         │
+│the displacements are measured at the center in both directions. │
+│you can see in the displacement curves that the resonance in x   │
 │direction comes first, at 270 rpm vs 540 rpm in y direction.     │
 │                                                                 │
 │increase the speed:                                              │
@@ -466,25 +466,25 @@ examples={
   {m:5,D:0.1,d:0,t:0.05,cx:0,cy:0,u:1e-6,a:0,cor:false,sen:"x"}
  ],speed:{min:10,max:4000,steps:400},title:"gyroscopic effect",help:`
 ┌─────────────────────────────────────────────────────────────────┐
-│                        gyroscopic effect                        │
+│                      gyroscopic effect                          │
 ├─────────────────────────────────────────────────────────────────┤
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│  tbd..                                                          │
+│                                                                 │
+│  - eigenfrequencies change with rotational speed                │
+│  - ratio J/Q of disc element is important                       │
+│  - in one case the change of eigenfrequencies is small          │
+│    and cut by the speed ramp                                    │
+│  - in the other case, eigenfrequency increases faster           │
+│    and never reached by the rotor speed                         │
+│  - most critical is the intermediate case:                      │
+│    the disc element is close to spherical: J/Q about 1          │
+│    - eigenfrequencies increase with speed with same slope       │
+│    - the system is always in resonance                          │
+│    - huge vibrations for a wide speed range                     │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
 │                                                                 │
 │                                                                 │
 │                                                                 │

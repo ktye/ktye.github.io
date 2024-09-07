@@ -1,0 +1,140 @@
+┌─────────────────────────────────────────────────────────────────┐
+│                       uniform shaft                             │
+├─────────────────────────────────────────────────────────────────┤
+│the example shows a shaft of 1m length and a diameter of 10cm.   │
+│it has springs on both ends which are relatively soft:           │
+│                                                                 │
+│                    cL³/EI is 1%                                 │
+│                                                                 │
+│which is a measure between support and shaft stiffness.          │
+│                                                                 │
+│the rigid rotor critical speeds are at 172 and 297 rpm, click    │
+│on 'model' to see the exact values from an analytic solution.    │
+│                                                                 │
+│verify the peaks in the displacment curves:                      │
+│double-click on the blue displacement curve.                     │
+│                                                                 │
+│now increase the 'max speed' until you see the first bending     │
+│critical. it appears at around 30krpm.                           │
+│click into the displacement curve close to the critical to see   │
+│the deformed mode shape in the animation.                        │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                            resonance                            │
+├─────────────────────────────────────────────────────────────────┤
+│the rotor has a single unbalance at the center.                  │
+│                                                                 │
+│at low speed the unbalance points outwards.                      │
+│increase the speed (click on the diagram or on ▶) until it       │
+│approaches the resonance at 270 rpm.                             │
+│the animation is always scaled to max but the actual orbits      │
+│are large.                                                       │
+│                                                                 │
+│                                                                 │
+│observe how the unbalance (short red line) turns forwards.       │
+│at the peak of the critical speed it has an angle of 90 degree.  │
+│look at the right wall projection to see the angle.              │
+│                                                                 │
+│increase further to high speeds.                                 │
+│the unbalance points inwards now and the displacement reaches    │
+│a small constant value.                                          │
+│                                                                 │
+│this is called self-centering.                                   │
+│                                                                 │
+│at high speed the body rotates around it's principal axis of     │
+│inertia. the force distribution of the springs is negligible.    │
+│the center of mass is displaced (excentric) by the unbalance by  │
+│                                                                 │
+│                        e = u / m                                │
+│                                                                 │
+│where m is the mass of the rotor.                                │
+│                                                                 │
+│this is typically a small value, measured in µm                  │
+│                                                                 │
+│  1 µm (excentricity)  =  1 gmm (unbalance) / 1kg (rotor mass)   │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    anisotropic bearings                         │
+├─────────────────────────────────────────────────────────────────┤
+│if the bearings have a different stiffness in their principal    │
+│directions, e.g. horizontal and vertial, the system is called    │
+│anisotropic.                                                     │
+│                                                                 │
+│in this example the stiffness in x direction is 4 times smaller  │
+│than in y direction.                  (x:horizontal, y:vertical) │
+│                                                                 │
+│observe the orbit at low speed:                                  │
+│it is elliptic now: small in vertical but large in horizontal    │
+│direction.                                                       │
+│                                                                 │
+│the displacements are measured at the center in both directions. │
+│you can see in the displacement curves that the resonance in x   │
+│direction comes first, at 270 rpm vs 540 rpm in y direction.     │
+│                                                                 │
+│increase the speed:                                              │
+│just before 270 rpm the orbit is very thin: the horizontal       │
+│oscillation dominates.                                           │
+│                                                                 │
+│between the two criticals the orbit moves backwards.             │
+│                                                                 │
+│at high speed after the second critical the unbalance points     │
+│inwards again as in the isotropic case.                          │
+│the forces of the springs (and their differences) are no longer  │
+│relevant.                                                        │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      gyroscopic effect                          │
+├─────────────────────────────────────────────────────────────────┤
+│  tbd..                                                          │
+│                                                                 │
+│  - eigenfrequencies change with rotational speed                │
+│  - ratio J/Q of disc element is important                       │
+│  - in one case the change of eigenfrequencies is small          │
+│    and cut by the speed ramp                                    │
+│  - in the other case, eigenfrequency increases faster           │
+│    and never reached by the rotor speed                         │
+│  - most critical is the intermediate case:                      │
+│    the disc element is close to spherical: J/Q about 1          │
+│    - eigenfrequencies increase with speed with same slope       │
+│    - the system is always in resonance                          │
+│    - huge vibrations for a wide speed range                     │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘

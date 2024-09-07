@@ -206,6 +206,7 @@ it turn's out it's too slow for this version of k for an interactive ui. the lu 
 
 
 - examples: ktye.github.io/rotor/index.html -
+
 ┌─────────────────────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────────────────────┐
 │                       uniform shaft                             │ │                            resonance                            │
 ├─────────────────────────────────────────────────────────────────┤ ├─────────────────────────────────────────────────────────────────┤
@@ -213,18 +214,19 @@ it turn's out it's too slow for this version of k for an interactive ui. the lu 
 │it has springs on both ends which are relatively soft:           │ │                                                                 │
 │                                                                 │ │at low speed the unbalance points outwards.                      │
 │                    cL³/EI is 1%                                 │ │increase the speed (click on the diagram or on ▶) until it       │
-│                                                                 │ │approaches the resonance 270rpm.                                 │
+│                                                                 │ │approaches the resonance at 270 rpm.                             │
 │which is a measure between support and shaft stiffness.          │ │the animation is always scaled to max but the actual orbits      │
 │                                                                 │ │are large.                                                       │
-│the rigid rotor critical speeds are at 172 and 297 rpm,          │ │                                                                 │
-│click on model to see the exact solution for a rigid shaft.      │ │                                                                 │
-│                                                                 │ │observe how the unbalance turns forwards.                        │
-│verify the peaks in the displacment curves.                      │ │at the peak of the critical speed it has an angle of 90 degree.  │
+│the rigid rotor critical speeds are at 172 and 297 rpm, click    │ │                                                                 │
+│on 'model' to see the exact values from an analytic solution.    │ │                                                                 │
+│                                                                 │ │observe how the unbalance (short red line) turns forwards.       │
+│verify the peaks in the displacment curves:                      │ │at the peak of the critical speed it has an angle of 90 degree.  │
+│double-click on the blue displacement curve.                     │ │look at the right wall projection to see the angle.              │
 │                                                                 │ │                                                                 │
-│now increase the max speed until you see the first bending       │ │increase further to high speeds.                                 │
+│now increase the 'max speed' until you see the first bending     │ │increase further to high speeds.                                 │
 │critical. it appears at around 30krpm.                           │ │the unbalance points inwards now and the displacement reaches    │
 │click into the displacement curve close to the critical to see   │ │a small constant value.                                          │
-│the defomed mode shape in the animation.                         │ │                                                                 │
+│the deformed mode shape in the animation.                        │ │                                                                 │
 │                                                                 │ │this is called self-centering.                                   │
 │                                                                 │ │                                                                 │
 │                                                                 │ │at high speed the body rotates around it's principal axis of     │
@@ -239,24 +241,23 @@ it turn's out it's too slow for this version of k for an interactive ui. the lu 
 │                                                                 │ │                                                                 │
 │                                                                 │ │  1 µm (excentricity)  =  1 gmm (unbalance) / 1kg (rotor mass)   │
 │                                                                 │ │                                                                 │
-│                                                                 │ │                                                                 │
 └─────────────────────────────────────────────────────────────────┘ └─────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────────────────────┐
-│                    anisotropic bearings                         │ │                            gyroscopic                           │
+│                    anisotropic bearings                         │ │                      gyroscopic effect                          │
 ├─────────────────────────────────────────────────────────────────┤ ├─────────────────────────────────────────────────────────────────┤
 │if the bearings have a different stiffness in their principal    │ │  tbd..                                                          │
 │directions, e.g. horizontal and vertial, the system is called    │ │                                                                 │
 │anisotropic.                                                     │ │  - eigenfrequencies change with rotational speed                │
-│                                                                 │ │  - ratio J/Q of disc element is important                       │ 
-│in this example the stiffness in x direction is 4 times smaller  │ │  - in one case the change of eigenfrequencies is small          │ 
+│                                                                 │ │  - ratio J/Q of disc element is important                       │
+│in this example the stiffness in x direction is 4 times smaller  │ │  - in one case the change of eigenfrequencies is small          │
 │than in y direction.                  (x:horizontal, y:vertical) │ │    and cut by the speed ramp                                    │
 │                                                                 │ │  - in the other case, eigenfrequency increases faster           │
 │observe the orbit at low speed:                                  │ │    and never reached by the rotor speed                         │
 │it is elliptic now: small in vertical but large in horizontal    │ │  - most critical is the intermediate case:                      │
 │direction.                                                       │ │    the disc element is close to spherical: J/Q about 1          │
 │                                                                 │ │    - eigenfrequencies increase with speed with same slope       │
-│the displacements are at the center measured in both directions. │ │    - the system is always in resonance                          │
-│you can see in the displacements that the resonance in x         │ │    - huge vibrations for a wide speed range                     │
+│the displacements are measured at the center in both directions. │ │    - the system is always in resonance                          │
+│you can see in the displacement curves that the resonance in x   │ │    - huge vibrations for a wide speed range                     │
 │direction comes first, at 270 rpm vs 540 rpm in y direction.     │ │                                                                 │
 │                                                                 │ │                                                                 │
 │increase the speed:                                              │ │                                                                 │
