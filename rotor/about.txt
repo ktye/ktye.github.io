@@ -19,7 +19,7 @@ concentrated unbalances at discrete positions. we do not consider the general mu
 as such the equation is misleading: it is not a vibration problem, but rather an equilibrium between the unbalance forces at a fixed
 rotational speed and the restoring forces of the bent shaft due to it's elastic properties. there is no oscillation involved at all,
 the shaft is simply bent (like a banana) and rotates around the axis defined by the bearings.
-however the equation has the same form and we can replace ∂²/∂t² with -Ω².
+however the equation has the same form and we can replace ∂²/∂t² with -Ω². Ω is the rotational speed (angle by time). 
 
 
  ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
@@ -36,8 +36,8 @@ however the equation has the same form and we can replace ∂²/∂t² with -Ω�
 
 - analytic solutions -
 
-consider a uniform shaft with two springs as support on both sides. critical speeds are the eigenvalues λ=ω² of the homogenous system.
-they increase with the stiffness c of the springs from unsupported c=0 to rigid support c=∞.
+consider a uniform shaft with two springs as support on both sides. critical speeds ω are computed from the eigenvalues λ=ω² of
+the homogenous system.  they increase with the stiffness c of the springs from unsupported c=0 to rigid support c=∞.
 
       √(ω√(L⁴ρA/EI))
 mode  free   fixed
@@ -53,7 +53,7 @@ mode  free   fixed
  • assemble shaft matrices K M G
  • add node properties: discrete discs, masses, springs(inplace of boundary conditions)
  • combine to large complex system matrix for one speed        ⮢
- • solve symmetric system, e.g. LU decomposition, for each speed
+ • solve linear system, e.g. with LU decomposition, for each speed
 
 to calculate the solution for general shaft geometries, we use finite elements to discretize the rotor and end up with some matrices:
 (single-element-matrices for an isotropic system)
@@ -95,12 +95,12 @@ direction towards the ground is very often different from the stiffness in horiz
 
 another reason to extend the model is to study the influence of gyroscopic forces to the system.
 gyroscopic forces are effective only for (relatively) high speeds and large cross section areas, such as concentrated discs, flywheels,
-turbine blades, etc.  the key feature is that if the shaft line has a slope φ in the x-z plane, because it is bend and rotates, it
-introduces forces (moments to be more specific) in the plane perpendicular to it: y-z, that have the tendency to bend it as well.
+turbine blades, etc.  the key feature is that if the shaft line has a slope φ in the x-z plane, because it is bent and rotates, it
+introduces forces (moments to be more specific) in the plane perpendicular to it: y-z, which have the tendency to bend it as well.
 gyroscopic forces couple the two directions.
 
 unfortunately this means we have to double the system order, get 4 times as many matrix elements and need to compute 8 times as much
-to solve the system.
+to solve the system:
 
                     stiffness                                          mass                                         gyroscopic
 
@@ -116,21 +116,22 @@ K = ⎯⎯ ⎢ 6L   0   0  4L² -6L   0   0  2L²⎥, M = ⎯⎯⎯ ⎢22L    0 
 												     
 both K and M are symmetric, while G is antimetric. the state vector now has 2 displacements and 2 angles: q = [v₀ w₀ φ₀ ψ₀ ..]
                  ⎯⎯⎯⎯⎯⎯⎯⎯⎯             ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯               
-                                                                 (let there be k)
+
+(let there be k)
 in k we define functions that return these element matrices for given parameters:
-                                                                                            (who can make these shorter?)
+                                                                                   (who can make these shorter? they overflow the line)
 k) Ki:{[ei;l]a:6*l;b:2*l*l;(ei%l*l*l)*sy(6;0;0;a;-12;0;0;a;6;-a;0;0;-12;-a;0;b;0;0;a;b;0;b;-a;0;0;b;6;0;0;-a;6;a;0;b;0;b)}
    Mi:{[ra;l]a:156;b:44*l;c:108;d:-26*l;e:4*l*l;f:-6*l*l;(ra*l%840)*sy(a;0;0;b;c;0;0;d;a;-b;0;0;c;-d;0;e;0;0;d;f;0;e;-d;0;0;f;a;0;0;-b;a;b;0;e;0;e)}
    Gi:{[ri;l]a:36;b:3*l;c:4*l*l;d:-l*l;(ri%15*l)*ys(-a;b;0;0;a;b;0;0;b;-a;0;0;b;-c;b;0;0;-d;0;b;d;0;-a;-b;0;0;-b;-c)}
-   sy:{,/x++x:((!8)#'0.),'(-1_+\0,8-!8)^x};ys:{,/x-+x:((1+!8)#'0.),'(+\0,7-!7)^x}
+   sy:{,/x++x:((!8)#'0.),'(-1_+\0,8-!8)^x};ys:{,/x-+x:((1+!8)#'0.),'(+\0,7-!7)^x}   /symmetric  antimetric
 
 
 to assemble the system matrices from the element matrices we do:
 
 
 k) A:0.25p*(D2:D*D)-d2:(d*d)                      /inputs L D d E rho are real vectors with the length of the number of shaft elements
-   I:0.015625p*(D2*D2)-d2*d2                      /       m J Q cx cy are real vectors with the length of the number of nodes (1+#L)
-   ei:E*I                                         /input  U       is a complex vector  with the length of the number of nodes
+   I:0.015625p*(D2*D2)-d2*d2                      /       m J Q cx cy are real .  .  .  .  .  .  .  .  .  .  .  .  .  . nodes (1+#L)
+   ei:E*I                                         /input  U       is a complex .  .  .  .  .  .  .  .  .  .  .  .  .  . nodes
    ra:rho*A
    ri:rho*I
    
@@ -159,22 +160,22 @@ k) diag:(!k)+k*!k
 
 the stiffness input vectors cx and cy are mostly 0 except for the location of discrete springs.
 more complicated bearing models are not considered, but many exist: spring-mass-damper systems, hydrodynamic bearings, rollers, ...
-classic boundary conditions are achieved by define a bearing to allow only bending or forcing the slope to be zero.
-this needs more consideration and typically cancels degrees of freedom which leads to a slightly smaller system of equations.
+classic boundary conditions are achieved by restricting a node to allow only rotation but no displacement or forcing the slope to be
+zero. this needs more consideration and removes some rows and columns from the system matrix.
 
-discrete mass or disc elements are placed at node locations. these elements do not deform but contribute the the mass and gyroscopic
+discrete mass or disc elements are placed at node locations. these elements cannot deform but contribute to the mass and gyroscopic
 properties in the case of discs.  m is the vector of mass elements, and J and Q are vectors of moments of inertia for each node,
 J around the axis of rotation and Q around the axes perpendicular to it (rotational symmetric cross sections only, e.g. cylindric).
 
 all three KMG matrices are real valued, but the system is not.
 the right hand side U is a vector of unbalances with one value per node. it is complex and the phase indicates the angle around the
-shaft axis of the location of a discrete unbalance mass attached at distance r from the shaft. only mass times radius is important
+shaft axis of the location of a discrete unbalance mass attached at distance r from the shaft. only mass times radius is important,
 hence U has dimension mass times length.
 
 k) u:,/1 1a90 0 0*/U                              /unbalance excitation vector
 
 u spreads the excitation around two degrees of freedom, taking the rotation of the shaft into account: the excitation in x and y
-direction is 90 degree appart, and is has no direct contribution to the moment (slope coordinates are 2 3 6 7..).
+direction is 90 degree apart, and it has no direct contribution to the moment (slope coordinates are 2 3 6 7..).
 
 
 - solving the system matrix -
@@ -243,19 +244,19 @@ it turn's out it's too slow for this version of k for an interactive ui. the lu 
 ┌─────────────────────────────────────────────────────────────────┐ ┌─────────────────────────────────────────────────────────────────┐
 │                    anisotropic bearings                         │ │                            gyroscopic                           │
 ├─────────────────────────────────────────────────────────────────┤ ├─────────────────────────────────────────────────────────────────┤
-│if the bearings have a different stiffness in their principal    │ │  p170                                                           │
+│if the bearings have a different stiffness in their principal    │ │  tbd..                                                          │
 │directions, e.g. horizontal and vertial, the system is called    │ │                                                                 │
-│anisotropic.                                                     │ │                                                                 │
-│                                                                 │ │                                                                 │
-│in this example the stiffness in x direction is 4 times smaller  │ │                                                                 │
-│than in y direction.                  (x:horizontal, y:vertical) │ │                                                                 │
-│                                                                 │ │                                                                 │
-│observe the orbit at low speed:                                  │ │                                                                 │
-│it is elliptic now: small in vertical but large in horizontal    │ │                                                                 │
-│direction.                                                       │ │                                                                 │
-│                                                                 │ │                                                                 │
-│the displacements are at the center measured in both directions. │ │                                                                 │
-│you can see in the displacements that the resonance in x         │ │                                                                 │
+│anisotropic.                                                     │ │  - eigenfrequencies change with rotational speed                │
+│                                                                 │ │  - ratio J/Q of disc element is important                       │ 
+│in this example the stiffness in x direction is 4 times smaller  │ │  - in one case the change of eigenfrequencies is small          │ 
+│than in y direction.                  (x:horizontal, y:vertical) │ │    and cut by the speed ramp                                    │
+│                                                                 │ │  - in the other case, eigenfrequency increases faster           │
+│observe the orbit at low speed:                                  │ │    and never reached by the rotor speed                         │
+│it is elliptic now: small in vertical but large in horizontal    │ │  - most critical is the intermediate case:                      │
+│direction.                                                       │ │    the disc element is close to spherical: J/Q about 1          │
+│                                                                 │ │    - eigenfrequencies increase with speed with same slope       │
+│the displacements are at the center measured in both directions. │ │    - the system is always in resonance                          │
+│you can see in the displacements that the resonance in x         │ │    - huge vibrations for a wide speed range                     │
 │direction comes first, at 270 rpm vs 540 rpm in y direction.     │ │                                                                 │
 │                                                                 │ │                                                                 │
 │increase the speed:                                              │ │                                                                 │
