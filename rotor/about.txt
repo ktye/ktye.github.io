@@ -179,7 +179,7 @@ direction is 90 degree apart, and it has no direct contribution to the moment (s
 
 
 - solving the system matrix -
-the system equation combines all matrices to form a complex valued matrix A which unfortunately is dependend on speed Ω.
+the system equation combines all matrices to form a complex valued matrix A which unfortunately depends on speed Ω.
 the right hand side depends only on the unbalance excitations:
 
 k) f:{[w]solve[k^imag[K-w2*M;B+w2*G];w2:w*w*u][,/0 1+/4*!n]}
@@ -202,7 +202,7 @@ k) lu:{[A]i:0;k:!#A;P:!#A;while[
     {[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
    solve:{lusolve[lu x;y]}
 
-it turn's out it's too slow for this version of k for an interactive ui. the lu decomposition is rewritten in wasm which is 20x faster.
+it turn's out it's too slow for this version of k for an interactive ui. the lu decomposition is rewritten in wasm to be 20x faster.
 
 
 - examples: ktye.github.io/rotor/index.html -
