@@ -503,6 +503,7 @@ examples={
 },model,chex=x=>{let e=examples[x.value];extitle.textContent=e.title;hlptxt.textContent=e.help;model=e.model;minspeed.value=scN(e.speed.min);maxspeed.value=scN(e.speed.max);steps.value=e.speed.steps;update(0);changeunits();showsim()},
 
 req,shaftline=[],ic=[],
+orbit=(a,b,c,d)=>{let p=Array(64).fill(0).map((_,i)=>2*pi*i/63),cs=p.map(cos),sn=p.map(sin);return[p.map((_,i)=>a*cs[i]+b*sn[i]),p.map((_,i)=>c*cs[i]+d*sn[i])]},
 
 setspeed=()=>{
  let w=speedrange()[speedidx]*pi/30,no=nodes(model).length,n=Array(4*no).fill(0).map((_,i)=>(i%4<2)?i:-1).filter(x=>x>=0) //0 1 4 5 8 9..
@@ -513,9 +514,13 @@ cors=()=>nodes(model).map((x,i)=>(x.u!=0||x.a!=0)?+x.cor:-1).filter(x=>x>=0), //
 re=v=>v.filter((_,i)=>~i&1),im=v=>v.filter((_,i)=>i&1),
 showplot=()=>af(document.getElementsByName("radios")).filter(x=>x.checked)[0].onchange(),
 plotdis=()=>{
- let r=ZK(kxy(Ks("dis"),KZ(ic),KI(cors()))),ini=r.slice(0,r.length/2),res=r.slice(r.length/2),sr=speedrange(),si=isen(),p=Array(si.length).fill([]),stride=ini.length/si.length
- p.forEach((_,i)=>{let r0=ini.slice(i*stride,(1+i)*stride),r1=res.slice(i*stride,(1+i)*stride),lines=[{x:sr,y:re(r0),z:im(r0)},{x:sr,y:re(r1),z:im(r1)}]
-  p[i]={type:["ampang","polar"][+polar.checked],title:"displacement node"+si[i],xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:lines}
+ let r=ZK(kxy(Ks("dis"),KZ(ic),KI(cors()))),ini=r.slice(0,r.length/2),res=r.slice(r.length/2),sr=speedrange(),si=isen(),orb=[],p=Array(si.length).fill([]),stride=ini.length/si.length
+ p.forEach((_,i)=>{let r0=ini.slice(i*stride,(1+i)*stride),r1=res.slice(i*stride,(1+i)*stride),lines=[{x:sr,y:re(r0),z:im(r0)},{x:sr,y:re(r1),z:im(r1)}];if(i&&si[i]==1+si[i-1])orb.push(i-1)
+  p[i]={type:["ampang","polar"][+polar.checked],title:"displacement "+("xy"[si[i]%2])+" node "+floor(si[i]/4),xlabel:"speed "+uni("N")[0],ylabel:"µm",lines:lines}
+ })
+ orb.forEach(i=>{let j=si[i],h=r.length/2,stride=r.length/si.length,a=j*stride+speedidx,b=h+a,c=(1+j)*stride+speedidx,d=h+c            //todo
+  let t="orbit node "+floor(j/4)+" at "+speedrange()[speedidx].toPrecision(6)+" "+uni("N")[0],[y0,z0]=orbit(ini[a],ini[b],ini[c],ini[d]),[y1,z1]=orbit(res[a],res[b],res[c],res[d])
+  p.push({type:"polar",title:t,ylabel:"µm",lines:[{y:y0,z:z0},{y:y1,z:z1}]})
  })
  plotcaption(["initial","residual"])
  plotjs.plots({plots:p,hi:{plot:0,lines:[0],point:speedidx}},pcnv,{b:bac,f:fwd},pcap,setlegend)
@@ -553,7 +558,7 @@ plotprm=()=>{
 plotcaption=x=>{rm(pcap);x.forEach((s,i)=>tc(s,ac(ce("option"),pcap)).dataset.i=i)},
 perr=s=>{let c=pcnv.getContext("2d");c.clearRect(0,0,pcnv.width,pcnv.height);rm(pcap);c.fillText(s,20,20)},
 
-setlegend=(s,idx)=>{legend.textContent=s;if(s.startsWith("z:"))return;speedidx=idx;legend.textContent=s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
+setlegend=(s,idx)=>{legend.textContent=s;if(s.startsWith("z:"))return;if(speedidx==idx)return;speedidx=idx;showplot()/*update orbit*/;legend.textContent=s.replace(/.*;/,"")+"  speed:"+(speedrange()[idx]).toPrecision(6)+" "+uni("N")[0];setspeed()},
 
 kw=null,lw=null,rk=null, //embed
 K,LU,C=()=>new Int8Array(K.memory.buffer),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
