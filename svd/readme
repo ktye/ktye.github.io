@@ -1,6 +1,19 @@
 golub kahan lanczos
  www.netlib.org/utk/people/JackDongarra/etemplates/node198.html
  github.com/zeryabmoussaoui/SVD-Golub-Kahan/blob/master/GOLUB-KAHAN-1965.pdf
+ www.netlib.org/lapack/lawnspdf/lawn11.pdf (svd of bidiag)
+ www.netlib.org/lapack/lawnspdf/lawn03.pdf (svd of bidiag)
+
+different algorithms:
+www.cs.utexas.edu/~inderjit/public_papers/HLA_SVD.pdf
+www.netlib.org/utk/people/JackDongarra/PAPERS/siam-svd-2018.pdf
+
+hestenes(real) https://www.ece.iastate.edu/~zambreno/assets/pdf/WanZam14A.pdf 222
+hestenes: www.naun.org/main/NAUN/circuitssystemssignal/a042005-083.pdf p2
+forsyth(complex): https://www.ams.org/journals/tran/1960-094-01/S0002-9947-1960-0109825-2/S0002-9947-1960-0109825-2.pdf
+one-sided-jacobi (complex) https://arxiv.org/pdf/2209.04626 p3-4
+complex jacobi rotations: https://arxiv.org/pdf/2308.14222v2
+also lapack zlaev2  www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlaev2.f
 
 alaff chapter 11
  www.cs.utexas.edu/~flame/laff/alaff/chapter11-reduction-to-bidirectional-form.html
