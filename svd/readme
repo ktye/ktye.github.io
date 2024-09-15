@@ -14,6 +14,7 @@ forsyth(complex): https://www.ams.org/journals/tran/1960-094-01/S0002-9947-1960-
 one-sided-jacobi (complex) https://arxiv.org/pdf/2209.04626 p3-4
 complex jacobi rotations: https://arxiv.org/pdf/2308.14222v2
 also lapack zlaev2  www.netlib.org/cgi-bin/netlibfiles.txt?format=txt&filename=/lapack/lapack_routine/zlaev2.f
+matlab(real): https://de.mathworks.com/matlabcentral/fileexchange/65619-jos_svd-g
 
 alaff chapter 11
  www.cs.utexas.edu/~flame/laff/alaff/chapter11-reduction-to-bidirectional-form.html
