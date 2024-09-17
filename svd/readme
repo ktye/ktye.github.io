@@ -23,3 +23,7 @@ alaff chapter 11
  function[u,tau]=Housev1(x);n=size(x,1);[r,u2,tau]=Housev(x(1,1),x(2:n,1));u=[r u2]
  function[r,u2,tau]=Housev(c,x2);normx=sqrt(c*c+x2'*x2);r=-sign(c)*normx;nu1=c-r;u2=x2/nu1;tau=(1+u2'*u2)/2
 
+
+qr: apply Q (instead of Q'): (exchange m,n, reverse the order of the loop)
+ www.math.iit.edu/~fass/477577_Chapter_4.pdf
+ www.cs.cornell.edu/~bindel/class/cs6210-f09/lec18.pdf
