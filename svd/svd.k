@@ -1,17 +1,20 @@
 /jacobi-hestenes
 
-j:{[A]
- ik:+(&|!n;,/1_(!n)_\!n:#A)  /+,/'(1+!n)_'/n^'!n,n
+qvd:{[A];n:#A
+ d:{+/(conj x)*y}
+ J:{$[1e-14<a:abs xy:d[x;y];(c;s:(xy%a)*t*c:1%%1+t*t:((q>0)-q<0)%(abs q)+%1+q*q:(_d[y;y]-_d[x;x])%2*a);1 0]}
+ R:{[c;s;x;y]((x*c)-y*conj s;(x*s)+y*c)}
+ Q:{[ik]r:J.A ik;A[ik]:R.r,A ik;V[ik]:R.r,V ik}
+ V:0a+(!n)=/!n:#A
+ P:{[A;ik]r:J.A ik;V[ik]:R.r,V ik;A[ik]:R.r,A ik}
+ I:,/i,''&'i>/i:!n
+ F:{[A]P/(,A),I}
+ A:F/A
+ (U:A%s;s:abs/'A;V)}
 
- /A:f/[ik;A]
+svd:{q:qr x;..}
 
- V:0a+(!n)=/!n
- r:{((x*c)-y*conj s;(x*s)+y*c)}
- f:{[A;ik]
-  uu:_d:{+/(conj x)*y}[u;u:A@*ik];uv:d[u;v:A ik 1];vv:_d[v;v]
-  $[1e-12>abs uv;A
-   [s:uv%a*t*c:1%%1+t*t:((q>0)-q<0)%abs q+%1+q*q:(_d[v;v]-_d[u;u])%2*a:abs uv
-    V[ik]+:r[V ik 0;V ik 1];A[ik]+:r[u;v]]]}
- f/[A;ik]
-}
+A:4^?16a
 
+/todo: grade, transpose?
+/      use R:qr..
