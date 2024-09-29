@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<link rel="icon" type="image/png" sizes="16x16" href="kelas16.png">
+<link rel="stylesheet" href="codemirror/codemirror.min.css">
+<style>
+*{font-family:monospace;font-size:12pt}
+html { overflow-x: hidden; overflow-y: hidden; }
+#maincontainer { box-sizing: border-box; position: absolute; width: 100%; height: 100%; background-color: green; }
+body { padding: 0px; margin: 0px; }
+object.embeddedpage { width: 100%; height: 100%; background-color: #FFFFEA; }
+div.column { box-sizing: border-box; position: absolute; height: 100%; border: none; }
+div.win { box-sizing: border-box; position: absolute; border: 1px solid black; min-height: 22px; }
+div.fullscreenwin { box-sizing: border-box; position: absolute; height: 100%; width: 100%; border 2px solid blue; top: 0px; left: 0px; z-index: 10; background-color: grey; }
+div.winheader { box-sizing: border-box; display: flex; height: 20px; background-color: #FFFFEA; border: 1px solid black; outline:none;  background-color: #FFFFEA; }
+div.windowmenu { box-sizing: border-box; position: absolute; display: flex; flex-direction: column; background-color: #FFFFEA; border: 1px solid black; top: 2px; width: 150px; margin: 1px; z-index: 11; }
+button.menubutton { border: none;  background-color: #FFFFEA; }
+button.menubutton:hover { background: #42F9E1; }
+div.editordiv { position: relative; top: 0; width: 100%; background: #FFFFEA; overflow: auto; }
+div.winbox { box-sizing: border-box; border: 1px solid black; width: 20px; margin: 1px; background-color: lightblue; }
+div.winboxchanged { box-sizing: border-box; border: 1px solid black; width: 20px; margin: 1px; background-color: red; }
+input.wintitle { box-sizing: border-box; background-color: #FFFFEA; border: none; outline:none; padding: 0; margin: 0; width: 100%; height: 18px; min-width: 50px; }
+input.winbuttons { box-sizing: border-box; background-color: #FFFFEA; border: none; outline:none; padding: 0; margin: 0; width: 100%; height: 18px; min-width: 50px; text-align: right; border-left: none; }
+.CodeMirror{ box-sizing: border-box; border: 1px solid black; width: 100%; height: 100%; background: #ffffea; }
+.CodeMirror-simplescroll-vertical { left: 0; top: 0; width: 12px; background: grey; border: none; }
+.CodeMirror-simplescroll-vertical div { left: 0; width: 100%; border: 1px solid black; background: #FFFFEA; }
+.CodeMirror-search-match { background: red; border-top: 1px solid orange; border-bottom: 1px solid orange; -moz-box-sizing: border-box; box-sizing: border-box; opacity: .5; }
+.CodeMirror-gutters { background-color: #ffffea; margin-left: 10px; }
+.CodeMirror-linenumber { min-width: 30px; }
+.CodeMirror pre { padding: 0 14px; }
+.CodeMirror-selected { background: orange; }
+.CodeMirror-focused .CodeMirror-selected { background: orange; }
+</style>
+<script src="codemirror/codemirror.min.js"></script>
+<script src="codemirror/matchbrackets.js"></script>
+<script src="codemirror/searchcursor.js"></script>
+<script type="application/javascript">
+var root = '__ROOT__'
+var rootdir = false
+
+async function request(r,d){
+ console.log("r?",r)
+ if(r.Command=="empty"){r.Text="k)";return r}
+ if(r.Command.startsWith(`k)`)){r.Text+="\ntodo..\n";return r}
+ if(r.Command.startsWith("read"))return read(r,d)
+ else { throw("unknown command "+r.Command) }
+}
+async function read(r,d){
+ if(!r.Name.startsWith("/")){ return await fetch(r.Name).then(x=>x.text()).then(x=>{r.Text=x;r.Clean=true;return r}) }
+ if(rootdir===false)rootdir=await readdir()
+ if(r.Command=="read"&&name=="/")return ls(r,"",rootdir)
+ if(r.Command.startsWith("read ")){
+  if(r.Command.EndsWith("/"))return ls(r,r.Command.slice(0,-1),d)
+ }
+ return r
+}
+async function ls(r,name,dir){
+ let t=""
+ for await (const x of dir.values()){
+  if(x.kind==="file")t+=x.name+"\n"
+  else if(x.kind==="directory")t+=x.name+"/\n"
+ }
+ r.Text=t
+ r.Dir=dir
+ return r
+}
+async function readdir(r){ return await showDirectoryPicker({mode:"readwrite"}); }
+async function Call(win, command) {
+	var r = {
+		Root: root,
+		Command: command,
+		Name: win.title,
+		Tags: win.winbuttons.value,
+		Default: win.defaultCommand,
+	}
+	if (win.editor != undefined) {
+		r.Selections = win.editor.GetSelections()
+		r.Text = win.editor.GetText()
+	}
+	console.log("win",win.column)
+	r=await request(r,win.Dir)
+	if(r){
+		if (r.Replace===""||r.Replace==undefined) {
+			win = win.column.layout.FindWindow(r.Name)
+		} else {
+			win = win.column.layout.FindWindow(r.Replace)
+		}
+		if (win == undefined) { //?
+			win = win.column.AddWindow(win.index+1)
+		}
+		win.SetTitle(r.Name)
+		win.SetTags(r.Tags)
+		win.Dir=r.Dir
+		win.SetDefaultCommand(r.Default)
+		if (win.editor == undefined) {
+			win.editor = new Editor(win)
+		}
+		win.editor.editor.setValue(r.Text)
+		win.editor.SetSelections(r.Selections)
+		win.editor.editor.focus()
+		win.MarkClean(r.Clean)
+	}
+}
+// Menu creates a popup menu which is activated
+// by clicking on the drag box with the right mouse button.
+function Menu(win) {
+	this.win = win
+	this.div = document.createElement("div") // menu div element
+	this.div.className = "windowmenu"
+	this.win.div.appendChild(this.div)
+	this.button = {}
+
+	this.AddEntry = function(title, callback) {
+		var but = document.createElement('button')
+		but.className = "menubutton"
+		but.textContent = title
+		var menu = this
+		but.onclick = function() {
+			if (callback != undefined)
+				callback()
+			menu.div.style.display = "none"
+		}
+		this.button[title] = but
+		this.div.appendChild(but)
+	}
+
+	this.AddEntry("Cancel")
+	this.AddEntry("Close", function(){win.Close()})
+}
+// attach an editor to an element: new Editor(element)
+function Editor(win) {
+	this.win = win
+	this.editor = CodeMirror(win.editordiv, {
+		lineNumbers: true,
+		matchBrackets: true,
+		tabSize: 8,
+		indentUnit: 8,
+		indentWithTabs: true,
+		smartIndent: true,
+		lineWrapping: false,
+	});
+	this.GetText = function() { return this.editor.getValue() }
+	this.Search = function(s) {
+		var sc = this.editor.getSearchCursor(s, this.editor.getCursor())
+		if (sc.findNext()) { this.editor.setSelection(sc.from(), sc.to())
+		} else { this.editor.setSelection({line:0,ch:0},{line:0,ch:0}, {scroll:false}) }
+	}
+	// GetSelections returns an array of the indexes of the current selections.
+	// It is interpreted as cmd.RuneRanges in go.
+	this.GetSelections = function(s) {
+		var sets = this.editor.listSelections()
+		var selections = []
+		var getRange = function(edt, r) {
+			var from = edt.indexFromPos(r.anchor)
+			var to = edt.indexFromPos(r.head)
+			return [from, to]
+		}
+		for (var i=0; i<sets.length; i++) {
+			var range = getRange(this.editor, sets[i])
+			selections.push(range)
+		}
+		return selections
+	}
+	
+	// SetSelections sets the cursor to the selections passed in the array.
+	// The string has the same format as GetSelections.
+	this.SetSelections = function(selections) {
+		if (selections == undefined) {
+			return
+		}
+		var sets = []
+		for (var i=0; i<selections.length; i++) {
+			var from = this.editor.posFromIndex(selections[i][0])
+			var to = this.editor.posFromIndex(selections[i][1])
+			sets.push({anchor:from, head:to})
+		}
+		this.editor.setSelections(sets)
+		this.editor.focus()
+	}
+
+	// double-click on a word: execute the default command with this word as argument.
+	this.editor.on('dblclick', function(cm, ev) {
+		var cmd = win.GetDefaultCommand()
+		var word = findClickedWord(cm, ev)
+		ev.preventDefault()
+		if (word.word.length > 0)
+			cmd = cmd + " " + word.word
+		win.Execute(cmd)
+	})
+
+	// set the border color to red if the editor is active
+	var edt = this
+	this.editor.on('focus', function() {
+		edt.win.div.style.border = '1px solid red'
+	})
+	this.editor.on('blur', function() {
+		edt.win.div.style.border = '1px solid black'
+	})
+
+	// mouse-click callback:
+	//	middle click: executed selected text which may contain multiple words.
+	//	right click: find next.
+	this.editor.on('mousedown', function(cm, evt) {
+		if (evt.button == 2) { // Find next.
+			var s = cm.getSelection()
+			if (s == "") {
+				evt.preventDefault()
+				return
+			}
+			var c = cm.getSearchCursor(s, cm.getCursor())
+			if (c.findNext()) {
+				cm.setSelection(c.pos.from, c.pos.to)
+				evt.preventDefault()
+				return
+			}
+			// Start from top.
+			c = cm.getSearchCursor(s)
+			if (c.findNext()) {
+				cm.setSelection(c.pos.from, c.pos.to)
+				evt.preventDefault()
+			}
+		} else if (evt.button == 1) { // Execute selected text.
+			evt.preventDefault()
+			var cmd = cm.getSelection()
+			if (cmd.length > 0)
+				win.Execute(cmd)
+		}
+	})
+	
+	this.editor.on('contextmenu', function(cm, evt) {
+		evt.preventDefault()
+		evt.stopPropagation()
+		return false
+	})
+
+	var win = this.win
+	this.editor.on('change', function(cm, ev) {
+		win.MarkClean(false)
+	})
+
+}
+function findClickedWord(cm, ev) {
+	var x = ev.pageX 
+	var y = ev.pageY
+	var pos = cm.coordsChar({left:x, top:y}, "page")
+	var doc = cm.getDoc()
+	var line = doc.getLine(pos.line)
+	return findWordAround(line, pos.ch)
+}
+// findWordAround looks for a complete word in s, that should be returned,
+// when a user clicked at character index idx.
+// It includes special non-blank characters.
+// TODO: allow "whitespace inside \"quoted text\"".
+function findWordAround(s, idx) {
+	var start = idx - 1
+	while (start >= 0) {
+		if ((s[start] == "\t") || (s[start] == " ")) {
+			start++
+			break
+		}
+		start--
+	}
+	if (start < 0) {
+		start = 0
+	}
+	var end = start
+	while (end < s.length) {
+		if ((s[end] == "\t") || (s[end] == " ")) {
+			break
+		}
+		end++
+	}
+	return {word: s.substr(start, end-start), start: start, end: end, pos: idx}
+}
+// A window contains an editor a dragbox, title and function bar and menus.
+function Window(column, index) {
+	this.column = column 	// pointer to the parent column the window is contained in
+	this.index = index 	// index in parent's windows array
+
+	// window main div
+	this.div = document.createElement("div") // div element
+	this.div.className = "win"
+
+	// allow being draged over and drop a winbox
+	var win = this
+	this.div.ondrop = function(ev) { 
+		if (ev.dataTransfer.getData("column") == "") {
+			return
+		}
+		var c = Number(ev.dataTransfer.getData("column"))
+		var i = Number(ev.dataTransfer.getData("index"))
+		var x0 = Number(ev.dataTransfer.getData("startx"))
+		var y0 = Number(ev.dataTransfer.getData("starty"))
+		win.column.layout.DropWindow(c, i, ev.clientX, ev.clientY, x0, y0)
+	}
+	this.div.ondragover = function(ev) { ev.preventDefault() }
+	this.shiftdown = false
+	this.div.onkeydown = function(ev) {
+		if (ev.key == "Shift") {
+			win.shiftdown = true
+		}
+	}
+	this.div.onkeyup = function(ev) {
+		if (ev.key == "Shift") {
+			win.shiftdown = false
+		}
+	}
+	
+	this.defaultCommand = ""
+	this.SetDefaultCommand = function(cmd) {
+		win.defaultCommand = cmd
+	}
+	this.GetDefaultCommand = function() {
+		var def = this.defaultCommand
+		if (def.length == 0) {
+			return "read"
+		} else {
+			return def
+		}
+	}
+
+	if (this.column.windows.length == index) {
+		this.column.div.appendChild(this.div)
+	} else {
+		this.column.div.insertBefore(this.div, this.column.windows[index].div)
+	}
+	
+	// window header div
+	this.headerdiv = document.createElement("div")
+	this.headerdiv.className = "winheader"
+	this.div.appendChild(this.headerdiv)
+	
+	// window editor div
+	this.editordiv = document.createElement("div")
+	this.editordiv.className = "editordiv"
+	this.div.appendChild(this.editordiv)
+
+	// window drag box
+	var win = this
+	this.winbox = document.createElement('div')
+	this.winbox.className = "winbox"
+	this.winbox.oncontextmenu = function(ev) {
+		win.menu.div.style.display = "flex"
+		ev.preventDefault()
+	}
+	this.winbox.onclick = function() { win.Inc() }
+	var winbox = this.winbox
+	this.winbox.ondragstart = function(ev) {
+		ev.dataTransfer.setData("startx", ev.clientX)
+		ev.dataTransfer.setData("starty", ev.clientY)
+		ev.dataTransfer.setData("column", win.column.index)
+		ev.dataTransfer.setData("index", win.index)
+	}
+	this.winbox.draggable = true
+	this.headerdiv.appendChild(this.winbox)
+
+	// window title
+	this.wintitle = document.createElement('input')
+	this.wintitle.type = "text"
+	this.wintitle.className = "wintitle"
+	this.wintitle.onkeydown = function(ev){
+		if (ev.keyCode == 13) {
+			win.SetTitle(win.wintitle.value);
+			win.Execute("read")
+		}
+	}
+	this.headerdiv.appendChild(this.wintitle)
+
+	this.winbuttons = document.createElement('input')
+	this.winbuttons.type = "text"
+	this.winbuttons.className = "winbuttons"
+	this.winbuttons.value = ""
+	var winbuttons = this.winbuttons
+	
+	// Mouse actions for Tag area:
+	// Left mouse: normal selection.
+	// Double Click: select word and execute.
+	// Middle mouse: execute selected words.
+	// Right mouse: find selected text (as regexp).
+	this.winbuttons.oncontextmenu = function(ev) {
+		ev.preventDefault()
+	}
+	this.winbuttons.onmousedown = function(ev) {
+		if (ev.button == 0) {
+			return
+		} else if (ev.button == 2) { // Find next.
+			var wb = winbuttons
+			var selectedText = wb.value.substring(wb.selectionStart, wb.selectionEnd).trim()
+			if ((win.editor != undefined) && selectedText != "") {
+				win.editor.Search(selectedText)
+			}
+		} else if (ev.button == 1) { // Execute previously selected words.
+			var wb = winbuttons
+			var selectedText = wb.value.substring(wb.selectionStart, wb.selectionEnd).trim()
+			win.Execute(selectedText)
+		}
+		ev.preventDefault()
+	}
+	this.winbuttons.ondblclick = function(ev) { 
+		var wb = winbuttons
+		// var selectedText = wb.value.substring(wb.selectionStart, wb.selectionEnd).trim()
+		// win.Execute(selectedText)
+		var word = findWordAround(wb.value, wb.selectionStart) // defined in editor_js
+		console.log("dblclick, start: ", word)
+		wb.setSelectionRange(word.start, word.end)
+		win.Execute(word.word)
+		ev.preventDefault()
+	}
+	
+	this.headerdiv.appendChild(this.winbuttons)
+
+	this.menu = new Menu(win)
+	this.menu.div.style.display = "none"
+
+
+	// return opened file name
+	this.GetFile = function() {
+		return this.title // this could be changed to split at "+" and return the basename
+	}
+
+	// check if clientY is inside this window
+	this.IsInside = function(y) {
+		if ((y >= this.div.offsetTop) && (y <= this.div.offsetTop+this.div.offsetHeight))
+			return true
+		return false
+	}
+
+	// Mark window as clean
+	this.MarkClean = function(clean) {
+		if (clean == true)
+			this.winbox.className = "winbox"
+		else
+			this.winbox.className = "winboxchanged"
+	}
+
+	// Check if window is marked as modified
+	this.IsClean = function() {
+		if (this.winbox.className == "winbox")
+			return true
+		return false
+	}
+
+	// set title
+	this.SetTitle = function(title) {
+		if (title == undefined)
+			title = "/"
+		this.wintitle.value = title
+		this.title = title
+	}
+	
+	// set tags
+	this.SetTags = function(tags) {
+		if (tags == undefined) {
+			tags = ""
+		}
+		this.winbuttons.value = tags
+	}
+
+	// close window
+	this.Close = function() {
+		this.column.windows.splice(this.index, 1)
+		// recalculate index of remaining columns
+		for (var i=0; i<this.column.windows.length; i++)
+			this.column.windows[i].index = i;
+		this.div.remove()
+		if (this.column.windows.length == 0)
+			this.column.Close()
+		this.column.layout.Resize()
+	}
+
+	this.Execute = function(cmd) {
+		if (cmd == undefined)
+			cmd = ""
+		Call(this, cmd)
+	}
+}
+// increase window height
+// window's weight may be 0 (closed), 1 (normal), 2 (double), max (all others closed)
+Window.prototype.Inc = function() {
+	if (this.relHeight == 0) {
+		inc = 1 / this.column.windows.length
+		this.relHeight = inc
+	} else {
+		inc = 2/3
+		this.relHeight /= inc
+	}
+
+
+	// set to full column: close all other windows
+	if (this.relHeight > 0.8) {
+		this.relHeight = 1
+		for (var i=0; i<this.column.windows.length; i++) {
+			if (i != this.index)
+				this.column.windows[i].relHeight = 0
+		}
+		this.column.layout.Resize()
+		return
+	}
+
+	// double height, decrease all other windows heights
+	for (var i=0; i<this.column.windows.length; i++) {
+		if (i != this.index) {
+			this.column.windows[i].relHeight *= inc
+		}
+	}
+	this.column.layout.Resize()
+}
+// Columns are part of the layout.
+// Each column contains one or more windows.
+function Column(layout) {
+	this.layout = layout			// reference to parent
+	this.index = layout.columns.length	// index of this in layout.columns
+	this.div = document.createElement("div")
+	this.div.className = "column"
+	this.relWidth = 1
+	this.left = 0
+	document.getElementById('maincontainer').appendChild(this.div)
+	this.windows = []
+
+	// add a new window after at index
+	this.AddWindow = function(index, title) {
+		var win = new Window(this, index)
+		this.windows.splice(index, 0, win)
+		if (title != undefined)
+			win.SetTitle(title)
+		for (var i=0; i<this.windows.length; i++) {
+			this.windows[i].index = i;
+		}
+		win.relHeight = 1 / this.windows.length
+		for (var i=0; i<this.windows.length; i++) {
+			if (i != index) {
+				this.windows[i].relHeight *= (this.windows.length - 1)/this.windows.length
+			}
+		}
+		this.layout.Resize()
+		return win
+	}
+
+	// remove window from column
+	this.RemoveWindow = function(index) {
+		var win = this.windows[index]	// save window
+		win.div.remove()		// remove window div from DOM
+		this.windows.splice(index, 1)	// remove window reference from colum
+		for (var i=0; i<this.windows.length; i++)	// update all window's indexes
+			this.windows[i].index = i
+		if (this.windows.length == 0)
+			this.Close()
+		return win
+	}
+
+	// insert window before nextwindow (can be undefined)
+	this.InsertWindow = function(win, nextwin) {
+		if (nextwin == undefined) {
+			this.windows.push(win)
+			this.div.appendChild(win.div)
+		} else {
+			this.windows.splice(nextwin.index, 0, win)
+			this.div.insertBefore(win.div, nextwin.div)
+		}
+		win.column = this
+		for (var i=0; i<this.windows.length; i++)
+			this.windows[i].index = i
+	}
+
+	// normalize
+	this.Normalize = function() {
+		for (var i=0; i<this.windows.length; i++) {
+			this.windows[i].weight = 1
+		}
+	}
+
+	// check if clientX is inside this column
+	this.IsInside = function(x) {
+		if ((x >= this.div.offsetLeft) && (x <= this.div.offsetLeft+this.div.offsetWidth))
+			return true
+		return false
+	}
+
+
+	// close column
+	this.Close = function() {
+		this.layout.columns.splice(this.index, 1)
+		// recalculate index of remaining columns
+		for (var i=0; i<layout.columns; i++)
+			layout.columns[i].index = i;
+		this.div.remove()
+	}
+}
+// Layout manages the layout of the editor windows
+// A layout contains columns which contain windows.
+function Layout() {
+	this.columns = []
+
+	// Add a column
+	this.AddColumn = function() {
+		this.columns.push( new Column(this) )
+		var col = this.columns[this.columns.length-1]
+		if (this.columns.length > 1) {
+			col.relWidth = 1 / this.columns.length
+			for (var i=0; i<this.columns.length-1; i++) {
+				this.columns[i].relWidth *= (this.columns.length-1) / this.columns.length
+			}
+		}
+		this.Resize()
+		return col
+	}
+
+	// Find an existing window by file id
+	// The file id is the relative path without mode prefix and address suffix.
+	this.FindWindow = function(id) {
+		for (var i=0; i<this.columns.length; i++) {
+			var col = this.columns[i]
+			for (var k=0; k<col.windows.length; k++) {
+				if (col.windows[k].title == id) {
+					return col.windows[k]
+				}
+			}
+		}
+		return undefined
+	}
+	
+	
+	// Drop a window to a new position
+	this.DropWindow = function(column, index, x, y, x0, y0) {
+		var dx = x-x0
+		var dy = y-y0
+
+		// get target column
+		var newcol = -1;
+		for (var i=0; i<this.columns.length; i++) {
+			if (this.columns[i].IsInside(x)) {
+				newcol = i
+				break
+			}
+		}
+		if (newcol == -1) {
+			console.log('cannot get target column')
+			return
+		}
+
+		// get target index
+		newindex = 0;		
+		var windows = this.columns[newcol].windows
+		for (var i=0; i<windows.length; i++) {
+			if (windows[i].IsInside(y-20)) { // use y-20 to be able to put it at index 0 (top)
+				newindex = i + 1
+				break
+			}
+		}
+
+		// top window, move left/right: change column width
+		if ((index == 0) && (Math.abs(dx) > Math.abs(dy))) {
+			if ((dx < 0) && (column > 0) && (-dx < this.columns[column-1].relWidth*window.innerWidth/2)) {
+				var rel = -dx / window.innerWidth
+				this.columns[column].relWidth += rel
+				this.columns[column-1].relWidth -= rel
+				this.Resize()
+				return
+			}
+			if ((dx > 0) && (column > 0) && (dx < this.columns[column].relWidth*window.innerWidth/2)) {
+				var rel = dx / window.innerWidth
+				this.columns[column].relWidth -= rel
+				this.columns[column-1].relWidth += rel
+				this.Resize()
+				return
+			}
+		}
+
+		// same window, moved down
+		if ((newcol == column) && (newindex-1 == index)) {
+			if ((Math.abs(dx) > Math.abs(dy))&&(this.columns[column].windows.length > 1)) {
+				var col = this.AddColumn()
+				var win = this.columns[column].RemoveWindow(index)
+				col.InsertWindow(win, 0)
+				this.Resize()
+				return
+			}
+			if (index == 0) {
+				this.columns[column].AddWindow(0)
+				return
+			}
+			var rel = dy / window.innerHeight
+			this.columns[column].windows[index].relHeight -= rel
+			this.columns[column].windows[index-1].relHeight += rel
+			this.Resize()
+			return
+		}
+
+		// same window, moved up: increase size
+		if ((newcol == column) && (newindex == index)) {
+			var rel = dy / window.innerHeight
+			this.columns[column].windows[index].relHeight -= rel
+			this.columns[column].windows[index-1].relHeight += rel
+			this.Resize()
+			return
+		}
+
+		// move window
+		var newcolumn = this.columns[newcol]
+		var nextwin = newcolumn.windows[newindex] // may be undefined, if newindex is last index
+		var win = this.columns[column].RemoveWindow(index)
+		newcolumn.InsertWindow(win, nextwin)
+		this.Resize()
+	}
+}
+Layout.prototype.Resize = function() {
+	var w = window.innerWidth
+	var h = window.innerHeight
+	var minheight = 22;
+	var x = 0
+	var sumWidth = 0
+	for (var c=0; c<this.columns.length; c++) {
+		var col = this.columns[c]
+		sumWidth += col.relWidth
+	}
+	for (var c=0; c<this.columns.length; c++) {
+		var col = this.columns[c]
+		col.relWidth /= sumWidth // adjust relWidths to 1
+		col.width = w * col.relWidth
+		col.left = x
+		x += col.width
+		col.div.style.left = col.left + "px"
+		col.div.style.width = col.width + "px"
+		var h = window.innerHeight - minheight * col.windows.length
+		var y = 0
+		var sumHeight = 0
+		for (var i=0; i<col.windows.length; i++) {
+			var win = col.windows[i]
+			if (win.relHeight * h < minheight)
+				win.relHeight = 0
+			sumHeight += win.relHeight
+		}
+		for (var i=0; i<col.windows.length; i++) {
+			var win = col.windows[i]
+			win.relHeight /= sumHeight // adjust relHeights to sum up to 1
+			win.height = win.relHeight * h + minheight
+			win.top = y
+			y += win.height
+			win.div.style.top = win.top + "px"
+			win.div.style.height = win.height + "px"
+			win.div.style.width = col.width + "px"
+			win.editordiv.style.height = (win.height - 22) + "px"
+			win.editordiv.style.width = col.width + "px"
+		}
+	}
+}
+//main
+var layout
+function init() {
+	document.addEventListener('contextmenu',function(e){e.preventDefault()})
+	layout = new Layout()
+	var col = layout.AddColumn()
+	col.AddWindow(0)
+	layout.columns[0].windows[0].SetTitle('/')
+	layout.columns[0].windows[0].Execute("empty")
+}
+</script>
+</head>
+<body onload="init()">
+<div class="maincontainer" id="maincontainer"></div>
+</body>
+</html>
