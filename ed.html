@@ -35,34 +35,111 @@ input.winbuttons { box-sizing: border-box; background-color: #FFFFEA; border: no
 <script type="application/javascript">
 var root = '__ROOT__'
 var rootdir = false
+var K,O
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 
-async function request(r,d){
- console.log("r?",r)
- if(r.Command=="empty"){r.Text="k)";return r}
- if(r.Command.startsWith(`k)`)){r.Text+="\ntodo..\n";return r}
- if(r.Command.startsWith("read"))return read(r,d)
+async function request(r){
+ let cmd=(r.Command.startsWith("!")?r.Command.slice(1):r.Command)
+ if(cmd=="empty"){r.Text="k)";return r}
+ if(cmd.startsWith("read")||cmd.startsWith("new"))return await read(r)
+ if(cmd=="Write")return await writeFile(r)
+ if(cmd.startsWith("rm "))return deleteFile(r.Name+cmd.slice(3))
+ if(cmd=="run")return await krun(r)
+ if(cmd.startsWith(`k)`))return krun(r)
  else { throw("unknown command "+r.Command) }
 }
-async function read(r,d){
+async function read(r){
  if(!r.Name.startsWith("/")){ return await fetch(r.Name).then(x=>x.text()).then(x=>{r.Text=x;r.Clean=true;return r}) }
  if(rootdir===false)rootdir=await readdir()
- if(r.Command=="read"&&name=="/")return ls(r,"",rootdir)
- if(r.Command.startsWith("read ")){
-  if(r.Command.EndsWith("/"))return ls(r,r.Command.slice(0,-1),d)
- }
- return r
+ let name=(r.Command.startsWith("read ")?(r.Name+r.Command.slice(5)):r.Name)
+ let create=r.Command.startsWith("new ");if(create)name=r.Name+r.Command.slice(4)
+ return(name.endsWith("/"))?ls(name,create):readfile(name,create)
 }
-async function ls(r,name,dir){
- let t=""
+async function ls(name,create){
+ let dir=await finddir(splitpathname(name)[0],create)
+ let t="",r={}
  for await (const x of dir.values()){
-  if(x.kind==="file")t+=x.name+"\n"
+  if(     x.kind==="file"     )t+=x.name+"\n"
   else if(x.kind==="directory")t+=x.name+"/\n"
  }
+ r.Name=name
  r.Text=t
- r.Dir=dir
+ r.Default="read"
+ r.Clean=true
  return r
 }
+function splitpathname(name){if(name=="/")return[[],""];let p=name.split("/"),f=p[p.length-1];return[p.slice(1,-1),f]}
+function joindir(p){ return(p.length?("/"+p.join("/")+"/"):"/") }
+async function writeFile(r){
+ if(r.Name.endsWith("/"))throw("Write: file name ends with /")
+ let[p,f]=splitpathname(r.Name)
+ let d=await finddir(p,false)
+ let w=(await(await d.getFileHandle(f)).createWritable())
+ await(w.write(r.Text))
+ await(w.close())
+ r.Clean=true
+ return r
+}
+async function deleteFile(name){
+ if(name.endsWith("/"))throw("rm: file ends with /")
+ let[p,f]=splitpathname(name)
+ let d=await finddir(p,false)
+ await d.removeEntry(f)
+ return ls(joindir(p),false)
+}
+async function readfile(name,create){
+ if(name.endsWith("/"))throw("file name ends with /")
+ let p=name.split("/").slice(1)
+ let d=(1==p.length)?rootdir:await finddir(p.slice(0,-1),false),f=p[p.length-1]
+ let t=await(await (await d.getFileHandle(f,{create:create})).getFile()).text()
+ let r={Name:name,Text:t,Default:"",Clean:true,Tags:" Write"}
+ if(name.endsWith(".k"))r.Tags=" run"+r.Tags
+ return r
+}
+async function finddir(p,create){let d=rootdir;
+ while(p.length){
+  d=await d.getDirectoryHandle(p[0],{create:create&&1==p.length})
+  p=p.slice(1)
+ }
+ return d
+}
 async function readdir(r){ return await showDirectoryPicker({mode:"readwrite"}); }
+async function kinit(){O=""
+ /*
+let K,B,lo=x=>Number(BigInt.asUintN(32,x)),
+C=()=>new Int8Array(K.memory.buffer),
+U=()=>new Uint32Array(K.memory.buffer),
+Ks=s=>K.sc(KC(s)),
+save=()=>{B=C().slice(0,1<<U()[32])},restore=()=>{C().set(B)},cw,
+*/
+ let kenv={env:{ 
+  Exit:  function(x      ){},
+  Args:  function(       ){return 0},
+  Arg:   function(x,y    ){return 0},
+  Read:  function(a,b,c  ){return -1},
+  Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);O+=su(v);return 0},
+  ReadIn:function(x,y    ){return 0},
+  Native:function(x,y    ){return 0}}}
+ let k=await WebAssembly.instantiate(await((await fetch("k.wasm")).arrayBuffer()),kenv)
+ K=k.instance.exports
+ K.kinit()
+}
+async function krun(r){
+ let lo=x=>Number(BigInt.asUintN(32,x))
+ let C=()=>new Int8Array(K.memory.buffer)
+ let CK=x=>new Uint8Array(K.memory.buffer,lo(x),K.nn(x))
+ let KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r}
+ if(K===undefined||r.Command=="run")await kinit()
+ if(r.Command=="run")r.Name+="+out"
+ if(r.Command.startsWith("k)")){
+  K.repl(KC(r.Command.slice(2)))
+  r.Text+="\n"+O+"k)";O="";return r
+ }
+ K.repl(KC(r.Text))
+ r.Text=O+"k)";O=""
+ r.Clean=true
+ return r
+}
 async function Call(win, command) {
 	var r = {
 		Root: root,
@@ -75,20 +152,19 @@ async function Call(win, command) {
 		r.Selections = win.editor.GetSelections()
 		r.Text = win.editor.GetText()
 	}
-	console.log("win",win.column)
-	r=await request(r,win.Dir)
+	let win_=win
+	r=await request(r)
 	if(r){
 		if (r.Replace===""||r.Replace==undefined) {
 			win = win.column.layout.FindWindow(r.Name)
 		} else {
 			win = win.column.layout.FindWindow(r.Replace)
 		}
-		if (win == undefined) { //?
-			win = win.column.AddWindow(win.index+1)
+		if (win===undefined){
+			win = win_.column.AddWindow(win_.index+1)
 		}
 		win.SetTitle(r.Name)
 		win.SetTags(r.Tags)
-		win.Dir=r.Dir
 		win.SetDefaultCommand(r.Default)
 		if (win.editor == undefined) {
 			win.editor = new Editor(win)
@@ -399,7 +475,6 @@ function Window(column, index) {
 		// var selectedText = wb.value.substring(wb.selectionStart, wb.selectionEnd).trim()
 		// win.Execute(selectedText)
 		var word = findWordAround(wb.value, wb.selectionStart) // defined in editor_js
-		console.log("dblclick, start: ", word)
 		wb.setSelectionRange(word.start, word.end)
 		win.Execute(word.word)
 		ev.preventDefault()
