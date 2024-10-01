@@ -41,12 +41,15 @@ let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new Tex
 
 async function request(r){
  let cmd=(r.Command.startsWith("!")?r.Command.slice(1):r.Command)
- if(cmd=="empty"){r.Text="k)";return r}
+ if(cmd=="empty")return{Name:r.Name,Text:""}
+ if(cmd=="read"&&r.Name=="k")return r
+ if(cmd.startsWith("readat "))return await readat(r.Name.slice(0,-4)+cmd.slice(7))
  if(cmd.startsWith("read")||cmd.startsWith("new"))return await read(r)
  if(cmd=="Write")return await writeFile(r)
  if(cmd.startsWith("rm "))return deleteFile(r.Name+cmd.slice(3))
  if(cmd=="run")return await krun(r)
- if(cmd.startsWith(`k)`))return krun(r)
+ if(cmd.startsWith("g "))return await grep(r.Name,cmd.slice(2),false)
+ if(cmd.startsWith("G "))return await grep(r.Name,cmd.slice(2),true)
  else { throw("unknown command "+r.Command) }
 }
 async function read(r){
@@ -56,6 +59,12 @@ async function read(r){
  let create=r.Command.startsWith("new ");if(create)name=r.Name+r.Command.slice(4)
  return(name.endsWith("/"))?ls(name,create):readfile(name,create)
 }
+async function readat(f){
+ let i=f.lastIndexOf("@")
+ let s=f.slice(1+i).split("-").map(Number)
+ let r=await read({Name:f.slice(0,i),Command:"read"})
+ r.Selections=[s]
+ return r}
 async function ls(name,create){
  let dir=await finddir(splitpathname(name)[0],create)
  let t="",r={}
@@ -105,6 +114,33 @@ async function finddir(p,create){let d=rootdir;
  return d
 }
 async function readdir(r){ return await showDirectoryPicker({mode:"readwrite"}); }
+async function grep(name,pattern,recursive){
+ let[p,f]=splitpathname(name)
+ let d=await finddir(p,false)
+ console.log("grep",p,pattern)
+ let t=[],r={}
+
+ let grepfile=async(dirname,x)=>{
+  let o=0,n=pattern.length
+  let r=dirname+x.name+"@"
+  let c=await(await x.getFile()).text()
+  let v=c.split("\n")
+  for(let i=0;i<v.length;i++){
+   let p=v[i].indexOf(pattern)
+   if(-1<p)t.push(r+(o+p)+"-"+(o+p+n)+" "+v[i])
+   o+=1+v[i].length
+  }
+ }
+ let walk=async (d,dirname)=>{
+  for await (const x of d.values()){
+   if(x.kind==="file"&&!x.name.startsWith("."))await grepfile(dirname,x)
+   else if(x.kind==="directory"&&recursive)await walk(x,dirname+x.name+"/")
+  }
+ }
+ await walk(d,"")
+
+ return{Name:name+"+out",Text:t.join("\n"),Clean:true,Default:"readat"}
+}
 
 let lo=x=>Number(BigInt.asUintN(32,x)),I=()=>new Int32Array(K.memory.buffer),J=()=>new BigInt64Array(K.memory.buffer),C=()=>new Int8Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer)
 let IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>lo(x)
@@ -120,8 +156,16 @@ async function kinit(){O=""
   Exit:  function(x      ){},
   Args:  function(       ){return 0},
   Arg:   function(x,y    ){return 0},
-  Read:  function(a,b,c  ){return -1},
-  Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);O+=su(v);return 0},
+  Read:  function(a,b,c  ){
+   let u=new Uint8Array(K.memory.buffer),f=su(u.slice(a,a+b))
+   let w=layout.FindWindow(f);if(w===undefined)return -1
+   let v=w.editor.editor.getValue()
+   if(c==0)return v.length
+   else u.set(us(v),c)
+   return 0},
+  Write: function(a,b,c,d){
+   let u=new Uint8Array(K.memory.buffer),f=su(u.slice(a,a+b)),v=u.slice(c,c+d);
+   v=su(v);(f.length)?windowWrite(f,v):O+=v;return 0},
   ReadIn:function(x,y    ){return 0},
   Native:function(x,y    ){return plotk(K.Atx(y,K.Ki(0)))}}}
  let k=await WebAssembly.instantiate(await((await fetch("k.wasm")).arrayBuffer()),kenv)
@@ -136,18 +180,48 @@ async function krun(r){
  let lo=x=>Number(BigInt.asUintN(32,x))
  if(K===undefined||r.Command=="run")await kinit()
  if(r.Command=="run")r.Name+="+out"
- if(r.Command.startsWith("k)")){
-  K.repl(KC(r.Command.slice(2)))
-  r.Text+="\n"+O+"k)";O="";return r
- }
  K.repl(KC(r.Text))
- r.Text=O+"k)";O=""
+ r.Text=O;O=""
  r.Clean=true
  return r
 }
-
+function repl(win){if(K===undefined)kinit()
+ let rm=p=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
+ let ce=x=>document.createElement(x)
+ let ac=(x,y)=>{x.appendChild(y);return y}
+ rm(win.editor.editor.doc.cm.getWrapperElement())
+ let d=win.editordiv;rm(d)
+ let ta=ac(d,ce("textarea"))
+ ta.value=" "
+ ta.focus()
+ ta.style.margin=0;ta.style.border="none";ta.style.outline="none"
+ ta.style.background="#ffffea"
+ ta.style.width="100%";ta.style.height="100%";ta.parentElement.style.overflow="hidden"
+ ta.style.resize="none"
+ ta.onkeydown=e=>{
+  if(e.key=="Enter"){e.preventDefault()
+    ta.value=ta.value.slice(0,ta.selectionEnd)
+    let i=ta.value.lastIndexOf("\n")
+    let s=ta.value.slice(((i<0)?0:i))
+    console.log("s",s)
+    O="";K.repl(KC(s.startsWith(" ")?s.slice(1):s))
+    ta.value+="\n"+O+" "
+    //todo set width/height trim output
+  }
+ }
+ console.log("ta.value",ta.value,ta.value.length)
+}
+function windowWrite(name,s){
+ let w=layout.FindWindow(name);if(w===undefined)w=layout.columns[0].AddWindow(1)
+ if(w.editor===undefined)w.editor=new Editor(w)
+ w.SetTitle(name);w.MarkClean(false);w.editor.editor.setValue(s)
+}
+function windowRead(name){
+ let w=layout.FindWindow(r.Name);if(w===undefined)return""
+ let e=w.editor.editor;if(w===undefined)return""
+ return e.getValue()
+}
 function plotk(x){
- console.log("plotk",x)
  let axis=x=>{plots[pid].limits=Array.from(x)}
  let pn=x=>{if(plots.length<=x)plots[x]={};return x},pt=x=>{plots[pid].type=("square"==x)?"xy":x;plots[pid].square=x=="square"},ri=x=>{x=ZK(x);return[x.filter((_,i)=>i&1),x.filter((_,i)=>~i&1)]},la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
  let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(3==t)?iK(x[0]):(5==t)?fK(x[0]):(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
@@ -170,6 +244,7 @@ async function Call(win, command) {
 	let win_=win
 	r=await request(r)
 	if(r){
+	 	if(r.Name=="k")return repl(win)
 		if (r.Replace===""||r.Replace==undefined) {
 			win = win.column.layout.FindWindow(r.Name)
 		} else {
@@ -469,6 +544,7 @@ function Window(column, index) {
 		if (ev.keyCode == 13) {
 			win.SetTitle(win.wintitle.value);
 			win.Execute("read")
+			ev.preventDefault()
 		}
 	}
 	this.headerdiv.appendChild(this.wintitle)
@@ -685,9 +761,10 @@ function Column(layout) {
 
 	// close column
 	this.Close = function() {
+	 console.log("close column")
 		this.layout.columns.splice(this.index, 1)
 		// recalculate index of remaining columns
-		for (var i=0; i<layout.columns; i++)
+		for (var i=0; i<layout.columns.length; i++)
 			layout.columns[i].index = i;
 		this.div.remove()
 	}
