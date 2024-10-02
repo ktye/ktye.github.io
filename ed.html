@@ -41,6 +41,7 @@ let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new Tex
 
 async function request(r){
  let cmd=(r.Command.startsWith("!")?r.Command.slice(1):r.Command)
+ if(r.Name=="plot")return r
  if(cmd=="empty")return{Name:r.Name,Text:""}
  if(cmd=="read"&&r.Name=="k")return r
  if(cmd.startsWith("readat "))return await readat(r.Name.slice(0,-4)+cmd.slice(7))
@@ -171,6 +172,7 @@ async function kinit(){O=""
  let k=await WebAssembly.instantiate(await((await fetch("k.wasm")).arrayBuffer()),kenv)
  K=k.instance.exports
  K.kinit()
+ K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC("300 40")))))
 
  let f=K.l2(BigInt(0),Ks("plot"));
  I()[(lo(f)>>>2)-3]=1
@@ -197,16 +199,20 @@ function repl(win){if(K===undefined)kinit()
  ta.style.margin=0;ta.style.border="none";ta.style.outline="none"
  ta.style.background="#ffffea"
  ta.style.width="100%";ta.style.height="100%";ta.parentElement.style.overflow="hidden"
- ta.style.resize="none"
+ ta.style.resize="none";ta.style.textWrap="nowrap";ta.style.overflow="hidden"
+ ta.onfocus=e=>ta.scrollTop=ta.scrollHeight
  ta.onkeydown=e=>{
   if(e.key=="Enter"){e.preventDefault()
-    ta.value=ta.value.slice(0,ta.selectionEnd)
-    let i=ta.value.lastIndexOf("\n")
-    let s=ta.value.slice(((i<0)?0:i))
-    console.log("s",s)
-    O="";K.repl(KC(s.startsWith(" ")?s.slice(1):s))
-    ta.value+="\n"+O+" "
-    //todo set width/height trim output
+   let j=ta.value.indexOf("\n",ta.selectionEnd)
+   ta.value=ta.value.slice(0,(j>0)?j:ta.selectionEnd)
+   let i=ta.value.lastIndexOf("\n")
+   let s=ta.value.slice(((i<0)?0:i))
+   console.log("s",s)
+   if(s.trim()=="\\"){kinit();ta.value=" ";return}
+   O="";K.repl(KC(s.startsWith(" ")?s.slice(1):s))
+   ta.value+="\n"+O+" "
+   ta.scrollTop=ta.scrollHeight
+   showplot()
   }
  }
  console.log("ta.value",ta.value,ta.value.length)
@@ -245,6 +251,7 @@ async function Call(win, command) {
 	r=await request(r)
 	if(r){
 	 	if(r.Name=="k")return repl(win)
+		if(r.Name=="plot")return showplot()
 		if (r.Replace===""||r.Replace==undefined) {
 			win = win.column.layout.FindWindow(r.Name)
 		} else {
@@ -263,25 +270,23 @@ async function Call(win, command) {
 		win.editor.SetSelections(r.Selections)
 		win.editor.editor.focus()
 		win.MarkClean(r.Clean)
-		if(plots!==0){
-			win = win.column.layout.FindWindow("plot")
-			if (win===undefined){
-				win = win_.column.AddWindow(win_.index+1)
-			}
-			setplot(win)
-		}
+		showplot()
 	}
 }
-function setplot(win){
-	let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
-	win.SetTitle("plot")
-	win.SetTags("")
-	win.MarkClean(true)
-	let cnv=document.createElement("canvas"),p=win.editordiv
-	cnv.width=p.clientWidth;cnv.height=p.clientHeight
-	rm(p);p.appendChild(cnv)
-	p.style.overflow="hidden"
-	plotjs.plots({plots},cnv)
+function showplot(){
+ if(plots===0)return
+ let w=layout.FindWindow("plot")
+ if(w===undefined)w=layout.columns[0].AddWindow(layout.columns[0].windows.length)
+ let rm=(p)=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
+ w.SetTitle("plot")
+ w.SetTags("")
+ w.MarkClean(true)
+ let cnv=document.createElement("canvas"),p=w.editordiv
+ cnv.width=p.clientWidth;cnv.height=p.clientHeight
+ rm(p);p.appendChild(cnv)
+ p.style.overflow="hidden"
+ plotjs.plots({plots},cnv,undefined,undefined,x=>w.SetTags(x))
+ cnv.onresize=e=>console.log(e)
 }
 // Menu creates a popup menu which is activated
 // by clicking on the drag box with the right mouse button.
@@ -640,6 +645,9 @@ function Window(column, index) {
 
 	// close window
 	this.Close = function() {
+	 	if(this.title==="plot"){
+			plots=0
+		}
 		this.column.windows.splice(this.index, 1)
 		// recalculate index of remaining columns
 		for (var i=0; i<this.column.windows.length; i++)
