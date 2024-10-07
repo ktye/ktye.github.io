@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<title></title>
+<style>body{font-family:monospace;white-space:pre}</style>
+
+<script src="k.js"></script>
+
+<script>
+
+let
+krep=s=>{
+ console.log(s)
+ let r=eval(s)
+ s=r.constructor.name+" "+r.toString()+"\n "
+ console.log(s)
+ document.body.textContent+=s
+ end()},
+end=()=>{
+ let b=document.body
+ let s=window.getSelection()
+ s.removeAllRanges()
+ let r=document.createRange()
+ r.selectNodeContents(b)
+ r.collapse(false)
+ s.addRange(r)
+ window.scrollTo(0,b.scrollHeight)
+ b.focus()},
+pos=()=>getSelection().getRangeAt(0).endOffset
+
+
+window.onkeydown=e=>{if(e.key=="Enter"){
+ e.preventDefault() 
+ let b=document.body,o=pos(),j=b.textContent.indexOf("\n",o)
+ if(j>=0)o=j
+ let t=b.textContent.slice(0,o)
+ b.textContent=t
+ let i=t.lastIndexOf("\n")
+ t=t.slice(i>0?1+i:0)
+ b.textContent+="\n"
+ if(t.trim()!=""){krep(t)}}}
+
+</script>
+</head>
+
+<body contenteditable="true" spellcheck="false" > </body></html>
