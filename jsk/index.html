@@ -2,20 +2,14 @@
 <head><meta charset="utf-8">
 <link rel=icon href="../kelas16.png">
 <title></title>
-<style>body{font-family:monospace;white-space:pre}</style>
+<style>body{margin:0;font-family:monospace;white-space:pre}</style>
 
 <script src="k.js"></script>
 
 <script>
 
 let
-krep=s=>{
- console.log(s)
- let r=eval(s)
- s=r.constructor.name+" "+r.toString()+"\n "
- console.log(s)
- document.body.textContent+=s
- end()},
+krep=s=>{document.body.textContent+=string(eval(s))+"\n ";end()},
 end=()=>{
  let b=document.body
  let s=window.getSelection()

@@ -7,8 +7,6 @@ rec   =f=>x=>atom(x)?f(x):x.map(rec(f)),
 each  =f=>x=>atom(x)?f(x):x.map(f),
 over  =(f,y)=>x=>{y=y?y:0;if(!atom(x))x.forEach(x=>y=f(y,x));return y},
 scan  =(f,y)=>x=>{y=y?y:first(x);return atom(x)?x:x.map(x=>y=f(y,x))},
-fix   =f=>x=>{let a=b=x;while(match(b,x)+match(a,x))x=f(b=x);return x},
-
 left  =f=>(x,y)=>atom(x)?f(x,y):x.map((x,i)=>f(x,y)),
 right =f=>(x,y)=>atom(y)?f(x,y):y.map((y,i)=>f(x,y)),
 both  =f=>(x,y)=>atom(x)?right(f)(x,y):atom(y)?left(f)(x,y):x.map((x,i)=>f(x,y[i])),
@@ -24,7 +22,7 @@ down  =x=>{x=til(count(x));return x.sort((a,b)=>a>b?-1:a<b?1:0)},
 freq  =x=>x.reduce((r,x)=>{r[x]=r[x]?r[x]+1:1;r},{}),
 not   =rec(x=>+!x),
 value =x=>(typeof x==="string")?eval(parse(x)):x.constructor===Object?Object.values(x):x,
-til   =x=>atom(x)?Array(x<0?0:x).fill(0).map((_,i)=>i):where(x),
+til   =x=>(typeof x==="string")?token(x):atom(x)?Array(x<0?0:x).fill(0).map((_,i)=>i):where(x),
 where =x=>Array(x.flatMap((x,i)=>Array(x).fill(i))),
 first =x=>atom(x)?x:x.length?x[0]:0,
 uniq  =x=>atom(x)?rand(x):x.filter((y,i)=>i===x.indexOf(y)),
@@ -33,6 +31,7 @@ sort  =x=>x.toSorted(),
 count =x=>atom(x)?1:x.length,
 floor =rec(Math.floor),
 list  =x=>[x],
+string=x=>atom(x)?String(x):x.every(atom)?x.map(String).join(" "):"("+x.map(string).join(";")+")",
 
 add   =atomic((x,y)=>x+y),
 sub   =atomic((x,y)=>x-y),
@@ -72,17 +71,17 @@ enc   =(x,y)=>rev(rev(x).map(x=>{let t=mod(x,y);y=idiv(x,y);return t}))
 = freq   eql
 ~ not    match
 . value        parse
-! til    dict  where (repeat) key
+! til    dict  where (repeat) key token
 @ first  at
 ? uniq   find  rand (shuffle)
 ^ sort   cut
 # count  take
 _ floor  drop
-, enlist cat
-$
+, list   cat
+$ string
 ' each   both 
 / over   right dec join  fix
 \ scan   left  enc split
 
-rec atom atomic
+atom atomic rec
 */
