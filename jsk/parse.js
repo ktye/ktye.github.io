@@ -1,31 +1,45 @@
 let token=x=>{
- let a=x,r=[],h=x=>x.length?x[0]:0
- chr=x=>{if(h(x)!="\"")return 0
-  let q=0,n=0;while(++n&&x.length>n&&(x[n]!="\\n"&&!q=q-+(x[n]=="\\")));
-  return[JSON.parse(x.slice(0,++n)),n]},
- num=x=>{
-  let r=parseFloat(x)
-  if(isNaN(x))return 0
-  let t=x.findIndex(x=>!"0123456789eE.+-".includes(x)));t=t<0?x.length:t
-  while(isNaN(Number(x.slice(0,t)))t--
-  return[r,t]},
- nms=x=>{
-  let r=num(x);if(!r)return 0
-  let a=[r[0]],n=r[1]
-  while(x.length>n&&x[n]==" "&&r=num(x)){a.push(r[0]);n+=1+r[1]}
-  return[1==a.length?a[0]:a,n]},
- ver=x=>"+-*%&|<> = ~ . !@ ?^#_,$'/\\".includes(x[0])?[x[0],1]:0,
- pct=x=>"{}[]();\n".includes(x[0])?[x[0],1]:0,
- nam=x=>{let n=0,a="abcdefghijklmnopqrstuvxyz"
-  if(!a.includes(x[0]))return 0
-  a+=a.toUpperCase()+"0123456789."
-  while(length(x)>++n&&a.includes(x[n]));
-  return[x.slice(0,n),n]}
+ let a=x,t=[]
+ chr=x=>{if(x[0]!="\"")return 0
+  let q=0,n=0;while(++n&&x.length>n&&("\\n"!=x[n]&&(q^=(x[n]=="\\"))));
+  return n},
+ num=x=>isNaN(parseFloat(x))?0:x.match(/-?[0-9]*\.?[0-9]*/)[0].length,
+ nms=x=>{let a=x,t,n=num(x);if(!n)return 0
+  while(x.length>n&&" "==x[n]&&(t=num(x=x.slice(1+n))))n+=1+t
+  return n},
+ ver=x=>+"+-*%&|<>=~.!@?^#_,$'/\\".includes(x[0]),
+ pct=x=>+"{}[]();\n".includes(x[0]),
+ nam=x=>(0>x.search(/a-zA-Z/))?0:x.search(/^a-zA-Z0-9/)
  while((x=x.trim()).length){
-  let[t,n]=chr(x)||nms(x)||ver(x)||pct(x)||nam(x)||throw("parse "+(a.length-x.length))
-  r.push(t);x=x.slice(n)}
- return r},
+  let pp=a.length-x.length,n=(chr(x)||nms(x)||ver(x)||pct(x)||nam(x)||(x=>{throw"parse: "+x})(pp))
+  t.push([x.slice(0,n),pp]);x=x.slice(n)
+ };return t},                                                 //token,position
 
-parse=x=>{if(typeof x=="string")x=token(x)
+parse=s=>{//+-*%&|<>=~.!@?^#_,$'/\\
+ let s1="type neg sqr sqrt flip rev up down frq not value til first uniq sort count floor list string each right left".split(" ")
+ let s2="add sub mul div min max less more eql match dot dict at find cut take drop cat string both join split".split(" ")
+ let Y="+-*%&|<>=~.!@?^#_,$'/\\"
+ let isv=x=>Y.includes(x[0])
  
+ s=((s.constructor===String)?token(s):s).toReversed()
+ 
+ let pp,N=()=>{if(!s.length)return false;let r=s.pop();pp=r[1];return r[0]},
+ monadic= (f,x)=>({t:(isv(f)?s1[Y.indexOf(f[0])]:f)+"("+x+")",v:0}),
+ dyadic=(x,f,y)=>({t:(isv(f)?s2[Y.indexOf(f[0])]:f)+"("+y+","+x+")",v:0}),
+ T=()=>{let r=N()
+  if(!r)return 0
+  return{t:r,v:isv(r)}
+ },
+ E=x=>{let z
+  if(!x)return 0
+  let y=T()
+  if(!y)return x
+  if(y.v&&!x.v){
+   z=E(T())
+   return dyadic(x.t,y.t,z.t)
+  }
+  z=E(y)
+  return monadic(x.t,z.t)
+ }
+ return E(T()).t
 }
