@@ -11,7 +11,16 @@
 <script>
 
 let
-krep=s=>{document.body.textContent+=string(eval(s))+"\n ";end()},
+o=x=>document.body.textContent+=x,
+krep=s=>{
+ let p=parse(s);o(" //"+p+"\n")
+ try{
+  r=string(eval(p))
+  o(r+"\n ")
+ }catch(e){
+  o(" ^"+e+"\n ")
+ }
+ end()},
 end=()=>{
  let b=document.body
  let s=window.getSelection()
@@ -33,7 +42,7 @@ window.onkeydown=e=>{if(e.key=="Enter"){
  b.textContent=t
  let i=t.lastIndexOf("\n")
  t=t.slice(i>0?1+i:0)
- b.textContent+="\n"
+ //b.textContent+="\n"
  if(t.trim()!=""){krep(t)}}}
 
 </script>
