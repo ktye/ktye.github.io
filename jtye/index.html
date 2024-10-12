@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<title></title>
+<style>
+*{font-family:monospace}
+.full{margin:0}
+.repl{height:100vh;width:100vw;margin:0;outline:none;display:none}
+</style>
+
+
+<script src="k.js" onload='console.log(this.content)'></script>
+<script src="parse.js"></script>
+
+<script>
+
+let
+o=x=>b.textContent+=x,
+krep=s=>{
+ if(s.trim().startsWith("\\")){b.textContent+="\n ";b.style.display="none";main.style.display="block";return}
+ let p=parse(s);o(" //"+p+"\n")
+ try{
+  r=string(eval(p))
+  o(r+"\n ")
+ }catch(e){
+  o(" ^"+e+"\n ")
+ }
+ end()},
+end=()=>{
+ let s=window.getSelection()
+ s.removeAllRanges()
+ let r=document.createRange()
+ r.selectNodeContents(b)
+ r.collapse(false)
+ s.addRange(r)
+ window.scrollTo(0,b.scrollHeight)
+ b.focus()},
+pos=()=>getSelection().getRangeAt(0).endOffset
+
+
+window.onkeydown=e=>{if(e.key=="Enter"){
+ e.preventDefault() 
+ let o=pos(),j=b.textContent.indexOf("\n",o)
+ if(j>=0)o=j
+ let t=b.textContent.slice(0,o)
+ b.textContent=t
+ let i=t.lastIndexOf("\n")
+ t=t.slice(i>0?1+i:0)
+ //b.textContent+="\n"
+ if(t.trim()!=""){krep(t)}}}
+
+</script>
+</head>
+
+<article id="main">
+<h2>jtye: a direct k for javascript <button onclick="main.style.display='none';b.style.display='block';body.classList.add('full');end()">repl</button> <a href="test.html">tests</a></h2>
+<details><summary>k core (k.js) <span id=coreb></span> bytes</summary><pre id="core"></pre></details>
+<details><summary>parser (parse.js) <span id=pareb></span> bytes</summary><pre id="pare"></pre></details>
+<h3>about</h3>
+direct use1 use2
+<h3>core</h3>
+types strings static
+<h3>parse</h3>
+</article>
+
+<pre id="b" class="repl" contenteditable="true" spellcheck="false">jtye/k (in //parse out \doc)
+ 
+</pre>
+
+
+<script>
+fetch("k.js"    ).then(r=>r.text()).then(r=>{core.textContent=r;coreb.textContent=r.length})
+fetch("parse.js").then(r=>r.text()).then(r=>{pare.textContent=r;pareb.textContent=r.length})
+</script>
+</body></html>
