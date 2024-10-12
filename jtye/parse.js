@@ -7,13 +7,13 @@ let token=x=>{let C,c,i=x=>split(x,"").map(x=>x.charCodeAt()),
  T=[" ;)+'a0q`-:e\/n",       //state transition table
     ";;)+'a0q`-+a'/;",
     ");)+'a0q`++a'';",
-    "+;)+'a0q`-+a'';",
+    "+;)+'a0q`-:a'';",
     "';)+'a0q`-:a'';",
     "a;)+'bbq`++b'';",
     "0;)+'11q`+:e'';",
     "qrrrrrrtrrrrsrr",
     "`;)+'b0q`++b'';",
-    "-;)+'a1q`-+a'';",
+    "-;)+'a1q`-:a'';",
     "/ccccccccccccc;",
     "cccccccccccccc;",
     ":;)+'a0q`-+a'';",
@@ -38,8 +38,9 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
  f1=" type neg sqr sqrt flip rev up down frq not value til first uniq sort count floor list string each right left".split(" "),
  f2=" add sub mul div min max less more eql match dot dict at find cut take drop cat string both join split".split(" "),
  a2=(x,y)=>(y=["","both","right","left"][1+["each","over","scan"].indexOf(x.slice(0,4))])?y+x.slice(4):x,
- F=(x,f)=>{let i=V.indexOf(x);return -1<i?f[i]:x},mo=(x,y)=>b(F(x,f1),y),dy=(x,y,z)=>b(F(a2(x),f2),[y,z])
- 
+ F=(x,f)=>{let i=V.indexOf(x);return -1<i?f[i]:x}
+
+
  
  let t=()=>{let r                                           //t(): term
   if(!L(s))return 0;r=s.pop();                              //next token
@@ -55,27 +56,35 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
   return r},
  
  e=(x)=>{let y,z                                           //e(t()): expr
-  if(!x)return 0;if(!(y=t()))return x
+  if(!x)return 0;if(!(y=t()))return G(x)
   if(y.verb&&!x.verb){
    z=e(t())
-   return L(y)==":"?_(x,y,z):(!z)?p(x,y):z.verb?q(x,y,z):dy(y,z,x)
+   return L(y)==":"?_(x,y,z):(!z)?p(x,y):z.verb? c(p(x,y),z)  /*q(x,y,z)*/ :D(y,z,x)
   }
-  z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):mo(x,z)},
+  z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):M(x,z)},
  
  a=(x,y)=>{y=l();return(1==y.length)?b("at",[y[0],x]):b(x,y.reverse())},                     //apply x[y] or x[y;z;..]   //todo project
  b=(x,y)=>x+"("+((y.constructor===Array)?y.join(","):y)+")",B=x=>b("",x),                    //x(y) or x(y0,y1)
- c=(x,y)=>v(i(V,y)?b("(x,y)=>"+F(x,f1),b(F(y,f2),"y,x")):b("x=>"+F(x,f1),b(y,"x"))),  //composition x=>x(y(x)) and (x,y)=>f(g(y,x))
- d=(x,r)=>v(["each(","over(","scan("]["'/\\".indexOf(x)]+F(r,L(r)==":"?f1:f2)+")"),   //derived verb
- i=(x,y)=>x.includes(y),
+ c=(x,y)=>v(i(f2,S(y))?b("((x,y)=>"+F(x,f1),b(y,"x,y)")):                                    //composition
+  sw(y,"((x,y)=>")?b("((x,y)=>"+F(x,f1),y.slice(8)):
+  b("(x=>"+F(x,f1),(sw(y,"(x=>")?y.slice(4):b(y,"x)")))),
+ d=(x,r)=> 
+  v(["each(","over(","scan("]["'/\\".indexOf(x)]+ G( (x=="'"&&i(V,r))?r+":": r   )+")"), //derived verb
+ M=(x,y)=>
+  //(sw(x,"both")&&i(f2,x.slice(5,-1)))?b(b("each",f1[f2.indexOf(x.slice(5,-1))]),y):
+  b(F(x,f1),y),
+ D=(x,y,z)=>b(F(a2(x),f2),[y,z]),
+ i=(x,y)=>x.includes(y),sw=(x,y)=>x.startsWith(y),
  j=(x,y)=>b("at",[y,x]),                                                                     //juxtaposition x y
- v=x=>((x=new String(x)).verb=true,x),n=x=>((x=new String(x)).verb=false,x),
- p=(x,y)=>b("x=>"+F(y,f2),["x",x]),                                                          //project 1+
- q=(x,y,z)=>v(B(i(V,z)?b("(y,x)=>"+F(y,f2),[b(F(z,f2),"y,x"),x]):b("x=>"+F(y,f2),[b(F(z,f1),"x"),x]))),  //compose project 1+-
+ v=x=>((x=new String(x)).verb=true,x),S=x=>x.toString(),n=x=>((x=new String(x)).verb=false,x),
+ p=(x,y)=>B(b("x=>"+F(y,f2),["x",x])),                                                          //project 1+
+ //q=(x,y,z)=>v(B(i(V,z)?b("(y,x)=>"+F(y,f2),[b(F(z,f2),"y,x"),x]):b("x=>"+F(y,f2),[b(F(z,f1),"x"),x]))),  //compose project 1+-
  l=r=>{r=[];while(L(s)){r.push(e(t()));if(s.pop()!=";")return r}},L=x=>x.length?x[x.length-1]:0,    // list e;e;e[terminator]
  R=()=>{let r=l();r=1==r.length?n(r[0]):"rev(["+r.reverse().join(",")+"])";return r},
+ G=(x)=>i(V,x[0])?(x.length==1?v(F(x,f2)):(x.length==2&&L(x)==":")?v(F(x[0],f1)):x):x,   //- -> x=>neg(x)
  _=(x,y,z)=>y[0]==":"?(x+"="+z):x+"=?amend?"
  //λ 
  
  s.reverse()
- return e(t()).toString()
+ return S(e(t()))
 }

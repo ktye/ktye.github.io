@@ -32,7 +32,7 @@ sort  =x=>x.toSorted(),
 count =x=>atom(x)?1:x.length,
 floor =rec(Math.floor),
 list  =x=>[x],
-string=x=>atom(x)?String(x):x.every(atom)?x.map(String).join(" "):"("+x.map(string).join(";")+")",
+string=x=>(atom(x)||typeof x==="function")?String(x):x.every(atom)?x.map(String).join(" "):"("+x.map(string).join(";")+")",
 
 add   =atomic((y,x)=>x+y),
 sub   =atomic((y,x)=>x-y),

@@ -1,0 +1,16 @@
+
+#repl using quickjs (bellard.org)
+
+(
+echo "#!/usr/bin/env -S qjs --std"
+
+cat k.js parse.js
+
+cat << x
+std.puts("jtye/k\n")
+while(1){
+ std.puts(" ")
+ let s=std.in.getline()
+ print(string(eval(parse(s))))}
+x
+)>j && chmod 744 j
