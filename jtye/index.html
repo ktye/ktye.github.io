@@ -61,6 +61,78 @@ direct use1 use2
 <h3>core</h3>
 types strings static
 <h3>parse</h3>
+
+<pre>
+<h3>ref</h3>
+<pre>
++ type   add   ' each prior bin `js`
+- neg    sub   / over right join dec
+* sqr    mul   \ scan left split enc
+% sqrt   div   inv idiv mod
+& flip   min              
+| rev    max                 atom 
+< up     less                atomic
+> down   more                   rec
+= freq   eql        
+~ not    match           
+. value        parse
+! til    dict  token key where
+@ first  at    amend
+? uniq   find  rand
+^ sort   cut             while()[;;]
+# count  take            if()[;;;;;]
+_ floor  drop            do[]while()
+, list   cat             for(;;)[;;]
+$ string             try[]catch(e)[]
+</pre>
+
+<h3>adverbs</h3>
+there are only 3 adverb symbols ' / \
+' is each or prior(for :+-*%&|<>=~), / \ are over and scan.
+
+derived verbs from each over and scan are available in variadic form
+and may also take more than 1 argument.
+the verb's arity should match the number of arguments:
+e.g. f'[a;b;c] is triadic each.
+
+x/y x\y is is encode/decode for numbers and join/split for strings.
+x'y is binary search.
+
+<h3>ambivalence</h3>
+
+primitives are fixed at compile time if possible, e.g. 1-2 is sub, while -x is neg.
+by themselves, e.g. (-;+) or f:- they default to dyadic, e.g. sub but not neg.
+this is also true when used in derived +/ which is over(add).
+the exception is each: -' compiles to ambivalent each((x,y)=>y===undefined?neg(x):sub(x,y))
+
+derived verbs themselves, are monadic by default +/ is sum not add-each-right.
+the dyadic form is chosen at compile time for x+/y.
+this is resolved at runtime using variadic forms.
+
+compositions however are always dyadic: 1+- is {1+x-y}
+to simulate a monadic train, append dex(:) e.g. 1+-:
+
+</pre>
+<h3>js escape</h3>
+everything between backticks is compiled verbatim to js and parsed as a noun:
+<pre>
+f`x.slice(-3)` compiles to  at(x.slice(3),f)
+</pre>
+<h3>structural</h3>
+<pre>
+while(1>x)[]
+do[]while(1>x) (maybe not)
+[]=>{b;l;o;c;k}
+for(a;b;c)[]
+for(`let i in a`)
+if()[]         (no else)
+try[]catch(e)[]
+$[a;b;c]
+</pre>
+
+<h3>standalone</h3>
+mk qjs qjsc(6mb)
+
 </article>
 
 <pre id="b" class="repl" contenteditable="true" spellcheck="false">jtye/k (in //parse out \doc)
