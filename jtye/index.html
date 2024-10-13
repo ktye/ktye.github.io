@@ -53,18 +53,39 @@ window.onkeydown=e=>{if(e.key=="Enter"){
 </head>
 
 <article id="main">
-<h2>jtye: a direct k for javascript <button onclick="main.style.display='none';b.style.display='block';body.classList.add('full');end()">repl</button> <a href="test.html">tests</a></h2>
+<h2 style="border-bottom:2px solid darkred;padding-bottom:0.2em">jtye: a direct k for javascript <button onclick="main.style.display='none';b.style.display='block';body.classList.add('full');end()">repl</button> <a href="test.html">tests</a></h2>
 <details><summary>k core (k.js) <span id=coreb></span> bytes</summary><pre id="core"></pre></details>
 <details><summary>parser (parse.js) <span id=pareb></span> bytes</summary><pre id="pare"></pre></details>
 <h3>about</h3>
-direct use1 use2
-<h3>core</h3>
-types strings static
-<h3>parse</h3>
+jtye/k is k for javascript.</p>
+
+i write more js these days, mainly for ui and cross platform.</br>
+my style evolves to more functional. that's mostly fine but sometimes annoying.
+</p>
 
 <pre>
-<h3>ref</h3>
+compare: let sum=(f,x)=>x.reduce((a,x)=>f(a,x),0)
+why not:                                over(add)
+</pre>
+
+<h3>core</h3>
+the core adds 50 primitive functions and 3 helpers which work on numbers arrays and strings.
+the functions can be used directly in javascript.<p/>
+
+the helper functions rec and atomic can be used to extend the language with more vector functions, e.g.
 <pre>
+sin=rec(Math.sin),cos=rec(Math.cos),pow=atomic(Math.pow)
+</pre>
+
+<h3>parse</h3>
+let's add a parser, that transforms k source to js which uses our primitives.</p>
+
+bytecode, virtual machine? we don't need this, we can just use javascript's eval.</br>
+
+see the <a href="test.html">test's output</a> (in green) what the parser compiles k code to.
+
+<h3>ref</h3>
+<pre style="border:2px solid darkred;width:fit-content;margin:0.5em">
 + type   add   ' each prior bin `js`
 - neg    sub   / over right join dec
 * sqr    mul   \ scan left split enc
@@ -113,12 +134,15 @@ compositions however are always dyadic: 1+- is {1+x-y}
 to simulate a monadic train, append dex(:) e.g. 1+-:
 
 </pre>
+
 <h3>js escape</h3>
 everything between backticks is compiled verbatim to js and parsed as a noun:
+
 <pre>
 f`x.slice(-3)` compiles to  at(x.slice(3),f)
 </pre>
-<h3>structural</h3>
+
+<h3>structural todo</h3>
 <pre>
 while(1>x)[]
 do[]while(1>x) (maybe not)
@@ -130,8 +154,16 @@ try[]catch(e)[]
 $[a;b;c]
 </pre>
 
+<h3>web use</h3>
+<pre>
+&lt;script src="k.js">&lt;/script>
+&lt;script src="parse.js">&lt;/script>
+</pre>
+
+example.. e.g. interactive page in k
+
 <h3>standalone</h3>
-mk qjs qjsc(6mb)
+see:mk, todo click to download. or compile to native: qjsc(6mb)
 
 </article>
 

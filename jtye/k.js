@@ -61,31 +61,3 @@ split =(y,x)=>y.split(x),
 join  =(y,x)=>y.join(x),
 dec   =(y,x)=>y.slice(1).reduce((r,y,i)=>y+mul(at(x,i),r),first(y)),
 enc   =(y,x)=>rev(rev(x).map(x=>{let t=mod(x,y);y=idiv(x,y);return t}))
-
-
-/*             (implicit)
-+ type   add
-- neg    sub
-* sqr    mul
-% sqrt   div   inv idiv mod
-& flip   min   (and)
-| rev    max   (or)
-< up     less
-> down   more
-= freq   eql
-~ not    match
-. value        parse
-! til    dict  where (repeat) key token
-@ first  at
-? uniq   find  rand (shuffle)
-^ sort   cut
-# count  take
-_ floor  drop
-, list   cat
-$ string
-' each   both 
-/ over   right dec join  fix
-\ scan   left  enc split
-
-atom atomic rec
-*/
