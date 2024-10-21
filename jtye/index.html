@@ -1,59 +1,20 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel=icon href="../kelas16.png">
-<title></title>
+<title>jtye</title>
 <style>
 *{font-family:monospace}
-.full{margin:0}
-.repl{height:100vh;width:100vw;margin:0;outline:none;display:none}
+.h{cursor:pointer;color:#0000ee}
 </style>
 
 
-<script src="k.js" onload='console.log(this.content)'></script>
+<script src="k.js"></script>
 <script src="parse.js"></script>
 
-<script>
-
-let
-o=x=>b.textContent+=x,
-krep=s=>{
- if(s.trim().startsWith("\\")){b.textContent+="\n ";b.style.display="none";main.style.display="block";return}
- let p=parse(s);o(" //"+p+"\n")
- try{
-  r=string(eval(p))
-  o(r+"\n ")
- }catch(e){
-  o(" ^"+e+"\n ")
- }
- end()},
-end=()=>{
- let s=window.getSelection()
- s.removeAllRanges()
- let r=document.createRange()
- r.selectNodeContents(b)
- r.collapse(false)
- s.addRange(r)
- window.scrollTo(0,b.scrollHeight)
- b.focus()},
-pos=()=>getSelection().getRangeAt(0).endOffset
-
-
-window.onkeydown=e=>{if(e.key=="Enter"){
- e.preventDefault() 
- let o=pos(),j=b.textContent.indexOf("\n",o)
- if(j>=0)o=j
- let t=b.textContent.slice(0,o)
- b.textContent=t
- let i=t.lastIndexOf("\n")
- t=t.slice(i>0?1+i:0)
- //b.textContent+="\n"
- if(t.trim()!=""){krep(t)}}}
-
-</script>
 </head>
 
 <article id="main">
-<h2 style="border-bottom:2px solid darkred;padding-bottom:0.2em">jtye: a direct k for javascript <button onclick="main.style.display='none';b.style.display='block';body.classList.add('full');end()">repl</button> <a href="test.html">tests</a></h2>
+<h2 style="border-bottom:2px solid darkred;padding-bottom:0.2em">jtye: k in fifty functions <a href="repl.html">repl</a> <a href="test.html">tests</a></h2>
 <details><summary>k core (k.js) <span id=coreb></span> bytes</summary><pre id="core">
 let  /*k*/
 
@@ -242,13 +203,13 @@ fetch("parse.js").then(r=>r.text()).then(r=>{pare.textContent=r;pareb.textConten
 let showref=(s)=>{
  let c=core.textContent
  c=c.slice(1+(c.match(RegExp("\n"+s.textContent+" *=")).index))
- c=c.slice(0,c.indexOf("\n"))
+ c=c.slice(0,c.indexOf("\n")-1)
  code.textContent=c
 }
 
 let s=ref.textContent,c=core.textContent,r="",m;while(m=s.match(/[a-z]+/)){
  if(c.match(RegExp("\n"+m[0]+" *="))){
-  r+=s.slice(0,m.index)+`<span onclick="showref(this)" onmouseover="showref(this)">${m[0]}</span>`
+  r+=s.slice(0,m.index)+`<span onclick="showref(this)" class="h">${m[0]}</span>`
  } else {
   r+=s.slice(0,m.index)+m[0]
  }

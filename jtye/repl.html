@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<title>jtye</title>
+<style>
+*{font-family:monospace;margin:0}
+#b{height:calc(100vh - 1em);width:calc(100vw - 1em);padding:.5em;outline:none}
+</style>
+
+
+<script src="k.js"></script>
+<script src="parse.js"></script>
+
+<script>
+
+let
+o=x=>b.textContent+=x,
+krep=s=>{
+ if(s.trim().startsWith("\\")){b.textContent+="\n ";b.style.display="none";main.style.display="block";return}
+ let p=parse(s);o(" //"+p+"\n")
+ try{
+  r=string(eval(p))
+  o(r+"\n ")
+ }catch(e){
+  o(" ^"+e+"\n ")
+ }
+ end()},
+end=()=>{
+ let s=window.getSelection()
+ s.removeAllRanges()
+ let r=document.createRange()
+ r.selectNodeContents(b)
+ r.collapse(false)
+ s.addRange(r)
+ window.scrollTo(0,b.scrollHeight)
+ b.focus()},
+pos=()=>getSelection().getRangeAt(0).endOffset
+
+
+window.onkeydown=e=>{if(e.key=="Enter"){
+ e.preventDefault() 
+ let o=pos(),j=b.textContent.indexOf("\n",o)
+ if(j>=0)o=j
+ let t=b.textContent.slice(0,o)
+ b.textContent=t
+ let i=t.lastIndexOf("\n")
+ t=t.slice(i>0?1+i:0)
+ //b.textContent+="\n"
+ if(t.trim()!=""){krep(t)}}}
+
+</script>
+</head>
+
+
+<pre id="b" class="repl" contenteditable="true" spellcheck="false">jtye/k
+ 
+</pre>
+</body></html>
