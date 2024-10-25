@@ -35,7 +35,7 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
  s=s.map(x=>new String(x))                                        //we use String object to mark verbs instead of primitive strings
  
  let V=":+-*%&|<>=~.!@?^#_,$'/\\"
- f1=" type neg sqr sqrt flip rev up down freq not value til first uniq sort count floor list string each right left".split(" "),
+ f1="id type neg sqr sqrt flip rev up down freq not value til first uniq sort count floor list string each right left".split(" "),
  f2="dex add sub mul div min max less more eql match dot dict at find cut take drop cat string both join split".split(" "),
  a2=(x,y)=>(y=["","each","right","left"][1+["each","over","scan"].indexOf(x.slice(0,4))])?y+x.slice(4):x,
  F=(x,f)=>{let i=V.indexOf(x);return -1<i?f[i]:x}
@@ -59,7 +59,7 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
   if(!x)return 0;if(!(y=t()))return G(x)                 //x or primitive
   if(y.verb&&!x.verb){
    z=e(t())
-   return L(y)==":"?_(x,y,z):(!z)?p(x,y):z.verb? c(p(x,y),z)  /*q(x,y,z)*/ :D(y,z,x)
+   return y==":"?_(x,0,z):(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):D(y,z,x)
   }
   z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):M(x,z)},
  
@@ -76,7 +76,7 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
  R=()=>{let r=l();r=1==r.length?n(r[0]):"rev(["+r.reverse().join(",")+"])";return r},
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
- _=(x,y,z)=>y[0]==":"?(x+"="+z):x+"=?amend?"
+ _=(x,y,z,s,i)=>B(sw(x,"at")?((s=sl(x,1+(i=x.lastIndexOf(","))))+b("=amend",[z,F(y,f2),x.slice(3,i),s])):x+"="+(y?D(y,z,x):z))  //assign(4x:modified&indexed)
  //λ 
  
  s.reverse()

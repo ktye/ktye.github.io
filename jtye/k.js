@@ -13,6 +13,7 @@ right =f=>(y,x)=>atom(y)?f(x,y):y.map((y,i)=>f(y,x)),
 both  =f=>(y,x)=>atom(x)?right(f)(x,y):atom(y)?left(f)(y,x):x.map((x,i)=>f(y[i],x)),
 prior =(f,y)=>x=>x.map((x,i,a)=>f(i?a[i-1]:y?y:a[0],x)),
 
+id    =x=>x,
 type  =x=>x.constructor.name,
 neg   =rec(x=>-x),
 sqr   =rec(x=>x*x),
