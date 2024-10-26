@@ -29,12 +29,12 @@ let token=x=>{let C,c,i=x=>split(x,"").map(x=>x.charCodeAt()),
   return cut(x,where(more(scan((x,y)=>T[y][x],0)(at(i(x),C)),10)))},
   
 
-parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=="/")||(!x.trim().length))) //remove comments,space
- let k=scan((x,y)=>x+x*y)(s.map(x=>+!isNaN(parseFloat(x)))),ax=x=>x.constructor===Array                     //join numeric vectors
- s=s.reduce((a,x,j)=>{a.push(1==k[j]?[x]:1<k[j]?[...a.pop(),x]:x);return a},[]).map(x=>(ax(x)&&1==x.length)?x[0]:ax(x)?("["+x.join(",")+"]"):x)
- s=s.map(x=>new String(x))                                        //we use String object to mark verbs instead of primitive strings
+parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&$[x]=="/")||(!x.trim().length))) //remove comments,space
+ let k=scan((x,y)=>x+x*y)($.map(x=>+!isNaN(parseFloat(x)))),ax=x=>x.constructor===Array                     //join numeric vectors
+ $=$.reduce((a,x,j)=>{a.push(1==k[j]?[x]:1<k[j]?[...a.pop(),x]:x);return a},[]).map(x=>(ax(x)&&1==x.length)?x[0]:ax(x)?("["+x.join(",")+"]"):x)
+ $=$.map(x=>new String(x))                                        //we use String object to mark verbs instead of primitive strings
  
- let V=":+-*%&|<>=~.!@?^#_,$'/\\"
+ let V=":+-*%&|<>=~.!@?^#_,$'/\\",xyz=[],
  f1="id type neg sqr sqrt flip rev up down freq not value til first uniq sort count floor list string each right left".split(" "),
  f2="dex add sub mul div min max less more eql match dot dict at find cut take drop cat string both join split".split(" "),
  a2=(x,y)=>(y=["","each","right","left"][1+["each","over","scan"].indexOf(x.slice(0,4))])?y+x.slice(4):x,
@@ -43,13 +43,14 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
 
  
  let t=()=>{let r                            //t(): term
-  if(!L(s))return 0;r=$.pop();               //next token
+  if(!L($))return 0;r=$.pop();               //next token
   if(i(")}];",r)){$.push(r);return 0}        //terminator
-  r.verb=i(V,r)
+  r.verb=i(V,r);λλ.n=Math.max(λλ.n,xyz.indexOf(S(r)))
+  if(r=="{")r=λ()
   if(r=="(")r=R()                            //(1) and (1;2;3)
   if(r[0]=="`")r=sl(r,1)                     //`js`
   while(1){                                  //adverb and [application]
-   if(!L(s))return r;let p=$.pop()
+   if(!L($))return r;let p=$.pop()
    if(i("'/\\",p))r=d(p,r)                   //derive
    else if(p=="[")r=a(r)                     //apply
    else{$.push(p);break}}
@@ -59,11 +60,11 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
   if(!x)return 0;if(!(y=t()))return G(x)                 //x or primitive
   if(y.verb&&!x.verb){
    z=e(t())
-   return y==":"?_(x,0,z):(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):D(y,z,x)
+   //return y==":"?_(x,0,z):(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):D(y,z,x)
+   return(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):y==":"?_(x,0,z):D(y,z,x)
   }
   z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):M(x,z)},
   
- 
  i=(x,y)=>x.includes(S(y)),sw=(x,y)=>x.startsWith(y),sl=(x,y)=>x.slice(y,-1),
  a=(x,y)=>{y=l();return(1==y.length)?b("at",[y[0],x]):b(x,y.reverse())},                         //apply x[y] or x[y;z;..]   //todo project
  b=(x,y)=>x+"("+((y.constructor===Array)?y.join(","):y)+")",B=x=>b("",x),                        //brace x(y) or x(y0,y1)
@@ -77,7 +78,11 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
  R=()=>{let r=l();r=1==r.length?n(r[0]):"rev(["+r.reverse().join(",")+"])";return r},
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
- _=(x,y,z,s,i)=>B(sw(x,"at")?((s=sl(x,1+(i=x.lastIndexOf(","))))+b("=amend",[z,F(y,f2),x.slice(3,i),s])):x+"="+(y?D(y,z,x):z)),  //assign(4x:modified&indexed)
+ _=(x,y,z,s,i)=>B(sw(x,"at")?((s=sl(x,1+(i=x.lastIndexOf(","))))+b("=amend",[z,F(y,f2),x.slice(3,i),s])):x+"="+(y?D(y,z,x):λλλ(x,z))),  //assign(4x:modified&indexed)
+ λ=(r,t,X)=>{t=λλ;λλ=[];λλ.n=0;
+  X=xyz;xyz="["==L($)?($.pop(),l().map(S)):["x","y","z"]
+  r=l();if(1<r.length){r[r.length-1]="return "+L(r);r="{"+join(r,";")+"}"}
+  [t,λλ]=[λλ,t];[X,xyz]=[xyz,X];return B(b("",uniq(cat(t,rev(X.slice(0,1+t.n)))))+"=>"+r)},λλ=[],λλλ=(x,y)=>(λλ.push(x),y)
  
  /*
  λ=()=>e(t()),
@@ -90,12 +95,8 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
   s.splice(li,1+la-li,λ())
  }
  */
- $=s
  
  
- //λ inside-out +\1 -1"{}"?
- 
- 
- s.reverse()  //return S(e(t()))
+ $.reverse()  //return S(e(t()))
  return join(l(),";")
 }
