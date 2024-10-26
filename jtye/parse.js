@@ -77,7 +77,7 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
  _=(x,y,z,s,i)=>B(sw(x,"at")?((s=sl(x,1+(i=x.lastIndexOf(","))))+b("=amend",[z,F(y,f2),x.slice(3,i),s])):x+"="+(y?D(y,z,x):z))  //assign(4x:modified&indexed)
- //λ 
+ //λ inside-out +\1 -1"{}"?
  
  s.reverse()
  return S(e(t()))

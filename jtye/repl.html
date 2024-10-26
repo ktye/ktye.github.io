@@ -17,7 +17,7 @@ let
 o=x=>b.textContent+=x,
 krep=s=>{
  if(s.trim().startsWith("\\")){b.textContent+="\n ";b.style.display="none";main.style.display="block";return}
- let p=parse(s);o(" //"+p+"\n")
+ let p=parse(s);o("  //"+p+"\n")
  try{
   r=string(eval(p))
   o(r+"\n ")
