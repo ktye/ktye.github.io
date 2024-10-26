@@ -43,16 +43,16 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
 
  
  let t=()=>{let r                            //t(): term
-  if(!L(s))return 0;r=s.pop();               //next token
-  if(i(")}];",r)){s.push(r);return 0}        //terminator
+  if(!L(s))return 0;r=$.pop();               //next token
+  if(i(")}];",r)){$.push(r);return 0}        //terminator
   r.verb=i(V,r)
   if(r=="(")r=R()                            //(1) and (1;2;3)
   if(r[0]=="`")r=sl(r,1)                     //`js`
   while(1){                                  //adverb and [application]
-   if(!L(s))return r;let p=s.pop()
+   if(!L(s))return r;let p=$.pop()
    if(i("'/\\",p))r=d(p,r)                   //derive
    else if(p=="[")r=a(r)                     //apply
-   else{s.push(p);break}}
+   else{$.push(p);break}}
   return r},
  
  e=x=>{let y,z                                           //e(t()): expr
@@ -62,6 +62,7 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
    return y==":"?_(x,0,z):(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):D(y,z,x)
   }
   z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):M(x,z)},
+  
  
  i=(x,y)=>x.includes(S(y)),sw=(x,y)=>x.startsWith(y),sl=(x,y)=>x.slice(y,-1),
  a=(x,y)=>{y=l();return(1==y.length)?b("at",[y[0],x]):b(x,y.reverse())},                         //apply x[y] or x[y;z;..]   //todo project
@@ -72,13 +73,29 @@ parse=s=>{s=((s.constructor===String)?token(s):s).filter(x=>!((1<x.length&&s[x]=
  M=(x,y)=>b(F(x,f1),y),D=(x,y,z)=>b(F(a2(x),f2),[y,z]),j=(x,y)=>b("at",[x,y]),                   //monadic/dyadic/juxtaposition
  p=(x,y)=>v(B(b("x=>"+F(y,f2),["x",x]))),                                                        //project 1+
  v=x=>((x=new String(x)).verb=true,x),S=x=>x.toString(),n=x=>((x=new String(x)).verb=false,x),   //mark verb/noun
- l=r=>{r=[];while(L(s)){r.push(e(t()));if(s.pop()!=";")return r}},L=x=>x.length?x[x.length-1]:0, //list e;e;e[terminator]
+ l=r=>{r=[];while(L($)){r.push(e(t()));if($.pop()!=";")return r}},L=x=>x.length?x[x.length-1]:0, //list e;e;e[terminator]
  R=()=>{let r=l();r=1==r.length?n(r[0]):"rev(["+r.reverse().join(",")+"])";return r},
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
- _=(x,y,z,s,i)=>B(sw(x,"at")?((s=sl(x,1+(i=x.lastIndexOf(","))))+b("=amend",[z,F(y,f2),x.slice(3,i),s])):x+"="+(y?D(y,z,x):z))  //assign(4x:modified&indexed)
+ _=(x,y,z,s,i)=>B(sw(x,"at")?((s=sl(x,1+(i=x.lastIndexOf(","))))+b("=amend",[z,F(y,f2),x.slice(3,i),s])):x+"="+(y?D(y,z,x):z)),  //assign(4x:modified&indexed)
+ 
+ /*
+ λ=()=>e(t()),
+ $,l0,li,la,
+ ll=scan(add)(at(find(s.map(x=>x.toString()),"{}"),[1,-1])) //nesting level: +\1 -1"{}"?s
+ while(0<(l0=over(max)(ll))){
+  li=ll.indexOf(l0);la=ll.indexOf(l0-1,1+li) 
+  ll.splice(li,1+la-li,l0-1)
+  $=s.slice(li+1,la).reverse()
+  s.splice(li,1+la-li,λ())
+ }
+ */
+ $=s
+ 
+ 
  //λ inside-out +\1 -1"{}"?
  
- s.reverse()
- return S(e(t()))
+ 
+ s.reverse()  //return S(e(t()))
+ return join(l(),";")
 }

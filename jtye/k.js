@@ -9,7 +9,7 @@ over  =f=>(...x)=>1<x.length?fold(f,...x):x[0].reduce((a,x,i)=>i?f(a,x):a),
 fold  =f=>(...x)=>flip(x.slice(1)).reduce((a,x,i)=>i?f(a,...x[i]):a,x[0]),
 scan  =(f,y)=>x=>{y=y?[f(x[0],y)]:[first(x)];  x.slice(1).forEach((x,i)=>y.push(f(x,y[i]))) ;return y},
 left  =f=>(y,x)=>atom(x)?f(x,y):x.map((x,i)=>f(y,x)),
-right =f=>(y,x)=>atom(y)?f(x,y):(y=y.map((y,i)=>f(y,x))).every(x=>"string"==typeof x)?y.join(""):y  ,
+right =f=>(y,x)=>atom(y)?f(x,y):(y=("string"===typeof y?y.split(""):y).map((y,i)=>f(y,x))).every(x=>"string"==typeof x)?y.join(""):y  ,
 both  =f=>(y,x)=>atom(x)?right(f)(x,y):atom(y)?left(f)(y,x):x.map((x,i)=>f(y[i],x)),
 prior =(f,y)=>x=>x.map((x,i,a)=>f(i?a[i-1]:y?y:a[0],x)),
 
