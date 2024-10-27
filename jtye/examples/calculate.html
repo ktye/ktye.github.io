@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../../kelas16.png"><title>jtye/calculate</title>
+<style>*{font-family:monospace;font-size:large}</style>
+</head>
+
+<body onload="eval(parse(k.textContent))">   <!-- run k on start -->
+<input id="a">+<input id="b">=               <!-- elements with ids are available to k -->
+<input id="r" readonly>
+<hr/><pre id="src"></pre>
+
+<script src="../k.js"></script>
+<script src="../parse.js"></script>
+<script id="k" type="text/k">
+
+calc:{r.value:+/.'(a.value;b.value)}         /parse inputs and show the sum
+a.value:2;b.value:3;calc[]                   /fill initial values
+{x.onchange:calc}'(a;b)                      /set onchange callbacks for input elements
+src.textContent:document.body.outerHTML      /dots are part of names
+
+</script>
+</body></html>

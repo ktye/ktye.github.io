@@ -106,17 +106,13 @@ everything between backticks is compiled verbatim to js and parsed as a noun:
 f`x.slice(-3)` compiles to  at(x.slice(3),f)
 </pre>
 
-<h3>structural todo</h3>
-<pre>
-while(1>x)[]
-do[]while(1>x) (maybe not)
-[]=>{b;l;o;c;k}
-for(a;b;c)[]
-for(`let i in a`)
-if()[]         (no else)
-try[]catch(e)[]
-$[a;b;c]
-</pre>
+<h3>structural</h3>
+js keywords <b>if for while try catch throw</b> are detected when called with brackets.<br/>
+the first &nbsp;&nbsp;1 &nbsp;3 &nbsp;&nbsp;1 &nbsp;&nbsp;&nbsp;&nbsp;0 &nbsp;&nbsp;1 &nbsp;&nbsp;&nbsp;&nbsp;1 arguments are (applied) the rest forms the {block}.</p>
+e.g. while[x>1;a;b;c;x-:1]<br/>
+try is immediately followed by catch: try[a;b;c]catch[e;-a;-b]<p/>
+
+there is no else, since we have cond: $[a;b;c;d;e] which compiles to ternary expressions.
 
 <h3>web use</h3>
 <pre>
@@ -124,7 +120,7 @@ $[a;b;c]
 &lt;script src="parse.js">&lt;/script>
 </pre>
 
-example.. e.g. interactive page in k
+<a href="examples/calculate.html">this example</a> shows a website with a dynamic part written in k and executed on page load.
 
 <h3>standalone</h3>
 see:mk, todo click to download. or compile to native: qjsc(6mb)
