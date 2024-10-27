@@ -38,8 +38,8 @@ parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&$[x]=
  f1="id type neg sqr sqrt flip rev up down freq not value til first uniq sort count floor list string each right left".split(" "),
  f2="dex add sub mul div min max less more eql match dot dict at find cut take drop cat string both join split".split(" "),
  a2=(x,y)=>(y=["","each","right","left"][1+["each","over","scan"].indexOf(x.slice(0,4))])?y+x.slice(4):x,
- F=(x,f)=>{let i=V.indexOf(x);return -1<i?f[i]:x}
-
+ F=(x,f)=>{let i=V.indexOf(x);return -1<i?f[i]:x},
+ J={if:1,for:3,while:1,try:0,catch:1,throw:1}
 
  
  let t=()=>{let r                            //t(): term
@@ -52,29 +52,30 @@ parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&$[x]=
   while(1){                                  //adverb and [application]
    if(!L($))return r;let p=$.pop()
    if(i("'/\\",p))r=d(p,r)                   //derive
-   else if(p=="[")r=a(r)                     //apply
+   else if(p=="[")r=a(r)                     //apply/cond
    else{$.push(p);break}}
   return r},
  
- e=x=>{let y,z                                           //e(t()): expr
-  if(!x)return 0;if(!(y=t()))return G(x)                 //x or primitive
+ e=x=>{let y,z                               //e(t()): expr
+  if(!x)return 0;if(!(y=t()))return G(x)     //x or primitive
   if(y.verb&&!x.verb){
    z=e(t())
-   //return y==":"?_(x,0,z):(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):D(y,z,x)
    return(!z)?p(x,y):z.verb?c(p(x,y),z):sw(z,"id(")?_(x,y,sl(z,3)):y==":"?_(x,0,z):D(y,z,x)
   }
   z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):M(x,z)},
   
  i=(x,y)=>x.includes(S(y)),sw=(x,y)=>x.startsWith(y),sl=(x,y)=>x.slice(y,-1),
- a=(x,y)=>{y=l();return(1==y.length)?b("at",[y[0],x]):b(x,y.reverse())},                         //apply x[y] or x[y;z;..]   //todo project
- b=(x,y)=>x+"("+((y.constructor===Array)?y.join(","):y)+")",B=x=>b("",x),                        //brace x(y) or x(y0,y1)
+ a=(x,y,n)=>x in J?((n=cut(y=l(),[0,J[x]])),x+(J[x]?b("",n[0],";"):"")+(n[1].length?b("",n[1],";","{}"):"")+(0==J[x]?e(t()):"")):
+  1==(n=(y=l()).length)?b("at",[y[0],F(x,f1)]):"$"==x&&y.length>2?C(y):y.undef?b("curry",F(x,f2)+",["+y.reverse().join(",")+"]"):b(F(x,f2),y.reverse()), //apply x[y] or x[y;z;..]
+ b=(x,y,s,q)=>x+(q?q[0]:"(")+((y.constructor===Array)?y.join(s?s:","):y)+(q?q[1]:")"),B=x=>b("",x),                        //brace x(y) or x(y0,y1)
+ C=x=>B(sl(join(x.map((x,i)=>x+"?:"[i&1]),""),0)), //cond
  c=(x,y)=>v(B("(x,y)=>"+(i(f2,y)?cx(x,F(y,f2)+"(x,y)"):sw(y,"(x=>")?cx(x,sl(y,4)):sw(y,"((x,y)=>")?cx(x,sl(y,8)):cx(x,y+"(x)")))),
  cx=(x,y)=>sw(x,"(x=>")?sl(x,4).replace("(x,","("+y+","):b(i(V,x)?F(x,f1):x,y),                  //c:composition
  d=(x,r)=>v( (x=="'"&&i(V,r)&&V.indexOf(r)<11)?b("prior",F(r,f2)):   ["each(","over(","scan("]["'/\\".indexOf(x)]+(x=="'"?H(r):G(r))+")"),                //derived: +/ -> over(add)
  M=(x,y)=>b(F(x,f1),y),D=(x,y,z)=>b(F(a2(x),f2),[y,z]),j=(x,y)=>b("at",[x,y]),                   //monadic/dyadic/juxtaposition
  p=(x,y)=>v(B(b("x=>"+F(y,f2),["x",x]))),                                                        //project 1+
  v=x=>((x=new String(x)).verb=true,x),S=x=>x.toString(),n=x=>((x=new String(x)).verb=false,x),   //mark verb/noun
- l=r=>{r=[];while(L($)){r.push(e(t()));if($.pop()!=";")return r}},L=x=>x.length?x[x.length-1]:0, //list e;e;e[terminator]
+ l=(r,x)=>{r=[];while(L($)){r.push((x=e(t()))?x:(r.undef=1,"undefined"));if($.pop()!=";")return r}},L=x=>x.length?x[x.length-1]:0, //list e;e;e[terminator]
  R=()=>{let r=l();r=1==r.length?n(r[0]):"rev(["+r.reverse().join(",")+"])";return r},
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
@@ -83,18 +84,6 @@ parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&$[x]=
   X=xyz;xyz="["==L($)?($.pop(),l().map(S)):["x","y","z"]
   r=l();if(1<r.length){r[r.length-1]="return "+L(r);r="{"+join(r,";")+"}"}
   [t,λλ]=[λλ,t];[X,xyz]=[xyz,X];return B(b("",uniq(cat(t,rev(X.slice(0,1+t.n)))))+"=>"+r)},λλ=[],λλλ=(x,y)=>(λλ.push(x),y)
- 
- /*
- λ=()=>e(t()),
- $,l0,li,la,
- ll=scan(add)(at(find(s.map(x=>x.toString()),"{}"),[1,-1])) //nesting level: +\1 -1"{}"?s
- while(0<(l0=over(max)(ll))){
-  li=ll.indexOf(l0);la=ll.indexOf(l0-1,1+li) 
-  ll.splice(li,1+la-li,l0-1)
-  $=s.slice(li+1,la).reverse()
-  s.splice(li,1+la-li,λ())
- }
- */
  
  
  $.reverse()  //return S(e(t()))

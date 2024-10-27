@@ -40,6 +40,7 @@
 parse"-'" /"prior(sub)"
 1 2,/(4 5;6 7) /(1 2 4 5;1 2 6 7)
 (1+-)[4;2] /3
+-[3;5] /-2
 k:4 /4
 k /4
 s*s:8 /64
@@ -69,16 +70,28 @@ k[2 3]+:1 2 /0 7 11 12
 {[a;b]a-b}\!4 /0 -1 -3 -6
 {[a;b]r:a+c:-b;r}\!4 /0 -1 -3 -6
 {f:{[a]y+:a};x-f y}[2;3] /-4
+$[3>x:+/!5;2*x;3*x] /30
+{(x;y;z)}[1;2;3] /1 2 3
+{(x;y;z)}[1;;3][2] /1 2 3
+{(x;y;z)}[1;2;][3] /1 2 3
+{(x;y;z)}[;2;3][1] /1 2 3
+{(x;y;z)}[;2;][1;3] /1 2 3
+{(x;y;z)}[;2;][1;][3] /1 2 3
+x:y:0;if[x<6;x+:1;y-:x];y /-1
+x:y:0;if[x>6;x+:1;y-:x];y /0
+x:!5;y:!0;while[#x;y,:-1#x;x:-1_x];y /4 3 2 1 0
+x:0;try[`throw 1`]catch[e;x:2];x /2
 </pre></body>
 
 <script>
 
+
 let i=di.textContent.trim().split("\n"),o=(x,y)=>di.appendChild(c(x,y)),c=(x,y)=>{let s=document.createElement("span");s.textContent=x;s.style="color:"+y;return s},
+ok=x=>di.insertBefore(c(x?"ok":"fails",x?"black":"red"),di.firstChild.nextSibling),
 t=x=>{let[a,b]=x.split(" /");o(" "+a,"darkred");
  try     {x=parse(a);o(" //"+x+"\n","green");if(b!=(a=string(eval(x))))throw a;o(b+"\n","black")}
- catch(e){o(" ^"+e,"red");console.log(e);throw(e)}}
-di.textContent="";o("jtye/k  (","black");o("in","darkred");o(" //parse","green");o(" out)\n","black");i.forEach(t);o("ok")
-
+ catch(e){o(" ^"+e,"red");ok(false);di.firstChild.nextSibling.onclick=()=>window.scrollTo(0,di.scrollHeight);console.log(e);throw(e)}}
+di.textContent="";o("jtye/k ","black");o(" (","black");o("in","darkred");o(" //parse","green");o(" out)\n","black");i.forEach(t);ok(true)
 </script></html>
 
 

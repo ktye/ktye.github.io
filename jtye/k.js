@@ -1,8 +1,9 @@
 let  /*k*/
 
 atom  =x=>"number"===typeof x||"string"===typeof(x)&&1==x.length,
-rec   =f=>x=>atom(x)?f(x):x.map(rec(f)),
 atomic=f=>(x,y)=>atom(x)?(atom(y)?f(x,y):y.map(y=>atomic(f)(x,y))):atom(y)?x.map(x=>atomic(f)(x,y)):x.map((x,i)=>atomic(f)(x,y[i])),
+curry =(f,a,i)=>(i=a.map((x,i)=>x==undefined?i:-1).filter(x=>-1<x),(...x)=>(x.forEach((x,j)=>a[i[j]]=x),f(...a))), 
+rec   =f=>x=>atom(x)?f(x):x.map(rec(f)),
 
 each  =f=>(...x)=>1==x.length?(atom(x[0])?f(x[0]):x[0].map(x=>f(x))):flip(x).map(x=>f(...x)),
 over  =f=>(...x)=>1<x.length?fold(f,...x):x[0].reduce((a,x,i)=>i?f(a,x):a),
@@ -25,7 +26,7 @@ down  =x=>{x=til(count(x));return x.sort((a,b)=>a>b?-1:a<b?1:0)},
 freq  =x=>x.reduce((r,x)=>{r[x]=r[x]?r[x]+1:1;r},{}),
 not   =rec(x=>+!x),
 value =x=>(typeof x==="string")?eval(parse(x)):x.constructor===Object?Object.values(x):x,
-til   =x=>(typeof x==="string")?token(x):atom(x)?Array(x<0?0:x).fill(0).map((_,i)=>i):where(x),
+til   =x=>atom(x)?Array(x<0?0:x).fill(0).map((_,i)=>i):where(x),
 where =x=>(atom(x)?list(x):x).flatMap((x,i)=>Array(x).fill(i)),
 first =x=>atom(x)?x:x.length?x[0]:0,
 uniq  =x=>atom(x)?rand(x):x.filter((y,i)=>i===x.indexOf(y)),
@@ -51,7 +52,7 @@ eql   =atomic((y,x)=>+(x==y)),
 
 match =(y,x)=>(type(x)!=type(y))?0:(atom(x)?+(x==y):(x.length!=y.length)?0:+x.every((x,i)=>match(x,y[i]))),
 dict  =(y,x)=>x.reduce((r,x,i)=>(r[x]=y[i],r),{}),
-at    =(y,x)=>(typeof x==="function")?x(y):atom(x)?x:atom(y)?(y>>>0<x.length?x[y]:"string"===typeof x?" ":0):right(at)(y,x),
+at    =(y,x)=>"function"===typeof x?x(y):atom(x)?x:atom(y)?(y>>>0<x.length?x[y]:"string"===typeof x?" ":0):right(at)(y,x),
 amend =(y,f,i,x)=>{x.slice();i.forEach((i,j)=>x[i]=f?f(x[i],atom(y)?y:y[j]):y);return x},
 find  =(y,x)=>atom(y)?(-1<(y=x.indexOf(y))?y:x.length):right(find)(y,x),
 cut   =(y,x)=>atom(x)?(x<0?cut(Math.floor(y.length/-x),y):cut(mul(Math.ceil(y.length/x),til(x)),y)):[...x].map((x,i,a)=>y.slice(x,a[i<a.length-1?1+i:a.length])),
