@@ -30,7 +30,7 @@ why not:                                over(add)
 <h3>core</h3>
 <details><summary>k core (k.js) <span id=coreb></span> bytes</summary><pre id="core"></pre></details>
 
-the core adds 50 primitive functions and 4 helpers which work on numbers arrays and strings.
+the core adds 50 primitive functions and 4 helpers which work on numbers, arrays and strings.
 the functions can be used directly in javascript.<p/>
 
 the helper functions rec and atomic can be used to extend the language with more vector functions, e.g.
@@ -67,7 +67,7 @@ see the <a href="test.html">test's output</a> (in green) what the parser compile
 # count  take             if[c;;;;;]
 _ floor  drop            while[c;;;]
 , list   cat           for[a;b;c;;;]
-$ string             try[]catch[e;;]
+$ string print       try[]catch[e;;]
 </pre>
 <b><span id="code"></span></b>
 
@@ -106,9 +106,11 @@ everything between backticks is compiled verbatim to js and parsed as a noun:
 f`x.slice(-3)` compiles to  at(x.slice(3),f)
 </pre>
 
+<code>x$y</code> prints x and y to the js console, usefull for debugging. x maybe a label, y is passed through.
+
 <h3>structural</h3>
 js keywords <b>if for while try catch throw</b> are detected when called with brackets.<br/>
-the first &nbsp;&nbsp;1 &nbsp;3 &nbsp;&nbsp;1 &nbsp;&nbsp;&nbsp;&nbsp;0 &nbsp;&nbsp;1 &nbsp;&nbsp;&nbsp;&nbsp;1 arguments are (applied) the rest forms the {block}.</p>
+the first &nbsp;&nbsp;1 &nbsp;3 &nbsp;&nbsp;1 &nbsp;&nbsp;&nbsp;&nbsp;0 &nbsp;&nbsp;1 &nbsp;&nbsp;&nbsp;&nbsp;1 arguments are (applied), the rest forms the {block}.</p>
 e.g. while[x>1;a;b;c;x-:1]<br/>
 try is immediately followed by catch: try[a;b;c]catch[e;-a;-b]<p/>
 
@@ -124,6 +126,8 @@ there is no else, since we have cond: $[a;b;c;d;e] which compiles to ternary exp
 
 <h3>standalone</h3>
 see:mk, todo click to download. or compile to native: qjsc(6mb)
+
+<h3>caveats</h3>
 
 </article>
 
