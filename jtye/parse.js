@@ -26,7 +26,7 @@ let token=x=>{let C,c,i=x=>split(x,"").map(x=>x.charCodeAt()),
     "t;)+'a0q`++a'';"];T=drop(T,1);let t0=i(join(each(first)(T),""));T=each(x=>find(i(x).slice(1),t0))(T)
   C=[i(S+L),i(R),i(V),i(A),cat(add(65,til(26)),add(97,til(26))),i("0123456789."),...each(list)(i("\"`-:e\\/\n"))];
   C=C.reduce((a,x,i)=>amend(i,0,x,a),add(-1,where(256)))
-  return drop(cut(x=" "+x,where(more(scan((x,y)=>T[y][x],0)(at(i(x),C)),10))).map(x=>x=="\n"?";":x),1)},
+  return drop(cut(x=" "+x,where(more(scan((x,y)=>T[y][x])(at(i(x),C)),10))).map(x=>x=="\n"?";":x),1)},
   
 
 parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&x[0]=="/")||!x.trim().length)) //rm space&comments
