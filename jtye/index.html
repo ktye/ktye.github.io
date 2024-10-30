@@ -124,19 +124,27 @@ there is no else, since we have cond: $[a;b;c;d;e] which compiles to ternary exp
 
 <a href="examples/calculate.html">this example</a> shows a website with a dynamic part written in k and executed on page load.
 
-<h3>standalone</h3>
-see:mk, todo click to download. or compile to native: qjsc(6mb)
+<h3>standalone</h3><a id="_dl" style="display:none"></a><span onclick="dl()" class="h">download</span>
+<pre>
+$j [a b.json c.js d.k] -e [expr]  #-e(eval&exit) .json(parse&assign) .js/k(eval) else assign
+k)\
+j)
+</pre>
 
 <h3>caveats</h3>
-
+direct call for args!=1. e.g. prevent "illegal invocation" cnv.getContext[0;"2d"]
 </article>
 
 <pre id="b" class="repl" contenteditable="true" spellcheck="false">jtye/k (in //parse out \doc)
  
 </pre>
 <script>
-fetch("k.js"    ).then(r=>r.text()).then(r=>{core.textContent=r;coreb.textContent=r.length})
-fetch("parse.js").then(r=>r.text()).then(r=>{pare.textContent=r;pareb.textContent=r.length})
+fetch("k.js"     ).then(r=>r.text()).then(r=>{core.textContent=r;coreb.textContent=r.length})
+fetch("parse.js" ).then(r=>r.text()).then(r=>{pare.textContent=r;pareb.textContent=r.length})
+let kn;fetch("kn").then(r=>r.text()).then(r=>kn=r)
+
+const td_=new TextDecoder("utf-8"),su=x=>td_.decode(x)
+const te_=new TextEncoder("utf-8"),us=x=>te_.encode(x)
 
 let showref=(s)=>{
  let c=core.textContent
@@ -154,5 +162,13 @@ let s=ref.textContent,c=core.textContent,r="",m;while(m=s.match(/[a-z]+/)){
  s=s.slice(m.index+m[0].length)
 };r+=s
 ref.innerHTML=r
+
+let dl=()=>{
+ let x=new Blob([us("#!/usr/bin/env -S node\n"+kn+"\n"+core.textContent+"\n"+pare.textContent)],{type:"application/octet-stream"})
+ _dl.href=URL.createObjectURL(x)
+ _dl.download="j"
+ _dl.click()
+}
+
 </script>
 </body></html>

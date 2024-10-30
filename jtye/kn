@@ -1,0 +1,22 @@
+//k.js parse.js 
+
+const readline=require("node:readline")
+const rl=readline.createInterface({input: process.stdin, output: process.stdout, prompt: 'k)',})
+const fs=require("fs")
+
+process.argv.slice(2).forEach((x,i,a)=>{
+ if(x=="-e"){ a=a.slice(1+i);if(a.length)console.log(string(eval(parse(a.join(" ")))));process.exit(0) }
+ let f=fs.readFileSync(x,{encoding:'utf8'})
+      if(x.endsWith(".json"))global[x.slice(0,-5)]=JSON.parse(f)
+ else if(x.endsWith(".js"))  eval(f)
+ else if(x.endsWith(".k"))   eval(parse(f))
+ else                        global[x]=f
+})
+
+console.log("jtye/k")
+rl.prompt();rl.on('line', x=>{
+ if(x=="\\")rl.setPrompt("k)"==rl.getPrompt()?"j)":"k)")
+ else{
+  try{console.log("k)"==rl.getPrompt()?string(eval(parse(x))):eval(x))}
+  catch(e){console.log(e)}}
+ rl.prompt()}).on('close',()=>{process.exit(0)})

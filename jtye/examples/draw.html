@@ -6,7 +6,7 @@
 
 <body onload="eval(parse(k.textContent))">
 <select id="mode" onchange="draw()">
- <option value="ellipse" selected>ellipse(95%)</option>
+ <option value="elli" selected>ellipse(95%)</option>
  <option value="hull">convex hull</option>
 </select><button onclick="reset()">reset</button> click on canvas to add points
 <canvas id="cnv" width="600" height="600"></canvas>
@@ -14,33 +14,58 @@
 
 <script src="../k.js"></script>
 <script src="../parse.js"></script>
-<script>
-ctx=cnv.getContext("2d");ctx.strokeStyle="darkred";ctx.lineWidth=3;
-clear=()=>ctx.clearRect(0,0,cnv.width,cnv.height)
-points=(y,x)=>x.forEach((x,i)=>{ctx.beginPath();ctx.arc(x,y[i],5,0,6.2832);ctx.fill()})
-ellipse=(a,ry,rx,y,x)=>{ctx.beginPath();ctx.ellipse(x,y,rx,ry,a,0,6.2832);ctx.stroke()}
-</script>
 <script id="k" type="text/k">
+
 
 avg:{(+/x)%#x}
 av1:{(+/x)%-1+#x}
 cov:{|av1'(x*y;*x-:avg x;*y-:avg y)}
 eig:{(xx;yy;xy):x;(m+s;m-s:%(*m:(.5*xx+yy))-(xx*yy)-*xy)}
+hyp:Math.hypot
 
 (X;Y):200+2^_200*?4
+
+ctx:cnv.getContext[0;"2d"];ctx.strokeStyle:"darkred";ctx.lineWidth:3
+clear:{ctx.clearRect[cnv.height;cnv.width;0;0]}
+point:{ctx.beginPath[];ctx.arc[6.2832;0;5;y;x];ctx.fill[]}
+ellip:{[x;y;rx;ry;a]ctx.beginPath[];ctx.ellipse[6.2832;0;a;ry;rx;y;x];ctx.stroke[]}
 reset:{X::2#X;Y::2#Y;draw[]}
 
+elli:{(ex;ey):eig(xx;yy;xy):cov[X;Y];a:.5*Math.atan2[xx-yy;2*xy];ellip[avg X;avg Y;2.448*%ex;2.448*%ey;1.57-a]}
+hull:{
+ i:0,i@@<X i:!Y=@Y@<Y   /startpoint(lowest Y then X)
+ X[i]:X[|i];Y[i]:Y[|i]  /exchange 0 with startpoint                            
+ cross:{[o;i;j]xi:(X i)-X o;yi:(Y i)-Y o;xj:(X j)-X o;yj:(Y j)-Y o;$[0~a:(xi*yj)-xj*yi; hyp[xi;yi]<hyp[xj;yj];a]}
+ i:sort[cross[0;;];!#X]      /sort by cross product with point 0
+ X::X i;Y::Y i
+ /..
+}
+
+/stack = append(stack, points[0], points[1])
+/i := 2
+/for i < len(points) {
+/	pi := points[i]
+/	p0 := stack[len(stack)-2]
+/	p1 := stack[len(stack)-1]
+/	if cross(p0, p1, pi) > 0 {
+/		stack = append(stack, pi)
+/		i++
+/	} else if len(stack) == 2 {
+/		stack[1] = pi
+/		i++
+/	} else {
+/		stack = stack[:len(stack)-1]
+/	}
+/}
+/Polygon(stack)
+
+
+
 cnv.addEventListener[{[e]X,:e.offsetX;Y,:e.offsetY;draw 0};"click"]
-draw:{clear 0;points[X;Y];
- (ex;ey):eig(xx;yy;xy):cov[X;Y]
- a:.5*Math.atan2[xx-yy;2*xy]
- $[`"hull"==mode.value`;polygon todo;ellipse[avg X;avg Y;2.448*%ex;2.448*%ey;1.57-a]]}
+draw:{clear[];point'[X;Y];window[mode.value][]}
 draw[]
 
 
-hull:{
- i@@<X i:!Y=@Y@<Y /.. startpoint lowest Y or X(if Y is equal)
-}
 
 src.textContent:k.textContent
 

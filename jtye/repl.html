@@ -38,13 +38,11 @@ pos=()=>getSelection().getRangeAt(0).endOffset
 
 window.onkeydown=e=>{if(e.key=="Enter"){
  e.preventDefault() 
- let o=pos(),j=$.textContent.indexOf("\n",o)
- if(j>=0)o=j
- let t=$.textContent.slice(0,o)
- $.textContent=t
+ let o=pos(),t=$.textContent,j=t.indexOf("\n",o),k=t.indexOf(" //",o)
+ if(j>=0)o=j;if(k>=0)o=Math.min(o,k-1)
+ $.textContent=t=t.slice(0,o)
  let i=t.lastIndexOf("\n")
  t=t.slice(i>0?1+i:0)
- //$.textContent+="\n"
  if(t.trim()!=""){krep(t)}}}
 
 </script>
