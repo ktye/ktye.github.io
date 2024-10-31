@@ -14,9 +14,9 @@
 <script>
 let
 o=x=>$.textContent+=x,
-krep=s=>{
- if(s.trim().startsWith("\\")){$.textContent+="\n ";$.style.display="none";main.style.display="block";return}
- let p=parse(s);o("  //"+p+"\n")
+krep=$=>{
+ if($.trim().startsWith("\\")){$.textContent+="\n ";$.style.display="none";main.style.display="block";return}
+ let p=parse($);o("  //"+p+"\n")
  try{
   r=string(eval(p))
   o(r+"\n ")

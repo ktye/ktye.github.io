@@ -1,6 +1,6 @@
 let  /*k*/
 
-atom  =x=>"number"===typeof x||"string"===typeof(x)&&1==x.length,
+atom  =x=>"number"===typeof x||"string"===typeof(x)&&1==x.length||"bigint"==typeof x||x.constructor===Date,
 atomic=f=>(x,y)=>atom(x)?(atom(y)?f(x,y):y.map(y=>atomic(f)(x,y))):atom(y)?x.map(x=>atomic(f)(x,y)):x.map((x,i)=>atomic(f)(x,y[i])),
 curry =(f,a,i)=>(i=a.map((x,i)=>x==undefined?i:-1).filter(x=>-1<x),(...x)=>(x.forEach((x,j)=>a[i[j]]=x),f(...a))), 
 rec   =f=>x=>atom(x)?f(x):x.map(rec(f)),
@@ -35,7 +35,7 @@ sort=(x,f)=>x.toSorted(f),
 count =x=>atom(x)?1:x.length,
 floor =rec(Math.floor),
 list  =x=>[x],
-string=x=>Array.isArray(x)||ArrayBuffer.isView(x)?x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")":typeof x==="function"?String(x):JSON.stringify(x),
+string=x=>Array.isArray(x)||ArrayBuffer.isView(x)?x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")":("function"===typeof x||"bigint"===typeof x)?String(x):JSON.stringify(x),
 //string=x=>(typeof x==="string"||typeof x==="object")?JSON.stringify(x):(atom(x)||typeof x==="function")?String(x):x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")",
 
 dex   =(y,x)=>y,
