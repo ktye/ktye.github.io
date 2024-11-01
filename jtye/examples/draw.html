@@ -6,8 +6,8 @@
 
 <body onload="eval(parse(k.textContent))">
 <select id="mode" onchange="draw()">
- <option value="elli"         >ellipse(95%)</option>
- <option value="hull" selected>convex hull</option>
+ <option value="elli" selected>ellipse(95%)</option>
+ <option value="hull" >convex hull</option>
 </select><button onclick="reset()">reset</button> click on canvas to add points
 <canvas id="cnv" width="600" height="600"></canvas>
 <hr/><pre id="src"></pre>
@@ -16,63 +16,28 @@
 <script src="../parse.js"></script>
 <script id="k" type="text/k">
 
-
 avg:{(+/x)%#x}
 av1:{(+/x)%-1+#x}
 cov:{|av1'(x*y;*x-:avg x;*y-:avg y)}
 eig:{(xx;yy;xy):x;(m+s;m-s:%(*m:(.5*xx+yy))-(xx*yy)-*xy)}
-hyp:Math.hypot
-atn:atomic Math.atan2
 
-(X;Y):200+2^_200*?4
+(X;Y):200+2^_200*?4;H:!0
 
 ctx:cnv.getContext[0;"2d"];ctx.strokeStyle:"darkred";ctx.lineWidth:3
-clear:{ctx.clearRect[cnv.height;cnv.width;0;0]}
+clear:{H::!0;ctx.clearRect[cnv.height;cnv.width;0;0]}
 point:{ctx.beginPath[];ctx.arc[6.2832;0;5;y;x];ctx.fill[]}
 ellip:{[x;y;rx;ry;a]ctx.beginPath[];ctx.ellipse[6.2832;0;a;ry;rx;y;x];ctx.stroke[]}
-polyg:{"poly"$(x;y);ctx.beginPath[];ctx.moveTo[@y;@x];while[#x;x:1_x;y:1_y;ctx.lineTo[@y;@x]];ctx.closePath[];ctx.stroke[]}
+polyg:{ctx.beginPath[];ctx.moveTo[@y;@x];while[1<#x;x:1_x;y:1_y;ctx.lineTo[@y;@x]];ctx.closePath[];ctx.stroke[]}
 reset:{X::2#X;Y::2#Y;draw[]}
-dang:{"dang"$(x;y);atn[$(X y)-X x;(Y y)-Y x]-atn[(X z)-X y;(Y z)-Y y]}
+
+dist:{a:(Y x)-Y y;b:(X y)-X x;c:((X x)*Y y)-(X y)*Y x;c+(b*Y z)+a*X z}
 elli:{(ex;ey):eig(xx;yy;xy):cov[X;Y];a:.5*Math.atan2[xx-yy;2*xy];ellip[avg X;avg Y;2.448*%ex;2.448*%ey;1.57-a]}
-hull:{
- i:0,i@@<X i:!Y=@Y@<Y   /startpoint(lowest Y then X)
- X[i]:X[|i];Y[i]:Y[|i]  /exchange 0 with startpoint                            
- X::X i:<atn[X-@X;Y-@Y];Y::Y i
- "X"$X
- "Y"$Y
- s:0 1;i:2
- while[i<#X; $[2=#s;s,:-1+i+:1;0>dang[s l-1;s@l:-1+#s;i];s,:-1+i+:1;s:-1_s]]
- "s"$s; "xs"$X s;"ys"$Y s
- polyg[X s;Y s]
-}
+half:{d:dist[x;y;z]; $[0<d l:@>d; (half[p;y;z];half[x;p:z l;z]);  H,:x,y]}
+hull:{$[3>#X;0;(polyg[X H;Y H];half[b;a;i];half[a;b;i:(!#X)_(a:@<X),b:@>X])]}
 
-/cross:{[o;i;j]xi:(X i)-X o;yi:(Y i)-Y o;xj:(X j)-X o;yj:(Y j)-Y o;$[0~a:(xi*yj)-xj*yi; hyp[xi;yi]<hyp[xj;yj];a]}
-
-/stack = append(stack, points[0], points[1])
-/i := 2
-/for i < len(points) {
-/	pi := points[i]
-/	p0 := stack[len(stack)-2]
-/	p1 := stack[len(stack)-1]
-/	if cross(p0, p1, pi) > 0 {
-/		stack = append(stack, pi)
-/		i++
-/	} else if len(stack) == 2 {
-/		stack[1] = pi
-/		i++
-/	} else {
-/		stack = stack[:len(stack)-1]
-/	}
-/}
-/Polygon(stack)
-
-
-
-cnv.addEventListener[{[e]$[+/(X=x:e.offsetX)&Y=y:e.offsetY;0;(X,:x;Y,:y)];draw 0};"click"]
+cnv.addEventListener[{[e]$[+/(X=x:e.offsetX)&Y=y:e.offsetY;0;(X,:x;Y,:y)];draw[]};"click"]
 draw:{clear[];point'[X;Y];window[mode.value][]}
 draw[]
-
-
 
 src.textContent:k.textContent
 
