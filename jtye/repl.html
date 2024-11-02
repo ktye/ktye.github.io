@@ -13,15 +13,15 @@
 
 <script>
 let
-o=x=>$.textContent+=x,
+_=x=>$.textContent+=x,
 krep=$=>{
  if($.trim().startsWith("\\")){$.textContent+="\n ";$.style.display="none";main.style.display="block";return}
- let p=parse($);o("  //"+p+"\n")
+ $=parse($);_("  //"+$+"\n")
  try{
-  r=string(eval(p))
-  o(r+"\n ")
+  $=string(eval($))
+  _($+"\n ")
  }catch(e){
-  o(" ^"+e+"\n ")
+  _(" ^"+e+"\n ")
  }
  end()},
 end=()=>{
