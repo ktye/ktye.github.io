@@ -4,15 +4,33 @@
 <title>jtye</title>
 <style>
 *{font-family:monospace;margin:0}
+#cnv{position:absolute;right:0;top:0;background:grey;display:none}
 ._{height:calc(100vh - 1em);width:calc(100vw - 1em);padding:.5em;outline:none}
 </style>
 
 
 <script src="k.js"></script>
 <script src="parse.js"></script>
+<script src="../plot.js"></script>
+<script>
+let _p=false,_pid=0,plot=x=>{if(!x){cnv.style.display="none";_p=false;_pid=0;return};cnv.style.display="block"
+ if(!_p){_p=[{}],_pid=0}
+ if("number"==typeof x){if(_p.length<=x)_p[x]={};_pid=x}
+ if("string"==typeof x){if(x.length==1){_p[_pid].styles=x;}else{_p[_pid].type=x}}
+ if(Array.isArray(x)){
+  if(x.every(x=>"string"==typeof x)){[_p[_pid].xlabel,_p[_pid].ylabel,_p[_pid].title]=x}
+  if(x.every(x=>"number"==typeof x)){_p[_pid].limits=x}
+  else{
+   if(!("lines"in _p[_pid]))_p[_pid].lines=[];_p[_pid].lines.push({x:x[0],y:x[1]})
+  }
+ }
+ return _pid;
+}
+</script>
 
 <script>
-let
+let pd=e=>{if(e){e.preventDefault();e.stopPropagation()}},
+
 _=x=>$.textContent+=x,
 krep=$=>{
  if($.trim().startsWith("\\")){$.textContent+="\n ";$.style.display="none";main.style.display="block";return}
@@ -20,6 +38,7 @@ krep=$=>{
  try{
   $=string(eval($))
   _($+"\n ")
+  if(_p)plotjs.plots({plots:_p},cnv)
  }catch(e){
   _(" ^"+e+"\n ")
  }
@@ -44,11 +63,20 @@ window.onkeydown=e=>{if(e.key=="Enter"){
  let i=t.lastIndexOf("\n")
  t=t.slice(i>0?1+i:0)
  if(t.trim()!=""){krep(t)}}}
+ 
+window.ondragover=e=>pd(e)
+window.ondrop=e=>{pd(e);
+ let _=e.dataTransfer.files
+ for(let _i=0;_i<_.length;_i++){
+  let $=_.item(_i);
+  $.text().then($$=>{$=$.name;console.log("drop",$,$$);
+   $.endsWith(".k")?console.log(eval(parse($$))):$.endsWith(".js")?eval($$):$.endsWith(".json")?window[$.slice(0,-5)]=JSON.parse($$):window[$]=$$
+})}}
 
 </script>
 </head>
 
-
+<canvas id="cnv"></canvas>
 <pre id="$" class="_" contenteditable="true" spellcheck="false">jtye/k
  
 </pre>
