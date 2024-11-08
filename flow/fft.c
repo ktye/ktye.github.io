@@ -69,10 +69,11 @@ void main(){
  F *v=malloc(sizeof(F)*N*(N+2));
  F *u0=malloc(sizeof(F)*N*(N+2));
  F *v0=malloc(sizeof(F)*N*(N+2));
- for(int i=0;i<N*N;i++){
-  u[i]=0.0;v[i]=0.0;u0[i]=0.0;v0[i]=0.0;
- }
- u0[5*N+4]=10.0;
+ for(int i=0;i<N*N;i++){u[i]=0.0;v[i]=0.0;u0[i]=0.0;v0[i]=0.0;}
+ 
+ FILE *fp=fopen("data","rb");
+ fread(u,8,N,fp);fread(v,8,N,fp);fread(u0,8,N,fp);fread(v0,8,N,fp);
+ fclose(fp); 
  
  init_FFT(N);
  flow(N,u,v,u0,v0,0.01,0.1);
