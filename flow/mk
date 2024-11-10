@@ -1,1 +1,2 @@
-gcc fft.c librfftw.a libfftw.a -lm
+#gcc fft.c librfftw.a libfftw.a -lm
+gcc fft.c -lrfftw -lfftw -lm
