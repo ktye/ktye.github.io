@@ -31,21 +31,15 @@ void flow(int n,F*u,F*v,F*u0,F*v0,F visc,F dt){
   v[i]+=dt*v0[i];v0[i]=v[i];
  }
 
- printf("t\n");
  for( x=0.5/n,i=0;i<n;i++,x+=1.0/n){
   for(y=0.5/n,j=0;j<n;j++,y+=1.0/n ){
    x0 = n*(x-dt*u0[i+n*j])-0.5; y0 = n*(y-dt*v0[i+n*j])-0.5;
    i0 = floor(x0); s = x0-i0; i0 = (n+(i0%n))%n; i1 = (i0+1)%n;
    j0 = floor(y0); t = y0-j0; j0 = (n+(j0%n))%n; j1 = (j0+1)%n;
-   printf(" %7.4f",t);
    u[i+n*j] = (1-s)*((1-t)*u0[i0+n*j0]+t*u0[i0+n*j1])+s*((1-t)*u0[i1+n*j0]+t*u0[i1+n*j1]);
    v[i+n*j] = (1-s)*((1-t)*v0[i0+n*j0]+t*v0[i0+n*j1])+s*((1-t)*v0[i1+n*j0]+t*v0[i1+n*j1]);
   }
-  printf("\n");
  }
- P("u",u);
- P("v",v);
- //P("u", u, n);
  
  //printf("x0\n");for(y=0.5/n,j=0;j<n;j++,y+=1.0/n ){
  // for( x=0.5/n,i=0;i<n;i++,x+=1.0/n){
@@ -57,11 +51,19 @@ void flow(int n,F*u,F*v,F*u0,F*v0,F visc,F dt){
  for(i=0;i<n;i++)for(j=0;j<n;j++){u0[i+(n+2)*j]=u[i+n*j];v0[i+(n+2)*j]=v[i+n*j];}
 
  FFT(1,u0);FFT(1,v0);
+ 
+ //printf("ur\n");for(i=0;i<n;i+=2){for(j=0;j<n;j++)printf(" %7.3f",u0[i+  (n+2)*j]);printf("\n");}
+ //printf("ui\n");for(i=0;i<n;i+=2){for(j=0;j<n;j++)printf(" %7.3f",u0[i+1+(n+2)*j]);printf("\n");}
+ //printf("vr\n");for(i=0;i<n;i+=2){for(j=0;j<n;j++)printf(" %7.3f",v0[i+  (n+2)*j]);printf("\n");}
+ //printf("vi\n");for(i=0;i<n;i+=2){for(j=0;j<n;j++)printf(" %7.3f",v0[i+1+(n+2)*j]);printf("\n");}
+ 
+ 
  for(i=0;i<=n;i+=2){
   x = 0.5*i;
   for(j=0;j<n;j++){
    y = j<=n/2 ? j : j-n;
    r = x*x+y*y;
+//printf("i/j %d/%d  x/y  %.1lf/%.1lf  r=%.lf\n", i, j, x, y, r);
    if ( r==0.0 ) continue;
    f = exp(-r*dt*visc);
    U0=u0[i  +(n+2)*j];V0=v0[i  +(n+2)*j];
@@ -89,9 +91,11 @@ void main(){
  fclose(fp); 
  
  init_FFT(N);
+ //P("u",u);
+ //P("v",v);
+ //P("u0",u0);
+ //P("v0",v0);
+ flow(N,u,v,u0,v0,0.01,0.1);
  P("u",u);
  P("v",v);
- P("u0",u0);
- P("v0",v0);
- flow(N,u,v,u0,v0,0.01,0.1);
 }
