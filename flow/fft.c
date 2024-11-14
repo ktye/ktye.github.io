@@ -48,18 +48,21 @@ void flow(int n,F*u,F*v,F*u0,F*v0,F visc,F dt){
  // };printf("\n");
  //}
  
+ P("u",u);
+ P("v",v);
+ 
  for(i=0;i<n;i++)for(j=0;j<n;j++){u0[i+(n+2)*j]=u[i+n*j];v0[i+(n+2)*j]=v[i+n*j];}
  FFT(1,u0);FFT(1,v0);
- 
-printf("exp:\n");
+
+printf("yy/r U0\n");
  for(i=0;i<=n;i+=2){
   x = 0.5*i;
   for(j=0;j<n;j++){
    y = j<=n/2 ? j : j-n;
    r = x*x+y*y;
-   if ( r==0.0 ) continue;
+printf(" %lf", (y*y/r)*u0[i+(n+2)*j]);
+   if(r==0.0)continue;
    f = exp(-r*dt*visc);
-printf(" %lf", f);
    U0=u0[i  +(n+2)*j];V0=v0[i  +(n+2)*j];
    U1=u0[i+1+(n+2)*j];V1=v0[i+1+(n+2)*j];
    //u0[i  +(n+2)*j]=f*((1-x*x/r)*U0   -x*y/r *V0);
@@ -70,12 +73,13 @@ printf(" %lf", f);
    //u0[i+1+(n+2)*j]=((1-x*x/r)*U1   -x*y/r *V1);
    //v0[i  +(n+2)*j]=(-y*x/r   *U0+(1-y*y/r)*V0);
    //v0[i+1+(n+2)*j]=(-y*x/r   *U1+(1-y*y/r)*V1);
-   u0[i  +(n+2)*j]*=f;
-   u0[i+1+(n+2)*j]*=f;
-   v0[i  +(n+2)*j]*=f;
-   v0[i+1+(n+2)*j]*=f;
+
+   //u0[i  +(n+2)*j]*=f;
+   //u0[i+1+(n+2)*j]*=f;
+   //v0[i  +(n+2)*j]*=f;
+   //v0[i+1+(n+2)*j]*=f;
   }
-  printf("\n");
+printf("\n");
  }
  FFT(-1,u0);FFT(-1,v0);
  f=1.0/(n*n);
@@ -91,6 +95,7 @@ void main(){
  
  FILE *fp=fopen("data","rb");
  fread(u,8,N*N,fp);fread(v,8,N*N,fp);fread(u0,8,N*N,fp);fread(v0,8,N*N,fp);
+ printf("data:");for(int i=0;i<2*N;i++)printf(" %lf", u[i]);printf("\n");
  fclose(fp); 
  
  init_FFT(N);
@@ -98,6 +103,7 @@ void main(){
  //P("v",v);
  //P("u0",u0);
  //P("v0",v0);
+ printf("project\n");
  flow(N,u,v,u0,v0,0.5,0.1);
  P("u",u);
  P("v",v);
