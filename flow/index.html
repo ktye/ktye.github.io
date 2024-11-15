@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png"><title>jtye/draw</title>
+<style>*{font-family:monospace;font-size:large}
+canvas{background:#ccc;}
+#err{color:darkred}
+</style>
+</head>
+
+<body onload="">
+<div style="display:flex;gap:2em">
+ <canvas id="cnv" width="512" height="512"></canvas><div><button onclick="step()">step</button></div>
+</div>
+<hr/><pre id="err"></pre>
+<hr/><pre id="src"></pre>
+
+
+<script>
+
+
+
+fetch("flow.k").then(r=>r.text()).then(r=>{src.textContent=r;kinit()})
+
+let K,f,lo=x=>Number(BigInt.asUintN(32,x)),C=()=>new Int8Array(K.memory.buffer),U=()=>new Uint32Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
+KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=s=>K.sc(KC(s)),
+FK=x=>{let r=F().slice(lo(x)>>>3,(lo(x)>>>3)+K.nn(x));K.dx(x);return r},
+su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
+kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);err.textContent+=su(v);return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y    ){return 0}}},
+kinit=()=>{fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{K=r.instance.exports;K.kinit();aprio();err.textContent="k"})},
+aprio=()=>{
+ f=K.Val(KC(src.textContent))
+ draw()
+ console.log("f",K.tp(f))
+},step=()=>{K.dx(K.Cal(K.rx(f),K.mk(23,0)));  draw()},ctx=cnv.getContext("2d"),
+draw=()=>{ctx.clearRect(0,0,512,512)
+ let u=FK(K.Val(KC("w 0"))),v=FK(K.Val(KC("w 1"))),n=Math.sqrt(u.length),scale=512/n,x=y=scale/2
+ let k=0;for(let i=0;i<n;i++){for(let j=0;j<n;j++){
+  ctx.fillRect(x-3,y-3,6,6)
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+20*u[k],y+20*v[k]);ctx.stroke()
+  x+=scale;k++
+ };y+=scale;x=scale/2}
+}
+
+
+
+</script>
+
+</body></html>

@@ -26,17 +26,25 @@ t:      .1
 viscous:.5*
 diffuse:((exp@-RR*viscous t)*)'
 
-R:,/'+'4^'
-d:2^`f@<`data
+y:+x:n^(n*n)#1p*((2*!n)-n-1.)%n
+R:,/'+'n^'
+/d:2^`f@<`data
+d:2^0.*?4*n*n
 w:R 2^d 0
-f:R 2^d 1
+/f:R 2^d 1
+f:(,/5.*(y>0)-y<0;,/0.*x)
 t:0.1
 
 //self-convection: v grad v
-z:-.5+n*Z-t*w+:t*f            /backtrack
-q:*/'((1-s),s:z-a:_z)Q        /bilinear average
-i:nn/'n!(+!2 2)+\a
-w:+/'q*/w@\i
+/z:-.5+n*Z-t*w+:t*f            /backtrack
+/q:*/'((1-s),s:z-a:_z)Q        /bilinear average
+/i:nn/'n!(+!2 2)+\a
+/w:+/'q*/w@\i
+convect:{[w]
+ z:-.5+n*Z-t*w+:t*f 
+ q:*/'((1-s),s:z-a:_z)Q
+ i:nn/'n!(+!2 2)+\a
+ +/'q*/w@\i}
 
 /W:forward w
 //ww:ifft2 W*exp(-RR*t*m)
@@ -63,21 +71,19 @@ ww:xy*(forward w)0
 
 /w:rfft2[n^imag/w]
 
+/y:+x:4^16#.5p*((!4)-1.5)
+/u:(sin x)*sin y      /divergence-free
+/v:(cos x)*cos y
+/u:1 1 -1 -1 1 1 -1 -1 -1 -1 1 1 -1 -1 1 1.
+/v:1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1.
+/
+/gradient field
+/u:1 -1 -1 1 -1 1 1 -1 -1 1 1 -1 1 -1 -1 1.
+/v:-1 -1 1 1 -1 -1 1 1 1 1 -1 -1 1 1 -1 -1.
+
+
 /`data<`c@-.5*?4*n*n
 
 /self advection: v grad v
+{[]w::convect w}
 
-
-/   gauss seidel
-/   pratt whitney
-/   boyle mariotte
-/   euler bernoulli
-/   hagen poiseuille
-/  cauchy green
-/  navier stokes
-/  taylor couette
-/  cayley hamilton
-/  kelvin helmholtz
-/ prandtl meyer
-/benjamin ono
-/rayleigh benard
