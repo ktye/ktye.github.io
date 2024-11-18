@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
-<link rel=icon href="../kelas16.png"><title>jtye/draw</title>
+<link rel=icon href="../kelas16.png"><title>NAVIER STOKES</title>
 <style>*{font-family:monospace;font-size:large}
 canvas{background:#ccc;}
 #err{color:darkred}
@@ -11,10 +11,64 @@ canvas{background:#ccc;}
 <div style="display:flex;gap:2em">
  <canvas id="cnv" width="512" height="512"></canvas><div><button onclick="step()">step</button></div>
 </div>
-<hr/><pre id="err"></pre>
-<hr/><pre id="src"></pre>
+<hr/>
+<pre id="err"></pre>
+<hr/><div style="display:flex;gap:2em"><pre id="src"></pre><div style="border-left:1px solid">
 
+<h1>NAVIER STOKES</h1>
+∂w/∂t + w grad w + grad p/ρ = 𝜈 div grad w + f<br/>
+div v = 0
 
+<h2>excitation</h2>
+∂w/∂t = f<br/>
+this is the simple part: multiply the force field f with the time step and add it to the velocity field.
+
+<h2>convection</h2>
+w grad w
+is the nonlinear term of fluid flow, which makes it interesting.
+the change of velocity is the local time derivative ∂w/∂t and what flows in if there is a gradient: w grad w.
+it's also called self-convection because it's the velocity which is transported by itself.
+
+forward integration can be unstable if the step size is too large.
+to keep it stable we integrate backwards: update the velocity with the value of the cells where it comes from.
+we use bilinear interpolation with the 4 neighbor cells as the source value.
+
+<h2>diffusion</h2>
+∂w/∂t = 𝜈 div grad v</br>
+with the laplace operator on the right side. it's the same form as the heat equation.
+differences equal out with time.
+this part is not present in the euler equations of inviscous flow.<br/>
+
+we solve it under the fft together with the projection step.
+
+<h2>projection</h2>
+handle grad p and div v = 0</br>
+we can ignore grad p if we keep the velocity field solenoidal.
+there are no sources and the conservation of mass demands div v = 0.<br/>
+in 2d this is 0=du/dx+dv/dy. in fourier space this is 0=X*U+Y*V,
+e.g. the scalar product with the wave vector (X;Y) is 0.
+this means, the velocity field in fouier space is perpendicular to the wave vector.
+we have to project it, to keep it that way.</br>
+
+for 2d-fft we can apply a normal fft to the rows than the columns,
+e.g. do twice: flip fft each.<br/>
+
+U:fft2 u; V:fft2 v. with two-for-one we have W:fft2 u+iv 
+and we can recover U:0.5*(W+conj W I) and V:-i*0.5*(W-conj W I) with I: n/n!n-!n,n
+The projection keeps U,V orthogonal to the vector of wave numbers X,Y
+e.g. it substracts the part in direction of X,Y:
+<pre>
+P(U) = (1-XX/RR) U -   (XY/RR) V
+P(V) = (- XY/RR) U + (1-YY/RR) U,  with RR:XX+YY
+</pre>
+X and Y are the wavenumbers X:0.+(n*n)#(!m),m,1_(-m)+!m:n%2 in the order after the transform.
+before transfoming back, we combine the parts: P(W) = P(U) + i*P(V).
+
+we can formulate the projection without decomposing W into U and V, working on W directly:
+<pre>
+P(W) = 0.5*W - 0.5*(conj W I) * (X+i*Y)^2 / (abs(X+i*Y))^2
+</pre>
+</div></div>
 <script>
 
 
@@ -47,8 +101,6 @@ draw=()=>{ctx.clearRect(0,0,512,512)
   x+=scale;k++
  };y+=scale;x=scale/2}
 }
-
-
 
 </script>
 
