@@ -1,16 +1,18 @@
-Z:(.5+!nn:n,n)%n:4
-Y:,/+n^X:0.+(n*n)#(!m),m,1_(-m)+!m:n%2
+N:(.5+!nn:n,n)%n:32
+R:abs Z:imag[X;Y:,/+n^X:0.+(n*n)#(!m),m,1_(-m)+!m:n%2]
+I:n/n!n-!nn
 Q:4\6 123
 
-viscous:0.5; t:0.1
+v:0.01;t:0.1;f:10*1a80*.5-imag/1 0*N;velocity:0.7*?0a+n*n
+E:exp@-R*R*v*t
 
-fourier:{,/+f'+(f:{ $[-1+n:#x;(x+r),(x:f x o)-r:(1@(!n)*-180.%n)*f x 1+o:2*!n%:2;x]   })'n^x}
-inverse:{,/+f'+(f:{($[-1+n:#x;(x+r),(x:f x o)-r:(1@(!n)* 180.%n)*f x 1+o:2*!n%:2;x])%n})'n^x}
+fourier:{,/+f'+(f:{$[-1+n:#x;(x+r),(x:f x o)-r:(1@(!n)*-180.%n)*f x 1+o:2*!n%:2;x]})'n^x    }
+inverse:{,/+f'+(f:{$[-1+n:#x;(x+r),(x:f x o)-r:(1@(!n)* 180.%n)*f x 1+o:2*!n%:2;x]})'n^x%n*n}
 
-project:{(x 0),1_(.5*x)+(s*s%a*a:abs s:imag[X;Y])*-.5*conj x@n/n!n-!nn}
-diffuse:{x*(exp@-RR*viscous*t)}
-convect:{+/'(*/'((1-s),s:z-a)Q)*/x@\nn/'n!(+!2 2)+\a:_z:-.5+n*Z-x+:t}
-exscite:{x+t*f}
+project:{(x 0),1_(.5*x)+(Z*Z%R*R)*-.5*conj x I}
+diffuse:{E*x}
+convect:{imag/+/'(*/'((1-s),s:c-a)Q)*/x@\nn/'n!(+!2 2)+\a:_c:-.5+n*N-t*x}
+exscite:{(_;imag)@\x+t*f}
 
 NAVIER::{inverse project diffuse fourier x}
 STOKES::{        convect exscite         x}
