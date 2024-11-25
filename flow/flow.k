@@ -18,3 +18,6 @@ NAVIER::{inverse project diffuse fourier x}
 STOKES::{        convect exscite         x}
 
 {[]velocity::NAVIER STOKES velocity}
+
+
+/click to perturb vector field

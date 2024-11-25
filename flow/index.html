@@ -9,76 +9,83 @@ canvas{background:#eee;}
 
 <body onload="">
 <div style="display:flex;gap:2em">
- <canvas id="cnv" width="512" height="512"></canvas><div><button onclick="step()">step</button></div>
-</div>
+ <canvas id="cnv" width="512" height="512" onclick="push(event)"></canvas><div><button onclick="start()" id="but">start</button><select id="vis" onchange="draw()"><option value="0">vector field</option><option value="1">velocity amplitude</option><option value="2">velocity phase</option></select>
+  <pre id="src"></pre>
+</div></div>
 <pre id="err"></pre>
-<hr/><div style="display:flex;gap:2em"><pre id="src"></pre><div style="border-left:1px solid">
+<hr/>
 
 <h1>NAVIER STOKES</h1>
 ∂w/∂t + w grad w + grad p/ρ = 𝜈 div grad w + f<br/>
 div v = 0
 
-<h2>excitation</h2>
-∂w/∂t = f<br/>
+<h2>excitation:  ∂w/∂t = f</h2>
 this is the simple part: multiply the force field f with the time step and add it to the velocity field.
 
-<h2>convection</h2>
-w grad w
+<h2>convection:  w grad w</h2>
+
 is the nonlinear term of fluid flow, which makes it interesting.
 the change of velocity is the local time derivative ∂w/∂t and what flows in if there is a gradient: w grad w.
 it's also called self-convection because it's the velocity which is transported by itself.
 
 forward integration can be unstable if the step size is too large.
 to keep it stable we integrate backwards: update the velocity with the value of the cells where it comes from.
-we use bilinear interpolation with the 4 neighbor cells as the source value.
+we use bilinear interpolation between the source cell and it's 4 neighbor cells.
 
-<h2>diffusion</h2>
-∂w/∂t = 𝜈 div grad v</br>
+<h2>diffusion:  ∂w/∂t = 𝜈 div grad v</h2>
 with the laplace operator on the right side. it's the same form as the heat equation.
 differences equal out with time.
 this part is not present in the euler equations of inviscous flow.<br/>
 
 we solve it under the fft together with the projection step.
 
-<h2>projection</h2>
-handle grad p and div v = 0</br>
+<h2>fourier</h2>
+<pre>
+fft:{$[-1+n:#x;(x+r),(x:fft x o)-r:(1@(!n)*-180.%n)*fftx 1+o:2*!n%:2;x]}  /radix-2 recursive odd/even split
+ifft:{(conj fft conj x)%#x}                                               /inverse is fft under conjugation
+rfft:{.5*(x+y;1a270*x-y:conj(x:fft imag[x;y])n!n-!n:#x)}                  /real241 two for the price of one
+fft2:+fft'+fft'                                                           /two-dim separate and do it again
+</pre>
+
+<h2>projection: handle grad p and div v = 0</h2>
 we can ignore grad p if we keep the velocity field solenoidal.
 there are no sources and the conservation of mass demands div v = 0.<br/>
-in 2d this is 0=du/dx+dv/dy. in fourier space this is 0=X*U+Y*V,
-e.g. the scalar product with the wave vector (X;Y) is 0.
+in 2d this is 0=du/dx+dv/dy. in fourier space this is 0=(X*U)+Y*V,
+e.g. the scalar product with the wave vector (X;Y) is 0.<br/>
 this means, the velocity field in fouier space is perpendicular to the wave vector.
-we have to project it, to keep it that way.</br>
+we have to project it, to keep it that way.</p>
 
-for 2d-fft we can apply a normal fft to the rows than the columns,
-e.g. do twice: flip fft each.<br/>
-
-U:fft2 u; V:fft2 v. with two-for-one we have W:fft2 u+iv 
-and we can recover U:0.5*(W+conj W I) and V:-i*0.5*(W-conj W I) with I: n/n!n-!n,n
-The projection keeps U,V orthogonal to the vector of wave numbers X,Y
+the projection P keeps U and V orthogonal to the vector of wave numbers X,Y<br/>
 e.g. it substracts the part in direction of X,Y:
 <pre>
 P(U) = (1-XX/RR) U -   (XY/RR) V
 P(V) = (- XY/RR) U + (1-YY/RR) U,  with RR:XX+YY
 </pre>
-X and Y are the wavenumbers X:0.+(n*n)#(!m),m,1_(-m)+!m:n%2 in the order after the transform.
-before transfoming back, we combine the parts: P(W) = P(U) + i*P(V).
+X and Y are the wavenumbers X:0.+(n*n)#(!m),m,1_(-m)+!m:n%2 in the order after the transform.</p>
 
-we can formulate the projection without decomposing W into U and V, working on W directly:
+we can do the 2d-fft on the complex velocity field if we combine w:u+iv.</br>
+to recover U and V we had to do:
+<pre>
+U:0.5*(W+conj W I) and V:-i*0.5*(W-conj W I) with I:n/n!n-!n,n  (n/decode n!modulo odometer!n,n)
+</pre>
+and before transforming back, we combine the parts: P(W) = P(U) + i*P(V).</p>
+
+let's get rid of the decomposition and work on W directly:
 <pre>
 P(W) = 0.5*W - 0.5*(conj W I) * (X+i*Y)^2 / (abs(X+i*Y))^2
 </pre>
-</div></div>
+
 <script>
 
 
 
 fetch("flow.k").then(r=>r.text()).then(r=>{src.textContent=r;kinit()})
 
-let K,f,lo=x=>Number(BigInt.asUintN(32,x)),C=()=>new Int8Array(K.memory.buffer),U=()=>new Uint32Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
+let K,f,p,lo=x=>Number(BigInt.asUintN(32,x)),C=()=>new Int8Array(K.memory.buffer),U=()=>new Uint32Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
 KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=s=>K.sc(KC(s)),
 ZK=x=>{let r=F().slice(lo(x)>>>3,(lo(x)>>>3)+2*K.nn(x));K.dx(x);return r},
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
-off=new OffscreenCanvas(32,32)
+off=new OffscreenCanvas(32,32),I=new Int32Array(32*32),run=false
 kenv={env:{ 
  Exit:  function(x      ){},
  Args:  function(       ){return 0},
@@ -88,12 +95,17 @@ kenv={env:{
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){return 0}}},
 kinit=()=>{fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,kenv)).then(r=>{K=r.instance.exports;K.kinit();aprio()})},
-aprio=()=>{f=K.Val(KC(src.textContent));draw()},
-step=()=>{K.dx(K.Cal(K.rx(f),K.mk(23,0)));  draw(); setTimeout(step,100)},ctx=cnv.getContext("2d"),
-draw=()=>{drawVectors()
+aprio=()=>{f=K.Val(KC(src.textContent));p=K.Val(KC("{velocity[32/32!(x;y)+(-1 -1 -1 0 0 0 1 1 1;-1 0 1 -1 0 1 -1 0 1)]:5*?9a}"));draw()},
+start=()=>{run=but.textContent=="start";but.textContent=run?"stop":"start";if(run)step()},
+step=()=>{K.dx(K.Cal(K.rx(f),K.mk(23,0)));draw();if(run)setTimeout(step,100)},ctx=cnv.getContext("2d"),
+clamp=x=>x>255?255:x,
+draw=()=>{if(vis.value=="0")return drawVectors()
  let c=off.getContext("2d"),d=c.getImageData(0,0,32,32)
- for(let i=0;i<4*32*32;i+=4){d.data[i+0]=i;d.data[i+1]=0;d.data[i+2]=0;d.data[i+3]=255}
- c.putImageData(d,0,0);ctx.imageSmoothingEnabled=false
+ let v=ZK(K.Val(KC("velocity")))
+ if(vis.value=="1")for(let i=0;i<32*32;i++){I[i]=cmap[clamp(Math.floor(250*Math.hypot(v[2*i],v[2*i+1])))]}
+ else              for(let i=0;i<32*32;i++){I[i]=cmap[clamp(Math.floor(128+128/Math.PI*Math.atan2(v[2*i],v[2*i+1])))]}
+ let m=c.createImageData(32,32);m.data.set(new Uint8ClampedArray(I.buffer));c.putImageData(m,0,0)
+ ctx.imageSmoothingEnabled=false
  ctx.drawImage(off,0,0,512,512)
 },
 drawVectors=()=>{
@@ -104,8 +116,10 @@ drawVectors=()=>{
   ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+20*v[k++],y+20*v[k++]);ctx.stroke()
   x+=scale
  };y+=scale;x=scale/2}
-}
+},
+push=e=>{let r=cnv.getBoundingClientRect(),x=Math.floor(32*(e.clientX-r.left)/512),y=Math.floor(32*(e.clientY-r.top)/512);K.dx(K.Cal(K.rx(p),K.l2(K.Ki(y),K.Ki(x))));draw()},
+cmap=new Int32Array("0300000400000600000700010901010b01010e01021002021202031403041603041804051b04061d05071f060821060923070a26070b28080d2a080e2d090f2f0910320a12340a13360b14390b163b0b173e0b19400b1a430c1c450c1d470c1f4a0c204c0b224e0b24500b26520b27540b29560a2b580a2d5a0a2e5c0a305d09325f093460093561093762093964093b65093c66093e660940670941680a43690a45690a466a0b486a0b4a6b0c4b6b0c4d6c0d4f6c0d506c0e526d0e536d0f556d0f576d10586d115a6e115b6e125d6e125f6e13606e14626e14636e15656e15666e16686e176a6e176b6e186d6e186e6e19706d19726d1a736d1b756d1b766d1c786d1c7a6c1d7b6c1d7d6c1e7e6b1f806b1f816b20836a20856a21866a218869228969228b69238d68248e68249067259167259366269566269665279864289964289b63299c63299e622aa0612ba1612ba3602ca45f2ca65f2da75e2ea95d2eab5c2fac5b30ae5b31af5a31b15932b25833b45733b55634b75635b85536ba5437bb5337bd5238be5139bf503ac14f3bc24e3cc44d3dc54c3ec74b3ec84a3fc94940cb4841cc4742cd4644cf4445d04346d14247d24148d44049d53f4ad63e4bd73d4dd93b4eda3a4fdb3950dc3852dd3753de3654df3456e03357e23258e3315ae4305be52e5ce62d5ee62c5fe72b61e82a62e92864ea2765eb2667ec2568ed236aed226cee216def1f6ff01e70f01d72f11c74f21a75f21977f31879f3167af4157cf5147ef51280f61181f61083f70e85f70d87f80c88f80b8af8098cf9088ef90890f90791fa0693fa0695fa0697fa0699fb069bfb069dfb079efb07a0fb08a2fb0aa4fb0ba6fb0da8fb0eaafb10acfb12aefb14b0fb16b1fb18b3fb1ab5fb1cb7fb1eb9fb21bbfa23bdfa25bffa28c1fa2ac3f92cc5f92fc7f931c9f834cbf837cdf83acff73cd1f73fd3f642d5f645d7f548d9f54bdbf44fdcf452def356e0f359e2f35de4f260e6f264e8f168e9f16cebf170edf174eef179f0f17df2f181f3f285f4f289f6f38df7f491f8f595faf699fbf79dfcf9a0fdfaa4fefc00ff00".match(/....../g).map(x=>"0xff"+x).map(Number))
 
 </script>
-
 </body></html>
+
