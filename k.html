@@ -19,7 +19,7 @@ kenv={env:{
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y    ){return 0}}},
 kinit=()=>{let n,nk=x=>{n=x.byteLength;return x}
- fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
+ fetch(window.location.hash=="#v"?"v.wasm":"k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit()
  cw=banner.getBoundingClientRect().width/10
  document.body.textContent="ktye/k "+n+"\n ";end()
