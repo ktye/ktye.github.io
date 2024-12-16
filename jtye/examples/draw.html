@@ -39,7 +39,7 @@ ajute:{r:(conv l:n-1)_h:conv n:#X; "r"$r; "h"$h; e:"e"$h mod[#h;-1 1+h?l]; {T,:,
 delau:{$[+/i:T pit\-1+#X;split@@!i;ajute[]]}
 
 elli:{(ex;ey):eig(xx;yy;xy):cov[X;Y];a:.5*Math.atan2[xx-yy;2*xy];ellip[avg X;avg Y;2.448*%ex;2.448*%ey;1.57-a]}
-dela:{polyg'[X T;Y T]}
+dela:{polyg'[X T;Y T]} /todo
 dist:{a:(Y x)-Y y;b:(X y)-X x;c:((X x)*Y y)-(X y)*Y x;c+(b*Y z)+a*X z}
 half:{$[0<d l:@>d:dist[x;y;z];half[x;p;z],half[p:z l;y;z];x,y]}
 conv:{[n]?half[b;a;i],half[a:@<n#X;b:@>n#X;i:!n]}
