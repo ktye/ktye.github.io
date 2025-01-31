@@ -1,21 +1,124 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
-<title>k/compile</title>
-<style>*{font-family:monospace}
-#s{width:100%}
-#o{width:100%;background:"grey"}
-.i{color:lightgreen}
-.I{color:green}
-.n{text-decoration:underline}
+<title>compiling k</title>
+<style>*{font-family:monospace;font-size:large}
+
 </style>
 </head>
 
-<textarea id="s">f:`iI:{2*x+y}
-</textarea>
-<pre id="o">
-<span class="n" data-n:"#y"><span class="i">2</span>*<span class="i">x</span>+<span class="I">y</span></span>
+<h1>compiling k</h1>
+
+<h2>3 compiler implementations</h2>
+<pre>
+kc.go prototype  target c
+kc.js online     compiles kc.k to wasm, needs only cCSiI
+kc.k  in kc      target c,wasm
 </pre>
+
+<h2>kc example programs</h2>
+<pre>
+fft, qr/lsqr, lu/gauss, svd, kc.k, .. nyi
+
+today we have:
+k)avg:F{(+/x)%#x}
+c)
+double avg(double*x){ //F{(+/x)%#x}
+ double f0;
+ {int n=n1(x);f0=0;N{f0+=x[i];}}
+ _(x);return(f0/((double)n1(x)));
+}
+</pre>
+
+<h2>types</h2>
+12 types, all static, no generic lists, no functions in vars
+<pre>
+k c        rank0    k c         rank1     k c          rank2
+-+--------------    -+---------------     -+----------------
+c char              C char          *     S char          **
+i int               I int           *     T int           **
+f double            F double        *     A double        ** 
+z double complex    Z double complex*     B double complex**
+
+rank2 are lists of rank1. lengths may vary but the type is fixed.
+</pre>
+
+<h2>variables and functions</h2>
+<pre>
+functions are defined in global scope. no nested definitions.
+no lists of functions, no indirect calls. they may be recursive.
+variables are local/global. no lexical scope.
+functions have 1 or more arguments and return 1 value (same type if multi-branch).
+</pre>
+
+<h2>minimal type annotations</h2>
+<pre>
+qr:B{..}           /input x type B, return type is computed by compiler
+f:iI{..}           /input x type i, y type I
+fft:Z:Z{..fft..}   /recursive function declares return type using assignment chain
+G:!100             /global variable, initialization expression executed from main()
+f[3;!5]            /everything else goes to main.
+</pre>
+
+<h2>static/dynamic</h2>
+<pre>
+compiler: type checks, generates direct code. throws type errors.
+direct code: don't couple an interpreter, no pre-existing imlementations for primitives.
+program at runtime: arrays have refcount and length. no types or dispatch.
+                    may throw length errors, or use min[#x;#y]
+</pre>
+
+<h2>ast transformations</h2>
+<pre>
+split expressions only when needed, insert into innermost statement list.
+detect pure functions (no i/o, no global assign, calling only functions).
+pure functions can take shortcuts: short loops, any evaluation order (compact c code).
+combine loops if possible.
+
+e.g. 3#X+Y loops to 3: r[i]=X[i]+Y[i]
+overtake memsets to 0 and loops to #X.
+
+reuse memory if possible. otherwise use malloc/free
+alloc:     char*_C(int n){int*r=malloc(8+n);r[0]=0;r[1]=n;return(char*)(2+r);}
+unref:     #define _(x) if(!--((int*)x)[-2])free(x)
+wasm uses linear memory with a bucket allocator.
+</pre>
+
+<h2>reduce, scan, prior</h2>
+<pre>
++/!x        int a=0,n=n1(x);     for(int i=0;i&lt;n;i++)a+=i;                    reduction closes a loop
+x++\y       int a=0,n=n1(x),*r;  for(int i=0;i&lt;n;i++){a+=y[i];r[i]=x[i]+a;}   a scan can continue
+-'!x        int a=0,n=n1(x),*r;b;for(int i=0;i&lt;n;i++){a=b;b=i;r[i]=b-a;}      prior/pairs
+</pre>
+
+<h2>control</h2>
+<pre>
+$[a;b;c..]     maybe also     if c d   (similar to while)
+{bl;o;ck}      (lambdas exist only as global assignments)
+while c d
+while(x>0){...}  maybe use last as a value? or only a statement.
+</pre>
+
+<h2>system/io</h2>
+<pre>
+k           c
+-------------------
+a[0]        argv[1]
+atof                  /maybe "%f"?x for parse and "%.3f"$x for format/print.
+atoi
+read"file"
+write C
+</pre>
+
+<h2>bitwise/shift/unsigned</h2>
+maybe: i|'i i&'i and/or/xor, i\i i/i shifts, i<'i unsigned comparison. or leave them out.
+
+<h2>extend in c</h2>
+<pre>
+`c-code`
+some syntax to declare c-funcs for k.
+</pre>
+
 
 <body>
 </body></html>
