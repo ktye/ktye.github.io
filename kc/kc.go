@@ -50,8 +50,9 @@ func main() {
 	//do(`j:I{(+/x)+1}`)
 	//do(`g:I{(+/x)+1}`)
 	//do(`bvg:F{(+/x)}`)
-	do("avg:F{(+/x)%#x};\ncal:F{avg x}")
-	//do(`avg:F{(+/x)%#x}`)
+	//do("avg:F{(+/x)%#x};\ncal:F{avg x}")
+	//do("avg:F{(+/x)%#x}\navg 1+0.1*3 2 3")
+	do(`0.1*3 2 4`)
 	//do(`var:F{(+/x*x:(x-avg x))%-1+#x}`)
 	//do(`fft:"Z":{$[-1+n:#x;(x+r),(x:fft x o)-r:(1@(!n)*-180.%n)*fft[x 1+o:2*!n%:2];x]}`)
 }
@@ -426,6 +427,13 @@ func typ(x node) node {
 	if s == "" { //(: v nil rhs)
 	} else if x.s == "_main" {
 		return x
+	} else if s == "_vlit" {
+		x.t = 'I'
+		for _, c := range x.c {
+			if contains(c.s, '.') {
+				x.t = 'F'
+			}
+		}
 	} else if contains(prims, s[0]) {
 		if len(x.c) == 1 {
 			x.t = mot(s[0], x.c[0].t, p)
@@ -481,13 +489,6 @@ func typ(x node) node {
 		x.t = 'i'
 		if contains(s, '.') {
 			x.t = 'f'
-		}
-	} else if s == "_vlit" {
-		x.t = 'I'
-		for _, c := range x.c {
-			if contains(c.s, '.') {
-				x.t = 'F'
-			}
 		}
 	} else {
 		fmt.Println(x)
@@ -987,20 +988,6 @@ func t() (r node) {
 			r.s = "_lambda:" + r.s
 			r.c = []node{node{s: ";", p: r.p, c: l}}
 			return r
-		} else if (isnum(r.s) && len(r.c) == 0) || r.s == "_vlit" { //vector literal
-			if false {
-				/*
-					if 6 == cl(y) || (y == '-' && 6 == cl(src[1+b])) {
-						b := node{s: tok()}
-						if r.s == "_vlit" {
-							r.c = append(r.c, b)
-						} else {
-							r = node{s: "_vlit", p: r.p, c: []node{r, b}}
-						}
-				*/
-			} else {
-				break
-			}
 		} else {
 			break
 		}
@@ -1040,6 +1027,11 @@ func e(x node) node {
 	}
 	r := e(y)
 	if !x.v { //juxtaposition
+		if isnum(x.s) && len(x.c) == 0 && isnum(r.s) && len(r.c) == 0 {
+			return node{s:"_vlit", p:x.p, c:[]node{x,r}}
+		} else if isnum(x.s) && len(x.c) == 0 && r.s == "_vlit" {
+			return node{s:"_vlit", p:x.p, c:append([]node{x},r.c...)}
+		}
 		return node{s: "@", n: 2, p: x.p, c: []node{x, r}}
 	} else if y.v && x.v && r.eql(y) {
 		E(y.p, "no composition")
@@ -1094,30 +1086,19 @@ func isasn(x node) bool              { return len(x.c) == 3 && strings.HasSuffix
 func contains(s string, b byte) bool { return strings.IndexByte(s, b) >= 0 }
 
 func E(p int, s string) {
-	a, b := 0, len(src)
-	if p >= a && p <= b {
-		for i := 0; i < 10; i++ {
-			if p-i == 0 {
-				break
-			}
-			if src[p-i] == '\n' {
-				a = 1 + p - i
-			}
+	if p >= 0 && p < len(src) {
+		a, b := bytes.LastIndexByte(src[:p], 10), 0
+		if i := bytes.IndexByte(src[p:], 10); i < 0 {
+			b = len(src)
+		} else {
+			b = p + i
 		}
-		for i := 0; i < 20; i++ {
-			if p+i == b {
-				break
-			}
-			if src[p+i] == '\n' {
-				b = p + i
-			}
+		fmt.Println(string(src[max(0,a):b]))
+		for i := 0; i < p-a-1; i++ {
+			fmt.Print(" ")
 		}
-		fmt.Println(string(src[a:b]))
+		fmt.Println("^")
 	}
-	for i := 0; i < p-a; i++ {
-		fmt.Print(" ")
-	}
-	fmt.Println("^")
 	fmt.Println(linepos(p), s)
 	shortstack()
 	os.Exit(1)
