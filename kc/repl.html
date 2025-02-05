@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="kelas16.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>ktye/k</title>
+<style>*{font-family:monospace;margin:0;border:none;padding:0;font-size:xx-large}
+body{overflow:hidden}
+#i{background-color:#ffe;position:absolute;width:100vw;height:50vh;top:0;outline:none;border:none;overflow:auto}
+#o{background-color:#efe;position:absolute;width:100vw;height:50vh;top:50vh;overflow:auto}
+</style>
+<script src="k0.js"></script>
+<script>
+
+let K=s=>{if(s){s=string(eval(parse(s)));o.innerText+=s}}
+
+window.init=()=>{o.innerText=""
+ let f=window.location.hash;f=f?f:"#kc.k";if(f)fetch(f.slice(1)).then(r=>r.text()).then(r=>{i.innerText=r;K(r)})
+ i.onblur=e=>{if(!o.textContent)K(i.innerText.replace(/^\\(.*)$/mg,"write[0;string($1)]"))}
+ i.oninput=e=>o.innerText=""
+}
+
+</script>
+</head>
+
+<body onload="window.init()">
+<pre id="i" contenteditable="true" spellcheck="false">f:ii{x+y}
+f[1;2]</pre>
+<pre id="o"></pre>
+</body></html>

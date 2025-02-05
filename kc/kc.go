@@ -52,7 +52,7 @@ func main() {
 	//do(`bvg:F{(+/x)}`)
 	//do("avg:F{(+/x)%#x};\ncal:F{avg x}")
 	//do("avg:F{(+/x)%#x}\navg 1+0.1*3 2 3")
-	do(`0.1*3 2 4`)
+	do(`0.1*3,2,4`)
 	//do(`var:F{(+/x*x:(x-avg x))%-1+#x}`)
 	//do(`fft:"Z":{$[-1+n:#x;(x+r),(x:fft x o)-r:(1@(!n)*-180.%n)*fft[x 1+o:2*!n%:2];x]}`)
 }
