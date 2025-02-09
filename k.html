@@ -9,23 +9,36 @@ body{overflow:hidden;height:100vh;display:grid;grid-template-rows:auto 1fr}
 #o{flex-grow:1;min-height:3em;background-color:#efe;/*position:absolute;*/width:100vw;/*height:50vh;top:50vh;*/;bottom:0;overflow:auto}
 .b:hover{cursor:pointer}
 </style>
+<script src="plot.js"></script>
 <script>
 
-let K,B,lo=x=>Number(BigInt.asUintN(32,x)),C=()=>new Int8Array(K.memory.buffer),U=()=>new Uint32Array(K.memory.buffer),KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=s=>K.sc(KC(s)),
+let K,B,lo=x=>Number(BigInt.asUintN(32,x)),C=()=>new Int8Array(K.memory.buffer),I=()=>new Uint32Array(K.memory.buffer),F=()=>new Float64Array(K.memory.buffer),
+KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r},
+CK=x=>(K.dx(x),su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x)))),
+Ks=s=>K.sc(KC(s)),sK=x=>CK(K.cs(x)),
+LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));K.dx(x);return r},
+IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>lo(x),
+FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0],
+ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},zK=x=>new Float64Array(K.memory.buffer,lo(x),2),
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
-save=()=>{B=C().slice(0,1<<U()[32])},restore=()=>{C().set(B)},cw,
+cw,
 
 kenv={env:{ 
  Exit:  function(x      ){},
  Args:  function(       ){return 0},
  Arg:   function(x,y    ){return 0},
  Read:  function(a,b,c  ){return -1},
- Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);o.textContent+=su(v);if(a)o.textContent+="\n";return 0},
+ //Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);o.textContent+=su(v)+"\n";if(a)o.textContent+="\n";return 0},
+ Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):o.textContent+=su(v)+"\n";return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y    ){return 0}}},
+ Native:function(x,y  ,i){return[kcsv,kplt,klns][lo(x)](y)}}},
+kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));
+I()[(lo(x)>>>2)-3]=a;
+K.dx(K.Asn(Ks(s),(14n<<59n)+BigInt(lo(x))))},
 kinit=s=>{let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
- K=r.instance.exports;K.kinit()
+ K=r.instance.exports;K.kinit();plots=0;pid=0;cnv.style.zIndex=-1
+ kreg("csv",2,0n);kreg("plot",1,1n);kreg("LINES",1,2n);plots=0;pid=0;
  cw=measure.getBoundingClientRect().width/10
  if(!s)o.textContent="ktye/k "+n+"\n "+help;
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
@@ -36,12 +49,29 @@ kinit=s=>{let n,nk=x=>{n=x.byteLength;return x}
   else console.log("ignore",a)
  })
  if(s)K.repl(KC(s))
+ if(plots){scaleplot(plots);cnv.style.zIndex=10}
 })},
-cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw)
+cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
+klns=x=>K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" "+lo(K.Atx(x,K.Ki(0))))))),
+kcsv=(x,y)=>console.log("kcsv.."),
+kplt=x=>{x=K.Atx(x,K.Ki(0));let pn=x=>{if(plots.length<=x)plots[x]={};return x},pt=x=>{plots[pid].type=("square"==x)?"xy":x;plots[pid].square=x=="square"},ri=x=>{x=ZK(x);return[x.filter((_,i)=>i&1),x.filter((_,i)=>~i&1)]},la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
+ let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(3==t)?iK(x[0]):(5==t)?fK(x[0]):(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
+ if(plots===0){pid=0;plots=[]};if(undefined===plots[pid])plots[pid]={}
+ let t=K.tp(x);
+ (2==t)?plots[pid].styles=cK(x):(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(18==t)?plots[pid].styles=CK(x):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
+ return K.Ki(pid)},
+axis=x=>plots[pid].limits=Array.from(x),
+scaleplot=a=>{
+ let fs=x=>((x?0.8:1)*parseFloat(getComputedStyle(document.body).fontSize)*devicePixelRatio)+"px monospace"
+ let p={plots:a,font1:fs(0),font2:fs(1)/*,cols:1*/}
+ plotjs.plots(p,cnv,undefined/*{b:bac,f:fwd}*/,undefined/*pcap*/,x=>o.textContent=x)}
+
+document.addEventListener('keydown',e=>{if(e.key=="Escape")cnv.style.zIndex=-1;false})
+
 
 window.init=()=>{kinit()
  let f=window.location.hash;if(f)fetch(f.slice(1)).then(r=>r.text()).then(r=>i.textContent=r)
- i.onblur=e=>{if(!o.textContent)kinit(i.innerText.replace(/^\\(.*)$/mg,"`o<`k@$1"))}
+ i.onblur=e=>{if(!o.textContent)kinit(i.innerText.replace(/^\\(.*)$/mg,"`<`k@$1"))}
  i.oninput=e=>o.textContent=""
 }
 window.onresize=e=>{K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))}
@@ -52,16 +82,18 @@ l=x=>{fs[x.nextSibling.nextSibling.textContent].sel=x.checked},
 argv=_=>Object.keys(fs).filter(x=>fs[x].sel),
 ref=_=>fetch("klib/ref").then(r=>r.text()).then(r=>o.textContent=r),
 suf=(x,i)=>(i=x.indexOf("."),x=x.endsWith(".k")?x:x.endsWith(".csv")?x:(((i>0)?x.slice(0,i):x)+":.."),x),
-addfile=(name,s,fe)=>{name=suf(name);fs[name]={name:name,text:fe?"":s,sel:false};first.insertAdjacentHTML('beforebegin','\n<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this,true)">'+name+'</label>' );if(fe)fetch("klib/"+name).then(r=>r.text()).then(r=>fs[name].text=r) },
+addfile=(name,s,fe)=>{name=suf(name);fs[name]={name:name,text:fe?"":s,sel:false};first.insertAdjacentHTML('beforebegin','\n<input type="checkbox" onchange="l(this)"> <label class="b" id="'+name+'" onclick="s(this,true)">'+name+'</label>' );if(fe)fetch("klib/"+name).then(r=>r.text()).then(r=>fs[name].text=r)},
 addfiles=l=>{for(let i=0;i<l.length;i++){let f=l.item(i);
  if(suf(f.name).endsWith(":.."))f.arrayBuffer().then(s=>addfile(f.name,new Uint8Array(s),false))
  else                           f.text(       ).then(s=>addfile(f.name,s,false))
 }}
+let down=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
+
 
 window.ondragover=e=>{e.preventDefault();e.stopPropagation()}
-window.ondrop=e=>{console.log(e);e.preventDefault();e.stopPropagation();addfiles(e.dataTransfer.files)}
+window.ondrop=e=>{e.preventDefault();e.stopPropagation();addfiles(e.dataTransfer.files)}
 
-const help=`\n\nthe yellow field above is the input editor.
+var help=`\n\nthe yellow field above is the input editor.
 if you click elsewhere, it is executed.
 
 select k-libs from the menu. click on the name to see them.
@@ -70,8 +102,66 @@ they are executed before the input.
 load files from the filesystem, or drop them into the window.
 .k files appear as libraries, .csv file(todo)
 and other files are assigned a variable by their name as bytes.
+`
+var plot=`plots are created using multiple calls to plot.
+depending on the type of the argument: 
+ plot 0                    /integer: select current plot (side-by-side)
+ plot\`polar                /symbol : \`xy\`bar\`polar\`ampang\`square
+ plot\`xstr\`ystr\`title      /symbols: 1..3 axis labels
+ plot(x;y0;y1;..)          /list of: x(I|F) y(I|F|Z), multi-line
+ plot(x0;x1;y0;y1)         /floats : axis limits y1|x0,x1|x0,x1,0,y1
 
-todo csv,plot
+calls to plot return the plot id (0 by default) which can be used
+to index into data.
+
+double click to mark a datapoint, or click and move to zoom.
+or use the mouse wheel, outside the axis (over x or y) zoom ver/hor
+
+examples
+ plot(!100;?100)
+`
+
+var csv=`drop a csv file on the window and select it from the file panel.
+e.g. a.csv appears as a:.. and the text is assigned to variable a.
+
+for parsing, use 
+ csv[";2hiff";a]   /list of columns
+
+or convert it to a table:
+ t:+\`x\`y\`z!csv["isa";a]
+
+format:
+ ;2hifs   /use semicolon, remove 2 header lines
+          /use columns 0 1 2 as ints, floats, symbols 
+ ,3i10ff  /use columns 3 as ints, 10 and 11 as floats
+          /by default the columns separator is blanks
+ i int
+ f float
+ s symbol
+ a complex 1a30 
+ @ complex 1@30
+ z complex 2 columns: abs degree
+ 
+`
+var io=`only the last expression is displayed automatically
+by default in matrix format (\`l@x)
+to switch to single line k  (\`k@x) prepend a space
+
+matrix format uses 20 lines by default. this can be changed with
+ LINES 100 
+
+for debugging, prepend a backslash before a line
+\\x:1+!10
+or within an expression after space:
+ x:1+ \\!10
+you can add a label to the left:
+ x:1+\`a \\!10
+
+write to stdout with:
+\`<"chars.."
+
+or to a file (which triggers a download):
+\`"file.txt"<"abc.."
 `
 </script>
 </head>
@@ -81,11 +171,13 @@ todo csv,plot
 <pre id="o">a
 b
 c</pre>
+<canvas id="cnv" style="position:absolute;left:0;bottom:0;width:60vw;height:60vh;z-index:-1"></canvas>
 <pre id="menu" spellcheck="false" style="position:absolute;z-index:10;right:0;bottom:0;background:#eef">
-<label for="f">load/drop/kcsv</label><input id="f" type="file" onchange="addfiles(this.files)", style="display:none"><label id="first"></label>
+<label for="f" class="b">load/drop/kcsv</label><input id="f" type="file" onchange="addfiles(this.files)", style="display:none"><label id="first"></label>
 <label class="b" onclick="ref()">ref</label> <a target="_blank" href="https://github.com/ktye/i/blob/master/intro.md">intro.md</a> <label class="b" title="close" onclick='menu.style.display="none"'>x</label>
 </pre>
 <span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
+<a id="dl" style="display:none"></a>
 
 <!--
 <input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">qr.k</label>
@@ -97,7 +189,15 @@ c</pre>
 -->
 
 <script>
-"qr lu svd fft stats interp".split(" ").forEach(s=>addfile(s+".k","",true))
+let 
+addhelp=(e,h)=>document.getElementById(e).insertAdjacentHTML("afterend",h)
+showhelp=x=>{o.textContent=x}
+addfile("qr.k","",true);addhelp("qr.k","<label class='b' onclick='showhelp(help)'>    help</label>")
+addfile("lu.k","",true);addhelp("lu.k","<label class='b' onclick='showhelp(plot)'>    plot</label>")
+addfile("svd.k","",true);addhelp("svd.k","<label class='b' onclick='showhelp(csv)'>    csv</label>")
+addfile("fft.k","",true);addhelp("fft.k","<label class='b' onclick='showhelp(io)'>     io</label>")
+addfile("stats.k","",true)
+addfile("interp.k","",true)
 </script>
 
 </body></html>
