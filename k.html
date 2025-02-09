@@ -4,9 +4,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
 <title>ktye/k</title>
 <style>*{font-family:monospace;margin:0;border:none;padding:0;font-size:xx-large}
-body{overflow:hidden}
-#i{background-color:#ffe;position:absolute;width:100vw;height:50vh;top:0;outline:none;border:none;overflow:auto}
-#o{background-color:#efe;position:absolute;width:100vw;height:50vh;top:50vh;overflow:auto}
+body{overflow:hidden;height:100vh;display:grid;grid-template-rows:auto 1fr}
+#i{flex-grow:1;min-height:3em;background-color:#ffe;/*position:absolute;*/width:100vw;/*height:50vh;*/top:0;outline:none;border:none;overflow:auto;resize:vertical}
+#o{flex-grow:1;min-height:3em;background-color:#efe;/*position:absolute;*/width:100vw;/*height:50vh;top:50vh;*/;bottom:0;overflow:auto}
 </style>
 <script>
 
@@ -25,7 +25,7 @@ kenv={env:{
 kinit=s=>{let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit()
- cw=banner.getBoundingClientRect().width/10
+ cw=measure.getBoundingClientRect().width/10
  if(!s)o.textContent="ktye/k "+n+"\n ";
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
  if(s)K.repl(KC(s))
@@ -43,9 +43,10 @@ window.onresize=e=>{K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))
 </head>
 
 <body onload="window.init()">
-<pre id="i" contenteditable="true" spellcheck="false">!1</pre>
+<pre id="i" contenteditable="true" spellcheck="false" autofocus>!1</pre>
 <pre id="o">a
 b
 c</pre>
-<span id="banner">0123456789</span>
+</div-->
+<span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
 </body></html>
