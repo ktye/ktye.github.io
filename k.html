@@ -7,6 +7,7 @@
 body{overflow:hidden;height:100vh;display:grid;grid-template-rows:auto 1fr}
 #i{flex-grow:1;min-height:3em;background-color:#ffe;/*position:absolute;*/width:100vw;/*height:50vh;*/top:0;outline:none;border:none;overflow:auto;resize:vertical}
 #o{flex-grow:1;min-height:3em;background-color:#efe;/*position:absolute;*/width:100vw;/*height:50vh;top:50vh;*/;bottom:0;overflow:auto}
+.b:hover{cursor:pointer}
 </style>
 <script>
 
@@ -26,8 +27,14 @@ kinit=s=>{let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit()
  cw=measure.getBoundingClientRect().width/10
- if(!s)o.textContent="ktye/k "+n+"\n ";
+ if(!s)o.textContent="ktye/k "+n+"\n "+help;
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
+ argv().forEach(a=>{
+  if(a.endsWith(".k"))K.repl(KC(fs[a].text))
+  else if(a.endsWith(".csv"))console.log("todo csv") // e.g.with input "iiff"
+  else if(a.endsWith(":.."))K.dx(K.Asn(Ks(a.slice(0,-3)),KC(fs[a].text/*uint8array*/)))
+  else console.log("ignore",a)
+ })
  if(s)K.repl(KC(s))
 })},
 cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw)
@@ -39,6 +46,33 @@ window.init=()=>{kinit()
 }
 window.onresize=e=>{K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))}
 
+let fs=[],
+s=e=>o.textContent=fs[e.textContent].text,
+l=x=>{fs[x.nextSibling.nextSibling.textContent].sel=x.checked},
+argv=_=>Object.keys(fs).filter(x=>fs[x].sel),
+ref=_=>fetch("klib/ref").then(r=>r.text()).then(r=>o.textContent=r),
+suf=(x,i)=>(i=x.indexOf("."),x=x.endsWith(".k")?x:x.endsWith(".csv")?x:(((i>0)?x.slice(0,i):x)+":.."),x),
+addfile=(name,s,fe)=>{name=suf(name);fs[name]={name:name,text:fe?"":s,sel:false};first.insertAdjacentHTML('beforebegin','\n<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this,true)">'+name+'</label>' );if(fe)fetch("klib/"+name).then(r=>r.text()).then(r=>fs[name].text=r) },
+addfiles=l=>{for(let i=0;i<l.length;i++){let f=l.item(i);
+ if(suf(f.name).endsWith(":.."))f.arrayBuffer().then(s=>addfile(f.name,new Uint8Array(s),false))
+ else                           f.text(       ).then(s=>addfile(f.name,s,false))
+}}
+
+window.ondragover=e=>{e.preventDefault();e.stopPropagation()}
+window.ondrop=e=>{console.log(e);e.preventDefault();e.stopPropagation();addfiles(e.dataTransfer.files)}
+
+const help=`\n\nthe yellow field above is the input editor.
+if you click elsewhere, it is executed.
+
+select k-libs from the menu. click on the name to see them.
+they are executed before the input.
+
+load files from the filesystem, or drop them into the window.
+.k files appear as libraries, .csv file(todo)
+and other files are assigned a variable by their name as bytes.
+
+todo csv,plot
+`
 </script>
 </head>
 
@@ -47,6 +81,23 @@ window.onresize=e=>{K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))
 <pre id="o">a
 b
 c</pre>
-</div-->
+<pre id="menu" spellcheck="false" style="position:absolute;z-index:10;right:0;bottom:0;background:#eef">
+<label for="f">load/drop/kcsv</label><input id="f" type="file" onchange="addfiles(this.files)", style="display:none"><label id="first"></label>
+<label class="b" onclick="ref()">ref</label> <a target="_blank" href="https://github.com/ktye/i/blob/master/intro.md">intro.md</a> <label class="b" title="close" onclick='menu.style.display="none"'>x</label>
+</pre>
 <span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
+
+<!--
+<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">qr.k</label>
+<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">lu.k</label>
+<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">svd.k</label>
+<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">fft.k</label>
+<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">stats.k</label>
+<input type="checkbox" onchange="l(this)"> <label class="b" onclick="s(this)">interp.k</label>
+-->
+
+<script>
+"qr lu svd fft stats interp".split(" ").forEach(s=>addfile(s+".k","",true))
+</script>
+
 </body></html>
