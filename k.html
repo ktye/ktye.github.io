@@ -31,21 +31,21 @@ kenv={env:{
  //Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);o.textContent+=su(v)+"\n";if(a)o.textContent+="\n";return 0},
  Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):o.textContent+=su(v)+"\n";return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y  ,i){return[kcsv,kplt,klns][lo(x)](y)}}},
+ Native:function(x,y  ,i){return[kplt,klns][lo(x)](y)}}},
 kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));
 I()[(lo(x)>>>2)-3]=a;
 K.dx(K.Asn(Ks(s),(14n<<59n)+BigInt(lo(x))))},
 kinit=s=>{let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit();plots=0;pid=0;cnv.style.zIndex=-1
- kreg("csv",2,0n);kreg("plot",1,1n);kreg("LINES",1,2n);plots=0;pid=0;
+ kreg("plot",1,0n);kreg("LINES",1,1n);plots=0;pid=0;
  cw=measure.getBoundingClientRect().width/10
  if(!s)o.textContent="ktye/k "+n+"\n "+help;
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
  argv().forEach(a=>{
   if(a.endsWith(".k"))K.repl(KC(fs[a].text))
-  else if(a.endsWith(":.."))    K.dx(K.Asn(Ks(a.slice(0,-3)),KC(fs[a].text/*uint8array*/)))
-  else if(a.endsWith(":(json)"))K.dx(K.Asn(Ks(a.slice(0,-7)),kjson(fs[a].json)))
+  else if(a.endsWith(":.."))   K.dx(K.Asn(Ks(a.slice(0,-3)),KC(fs[a].text/*uint8array*/)))
+  else if(a.endsWith("(json)"))K.dx(K.Asn(Ks(a.slice(0,-6)),kjson(fs[a].json)))
   else console.log("ignore",a)
  })
  if(s&&s.length<1000)window.location.hash="#"+encodeURIComponent(s)
@@ -70,16 +70,33 @@ kjson=x=>{let r=0n,i,cat=(x,y)=>K.Cal(13n,K.l2(x,K.Atx(13n,y))),key=(x,y)=>K.Cal
  return("number"==t)?K.Kf(x):(("boolean"==t)||(null===x))?K.Ki(+x):("string"==t)?KC(x):key(kjson(Object.keys(x)),kjson(Object.values(x)))},
 csvhead=(f,x)=>{x=x.split("\n");if(x.length&&!x[x.length-1].length)x=x.slice(0,-1);x=x.map(y=>(y.endsWith("\r")?y.slice(0,-1):y));let r=f+": "+(x.length?x.length+"(lines)":"empty");if(!x.length)return r
  let x0=x[0].split(""),nc=x0.filter(x=>x==",").length,ns=x0.filter(x=>x==";").length,nt=x0.filter(x=>x=="\t").length,m=Math.max(nc,ns,nt),s=(nt==m)?"\t":(ns==m)?";":","
- r+=" "+m+"(cols) sep("+((s=="\t")?"tab":s)+") header:\n"
+ r+=" "+m+"(cols) sep("+((s=="\t")?"tab":s)+")\n"
  x0=x[0].split(s);x0.forEach((x,i)=>r+=i+" "+x+"\n");return r},
+csvform=f=>{ //",3if" => r:{h:0,s:",",3:'i',4:'f',..}
+ let r={h:0},i=-1;r.s=32 // /[ \t]+/
+ if(f.length&&!"h0123456789ifsz@z".includes(f[0])){r.s=f.charCodeAt();f=f.slice(1)}
+ for(const m of f.matchAll(/([0-9]*)(.)/g)){
+  if(m[1]=="h")r.h=(m[1]=="")?1:(+m[0])
+  else{let n=(m[0]=="")?1+i:(+m[0]);i=n;r[n]=m[1]}};return r},
+csvsplit=(f,u,ml)=>{let i,j=0,c=[],r=[],s=f.s,l=0,q=0,b=new Uint8Array(128),
+ p=_=>{if(s!=32||j>0)c.push(su(b.slice(0,j)));j=0}
+ for(i=0;i<u.length;i++){let v=u[i];q^=v==34;
+  if(q){if(j<128)b[j++]=v}
+  else if(v==s){if(s!=32||j>0)p()}
+  else if(v==10){p();r.push(c);c=[];if(ml==len(r))return r}
+  else if(v!=13&&j<128)b[j++]=v};return r}
+
+
+/*
 kcsv=x=>{let Q=x=>{o.textContent=x;throw(x)},f=CK(K.Atx(K.rx(x),K.Ki(0)));x=CK(K.Atx(K.rx(x),K.Ki(0)));if(!f.length)return K.mk(23,0);
- let s=/[ \t]+/;if(!"0123456789ifsca@zh".includes(f[0])){s=s[0];f=f.slice(1)}                         ;if(!f.length)return K.mk(23,0);
+ let s=/[ \t]+/;if(!"0123456789ifsa@zh".includes(f[0])){s=s[0];f=f.slice(1)}                         ;if(!f.length)return K.mk(23,0);
  let h,i=f.indexOf("h");h=(!i)?1:(-1==i)?0:parseFloat(h);if(i>=0)f=f.slice(1+i)                       ;if(!f.length)return K.mk(23,0);
  let c=[];i=-1;for(const m of f.matchAll(/([0-9]*)(.)/g)){let e=[(m[1]=="")?1+i:(+m[1]),m[2]];i=e[0];c.push(e);if(e[1]=="z")i++}
  x=x.split("\n").slice(h).map(x=>x.endsWith("\r")?x.slice(0,-1):x)                                    ;if(!x.length)return K.mk(23,0);
  let r=[],m={i:21,s:22,f:23,z:23,a:23};m["@"]=23;r=c.map(x=>{if(!(x[1]in m))Q("illegal csv column format: +"+x[1]);return K.mk(m[x[1]],0)})
  /*todo..*/ return K.mk(23,0)
 }
+*/
 
 document.addEventListener('keydown',e=>{if(e.key=="Escape")cnv.style.zIndex=-1;false})
 
@@ -93,16 +110,18 @@ window.init=()=>{kinit()
 window.onresize=e=>{K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))}
 
 let fs=[],
-s=e=>{e=e.textContent;let x=fs[e].text;o.textContent=("string"===typeof x)?x:fs[e].csv?csvhead(e,su(x)):e.slice(0,-3)+"("+x.length+" bytes)\n"+((x.length>100)?x.slice(0,100)+"..":x)},
+s=e=>{e=e.textContent;let x=fs[e].text;o.textContent=fs[e].csv?csvhead(e,x):("string"===typeof x)?x:e.slice(0,-3)+"("+x.length+" bytes)\n"+((x.length>100)?x.slice(0,100)+"..":x)},
 l=x=>{fs[x.nextSibling.nextSibling.textContent].sel=x.checked},
 argv=_=>Object.keys(fs).filter(x=>fs[x].sel),
 ref=_=>fetch("klib/ref").then(r=>r.text()).then(r=>o.textContent=r),
-suf=(x,i)=>(i=x.indexOf("."),x=x.endsWith(".k")?x:x.endsWith(".json")?x.slice(0,-5)+":(json)":(((i>0)?x.slice(0,i):x)+":.."),x),
+suf=(x,i)=>(i=x.indexOf("."),x=x.endsWith(".k")?x:x.endsWith(".json")?x.slice(0,-5)+"(json)":x.endsWith(".csv")?x.slice(0,-4)+"(csv)":(((i>0)?x.slice(0,i):x)+":.."),x),
 addfile=(name,s,fe)=>{let csv=name.endsWith(".csv");name=suf(name);
  fs[name]={name:name,text:fe?"":s,sel:false,csv:csv};
- if(name.endsWith(":(json)")){try{fs[name].json=JSON.parse(s)}catch(e){console.log(e);o.textContent=name+":\n"+e.message}}
- if(csv)o.textContent=csvhead(name.slice(0,-3)+".csv",su(s))
- first.insertAdjacentHTML('beforebegin','\n<input type="checkbox" onchange="l(this)"> <label class="b" id="'+name+'" onclick="s(this,true)">'+name+'</label>' );if(fe)fetch("klib/"+name).then(r=>r.text()).then(r=>fs[name].text=r)},
+ if(name.endsWith("(json)")){try{fs[name].json=JSON.parse(s)}catch(e){console.log(e);o.textContent=name+":\n"+e.message}}
+ if(csv)o.textContent=csvhead(name.slice(0,-4)+".csv",s)
+ first.insertAdjacentHTML('beforebegin','\n<input type="checkbox" onchange="l(this)"> <label class="b" id="'+name+'" onclick="s(this,true)">'+name+'</label>' );
+ if(csv)first.insertAdjacentHTML('beforebegin',':<label contenteditable="true" style="background:#ffe;border:none;outline:none">,hss</label>')
+ if(fe)fetch("klib/"+name).then(r=>r.text()).then(r=>fs[name].text=r)},
 addfiles=l=>{for(let i=0;i<l.length;i++){let f=l.item(i)
  if(suf(f.name).endsWith(":.."))f.arrayBuffer().then(s=>{addfile(f.name,new Uint8Array(s),false);mark(f.name)})
  else                           f.text(       ).then(s=>{addfile(f.name,s                ,false);mark(f.name)})};o.textContent=""},
@@ -125,7 +144,7 @@ and other files are assigned a variable by their name as bytes.
 `
 
 var json=`drop a json file, e.g. a.json and it appears as
- a:(json) 
+ a(json) 
 in the file list.
 it is converted and assigned to variable a in k.
 
@@ -137,13 +156,13 @@ conversion
 `
 
 var csv=`drop a csv file on the window and select it from the file panel.
-e.g. a.csv appears as a:.. and the text is assigned to variable a.
+e.g. a.csv appears as a(csv):,h?? then edit the format (see below).
 
-for parsing, use 
- csv[";2hiff";a]   /list of columns
+a summary of the first line with guessed delimiter is shown in the output.
 
-or convert it to a table:
- t:+\`x\`y\`z!csv["isa";a]
+in k, the parsed csv file is assigned to 'a' as a list of columns.
+to get a table, do:
+ t:+\`x\`y\`z!a
 
 format:
  ;2hifs   /use semicolon, remove 2 header lines
@@ -191,7 +210,7 @@ c</pre>
 <canvas id="cnv" style="position:absolute;left:0;bottom:0;width:80vw;height:60vh;z-index:-1"></canvas>
 <pre id="menx" class="b"          style="position:absolute;z-index:-1;right:0px;bottom:20px;background:#eef" onclick='menx.style.zIndex=-1;menu.style.display=""'> ? </pre>
 <pre id="menu" spellcheck="false" style="position:absolute;z-index:10;right:0;bottom:0;background:#eef">
-<label for="f" class="b">load/drop/kcsv</label><input id="f" type="file" onchange="addfiles(this.files)", style="display:none"><label id="first"></label>
+<label for="f" class="b">load/drop file</label><input id="f" type="file" onchange="addfiles(this.files)", style="display:none"><label id="first"></label>
 <label class="b" onclick="ref()">ref</label> <a target="_blank" href="https://github.com/ktye/i/blob/master/intro.md">intro.md</a> <label class="b" title="close" onclick='menu.style.display="none";menx.style.zIndex=10'>x</label>
 </pre>
 <span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
