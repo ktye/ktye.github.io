@@ -20,6 +20,8 @@ svq:{q:qr x;h:q 0;r:q 1;n:q 2;m:q 3;o:0|(1+&n)@!m
  d:{x*(!#x)=/!#x}
  (,qmul'U:D 0),1_D:svd R:(d r)+(n#'h)*i</i:!n}
 
+cond:{(*x)%*|x:(svd x)1}
+
 / eye:{(!x)=/!x}
 / dia:{x*eye@#x}
 / uni:{|/|/abs mul[+conj x;x]-eye@#x}              /test if unitary: maxabs I-x'*x
