@@ -99,6 +99,24 @@ csvunq=(x,c)=>{let i=0,q=0,r="",col="\x1f",line="\x1e"
   if(q&&i&&v=='"'&&x[i-1]=='"')r+='"'}
  if(c==" "){x=r;r="";for(i=0;i<x.length;i++)if(!(i&&x[i]=="\x1f"&&x[i-1]=="\x1f"))r+=x[i];}
  return r},
+/*
+csvunq=(x,f)=>{let i=0,q=0,c=f.c,r="",col=0,mc=0,d=new Map();
+ pi=x=>{x=parseFloat(x);return(isNaN(x)||x<-2147483648||x>2147483647)?-2147483648:x},
+ pb=x=>{x=x.toLowerCase();return(x=="1"||x=="true"||x=="yes")?1:(x=="0"||x=="false"||x=="no"):0:-2147483648},
+ pf=x=>parseFloat(x.replaceAll(",",".")),pz=(x,y)=>(y*=Math.PI/180,[x*Math.cos(y),x*Math.sin(y)],
+ co=m=>{m=f[col];if(m){d[col].push((m=="s")?r:(m=="i"):pi(r):(m=="b"):pb(r):pf(r));
+  if("z"==m){let v=r.split("a");if(r!=2)v=r.split("@");if(r!=2){d.col.push(NaN,0)}else{d[col].push(pz(v[0],v[1]))}}
+  else if(f[col-1]=="a"){d[col-1].push(pz(d[col-1].pop(),r))}};r="";return ""},
+ na=m=>("s"==m)?[""]:("i"==m||"b"==m):[-2147483648]:("f"==m)?[NaN]:[NaN,0],
+ ln=_=>{while(++col<mc)if(col in d)d[col].push(...na(f[col]));col=0;return""}
+ for(i of Object.keys(f).filter(x=>!"sc".includes(x))){d[+i]=[],mc=Math.max(mc,+i)}
+ for(i=0;i<x.length;i++){let a=x[i];q^=(a=='"')
+  if(a!='"')r=(!q)?((a==c)?co():(a=="\n")?ln():(a=="\r")?r:r+a):r+a
+  if(q&&i&&a=='"'&&x[i-1]=='"')r+='"'}
+ if(c==" "){x=r;r="";for(i=0;i<x.length;i++)if(!(i&&x[i]=="\x1f"&&x[i-1]=="\x1f"))r+=x[i];}
+ for(i in f){let m=f[i];d[i]=("i"==m||"b"==m)?new Int32Array(d[i]):("s"==m)?d[i]:new Float64Array(d[i]);if("a"==m||"z"==m)d[i].z=true}
+ return d},
+*/
 kcsv=d=>{let r=K.mk(23,0),v,cat=(x,y)=>K.Cal(13n,K.l2(x,K.Atx(13n,y))),KL=x=>{let r=mk(23,0);x.forEach(x=>r=cat(r,KC(x)));return r};for(v of d)r=cat(r,Array.isArray(v)?KL(v):(v.constructor==Int32Array)?KI(v):KF(v));return r}
 
 document.addEventListener('keydown',e=>{if(e.key=="Escape")cnv.style.zIndex=-1;false})
