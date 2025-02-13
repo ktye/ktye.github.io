@@ -30,3 +30,8 @@ wbl:{(-10|log x;log log 1%1-cdf:(-1_(1+!n)*d),1-0.5*d:1.%n:#x:^x)}   /(X;Y) weib
 qwbl:{[p;k;l]l*(-log 1-p)^1%k}                                       /quantile for p from k l
 klwbl:{[XY]ab:fit.XY;(k;exp(-*ab)%k:ab 1)}
 wblplot:{plot xy:wbl x;+`shape`scale`q95!,'kl,(qwbl 0.95).kl:klwbl xy}
+
+
+/interpolation: lin[0 4.;3 4.;0.+!5] /3. 3.25 3.5 3.75 4.
+lin:{$[`L~@z;lin[x;y]'z;[dx:0.+1_`d x;dy:0.+1_`d y;b:(-2+#x)&0|x'z;(y b)+(dy b)*(z-x b)%dx b]]}
+
