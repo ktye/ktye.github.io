@@ -22,6 +22,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
  p.font1  =("font1" in p)?p.font1 :"16px monospace"
  p.font2  =("font2" in p)?p.font2 :"14px monospace"
  p.hi     =("hi"    in p)?p.hi    :{plot:null,lines:[],point:null}
+ p.grip   =("grip"  in p)?p.grip  :0
  p=layout(c,p)
  
  let rects=[]
@@ -30,6 +31,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   let np=p.plots.length,nc=abs(p.cols);nc=nc?nc:np
   let nr=ceil(np/nc),w=width/nc,h=height/nr,r
   for(let i=0,j=0;i<np;i++){c.save();c.translate(w*(i%nc),j*h);r=[w*(i%nc),j*h,w,h];r.push(...plot(p.plots[i],i,c,w,h,p));rects.push(r);c.restore();if(0==(1+i)%nc)j++;if((j==nr-1)&&(np%nc))w=width/(np%nc)}}
+  if(p.grip){c.beginPath();c.moveTo(canvas.width,0);c.lineTo(canvas.width-15,0);c.lineTo(canvas.width,15);c.closePath();c.fillStyle="#123";c.fill()}
  canvas.plots=p;canvas.slider=slider;canvas.listbx=listbx;canvas.legend=legend
  if(p.hi.point!==null){
   let hip=p.plots[p.hi.plot],li=p.hi.lines[0],pl=hip.lines[li],pt=p.hi.point,po=hip.type=="polar",st=hip.stacked
@@ -77,7 +79,9 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   if(zoom.meas){legend("dz: "+absang(-dx,dy));zoom=null;return};l[0]+=dx;l[1]+=dx;l[2]+=dy;l[3]+=dy}
   else p.plots[ri].limits=[min(x,X),max(x,X),min(y,Y),max(y,Y)];zoom=null;replot(canvas)
  }
- canvas.onmousemove=e=>{pd(e);if(1==e.which){return(zoom===null)?startzoom(e.shiftKey||e.ctrlKey,e.ctrlKey,e.shiftKey&&e.ctrlKey,...mousecoords(e)):drawzoom(zoom.x0,zoom.y0,...clickpos(e))};if(zoom===null)return;if(e.which==0)endzoom(...mousecoords(e)) }
+ let resize=e=>{if(e.offsetY<20&&20>(canvas.width-e.offsetX)){ if(!e.which)canvas.style.cursor="nesw-resize"; return true };  if(canvas.style.cursor="nesw-resize")canvas.style.cursor=""; return false}
+ canvas.onclick=e=>{if(p.grip&&zoom===null&&resize(e)){p.grip();pd(e);return false}}
+ canvas.onmousemove=e=>{pd(e);if(p.grip&&resize(e))return;if(1==e.which){return(zoom===null)?startzoom(e.shiftKey||e.ctrlKey,e.ctrlKey,e.shiftKey&&e.ctrlKey,...mousecoords(e)):drawzoom(zoom.x0,zoom.y0,...clickpos(e))};if(zoom===null)return;if(e.which==0)endzoom(...mousecoords(e)) }
  canvas.onwheel=e=>{let[x,y,X,Y,ri]=mousecoords(e);if(e.deltaY==0)return;let z=(e.deltaY>0)?2:0.5,pi=p.plots[ri],l=pi.limits,xm=(l[0]+l[1])/2,ym=(l[2]+l[3])/2,DX=(l[1]-l[0])/2*z,DY=(l[3]-l[2])/2*z
   let xo=(X-xm)*z,yo=(Y-ym)*z;if(X>l[0]){l[0]=X-xo-DX;l[1]=X-xo+DX};if(Y>l[2]){l[2]=Y-yo-DY;l[3]=Y-yo+DY}
   replot(canvas)}
@@ -148,7 +152,7 @@ function polarplot(p,c,w,h,plts){if(!p.lines)return;
  c.textAlign="center";c.textBaseline="bottom"
  c.fillText(p.title,0,-ra-plts.tl-plts.tlh)
  align(c,0);c.fillText("↖"/*"⮤"*/+sn(r1),floor(0.74*ra),floor(0.67*ra));if(X!=0||Y!=0)c.fillText("-"+absang(X,-Y),floor(0.74*ra),floor(plts.tih+0.67*ra))
- if(p.ylabel){align(c,0);c.fillText(p.ylabel,floor(0.74*ra),plts.tih+floor(0.67*ra))}
+ if(p.ylabel){align(c,0);c.fillText(" "+p.ylabel,floor(0.74*ra),plts.tih+floor(0.67*ra))}
  c.font=plts.font2;iota(12).map(i=>{let p=30*i*Math.PI/180,x=Math.sin(p),y=-Math.cos(p);align(c,al[i]);c.beginPath();c.moveTo(ra*x,ra*y);c.lineTo(raa*x,raa*y);c.stroke();c.fillText(""+30*i,raa*x,raa*y)})
  c.strokeStyle="#ccc";ncTic(0,r1).slice(1,-1).map(t=>circle(c,0,0,sc*t))
  c.beginPath();c.moveTo(-ra,0);c.lineTo(ra,0);c.stroke();c.beginPath();c.moveTo(0,-ra);c.lineTo(0,ra);c.stroke()
