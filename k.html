@@ -151,7 +151,8 @@ ren=x=>{let s=x.innerText,ext=x=>x.endsWith("*:..")?false:x.endsWith("*(csv)")?f
  x.setAttribute("contenteditable","true");x.onblur=e=>{let d=e.target.innerText,de=ext(d);x.setAttribute("contenteditable","false");
  if(d==""){delete fs[s];x.previousSibling.remove();if(s.endsWith("(csv)")){x.nextSibling.remove();x.nextElementSibling.remove()};x.remove();return};if(se&&se==de&&!(d in fs)){fs[s].name=d;fs[d]=fs[s];delete fs[s];x.innerText=d}else x.innerText=s}},
 down=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()},
-test=t=>{o.textContent="file tests    ms\n";let t0=performance.now();for(let k in t)k.endsWith(".t")?test1(k,t[k]):bench(k,t[k]);o.textContent+=".  .  .  ."+(Math.round(performance.now()-t0)+"").padStart(6," ")+" .  ."},
+test=t=>{o.textContent="file tests    ms\n";tests(Object.keys(t),t,performance.now())},
+tests=(a,m,t0)=>{let k=a[0];a=a.slice(1);setTimeout(_=>{k.endsWith(".t")?test1(k,m[k]):bench(k,m[k]);if(a.length)tests(a,m,t0);else o.textContent+=".  .  .  ."+(Math.round(performance.now()-t0)+"").padStart(6," ")+" .  ." },10)},
 test1=(f,t)=>{t=t.split("\n");if(!t[t.length-1])t=t.slice(0,-1);t=t.map(x=>x.split(" /"));t.forEach((x,i)=>{if(2!=x.length){throw"bad test at line "+1+i}}) 
  o.textContent+=f.padEnd(5," ")+" "+(""+t.length).padStart(4," ")
  let kst=x=>K.Atx(28n,x),t0=performance.now()
@@ -325,12 +326,8 @@ fetchall(libs,x=>libs.forEach((name,i)=>fs[name+".k"]={name:name+".k",text:x[nam
 let
 hlp=x=>{cnv.style.zIndex=-1;o.textContent=window[x.innerText]},
 kdb=_=>fetch("db/db.csv").then(r=>r.text()).then(r=>{fs["db(csv)"]={name:"db(csv)",csv:true,text:r},csvshow("db(csv)");fetch("klib/db.k").then(r=>r.text()).then(r=>fs["db.k"]={name:"db.k",text:r,csv:false})}),
-tst=_=>{o.textContent="";
- let a="k.t b.t apl.k klib/apl.t klib/qr.b klib/lu.b klib/svd.b klib/fft.b".split(" "),m={},p=x=>x.split("\n").slice(1).join("\n")+"\n`ok\n",
- f=a=>fetch(a[0]).then(r=>r.text()).then(
-  r=>{m[a[0].startsWith("klib/")?a[0].slice(5):a[0]]=("apl.k"==a[0])?p(r):r;(1<a.length)?f(a.slice(1)):kinit(m)}
- );f(a)
-}
+tst=_=>{o.textContent="";let a="k.t apl.k klib/apl.t klib/qr.b klib/lu.b klib/svd.b klib/fft.b kweb/k.k klib/cc.k klib/wb.k".split(" "),m={},p=x=>x.split("\n").slice(1).join("\n"),ok=x=>x+"\n`ok\n",
+ f=a=>fetch(a[0]).then(r=>r.text()).then(r=>{let a0=a[0];a0=a0.includes("/")?a0.slice(1+a0.lastIndexOf("/")):a0;m[a0]=("apl.k"==a0)?ok(p(r)):("k.k"==a0)?ok(r):r;(1<a.length)?f(a.slice(1)):kinit(m)});f(a)}
 </script>
 
 </body></html>
