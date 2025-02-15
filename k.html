@@ -33,13 +33,13 @@ kenv={env:{
  Arg:   function(x,y    ){return 0},
  Read:  function(a,b,c  ){return -1},
  //Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);o.textContent+=su(v)+"\n";if(a)o.textContent+="\n";return 0},
- Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):o.textContent+=su(v)+"\n";return 0},
+ Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):o.textContent+=su(v);return 0},
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y  ,i){return[kplt,klns][lo(x)](y)}}},
 kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));
 I()[(lo(x)>>>2)-3]=a;
 asn(s,(14n<<59n)+BigInt(lo(x)))},
-kinit=s=>{s=s?s.replace(/^\\(.*)$/mg,"`<`k@$1"):s;
+kinit=s=>{s=("string"==typeof s)?s.replace(/^\\(.*)$/mg,"`<`k@$1"):s;
  let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit();plots=0;pid=0;cnv.style.zIndex=-1
@@ -55,6 +55,7 @@ kinit=s=>{s=s?s.replace(/^\\(.*)$/mg,"`<`k@$1"):s;
   else if(a.endsWith("(csv)")) asn(a.slice(0,-5),kcsv(fs[a].csv.data))
   else console.log("ignore",a)
  })
+ if("object"==typeof s)return test(s)
  if(s&&s.length<1000)window.location.hash="#"+encodeURIComponent(s)
  if(s)K.repl(KC(s))
  if(plots){scaleplot(plots);cnv.style.zIndex=10}
@@ -119,6 +120,8 @@ window.init=()=>{kinit()
  i.oninput=e=>o.textContent=""
 }
 window.onresize=e=>{asn("l.",K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20"))));if(0<+cnv.style.zIndex)scaleplot(plots)}
+window.onerror=(m,s,l,c,e)=>{o.textContent+="\n"+s+m}
+window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
 document.addEventListener('keydown',e=>{if(e.key=="Escape")cnv.style.zIndex=-1;false})
 let cnvfull=0,cnvgrip=_=>{cnvfull=1-cnvfull;cnv.style.width=cnvfull?"100vw":"";scaleplot(plots)}
 
@@ -126,20 +129,20 @@ let fs={},
 s=e=>{cnv.style.zIndex=-1;e=e.textContent;if(Array.isArray(fs[e])){if(fs[e][0].csv)return csvlist(fs[e]);let r="a(dict) with "+fs[e].length+" files:\n";fs[e].forEach(x=>r+=x.name+":"+x.text.slice(0,Math.min(10,x.text.length))+" ("+x.text.length+" bytes)\n");o.textContent=r;return};
  let x=fs[e].text;if(fs[e].csv)csvshow(fs[e].name);else o.textContent=("string"===typeof x)?x:e.slice(0,-3)+"("+x.length+" bytes)\n"+((x.length>100)?x.slice(0,100)+"..":x)},
 ref=_=>fetch("klib/ref").then(r=>r.text()).then(r=>o.textContent=r),
-suf=(x,i)=>(i=x.indexOf("."),x=x.endsWith(".k")?x:x.endsWith(".json")?x.slice(0,-5)+"(json)":x.endsWith(".csv")?x.slice(0,-4)+"(csv)":(((i>0)?x.slice(0,i):x)+":.."),x),
+suf=(x,i)=>(i=x.indexOf("."),x=(x.endsWith(".k")||x.endsWith(".t"))?x:x.endsWith(".json")?x.slice(0,-5)+"(json)":x.endsWith(".csv")?x.slice(0,-4)+"(csv)":(((i>0)?x.slice(0,i):x)+":.."),x),
 addfile=(name,s)=>{ console.log("addfile",name)
- let csv=name.endsWith(".csv");name=suf(name);let old=(name in fs); console.log("sname",name,old,fs[name])//fe
+ let csv=name.endsWith(".csv");name=suf(name);let old=(name in fs);
  fs[name]={name:name,text:s,csv:csv};
  if(name.endsWith("(json)")){try{fs[name].json=JSON.parse(s)}catch(e){console.log(e);o.textContent=name+":\n"+e.message}}
  if(!old){
   first.insertAdjacentHTML('beforebegin','\n<label class="b" id="'+name+'" ondblclick="ren(this)" oncontextmenu="ren(this)" onclick="s(this,true)">'+name+'</label>' );
   if(csv)first.insertAdjacentHTML('beforebegin',':<label contenteditable="true" onblur="chfmt(this)">,</label>')}
  if(csv)csvshow(name)},
-addfiles=l=>{let i,a=[],jk=[],c=[],f0;for(i=0;i<l.length;i++){let s=suf(l.item(i).name);(s.endsWith(".k")||s.endsWith("(json)"))?jk.push(i):s.endsWith("(csv)")?c.push(i):a.push(i)}
- console.log("addfiles",a.length,jk.length,c.length)
+addfiles=l=>{let i,a=[],jk=[],c=[],t=[],f0;for(i=0;i<l.length;i++){let s=suf(l.item(i).name);console.log("s?",s);(s.endsWith(".k")||s.endsWith("(json)"))?jk.push(i):s.endsWith("(csv)")?c.push(i):(s.endsWith(".t")||s.endsWith(".b"))?t.push(i):a.push(i)}
  for(i of jk){let n=i;l.item(i).text().then(s=>addfile(l.item(n).name,s))}
  if(a.length)l.item(a[0]).arrayBuffer().then(s=>{addfile((a.length>1)?"a*"    :l.item(a[0]).name,new Uint8Array(s));if(a.length>1){f0=fs["a*:.."  ];f0.name=l.item(a[0]).name            ;f0=[f0];fs["a*:.."  ]=f0;addmany(l,a.slice(1),f0,1)}})
- if(c.length)l.item(c[0]).text(       ).then(s=>{addfile((c.length>1)?"c*.csv":l.item(c[0]).name,               s );if(c.length>1){f0=fs["c*(csv)"];f0.name=l.item(c[0]).name.slice(0,-4);f0=[f0];fs["c*(csv)"]=f0;addmany(l,c.slice(1),f0,0)}})},
+ if(c.length)l.item(c[0]).text(       ).then(s=>{addfile((c.length>1)?"c*.csv":l.item(c[0]).name,               s );if(c.length>1){f0=fs["c*(csv)"];f0.name=l.item(c[0]).name.slice(0,-4);f0=[f0];fs["c*(csv)"]=f0;addmany(l,c.slice(1),f0,0)}})
+ if(t.length){let m={},f=x=>l.item(x[0]).text().then(s=>{m[l.item(x[0]).name]=s;x.length?f(x.slice(1)):kinit(m)});f(t)}},
 addmany=(l,a,f0,b)=>{if(b)l.item(a[0]).arrayBuffer().then(s=>{f0.push({name:l.item(a[0]).name            ,text:new Uint8Array(s),csv:false});if(a.length>1)addmany(l,a.slice(1),f0,1) })
                      else l.item(a[0]).text(       ).then(s=>{f0.push({name:l.item(a[0]).name.slice(0,-4),text:s,csv:true                 });if(a.length>1)addmany(l,a.slice(1),f0,0);else csvlist(fs["c*(csv)"]) })},
 
@@ -147,22 +150,32 @@ chfmt=e=>{let name=e.previousElementSibling.innerText;if(name=="c*(csv)")csvlist
 ren=x=>{let s=x.innerText,ext=x=>x.endsWith("*:..")?false:x.endsWith("*(csv)")?false:x.endsWith("(csv)")?"(csv)":x.endsWith(":..")?":..":x.endsWith("(json)")?"(json)":false,se=ext(s);
  x.setAttribute("contenteditable","true");x.onblur=e=>{let d=e.target.innerText,de=ext(d);x.setAttribute("contenteditable","false");
  if(d==""){delete fs[s];x.previousSibling.remove();if(s.endsWith("(csv)")){x.nextSibling.remove();x.nextElementSibling.remove()};x.remove();return};if(se&&se==de&&!(d in fs)){fs[s].name=d;fs[d]=fs[s];delete fs[s];x.innerText=d}else x.innerText=s}},
-down=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
+down=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()},
+test=t=>{o.textContent="file tests    ms\n";let t0=performance.now();for(let k in t)k.endsWith(".t")?test1(k,t[k]):bench(k,t[k]);o.textContent+=".  .  .  ."+(Math.round(performance.now()-t0)+"").padStart(6," ")+" .  ."},
+test1=(f,t)=>{t=t.split("\n");if(!t[t.length-1])t=t.slice(0,-1);t=t.map(x=>x.split(" /"));t.forEach((x,i)=>{if(2!=x.length){throw"bad test at line "+1+i}}) 
+ o.textContent+=f.padEnd(5," ")+" "+(""+t.length).padStart(4," ")
+ let kst=x=>K.Atx(28n,x),t0=performance.now()
+ t.forEach((x,i)=>{try{let s=CK(kst(K.Val(KC(x[0]))));if(s!=x[1])throw("got: "+s) }catch(e){o.textContent+="\n"+f+":"+(1+i)+":\n "+x[0]+"\nexp: "+x[1];throw e}})
+ o.textContent+=(Math.round(performance.now()-t0)+" ok\n").padStart(10," ")},
+bench=(f,t)=>{
+ o.textContent+=f.padEnd(5," ")+" "
+ let t0=performance.now(),r=sK(K.Val(KC(t)))
+ t0=Math.round(performance.now()-t0)
+ o.textContent+=" ".repeat(5)+(t0+" ").padStart(6)+(("ok"!=r)?"fail\n":(1000<t0)?"slow\n":"fast\n")
+}
 
 
 window.ondragover=e=>{e.preventDefault();e.stopPropagation()}
 window.ondrop=e=>{e.preventDefault();e.stopPropagation();addfiles(e.dataTransfer.files)}
 
-var help=`\n\nthe yellow field above is the input editor.
+var help=`\nthe yellow field above is the input editor.
 edit and click elsewhere to execute.
 
 k-libs from the menu are pre-loaded.
-click on the name to see them.
+click on their name to see them.
 
 load files from the filesystem, or drop them into the window.
-.k files appear as libraries, .json&.csv files are parsed
-and other files are assigned a variable by their name as bytes.
-data, json and csv names can be edited with double-click.
+click on 'io' for details.
 `
 
 var json=`load a json file, e.g. "a.json" and it appears as
@@ -206,12 +219,33 @@ format:
  z complex 2 columns:  abs,degree
  b bool to int  (1 true yes) or 0
 `
-var io=`only the last expression is displayed automatically
+var io=`files
+.k     k files (evaluated before the input)
+.t .b  tests/benchmarks
+.csv   parsed and assigned, see 'csv'
+.json  parsed and assigned, see 'json'
+*      assigned to vars by their name as bytes
+
+multifile (load or drop at once):
+multiple data files appear as 
+ a*:..
+they are assigned to 'a' as a dict by their name:
+ a:\`file\`file2!("..";"..")
+
+multiple csv files show up as
+ c*(csv):,hiif
+they are all parsed using the same format
+and assigned to as a dict to 'c':
+ c:\`file1\`file1!(list of cols;list of cols)
+
+predefined libraries(qr.k..) are always present.
+the example database(see 'db') is loaded on doubleclick.
+
+
+debug
+only the last expression is displayed automatically
 by default in matrix format (\`l@x)
 to switch to single line k  (\`k@x) prepend a space
-
-matrix format uses 20 lines by default. this can be changed with
- LINES 100 
 
 for debugging, prepend a backslash before a line
 \\x:1+!10
@@ -225,6 +259,11 @@ write to stdout with:
 
 or to a file (which triggers a download):
 \`"file.txt"<"abc.."
+
+
+format
+matrix format uses 20 lines by default.
+this can be changed with    'LINES 100'
 
 todo fmt table
 `
@@ -264,7 +303,7 @@ key table: aggregate by type
 <label         class="b" onclick="s(this)">svd.k</label> <label class='b' onclick='hlp(this)'>csv</label>
 <label         class="b" onclick="s(this)">fft.k</label>  <label class='b' onclick='hlp(this)' ondblclick='kdb()' oncontextmenu='kdb()'>db</label>
 <label         class="b" onclick="s(this)">plot.k</label> <label class='b' onclick='hlp(this)'>io</label>
-<label         class="b" onclick="s(this)">stats.k</label><label id="first"></label>
+<label         class="b" onclick="s(this)">stats.k</label> <label class='b' onclick='tst()' title="test&bench">t</label><label id="first"></label>
 <label class="b" onclick="ref()">ref</label> <a target="_blank" href="https://github.com/ktye/i/blob/master/intro.md">man</a> <label class="b" title="close" onclick='menu.style.display="none";menx.style.zIndex=5'>x</label>
 </pre>
 <span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
@@ -279,22 +318,19 @@ o.addEventListener('dblclick',   e=>{e.preventDefault();o.textContent="";e=i.inn
 o.addEventListener('contextmenu',e=>{e.preventDefault();o.textContent="";e=i.innerText?kinit(i.innerText):0})
 o.addEventListener('click',e=>{cnv.style.zIndex=-1;})
 
-//let 
-//addhelp=(e,h)=>document.getElementById(e).insertAdjacentHTML("afterend",h)
-//showhelp=x=>{o.textContent=x}
-//addfile("qr.k","");addhelp("qr.k","  <label class='b' onclick='showhelp(help)'>   help</label>")
-//addfile("lu.k","");addhelp("lu.k","  <label class='b' onclick='showhelp(json)'>   json</label>")
-//addfile("svd.k","");addhelp("svd.k","<label class='b' onclick='showhelp(csv)'>   csv</label>  ")
-//addfile("fft.k","");addhelp("fft.k","<label class='b' onclick='showhelp(io)'>    io</label>   ")
-//addfile("plot.k","")
-//addfile("stats.k","")
-let hlp=x=>{cnv.style.zIndex=-1;o.textContent=window[x.innerText]}
 let libs="qr lu svd fft plot stats".split(" "),
 fetchall=(l,f)=>{let x=[],F={};l.forEach(function(u,i){x.push(fetch("klib/"+u+".k").then(r=>r.text()).then(r=>F[l[i]]=r))});Promise.all(x).then(function(){f(F)})}
 fetchall(libs,x=>libs.forEach((name,i)=>fs[name+".k"]={name:name+".k",text:x[name],csv:false}))
 
-let kdb=_=>fetch("db/db.csv").then(r=>r.text()).then(r=>{fs["db(csv)"]={name:"db(csv)",csv:true,text:r},csvshow("db(csv)");fetch("klib/db.k").then(r=>r.text()).then(r=>fs["db.k"]={name:"db.k",text:r,csv:false})})
-
+let
+hlp=x=>{cnv.style.zIndex=-1;o.textContent=window[x.innerText]},
+kdb=_=>fetch("db/db.csv").then(r=>r.text()).then(r=>{fs["db(csv)"]={name:"db(csv)",csv:true,text:r},csvshow("db(csv)");fetch("klib/db.k").then(r=>r.text()).then(r=>fs["db.k"]={name:"db.k",text:r,csv:false})}),
+tst=_=>{o.textContent="";
+ let a="k.t b.t apl.k klib/apl.t klib/qr.b klib/lu.b klib/svd.b klib/fft.b".split(" "),m={},p=x=>x.split("\n").slice(1).join("\n")+"\n`ok\n",
+ f=a=>fetch(a[0]).then(r=>r.text()).then(
+  r=>{m[a[0].startsWith("klib/")?a[0].slice(5):a[0]]=("apl.k"==a[0])?p(r):r;(1<a.length)?f(a.slice(1)):kinit(m)}
+ );f(a)
+}
 </script>
 
 </body></html>

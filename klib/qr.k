@@ -8,7 +8,7 @@ qr:{K:!m:#*x;I:!n:#x;j:0;r:n#0a;turn:$[`Z~@*x;{(-x)@angle y};{x*1. -1@y>0}]
   x[I;K]-:{+/x*y}/[(conj x[j;K]);x[I;K]]*\x[j;K]
   K:1_K;j+:1];(x;r;n;m)}
 
-solve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m
+lsq:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m
  while[j<n;y[K]-:(+/(conj H[j;K])*y K)*H[j;K];K:1_K;j+:1]
  i:n-1;J:!n;y[i]%:r@i
  while[i;j:i_J;i-:1;y[i]:(y[i]-+/H[j;i]*y@j)%r@i]
@@ -17,7 +17,7 @@ solve:{qslv:{H:x 0;r:x 1;n:x 2;m:x 3;j:0;K:!m
 
 / dot:(+/*)\
 / A:(3 5 -8 12.;-2 3 3 0.;7 -8 2 1.)
-/ b:dot[+A;x:1 2 3];0.00001>|/abs x-solve[A;b]
+/ b:dot[+A;x:1 2 3];0.00001>|/abs x-lsq[A;b]
 /
 / A:+0a0+(1 -2a90 3;5a90 3 2;2 3 1;4 -1 1);
-/ 0.0001>|/abs r-solve[A;dot[+A;r:1a30 2a30 3a30]]
+/ 0.0001>|/abs r-lsq[A;dot[+A;r:1a30 2a30 3a30]]
