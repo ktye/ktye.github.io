@@ -1,1 +1,1 @@
-time -f "%U" k ../k.t ../apl.k apl.t qr.k lu.k svd.k fft.k ../kweb/k.k cc.k wb.k -e >/dev/null
+time -f "%U" k ../k.t ../apl.k apl.t qr.k lu.k svd.k fft.k ../kweb/k.k cc.k wb.k rot.k flow.k -e >/dev/null

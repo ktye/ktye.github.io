@@ -49,7 +49,7 @@ kinit=s=>{s=("string"==typeof s)?s.replace(/^\\(.*)$/mg,"`<`k@$1"):s;
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
  Object.keys(fs).forEach(a=>{
   if(Array.isArray(fs[a]))     asn(fs[a][0].csv?"c":"a",kdict(fs[a]))
-  else if(a.endsWith(".k"))    K.repl(KC(fs[a].text))
+  else if(a.endsWith(".k"))    K.repl(KC(fs[a].text.split(/\n\\\n/)[0]))
   else if(a.endsWith(":.."))   asn(a.slice(0,-3),KC(fs[a].text))
   else if(a.endsWith("(json)"))asn(a.slice(0,-6),kjson(fs[a].json))
   else if(a.endsWith("(csv)")) asn(a.slice(0,-5),kcsv(fs[a].csv.data))
@@ -120,12 +120,16 @@ window.init=()=>{kinit()
  i.oninput=e=>o.textContent=""
 }
 window.onresize=e=>{asn("l.",K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20"))));if(0<+cnv.style.zIndex)scaleplot(plots)}
+window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
+ if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
+ else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
+ window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
 window.onerror=(m,s,l,c,e)=>{o.textContent+="\n"+s+m}
 window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
 document.addEventListener('keydown',e=>{if(e.key=="Escape")cnv.style.zIndex=-1;false})
 let cnvfull=0,cnvgrip=_=>{cnvfull=1-cnvfull;cnv.style.width=cnvfull?"100vw":"";scaleplot(plots)}
 
-let fs={},
+let fs={},lastsel=false
 s=e=>{cnv.style.zIndex=-1;e=e.textContent;if(Array.isArray(fs[e])){if(fs[e][0].csv)return csvlist(fs[e]);let r="a(dict) with "+fs[e].length+" files:\n";fs[e].forEach(x=>r+=x.name+":"+x.text.slice(0,Math.min(10,x.text.length))+" ("+x.text.length+" bytes)\n");o.textContent=r;return};
  let x=fs[e].text;if(fs[e].csv)csvshow(fs[e].name);else o.textContent=("string"===typeof x)?x:e.slice(0,-3)+"("+x.length+" bytes)\n"+((x.length>100)?x.slice(0,100)+"..":x)},
 ref=_=>fetch("klib/ref").then(r=>r.text()).then(r=>o.textContent=r),
@@ -151,19 +155,20 @@ ren=x=>{let s=x.innerText,ext=x=>x.endsWith("*:..")?false:x.endsWith("*(csv)")?f
  x.setAttribute("contenteditable","true");x.onblur=e=>{let d=e.target.innerText,de=ext(d);x.setAttribute("contenteditable","false");
  if(d==""){delete fs[s];x.previousSibling.remove();if(s.endsWith("(csv)")){x.nextSibling.remove();x.nextElementSibling.remove()};x.remove();return};if(se&&se==de&&!(d in fs)){fs[s].name=d;fs[d]=fs[s];delete fs[s];x.innerText=d}else x.innerText=s}},
 down=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()},
-test=t=>{o.textContent="file tests    ms\n";tests(Object.keys(t),t,performance.now())},
-tests=(a,m,t0)=>{let k=a[0];a=a.slice(1);setTimeout(_=>{k.endsWith(".t")?test1(k,m[k]):bench(k,m[k]);if(a.length)tests(a,m,t0);else o.textContent+=".  .  .  ."+(Math.round(performance.now()-t0)+"").padStart(6," ")+" .  ." },10)},
+test=t=>{o.textContent="file  tests    ms mem\n";tests(Object.keys(t),t,performance.now())},
+tests=(a,m,t0)=>{let k=a[0];a=a.slice(1);setTimeout(_=>{k.endsWith(".t")?test1(k,m[k]):bench(k,m[k]);if(a.length)tests(a,m,t0);else o.textContent+=".  .  .  . "+(Math.round(performance.now()-t0)+"").padStart(6," ")+" .  .  ." },10)},
 test1=(f,t)=>{t=t.split("\n");if(!t[t.length-1])t=t.slice(0,-1);t=t.map(x=>x.split(" /"));t.forEach((x,i)=>{if(2!=x.length){throw"bad test at line "+1+i}}) 
- o.textContent+=f.padEnd(5," ")+" "+(""+t.length).padStart(4," ")
+ o.textContent+=f.padEnd(6," ")+" "+(""+t.length).padStart(4," ")
  let kst=x=>K.Atx(28n,x),t0=performance.now()
  t.forEach((x,i)=>{try{let s=CK(kst(K.Val(KC(x[0]))));if(s!=x[1])throw("got: "+s) }catch(e){o.textContent+="\n"+f+":"+(1+i)+":\n "+x[0]+"\nexp: "+x[1];throw e}})
- o.textContent+=(Math.round(performance.now()-t0)+" ok\n").padStart(10," ")},
+ o.textContent+=(Math.round(performance.now()-t0)+" "+mem()+" ok\n").padStart(13," ")},
 bench=(f,t)=>{
- o.textContent+=f.padEnd(5," ")+" "
+ o.textContent+=f.padEnd(6," ")+" "
  let t0=performance.now(),r=sK(K.Val(KC(t)))
  t0=Math.round(performance.now()-t0)
- o.textContent+=" ".repeat(5)+(t0+" ").padStart(6)+(("ok"!=r)?"fail\n":(1000<t0)?"slow\n":"fast\n")
-}
+ o.textContent+=" ".repeat(5)+(t0+" "+mem()+" ").padStart(9)+((1000<t0)?"slow\n":"fast\n")
+},
+mem=_=>Math.log2(K.memory.buffer.byteLength)
 
 
 window.ondragover=e=>{e.preventDefault();e.stopPropagation()}
@@ -316,18 +321,18 @@ i.addEventListener('paste',e=>{e.preventDefault();
  let t=e.clipboardData.getData("text/plain"),s=window.getSelection()
  if(s.rangeCount){s.deleteFromDocument();s.getRangeAt(0).insertNode(document.createTextNode(t))};o.textContent=""})
 o.addEventListener('dblclick',   e=>{e.preventDefault();o.textContent="";e=i.innerText?kinit(i.innerText):0})
-o.addEventListener('contextmenu',e=>{e.preventDefault();o.textContent="";e=i.innerText?kinit(i.innerText):0})
+//o.addEventListener('contextmenu',e=>{e.preventDefault();o.textContent="";e=i.innerText?kinit(i.innerText):0})
 o.addEventListener('click',e=>{cnv.style.zIndex=-1;})
 
 let libs="qr lu svd fft plot stats".split(" "),
-fetchall=(l,f)=>{let x=[],F={};l.forEach(function(u,i){x.push(fetch("klib/"+u+".k").then(r=>r.text()).then(r=>F[l[i]]=r))});Promise.all(x).then(function(){f(F)})}
-fetchall(libs,x=>libs.forEach((name,i)=>fs[name+".k"]={name:name+".k",text:x[name],csv:false}))
+felibs=(l,f)=>{let x=[],F={};l.forEach(function(u,i){x.push(fetch("klib/"+u+".k").then(r=>r.text()).then(r=>F[l[i]]=r))});Promise.all(x).then(function(){f(F)})}
+felibs(libs,x=>libs.forEach((name,i)=>fs[name+".k"]={name:name+".k",text:x[name],csv:false}))
 
 let
 hlp=x=>{cnv.style.zIndex=-1;o.textContent=window[x.innerText]},
 kdb=_=>fetch("db/db.csv").then(r=>r.text()).then(r=>{fs["db(csv)"]={name:"db(csv)",csv:true,text:r},csvshow("db(csv)");fetch("klib/db.k").then(r=>r.text()).then(r=>fs["db.k"]={name:"db.k",text:r,csv:false})}),
-tst=_=>{o.textContent="";let a="k.t apl.k klib/apl.t klib/qr.b klib/lu.b klib/svd.b klib/fft.b kweb/k.k klib/cc.k klib/wb.k".split(" "),m={},p=x=>x.split("\n").slice(1).join("\n"),ok=x=>x+"\n`ok\n",
- f=a=>fetch(a[0]).then(r=>r.text()).then(r=>{let a0=a[0];a0=a0.includes("/")?a0.slice(1+a0.lastIndexOf("/")):a0;m[a0]=("apl.k"==a0)?ok(p(r)):("k.k"==a0)?ok(r):r;(1<a.length)?f(a.slice(1)):kinit(m)});f(a)}
+tst=_=>{o.textContent="";let a="k.t apl.k klib/apl.t klib/qr.k klib/lu.k klib/svd.k klib/fft.k kweb/k.k klib/cc.k klib/wb.k klib/rot.k klib/flow.k".split(" "),m={},p=x=>x.split("\n").slice(1).join("\n"),
+ f=a=>fetch(a[0]).then(r=>r.text()).then(r=>{let a0=a[0];a0=a0.includes("/")?a0.slice(1+a0.lastIndexOf("/")):a0;m[a0]=("apl.k"==a0)?p(r):r;(1<a.length)?f(a.slice(1)):kinit(m)});f(a)}
 </script>
 
 </body></html>
