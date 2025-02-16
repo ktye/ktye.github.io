@@ -7,6 +7,7 @@ locs:0                                         /ifun!names
 glob:0#`
 fsig:(0#`)!()
 sigs:()
+delta:{x-(*x),-1_x}
 
 wb:{[o]opts::o
  F[`prg`mem`con`var`tab`fun`arg`sym`res`loc`ast`lod`sto]:(wbprg;wbmem;wbcon;wbvar;wbtab;wbfun;wbarg;wbsym;wbres;wbloc;wbast;wblod;wbsto)
@@ -57,7 +58,7 @@ wbmem:{y;""}
 wbcon:{(wbtype S 1+x),0x00,(*y),0x0b}
 wbvar:{(wbtype S 1+x),0x01,(*y),0x0b}
 wbtab:{y;(I x;(!fsig)?S x)}
-wbtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=`d@*x)^(x:+x)1]}
+wbtbl:{{0x0041,(leb x),0x0b,(leb@#y),,/leb'y}'[(*x)i;(i:&~1=delta@*x)^(x:+x)1]}
 wbfex:{(leb@#$x),($x),0x00,leb y}
 
 wbfun:{s:$S x;c:&x=P
