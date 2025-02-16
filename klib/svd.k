@@ -22,14 +22,13 @@ svq:{q:qr x;h:q 0;r:q 1;n:q 2;m:q 3;o:0|(1+&n)@!m
 
 cond:{(*x)%*|x:(svd x)1}
 
-/ eye:{(!x)=/!x}
-/ dia:{x*eye@#x}
-/ uni:{|/|/abs mul[+conj x;x]-eye@#x}              /test if unitary: maxabs I-x'*x
-/ mul:{(+/*)/[x;y]}                                /r,x,y: list of rows
-/ dvs:{[U;s;V]|/|/abs A-mul[U]mul[dia s;+conj V]}  /test if A is U*S*V'
-/ 
-/ A:3^?12  /or 3^?12a (complex)
-/ q:svd A
-/ `u \uni U:q 0
-/ `v \uni V:q 2
-/ `t \dvs.q
+\
+eye:{(!x)=/!x}
+dia:{x*eye@#x}
+uni:{|/|/abs mul[+conj x;x]-eye@#x}              /test if unitary: maxabs I-x'*x
+mul:{(+/*)/[x;y]}                                /r,x,y: list of rows
+dvs:{[U;s;V]|/|/abs a-mul[U]mul[dia s;+conj V]}  /test if A is U*S*V'
+
+a:50^?50*50
+q:svd a
+$[1e-6<|/(uni U:q 0;uni V:q 2;dvs.q;1>cond a);1+`fail;`ok]

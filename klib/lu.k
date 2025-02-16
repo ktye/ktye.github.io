@@ -14,7 +14,9 @@ lusolve:{[LUP;b];A:*LUP;P:*|LUP
  r:{[x;i;a]x[i]-:+/(a k)*x k:!i}/[b P;!n:#A;A]
    {[x;i;a]x[i]:(x[i]-+/(a k)*x k:(1+i)_!#x)%a[i]}/[r;|!n;|A]}
 
-/ A:5^?25
-/ x:?5
-/ b:(+/*)\[A;x]
-/ x-lusolve[lu A;b]
+\
+A:400^?400*400
+x:?400
+b:(+/*)\[A;x]
+r:x-lusolve[lu A;b]
+$[1e-6<|/abs r;1+`fail;`ok]
