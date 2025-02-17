@@ -5,6 +5,7 @@
 /  plot`xstr`ystr`title  /symbols: 1..3 axis labels
 /  plot(x;y0;y1;..)      /list of: x(I|F) y(I|F|Z), multi-line
 /  plot(x0;x1;y0;y1)     /floats : axis limits y1|x0,x1|x0,x1,0,y1
+/  plot".."              /chars:   styles: ".oO08"(pointsize) "-=#"(linewidth) ">"(arrow)
 /  plot".5 .8 20 18"     /chars:   canvas/font size 50% 80% 20pt 18pt, wh is pixels(>1) or % of screen.
 / 
 / calls to plot return the plot id (0 by default) which can be used

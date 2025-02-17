@@ -41,7 +41,9 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   legend(s,pt)
  }
  let clickpos=e=>{let r=e.target.getBoundingClientRect(),z=devicePixelRatio,x=z*(e.clientX-r.left),y=z*(e.clientY-r.top),ri=targetRect(x,y,rects);return[x,y,ri]}
- canvas.ondblclick=function(e){pd(e);zoom=null;canvas.style.cursor="";let[x,y,ri]=clickpos(e),l=p.plots[ri].limits,rri=rects[ri],[X,Y]=rects[ri][5](x-rri[0],y-rri[1])
+
+canvas.ondblclick=function(e){if(p.grip&&zoom===null&&resize(e)){p.grip();pd(e);return false} //dblclick seems to work on ios
+ pd(e);zoom=null;canvas.style.cursor="";let[x,y,ri]=clickpos(e),l=p.plots[ri].limits,rri=rects[ri],[X,Y]=rects[ri][5](x-rri[0],y-rri[1])
   if(outside(l,X,Y)){delete p.plots[ri].limits;replot(canvas);return}
   let[line,point]=snapPoint(x,y,rects[ri],p.plots[ri])
   p.hi={plot:ri,lines:[line],point:point}
@@ -80,7 +82,7 @@ function plots(p,canvas,slider,listbx,legend){const z=devicePixelRatio //zoom sc
   else p.plots[ri].limits=[min(x,X),max(x,X),min(y,Y),max(y,Y)];zoom=null;replot(canvas)
  }
  let resize=e=>{if(e.offsetY<40&&40>(canvas.width-e.offsetX)){ if(!e.which)canvas.style.cursor="nesw-resize"; return true };  if(canvas.style.cursor="nesw-resize")canvas.style.cursor=""; return false}
- canvas.ontouchend=e=>o.textContent+=("touchend #touches"+(e.touches.length)+" scale: "+e.scale)
+ canvas.ontouchend=e=>o.textContent+=("touchend #touches"+(e.touches.length)+" scale: "+e.scale+"\n")
  canvas.onclick=e=>{if(p.grip&&zoom===null&&resize(e)){p.grip();pd(e);return false}}
  canvas.onmousemove=e=>{pd(e);if(p.grip&&resize(e))return;if(1==e.which){return(zoom===null)?startzoom(e.shiftKey||e.ctrlKey,e.ctrlKey,e.shiftKey&&e.ctrlKey,...mousecoords(e)):drawzoom(zoom.x0,zoom.y0,...clickpos(e))};if(zoom===null)return;if(e.which==0)endzoom(...mousecoords(e)) }
  canvas.onwheel=e=>{let[x,y,X,Y,ri]=mousecoords(e);if(e.deltaY==0)return;let z=(e.deltaY>0)?2:0.5,pi=p.plots[ri],l=pi.limits,xm=(l[0]+l[1])/2,ym=(l[2]+l[3])/2,DX=(l[1]-l[0])/2*z,DY=(l[3]-l[2])/2*z
