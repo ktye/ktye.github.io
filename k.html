@@ -39,7 +39,7 @@ kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));I()[(lo(x)>>>2)-3]=a;asn(s,(14n<<59n)+BigInt(lo
 kinit=s=>{s=("string"==typeof s)?shortcut(s):s;
  let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
- K=r.instance.exports;K.kinit();plots=0;pid=0;cnv.style.zIndex=-1
+ K=r.instance.exports;K.kinit();plots=0;pid=0;psiz={};cnv.style.zIndex=-1
  kreg("plot",1,0n);kreg("LINES",1,1n);kreg("memory",0,2n);plots=0;pid=0;
  cw=measure.getBoundingClientRect().width/10
  if(!s)o.textContent="ktye/k "+n+"\n "+help;
@@ -64,15 +64,21 @@ kplt=x=>{x=K.Atx(x,K.Ki(0));let pn=x=>{if(plots.length<=x)plots[x]={};return x},
  let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(3==t)?iK(x[0]):(5==t)?fK(x[0]):(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
  if(plots===0){pid=0;plots=[]};if(undefined===plots[pid])plots[pid]={}
  let t=K.tp(x);if(5==t||t==6)return kplt(enl((5==t)?enl(rnd(flr(x))):rnd(x)));
- (2==t)?plots[pid].styles=cK(x):(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(18==t)?plots[pid].styles=pltsty(CK(x)):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
+ if(18==t){x=psty(CK(x));if(x)plots[pid].styles=x;return K.Ki(pid)}
+ (2==t)?plots[pid].styles=cK(x):(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
  return K.Ki(pid)},
-pltsty=s=>s?s:plots[pid].styles, //todo intercept ".5 .8 20 18" w h font1 font2
+psty=(s,d)=>{let x=s.split(" ").map(x=>Number(x)),n=x.length;return(1<n&&x.every(x=>!isNaN(x)))?((psiz.w=x[0]),(psiz.h=x[1]),(psiz.f1=((2<n)?x[2]:0)),(psiz.f2=((3<n)?x[3]:0)),0):s}, //intercept ".5 .8 2018"=>w h f1 f2
 kmem=x=>{K.dx(x);console.log("memory: todo bucket stats");return K.Ki(Math.log2(K.memory.buffer.byteLength))}, //memory[]
 axis=x=>plots[pid].limits=Array.from(x),
 scaleplot=a=>{
  let fs=x=>((x?0.8:1)*parseFloat(getComputedStyle(document.body).fontSize)*devicePixelRatio)+"px monospace"
- let p={plots:a,font1:fs(0),font2:fs(1),grip:cnvgrip,cols:+(window.innerHeight>1.2*window.innerWidth)}
+ let w=window.innerWidth,h=window.innerHeight,p={plots:a,font1:fs(0),font2:fs(1),grip:cnvgrip,
+ cols:Math.min(a.length,Math.ceil(Math.sqrt(a.length*0.8*w/h)))}
+ if(psiz&&psiz.f1)p.font1=psiz.f1+"px monospace";if(psiz&&psiz.f2)p.font2=psiz.f2+"px monospace"
+ if(psiz&&psiz.w)cnv.style.width=(psiz.w>1)?psiz.w+"px":(100*psiz.w)+"vw";if(psiz&&psiz.h)cnv.style.height=(psiz.h>1)?psiz.h+"px":(100*psiz.h)+"dvh"
+ if((!psiz)||!(psiz.w&&psiz.h))autocnv(plots.length,w,h,p.cols)
  plotjs.plots(p,cnv,undefined/*{b:bac,f:fwd}*/,undefined/*pcap*/,x=>o.textContent=x)},
+autocnv=(n,w,h,cols)=>{let hw=h/w,HW=1.2*Math.ceil(n/cols)/cols;if(hw>HW){w=1,h=Math.min(0.95,HW/hw)}else{h=1,w=Math.min(0.95,hw/HW)};cnv.style.width=(100*w)+"vw";cnv.style.height=(100*h)+"dvh"},
 kdict=a=>K.Cal(12n,K.l2(KS(a.map(x=>x.name)), a[0].csv?Kl(a.map(x=>kcsv(x.csv.data))) :KL(a.map(x=>x.text))   )),
 kjson=x=>{let r=0n,i,key=(x,y)=>K.Cal(12n,K.l2(x,y)),t=typeof x,sc=x=>(23==K.tp(x)&&K.nn(x)>0&&18==K.tp(K.Atx(K.rx(x),K.Ki(0))))?K.Cal(17n,K.l2(Ks(""),x)):x; //`$x
  if(Array.isArray(x)){r=K.mk(23,0);x.forEach(x=>r=cat(r,kjson(x)));return r}
