@@ -1,1 +1,15 @@
-time -f "%U" /tmp/k/k ../k.t ../apl.k apl.t qr.k lu.k svd.k fft.k ../kweb/k.k cc.k wb.k rot.k flow.k -e >/dev/null
+time -f "%U" ./a.exe ../k.t ../apl.k apl.t qr.k lu.k svd.k fft.k ../kweb/k.k cc.k wb.k rot.k flow.k -e >/dev/null
+
+
+#                   bytes   milli
+# k.wasm            34163    3240
+# k.wasm -Os        31482    7030
+# k.wasm -O4        37525    3070
+# k.wasm simd4      37495    2680
+# k.wasm -Os,simd4  34729    2545
+# k.wasm -O4,simd4  40788    2333
+#
+# k.c gcc -O3      250512    2666
+# k.c clang19 avx2 256973    2283
+# k.go            2350592    4591
+# k.go+aligncheck 2467328    8128

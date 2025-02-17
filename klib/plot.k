@@ -1,10 +1,11 @@
 / plots are created using multiple calls to plot.
 / depending on the type of the argument: 
-/  plot 0                    /integer: select current plot (side-by-side)
-/  plot\`polar                /symbol : \`xy\`bar\`polar\`ampang\`square
-/  plot\`xstr\`ystr\`title      /symbols: 1..3 axis labels
-/  plot(x;y0;y1;..)          /list of: x(I|F) y(I|F|Z), multi-line
-/  plot(x0;x1;y0;y1)         /floats : axis limits y1|x0,x1|x0,x1,0,y1
+/  plot 0                /integer: select current plot (side-by-side)
+/  plot`polar            /symbol : \`xy\`bar\`polar\`ampang\`square
+/  plot`xstr`ystr`title  /symbols: 1..3 axis labels
+/  plot(x;y0;y1;..)      /list of: x(I|F) y(I|F|Z), multi-line
+/  plot(x0;x1;y0;y1)     /floats : axis limits y1|x0,x1|x0,x1,0,y1
+/  plot".5 .8 20 18"     /chars:   canvas/font size 50% 80% 20pt 18pt, wh is pixels(>1) or % of screen.
 / 
 / calls to plot return the plot id (0 by default) which can be used
 / to index into data.
@@ -22,6 +23,10 @@
 /  plot'(`bar;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"bar plot")
 /  plot'(`stacked;(1 2 3 4 5;10 2 5 11 1;2 3 2 1 7;1 2 3 4 5);`class`count`"stacked bar plot")
 /  x:0.02*!n:123;y0:2a30%1-0.5a90+x*x;y1:y0*1.1a165;plot'((x;y0);(x;y1);1;`polar;(x;y0;y1))
+/ shortcuts  k.html has a short form: p)..  is replaced by plot'(..)
+/  p)`x`y`z;(!100;?100)                    so it takes multiple commands in one line 
+/  p)10.     random xy    plot, short for plot@,?10
+/  p)10a     random polar plot, short for plot'(`polar;,?10a)
 
 hist:{n:_0.+*x:(0.+x),(&/y;|/y);a:x 1;b:x 2;x:a+(w:(b-a)%n)*!n;d:#'=x'y;d[0]+:0|d@-1;plot'(`bar;(x+0.5*w;0|d@!#x))}
 

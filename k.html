@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
 <title>ktye/k</title>
 <style>*{font-family:monospace;margin:0;border:none;padding:0;}
-body{overflow:hidden;height:100vh;display:grid;grid-template-rows:auto 1fr}
+body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
 [contenteditable="true"]{background-color:#ffe;border:none;outline:none}
 #i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
 #o{flex-grow:1;min-height:4em;background-color:#efe;width:100vw;bottom:0;overflow:auto}
@@ -23,7 +23,7 @@ LK=x=>{let n=K.nn(x),r=Array(n);for(let i=0;i<n;i++)r[i]=K.Atx(K.rx(x),K.Ki(i));
 IK=x=>{let p=lo(x)>>>2,n=K.nn(x);let r=I().slice(p,p+n);K.dx(x);return r},iK=x=>lo(x),KI=x=>{r=K.mk(19,x.length);I().set(x,lo(r)>>2);return r},
 FK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+n);K.dx(x);return r},fK=x=>new Float64Array(K.memory.buffer,lo(x),1)[0],KF=(x,r)=>{r=K.mk(21,x.length);F().set(x,lo(r)>>>3);return r},
 ZK=x=>{let p=lo(x)>>>3,n=K.nn(x);let r=F().slice(p,p+2*n);K.dx(x);return r},zK=x=>new Float64Array(K.memory.buffer,lo(x),2),KZ=(x,r)=>{r=K.mk(22,x.length/2);F().set(x,lo(r)>>>3);return r},
-asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),cat=(x,y)=>K.Cal(13n,K.l2(x,K.Atx(13n,y))),
+asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),enl=x=>K.Atx(13n,x),flr=x=>K.Atx(16n,x),rnd=x=>K.Atx(18n,x),cat=(x,y)=>K.Cal(13n,K.l2(x,enl(y))),
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
 cw,
 
@@ -32,18 +32,15 @@ kenv={env:{
  Args:  function(       ){return 0},
  Arg:   function(x,y    ){return 0},
  Read:  function(a,b,c  ){return -1},
- //Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d);o.textContent+=su(v)+"\n";if(a)o.textContent+="\n";return 0},
  Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);a?down(su(f),v):o.textContent+=su(v);return 0},
  ReadIn:function(x,y    ){return 0},
- Native:function(x,y  ,i){return[kplt,klns][lo(x)](y)}}},
-kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));
-I()[(lo(x)>>>2)-3]=a;
-asn(s,(14n<<59n)+BigInt(lo(x)))},
-kinit=s=>{s=("string"==typeof s)?s.replace(/^\\(.*)$/mg,"`<`k@$1"):s;
+ Native:function(x,y  ,i){return[kplt,klns,kmem][lo(x)](y)}}},
+kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));I()[(lo(x)>>>2)-3]=a;asn(s,(14n<<59n)+BigInt(lo(x)))},
+kinit=s=>{s=("string"==typeof s)?shortcut(s):s;
  let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit();plots=0;pid=0;cnv.style.zIndex=-1
- kreg("plot",1,0n);kreg("LINES",1,1n);plots=0;pid=0;
+ kreg("plot",1,0n);kreg("LINES",1,1n);kreg("memory",0,2n);plots=0;pid=0;
  cw=measure.getBoundingClientRect().width/10
  if(!s)o.textContent="ktye/k "+n+"\n "+help;
  window.onresize() //K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20")))))
@@ -60,14 +57,16 @@ kinit=s=>{s=("string"==typeof s)?s.replace(/^\\(.*)$/mg,"`<`k@$1"):s;
  if(s)K.repl(KC(s))
  if(plots){scaleplot(plots);cnv.style.zIndex=10}
 })},
+shortcut=s=>s.replace(/^\\(.*)$/mg," \\$1").replaceAll(/^p\)(.*;.*)$/mg,"plot'($1)").replaceAll(/^p\)(.*)$/mg,"plot($1)"),
 cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
 klns=x=>asn("l.",K.Atx(Ks("lxy"),K.Val(KC(cols()+" "+lo(K.Atx(x,K.Ki(0))))))),
 kplt=x=>{x=K.Atx(x,K.Ki(0));let pn=x=>{if(plots.length<=x)plots[x]={};return x},pt=x=>{plots[pid].type=("square"==x)?"xy":x;plots[pid].square=x=="square"},ri=x=>{x=ZK(x);return[x.filter((_,i)=>i&1),x.filter((_,i)=>~i&1)]},la=x=>{x.push("","");[plots[pid].xlabel,plots[pid].ylabel,plots[pid].title]=x}
  let ln=x=>{if(!("lines"in plots[pid]))plots[pid].lines=[];let t=K.tp(x[0]),X;if(x.length>1&&22>t){X=(3==t)?iK(x[0]):(5==t)?fK(x[0]):(19==t)?IK(x[0]):FK(x[0]);x.shift()};x.forEach(y=>{let t=K.tp(y),v=(22==t)?ri(y):(19==t)?IK(y):FK(y);plots[pid].lines.push({x:X,y:(22==t)?v[0]:v,z:(22==t)?v[1]:undefined})})}
  if(plots===0){pid=0;plots=[]};if(undefined===plots[pid])plots[pid]={}
- let t=K.tp(x);
+ let t=K.tp(x);if(5==t||t==6)return kplt(enl((5==t)?enl(rnd(flr(x))):rnd(x)));
  (2==t)?plots[pid].styles=cK(x):(3==t)?pid=pn(lo(x)):(4==t)?pt(sK(x)):(18==t)?plots[pid].styles=CK(x):(20==t)?la(SK(x)):(19==t)?axis(IK(x)):(21==t)?axis(FK(x)):(22==t)?(pt("polar"),ln([x])):(23==t)?ln(LK(x)):K.dx(x)
  return K.Ki(pid)},
+kmem=x=>{K.dx(x);console.log("memory: todo bucket stats");return K.Ki(Math.log2(K.memory.buffer.byteLength))}, //memory[]
 axis=x=>plots[pid].limits=Array.from(x),
 scaleplot=a=>{
  let fs=x=>((x?0.8:1)*parseFloat(getComputedStyle(document.body).fontSize)*devicePixelRatio)+"px monospace"
