@@ -1,0 +1,61 @@
+# get compile and run benchmarks:
+#  $mkdir /tmp/k && cd /tmp/k
+#  $wget ktye.github.io/klib/bench
+#  $sh bench get
+#  $CC=clang-19 sh bench compile     #kv needs at least clang-17
+#  $time sh bench k  >/dev/null
+#  $time sh bench kv >/dev/null
+# if you have go
+#  $sh bench go       #compile
+#  $time sh bench kg >/dev/null
+
+if [ "$1" = "get" ]; then
+	w="https://ktye.github.io"
+	for f in k.t apl.k klib/apl.t klib/qr.k klib/lu.k klib/svd.k klib/fft.k kweb/k.k klib/cc.k klib/wb.k klib/rot.k klib/flow.k; do
+		wget $w/$f
+	done
+	wget https://github.com/ktye/i/releases/download/latest/k.c
+	wget https://github.com/ktye/i/releases/download/latest/kv.c
+	wget https://github.com/ktye/i/releases/download/latest/k.go
+fi
+if [ "$1" = "compile" ]; then
+	if [ -z "$CC" ]; then
+		CC=cc
+	fi
+	set -x
+	$CC -O3 -march=native -ok  k.c  -lm
+	$CC -O3 -march=native -okv kv.c -lm
+fi
+if [ "$1" = "go" ]; then
+	go build -o kg k.go
+fi
+if [ "$1" = "k" ]; then
+	./k  apl.k apl.t qr.k lu.k svd.k fft.k k.k cc.k wb.k rot.k flow.k -e
+fi
+if [ "$1" = "kv" ]; then
+	./kv apl.k apl.t qr.k lu.k svd.k fft.k k.k cc.k wb.k rot.k flow.k -e
+fi
+if [ "$1" = "kg" ]; then
+	./kg apl.k apl.t qr.k lu.k svd.k fft.k k.k cc.k wb.k rot.k flow.k -e
+fi
+
+
+#thinkpad
+# chrome  5700
+# k.c     3200
+# kv.c    2800
+# k.go    6600
+
+#dell
+#                   bytes   milli
+# k.wasm            34163    3240
+# k.wasm -Os        31482    7030
+# k.wasm -O4        37525    3070
+# k.wasm simd4      37495    2680
+# k.wasm -Os,simd4  34729    2545
+# k.wasm -O4,simd4  40788    2333
+#
+# k.c gcc -O3      250512    2666
+# k.c clang19 avx2 256973    2283
+# k.go            2350592    4591
+# k.go+aligncheck 2467328    8128
