@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>kn</title>
+<style>*{font-family:monospace;margin:0;border:none;padding:0;}
+body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
+[contenteditable="true"]{background-color:#ffe;border:none;outline:none}
+#i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
+#o{flex-grow:1;min-height:4em;background-color:#fee;width:100vw;bottom:0;overflow:auto}
+#cnv{position:absolute;left:0;bottom:0;width:80vw;height:80vh;z-index:-1}
+.b:hover{cursor:pointer}
+@media(orientation:portrait){*{font-size:x-large}}
+</style>
+<script src="k.js"></script>
+<script>
+
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
+kdo=s=>{s=i.innerText.trim();if(s)o.textContent=string(eval(parse(s)));if(1000>s.length)window.location.hash="#"+encodeURIComponent(s)}
+
+window.init=()=>{kdo()
+ let f=window.location.hash;if(f)i.innerText=decodeURIComponent(f.slice(1))
+ i.onblur=e=>{if(!o.textContent)kdo()}
+ i.oninput=e=>o.textContent=""
+}
+window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
+ if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
+ else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
+ window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
+window.onerror=(m,s,l,c,e)=>{o.textContent+="\n"+s+m}
+window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
+
+</script>
+</head>
+
+<body onload="window.init()">
+<pre id="i" contenteditable="true" spellcheck="false" autofocus>
+
+</pre>
+<pre id="o">
+k for binaries
+
+3     -> bigint
+3n    -> bigint
+3h    -> BigInt.asIntN(16,3n)
+0 1c  -> int8array
+2 3h  -> int16array
+4 5i  -> int32array
+6 7l  -> BigInt64Array, also _6 7
+8 9   -> array of bigints [8n,9n]
+8 9n  -> same as 8 9
+"abc" -> uint8array
+0b110 0xff3 ..
+
+unsigned
++x  
++3h
++3 4c -> uint8array
+
+downtype: _x: bigint->bigint64->int32->int16->int8
+_ 2 3h -> int8array
+_+3 4c -> uint8->int8
+
+uptype: mix with larger type
+0i+0 1c -> 0 1i
+1i++2i  -> +3i   unsigned dominates
+3 +0 1c -> 3 4c  bigints don't uptype
+
+arithmetics (atomic)
++ - * % ! / \  (div mod shift)
+
+cast/reinterpret
+0i?1 2 3 4c  -> 67305985i           new Int32Array(c.buffer.slice())
+0c?1234i     -> -46 4 0 0c
+
+clamp
+ 4$1 2 3     -> asUintN(4,x)
+-4$1 2 3     -> asIntN( 4,x)
+
+</pre>
+<pre style="position:absolute;z-index:5;right:0;bottom:0;background:#efe">
+<label id="dec" class="b" onclick="fmt(this)">>dec</label>
+<label id="hex" class="b" onclick="fmt(this)"> hex</label>
+<label id="bin" class="b" onclick="fmt(this)"> bin</label>
+</pre>
+<span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
+
+<script>
+let fmt=x=>Array.from(x.parentElement.children).forEach(y=>y.innerText=((x==y)?">":" ")+y.innerText.slice(1))
+o.addEventListener('dblclick',e=>{e.preventDefault();o.textContent="";e=i.innerText?kdo():0})
+
+</script>
+
+</body></html>
