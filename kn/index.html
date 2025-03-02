@@ -5,9 +5,9 @@
 <title>kn</title>
 <style>*{font-family:monospace;margin:0;border:none;padding:0;}
 body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
-[contenteditable="true"]{background-color:#ffe;border:none;outline:none}
+[contenteditable="true"]{background-color:#000;color:#fff;border:none;outline:none}
 #i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
-#o{flex-grow:1;min-height:4em;background-color:#fee;width:100vw;bottom:0;overflow:auto}
+#o{flex-grow:1;min-height:4em;background-color:#fff;width:100vw;bottom:0;overflow:auto}
 #cnv{position:absolute;left:0;bottom:0;width:80vw;height:80vh;z-index:-1}
 .b:hover{cursor:pointer}
 @media(orientation:portrait){*{font-size:x-large}}
@@ -54,35 +54,45 @@ k for binaries
 0b110 0xff3 ..
 
 unsigned
-+x  
-+3h
-+3 4c -> uint8array
+ +x  
+ +3h
+ +3 4c -> uint8array
 
 downtype: _x: bigint->bigint64->int32->int16->int8
-_ 2 3h -> int8array
-_+3 4c -> uint8->int8
+ _ 2 3h -> int8array
+ _+3 4c -> uint8->int8
 
 uptype: mix with larger type
-0i+0 1c -> 0 1i
-1i++2i  -> +3i   unsigned dominates
-3 +0 1c -> 3 4c  bigints don't uptype
+ 0i+0 1c -> 0 1i
+ 1i++2i  -> +3i   unsigned dominates
+ 3 +0 1c -> 3 4c  bigints don't uptype
 
 arithmetics (atomic)
-+ - * % ! / \  (div mod shift)
+ + - * % !  (div mod)
+
+bitwise     (atomic)
+ / \   shift     e.g. 5/+x(logical right)
+ &' |' and  or   x|'y
+ `     not xor  `x(bit not)      x`y(xor)
+ rot[x;y]        right: rot[-5;x]
+ clz ctz cxi     popcount
+
 
 cast/reinterpret
-0i?1 2 3 4c  -> 67305985i           new Int32Array(c.buffer.slice())
-0c?1234i     -> -46 4 0 0c
+ 0i?1 2 3 4c  -> 67305985i           new Int32Array(c.buffer.slice())
+ 0c?1234i     -> -46 4 0 0c
 
 clamp
- 4$1 2 3     -> asUintN(4,x)
--4$1 2 3     -> asIntN( 4,x)
+  4$1 2 3     -> asUintN(4,x)
+ -4$1 2 3     -> asIntN( 4,x)
 
 </pre>
-<pre style="position:absolute;z-index:5;right:0;bottom:0;background:#efe">
-<label id="dec" class="b" onclick="fmt(this)">>dec</label>
+<pre style="position:absolute;z-index:5;right:0;bottom:0;background:#000;color:#fff">
+<label id="str" class="b" onclick="fmt(this)">>str</label>
+<label id="dec" class="b" onclick="fmt(this)"> dec</label>
 <label id="hex" class="b" onclick="fmt(this)"> hex</label>
 <label id="bin" class="b" onclick="fmt(this)"> bin</label>
+<label id="xxd" class="b" onclick="fmt(this)"> xxd</label>
 </pre>
 <span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
 

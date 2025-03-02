@@ -69,39 +69,13 @@ split =(y,x)=>y.split(x),
 join  =(y,x)=>y.join(x),
 
 
-token=x=>{let C,c,i=x=>split(x,"").map(x=>x.charCodeAt()),
- S=" \t",                    //space
- L="({[;\n",                 //left
- R=")}]",                    //right
- A="'/\\",                   //adverb
- V="+-*%&|<>=^!~,#_$?@.",    //verb
- T=[" ;)+'a0q`-:e\/n",       //state transition table
-    ";;)+'a0q`-+a'/;",
-    ");)+'a0q`++a'';",
-    "+;)+'a0q`-+a'';",
-    "';)+'a0q`-+a'';",
-    "a;)+'bbq`++b'';",
-    "0;)+'11q`+:e'';",
-    "qrrrrrrtrrrrsrr",
-    "`jjjjjjjjjjjjjj",
-    "-;)+'a1q`-+a'';",
-    "/ccccccccccccc;",
-    "cccccccccccccc;",
-    ":;)+'a0q`-+a'';",
-    "b;)+'bbq`++b'';",
-    "1;)+'11q`+1e'';", //"1;)+'11q`++e'';",
-    "e;)+'11q`1+1'';",
-    "rrrrrrrtrrrrsrr",
-    "srrrrrrrrrrrrrr",
-    "jjjjjjjjtjjjjjj",
-    "t;)+'a0q`++a'';"];T=drop(T,atom(1));let t0=i(join(each(first)(T),""));T=each(x=>find(i(x).slice(1),t0))(T)
-  C=[i(S+L),i(R),i(V),i(A),cat(add(65,til(26)),add(97,til(26))),i("0123456789."),...each(list)(i("\"`-:e\\/\n"))];
-  C=C.reduce((a,x,i)=>amend(i,0,x,a),add(-1,where(256)))
-  return drop(cut(x=" "+x,where(more(scan((x,y)=>T[y][x])(at(i(x),C)),10))).map(x=>x=="\n"?";":x),1)},
-  
+token=x=>{x=us(x);let i,s,r=[],
+ C="aaaaaaaaaanaaaaaaaaaaaaaaaaaaaaaadhddddebcdddjgmggggggggggdbdddddffffffffffffffffffffffffffblcddiffffkfffffffffffffffffffffbdcdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+ T="abcdefghijfekbabcdefghijfekbabcdefghidfeebabcdefghijfeebabcdefghijfeebabcdemmhidmeebabcdennhidoeebppppppprpppqppabcdemghidmeebabcdefnhijfeeblllllllllllllblllllllllllllbabcdemmhidmeebabcdennhidoeebabcdennhinneebppppppprpppqppppppppppppppppabcdefghidfeeb",
+ C=us(C).map(x=>x-97);T=us(T).map(x=>x-97);s=0;for(i of x)(11<(s=T[14*s+C[i]]))?r[r.length-1].push(i):r.push([i]);return r}
 
-parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&x[0]=="/")||!x.trim().length)) //rm space&comments
- let S=x=>String(x),i=(x,y)=>x.includes(S(y)),nm="0123456789",num=x=>i(nm,x[0])||(x.length>1&&"-"==x[0]&&i(nm,x[1])),
+parse=$=>{$=token($).filter(x=>!((1<x.length&&x[0]==47)||!x[0]==32)) //rm space&comments
+ let i=(x,y)=>x.includes(y),nm=us("0123456789"),num=x=>i(nm,x[0])||(1<x.length&&45==x[0]&&i(nm,x[1])),
  k=scan((x,y)=>x+x*y)($.map(x=>+num(x))),ax=x=>x.constructor===Array,                     
  b=(x,y,s,q)=>x+(q?q[0]:"(")+((y.constructor===Array)?y.join(s?s:","):y)+(q?q[1]:")"),B=x=>b("",x)      //join numeric vectors
  $=$.reduce((a,x,j)=>{a.push(1==k[j]?[x]:1<k[j]?[...a.pop(),x]:x);return a},[]).map(x=>(ax(x)&&1==x.length)? b("atom",x[0]) /*x[0]*/  :ax(x)?b("",x,",","[]"):x)
@@ -165,5 +139,3 @@ parse=$=>{$=(($.constructor===String)?token($):$).filter(x=>!((1<x.length&&x[0]=
  while(L($)==";")$.pop();$.reverse()
  return join(l(),";")
 }
-
-
