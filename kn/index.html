@@ -10,13 +10,13 @@ body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
 #o{flex-grow:1;min-height:4em;background-color:#fff;width:100vw;bottom:0;overflow:auto}
 #cnv{position:absolute;left:0;bottom:0;width:80vw;height:80vh;z-index:-1}
 .b:hover{cursor:pointer}
+.w{background:white;color:black}
 @media(orientation:portrait){*{font-size:x-large}}
 </style>
 <script src="k.js"></script>
 <script>
 
-let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
-cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
+let cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
 kdo=s=>{s=i.innerText.trim();if(s)o.textContent=string(eval(parse(s)));if(1000>s.length)window.location.hash="#"+encodeURIComponent(s)}
 
 window.init=()=>{kdo()
@@ -38,7 +38,55 @@ window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.
 <pre id="i" contenteditable="true" spellcheck="false" autofocus>
 
 </pre>
-<pre id="o">
+<pre id="o"></pre>
+
+
+</pre>
+<pre style="position:absolute;z-index:5;right:0;bottom:0;background:#000;color:#fff;border-left:1px solid black">
+<label class="b" onclick="o.innerText=help">?man</label>
+<label id="str" class="b w" onclick="fmt(this)">>str</label>
+<label id="dec" class="b w" onclick="fmt(this)"> dec</label>
+<label id="hex" class="b w" onclick="fmt(this)"> hex</label>
+<label id="bin" class="b w" onclick="fmt(this)"> bin</label>
+<label id="xxd" class="b w" onclick="fmt(this)"> xxd</label>
+<label id="xxd" class="b"  >↓get</label>
+</pre>
+<span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
+
+<script>let help=`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 k for binaries
 
 3     -> bigint
@@ -73,7 +121,7 @@ arithmetics (atomic)
 bitwise     (atomic)
  / \   shift     e.g. 5/+x(logical right)
  &' |' and  or   x|'y
- `     not xor  `x(bit not)      x`y(xor)
+ \`     not xor  \`x(bit not)      x\`y(xor)
  rot[x;y]        right: rot[-5;x]
  clz ctz cxi     popcount
 
@@ -85,21 +133,12 @@ cast/reinterpret
 clamp
   4$1 2 3     -> asUintN(4,x)
  -4$1 2 3     -> asIntN( 4,x)
+ 
+`
 
-</pre>
-<pre style="position:absolute;z-index:5;right:0;bottom:0;background:#000;color:#fff">
-<label id="str" class="b" onclick="fmt(this)">>str</label>
-<label id="dec" class="b" onclick="fmt(this)"> dec</label>
-<label id="hex" class="b" onclick="fmt(this)"> hex</label>
-<label id="bin" class="b" onclick="fmt(this)"> bin</label>
-<label id="xxd" class="b" onclick="fmt(this)"> xxd</label>
-</pre>
-<span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
-
-<script>
-let fmt=x=>Array.from(x.parentElement.children).forEach(y=>y.innerText=((x==y)?">":" ")+y.innerText.slice(1))
+let fmt=x=>Array.from(x.parentElement.children).forEach(y=>{if(y.classList.contains("w"))y.innerText=((x==y)?">":" ")+y.innerText.slice(1)})
 o.addEventListener('dblclick',e=>{e.preventDefault();o.textContent="";e=i.innerText?kdo():0})
-
+o.innerText=help
 </script>
 
 </body></html>
