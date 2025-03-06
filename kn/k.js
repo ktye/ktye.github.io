@@ -1,10 +1,18 @@
 let  /*k*/
 
-constructors=[Array,Int8Array,Uint8Array,Int16Array,Uint16Array,Int32Array,Uint32Array,BigInt64Array,BigUint64Array],
-conform=(x,y,a,b)=>(a=type(x),b=type(y),(a<b)?[uptype(x,a,b),y]:(a>b)?[x,uptype(y,b,a)]:[x,y]),
-uptype=(x,s,d)=>(s==0&&d>6)?new constructors[d](x):(s==0)?new constructors[i]( ..................................................
-atom=(x,t)=>{t=t?t:"n";x=("c"==t?new Int8Array([x]):"h"==t?new Int16Array([x]):"i"==t?new Int32Array([x]):"l"==t?new BigInt64Array([BigInt(x)]):[BigInt(x)]);x.a=true;return x},
-atomic=f=>(x,y)=>([x,y]=conform(x,y),x.a?(y.a?f(x,y):y.map(y=>atomic(f)(x,y))):y.a?x.map(x=>atomic(f)(x,y)):x.map((x,i)=>atomic(f)(x,y[i]))),
+//3 4+5i
+
+constructors=[Array,BigInt,Number,Int8Array,Uint8Array,Int16Array,Uint16Array,Int32Array,Uint32Array,BigInt64Array,BigUint64Array],
+conform=(x,y,a,b)=>(a=type(x),b=type(y),(!a)?[x,y,y.constructor]:(!b)?[x,y,x.constructor]:(a<b)?[uptype(x,a,b),y,y.constructor]:(a>b)?[x,uptype(y,b,a),x.constructor]:[x,y,x.constructor]),
+uptype=(x,s,d,f)=>(f=constructors[d],(s==0&&d>6)?new f(x):(d==0)?[...x].map(BigInt):(d>6)?f([...x].map(BigInt)):f((d==0||d>6)?[...x].map(Number):x)),
+atom=(x,t)=>{t=t?t:"n";x=(("function"===typeof t)?(t==Array)?t(x):new t([x]):"c"==t?new Int8Array([x]):"h"==t?new Int16Array([x]):"i"==t?new Int32Array([x]):"l"==t?new BigInt64Array([BigInt(x)]):[BigInt(x)]);x.a=true;return x},
+atomic=f=>(x,y,t)=>{
+ [x,y,t]=conform(x,y);
+ return(t==Number||t==BigInt)?f(x,y)
+ :x.a?(y.a?atom(f(x[0],y[0]),t)
+ :y.map(y=>atomic(f)(x[0],y)))
+ :y.a?x.map(x=>atomic(f)(x,y[0]))
+ :x.map((x,i)=>atomic(f)(x,y[i]))},
 curry =(f,a,i)=>(i=a.map((x,i)=>x==undefined?i:-1).filter(x=>-1<x),(...x)=>(x.forEach((x,j)=>a[i[j]]=x),f(...a))), 
 rec   =f=>x=>x.a?f(x):x.map(rec(f)),
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
@@ -21,7 +29,7 @@ both  =f=>(y,x)=>x.a?right(f)(x,y):y.a?left(f)(y,x):x.map((x,i)=>f(y[i],x)),
 prior =(f,y)=>x=>x.map((x,i,a)=>f(i?a[i-1]:y?y:a[0],x)),
 
 id    =x=>x,
-type  =x=>constructors.indexOf(x),
+type  =x=>constructors.indexOf(x.constructor),
 neg   =rec(x=>-x),
 sqr   =rec(x=>x*x),
 sqrt  =rec(Math.sqrt),
@@ -42,7 +50,8 @@ sort=(x,f)=>x.toSorted(f),
 count =x=>atom(x.length),
 floor =rec(Math.floor),
 list  =x=>[x],
-string=x=>Array.isArray(x)||ArrayBuffer.isView(x)?x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")":("function"===typeof x||"bigint"===typeof x)?String(x):JSON.stringify(x),
+string=(x,t,u,s)=>(console.log("out",x),t=constructors.indexOf(x.constructor)-2,u=(t&&!(t%2))?"+":"",s=(t>0)?"chil"[~~(t/2)]:"",(x.a?u+String(x[0]):(1==x.length)?","+u+String(x[0]):u+([...x].map(String).join(" ")))+s),
+//string=x=>Array.isArray(x)||ArrayBuffer.isView(x)?x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")":("function"===typeof x||"bigint"===typeof x)?String(x):JSON.stringify(x),
 //string=x=>(typeof x==="string"||typeof x==="object")?JSON.stringify(x):(x.a||typeof x==="function")?String(x):x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")",
 
 dex   =(y,x)=>y,
@@ -61,6 +70,7 @@ eql   =atomic((y,x)=>+(x==y)),
 match =(y,x)=>(type(x)!=type(y))?0:(x.a?+(x==y):(x.length!=y.length)?0:+x.every((x,i)=>match(x,y[i]))),
 dict  =(y,x)=>x.reduce((r,x,i)=>(r[x]=y[i],r),{}),
 at    =(y,x)=>"function"===typeof x?x(y):x.a?x:Array.isArray(y)||ArrayBuffer.isView(y)?right(at)(y,x):(y=x[y])!==undefined?y:"string"==typeof x?" ":0,
+ati   =(x,i,f)=>{console.log("ati");i=x[i];return(i.constructor==Number||i.constructor==BigInt)?atom(i):i},
 amend =(y,f,i,x)=>{x=x.slice();(i.a?(y=[y],[i]):i).forEach((i,j)=>x[i]=(f?f:dex)(y.a?y:y[j],x[i]));return x},
 find  =(y,x)=>y.a?(-1<(y=x.indexOf(y))?y:x.length):right(find)(y,x),
 cut   =(y,x)=>x.a?(x<0?cut(y,0|y.length/-x):cut(y,mul(0|y.length/x,til(x)))):[...x].map((x,i,a)=>y.slice(x,a[i<a.length-1?1+i:a.length])),
