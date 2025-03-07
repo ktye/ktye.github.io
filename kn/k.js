@@ -2,12 +2,12 @@ let  /*k*/
 
 //3 4+5i
 
-atom=(x,t,u)=>(x=Object(x),x.a=true,x.t=("string"==typeof t)?8<<"chilxyzABCDEFG".indexOf(t):("number"==typeof t)?t:0,x.u=u?1:0,x),
-atomic=f=>(x,y,t)=>{
+atom=(x,t,u)=>(x=Object(x),x.a=true,x.t=("string"==typeof t)?8<<"ghijklmnopqrstuvxyz".indexOf(t):("number"==typeof t)?t:0,x.u=u?1:0,x),
+atomic=f=>(x,y,t)=>
  x.a?(y.a?atom(f(x.valueOf(),y.valueOf()),Math.max(x.t,y.t),Math.max(x.u,y.u))
  :y.map(y=>atomic(f)(x,y)))
  :y.a?x.map(x=>atomic(f)(x,y))
- :x.map((x,i)=>atomic(f)(x,y[i]))},
+ :x.map((x,i)=>atomic(f)(x,y[i])),
 curry =(f,a,i)=>(i=a.map((x,i)=>x==undefined?i:-1).filter(x=>-1<x),(...x)=>(x.forEach((x,j)=>a[i[j]]=x),f(...a))), 
 rec   =f=>x=>x.a?f(x):x.map(rec(f)),
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
@@ -43,8 +43,8 @@ sort=(x,f)=>x.toSorted(f),
 count =x=>atom(x.length),
 floor =rec(Math.floor),
 list  =x=>[x],
-string=x=>(console.log("out",x),String(x)),
-//string=(x,t,u,s)=>(console.log("out",x),t=constructors.indexOf(x.constructor)-2,u=(t&&!(t%2))?"+":"",s=(t>0)?"chilxyzABCDEFG"[~~(t/2)]:"",(x.a?u+String(x[0]):(1==x.length)?","+u+String(x[0]):u+([...x].map(String).join(" ")))+s),
+string=x=>(String==x.constructor)?x:(BigInt==x.constructor)?((x.u?"+":"")+(x.t?(x.u?BigInt.asUintN(x.t,x):BigInt.asIntN(x.t,x))+("ghijklmnopqrstuvwxyz"[Math.log2(x.t)-3]):String(x))):(!x.length)?"()":(1==x.length)?","+string(x[0]):(x.every(e=>(BigInt==e.constructor)&&e.t==x[0].t&&e.u==x[0].u))?x.map((y,i)=>string(y).slice(0,(y.t&&i<x.length-1)?-1:y.length)).join(" ") : "("+x.map(string).join(";")+")",
+//string=(x,t,u,s)=>(console.log("out",x),t=constructors.indexOf(x.constructor)-2,u=(t&&!(t%2))?"+":"",s=(t>0)?"ghijklmnopqrstuvwxyz"[~~(t/2)]:"",(x.a?u+String(x[0]):(1==x.length)?","+u+String(x[0]):u+([...x].map(String).join(" ")))+s),
 //string=x=>Array.isArray(x)||ArrayBuffer.isView(x)?x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")":("function"===typeof x||"bigint"===typeof x)?String(x):JSON.stringify(x),
 //string=x=>(typeof x==="string"||typeof x==="object")?JSON.stringify(x):(x.a||typeof x==="function")?String(x):x.every(x=>!isNaN(x))?x.map(String).join(" "):"("+x.map(string).join(";")+")",
 
@@ -82,11 +82,11 @@ token=x=>{x=us(x);let i,s,r=[],
 
 parse=$=>{$=token($).filter(x=>!((1<x.length&&x[0]=="/")||x[0]==" ")) //rm space&comments
  let i=(x,y)=>x.includes(y),nm="0123456789",num=x=>i(nm,x[0])||(1<x.length&&"-"==x[0]&&i(nm,x[1])),la=x=>x[x.length-1],
- //ar=x=>{let t=la(x);if(!i("chi",t)){x=i("ln",x)?la(x):x;return((t=="l")?"new BigInt64Array":"")+"(["+x.split(",").map(x=>x+"n").join(",")+"])"};return "new Int"+("c"==t?"8":"h"==t?"16":"32")+"Array(["+x.slice(0,-1)+"])"},
- ar=(x,t)=>(t=8<<"chi".indexOf(la(x)),"["+(t?x.slice(0,-1):x).split(",").map(x=>b("atom",[x+"n",t])).join(",")+"]"),
- b=(x,y,s,q)=>x+(q?q[0]:"(")+((y.constructor===Array)?y.join(s?s:","):y)+(q?q[1]:")"),B=x=>b("",x),k=0
+ ar=(x,t)=>(t=8<<"ghijklmnopqrstuvwxyz".indexOf(la(x)),"["+(t?x.slice(0,-1):x).split(",").map(x=>b("atom",[x+"n",t])).join(",")+"]"),
+ b=(x,y,s,q)=>x+(q?q[0]:"(")+((y.constructor===Array)?y.join(s?s:","):y)+(q?q[1]:")"),B=x=>b("",x),sw=(x,y)=>x.startsWith(y),k=0
  while(k<$.length){if(k&&num($[k])&&num($[k-1])){$.splice(k-1,2,$[k-1]+","+$[k])}else{k++}}
- $=$.map(x=>new String(num(x)?(i(x,",")?ar(x):b("atom",i("chilxyzABCDEFG",la(x))?[x.slice(0,-1)+"n","'"+x.slice(-1)+"'"]:x+"n")):x))
+ $=$.map(x=>new String(num(x)?(i(x,",")?ar(x):b("atom",i("ghijklmnopqrstuvwxyz",la(x))?[x.slice(0,-1)+"n","'"+x.slice(-1)+"'"]:x+"n")):x))
+ $=$.map(x=>sw(x,'"')?b("Array.from",b("us",x))+".map(x=>atom(BigInt(x),'g'))":x)
  
  console.log($.length,$.join(" ; "))
  
@@ -119,7 +119,7 @@ parse=$=>{$=token($).filter(x=>!((1<x.length&&x[0]=="/")||x[0]==" ")) //rm space
   }
   z=e(y);return(!x.verb)?j(z,x):z.verb?c(x,z):M(x,z)},
   
- sw=(x,y)=>x.startsWith(y),sl=(x,y)=>x.slice(y,-1),
+ sl=(x,y)=>x.slice(y,-1),
  a=(x,y,n)=>x in J?((n=cut(y=l(),[0,J[x]])),x+(J[x]?b("",n[0],";"):"")+(n[1].length?b("",n[1],";","{}"):"")+(0==J[x]?e(t()):"")):
   1==(n=(y=l()).length)?b("at",[y[0],F(x,f1)]):"$"==x&&y.length>2?C(y):y.undef?b("curry",F(x,f2)+b(",",y.reverse(),",","[]")):b(F(x,f2),y.reverse()), //apply x[y] or x[y;z;..]
  C=x=>B(sl(join(x.map((x,i)=>x+"?:"[i&1]),""),0)), //cond
