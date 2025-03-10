@@ -17,7 +17,12 @@ body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
 <script>
 
 let cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
-kdo=s=>{s=i.innerText.trim();if(s)o.textContent=string(eval(parse(s)));if(1000>s.length)window.location.hash="#"+encodeURIComponent(s)}
+kdo=s=>{s=i.innerText.trim();
+ if(s){
+  let p=parse(s);console.log("p",p)
+  o.textContent=string(eval(p));
+ }
+ if(1000>s.length)window.location.hash="#"+encodeURIComponent(s)}
 
 window.init=()=>{kdo()
  let f=window.location.hash;if(f)i.innerText=decodeURIComponent(f.slice(1))
@@ -44,8 +49,8 @@ window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.
 </pre>
 <pre style="position:absolute;z-index:5;right:0;bottom:0;background:#000;color:#fff;border-left:1px solid black">
 <label class="b" onclick="o.innerText=help">?man</label>
-<label id="str" class="b w" onclick="fmt(this)">>str</label>
-<label id="dec" class="b w" onclick="fmt(this)"> dec</label>
+<label id="dec" class="b w" onclick="fmt(this)">>dec</label>
+<label id="str" class="b w" onclick="fmt(this)"> str</label>
 <label id="hex" class="b w" onclick="fmt(this)"> hex</label>
 <label id="bin" class="b w" onclick="fmt(this)"> bin</label>
 <label id="xxd" class="b w" onclick="fmt(this)"> xxd</label>
