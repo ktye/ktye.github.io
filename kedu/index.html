@@ -24,7 +24,7 @@ tc=(x,y)=>(x.textContent=y,x),
 cl=(x,y)=>(x.classList.add(y),x),
 af=x=>Array.from(x),
 rm=p=>{while(p.firstChild)p.removeChild(p.firstChild)},
-fe=(x,f)=>fetch(x).then(r=>r.text()).then(f)
+fe=(x,f)=>fetch(x).then(r=>{if(r.ok){return r.text()};throw new Error("e")}).then(f).catch(e=>f(""))
     
 show=_=>{rm(files)
  let p=("previous"==etad.value)?date.options[date.selectedIndex+1].value:(etad.value=="none")?0:etad.value
