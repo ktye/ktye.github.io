@@ -1,0 +1,31 @@
+#include"a.h"
+_f(T_,M(mx,_R(tx+1,nx,VR=sr;$3(tx-1,XX=sx;JR(i),SX=sx;JR(e),YX=sx;JR(j)))))_f(_T,M(mx,_R(tx-1,nx,VX=sx;$3(tx-2,XR=sr;JX(g4,I),IR=sr;JX(s6,E),YR=sr;JX(i5,J)))))g(T,W(i>tx)x=T_(x);x)
+#define Oo(O,o,n,d) {IA=d;Iz=z2;N4(Ai=z=O##I(z[15]-z2,o##I(Ai)))}//s0 S0 sI SI
+#define on(h,n,f,F,t,T) _D(t##6,f##T,i(6-n,a=F##T(a,R##n(i,z##h,a)))a,Va)_U(f##n,c##h(i<<n,X);Va=z##h;J(i<<n,a=F##T(a,X_))f##T(a)[b(6-n)],ii,VX)_f(F##n,t##6 a=z##h;X(a=F##T(a[b(6-n)]-z##n,f##T(X_))))
+on(1,0,l,L,g,G)on(0,0,m,M,g,G)on(0,0,s,S,g,G)on(1,2,l,L,i,I)on(0,2,m,M,i,I)on(0,2,s,S,i,I)
+g(o3,_x(1<i&2<tx?te(se(nx,sx)):t(tx,$6(2*i+bx/2,l0,l2,m0,m2,s0,s2)(nx,sx))))g(s3,Ez=z0;1<i&2<tx?X(z=sE(X_)+z[15]):$6(2*i+tx-1,L0,L2,M0,M2,S0,S2)(x))_f(lm,m2(nx,sx)+1)
+#define H(H) h(H,ik=H/8;j(k,ii=2*h*k+j;zi=_h(zi,r(z[i|k],z[i|k]=h_(zi,r))))) //fft64 HH.HH
+_f(ff,im=mx;in=vx;Qn((m|n)%16)M(vx,RX(m/=16;n/=16;h(m,j(n,Ez[16];IX=xV+n*h+j;i(16,zi=X[i*n])H(8)H(4)H(2)H(1)X=rV+m*j+h;i(16,X[i*m]=zi))))))
+#define Y(k0) i2*z=Z;m6(4*m,z);ik=k0;m=k?n:m;OO(m-1>>20)i(n,++z[si>>k]) //n0(.04n) n1(+.04m) =.6 ^1.6(.5-2.5)
+mn(m1,Y(0)Oo(S,s,m,z)m6(4*n,d);i(m,d[i?z[i-1]:0]=i)Oo(M,m,n,d))Vf(ab,Iz=0<I%2;z^LI(z^x,z^p2(BA,x)))mn(n0,Iz=1>I%2;Vd=r(Vs,i(n+1>>1,r=ab(r);r=z^LI(z^r,z^p2(r,CB)))))
+mn(n1,Y(lu((m+n-1)/n))m=m2(n,z);OO(m>20)Oo(S,s,n,z)ii=n;W(i--)d[--z[si>>k]]=si;IR=d--;*d=r(*d,*d=0;IA=d;i(m+1>>1,N4(Ri=ab(Ri))N4(Ai=ab(Ai)))))
+_F(qq,QZ)
+
+f(sq,Qz(2-bx)in=nx;im=17>n?0:3>tx?lm(x):1<<20;Qz(m>>31)ii=3>tx|!m;x=i?x:X((b(23)&(i6)(1+Ex))>>3);c1(Nx,sx);x=RX((17>n?n0:m/4>n?n1:m1)(m,n,sr,sx));i?x:X((e6)(127<<23|Ix<<3)-1))
+f(nq,Qz(2-tx)in=nx;im=lm(x);i2*s=sx;Y(0)i6 a=z0;IA=z;i(n4(m),a-=0<A_)_x(ti(sI(a)[15])))f(fq,nq(x))f(uq,nq(x))f(aq,QZ)f(bq,QZ)
+G(VV,EA=sa;_a(X(3>tx?$3(i,Ia+Ix,Ia-Ix,Ia*Ix):$4(i,*A+++Ex,*A++-Ex,*A++*Ex,*A++/Ex))))g(pe,Qz(--i-1|2-tx)ii=*x2;EA=x2-1;x=X(Ix-A_);*x2=i;x)g(_0,tx?t(tx,x2[i]):r_(xU[i]))
+G(AV,X(3>tx?$3(i,ia+Ix,ia-Ix,ia*Ix):$4(i,ea+Ex,ea-Ex,ea*Ex,a?ea/Ex:_q(Ex))))G(MV,Qz(mx|nx%16)Qn(va-nx)EE im=nx/16;EA=sx;_x(x(a,X(A[i++%m]*Ex))))_f(_v,_x(_0(0,x)))f(v,R(tx,1,*rU=x))
+G(B,P(15==i,ax?_v(_T(v(x))):_T(x))a=9-i?a:(--i,t(1,0));P(aa&ax,ti($5(i-4,ia&ix,ia|ix,ia<ix,ia>ix,ia==ix)))Qz(2-tx|!aa^6>i)VA=aa?0:sa;_a(X($5(i-4,Ia&Ix,Ia|Ix,1&ia<Ix,1&ia>Ix,1&ia==Ix))))
+G(A,a=a|2-i?a:r_(x);it=2<i|2<ta|2<tx;P(ax,aa?t?_v(A(i,a,v(x))):ti($3(i,ia+ix,ia-ix,ia*ix)):A(i,$4(i,x,ti(-ix),x,te(1/ex)),a))if(t)EE;(aa?AV:!!ma^!!mx?MV:VV)(i,a,x))f(pi,QZ)
+G(d3,in=(ia+65535)/ia;1==i|2<m(ta,tx)?A(2,1<i?te(1/ea):a,x):ax?ti(i?ix/ia:ix%ia):X(i6 z=Ix;x(n*z>>16,i?x:z-ia*x)))F(Dt,Qz(a)4>tx?T(4,x):_T(x))
+inx(ln,R(tx,n,M6(Nr,sr,sx+((int)i<<bx))))g(_i,mx?ln(i*vx,vx,x):_0(i,x))g(i_,Uu;VX=sx;J(Nx,$(2>tx,P(u=b0((i0)i==X_),l(nx,64*j|iu(u))))P(u=b2(i==Ix),l(nx,16*j|iu(u))))nx)
+F(_I,Qt(2<tx)x=T(2,x);Qn(m2(nx,sx)>=na)_a(ta?2>ta?X(g0(sa,Ix)):t(ta-tx,X(g2(sa,Ix))):RU(_0(x2[j],a))))F(I_,Qt(2-ta|2-tx)Qn(64<nx)_a(r(uz(x),i(nr,r2[i]=i_(x2[i],a)))))
+G(I3,Qz(!i--)ax?_a(i?ti(i_(x,a)):_i(x,a)):ma|mx?S(a,x):(i?I_:_I)(a,x))//&|<>=__!@?#_^[gief...] [+-*%~_.!]f 
+g(g1,in=iz(x);n>>31?pi(-n):9>i?M(n,RV(3,n*n,1-ze)):RV(12>i?2:3,n,$3(i-11>>1,I|16*j,(e6)(127<<23|b(23)&(i6)AB())-1,1.f/n*C(e6,I|16*j))))
+_f(R1,i(!tx*nx,r_(xU[i]))x)g(dz,hn(tx,i)>hx?_R(tx,i,R1(x);M6(Nx,sr,sx)):x+i-nx)g(nt,i>nx?r(dz(i,x),i=Nx;W(i<Nr)(m9(l(i,Nr-i),sr+i,sr),i*=2)):x+i-nx)
+G(N3,P(1<i,M(ia,x))Qr(!aa)in=iz(a);P(ax,Qz(i)RV(tx,i,ix-z2))P(i^n>>31,Qz(!tx|mx)n+=!i*ux;_x(ln(n,nx-n,x)))n+=!!i*ux;x=tx?mx?M(n,nt(n*vx,x)):nt(n,x):_R(0,n,i(n,_0(i%nx,x))))
+F(CC,P(!a,ax?v(x):!tx|mx?R(0,1,*rU=x):M(1,x))Qz(ta-tx|mx|(ma&&va-nx))a=aa?v(a):a;x=ax?v(x):x;R1(x);x=_x(r(dz(na+nx,a),m9(Nx,sr+Na,sx)));ma?M(ma+1,x):x)
+f(rr,Qz(mx)RX(VR=sr;VX=sx+Nx;J(Nx,R_=2>tx?p0(*--X,63-I0):p2(*--X,15-I))))g(v1,12==i?_x(_i(0,x)):14==i?_x(ti(ux)):$6(i-4,ff,rr,aq,bq,fq,14>i?uq:sq)(x))f(ty,_x(ti(tx)))G(Z3,QZ)
+G(er,RU(k(i,a,_i(j,x))))G(R6,Qr(ax)P(a,S(a,x))Qz(mx)o3(i,x))G(O3,P(ta,Z3(i,a,x))Qr(ax)P(10>i,(tx?10:4)<a?er(a-1,0,x):pe(a,x))P(18==a,M(0,x))Qz(--a&&1<a-4|mx)(1&i?s3:o3)(a?a-4:2,x))
+G_(k,17>i&10!=i?(a?9>i:4>i|9==i|15==i)?(tx?4>i?A:B:er)(i,a,x):a?14>i?(aa?d3:I3)(i-11,a,x):N3(i-14,a,x):(ax?g1:v1)(i,x):19>i?$3(i-17,CC,qq,Dt)(a,x):(25>i?R6:28>i?e3:O3)(i-19,a,x))
+g_(k_,x?$3(i,_r(x),r_(x),(U)sx):o?ti(W):(o=1,om()))

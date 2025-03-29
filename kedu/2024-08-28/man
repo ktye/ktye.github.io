@@ -1,0 +1,17 @@
+wget shakti.com/edu/k.zip;unzip k;make
+
+while if else select by from where   f'each/over\scan   rand rule (mins maxs sums deltas differ ..)
++- *   %    &and |or  <   >    =    ~   .   !   @     ?inv ^cut #take _drop , $ exp in min max sum avg var dev
++- sqr sqrt flip flop asc desc freq not val key first uniq sort count floor , $ exp in min max sum avg var dev
+
+k-torch
+tcn(.7) 16M 2 13 192 64 50 0|v+mxi
+llm(61) 13M 2 13 6 288 288 x+l7{l8x*{x%1+E-x}l6x}rl5x+:l4@,/(hvi,:l3w)Ss@S''h(ki,:ql2w)*mql1w:rl0x (13M 2 32000 288)
+
+e::x`l x:=x           /entropy    e@.`kj.txt
+o::avg/1>+x           /octant     o grid 960
+m::2>+50(x+*)/x       /mandelbrot m grid 960
+s::1'                 /srt        s rand 256
+f::{(x+y),x-y:.y}0'   /fft        f rand 256
+w::{(#x)-in'm[;x]}m'  /wordle     w count m:12792 2315$..
+

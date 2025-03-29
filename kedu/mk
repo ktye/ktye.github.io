@@ -1,0 +1,14 @@
+ef=~/src/effbiae/k.edu
+#(cd $ef && git pull)
+git -C $ef log --pretty=format:"%h %ad" --date=format:"%Y-%m-%d" | while read rev date; do
+	if [ ! -d "$date" ]; then
+		mkdir $date && git -C $ef archive $rev | tar -xC $date
+	fi
+done
+
+echo -n                "" > list
+for d in 20*; do
+	echo -n $d":"     >>list
+	ls $d|tr '\n' ' ' >>list
+	echo              >>list
+done

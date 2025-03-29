@@ -1,0 +1,23 @@
+#include"a.h"//4/12/16/32 32/5/27  [012]x
+_g(_m,W-=1<<i;*(U*)x=m[i];m[i]=x)_i(m_,Ux=m[i];P(x,m[i]=*(U*)x;W+=1<<i;x)30-1>i?_m(i,m_(i+1))+(64L<<i):0)
+ZU O[1<<12];g_(tn,ih=hn(i,x);t(8+i,x|(U)r(o,o=O[o];O[r]=(U)h<<59|m_(h))<<48))inx(mtn,mz(i,tn(n,x)))
+_f(_r,P(63&rx,--rx)if(!tx)i(nx,__(xU[i]))_m(rx>>59,(U)sx);rx=o;o=4095&x>>48)_f(r_,ax?x:(++rx,x))f(R1,i(nx*!tx,r_(xU[i]))x)
+g_(k_,P(x,$3(i,_r(x),r_(x),(U)sx))P(o,ti(W))o=1;i(1<<12,O[i]=i+1)i(30,m[i]=(U)_+64*b(i))i(8,P[i]=RR()[0])i(1e4,RR())0)
+
+_f(uz,63&rx?(--rx,mtn(mx,tx,nx)):x)f(v,ax|!tx|mx?R(ax*tx,1,*rU=x):mz(1,x))
+inx(ln,ik=mx?kx:1;R1(mz(mx?n:0,R(tx,n*k,ds(Nr,sr,sx+((int)(i*k)<<bx-3))))))f(rr,VX=sx+Nx;_x(R1(r(mtn(mx,tx,nx),VR=sr;J(Nr,R_=A0(*--X,R4[bx-3]))))))
+g(a_,mx?mz(0,ln(i,1,x)):tx?t(tx,$4(tx-2,sx[i],x2[i],x2[i],xU[i])):r_(xU[i]))inx(en,(i<<bx-3)+n6(Nx)*64>>bx-3)inx(dz,_x(mz(mx,r(tn(tx,i)-i+n,ds(Nx,sr,sx)))))
+g(nz,R(3>x?x?4:3:tx,i,VR=sr;J(Nr,R_=$4(x,I2|j<<4,(e6)(127<<23|(i6)RR()>>9)-1,C(e6,I2|j<<4)/(e2)i,3>tx?gx-z0:ix-z2))))
+g(nl,Q(tx|1!=nx)_x(R(0,i,j(i,rU[j]=a_(0,x)))))f(_n,_x(ti(mn)))f(_v,_x(a_(0,x)))F(qq,!ta|ta!=tx|(ma&&ka!=kx))
+F(_C,a=aa?v(a):a;x=ax?v(x):x;in=ma?:na;_x(qq(a,x)?_a(R(0,n+mn,U*R=sr;j(nr,R_=n>j?a_(j,a):a_(j-n,x)))):mz(ma?ma+m(1,mx):0,r(hn(tx,n=en(na,nx,a))>ra>>59?dz(n,na+nx,a):a+nx,ds(Nx,sr+Na,sx)))))
+f(t_,$3(tx-2,V_(i4,C(i6,(g4)X_)),V(C(e6,(s6)Ix))+t(1,0),0))f(_t,$3(tx-3,GI,V(C(s6,Ex))-t(1,0),0))f(p0,if(nx%64)xU[nx>>6]&=b(nx%64);x)_f(P0,if(Nx%64)xV[Nx>>6]&=(i0)(Nx%64)>I0;x)
+f(ty,ti(ax?tx:_x(tx)))g(sB,Ua=0;I(a=X9(a>>63,X_)))g(pB,Ua=0;I(Ub=a>>63;b|=(a=X_)<<1;i?$6(i-5,a&b,a|b,~a&b,a&~b,0,a^b):b))
+//VE(x_,x*=x;1-.5*x+x*x*p3(.041666646f,-.0013887316f,.00024433157f))VE(y_,Ez=x;x*=x;z+z*x*p3(-.16666655f,.0083321609f,-.00019515296f))
+VE(_l,Ez=C(e6,C(s6,x-.5));x-=z;(1+z)*p6(.99999994f,.69315308f,.24015361f,.055826318f,.0089893397f,.0018775767f))_e(eS,i(4,z+=S6(2+i,z))z[15],Ez)Ze E=1.442695,L=.69314718;
+VE(l_,s6 i=x;x=127<<23|(1<<23)-1&i;C(e6,(i>>23)-127)+(x-1)*p6(3.1157899f,-3.324199f,2.5988452f,-1.2315303f,.31821337f,-.034436006f))
+_e(se,Ez[4]={};i(n/64,i(4,zi+=X_))Eb=z[3];i(3,b+=zi)i(n/16%4,b+=X_)ee=eS(b);eA=X;i(n%16,e+=AZ)e,in,EX)
+_e(sE,in=n4(nx);EX=sx;Ez[4]={};i(n/4,i(4,zi+=AZ*X_))Eb=z[3];i(3,b+=zi)i(n%4,b+=AZ*X_)eS(b),EA,Ux)
+#define on(n,o,O,t,T) _D(t##6,o##T,i(6-n,a=O##T(a,S6(n+i,a)))a,Va)_U(o##t,Va=i%16>I2&X[i>>4];j(i>>6-n,a=O##T(a,X_))o##T(a)[b(6-n)],ii,VX)_f(O##t,Va={};V(a=o##T(*X)+A2(a,15-z2)))
+on(0,m,M,g,G)on(0,s,S,g,G)on(2,m,M,i,I)on(2,s,S,i,I)Zf(sf,Mg,Mi,Sg,Si)Zh(og,mg,mi,sg,si)g(u,i<<1|2<tx)_U(sb,i6 a={};j(n9(i),a+=o(vpopcntd_)(X_))sI(a)[15],ii,VX)
+g(o3,Q(mx)P0(x);_x(2>tx?_(p0(x);in=sb(nx,sx);1<i?ti(n):tb(i?!!n:n==nx)):!i--?0:i&4==tx?te(se(nx,sx)):t(tx,og[u(i,x)](nx,sx))))_f(pi,r(1,i(nx,r*=x2[i])))
+g(po,P(!i--,a_(nx-1,x))P(17==i,Q(!tx)mz(0,x))P(2==i,Q(3!=tx)_x(t(tx,pi(x))))!!i&1<i-4?0:o3(i?i-4:2,x))g(ps,P(!i--|mx,0)P(2>tx,sB(i,x))!!i&1<i-4?0:sf[u(i?i-4:2,x)](x))

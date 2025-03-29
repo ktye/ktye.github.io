@@ -1,0 +1,8 @@
+evaluator takes list of list of bytecode. e.g. a:2;a+3
+
+Zx is (E;const ..)
+E ist list of e
+e is list of bytes
+
+k(f,a,x) monad/dyad (also generator g(K,k(a,x,0))
+_k(x) deref

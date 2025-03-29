@@ -1,0 +1,4 @@
+o=-Ofast -fno-builtin -funsigned-char -fno-unwind-tables -Wfatal-errors -Wno-parentheses -Wno-incompatible-pointer-types 
+a:?.[ch] m
+	clang-13 $o -oa z.c a.c -march=native -s -nostdlib 
+

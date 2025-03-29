@@ -1,0 +1,28 @@
+$wget shakti.com/edu/k.zip;unzip k;make # linux/avx512
+
+while if else .. select by from where .. in ..
++   - *   %    &and |or <   >    =    ~ @     ?ind ^cut #take _drop , !   .   F'/\  [,.! ~+-*%&|<>=@? ^#_]
+abs - sqr sqrt flip rev asc desc freq ~ first uniq sort count floor , key val f'/\  [,.! ~+-*%_ <>=^?&|#@]
+LMSAR(min max sum avg rms*) DEZ(log exp zgm*) rand rule grid          gen     'map/reduce\scan
+
+k-torch Zigmoid(a*x%1+exp-x) Zoftmax(x%+/x:exp x-max x)
+fwd(24M/14)[6 14 288 288] f::x+g@fyZey:x%Rx+:d(li,:cy)S6Z'(ki,:z.by)*(%48)?(z:1e-4*#@k).ay:x%Rx
+gen(37M/18)[   32000 288] g::x?Mx:a@bf/ax
+tcn(.6M/16)[13 50 192 64] a+0|b?d^0|c?d^x
+
+mathematics from 4400BC  (iraq egypt india ..)
+s:1'                    /sort         s rand 16                   uruk -4400 divide&impera
+q:avg/1>abs             /quadrant     p grid 96                 thebes -3200 pi:abs log -1
+a:(+\|)\                /fibonacci    f 2 3       pingala       ujjain  -300
+g:(|!\)/                /gcd          g 4 6       euclid    alexandria  -300
+p::(+x*)/1 2 3          /polynomial   p rand 16   al-khwarizmi baghdad   820
+r::(-x*)/1 3 5          /taylorseries q rand 16   madhava       kerala  1390 arc cossin
+e::x log x%+/x          /entropy      e freq kj   napier       louvain  1572 ratio zeno
+f:(+,-.)0'              /fft          f rand 16   gauss      brunswick  1805 divide&impera
+w:(k log)w'             /wordle       w 2315      boltzmann       graz  1872 divide&impera
+m::2>abs(x+*)/x         /mandelbrot   m grid 96   fatou&julia    paris  1915
+
+rosetta        infix              prefix                                     postfix 
+k      (;){:}: +-*%&|<>=~@?#_^,!  +-*%~_&|<>=?^@,#!!.                        '/\
+python (,){:}= +-*/&|<>DD w[:]a%  a-ss~ftra suc  lrkv[len range keys values]  
+numpy.[where append abs square sqrt floor transpose reverse sort argsort unique collections.counter]

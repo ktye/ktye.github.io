@@ -1,0 +1,28 @@
+$wget shakti.com/edu/k.zip;unzip k;make
+
++- *   %    &and |or  <   >    =    ~   !   .     @     ?fnd ^cut #take _drop $     , $ F'/\
++- sqr sqrt flip flop asc desc freq not key value first uniq sort count floor shape , $ f'/\
+select min max sum avg var dev med in .. by from where  rand rule[grid]  exp log cos sin tan .. while if else
+
+k-torch tcn(.7) 16M 2 13 50 192 64 ..0|v+mxi
+k-torch llm(61) 16M 2 16 6 288 288 ..x+y7@y8x*w%1+E-w:y6x:ry5x+:y4@,/(6^'vi,:y3w)Ss@S''6^'(ki,:qy2w)*mqy1w:ry0x
+
+p::+x*                /polynomial p[2]/1 2 3  madhava 1390 cos sin arc
+e::x`l x:=x           /entropy    e value`kj  napier  1590 log[01][o0] 
+c::(2!)(2?)\1+3*      /collatz    c 12        euclid(|!\) fibonacci(|+\)
+m::2>+(x+*)/x         /mandelbrot m grid 96
+o::avg/1>+x           /octant     o grid 96
+f::{(x+y),x-y:.y}0'   /fft        f rand 16 
+s::1'                 /sort       s rand 16
+w::{@>in'm[;x]}m'     /wordle     w count m:12792^.. !m[y;x_:y]
+
+rosetta                 dyad                    monad                     mode (first desc freq)
+2024 k      :()[;]. '/\ +-*%&|<>=~ .! @? #_^ ,  ~+-*%_ #! &| ^? <>= @, !. @>=
+1992 k0     :()[;]. '/\ +-*%&|<>=  .! @? #__ ,  ~ -  _ #! +|  ? <>= *,    x i[@>-'(i:!~'x),#x:^x]
+1960 apl    :()[;]. A/\ +-*%^v<>=~  |  i /\  ,  ~ -.._ #! &|    <>        x[i[d?|/d:(1_i,#x)-i:(~x=-1_-1,x)/!#x:x[<x]]]
+
+1994 python =()[;]. M   +-*%&|<>..  %  f [:] a  ~ -    lr  r ss        kv (len range reversed sorted set keys values)
+
+
+
+

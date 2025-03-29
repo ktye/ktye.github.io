@@ -1,0 +1,17 @@
+with most primitives.
+still have to put back 
+
+vv vm mv mm
+
+data in M  (m_ _m)
+
+object(addr/size/ref) in O (tn _o)
+
+same header info in the 64bit x.
+atom1 type3 object8 l4 m16 n32
+
+so we can have instant views of the same data.
+(later we can also temp-subslice)
+this is all AI-useful
+
+up to 3 dimensional

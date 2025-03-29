@@ -1,0 +1,18 @@
+install$wget shakti.com/edu/k.zip;unzip k;make -f m
+
+while if else select[count first min max sum avg var dev median]by from where    f'each/over\scan `l(-log2)
++   - *   %    &and |or     <   >    =    ~   .     !mod  @mul  ?div/find ^cut      #take _drop ,$ min .. in exp
+abs - sqr sqrt flip reverse asc desc freq not value index first rand/uniq rule/sort count floor ,$ min .. in exp log cos sin ..
+
+examples
+e::x`l x:=x        'entropy    e value`kj.txt
+o::avg/1>abs x     'octant     o grid 960  uses complex
+m::2>abs 50(x+*)/x 'mandelbrot m grid 960  uses complex
+
+python/rosetta (k=python+numpy+pandas+polars..)
+k +-*%!&|<> =  ~  in not min max sum count   avg  var dev median abs sqrt floor exp log cos sin tan .. 
+p +-*/%&|<> == != in not min max sum len np.[mean var std median abs sqrt floor exp log cos sin tan ..]
+k #_^ ?        @      ,      $       index  flip      reverse uniq freq sort asc desc rule   rand      f'      f/         f\
+p [:] find np.[matmul append reshape arange transpose reverse unique(.) sort argsort? linear random.*] map(f,) reduce(f,) ?? 
+k       r::x%sqrt 1e-5+avg x*x          /rms norm
+p def r(x):x/sqrt(1e-5+mean(x*x))       /rms norm

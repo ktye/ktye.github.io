@@ -1,0 +1,21 @@
+#define Y(f,i) AS(f,"mov %rcx,%r10;mov $"#i",%rax;syscall;ret",Ux,...) //Linux[56]Macos[A] #if __linux U(M7,m_(0,1L<<35,3,0x1042,0,0))f(D7,Ua[24];!d7(x,a)&1&a[1]>>15?a[12]:0)
+Y(_k,60)Y(w_,1)Y(_w,0)Y(d_,2)Y(_d,3)Y(d7,4)Y(m_,9)Y(_m,11)Y(m7,28)AS(ut,"rdtsc;shl $32,%rdx;or %rdx,%rax;ret")U(M7,m_(0,1L<<35,3,0x4022,0,0))f(D7,Ua[24];!d7(x,a)&1&a[3]>>15?a[6]:0)
+#define b(f) __builtin_ia32_##f
+#define o(f) b(f##512)
+_U(b_,o(cvtb2mask)(a),Va)V(_b,1&0<(1<<I0%8&o(pshufb)(x-z3,I0/8)),Ux)
+
+V(rn,$6(i,1<=I0&o(permvarqi)(a,I0-1),2<=I0&o(permvarqi)(a,I0-2),o(alignd)(a,z0,15),o(alignd)(a,z0,14),o(alignd)(a,z0,12),o(alignd)(a,z0,8)),ii,Va)
+V(BM,b(vfmaddsubps512_mask3)(a,b,c,-1,9),Va,Vb,Vc)
+Vf(ba,o(vpermilps)(a,0xb1))
+VF(GG,BM(a,o(vpermilps)(b,0xa0),(e6)ba(a)*o(vpermilps)(b,0xf5)))
+Vf(gq,15&o(pshufb)(a,I0%16/2)>>I0%2*4)_f(X9,o(pclmulqdq)((j6){x},~z3,0)[0])Vf(sqrt,o(sqrtps)(a,4))
+#define gv(g,z,j,t) V(g,b(gathersiv##z##i)(z0,as,x,-1,j),Ua,i##t x)
+gv(A0,16s,1,6)gv(A2,16s,4,6)gv(A3,8d,8,5)
+VF(LG,o(pminub)(a,b))VF(MG,o(pmaxub)(a,b))
+VF(LI,o(pminsd)(a,b))
+VF(MI,o(pmaxsd)(a,b))
+
+V(gb,b(compressqi512_mask)(b,z0,a),Ua,Vb)
+#define b3(i,a,x) b(cmpb512_mask)(a,x,i,-1)
+#define b1(i,a,x) b(cmpd512_mask)(a,x,i,-1)
+#define b0(i,a,x) b(cmpq512_mask)(a,x,i,-1)

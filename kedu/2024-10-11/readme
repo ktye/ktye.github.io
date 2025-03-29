@@ -1,0 +1,8 @@
+2024.10.11
+
+z.h has the linux/macos 5 system calls.(should be trivial to add windows)
+w_ _w(write/unwrite) d_ _d(open/unopen) d7(stat)
+
+in the end there will just be the k(i2,U,U) entry point. (and maybe tn(i2,i2))
+but for now we still also have:
+om() U O[] V M[]

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>ktye</title>
+<style>*{font-family:monospace}
+.b:hover{cursor:pointer}
+.B{font-weight:bold}
+.r{color:red}.g{color:green}
+</style>
+</head>
+<body>
+<select id="date" onchange="show()"></select>
+<select id="algo" onchange="show()"><option>cat</option><option>diff</option></select>
+<select id="etad" onchange="show()"><option>none</option><option>previous</option></select>
+<div    id="files" style="display:inline"></div>
+<pre    id="out"></pre>
+
+<script src="dmp.js"></script>
+<script>
+let curfile="a.c"
+ce=x=>document.createElement(x),
+ac=(x,y)=>x.appendChild(y)
+tc=(x,y)=>(x.textContent=y,x),
+cl=(x,y)=>(x.classList.add(y),x),
+af=x=>Array.from(x),
+rm=p=>{while(p.firstChild)p.removeChild(p.firstChild)},
+fe=(x,f)=>fetch(x).then(r=>r.text()).then(f)
+    
+show=_=>{rm(files)
+ let p=("previous"==etad.value)?date.options[date.selectedIndex+1].value:(etad.value=="none")?0:etad.value
+ let d=date.selectedOptions[0],dir=d.textContent+"/"
+ let F=d.dataset.f.split(" "),G=p?af(date).filter(x=>x.textContent==p)[0].dataset.f.split(" "):[]
+ let B=F.slice()
+ G.forEach(x=>{if(!B.includes(x))B.push(x)})
+ B.forEach(f=>{
+  let sp=cl(tc(ce("span"),f+" "),"b")
+  if(f==curfile)cl(sp,"B")
+  sp.onclick=_=>{curfile=f;show()}
+  ac(files,sp)})
+ out.style.color="";out.textContent=""
+ if(!p)fe(d.textContent+"/"+curfile,r=>out.textContent=r)
+ else{let a;fe(dir+curfile,x=>{a=x,fe(p+"/"+curfile,b=>{
+   let dmp=new diff_match_patch()
+    if("diff"==algo.value){
+     let d=dmp.diff_main(a,b);dmp.diff_cleanupSemantic(d)
+     d.forEach(x=>ac(out,cl(tc(ce("span"),x[1]),(0>x[0])?"r":x[0]?"g":"c")))
+    }else out.textContent="+++ "+dir+curfile+"\n"+a+"\n\n--- "+p+"/"+curfile+"\n"+b
+  })})}}
+
+fetch("list").then(r=>r.text()).then(r=>{
+ r=r.slice(0,-1).split("\n")
+ let d=r.map(x=>x.slice(0,10)).toReversed()
+ let f=r.map(x=>x.slice(11,-1)).toReversed()
+ d.forEach((x,i)=>{
+  ac(etad,tc(ce("option"),x))
+  x=tc(ce("option"),x)
+  x.dataset.f=f[i]
+  if(!i)curfile=f[0].split(" ")[0]
+  ac(date,x)})
+ show()
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+#include"a.h"//tomn[shr] ll+-*%&|<>=~. @? #_ ^, [+-*%_~. &| @? #! <>=?^]
+g(t_,Qz(4!=i|3!=tx)T1+X(C(e6,(s6)Ix)))f(_t,$3(tx-2,X(Va=Gx;a|32&26>a-65),_x(V(2,nx,g4*R=sr;VX=sx;J(Nx,*R++=C(g4,Ix)))),X(C(s6,Ex))-T1))
+_U(e8,P(ax,_v(e8(e,i,v(x))))x=4>tx?t_(4,x):x;$3(i,X(e*l_(Ex)),X(_l(e*Ex)),X(sq(Ex))),ee,ii,Ux)F(E8,e8(a?l_(ea-ze)[0]:.69314718f,1,x))G(nn,Qs('l'!=(i0)a,&a)e8(1,i,x))
+g(a9,$5(i,QZ,ax?y(1,x):Y(1,x),ax?_v(a9(2,v(x))):$3(tx-3,X(i6 a=Ix;a*a),X(e6 a=Ex;a*a),QZ),e8(1,-1,x),ax?tb(!ix):2>tx?X(~Gx):QZ))
+#define A(G,I,E) 4>i?X(4>tx?$3(i,I+Ix,I-Ix,(I)*Ix):$4(i,E+Ex,E-Ex,(E)*Ex,(E)/Ex)):6>i?X(3>tx?5>i?LG(G,Gx):MG(G,Gx):5>i?LI(I,Ix):MI(I,Ix)):3>tx?$3(i-6,X3(G<Gx),X3(G>Gx),X3(G==Gx)):$3(i-6,X1(I<Ix),X1(I>Ix),X1(I==Ix))
+G(AV,A(ga-z0,ia-z2,ea-ze))U(vV,A(Ga,Ia,Ea),ii,VA,Ux)G(VV,vV(i,sa,x))g(pe,P(1==tx,pB(i,x))Ua=i?*xU:0;Ub=b(1<<bx);x=i--?vV(i^2>i-6,sx-(1<<bx-3),x):_x(ln(-1,nx,x));x=qy(i)?Y(i,x):x;*xU=b&a|~b&*xU;x)
+G(A9,it=m(3>i?3:4>i?4:0,m(ta,tx));Qz(4<t)ax?aa?3<t?_v(A9(i,a,v(x))):Y9(i,a,x):A9(i-qy(i)^2>i-6,qy(i)?y(i,x):x,a):aa?AV(i,4==t&t>ta?te((int)a):a,x):(!ma^!mx?ma?MV:VM:VV)(i,t>ta?t_(t,a):a,t>tx?t_(t,x):x))
+G(md,P(!i|3<m(ta,tx),A9(2,i?y(3,a):a,x))im=a;P(ax,ti(++i?ix/m:ix%m))Qn(m-1>>16)in=(m+65535)/m;i?X(n*Ix>>16):X(i6 a=Ix;a-m*(n*a>>16)))
+F(A_,P(ax,a_(x,a))P(ma|mx|4==tx,at(a,x))Qt(3!=tx)Qz(5!=x(a,bx))_x(R2(nx,ai[*X++])))F(_A,P(ax,ti(l(na,_a(x,a))))Qz(100<nx)Qt(ta!=tx)Qz(5!=bx)_x(R2(nx,_a(*X++,a))))
+G(AA,aa?(7>ta?md:nn)(i,a,x):__((i?_A:A_)(a,x)))G(NN,Qz(!aa)in=a;P(ax,nz(n,x))im=mx?:nx;n>>31^i?(n+=!i*m,_x(ln(n,m-n,x))):(i?n:n-m)+x)
+#include"b.c"
+f(fl,ax?_v(_t(v(x))):_t(x))f(dt,P(4==tx,a9(4,x))QZ)F(Dt,QZ)F(Nt,QZ)
+Zf(f,ff,rr,_s,s_,fq,0,dt,n_,_e,uq,_n,fl,so,e_,_S)ZF(F,Nt,Dt,0,0,0,0,0,cut,cat,S_)g(io,QZ)g(is,QZ)
+G(z,4>i|9==i?a9(i,x):19>i?f[i-4](x):27>i?o8(i-19,0,x):E8(0,x))G(Z,9>i?A9(i,a,x):3>i-11?AA(i-12,a,x):2>i-14?NN(i-14,a,x):19>i?F[i-9](a,x):27>i?o8(i-19,a,x):E8(0,x))
+g(po,P(!i--,a_(nx-1,x))P(17==i,Qr(ax)Qz(!tx)mz(0,x))P(2==i,Qt(3!=tx)_x(t(tx,pi(x))))Qz(i&&1<i-4)o3(i?i-4:2,x))g(ps,P(!i--,x)Qr(mx)P(2>tx,sB(i,x))Qz(i&&1<i-4)s3(i?i-4:2,x))
+Zg(g,ie,pe,io,po,is,ps)U(e1,_x(V(0,nx,U*R=sr;i(nx,*R++=a(a_(i,x))))),Uf a,Ux)G_(k,Qz(!tx)P(!a|29>i,(a?Z:z)(i-1,a,x))Qr(!aa|ax)i-=29;!i&9>a-11?e1(f[a-5],x):g[2*i|pa](a,x))
