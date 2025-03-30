@@ -1,0 +1,43 @@
+2024.06.01 shakti.com/k.zip
+man:
+$wget shakti.com/k.zip;unzip k;make
+
+name   char e.g. fx is f@x
+type   bcieg(bool char int float(2.3) complex(2:3)) also: 0111(bool) 0122(char)                Adverb
+dyad   F+- *    %     &and  |or   <    >     =      ~ .! @at    ?find #take  _drop  ^cut   ,$  F['/\]each right left
+monad  f+- *sqr %sqrt &flip |flop <asc >desc =group ~ .! @first ?nub  #count _floor ^order ,$  F['/\]prior over scan f['/\]each..
+
+f 2x  'function definition
+
+I/O    0'"z.k" 1'"z.k"
+system \[ltw\] load time work exit
+
+nyi
+{a:2 3} [a:2 3] while(a)if(b)c else d
+A/1>+#9      'estimate pi%4
+2>+(x+*)/#9  'mandelbrot set
+
+ref:
+   F(Dyad)  f(monad)
++  +        +       *F'Each(prior)  f'each
+-  -        -       *F/Right(over) *f/over
+*  *        sqr     *F\Left(scan)  *f\scan
+%  per      sqrt
+&  and     *flip     I/O
+|  or       flop     0'line
+<  <       *asc      1'char
+>  >       *desc
+=  =       *group
+~  ~        ~
+. *.       *value
+!  mod      key
+@  @        first
+? *inv     *nub
+#  take     count
+_  drop     floor    \l load
+^  cut     *order    \t time
+,  ,        ,        \w work
+$ *cast     string   \\ exit
+
+*nyi(not yet implemented)
+

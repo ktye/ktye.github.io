@@ -1,0 +1,2 @@
+-Os -oa a.c -ffast-math -fno-finite-math-only -fno-unwind-tables -ferror-limit=1 -nostdlib 
+-Wno-psabi -Wno-parentheses -Wno-pointer-sign -Wno-incompatible-pointer-types -Wno-implicit-function-declaration

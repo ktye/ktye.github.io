@@ -1,0 +1,71 @@
+2024.01.07
+reference and manual. (educational version)
+please lmk if something doesn't make sense.
+once the literals/sort/unique are in this basically numpy - but faster/easier.
+once dict is in then this is python+numpy+..
+
+
+verb(~+-*%&|<>=!. @? #_^,) adverb('/\) noun(bool char int float complex symbol)
+F ~+-*mul %div &min  |max  <>= !mod .dot  @at ?find #take  _drop ^cut  ,cat   F'/\(each right left)
+f ~+-*exp %log &flip |flop <>= !ind .val  @at ?uniq #count _sqrt ^sort ,list fF'/\(each over scan)
+NYI ""23 &^?<>=[x] x[@?.]V f['/\] while if else
+
+rosetta        Atom         List       atom    list        Mm  map                 control
+k      ;()[].: +-*%&|<>=~!. @?#_^,     -*%_~!. @,#!|^<>?=  @&  f'               /\ while(a)if(b)c else d
+python ;()[].= +-*/&|<> ^%d  is.sa     -els~kv   lrrsa u.  @t  [f(x)for x in y]    while a:if b:c else:d
+(dict;index slices split append;exp log sqrt key value;len range reverse sort argsort uniques;transpose)
+
+
+2024.01.08
+objects are 64bit(using top 4bit for type)
+complex is float/float
+symbols(nyi) are up to 12*5bit values
+
+the g g_ _g G _G G_
+remove 2 exponent bits from the e's to make complex atoms.
+
+i.e. max/min exponent is 2^32 for complex atoms.
+which is fine. (we could do 1 bit but more complicated)
+
+g_ is supposed to make e30 from e32 etc.
+
+> refcount
+
+r_(inc)
+_r(dec)
+
+
+
+this is a little different that i have done before.
+instead of putting
+
+[type count refcount header]data
+they are separate. pure data is in 64byte align O[](log sizes 6 7 8 ..).
+the linked list headers are H.
+the refcount is in o[]
+type count oO is all in the 64bits (toOn 4 12 24 24)
+the most common case is no refcount.
+so that is handled separately.
+
+this is all in _.c
+
+Zi W[1<<28],H[25]; //data
+ui(O_,r(Hi,Hi=W[16*r]))  //alloc
+du(_O,W[16*r]=Hi;Hi=r,ii,ir) //free
+ui(O,N&Hi?_O(i,O(i+1))+(1<<i):O_(i))
+
+
+ui(bn,64<i?l(i)-6:0) // bucket from size
+tn(t_,8L+t<<60|n|O(bn(n<<lt[t]))<<24)  //vector t n
+
+Zi h,o[1<<12]; //objref
+du(R_,ux=*a;ax?x:ox?(++o[ox],x):E(ii=h;h=oi;oi=1;*a|=(u)i<<48),u*a) //inc at address
+u(_r,ii=ox;i&&(oi--||(oi=h,h=i,0))?x:E(if(!tx)N(_r(xu))_O(bn(Nx),O)) //dec
+
+
+> 60bit complex atom
+
+we could also store polar form.
+31bit float magnitude(or log magnitude)
+29bit rotation(which is fine. in fact maybe better.)
+

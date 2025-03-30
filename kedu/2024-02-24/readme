@@ -1,0 +1,23 @@
+2024.02.24
+im putting in '/\ so we can parse from k.
+e.g. functions for
+string number alpha ( [ . (adverb verb or monads/pemdas/bodmas/..)
+
+:'~\"'"=
+&'"0"=c@
+&'"a"=c@
+:'+\1 -1"()"?
+:'+\1 -1"[]"?
+"'"=c@   adverb
+>'"+"=c@  verb
+
+pemdas
+
+|'"+"=
+|'"-"=
+..
+
+these are all vector functions and can be practically instantaneous(100GB per second).
+
+(the ()[] +\ is a little slower)
+the reductions are just apl-compress which is also 100GB per second

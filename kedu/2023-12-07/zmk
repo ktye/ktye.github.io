@@ -1,0 +1,4 @@
+c=clang-13 -Os -march=native -ferror-limit=1 -fno-unwind-tables -Wno-parentheses -Wno-pointer-sign -Wno-pointer-type-mismatch -Wno-incompatible-pointer-types
+
+a:a.c ?.h zmk
+	$c -oa a.c -nostdlib

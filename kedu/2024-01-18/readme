@@ -1,0 +1,27 @@
+2024.01.17
+especially when we(you) write the +\ version.
+this is exactly what we need for
+{}()[] parsing
+e.g.
+~+\(')'==z)-('('==z)
+
+backwards because c==z gives -1 and 0
+
+2024.01.17
+please write the arm/avx2/avx512 for +\G (also IJEF)
+maybe avx2 can use the avx512 code?
+
+
+what should we call these? we have
+
+SPM (sum prd max)  (in k/pro we call these APM)
+ghij(ints) cdef(floats)(8 16 32 64)
+ S_ _s  s   S  _S
+a+x 0-x +/x +\x -'x
+a*x 1%x */x *\x %'x
+a|x   ? |/x |\x   ?
+Register and vector so roughly 720 functions [+*|][Tt][+-/\'][ghijcdef][arm/avx5/avx6]
+
+please write [sS][GIJEF] (register scans and reduces)
+
+

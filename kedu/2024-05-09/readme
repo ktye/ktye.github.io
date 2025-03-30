@@ -1,0 +1,75 @@
+2024.05.07
+k-junior is free and opensource (i hope to post tomorrow. still incomplete.)
+k-senior is $upported and 10-100 times faster.
+
+here is a teaser. k-junior is about 60 lines of c code.(it will get smaller when we do our own c-compiler)
+the last 15 lines are integrated-development-environment (repl). (the first 45 are the  cross product of 20types 20types and 100 primitives)
+anyone can replace this with c/k/python to do whatever you want. i.e. the core 20 types and 100 primitives are the first 45 lines.
+
+//lukasiewicz execution: 32const 32monad 32dyad 32set 32get
+F(z,*--c=x;x=ax;Ur;_n(ij=o%32;Q(r=*c=$5(o/32,--c;22>j?_i(j,a):ti(j-22),a1(j,r),a2(j,r,*++c),--i;r_(sv(j,r)),--c;r_(*v(j)))))r(*c++,_r(*c++)))
+Zs B="//the manual
++-*    %     &and  |or   <    >     =      ~ . !index @at    ?find #take  _drop  ^cut   ,$\n
++-*sqr %sqrt &flip |flop <asc >desc =group ~ . !index @first ?nub  #count _floor ^order ,$",
+
+//prim maps   parse at GB per sec (clang does 100k)
+Zs P="FLJOSDET^_CARBKU@]GIHNM V QP",_P=":+-*%&|<>=~.!@?#_^,$'/\\";
+f(p_,pm(v,10>v-48,v-26,26>v-97,v+(58!=d(1,v)&32),a5(P,v-32-(57<v&10)-(90<v&26)-(122<v&56))-32))
+
+//print
+f($,tx?lx?$t(x):$(v_(x)):$3(Tx1,Nt(2,32+14*_b(xh)),32>x_%128?pm(90,32>v,26+v,96<v,96+v%32,a5(_P,v%32)):x,f1($,x)))f(_z,px?ns(1,_P+x):tx||!Lx?$(x):qf(x)?$(_v(x)):sS(32,f1(_z,x)))
+
+//syscalls (mac has different numbers)
+#define S(f,i) __attribute((naked))ZU f(Ux,...){asm("mov %rcx,%r10;mov $"#i",%rax;syscall;ret");}
+S(_w,0)S(w_,1)S(f_,2)S(_f,3)S(n_,4)S(m_,9)S(_k,60)s(nf,it[36];!n_((U)s,(U)t)&&1&t[0?1:6]>>15?t[0?24:12]:0)
+
+//strings
+s(sl,ii=0;W(si)++i;i)u(is,i(n,P(c==si,i))n,cc,in,ss)Z(s,ws,w_(2,(U)s,sl(s));s,ss)f(wc,w_(2,(U)&x,1))F(err,if(a)ws(sa);wc(58);ws(sx);wc(10);96)g(qg,nx>is(f,nx,sx))
+
+//read int float complex
+nS(i$,r(0,i(n,r=si%16+10*r)))nS(e$,ii=is(101,n,s);ue(n>i?i$(i,s)*E[s[i+1]%16]:(i=is(46,n,s),n>i?_(n-=i+1;i$(i,s)*E[n]+i$(n,s+i+1))/E[n]:i$(n,s))))
+nS(t$,Ux=Ss(c_(ns(n,s),32));it=0;n(t=m(t,qg(58,xU)?2:qg(46,xU)||qg(101,xU)))_R(t+3,nx,IF(2>t,n(ru=(t?e$:i$)(nU,sU)))n(in=is(58,nU,sU);rU=G_(e$(n,sU)|e$(nU-n-1,sU+n+1)<<32))))
+
+// parser pairs (GB per second). stanford goog etc. lucky to do 100KB. B-team. (i had research position at stanford in AI. garbage.)
+f(Bq,bp(0,bC(34==Cx)))f(Bt,bp(10,bp(5,bC(Vv=10>Cx-48;v|(46==Cx|58==Cx|101==Cx|32==Cx)&d(1,v)&d(-1,v)))))f(Bp,bp(0,bC(2>Cx-62)))nS(q$,ns(n-2,s+1))ZU a,pZ(),ys();nS(p$,pZ(ns(n-2,s+1)))
+Z_ P0[]={Bq,Bt,Bp},P1[]={q$,t$,p$};f(ap,UA[na]=x;na++)
+
+// noun verb adverb
+f(nva,c(i(nx-1,ij=1==o/32;(j?3u>o_-52:1==o_/32)?(*d++=32+o_,*d++=j?ap(o-32):o,++i):(*d=77,d+=!j,*d++=o))*d++=x_))
+
+// parse reduction insert
+g(ins,Ua=ind(P0[f](x));_a(!na?x:c(ij=0;i(na,ik=au-1;d=(s)ds((U)d,x+j,k-j);j=++i<na?au:nx;Ur=P1[f](j-k,sx+k);*d++=f/2*160+ap(2>f&&1==nr?_v(r):r))d=(s)ds((U)d,x+j,nx-j))))
+f(pz,nva(ins(2,x)))f(pZ,qg(61,x)?(x=f1(nva,Ss(c_(x,61))),a(nz(nx-1,tc(83)),C_(sS(0,x),a))):pz(x))Z(s,pS,n(IF(160>o,*d++=o)d=pS(d,UA[o%32]))d,sd,Ux)
+s(ps,Ux=ns(sl(s),s);a=tn(0,32);na=1;i(2,x=ins(i,x))Q(x=pz(p_(x)))*UA=x=c(d=pS(c,x));a)s(zs,P(92==*s,ys(s+1))P(32==s[1],sv(*s-96,ps(s+2));0)Qx(ps)x=_x(z(x,0));58==s[1]?_x(0):x)
+s(os,P(!*s||39==*s,0)Qx(zs)x?wx(x):0)s(ts,ii=is(32,20,s);si=0;in=i?zs(s+1):1;s+=i+1;Qx(ps)Ua=ut();i(n,Q(_r(z(x,0))))_x(ti(((ut()-a)/2.4e6-n/2e5))))
+// \l \t \w \v ..
+s(ls,Qx(_0)n(Q(nU?os(sU):_x(96)))_x(0))s(ys,if(!*s)_k(0);$5(is(*s,4,"ltvw"),ls(s+2),ts(s+1),Ux=0;c(i(27,if(Q[i])*d++=96+i)),ti(wm()),ns(sl(B),B)))
+s(_1,in=nf(s);Qs(!n,s);ii=f_((U)s,0);R(2,n,_w(i,(U)sr,n);_f(i)))s(_0,Qx(_1)Qd(10!=x_)Ss(x))f(wx,x=sS(10,px||tx||Tx||qf(x)?v_(_z(x)):f1(_z,x));w_(2,x,nx);_x(0))
+int main(int n,s*_){M[31]=m_(0,32L<<31,3,0x4022,0,0);IF(*++_,ls(*_))ws("k/fun4 (c) 2024 arthur whitney MIT license\n");cc[256];W(1)wc(32),c[_w(0,(U)c,256)-1]=0,*c?os(c):0;}
+
+// NO LIBC THANK GOD ALMIGHTY. bell labs can go to hell.
+void _start(){asm("lea 8(%rsp),%rsi;call main");}
+
+//clang needs this
+void*memcpy(void*r,const void*a,Ux){return(void*)ds((U)r,(U)a,x);}
+
+2024.05.09 k- (aka k-junior)
+a linux/avx2 binary (antonio(or you) can quickly do macos/arm: syscall nums and a few vector instructions)
+a.c code
+a.h abbr
+a.k test
+
+clang -Os -oa a.c -mavx2 -mfma -nostdlib -s -funsigned-char -ffast-math -fno-finite-math-only -fno-unwind-tables -Wno-incompatible-pointer-types -Wno-parentheses
+
+currently
+names are one character
+function def is:
+
+f ..
+e.g.
+f 2x
+f3
+is 6
+
+f@x is fx is application/composition/multiply/matrixmultiply/funcall/indexing/ ..
+f?x are the inverses

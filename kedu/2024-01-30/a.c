@@ -1,0 +1,46 @@
+#define e(g) T0(g(a_(i,x)))
+#define gx (2+I*ex)
+#define ex (*(e*)&x)
+#define b(g,t,a,v) f(g,ax?ue(t,a):uE(t,v))
+#define ue(t,z) _(x=t&&t>ax?Ua(t,x):x;z)
+#define uE(t,z) _(x=t&&t>tx?Ut(t,x):x;z)
+#define uu(e) _(if(aa!=ax)If(aa<ax,a=Ua(ax,a))x=Ua(aa,x);e)
+#define UU(e) _a(it=aa?:ta;if(t!=tx)If(t<tx,a=ax?Ua(tx,a):Ut(tx,a))x=Ut(t,x);e)
+#define a(t,z) ((u)(t)<<61|c3(m(3,t)-3,(unsigned)(z),ie(z),ug(z)))
+#define t(t,h,e,g)         c3(m(3,t)-3,a(t,h),a(4,e),a(5,g))
+#define T(t,c,h,e,g) _x(R(t,nx,C4(t-2,i(nx,rc=c),i(nx,ri=h),i(nx,re=e),i(nx,rg=g))))
+#define R(t,n,z) r(t_(t,n),z) //rrrtn bcieg  acd mnop |f im rtuwx
+#include"a.h"//ACDEMNOPS|FG  QRTUW (B GHIJKL UV [XYZ]) At Cut Dot Equal Func G Max Num Order Prod Q Res Sum Type Write
+typedef float e;typedef float complex g;e sqrtf(e),expf(e),logf(e);g csqrtf(g),cexpf(g),clogf(g);f(s,in=0;X(n+=xc)n)Zi ie(e x){return*(int*)&x;}Zu ug(g x){return*(u*)&x;}
+void*malloc(),free(),*memcpy();char*strchr(const char*,int);ns(is,st=strchr(s,n);t?1+t-s:0)__attribute((naked))
+long write(),read();int stat(),open(),close();G(W_,write(f,sa,x))G(_W,read(f,sa,x))F(F_,open(sa,x))f(_F,close(x))F(F$,stat(sa,sx))ns(w_,W_(1,(u)s,n))f(w,127>x?w_(1,&x):w_(is(0,sx),sx))
+u(t_,ii=n<<l[t];W+=i;ux=(u)malloc(8+i+1);*xU=t<<24|n<<32;x+8,it,un)f(_t,W-=Nx;free(sx-8);0)f(r_,Ax?x:(++xr,x))f(_r,Ax?x:(1<<24)-1&xr?(--xr,x):_(if(!tx)X(_r(xu))_t(x)))G(mc,(u)memcpy(sf,sa,x))
+u(n,R(3,n,i(n,ri=i)),in)u(n$,R(3,n,i(n,ri=n-1-i)),in)nu(nz,ua=ix;R(ax,n,i(7+Nr>>3,ru=a)))
+f(v,r(t_(ax,1),*rU=x))F(vc,++W;sx[nx++]=a;x)G(c,mc(t_(tx,a),x+(f<<lx),a<<lx))F(V,_a(R(tx,na+nx,mc(r,a,Na);mc(r+Na,x,Nx))))F(_C,_x(R(2,0,X(r=vc(a,V(r,xu))))))
+f(ind,_x(R(3,s(x),int*restrict s=rI;X(if(xc)*s++=i))))nu(ec,T1(n==xc))F(C,_a(T0(c(xi,(i+1<nx?xI[i+1]:na)-xi-1,a))))f(C_,ua=ec(sx[nx-1],x);a=_a(c(-1,na,a));*sa=1;C(x,ind(a)))
+iu(a_,tx?a(tx,c4(lx,xc,0,xi,xu)):r_(xu))
+tu(Ua,t(t,ix,(e)ix,ex)) //4>ax?(e)ix:ex))
+tu(Ut,T(t,xc,xc,xi,4>tx?xi:xe))
+
+#define B(g,o) b(g,4,5>ax?a(4,o(ex)):a(5,o(gx)),5>ax?T4(o(xe)):T5(o(xg)))
+b(_s,2,t(ax,-ix,-ex,-gx),T(tx,-xc,-xi,-xe,-xg))b(_e,0,a(1,!ix),T1(ci))b(d,4,a(5,I*ex),T5(I*xe))e $p(e x){return 1/x;}B(_p,$p)B(_q,sqrtf)B(_l,expf)B(l_,logf)
+#define ME(g,o) F(g,ax?aa?uu(a(1,ia o ix)):M==g?M(_s(x),_s(a)):g(x,a):UU(_x(T1(ai o ci))))
+#define SP(g,o) F(g,ax?aa?uu(ue(2,t(ax,ia o ix,ea o ex,ga o gx))):g(x,a):UU(uE(2,T(tx,ai o xc,ai o xi,ae o xe,ag o xg))))
+SP(S,+)SP(P,*)ME(M,>)ME(E,==)
+ns(k,mc(t_(2,n),(u)s,n))int sprintf(char*,const char*s,...);f($i,bs[12];k(sprintf(s,"%d",ix),s))f($e,bs[12];k(sprintf(s,"%g",ex),s))f($g,bs[24];k(sprintf(s,"0+.%g",ex),s))
+f($,px?c1('?'):ax?c3(m(3,ax)-3,$i(x),$e(x),$g(x)):2==tx?x:e($))f($_,Ax||!lx?$(x):tx?_C(32,e($)):c1('.'))f(wx,_x(w_(nx,sx)))f(w$,wx(vc(10,Ax||tx?$_(x):_C(10,e($_)))))
+#define Qi(z) Qr(!a##z)Qt(3<a##z)Qd(0>i##z)
+F(err,w(a);w(58);w(x);w(10);Q)F(A,QZ)F(A_,Qr(aa)A(a,x))F(_A,Qr(aa)QZ)f(f_,Qr(ax)A(x,n$(nx)))f(_n,Qr(ax)_x(a(3,nx)))f(_v,Qr(ax)_x(a_(0,x)))
+f(n_,Qi(x)n(ix))F(N$,Qi(a)QZ)F(_N,Qi(a)ax?nz(ia,x):_x(c(0,ia,x)))F(N_,Qi(a)ax?nz(ia,x):_x(c(ia,nx-ia,x)))F(V_,a=aa?v(a):a;x=ax?v(x):x;Qt(ta!=tx)_x(V(a,x)))
+F(_S,S(a,_s(x)))F(_P,P(a,_p(x)))F(_M,M(x,a))F(_E,_e(E(a,x)))F(D,QZ)F(_$,QZ)F(_m,QZ)F(m_,QZ)f(o,QZ)f(_o,QZ)f(o_,_o(_e(x)))f(O,QZ)f(_O,QZ)
+Z_// +  - *  %  &  |   < >  =  ~  $ . !  @   ?  # _  ^ ,  *exp %log &Flip |flop <asc >desc =group ?nub ^order (#= #'=)
+f[]={0,_s,_l,l_,0 ,f_,_o,o_,O,_e, $,d,n_,_v,_O,_n,_q,o,v },F[]={S,_S,P ,_P,_m,m_,_M,M ,E,_E,_$,D,N$,A_,_A,_N,N_,0,V_};
+f(z_,10>x-48?a(3,x-48):26>x-97?r_(G[x-97]):is(x,"+-*%&|<>=~$.!@?#_^,"))us(z,ua=z_(*s++);!*s?a:x(z(s+!pa),Q(x)pa?f[a-1](x):F[z_(*s)-1](a,x)))
+us(ps,i(13,in=is(" \"`;()[]{}'/\\"[i],s);Pr(n--,w((u)s);w(10);wx(vc(94,nz(n,a(2,32))));w(10);Q))(u)s)
+us(ws,ux=92==*s?(u)s:ps(s);Q(x)Q(x=es(sx))x?w$(x):0)us(ts,ux=ps(s);Q(x)in=1e6;uf=uz();i(n,Q(_r(es(sx))))a(3,(m(f,uz())-f)/(OS?2.4e6:2.4e4)-4*n/1e6))
+us(f1,ii[36];in=!F$((u)s,(u)i)&&1&i[OS?6:1]>>15?i[OS?12:24]:0;Qs(!n,s)R(2,n,ii=F_((u)s,0);_W(i,r,n);_F(i)))us(f0,ux=f1(s);Q(x)C_(x))
+us(ls,ux=f0(s);Q(x)ii=-1;W(++i<nx&&nxu)Q(ws(sxu))_x(0))
+us(es,92==*s?c4(is(s[1],"ltw"),0,ls(s+3),ts(s+3),a(3,W)):58==s[1]?_(u*restrict a=G+*s-97;_r(*a);*a=z(s+2);0):z(s))
+int main(int _,char**a){OS=(u)a>>46;
+ws("_2");
+If(*++a,ls(*a))w((u)"k/fun (c)atw "__DATE__),w(10);bs[64];W(1)w(32),s[read(0,s,64)-1]=0,*s?ws(s):0;}

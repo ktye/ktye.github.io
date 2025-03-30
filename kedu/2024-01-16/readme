@@ -1,0 +1,37 @@
+2021.01.16
+macos/linux and  arm64/avx2/avx512 (k/fun is very fast. k/pro/enterprise is 10 times faster again.)
+what is your machine? i'm on linux. antonio has m1. i dont know what kai uses.
+
+my favorite thing is the parser(ps) which is still not clear but will be.
+vars are one char. (obviously python4 sql .. will have longer names)
+bool char int float complex ..
+
+
+
+\l z.k
+executes until first blank line.
+in z.k you can see i'm plan on adding cosine similarity.
+(xy)%_(xx)yy
+
+note xy is x@y is
+
+application
+indexing(vectors are functions)
+matmul(linear transformation)
+dotproduct
+composition
+..
+
+
+2014.01.16
+here is some similar numpy with timings.
+
+we are close to a very fast fft. {(x+y),x-y*:^#y}0/   (^n is n fractional rotations of pi)
+(much faster than fftw/numpy/scipy ..)
+
+
+a.h and _.h are a bunch of abbreviations.
+could(and will be) be generated with a line or two of k-code.
+i.e. kolmogorov 0
+
+also the manual k.d

@@ -1,0 +1,36 @@
+2024.05.13
+>uses vector instructions
+yes. (this b.zip uses 256bit. will switch to 512bit in a moment..)
+
+>6types: list3 bool0b char0c int2i float2e cmplx3g  (byte size/element 1<<i) layout: rrrrnnnn?
+yes. (actually about 15 types. 5atom 5vect list func ..) will soon add sym (and special intervals a+!n a+^n a+#n)
+yes except it is: rrbtnnnn _R=b<<16|t<<24|n<<32    b is bucket[0-31] t is type[0-7]
+>single allocation: M[31]=mf(32L<<31) mmap 64gb
+yes
+>syscalls: read0 write1 open2 close3 stat4(filesize) mmap9 exit60 +ut(time)
+yes
+>MO? is that a switch for macos constants?
+yes. affects stat and mmap. now the flag is A(apple) A=main>>32 (i.e. apple puts main above 005)
+005 is bond notation. e.g. 007 is 2^2^7(2^128)
+
+>vector instructions b_ pmovmskb b2 movmskps  sq sqrtps li pminud mi pmaxud pshufb pshufd
+>gg for complex mulitply?
+
+yes. and a5(in this b.zip) is 32value indexing. avx2 has no instruction so we have to blend 2 pshufb
+
+
+todo:
++/'!'2 3
+(x+*)
+a'b while(a)b
+A'B if(a)b if(c)d else e
+2b|~2b
+?n
+^?<>=
+x.y
+2>_(x+*)/x (mandelbrot set)
+sql
+^x [a/b/deepmind]
+
+clang -s -Os -oa a.c -mavx2 -mfma -nostdlib -fno-builtin -funsigned-char -ffast-math -fno-finite-math-only -fno-unwind-tables -Wno-incompatible-pointer-types -Wno-parentheses
+

@@ -1,0 +1,43 @@
+2024.01.13
+i want to keep middle 6 bits of exponent(instead of 8).
+so roughly (2^-32 to 2^32) and 0/inf/nan
+
+fortunately g_ and _g perf don't matter. rare.
+
+ieee f1 f2 f3 are [-](5.10 8.23 11.52)
+
+reals should be stored/printed logarithmically(just like napier did 400 years ago)
+i.e. all exponent. then real* is just integer+.(that saves 8billion transistors)
++ is a pain. but my dad(pilot/navigatorWW2(transport! not bombing)/multiple matholympiad winner)
+could do that in his head.
+
+when we redo physics we will see what exponents we need.
+but i plan on using 3 sets: atomic/human/galaxy (each 1e9 apart)
+within each set i dont think we need much range. e.g. 4e9(2^32)
+
+2024.01.13
+im working on multichar tokens.
+big step...
+
+token/parse is incredibly fast.
+match/op/compress e.g. ~\ for matching "'s +\ for matching()
+match/op/compress
+..
+each step reduces size down to AST(polish)
+
+
+clang/gcc/python/js/java/.. parse at about 10000ns per byte.
+
+i think we can do 10ns(or less)
+
+2024.01.13
+since i want x to be volatile
+maybe we should switch to:
+
+x
+ax
+fx
+fax
+
+and arg passing puts result/x in r0
+the others in r1 r2

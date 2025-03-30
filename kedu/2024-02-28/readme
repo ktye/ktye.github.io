@@ -1,0 +1,19 @@
+2024.02.28
+el[xyzXYZ]
+
+do
+
+exp/log log2/exp2 cos/acos sin/asin tan/atan cosh/acosh ..
+
+e.g.
+
+`e?-1  for pi
+
+for now using "e"
+*% are sqr/sqrt
+
+e.g. mandelbrot
+
+x+*
+
+bitmap with: 2>+50(x+*)/0

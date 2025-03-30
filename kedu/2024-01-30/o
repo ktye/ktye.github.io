@@ -1,0 +1,2 @@
+-oa a.c -Os -ffast-math -fno-finite-math-only -fno-unwind-tables -ferror-limit=1 -Wno-parentheses -Wno-incompatible-pointer-types 
+

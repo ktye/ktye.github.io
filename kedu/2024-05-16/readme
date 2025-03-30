@@ -1,0 +1,8 @@
+2024.05.16
+this is much better.
+
+we will parse/compile/execute several languages with this:
+
+excel sql(many variants) k c python3 python4 ..
+
+there are 10 to 20 parse patterns. fortunately most parsing patterns are the same among these languages

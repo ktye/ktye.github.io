@@ -1,0 +1,11 @@
+2024.02.29
+Pi PI will be the rotations(for fft or whatever)
+using half-angle-cos
+
+Pi (%2?1+)\0
+
+and then fill in sin's with %1-*
+
+the fft rotations are
+
+x,Pi[i]x

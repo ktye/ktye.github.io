@@ -1,0 +1,9 @@
+2024.02.04
+getting closer to fft
+
+^4
+pi cut
+
+e.g. the fft recursion is
+(x+y),x-y*:^#y
+

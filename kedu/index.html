@@ -12,7 +12,7 @@
 <select id="date" onchange="show()"></select>
 <select id="algo" onchange="show()"><option>cat</option><option>diff</option></select>
 <select id="etad" onchange="show()"><option>none</option><option>previous</option></select>
-<div    id="files" style="display:inline"></div>
+<div    id="files" style="display:inline;outline:none" tabindex="0" onkeydown="key(event)"></div>
 <pre    id="out"></pre>
 
 <script src="dmp.js"></script>
@@ -24,7 +24,13 @@ tc=(x,y)=>(x.textContent=y,x),
 cl=(x,y)=>(x.classList.add(y),x),
 af=x=>Array.from(x),
 rm=p=>{while(p.firstChild)p.removeChild(p.firstChild)},
-fe=(x,f)=>fetch(x).then(r=>{if(r.ok){return r.text()};throw new Error("e")}).then(f).catch(e=>f(""))
+fe=(x,f)=>fetch(x).then(r=>{if(r.ok){return r.text()};throw new Error("e")}).then(f).catch(e=>f("")),
+
+//use arrows withing file list:
+key=e=>go(e,["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].indexOf(e.key)),
+go=(e,i)=>(i<0)?true:(e.preventDefault(),((i<2)?lr(i):ud(i-2)),false),
+lr=i=>{let n=af(files.childNodes).find(x=>curfile==x.textContent.trim()),m=i?n.nextElementSibling:n.previousElementSibling;if(m){n.classList.remove("B");m.classList.add("B");curfile=m.textContent.trim();show()}},
+ud=i=>(date.selectedIndex=Math.min(date.options.length-1,Math.max(0,date.selectedIndex+(i?1:-1))),show()),
     
 show=_=>{rm(files)
  let p=("previous"==etad.value)?date.options[date.selectedIndex+1].value:(etad.value=="none")?0:etad.value
@@ -59,6 +65,13 @@ fetch("list").then(r=>r.text()).then(r=>{
   ac(date,x)})
  show()
 })
+
+//mark&right click to find next
+window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
+ if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
+ else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
+ window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
+
 </script>
 </body>
 </html>

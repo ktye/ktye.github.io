@@ -1,0 +1,22 @@
+2024.05.18
+b_ is bit from byte(_b byte from bit)
+b2 is bit from int(i.e.size2)
+X9 is ~\
+i0&i2 are indexing(byte int)
+
+
+2024.05.19
+a0 is at-size-0. i.e. indexing into byte array.
+x86(and arm?) can do 32 or 64 at a time.
+easy to write loop, e.g.
+
+i(32,rc=sa[xc])
+
+i use it for parse-unparse (since there are about 32 glyphs. 09 az are blended in.)
+
+in a loop i think you might as well do all 70 values(32+10+26+..) . i.e. dont bother with blend.
+with avx512(64bytes) we could almost do all the glyphs in one instruction.
+for parse we shift alphanumeric into range. unparse is fine as is.
+
+btw if there is a 32byte version(e.g. avx2) then 64byte is 3 or 4 instructions. maybe in parallel
+
