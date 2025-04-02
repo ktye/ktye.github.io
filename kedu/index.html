@@ -10,8 +10,8 @@
 </head>
 <body>
 <select id="date" onchange="show()"></select>
-<select id="algo" onchange="show()"><option>cat</option><option>diff</option></select>
-<select id="etad" onchange="show()"><option>none</option><option>previous</option></select>
+<select id="algo" onchange="show()"><option>show</option><option>diff previous</option><option>cat previous</option></select>
+<!--select id="etad" onchange="show()"><option>none</option><option>previous</option></select-->
 <div    id="files" style="display:inline;outline:none" tabindex="0" onkeydown="key(event)"></div>
 <pre    id="out"></pre>
 
@@ -33,7 +33,7 @@ lr=i=>{let n=af(files.childNodes).find(x=>curfile==x.textContent.trim()),m=i?n.n
 ud=i=>(date.selectedIndex=Math.min(date.options.length-1,Math.max(0,date.selectedIndex+(i?1:-1))),show()),
     
 show=_=>{rm(files)
- let p=("previous"==etad.value)?date.options[date.selectedIndex+1].value:(etad.value=="none")?0:etad.value
+ let p=date.options[(date.selectedIndex==date.options.length-1)?date.selectedIndex:date.selectedIndex+1].value
  let d=date.selectedOptions[0],dir=d.textContent+"/"
  let F=d.dataset.f.split(" "),G=p?af(date).filter(x=>x.textContent==p)[0].dataset.f.split(" "):[]
  let B=F.slice()
@@ -44,10 +44,10 @@ show=_=>{rm(files)
   sp.onclick=_=>{curfile=f;show()}
   ac(files,sp)})
  out.style.color="";out.textContent=""
- if(!p)fe(d.textContent+"/"+curfile,r=>out.textContent=r)
+ if("show"==algo.value)fe(d.textContent+"/"+curfile,r=>out.textContent=r)
  else{let a;fe(dir+curfile,x=>{a=x,fe(p+"/"+curfile,b=>{
    let dmp=new diff_match_patch()
-    if("diff"==algo.value){
+    if("diff previous"==algo.value){
      let d=dmp.diff_main(a,b);dmp.diff_cleanupSemantic(d)
      d.forEach(x=>ac(out,cl(tc(ce("span"),x[1]),(0>x[0])?"r":x[0]?"g":"c")))
     }else out.textContent="+++ "+dir+curfile+"\n"+a+"\n\n--- "+p+"/"+curfile+"\n"+b
@@ -58,7 +58,6 @@ fetch("list").then(r=>r.text()).then(r=>{
  let d=r.map(x=>x.slice(0,10)).toReversed()
  let f=r.map(x=>x.slice(11,-1)).toReversed()
  d.forEach((x,i)=>{
-  ac(etad,tc(ce("option"),x))
   x=tc(ce("option"),x)
   x.dataset.f=f[i]
   if(!i)curfile=f[0].split(" ")[0]
