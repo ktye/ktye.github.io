@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" class="no-tui-scroll">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Turbo Vision Example</title>
+    <script src="tuicss.min.js"></script>
+    <link rel="stylesheet" href="tuicss.min.css">
+</head>
+
+<body>
+    <!--div class="tui-screen-800-600 bordered tui-bg-blue-black" style="width:100vw;height:100vh"-->
+    <div class="bordered tui-bg-blue-black" style="width:100vw;height:100vh">
+
+        <!-- Sidenav -->
+        <nav class="tui-sidenav absolute">
+            <ul>
+                <li>
+                    <a href="#!">
+                        <span class="red-168-text">O</span>pen
+                        <span class="tui-shortcut">ctrl+o</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#!">OS Shell</a>
+                </li>
+                <li>
+                    <a href="#!">
+                        <span class="red-168-text">C</span>opy
+                        <span class="tui-shortcut">ctrl+c</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#!">
+                        <span class="red-168-text">P</span>aste
+                        <span class="tui-shortcut">ctrl+v</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#!">C<span class="red-168-text">u</span>t
+                        <span class="tui-shortcut">ctrl+x</span>
+                    </a>
+                </li>
+                <div class="tui-black-divider"></div>
+                <li>
+                    <a href="#!">Insert</a>
+                </li>
+                <li>
+                    <a href="#!">Delete</a>
+                </li>
+                <li>
+                    <a href="#!">Go...</a>
+                </li>
+                <div class="tui-black-divider"></div>
+                <li>
+                    <a href="#!">
+                        <span class="red-168-text">S</span>earch
+                        <span class="tui-shortcut">ctrl+p</span>
+                    </a>
+                </li>
+                <div class="tui-black-divider"></div>
+                <li>
+                    <a href="#!">Exit <span class="tui-shortcut">F10</span></a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Navbar -->
+        <nav class="tui-nav absolute">
+            <span class="tui-datetime" data-format="h:m:s a"></span>
+            <ul>
+                <li class="tui-sidenav-button red-168-text">≡</li>
+                <li class="tui-dropdown">
+                    <span class="red-168-text">F</span>ile
+                    <div class="tui-dropdown-content">
+                        <ul>
+                            <li>
+                                <a href="#!">
+                                    <span class="red-168-text">N</span>ew
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#!">
+                                    <span class="red-168-text">O</span>pen...
+                                    <span class="tui-shortcut">F3</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#!">
+                                    <span class="red-168-text">S</span>ave
+                                    <span class="tui-shortcut">F2</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#!">
+                                    S<span class="red-168-text">a</span>ve as...
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#!">
+                                    Save a<span class="red-168-text">l</span>l
+                                </a>
+                            </li>
+                            <div class="tui-black-divider"></div>
+
+                            <!-- SUBMENU EXAMPLE -->
+
+                            <li class="tui-dropdown block">
+                                <span class="right">►</span>
+                                <span class="red-168-text">M</span>ore
+                                <div class="tui-dropdown-content">
+                                    <ul>
+                                        <li>
+                                            <a href="#!">
+                                                <span class="red-168-text">C</span>hange dir...
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#!">
+                                                <span class="red-168-text">P</span>rint
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#!">
+                                                <span class="red-168-text">D</span>OS shell
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <div class="tui-black-divider"></div>
+                            <li>
+                                <a href="#!">
+                                    <span class="red-168-text">Q</span>uit
+                                    <span class="tui-shortcut">F10</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="tui-dropdown">
+                    <span class="red-168-text">E</span>dit
+                </li>
+                <li class="tui-dropdown">
+                    <span class="red-168-text">V</span>iew
+                </li>
+                <li class="tui-dropdown">
+                    <span class="red-168-text">H</span>elp
+                </li>
+            </ul>
+        </nav>
+
+
+<table class="tui-table-grid" style="position:absolute;top:20px;height:calc(100% - 45px)">
+    <tbody>
+        <tr style="height:30%">
+            <td rowspan="2" style="width:30%">
+		<div class="tui-window full-width full-height tui-no-shadow" style="/*margin-top:20px*/">
+		    <fieldset class="tui-fieldset full-height">
+			<legend class="center">ASM</legend>
+			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
+			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
+			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+			<textarea class="tui-textarea full-width full-height" style="overflow: scroll;">
+			</textarea>
+		    </fieldset>
+		</div>
+	    </td>
+            <td width="70%">
+		<div class="tui-window full-width full-height tui-no-shadow" style="/*margin-top:20px*/">
+		    <fieldset class="tui-fieldset full-height">
+			<legend class="center">A.K</legend>
+			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
+			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
+			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+			<textarea class="tui-textarea full-width full-height" style="overflow: scroll;">
+			</textarea>
+		    </fieldset>
+		</div>
+            </td>
+        </tr>
+        <tr style="height:30%">
+            <td width="70%">
+		<div class="tui-window full-width full-height tui-no-shadow" >
+		    <fieldset class="tui-fieldset full-height">
+			<legend class="center">A.C</legend>
+			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
+			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
+			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+			<textarea class="tui-textarea full-width" style="overflow: scroll;">
+			</textarea>
+		    </fieldset>
+		</div>
+            </td>
+        </tr>
+        <tr style="height:30%">
+	 <td>
+	 <div id="debug">
+	 </div>
+	 </td>
+	 <td style="height:30%">
+	  <div class="tui-window full-width full-height tui-no-shadow" style="background:black">
+		    <fieldset class="tui-fieldset full-height">
+			<legend class="center">OUT</legend>
+			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
+			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
+			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+			<pre>
+			</pre>
+			<!--textarea class="tui-textarea full-width" style="height: 200px; overflow: scroll;">
+			</textarea-->
+		    </fieldset>
+	  <div>
+	 </td>
+	</tr>
+    </tbody>
+</table>
+
+
+        <!-- Status bar -->
+        <div class="tui-statusbar absolute">
+            <ul>
+                <li><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
+                <li><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
+                <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
+                <li><a href="#!"><span class="red-168-text">Alt+F9</span> Compile</a></li>
+                <span class="tui-statusbar-divider"></span>
+                <li><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
+            </ul>
+        </div>
+
+    </div>
+</body>
+
+</html>
