@@ -1,240 +1,234 @@
 <!DOCTYPE html>
 <html lang="en" class="no-tui-scroll">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Turbo Vision Example</title>
-    <script src="tuicss.min.js"></script>
-    <link rel="stylesheet" href="tuicss.min.css">
-</head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA9klEQVR42qTTzyoGURjH8c/7ei0kf1IkLoENGxeg7JQdC1eAsrJkpyRLyhWgxFIpF2NB9iQURoeHxclMM72/mqkz/c7vfOd5ntPxp7P0Wseham3giJXvRVuX6mTrFHiPE/RjFYNNA26xg3EsNg0o0wve0YdWfmKVkvkJa5jHNXqaEpzjFMOYQFGH4BfzEtuxaQsz+KxDkAIeYvMjNqP/mhC8RfGS7vD8n7EsoIj27WEOF9gP/FadX0jGET/zOoVlHGMhP7RdMhtDGAiS1L4lvOImr0FO8IFpXKEXo+HZjVkYw0FVQBF3YDb7PhlP7SLW1lcAAAD//1q7KdiUynS9AAAAAElFTkSuQmCC">
+<!--https://go.dev/play/p/KRYT29YqOo2-->
+<title>turbo-k</title>
+<script src="tuicss.min.js"></script>
+<link rel="stylesheet" href="tuicss.min.css">
+<style>
+ textarea{resize:none}
+.fullscr{width:100%!important;height:100%!important;position:absolute;left:0;top:0;z-index:9}
+.hidden{display:none}
+.h1{flex-grow:1}
+.h2{flex-grow:2.57}
+</style>
+</head><body>
 
-<body>
-    <!--div class="tui-screen-800-600 bordered tui-bg-blue-black" style="width:100vw;height:100vh"-->
-    <div class="bordered tui-bg-blue-black" style="width:100vw;height:100vh">
+<script>
 
-        <!-- Sidenav -->
-        <nav class="tui-sidenav absolute">
-            <ul>
-                <li>
-                    <a href="#!">
-                        <span class="red-168-text">O</span>pen
-                        <span class="tui-shortcut">ctrl+o</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#!">OS Shell</a>
-                </li>
-                <li>
-                    <a href="#!">
-                        <span class="red-168-text">C</span>opy
-                        <span class="tui-shortcut">ctrl+c</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#!">
-                        <span class="red-168-text">P</span>aste
-                        <span class="tui-shortcut">ctrl+v</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#!">C<span class="red-168-text">u</span>t
-                        <span class="tui-shortcut">ctrl+x</span>
-                    </a>
-                </li>
-                <div class="tui-black-divider"></div>
-                <li>
-                    <a href="#!">Insert</a>
-                </li>
-                <li>
-                    <a href="#!">Delete</a>
-                </li>
-                <li>
-                    <a href="#!">Go...</a>
-                </li>
-                <div class="tui-black-divider"></div>
-                <li>
-                    <a href="#!">
-                        <span class="red-168-text">S</span>earch
-                        <span class="tui-shortcut">ctrl+p</span>
-                    </a>
-                </li>
-                <div class="tui-black-divider"></div>
-                <li>
-                    <a href="#!">Exit <span class="tui-shortcut">F10</span></a>
-                </li>
-            </ul>
-        </nav>
+let af=x=>Array.from(x),
+fullscr=x=>x.closest(".tui-window").classList.toggle("fullscr"),
+fullcol=x=>(x=x.closest(".tui-window"),x.style.flexGrow=(x.style.flexGrow?"":1000)),
 
-        <!-- Navbar -->
-        <nav class="tui-nav absolute">
-            <span class="tui-datetime" data-format="h:m:s a"></span>
-            <ul>
-                <li class="tui-sidenav-button red-168-text">≡</li>
-                <li class="tui-dropdown">
-                    <span class="red-168-text">F</span>ile
-                    <div class="tui-dropdown-content">
-                        <ul>
-                            <li>
-                                <a href="#!">
-                                    <span class="red-168-text">N</span>ew
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#!">
-                                    <span class="red-168-text">O</span>pen...
-                                    <span class="tui-shortcut">F3</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#!">
-                                    <span class="red-168-text">S</span>ave
-                                    <span class="tui-shortcut">F2</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#!">
-                                    S<span class="red-168-text">a</span>ve as...
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#!">
-                                    Save a<span class="red-168-text">l</span>l
-                                </a>
-                            </li>
-                            <div class="tui-black-divider"></div>
+show=x=>x.classList.add("active"),
+showall=_=>[wa,wk,wc].forEach(x=>x.classList.remove("hidden")),
+hide=x=>x.classList.add("hidden"),
+title=(w,t)=>w.querySelector("legend").textContent=t,
+loadfile=(name,text)=>{[ek,ec,ea].forEach(x=>{x.value="";x.readOnly=true});showall()
+ let n=name.slice(0,-1).toUpperCase();title(wk,n+"K");title(wc,n+"C");title(wa,n+"A")
+ name.endsWith(".a")?(hide(wk),hide(wc),ea.value=text,ea.readOnly=false):
+ name.endsWith(".c")?(hide(wk)         ,ec.value=text,ec.readOnly=false):
+ name.endsWith(".k")?(                  ek.value=text,ek.readOnly=false):"?"},
 
-                            <!-- SUBMENU EXAMPLE -->
+newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input')).filter(x=>x.checked)[0].value,""),
+openfile=f=>(f=openfilename.files[0],f.text().then(r=>loadfile(f.name,r)))
 
-                            <li class="tui-dropdown block">
-                                <span class="right">►</span>
-                                <span class="red-168-text">M</span>ore
-                                <div class="tui-dropdown-content">
-                                    <ul>
-                                        <li>
-                                            <a href="#!">
-                                                <span class="red-168-text">C</span>hange dir...
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#!">
-                                                <span class="red-168-text">P</span>rint
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#!">
-                                                <span class="red-168-text">D</span>OS shell
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
+</script>
 
-                            <div class="tui-black-divider"></div>
-                            <li>
-                                <a href="#!">
-                                    <span class="red-168-text">Q</span>uit
-                                    <span class="tui-shortcut">F10</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="tui-dropdown">
-                    <span class="red-168-text">E</span>dit
-                </li>
-                <li class="tui-dropdown">
-                    <span class="red-168-text">V</span>iew
-                </li>
-                <li class="tui-dropdown">
-                    <span class="red-168-text">H</span>elp
-                </li>
-            </ul>
-        </nav>
+<div class="bordered tui-bg-blue-black" style="width:100vw;height:100vh">
+<nav class="tui-nav absolute">
+<ul>
+ <li class="tui-dropdown">
+  <span class="red-168-text">F</span>ile
+  <div class="tui-dropdown-content">
+  <ul>
+   <li onclick="show(filenew)">
+    <a href="#!">
+     <span class="red-168-text">N</span>ew
+    </a>
+   </li>
+   <li onclick="show(fileopen)">
+    <a href="#!">
+     <span class="red-168-text">O</span>pen...
+     <span class="tui-shortcut">F3</span>
+    </a>
+   </li>
+   <li>
+    <a href="#!">
+    <span class="red-168-text">S</span>ave
+    <span class="tui-shortcut">F2</span>
+    </a>
+   </li>
+   <li>
+    <a href="#!">S<span class="red-168-text">a</span>ve as...</a>
+   </li>
+   <div class="tui-black-divider"></div>
+  </ul>
+ </li>
+ <li class="tui-dropdown">
+  <span class="red-168-text">E</span>dit
+  <!--Undo Redo|Cut Copy Paste Clear Copy example|Show clipboard-->
+ </li>
+ <li class="tui-dropdown">
+  <span class="red-168-text">S</span>earch
+  <!--Find Replace Search again|Go to line number... Previous error Next error Locate function...-->
+ </li>
+ <li class="tui-dropdown">
+  <span class="red-168-text">R</span>un
+  <!--Run Ctrl+F9 Program reset Ctrl+F2 Go to cursor F4 Trace into F7 Step over F8 Arguments...-->
+ </li>
+ <li class="tui-dropdown">
+  <span class="red-168-text">C</span>ompile
+  <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages-->
+ </li>
+ <li class="tui-dropdown">
+  <span class="red-168-text">D</span>ebug
+  <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... -->
+  <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches-->
+ </li>
+ <li class="tui-dropdown" style="float:right;margin-left:10px">
+  <span class="red-168-text">H</span>elp
+ </li>
+</ul>
+</nav>
 
 
-<table class="tui-table-grid" style="position:absolute;top:20px;height:calc(100% - 45px)">
-    <tbody>
-        <tr style="height:30%">
-            <td rowspan="2" style="width:30%">
-		<div class="tui-window full-width full-height tui-no-shadow" style="/*margin-top:20px*/">
-		    <fieldset class="tui-fieldset full-height">
-			<legend class="center">ASM</legend>
-			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
-			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
-			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-			<textarea class="tui-textarea full-width full-height" style="overflow: scroll;">
-			</textarea>
-		    </fieldset>
-		</div>
-	    </td>
-            <td width="70%">
-		<div class="tui-window full-width full-height tui-no-shadow" style="/*margin-top:20px*/">
-		    <fieldset class="tui-fieldset full-height">
-			<legend class="center">A.K</legend>
-			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
-			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
-			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-			<textarea class="tui-textarea full-width full-height" style="overflow: scroll;">
-			</textarea>
-		    </fieldset>
-		</div>
-            </td>
-        </tr>
-        <tr style="height:30%">
-            <td width="70%">
-		<div class="tui-window full-width full-height tui-no-shadow" >
-		    <fieldset class="tui-fieldset full-height">
-			<legend class="center">A.C</legend>
-			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
-			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
-			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-			<textarea class="tui-textarea full-width" style="overflow: scroll;">
-			</textarea>
-		    </fieldset>
-		</div>
-            </td>
-        </tr>
-        <tr style="height:30%">
-	 <td>
-	 <div id="debug">
-	 </div>
-	 </td>
-	 <td style="height:30%">
-	  <div class="tui-window full-width full-height tui-no-shadow" style="background:black">
-		    <fieldset class="tui-fieldset full-height">
-			<legend class="center">OUT</legend>
-			<span class="tui-fieldset-button"><span class="green-255-text">↕</span></span>
-			<span class="tui-fieldset-button left"><span class="green-255-text">■</span></span>
-			<span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-			<span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-			<pre>
-			</pre>
-			<!--textarea class="tui-textarea full-width" style="height: 200px; overflow: scroll;">
-			</textarea-->
-		    </fieldset>
-	  <div>
-	 </td>
-	</tr>
-    </tbody>
-</table>
+<div style="position:absolute;top:20px;height:calc(100% - 45px);width:100%;display:flex">
+<div id="left" style="height:100%;width:30%;display:flex;flex-flow:column">
 
+ <div id="wa" class="tui-window full-width h2 tui-no-shadow">
+ <fieldset class="tui-fieldset full-height">
+ <legend class="center">A.A</legend>
+ <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+ <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
+ <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+ <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+ <textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
+ </fieldset>
+ </div>
 
-        <!-- Status bar -->
-        <div class="tui-statusbar absolute">
-            <ul>
-                <li><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
-                <li><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
-                <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
-                <li><a href="#!"><span class="red-168-text">Alt+F9</span> Compile</a></li>
-                <span class="tui-statusbar-divider"></span>
-                <li><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
-            </ul>
-        </div>
+ <div id="wd" class="tui-window full-width h1 tui-no-shadow">
+ <fieldset class="tui-fieldset full-height">
+ <legend class="center">DEBUG</legend>
+ <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+ <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
+ <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+ <pre>
+ </pre>
+ <!--textarea class="tui-textarea full-width" style="height: 200px; overflow: scroll;" spllcheck="false">
+ </textarea-->
+ </fieldset>
+ </div>
 
-    </div>
-</body>
+</div>
+<div id="right" style="height:100%;width:70%;display:flex;flex-flow:column">
 
-</html>
+ <div id="wk" class="tui-window full-width h1 tui-no-shadow">
+ <fieldset class="tui-fieldset full-height">
+ <legend class="center">A.K</legend>
+ <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+ <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
+ <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+ <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+ <textarea id="ek" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
+ </fieldset>
+ </div>
+
+ <div id="wc" class="tui-window full-width h1 tui-no-shadow">
+ <fieldset class="tui-fieldset full-height">
+ <legend class="center">A.C</legend>
+ <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+ <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
+ <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+ <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+ <textarea id="ec" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
+ </fieldset>
+ </div>
+
+ <div id="wo" class="tui-window full-width h1 tui-no-shadow" style="background:black">
+ <fieldset class="tui-fieldset full-height">
+ <legend class="center">OUT</legend>
+ <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+ <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
+ <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
+ <pre id="out"></pre>
+ <!--textarea class="tui-textarea full-width" style="height: 200px; overflow: scroll;" spllcheck="false">
+ </textarea-->
+ </fieldset>
+ </div>
+</div>
+</div>
+
+ <div class="tui-statusbar absolute">
+  <ul>
+   <li><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
+   <li><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
+   <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
+   <li><a href="#!"><span class="red-168-text">Alt+F9</span> Compile</a></li>
+   <span class="tui-statusbar-divider"></span>
+   <li><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
+  </ul>
+ </div>
+</div>
+
+<!-- dialogs -->
+<div class="tui-overlap"></div>
+<div id="filenew" class="tui-modal center" >
+ <div class="tui-window">
+  <fieldset class="tui-fieldset">
+  <legend class="center">New File</legend>
+  <fieldset id="newfiletype" class="tui-input-fieldset">
+   <legend>Type</legend>
+   <label class="tui-radio">k<input type="radio" name="filetype" value="k" checked/><span></span></label>
+   <label class="tui-radio">c<input type="radio" name="filetype" value="c" /><span></span></label>
+   <label class="tui-radio">assembly<input type="radio" name="filetype" value="a"/><span></span></label>
+  </fieldset>
+  <br>
+  <fieldset class="tui-input-fieldset">
+   <legend>Name</legend>
+   <input id="newfilename" class="tui-input" value="a"></input>
+  </fieldset>
+  <br>
+  <div class="tui-divider"></div>
+  <br>
+  <button class="tui-button tui-modal-close-button left white-255-text" data-modal="filenew" onclick="newfile()" >ok</button>
+  <span> </span>
+  <button class="tui-button tui-modal-close-button right white-255-text cyan-168" data-modal="filenew">close</button>
+  </fieldset>
+ </div>
+</div>
+
+<div id="fileopen" class="tui-modal center" >
+ <div class="tui-window">
+  <fieldset class="tui-fieldset">
+   <legend class="center">Open</legend>
+   File <input id="openfilename" class="tui-input full-width" type="file"/>
+  <br>
+  <div class="tui-divider"></div>
+  <br>
+  <button class="tui-button tui-modal-close-button left white-255-text" data-modal="fileopen" onclick="openfile()">ok</button>
+  <span> </span>
+  <button class="tui-button tui-modal-close-button right white-255-text cyan-168" data-modal="fileopen">close</button>
+  </fieldset>
+ </div>
+</div>
+
+<script>
+[ek,ec,ea].forEach(x=>x.onselectionchange=e=>{e=e.target
+ let l=1,p=e.selectionStart,t=e.value.slice(0,p),i=t.indexOf("\n");
+ while(i>=0&&i<p){l++;i=t.indexOf("\n",1+i)};let c=p-t.lastIndexOf("\n")
+ e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"})
+
+let name=window.location.hash.slice(1);if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
+
+let O=x=>out.textContent+=x
+let help=_=>true
+let save=_=>true
+let open=_=>show(fileopen)
+let compile=_=>out.textContent="compiling\n"
+let handle=(e,f)=>{e.preventDefault();f()}
+window.onkeydown=e=>("F1"==e.key)?handle(e,help):("F2"==e.key)?handle(e,save):("F3"==e.key)?handle(e,open):("F9"==e.key&&e.altKey)?handle(e,compile):true
+</script>
+</body></html>
