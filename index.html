@@ -2,15 +2,16 @@
 <head><meta charset="utf-8">
 <link rel="icon" type="image/png" sizes="16x16" href="kelas16.png">
 <title>ktye</title>
-<style>*{font-family:monospace}</style>
+<style>*{font-family:monospace}
+html,body{height:calc(100% - 1em)}</style>
 </head>
 
-<body>
+<body style="display:flex;flex-direction:column;justify-content:space-between">
 <pre>
 &bull;ktye/k  <a href="k.html">run</a>  <a href="https://github.com/ktye/i">src</a>  <a href="https://github.com/ktye/i/blob/master/intro.md">intro</a>  <a href="apl.html">apl360</a>  <a href="pdp11/index.html">pdp11</a>
          <a href="kweb/tok.html">tokenize</a> <a href="halfkey/index.html">halfkey</a>  <a href="xkdoc.html">xk</a>  <a href="rotor/about.txt">fem</a> <a href="flow/index.html">flow</a>
 
-&bull;<a href="a/index.html">the k incunabulum</a>           <a title="may help to read arthur's c" href="a/c.html">a/c</a>  <a href="kedu/index.html">k.edu</a>
+&bull;<a href="a/index.html">the k incunabulum</a>
 
 &bull;zoo of array languages <a href="zoo/index.html#apl360">APL\360</a> <a href="zoo/index.html#ngnapl">ngn/apl</a>
          <a href="zoo/index.html#iv">APL\iv</a>  <a href="zoo/index.html#bqn">BQN</a>   <a href="zoo/index.html#kap">KAP</a>  <a href="zoo/index.html#j0">incunabulum</a>
@@ -23,7 +24,10 @@
 &bull;<a href="ed.html">edit</a>
 </pre>
 
-<a href="k.html" style="text-decoration:none"><pre style="background:#ffe;display:inline-block;border:2px solid;margin:0;color:black;position:absolute;bottom:1em">
+
+<div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;width:100%;bottom:1em">
+
+<a href="k.html" style="text-decoration:none"><pre style="background:#ffe;border:2px solid;margin:0;color:black">
 <span style="background:#123;color:white">ktye/k   ktye.github.io/k.html</span>
 + flp add  '  ech pri both bin
 - neg sub  /  ovr fix echright
@@ -51,7 +55,25 @@ imag conj  types:cisfzLDTvcdlx
 n?n(with)   random   -n?n(w/o)</span>
 </pre></a>
 
-<a href="jtye/index.html" style="text-decoration:none;color:black;position:absolute;bottom:1em;right:0.5em;text-align:center">&bull; jtye/k: k in fifty functions
+<a href="turbok/index.html"><pre style="background:#0000a8;color:white;height:fit-content;margin:0">
+╔═[<span style="color:#00ff00">■</span>]════════ TURBO.K ════════[<span style="color:#00ff00">↑</span>]═╗
+║            ║                    ║
+║            ║         K          ║
+║            ║                    ║
+║            ║                    ║
+║    ASM     ╠════════════════════╣
+║            ║                    ║
+║            ║         C          ║
+║            ║                    ║
+║            ║                    ║
+╠════════════╩════════════════════╣
+║<span style="background:#00a8a8">                                 </span>║
+║<span style="background:#00a8a8">              WATCH              </span>║
+║<span style="background:#00a8a8">                                 </span>║
+╚══1:1════════════════════════════╝
+</pre></a>
+
+<a href="jtye/index.html" style="text-decoration:none;color:black;text-align:center">&bull; jtye/k: k in fifty functions
 <pre id="ref" style="color:black;border:2px solid darkred;width:fit-content;padding:0.5em;text-align:left;margin:0">
 + type   add   ' each prior bin `js`
 - neg    sub   / over right join dec
@@ -74,6 +96,7 @@ _ floor  drop            do[]while()
 $ string             try[]catch(e)[]
 </pre>
 </a>
+</div>
 
 </body>
 </html>

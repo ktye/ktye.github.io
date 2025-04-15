@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA9klEQVR42qTTzyoGURjH8c/7ei0kf1IkLoENGxeg7JQdC1eAsrJkpyRLyhWgxFIpF2NB9iQURoeHxclMM72/mqkz/c7vfOd5ntPxp7P0Wseham3giJXvRVuX6mTrFHiPE/RjFYNNA26xg3EsNg0o0wve0YdWfmKVkvkJa5jHNXqaEpzjFMOYQFGH4BfzEtuxaQsz+KxDkAIeYvMjNqP/mhC8RfGS7vD8n7EsoIj27WEOF9gP/FadX0jGET/zOoVlHGMhP7RdMhtDGAiS1L4lvOImr0FO8IFpXKEXo+HZjVkYw0FVQBF3YDb7PhlP7SLW1lcAAAD//1q7KdiUynS9AAAAAElFTkSuQmCC">
 <!--https://go.dev/play/p/KRYT29YqOo2-->
-<title>turbo-k</title>
+<title>TURBO.K</title>
 <script src="tuicss.min.js"></script>
 <link rel="stylesheet" href="tuicss.min.css">
 <style>
@@ -13,6 +13,11 @@
 .hidden{display:none}
 .h1{flex-grow:1}
 .h2{flex-grow:2.57}
+.tui-dropdown:focus{background:#00a800;outline:none}
+.tui-dropdown li:focus{background:#00a800;outline:none}
+.tui-dropdown:focus>.tui-dropdown-content:first-of-type{display:block}
+.tui-dropdown:focus-within>.tui-dropdown-content:first-of-type{display:block}
+.tui-dropdown-content:focus{display:block}
 </style>
 </head><body>
 
@@ -20,6 +25,8 @@
 
 let file={name:"",h:null,ed:null},
 af=x=>Array.from(x),
+pd=e=>e.preventDefault(),
+max=(x,y)=>Math.max(x,y),min=(x,y)=>Math.min(x,y),
 fullscr=x=>x.closest(".tui-window").classList.toggle("fullscr"),
 fullcol=x=>(x=x.closest(".tui-window"),x.style.flexGrow=(x.style.flexGrow?"":1000)),
 
@@ -42,23 +49,30 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
 <div class="bordered tui-bg-blue-black" style="width:100vw;height:100vh">
  <nav class="tui-nav absolute">
   <ul>
-   <li class="tui-dropdown">
+   <li id="fmenu" tabindex="1" class="tui-dropdown">
     <span class="red-168-text">F</span>ile
     <div class="tui-dropdown-content">
     <ul>
-     <li onclick="show(filenew)"> <a href="#!"> <span class="red-168-text">N</span>ew </a> </li>
-     <li onclick="fileopen()"> <a href="#!"> <span class="red-168-text">O</span>pen...  <span class="tui-shortcut">F3</span> </a> </li>
-     <li> <a href="#!"> <span class="red-168-text">S</span>ave <span class="tui-shortcut">F2</span> </a> </li>
-     <li> <a href="#!">S<span class="red-168-text">a</span>ve as...</a> </li>
-     <div class="tui-black-divider"></div>
+     <li tabindex="2" onclick="show(filenew)"> <a href="#!"> <span class="red-168-text">N</span>ew </a> </li>
+     <li tabindex="3" onclick="fileopen()"> <a href="#!"> <span class="red-168-text">O</span>pen...  <span class="tui-shortcut">F3</span> </a> </li>
+     <li tabindex="4" > <a href="#!"> <span class="red-168-text">S</span>ave <span class="tui-shortcut">F2</span> </a> </li>
+     <li tabindex="5" > <a href="#!">S<span class="red-168-text">a</span>ve as...</a> </li>
     </ul>
    </li>
-   <li class="tui-dropdown"> <span class="red-168-text">E</span>dit <!--Undo Redo|Cut Copy Paste Clear Copy example|Show clipboard--> </li>
-   <li class="tui-dropdown"> <span class="red-168-text">S</span>earch <!--Find Replace Search again|Go to line number... Previous error Next error Locate function...--> </li>
-   <li class="tui-dropdown"> <span class="red-168-text">R</span>un <!--Run Ctrl+F9 Program reset Ctrl+F2 Go to cursor F4 Trace into F7 Step over F8 Arguments...--> </li>
-   <li class="tui-dropdown"> <span class="red-168-text">C</span>ompile <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages--> </li>
-   <li class="tui-dropdown"> <span class="red-168-text">D</span>ebug <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... --> <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches--> </li>
-   <li class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
+   <li id="emenu" tabindex="6" class="tui-dropdown"> <span class="red-168-text">E</span>dit <!--Undo Redo|Cut Copy Paste Clear Copy example|Show clipboard-->
+    <div class="tui-dropdown-content">
+    <ul>
+     <li tabindex="7"> <a href="#!"> <span class="red-168-text">C</span>ut </a> </li>
+     <li tabindex="8"> <a href="#!"> C<span class="red-168-text">o</span>py </a> </li>
+     <li tabindex="9"> <a href="#!"> <span class="red-168-text">P</span>aste </a> </li>
+    </ul>
+   </li>
+   <li id="smenu" class="tui-dropdown"> <span class="red-168-text">S</span>earch <!--Find Replace Search again|Go to line number... Previous error Next error Locate function...--> </li>
+   <li id="rmenu" class="tui-dropdown"> <span class="red-168-text">R</span>un <!--Run Ctrl+F9 Program reset Ctrl+F2 Go to cursor F4 Trace into F7 Step over F8 Arguments...--> </li>
+   <li id="cmenu" class="tui-dropdown"> <span class="red-168-text">C</span>ompile <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages--> </li>
+   <li id="dmenu" class="tui-dropdown"> <span class="red-168-text">D</span>ebug <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... --> <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches--> </li>
+   <li id="wmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
+   <li id="hmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">W</span>indow </li>
   </ul>
  </nav>
 
@@ -139,9 +153,10 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
    <li><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
    <li><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
    <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
+   <li><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
    <li><a href="#!"><span class="red-168-text">Alt+F9</span> Compile</a></li>
-   <span class="tui-statusbar-divider"></span>
-   <li><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
+   <!--span class="tui-statusbar-divider"></span-->
+   <li style="float:right;"><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
   </ul>
  </div>
 </div>
@@ -196,7 +211,7 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
 
 let name=window.location.hash.slice(1);if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
 let O=x=>out.textContent+=x,
-help=_=>true,
+help=_=>out.textContent="help..\n",
 save=async _=>{
  if(file.h==null)return
  let w=await file.h.createWritable()
@@ -210,12 +225,60 @@ fileopen=async _=>{
  let t=await f.text();
  loadfile(f.name,t,h)
 },
-compile=_=>out.textContent="compiling\n",
+compile=_=>out.textContent="compile..\n",
+run=_=>out.textContent="compile&run..\n",
 handle=(e,f)=>{e.preventDefault();f()},
 mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim()+"*&nbsp;"},
 unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"}
 
 ea.onchange=mark(wa);ek.onchange=mark(wk);ec.onchange=mark(wc)
-window.onkeydown=e=>("F1"==e.key)?handle(e,help):("F2"==e.key)?handle(e,save):("F3"==e.key)?handle(e,fileopen):("F9"==e.key&&e.altKey)?handle(e,compile):true
+window.onkeydown=e=>
+ ("f"==e.key&&e.altKey)?handle(e,_=>fmenu.focus()):
+ ("e"==e.key&&e.altKey)?handle(e,_=>emenu.focus()):
+ ("s"==e.key&&e.altKey)?handle(e,_=>smenu.focus()):
+ ("r"==e.key&&e.altKey)?handle(e,_=>rmenu.focus()):
+ ("c"==e.key&&e.altKey)?handle(e,_=>cmenu.focus()):
+ ("d"==e.key&&e.altKey)?handle(e,_=>dmenu.focus()):
+ ("w"==e.key&&e.altKey)?handle(e,_=>wmenu.focus()):
+ ("h"==e.key&&e.altKey)?handle(e,_=>hmenu.focus()):
+ ("F1"==e.key)?handle(e,help):
+ ("F2"==e.key)?handle(e,save):
+ ("F3"==e.key)?handle(e,fileopen):
+ ("F9"==e.key&&e.ctrlKey)?handle(e,run):
+ ("F9"==e.key&&e.altKey)?handle(e,compile):
+ ("F10"==e.key)?handle(e,_=>{fmenu.focus()}):true
+
+let accel={fmenu:{
+	"n":_=>show(filenew),
+ 	"o":fileopen,
+}}
+
+/*
+fmenu.onkeydown=e=>console.log("fmenu key", e.key)
+ ("n"==e.key)?handle(e,newfile):
+ ("o"==e.key)?handle(e,open):
+ ("s"==e.key)?handle(e,save):
+ ("a"==e.key)?handle(e,saveas):false
+ */
+
+//left-right
+af(document.querySelectorAll(".tui-dropdown")).forEach((x,i,a)=>x.onkeydown=e=>{ 
+ (e.key=="ArrowRight")?(pd(e),a[min(a.length-1,1+i)].focus()):
+ (e.key=="ArrowLeft")?(pd(e),a[max(0,i-1)].focus()):
+ (e.key=="ArrowDown")?(pd(e),e.target.querySelector("li").focus()):
+ (e.key=="Escape")?e.target.blur():
+ (e.key in accel[x.id]?handle(e,accel[x.id][e.key]):true)
+ })
+
+//up-down
+af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
+ af(x.querySelectorAll("li")).forEach(x=>x.onkeydown=e=>
+  (e.key=="ArrowDown")?x.nextElementSibling.focus():
+  (e.key=="ArrowUp")?x.previousElementSibling.focus():
+  (e.key=="Escape")?x.blur():
+  true
+ )
+)
+
 
 </script></body></html>
