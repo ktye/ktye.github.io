@@ -1,0 +1,141 @@
+i i  i32.eqz             ezi 0x45
+i ii i32.eq              eqi 0x46
+i ii i32.ne              nei 0x47
+i ii i32.lt_s            lti 0x48
+i ii i32.lt_u            ltu 0x49
+i ii i32.gt_s            gti 0x4a
+i ii i32.gt_u            gtu 0x4b
+i ii i32.le_s            lei 0x4c
+i ii i32.le_u            leu 0x4d
+i ii i32.ge_s            gei 0x4e
+i ii i32.ge_u            geu 0x4f
+
+i j  i64.eqz             ezj 0x50
+i jj i64.eq              eqj 0x51
+i jj i64.ne              nej 0x52
+i jj i64.lt_s            ltj 0x53
+i jj i64.lt_u            ltl 0x54
+i jj i64.gt_s            gtj 0x55
+i jj i64.gt_u            gtl 0x56
+i jj i64.le_s            lej 0x57
+i jj i64.le_u            lel 0x58
+i jj i64.ge_s            gej 0x59
+i jj i64.ge_u            gel 0x5a
+
+i ee f32.eq              eqe 0x5b
+i ee f32.ne              nee 0x5c
+i ee f32.lt              lte 0x5d
+i ee f32.gt              gte 0x5e
+i ee f32.le              lee 0x5f
+i ee f32.ge              gee 0x60
+
+i ff f64.eq              eqf 0x61
+i ff f64.ne              nef 0x62
+i ff f64.lt              ltf 0x63
+i ff f64.gt              gtf 0x64
+i ff f64.le              lef 0x65
+i ff f64.ge              gef 0x66
+
+i i i32.clz              clz 0x67
+i i i32.ctz              ctz 0x68
+i i i32.popcnt           pci 0x69
+i ii i32.add             adi 0x6a
+i ii i32.sub             sui 0x6b
+i ii i32.mul             mui 0x6c
+i ii i32.div_s           dvi 0x6d
+i ii i32.div_u           dvu 0x6e
+i ii i32.rem_s           moi 0x6f
+i ii i32.rem_u           mou 0x70
+i ii i32.and             ani 0x71
+i ii i32.or              ori 0x72
+i ii i32.xor             xoi 0x73
+i ii i32.shl             sli 0x74
+i ii i32.shr_s           sri 0x75
+i ii i32.shr_u           sru 0x76
+i ii i32.rotl            rli 0x77
+i ii i32.rotr            rri 0x78
+
+j j i64.clz              clj 0x79
+j j i64.ctz              ctj 0x7a
+j j i64.popcnt           pcj 0x7b
+j jj i64.add             adj 0x7c
+j jj i64.sub             suj 0x7d
+j jj i64.mul             muj 0x7e
+j jj i64.div_s           dvj 0x7f
+j jj i64.div_u           dvl 0x80
+j jj i64.rem_s           moj 0x81
+j jj i64.rem_u           mol 0x82
+j jj i64.and             anj 0x83
+j jj i64.or              orj 0x84
+j jj i64.xor             xoj 0x85
+j jj i64.shl             slj 0x86
+j jj i64.shr_s           srj 0x87
+j jj i64.shr_u           srl 0x88
+j jj i64.rotl            rlj 0x89
+j jj i64.rotr            rrj 0x8a
+
+e e f32.abs              abe 0x8b
+e e f32.neg              nge 0x8c
+e e f32.ceil             cee 0x8d
+e e f32.floor            fle 0x8e
+e e f32.trunc            tre 0x8f
+e e f32.nearest          nae 0x90
+e e f32.sqrt             sqe 0x91
+
+e ee f32.add             ade 0x92
+e ee f32.sub             sue 0x93
+e ee f32.mul             mue 0x94
+e ee f32.div             dve 0x95
+e ee f32.min             mie 0x96
+e ee f32.max             mae 0x97
+e ee f32.copysign        cse 0x98
+
+f f f64.abs              abf 0x99
+f f f64.neg              ngf 0x9a
+f f f64.ceil             cef 0x9b
+f f f64.floor            flf 0x9c
+f f f64.trunc            trf 0x9d
+f f f64.nearest          naf 0x9e
+f f f64.sqrt             sqf 0x9f
+
+f ff f64.add             adf 0xa0
+f ff f64.sub             suf 0xa1
+f ff f64.mul             muf 0xa2
+f ff f64.div             dvf 0xa3
+f ff f64.min             mif 0xa4
+f ff f64.max             maf 0xa5
+f ff f64.copysign        csf 0xa6
+
+i j i32.wrap_i64         ioj 0xa7
+i e i32.trunc_f32_s      ioe 0xa8
+i e i32.trunc_f32_u      uoe 0xa9
+i f i32.trunc_f64_s      iof 0xaa
+i f i32.trunc_f64_u      iou 0xab
+
+j i i64.extend_i32_s     joi  0xac
+j i i64.extend_i32_u     jou  0xad
+j e i64.trunc_f32_s      joe  0xae
+j e i64.trunc_f32_u      loe  0xaf
+j f i64.trunc_f64_s      jof  0xb0
+j f i64.trunc_f64_u      lof  0xb1
+
+e i f32.convert_i32_s    eoi  0xb2
+e i f32.convert_i32_u    eou  0xb3
+e j f32.convert_i64_u    eoj  0xb4
+e j f32.convert_i64_s    eol  0xb5
+e f f32.demote_f64       eof  0xb6
+f i f64.convert_i32_s    foi  0xb7
+f i f64.convert_i32_u    fou  0xb8
+f j f64.convert_i64_s    foj  0xb9
+f j f64.convert_i64_u    fol  0xba
+f e f64.promote_f32      foe  0xbb
+i e i32.reinterpret_f32  ire  0xbc
+j f i64.reinterpret_f64  jrf  0xbd
+e i f32.reinterpret_i32  eri  0xbe
+f j f64.reinterpret_i64  frj  0xbf
+i i i32.extend8_s        ixb  0xc0
+i i i32.extend16_s       ixh  0xc1
+j j i64.extend8_s        jxb  0xc2
+j j i64.extend16_s       jxh  0xc3
+j j i64.extend32_s       jxi  0xc4
+
