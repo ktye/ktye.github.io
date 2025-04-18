@@ -9,7 +9,7 @@ lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&
 sect=(x,y)=>y.length?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124},
-expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,j[i]]),
+expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
 locs=x=>[0], //todo encode locals
 
 /*o-p-s*/
@@ -137,11 +137,29 @@ ire:0xbc,
 jrf:0xbd,
 eri:0xbe,
 frj:0xbf,
-ixb:0xc0,
+ixg:0xc0,
 ixh:0xc1,
-jxb:0xc2,
+jxg:0xc2,
 jxh:0xc3,
 jxi:0xc4,
+ldi:[0x28,2,0],
+ldj:[0x29,3,0],
+lde:[0x2a,2,0],
+ldf:[0x2b,3,0],
+ldg:[0x2c,0,0],
+ldb:[0x2d,0,0],
+ldh:[0x2e,1,0],
+lds:[0x2f,1,0],
+sti:[0x36,2,0],
+stj:[0x37,3,0],
+ste:[0x38,2,0],
+stf:[0x39,3,0],
+stg:[0x3a,0,0],
+sth:[0x3b,1,0],
+siz:[0x3f,0],
+grw:[0x40,0],
+cpy:[0xfc,10,0,0],
+fil:[0xfc,11,0],
 },
 /*o-p-s*/
 
@@ -156,7 +174,7 @@ wa=x=>{
   try{x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
    ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],e=((3>a.length)?"":(3==a.length)?a[0]:a[3]))
    :("get"==a[0])?c.push(32,...lebu(int(Number(im(a)))))
-   :(x in ops)?c.push(ops[x])
+   :(x in ops)?(Array.isArray(ops[x])?c.push(...ops[x]):c.push(ops[x]))
    :           E(line,"unknown op "+a[0])
   }}catch(e) { E(line,e.message) }
  });p()

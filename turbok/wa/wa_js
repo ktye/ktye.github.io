@@ -9,7 +9,7 @@ lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&
 sect=(x,y)=>y.length?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124},
-expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,j[i]]),
+expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
 locs=x=>[0], //todo encode locals
 
 /*o-p-s*/
@@ -25,7 +25,7 @@ wa=x=>{
   try{x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
    ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],e=((3>a.length)?"":(3==a.length)?a[0]:a[3]))
    :("get"==a[0])?c.push(32,...lebu(int(Number(im(a)))))
-   :(x in ops)?c.push(ops[x])
+   :(x in ops)?(Array.isArray(ops[x])?c.push(...ops[x]):c.push(ops[x]))
    :           E(line,"unknown op "+a[0])
   }}catch(e) { E(line,e.message) }
  });p()

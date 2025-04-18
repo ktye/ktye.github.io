@@ -133,9 +133,29 @@ i e i32.reinterpret_f32  ire  0xbc
 j f i64.reinterpret_f64  jrf  0xbd
 e i f32.reinterpret_i32  eri  0xbe
 f j f64.reinterpret_i64  frj  0xbf
-i i i32.extend8_s        ixb  0xc0
+i i i32.extend8_s        ixg  0xc0
 i i i32.extend16_s       ixh  0xc1
-j j i64.extend8_s        jxb  0xc2
+j j i64.extend8_s        jxg  0xc2
 j j i64.extend16_s       jxh  0xc3
 j j i64.extend32_s       jxi  0xc4
 
+i i i32.load             ldi  [0x28,2,0]
+j i i64.load             ldj  [0x29,3,0]
+e i f32.load             lde  [0x2a,2,0]
+f i f64.load             ldf  [0x2b,3,0]
+i i i32.load8_s          ldg  [0x2c,0,0]
+i i i32.load8_u          ldb  [0x2d,0,0]
+i i i32.load16_s         ldh  [0x2e,1,0]
+i i i32.load16_u         lds  [0x2f,1,0]
+
+- ii i32.store           sti  [0x36,2,0]
+- ij i64.store           stj  [0x37,3,0]
+- ie f32.store           ste  [0x38,2,0]
+- if f64.store           stf  [0x39,3,0]
+- ii i32.store8          stg  [0x3a,0,0]
+- ii i32.store16         sth  [0x3b,1,0]
+
+i -  memory.size         siz  [0x3f,0]
+i i  memory.grow         grw  [0x40,0]
+- iii memory.copy        cpy  [0xfc,10,0,0]
+- iii memory.fill        fil  [0xfc,11,0]

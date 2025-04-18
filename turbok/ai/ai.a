@@ -443,18 +443,81 @@ eri e:i export eri
 frj f:j export frj
  get 0
  frj
-ixb i:i export ixb
+ixg i:i export ixg
  get 0
- ixb
+ ixg
 ixh i:i export ixh
  get 0
  ixh
-jxb j:j export jxb
+jxg j:j export jxg
  get 0
- jxb
+ jxg
 jxh j:j export jxh
  get 0
  jxh
 jxi j:j export jxi
  get 0
  jxi
+ldi i:i export ldi
+ get 0
+ ldi
+ldj j:i export ldj
+ get 0
+ ldj
+lde e:i export lde
+ get 0
+ lde
+ldf f:i export ldf
+ get 0
+ ldf
+ldg i:i export ldg
+ get 0
+ ldg
+ldb i:i export ldb
+ get 0
+ ldb
+ldh i:i export ldh
+ get 0
+ ldh
+lds i:i export lds
+ get 0
+ lds
+sti :ii export sti
+ get 0
+ get 1
+ sti
+stj :ij export stj
+ get 0
+ get 1
+ stj
+ste :ie export ste
+ get 0
+ get 1
+ ste
+stf :if export stf
+ get 0
+ get 1
+ stf
+stg :ii export stg
+ get 0
+ get 1
+ stg
+sth :ii export sth
+ get 0
+ get 1
+ sth
+siz i: export siz
+ siz
+grw i:i export grw
+ get 0
+ grw
+cpy :iii export cpy
+ get 0
+ get 1
+ get 2
+ cpy
+fil :iii export fil
+ get 0
+ get 1
+ get 2
+ fil
