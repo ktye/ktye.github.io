@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 </head><body>
+<pre id="out">testing..
+</pre>
 <pre id="lebstest">71 c700
 -57 47
 58 3a
@@ -1796,19 +1798,20 @@
 <script src="wa.js"></script>
 <script>
 
-let hxu=u=>Array.from(u).map(x=>x.toString(16).padStart(2,'0')).join("")
+let OO=(x,y)=>out.textContent+=x+" "+y+"\n"
+let hxu=x=>x.map(x=>x.toString(16).padStart(2,'0')).join("")
 
 let testlebs=ok=>{lebstest.textContent.split("\n").forEach(x=>{
  [a,b]=x.split(" ");a=Number(a);let r=hxu(lebs(a));if(r!=b){throw new Error(a+":s:"+r+"!="+b)}else{ok++}
-});console.log("testlebs ok", ok)}
+});OO("testlebs ok", ok)}
 
 let testlebu=ok=>{lebutest.textContent.split("\n").forEach(x=>{
  [a,b]=x.split(" ");a=Number(a);let r=hxu(lebu(a));if(r!=b){throw new Error(a+":u:"+r+"!="+b)}else{ok++}
-});console.log("testlebu ok", ok)}
+});OO("testlebu ok", ok)}
 
 let testlebn=ok=>{lebntest.textContent.split("\n").forEach(x=>{
  [a,b]=x.split(" ");a=BigInt(a);let r=hxu(lebn(a));if(r!=b){throw new Error(a+":n:"+r+"!="+b)}else{ok++}
-});console.log("testlebn ok", ok)}
+});OO("testlebn ok", ok)}
 
 
 testlebs(0)

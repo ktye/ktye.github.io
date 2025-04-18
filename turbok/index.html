@@ -2,13 +2,13 @@
 <html lang="en" class="no-tui-scroll">
 <head>
 <meta charset="UTF-8">
-<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA9klEQVR42qTTzyoGURjH8c/7ei0kf1IkLoENGxeg7JQdC1eAsrJkpyRLyhWgxFIpF2NB9iQURoeHxclMM72/mqkz/c7vfOd5ntPxp7P0Wseham3giJXvRVuX6mTrFHiPE/RjFYNNA26xg3EsNg0o0wve0YdWfmKVkvkJa5jHNXqaEpzjFMOYQFGH4BfzEtuxaQsz+KxDkAIeYvMjNqP/mhC8RfGS7vD8n7EsoIj27WEOF9gP/FadX0jGET/zOoVlHGMhP7RdMhtDGAiS1L4lvOImr0FO8IFpXKEXo+HZjVkYw0FVQBF3YDb7PhlP7SLW1lcAAAD//1q7KdiUynS9AAAAAElFTkSuQmCC">
-<!--https://go.dev/play/p/KRYT29YqOo2-->
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAABNSURBVDhPY2SgEDD+BwJkMxgZV+I18v//cBR5uAGENKKbCjOIBgb8j8AfKowrwPK4XTBqADB0hn4gEpk3qJ8SYRYTyhMYmYlIF+NUBgC/jXHZe9dG2gAAAABJRU5ErkJggg==">
 <title>TURBO.K</title>
 <script src="tuicss.min.js"></script>
 <link rel="stylesheet" href="tuicss.min.css">
 <style>
  textarea{resize:none}
+#out{color:#ccc}
 .fullscr{width:100%!important;height:100%!important;position:absolute;left:0;top:0;z-index:9}
 .hidden{display:none}
 .h1{flex-grow:1}
@@ -80,11 +80,11 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
 
   <div id="main" class="full-width" style="display:flex;flex-grow:2">
 
-   <div id="left" style="height:100%;width:30%;display:flex;flex-flow:column">
+   <div id="left" style="height:100%;width:30%;display:flex;flex-flow:column;resize:horizontal;overflow:auto">
    
     <div id="wa" class="tui-window full-width h2 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
-      <legend class="center">A.A</legend>
+      <legend class="center">AI.A</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
       <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
@@ -125,9 +125,8 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
       <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-      <pre id="out"></pre>
-      <!--textarea class="tui-textarea full-width" style="height: 200px; overflow: scroll;" spllcheck="false">
-      </textarea-->
+      <!--pre id="out" style="margin:0"></pre-->
+      <textarea id="out" class="tui-textarea full-width full-height" spellcheck="false" readonly></textarea>
      </fieldset>
     </div>
    </div>
@@ -160,6 +159,7 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
   </ul>
  </div>
 </div>
+<a id="dl" style="display:none"></a>
  
 <!-- dialogs -->
 <div class="tui-overlap"></div>
@@ -210,8 +210,8 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
  e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"})
 
 let name=window.location.hash.slice(1);if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
-let O=x=>out.textContent+=x,
-help=_=>out.textContent="help..\n",
+let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},
+help=_=>out.value="help..\n",
 save=async _=>{
  if(file.h==null)return
  let w=await file.h.createWritable()
@@ -225,11 +225,12 @@ fileopen=async _=>{
  let t=await f.text();
  loadfile(f.name,t,h)
 },
-compile=_=>out.textContent="compile..\n",
-run=_=>out.textContent="compile&run..\n",
+compile=_=>out.value="compile..\n",
+run=_=>out.value="compile&run..\n",
 handle=(e,f)=>{e.preventDefault();f()},
 mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim()+"*&nbsp;"},
-unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"}
+unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"},
+download=(u,n)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=n;dl.click()}
 
 ea.onchange=mark(wa);ek.onchange=mark(wk);ec.onchange=mark(wc)
 window.onkeydown=e=>
@@ -279,6 +280,10 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
   true
  )
 )
+</script>
 
+<script src="wa/wa.js"></script>
+<script src="wa/link.js"></script>
+<script src="ai/boot.js"></script>
 
-</script></body></html>
+</body></html>

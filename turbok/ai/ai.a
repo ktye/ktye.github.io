@@ -1,0 +1,460 @@
+ezi i:i export ezi
+ get 0
+ ezi
+eqi i:ii export eqi
+ get 0
+ get 1
+ eqi
+nei i:ii export nei
+ get 0
+ get 1
+ nei
+lti i:ii export lti
+ get 0
+ get 1
+ lti
+ltu i:ii export ltu
+ get 0
+ get 1
+ ltu
+gti i:ii export gti
+ get 0
+ get 1
+ gti
+gtu i:ii export gtu
+ get 0
+ get 1
+ gtu
+lei i:ii export lei
+ get 0
+ get 1
+ lei
+leu i:ii export leu
+ get 0
+ get 1
+ leu
+gei i:ii export gei
+ get 0
+ get 1
+ gei
+geu i:ii export geu
+ get 0
+ get 1
+ geu
+ezj i:j export ezj
+ get 0
+ ezj
+eqj i:jj export eqj
+ get 0
+ get 1
+ eqj
+nej i:jj export nej
+ get 0
+ get 1
+ nej
+ltj i:jj export ltj
+ get 0
+ get 1
+ ltj
+ltl i:jj export ltl
+ get 0
+ get 1
+ ltl
+gtj i:jj export gtj
+ get 0
+ get 1
+ gtj
+gtl i:jj export gtl
+ get 0
+ get 1
+ gtl
+lej i:jj export lej
+ get 0
+ get 1
+ lej
+lel i:jj export lel
+ get 0
+ get 1
+ lel
+gej i:jj export gej
+ get 0
+ get 1
+ gej
+gel i:jj export gel
+ get 0
+ get 1
+ gel
+eqe i:ee export eqe
+ get 0
+ get 1
+ eqe
+nee i:ee export nee
+ get 0
+ get 1
+ nee
+lte i:ee export lte
+ get 0
+ get 1
+ lte
+gte i:ee export gte
+ get 0
+ get 1
+ gte
+lee i:ee export lee
+ get 0
+ get 1
+ lee
+gee i:ee export gee
+ get 0
+ get 1
+ gee
+eqf i:ff export eqf
+ get 0
+ get 1
+ eqf
+nef i:ff export nef
+ get 0
+ get 1
+ nef
+ltf i:ff export ltf
+ get 0
+ get 1
+ ltf
+gtf i:ff export gtf
+ get 0
+ get 1
+ gtf
+lef i:ff export lef
+ get 0
+ get 1
+ lef
+gef i:ff export gef
+ get 0
+ get 1
+ gef
+clz i:i export clz
+ get 0
+ clz
+ctz i:i export ctz
+ get 0
+ ctz
+pci i:i export pci
+ get 0
+ pci
+adi i:ii export adi
+ get 0
+ get 1
+ adi
+sui i:ii export sui
+ get 0
+ get 1
+ sui
+mui i:ii export mui
+ get 0
+ get 1
+ mui
+dvi i:ii export dvi
+ get 0
+ get 1
+ dvi
+dvu i:ii export dvu
+ get 0
+ get 1
+ dvu
+moi i:ii export moi
+ get 0
+ get 1
+ moi
+mou i:ii export mou
+ get 0
+ get 1
+ mou
+ani i:ii export ani
+ get 0
+ get 1
+ ani
+ori i:ii export ori
+ get 0
+ get 1
+ ori
+xoi i:ii export xoi
+ get 0
+ get 1
+ xoi
+sli i:ii export sli
+ get 0
+ get 1
+ sli
+sri i:ii export sri
+ get 0
+ get 1
+ sri
+sru i:ii export sru
+ get 0
+ get 1
+ sru
+rli i:ii export rli
+ get 0
+ get 1
+ rli
+rri i:ii export rri
+ get 0
+ get 1
+ rri
+clj j:j export clj
+ get 0
+ clj
+ctj j:j export ctj
+ get 0
+ ctj
+pcj j:j export pcj
+ get 0
+ pcj
+adj j:jj export adj
+ get 0
+ get 1
+ adj
+suj j:jj export suj
+ get 0
+ get 1
+ suj
+muj j:jj export muj
+ get 0
+ get 1
+ muj
+dvj j:jj export dvj
+ get 0
+ get 1
+ dvj
+dvl j:jj export dvl
+ get 0
+ get 1
+ dvl
+moj j:jj export moj
+ get 0
+ get 1
+ moj
+mol j:jj export mol
+ get 0
+ get 1
+ mol
+anj j:jj export anj
+ get 0
+ get 1
+ anj
+orj j:jj export orj
+ get 0
+ get 1
+ orj
+xoj j:jj export xoj
+ get 0
+ get 1
+ xoj
+slj j:jj export slj
+ get 0
+ get 1
+ slj
+srj j:jj export srj
+ get 0
+ get 1
+ srj
+srl j:jj export srl
+ get 0
+ get 1
+ srl
+rlj j:jj export rlj
+ get 0
+ get 1
+ rlj
+rrj j:jj export rrj
+ get 0
+ get 1
+ rrj
+abe e:e export abe
+ get 0
+ abe
+nge e:e export nge
+ get 0
+ nge
+cee e:e export cee
+ get 0
+ cee
+fle e:e export fle
+ get 0
+ fle
+tre e:e export tre
+ get 0
+ tre
+nae e:e export nae
+ get 0
+ nae
+sqe e:e export sqe
+ get 0
+ sqe
+ade e:ee export ade
+ get 0
+ get 1
+ ade
+sue e:ee export sue
+ get 0
+ get 1
+ sue
+mue e:ee export mue
+ get 0
+ get 1
+ mue
+dve e:ee export dve
+ get 0
+ get 1
+ dve
+mie e:ee export mie
+ get 0
+ get 1
+ mie
+mae e:ee export mae
+ get 0
+ get 1
+ mae
+cse e:ee export cse
+ get 0
+ get 1
+ cse
+abf f:f export abf
+ get 0
+ abf
+ngf f:f export ngf
+ get 0
+ ngf
+cef f:f export cef
+ get 0
+ cef
+flf f:f export flf
+ get 0
+ flf
+trf f:f export trf
+ get 0
+ trf
+naf f:f export naf
+ get 0
+ naf
+sqf f:f export sqf
+ get 0
+ sqf
+adf f:ff export adf
+ get 0
+ get 1
+ adf
+suf f:ff export suf
+ get 0
+ get 1
+ suf
+muf f:ff export muf
+ get 0
+ get 1
+ muf
+dvf f:ff export dvf
+ get 0
+ get 1
+ dvf
+mif f:ff export mif
+ get 0
+ get 1
+ mif
+maf f:ff export maf
+ get 0
+ get 1
+ maf
+csf f:ff export csf
+ get 0
+ get 1
+ csf
+ioj i:j export ioj
+ get 0
+ ioj
+ioe i:e export ioe
+ get 0
+ ioe
+uoe i:e export uoe
+ get 0
+ uoe
+iof i:f export iof
+ get 0
+ iof
+iou i:f export iou
+ get 0
+ iou
+joi j:i export joi
+ get 0
+ joi
+jou j:i export jou
+ get 0
+ jou
+joe j:e export joe
+ get 0
+ joe
+loe j:e export loe
+ get 0
+ loe
+jof j:f export jof
+ get 0
+ jof
+lof j:f export lof
+ get 0
+ lof
+eoi e:i export eoi
+ get 0
+ eoi
+eou e:i export eou
+ get 0
+ eou
+eoj e:j export eoj
+ get 0
+ eoj
+eol e:j export eol
+ get 0
+ eol
+eof e:f export eof
+ get 0
+ eof
+foi f:i export foi
+ get 0
+ foi
+fou f:i export fou
+ get 0
+ fou
+foj f:j export foj
+ get 0
+ foj
+fol f:j export fol
+ get 0
+ fol
+foe f:e export foe
+ get 0
+ foe
+ire i:e export ire
+ get 0
+ ire
+jrf j:f export jrf
+ get 0
+ jrf
+eri e:i export eri
+ get 0
+ eri
+frj f:j export frj
+ get 0
+ frj
+ixb i:i export ixb
+ get 0
+ ixb
+ixh i:i export ixh
+ get 0
+ ixh
+jxb j:j export jxb
+ get 0
+ jxb
+jxh j:j export jxh
+ get 0
+ jxh
+jxi j:j export jxi
+ get 0
+ jxi

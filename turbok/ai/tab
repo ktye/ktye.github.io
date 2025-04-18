@@ -121,8 +121,8 @@ j f i64.trunc_f64_u      lof  0xb1
 
 e i f32.convert_i32_s    eoi  0xb2
 e i f32.convert_i32_u    eou  0xb3
-e j f32.convert_i64_u    eoj  0xb4
-e j f32.convert_i64_s    eol  0xb5
+e j f32.convert_i64_s    eoj  0xb4
+e j f32.convert_i64_u    eol  0xb5
 e f f32.demote_f64       eof  0xb6
 f i f64.convert_i32_s    foi  0xb7
 f i f64.convert_i32_u    fou  0xb8
