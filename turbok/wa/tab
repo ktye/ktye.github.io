@@ -139,6 +139,12 @@ j j i64.extend8_s        jxg  0xc2
 j j i64.extend16_s       jxh  0xc3
 j j i64.extend32_s       jxi  0xc4
 
+i i -                    ngi  [65,127,108]
+j j -                    ngj  [66,127,127]
+- ? drop                 drp  0x1a
+? ?? select              sel  0x1b
+- ? return               ret  0x0f
+
 i i i32.load             ldi  [0x28,2,0]
 j i i64.load             ldj  [0x29,3,0]
 e i f32.load             lde  [0x2a,2,0]

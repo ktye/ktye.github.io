@@ -2,7 +2,8 @@
 <html lang="en" class="no-tui-scroll">
 <head>
 <meta charset="UTF-8">
-<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAABNSURBVDhPY2SgEDD+BwJkMxgZV+I18v//cBR5uAGENKKbCjOIBgb8j8AfKowrwPK4XTBqADB0hn4gEpk3qJ8SYRYTyhMYmYlIF+NUBgC/jXHZe9dG2gAAAABJRU5ErkJggg==">
+<link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAABSSURBVDhPY2RgWPGfgQLASLEB/4EA3QGMjCuxuun//3AMcUaYAbg04fIdzDAaGfA/ArvFjCvg4vhdMGoAAwPFYUBE0qZ+OkC2lKSkTHFmotQAAMNiZn1JrqSvAAAAAElFTkSuQmCC">
+
 <title>TURBO.K</title>
 <script src="tuicss.min.js"></script>
 <link rel="stylesheet" href="tuicss.min.css">
@@ -31,13 +32,13 @@ fullscr=x=>x.closest(".tui-window").classList.toggle("fullscr"),
 fullcol=x=>(x=x.closest(".tui-window"),x.style.flexGrow=(x.style.flexGrow?"":1000)),
 
 show=x=>x.classList.add("active"),
-showall=_=>[wa,wk,wc].forEach(x=>x.classList.remove("hidden")),
+showall=_=>[w_a,w_k,w_c].forEach(x=>x.classList.remove("hidden")),
 hide=x=>x.classList.add("hidden"),
 title=(w,t)=>w.querySelector("legend").innerHTML="&nbsp;"+t+"&nbsp;",
 loadfile=(name,text,h)=>{[ek,ec,ea].forEach(x=>{x.value="";x.readOnly=true});showall();file={name:"",h:null,ed:null}
- let n=name.slice(0,-1).toUpperCase();title(wk,n+"K");title(wc,n+"C");title(wa,n+"A")
- name.endsWith(".a")?(hide(wk),hide(wc),ea.value=text,ea.readOnly=false,file.name=name,file.h=h,file.ed=ea):
- name.endsWith(".c")?(hide(wk)         ,ec.value=text,ec.readOnly=false,file.name=name,file.h=h,file.ed=ec):
+ let n=name.slice(0,-1).toUpperCase();title(w_k,n+"K");title(w_c,n+"C");title(w_a,n+"A")
+ name.endsWith(".a")?(hide(w_k),hide(w_c),ea.value=text,ea.readOnly=false,file.name=name,file.h=h,file.ed=ea):
+ name.endsWith(".c")?(hide(w_k)         ,ec.value=text,ec.readOnly=false,file.name=name,file.h=h,file.ed=ec):
  name.endsWith(".k")?(                  ek.value=text,ek.readOnly=false,file.name=name,file.h=h,file.ed=ek):"?"},
 
 newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input')).filter(x=>x.checked)[0].value,"")
@@ -82,7 +83,7 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
 
    <div id="left" style="height:100%;width:30%;display:flex;flex-flow:column;resize:horizontal;overflow:auto">
    
-    <div id="wa" class="tui-window full-width h2 tui-no-shadow">
+    <div id="w_a" class="tui-window full-width h2 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
       <legend class="center">AI.A</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
@@ -97,7 +98,7 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
   
    <div id="right" style="height:100%;width:70%;display:flex;flex-flow:column">
   
-    <div id="wk" class="tui-window full-width h1 tui-no-shadow">
+    <div id="w_k" class="tui-window full-width h1 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
       <legend class="center">A.K</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
@@ -108,7 +109,7 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
      </fieldset>
     </div>
   
-    <div id="wc" class="tui-window full-width h1 tui-no-shadow">
+    <div id="w_c" class="tui-window full-width h1 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
       <legend class="center">A.C</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
@@ -232,7 +233,7 @@ mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e
 unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"},
 download=(u,n)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=n;dl.click()}
 
-ea.onchange=mark(wa);ek.onchange=mark(wk);ec.onchange=mark(wc)
+ea.onchange=mark(w_a);ek.onchange=mark(w_k);ec.onchange=mark(w_c)
 window.onkeydown=e=>
  ("f"==e.key&&e.altKey)?handle(e,_=>fmenu.focus()):
  ("e"==e.key&&e.altKey)?handle(e,_=>emenu.focus()):
@@ -284,6 +285,6 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
 
 <script src="wa/wa.js"></script>
 <script src="wa/link.js"></script>
-<script src="ai/boot.js"></script>
+<script src="wa/boot.js"></script>
 
 </body></html>

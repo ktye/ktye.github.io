@@ -1,3 +1,3 @@
 #sh wat.mk
-sh wa.mk > ../wa/wa.js
+sh wa.mk > wa.js
 sh ai.mk > ai.a

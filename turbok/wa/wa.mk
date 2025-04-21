@@ -8,6 +8,6 @@ while read res arg op mne xx; do
  fi
 done < tab
 
-echo "},"
+echo "}"
 
 sed -n '/o-p-s/,$p' ../wa/wa_js     #tail
