@@ -1,5 +1,7 @@
 /*
 
+i alpha /global
+
 fname i:ii export fname
 cos f:f import Math.cos
  
@@ -49,6 +51,7 @@ lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&
 sect=(x,y)=>y.length?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124},
+glob={}, glo=(t,s,n,c)=>{c.unshift(n);c.push(11);glob[s]={t:t,c:c,i:Object.keys(glob).length}}, //name:{t:65,c:[42,7,11],i:0}
 expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
 locs=x=>[0], //todo encode locals
 
@@ -59,6 +62,7 @@ return(x=>{
  let a,n=0,s,e="",c=[],i,p=_=>((n?funs.push({sig:addsig(s),code:c,name:n,export:e}):0),[n,s,e,c]=[0,"","",[]]),
  sigs=[],addsig=x=>(sigs.includes(x)?x:sigs.push(x),x), //e.g. ["i:ii",":ij",..]
  fns={},funs=[],       //{sig:"i:ii",code:[1,2,..],name:"a","export":"A"}
+ con=(t,n,x)=>{s?c.push(n,...x):glob
  l=x.split("\n");
  l.forEach((x,line)=>{if(x.contains(":"))fns[x.split(" ")[0]]=Object.keys(fns).length}
  l.forEach((x,line)=>{
@@ -68,10 +72,10 @@ return(x=>{
    ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],e=((3>a.length)?"":(3==a.length)?a[0]:a[3]))
    :(x in ops)?(Array.isArray(ops[x])?c.push(...ops[x]):c.push(ops[x]))
    :(i="get set tee glo gst".indexOf(a[0]))>=0?c.push(32+i/4,...lebu(int(Number(im(a)))))
-   :"i"==a[0]?c.push(65,...lebu(int(Number(im(a)))))
-   :"j"==a[0]?c.push(66,...lebn(BigInt(im(a))))
-   :"e"==a[0]?c.push(67,...new Uint8Array(new Float32Array([parseFloat(im(a))]).buffer))
-   :"f"==a[0]?c.push(68,...new Uint8Array(new Float64Array([parseFloat(im(a))]).buffer))
+   :"i"==a[0]?(i=lebu(int(Number(s?im(a):im2(a))))                                    ,s?c.push(65,...i):glo(a[0],a[1],65,i))
+   :"j"==a[0]?(i=lebn(BigInt(s?im(a):im2(a)))                                         ,s?c.push(66,...i):glo(a[0],a[1],66,i))
+   :"e"==a[0]?(i=new Uint8Array(new Float32Array([parseFloat(s?im(a):im2(a))]).buffer),s?c.push(67,...i):glo(a[0],a[1],67,i))
+   :"f"==a[0]?(i=new Uint8Array(new Float64Array([parseFloat(s?im(a):im2(a))]).buffer),s?c.push(68,...i):glo(a[0],a[1],68,i))
    :"if"==a[0]?c.push(4,[64,127,126,125,124][1+"ijef".indexOf(a[1]))
    :"else"==a[0]?c.push(5)
    :"end"==a[0]?c.push(11)
