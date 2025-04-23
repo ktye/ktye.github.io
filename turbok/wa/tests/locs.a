@@ -1,0 +1,12 @@
+/5 -5
+f i:i export test
+ i x
+ i y
+ get 0
+ i 2
+ mui
+ set x
+ get 0
+ tee y
+ get x
+ sui

@@ -1,0 +1,1 @@
+for file in *.wat; do wat2wasm $file; done

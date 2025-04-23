@@ -1,5 +1,10 @@
 /*
 
+i alpha /global
+i alpha /local (within func)
+f 0.5   /const
+j 0x0a
+
 fname i:ii export fname
 cos f:f import Math.cos
  
@@ -9,8 +14,32 @@ tee 0 /34
 glo 0 /35
 gst 0 /36
 
+i 1
+if  /0x0440
+end /0x0b
 
+if i /0x047f result type
+else /0x05
+end  /0x0b
 
+cal f      /0x10 funcidx
+cal i:ii   /0x10 typeidx 0(table)
+
+do [type]  /0x03(loop) type|0x40
+...
+end        /0x0d(br_if) 0(label) 0x0b
+
+while [type] /0x02(block) type 0x03(loop) type
+ ...
+do           /0x45(eqz) 0x0d(brif) 1(label) 
+end          /0x0c(br) 0(label) 0x0b 0x0b
+
+switch [type] /{1+2*x;x*4;5-x}[y-2]x
+.
+ ..
+.
+ ..
+end
 
 */
 
@@ -25,8 +54,9 @@ lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&
 sect=(x,y)=>y.length?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124},
+glob={}, glo=(t,s)=>{glob[s]={t:t,c:[t,...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:65,c:[42,7,11],i:0}
 expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
-locs=x=>[0], //todo encode locals
+locs=x=>{let t={};Object.values(x.lo).forEach(x=>t[x]=(x in t?1+t[x]:1)); console.log("t",t); let r=vect(Object.keys(t).map(x=>[...lebu(t[x]),Number(x)])); console.log("locs",r); return r},
 
 /*o-p-s*/
 ops={
@@ -162,6 +192,7 @@ ngi:[65,127,108],
 ngj:[66,127,127],
 drp:0x1a,
 sel:0x1b,
+ret:0x0f,
 ldi:[0x28,2,0],
 ldj:[0x29,3,0],
 lde:[0x2a,2,0],
@@ -185,20 +216,29 @@ fil:[0xfc,11,0],
 
 return(x=>{
  //parse asm 
- let a,n=0,s,e="",c=[],i,p=_=>((n?funs.push({sig:addsig(s),code:c,name:n,export:e}):0),[n,s,e,c]=[0,"","",[]]),
+ let a,n=0,narg=0,s,e="",c=[],lo={},i,p=_=>((n?funs.push({sig:addsig(s),lo:lo,code:c,name:n,export:e}):0),[n,s,e,c,lo]=[0,"","",[],{}]),
  sigs=[],addsig=x=>(sigs.includes(x)?x:sigs.push(x),x), //e.g. ["i:ii",":ij",..]
- funs=[]          //{sig:"i:ii",code:[1,2,..],name:"a","export":"A"}
- x.split("\n").forEach((x,line)=>{
-  im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1]
-  int=x=>Number.isInteger(x)?x:E(line,"expect integer")
+ fns={},funs=[],       //{sig:"i:ii",code:[1,2,..],name:"a","export":"A"}
+ l=x.split("\n");
+ l.forEach((x,line)=>{if(x.includes(":"))fns[x.split(" ")[0]]=Object.keys(fns).length})
+ l.forEach((x,line)=>{
+  let im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1],
+  numvar=(x,b)=>"-0123456789".includes(x[0])?(b?BigInt(x):parseFloat(x)):x,
+  int=x=>Number.isInteger(x)?x:E(line,"expect integer"),
+  lup=(x,g)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x[0] in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
   try{x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
-   ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],e=((3>a.length)?"":(3==a.length)?a[0]:a[3]))
+   ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],narg=s.length-s.indexOf(":")-1,e=((3>a.length)?"":(3==a.length)?a[0]:a[3]))
    :(x in ops)?(Array.isArray(ops[x])?c.push(...ops[x]):c.push(ops[x]))
-   :(i="get set tee glo gst".indexOf(a[0]))>=0?c.push(32+i/4,...lebu(int(Number(im(a)))))
-   :"i"==a[0]?c.push(65,...lebu(int(Number(im(a)))))
-   :"j"==a[0]?c.push(66,...lebn(BigInt(im(a))))
-   :"e"==a[0]?c.push(67,...new Uint8Array(new Float32Array([parseFloat(im(a))]).buffer))
-   :"f"==a[0]?c.push(68,...new Uint8Array(new Float64Array([parseFloat(im(a))]).buffer))
+   :(i="get set tee glo gst".indexOf(a[0]))>=0?c.push(32+i/4,...lup(im(a),2<i/4))
+   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=127):glo(65,a[1])):c.push(65,...lebu(int(i)))))
+   :"j"==a[0]?(("string"==typeof(i=numvar(im(a),1))?(s?(lo[a[1]]=126):glo(66,a[1])):c.push(66,...lebn(i))))
+   :"e"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=125):glo(67,a[1])):c.push(67,...new Uint8Array(new Float32Array([i]).buffer))))
+   :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=124):glo(68,a[1])):c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))
+   :"if"==a[0]?c.push(4,[64,127,126,125,124][1+"ijef".indexOf(a[1])])
+   :"else"==a[0]?c.push(5)
+   :"end"==a[0]?c.push(11)
+   :("cal"==a[0]&&a[1].includes(":"))?(sigs.includes(a[1])?c.push(17,...lebu(sigs.indexOf(a[1])),0):E(line,"undefined signature"))
+   :"cal"==a[0]?c.push(16,...lebu(fns.includes(a[1])?fns[a[1]]:E(line,"undefined function")))
    :           E(line,"unknown op "+a[0])
   }}catch(e) { E(line,e.message) }
  });p()
