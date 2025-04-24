@@ -8,24 +8,29 @@
 <script src="wa.js"></script>
 <script>
 let lns=x=>x.split("\n").map((x,i)=>(""+i).padStart(2," ")+"  "+x).join("\n")
-//let xxd=(d,x)=>(d.textContent=x.map(x=>x.toString(16).padStart(2,"0")).join(" ").match(/.{1,8}/g).join("\n"),x)
 let xxd=(d,x)=>((d.textContent=Array.from(x).map(x=>x.toString(16).padStart(2,"0")).join(" ").match(/.{1,12}/g).join("\n").replaceAll(" \n","\n")),x)
 
-let diff=(x,y)=>{if(x.length!=y.length)throw new Error("binary length differs");for(let i=0;i<x.length;i++){
+let erat=(p,i)=>{let t=p.textContent;p.textContent=t.slice(0,i);let s=document.createElement("span");s.textContent=t.slice(i);s.style.color="red";p.appendChild(s)}
+let diff=(x,y)=>{
+ for(let i=0;i<Math.min(x.length,y.length);i++){if(x[i]!=y[i]){erat(X,i);erat(Y,i);break}}
+if(x.length!=y.length)throw new Error("binary length differs");for(let i=0;i<x.length;i++){
  if(x[i]!=y[i]){throw new Error("binary mismatch at "+Math.floor(i/3))}}}
 
-let tests="locs glob".split(" "),tc=0
+let tests="blck data elif glob libm locs loop tabl".split(" "),tc=0
 run=_=>{x=tests[tc++];if(tc>tests.length)return
  o.textContent+=x+".."
  fetch("tests/"+x+".wasm").then(r=>r.arrayBuffer()).then(r=>{xxd(Y,new Uint8Array(r))
   fetch("tests/"+x+".a").then(r=>r.text()).then(r=>{
-   let t=r.slice(1,r.indexOf("\n")).split(" ").map(Number);r=r.slice(1+r.indexOf("\n"))
+   let t=r.split("\n").filter(x=>x[0]==="/").map(x=>x.slice(1).split(" ").map(Number))
+   r=r.split("\n").filter(x=>x[0]!=="/").join("\n")
    a.textContent=lns(r)
    try{
     r=xxd(X,wa(r))
     diff(X.textContent,Y.textContent)
-    WebAssembly.instantiate(r).then(r=>{let m=r.instance.exports;
-     let q=m.test(t[0]); if(t[1]!=q){throw new Error("test("+t[0]+"): expected "+t[1]+" got "+q)}else{o.textContent+=" ok\n";run()}
+    WebAssembly.instantiate(r,{math:{cos:Math.cos}}).then(r=>{let m=r.instance.exports;
+     t.forEach(t=>{let q=m.test(t[0]);if(t[1]!=q){throw new Error("test("+t[0]+"): expected "+t[1]+" got "+q)}})
+     o.textContent+=" "+t.length+" ok\n"
+     run()
     }).catch(e=>{o.textContent+="\n"+e.message;throw(e)})
    }catch(e){o.textContent+="\n"+e.message;throw(e)}
   })

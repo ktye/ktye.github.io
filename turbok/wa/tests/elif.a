@@ -1,0 +1,41 @@
+/0 4
+/3 7
+/4 20
+/5 33
+/20 20 
+f i:i export test
+ get 0
+ i 5
+ lti
+ if i
+  get 0
+  cal g
+ else
+  get 0
+  cal h
+ end
+g i:i
+ get 0
+ i 3
+ gti
+ if
+  get 0
+  i 5
+  mui
+  ret
+ else
+  get 0
+  i 4
+  adi
+  set 0
+ end
+ get 0
+h i:i
+ get 0
+ i 10
+ lti
+ if
+  i 33
+  ret
+ end
+ get 0

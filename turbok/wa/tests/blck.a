@@ -1,0 +1,20 @@
+/2 2
+/7 10
+f i:i export test
+ while
+  get 0
+  i 10
+  lti
+ do i
+  get 0
+  i 5
+  lti
+  if
+   br 2
+  end
+  get 0
+  i 1
+  adi
+  set 0
+ end
+ get 0

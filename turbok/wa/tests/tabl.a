@@ -1,0 +1,21 @@
+/2 14
+f i:i export test
+ get 0
+ get 0
+ i 0
+ i:ii
+ i 4
+ mui
+ get 0
+ i 1
+ i:ii
+add i:ii
+ get 0
+ get 1
+ adi
+sub i:ii
+ get 0
+ get 1
+ sui
+tab 0 add
+tab 1 sub

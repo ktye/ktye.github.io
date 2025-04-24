@@ -23,16 +23,16 @@ else /0x05
 end  /0x0b
 
 cal f      /0x10 funcidx
-cal i:ii   /0x10 typeidx 0(table)
+i:ii cal   /0x10 typeidx 0(table)
 
 do [type]  /0x03(loop) type|0x40
 ...
 end        /0x0d(br_if) 0(label) 0x0b
 
-while [type] /0x02(block) type 0x03(loop) type
+while      /0x02(block) type 0x03(loop) type
  ...
-do           /0x45(eqz) 0x0d(brif) 1(label) 
-end          /0x0c(br) 0(label) 0x0b 0x0b
+do         /0x45(eqz) 0x0d(brif) 1(label) 
+end        /0x0c(br) 0(label) 0x0b 0x0b
 
 switch [type] /{1+2*x;x*4;5-x}[y-2]x
 .
@@ -40,6 +40,8 @@ switch [type] /{1+2*x;x*4;5-x}[y-2]x
 .
  ..
 end
+
+dat 0 0a0a0a0a /offset hex (subsequent sections are joined)
 
 */
 
@@ -51,12 +53,14 @@ lebu=(x,r,b)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r},    
 lebs=(x,r,b)=>{x|=0;r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r},        //signed i32
 lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&&(b&64))){r.push(b);break};r.push(b|128)};return r}  //signed BitInt
 
-sect=(x,y)=>y.length?(O(x),O(lebu(y.length)),O(y)):0,
+sect=(x,y)=>(y.length&&y[0]!=0)?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124},
-glob={}, glo=(t,s)=>{glob[s]={t:t,c:[t,...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:65,c:[42,7,11],i:0}
 expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
-locs=x=>{let t={};Object.values(x.lo).forEach(x=>t[x]=(x in t?1+t[x]:1)); console.log("t",t); let r=vect(Object.keys(t).map(x=>[...lebu(t[x]),Number(x)])); console.log("locs",r); return r},
+locs=x=>{let t={};Object.values(x.lo).forEach(x=>t[x]=(x in t?1+t[x]:1));let r=vect(Object.keys(t).map(x=>[...lebu(t[x]),Number(x)]));return r},
+asci=x=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0))],
+iota=x=>Array(x).fill(0).map((_,i)=>i),
+hexa=x=>x.match(/.{1,2}/g).map(x=>parseInt(x,16)),
 
 /*o-p-s*/
 ops={
@@ -216,45 +220,54 @@ fil:[0xfc,11,0],
 
 return(x=>{
  //parse asm 
- let a,n=0,narg=0,s,e="",c=[],lo={},i,p=_=>((n?funs.push({sig:addsig(s),lo:lo,code:c,name:n,export:e}):0),[n,s,e,c,lo]=[0,"","",[],{}]),
+ let a,n=0,narg=0,s,e="",imp=0,c=[],lo={},i,p=_=>((n?funs.push({sig:s,lo:lo,code:c,name:n,export:e,import:imp}):0),[n,s,e,imp,c,lo]=[0,"","",0,[],{}]),
  sigs=[],addsig=x=>(sigs.includes(x)?x:sigs.push(x),x), //e.g. ["i:ii",":ij",..]
  fns={},funs=[],       //{sig:"i:ii",code:[1,2,..],name:"a","export":"A"}
+ glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[c,...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:127,c:[42,7,11],i:0}
+ tabl=[],addtab=(i,s)=>(i!=tabl.length?E(line,"index error"):(s in fns)?tabl[i]=fns[s]:E(line,"unknown function: "+s)),
+ data=[],adddat=(i,s)=>(data.filter(x=>i==x.o+x.d.length).length?data[data.length-1].d.push(...hexa(s)):data.push({o:i,d:hexa(s)})), //{o:1,d:[1,2,3,4]}
+ nest=[]
  l=x.split("\n");
- l.forEach((x,line)=>{if(x.includes(":"))fns[x.split(" ")[0]]=Object.keys(fns).length})
+ l.forEach((x,line)=>{x=x.trim().split(" ");if(1<x.length&&x[1].includes(":")){fns[x[0]]=Object.keys(fns).length;addsig(x[1])}})
  l.forEach((x,line)=>{
   let im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1],
   numvar=(x,b)=>"-0123456789".includes(x[0])?(b?BigInt(x):parseFloat(x)):x,
   int=x=>Number.isInteger(x)?x:E(line,"expect integer"),
   lup=(x,g)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x[0] in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
-  try{x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
-   ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],narg=s.length-s.indexOf(":")-1,e=((3>a.length)?"":(3==a.length)?a[0]:a[3]))
+  x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
+   ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],narg=s.length-s.indexOf(":")-1,e=(a[2]==="export"?a[3]:""),imp=(a[2]==="import"?a.slice(3):0))
    :(x in ops)?(Array.isArray(ops[x])?c.push(...ops[x]):c.push(ops[x]))
    :(i="get set tee glo gst".indexOf(a[0]))>=0?c.push(32+i/4,...lup(im(a),2<i/4))
-   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=127):glo(65,a[1])):c.push(65,...lebu(int(i)))))
-   :"j"==a[0]?(("string"==typeof(i=numvar(im(a),1))?(s?(lo[a[1]]=126):glo(66,a[1])):c.push(66,...lebn(i))))
-   :"e"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=125):glo(67,a[1])):c.push(67,...new Uint8Array(new Float32Array([i]).buffer))))
-   :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=124):glo(68,a[1])):c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))
-   :"if"==a[0]?c.push(4,[64,127,126,125,124][1+"ijef".indexOf(a[1])])
+   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=127):addglo(127,65,a[1])):c.push(65,...lebu(int(i)))))
+   :"j"==a[0]?(("string"==typeof(i=numvar(im(a),1))?(s?(lo[a[1]]=126):addglo(126,66,a[1])):c.push(66,...lebn(i))))
+   :"e"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=125):addglo(125,67,a[1])):c.push(67,...new Uint8Array(new Float32Array([i]).buffer))))
+   :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=124):addglo(124,68,a[1])):c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))
+   :"if"==a[0]?(nest.push("if"),c.push(4,[64,127,126,125,124][1+"ijef".indexOf(a[1])]))
    :"else"==a[0]?c.push(5)
-   :"end"==a[0]?c.push(11)
-   :("cal"==a[0]&&a[1].includes(":"))?(sigs.includes(a[1])?c.push(17,...lebu(sigs.indexOf(a[1])),0):E(line,"undefined signature"))
-   :"cal"==a[0]?c.push(16,...lebu(fns.includes(a[1])?fns[a[1]]:E(line,"undefined function")))
-   :           E(line,"unknown op "+a[0])
-  }}catch(e) { E(line,e.message) }
+   :"end"==a[0]?(i=nest.pop(),i=="do"?c.push(13,0,11):i=="while"?c.push(12,0,11,11):c.push(11))
+   :a[0].includes(":")?(addsig(a[0]),c.push(17,...lebu(sigs.indexOf(a[0])),0))
+   :"cal"==a[0]?c.push(16,...lebu(a[1] in fns?fns[a[1]]:E(line,"undefined function: "+a[1])))
+   :"while"==a[0]?(nest.push("while"),c.push(2,64,3,64))
+   :"do" ==a[0]?((nest[nest.length-1]==="while")?c.push(69,13,1):(nest.push("do"),c.push(3,[64,127,126,125,124]["ijef".indexOf(a[1])+1])))
+   :"br" ==a[0]?c.push(12,int(Number(im(a))))
+   :"tab"==a[0]?(p(),addtab(int(Number(im(a))),a[2]))
+   :"dat"==a[0]?(p(),adddat(int(Number(im(a))),a[2]))
+   :E(line,"unknown op "+a[0])
+  }
  });p()
 
  //emit
  o=[0,97,115,109,1,0,0,0] 
  sect( 1,vect(sigs.map((x,r,a)=>([r,a]=x.split(":"),[96,a.length,...a.split("").map(x=>typs[x]),r.length,...r.split("").map(x=>typs[x])]))))
- sect( 2,[]) //imports..
- sect( 3,vect(funs.map(x=>lebu(sigs.indexOf(x.sig))))),
- sect( 4,[]) //table..
+ sect( 2,vect(funs.filter(x=>x.import).map(x=>[...asci(x.import[0]),...asci(x.import[1]),0,...lebu(sigs.indexOf(x.sig))] ))) //imports..
+ sect( 3,vect(funs.filter(x=>!x.import).map(x=>lebu(sigs.indexOf(x.sig)))))
+ if(tabl.length)sect(4,[1,112,0,...lebu(tabl.length)])
  sect( 5,[1,0,1]) //memory: 1segment, unshared, 1block
- sect( 6,[]) //global..
+ sect( 6,vect(Object.values(glob).map(x=>[x.t,1,...x.c]))) //global..
  sect( 7,vect(expo(["memory",...funs.filter(x=>x.export.length>0).map(x=>x.export)], //names
                    [0,...funs.map((x,i)=>(x.export.length?i:-1)).filter(x=>x>=0)]))) //index
  sect( 8,[]) //start
- sect( 9,[]) //elements(indirect function table)
- sect(10,vect(funs.map(x=>((x=[...locs(x),...x.code,11]),[...lebu(x.length),...x])))) //code
- sect(11,[]) //data
+ if(tabl.length)sect(9,[1,0,65,0,11,...lebu(tabl.length),...tabl.map(lebu).flat()]) //elements(indirect function table)
+ sect(10,vect(funs.filter(x=>!x.import).map(x=>((x=[...locs(x),...x.code,11]),[...lebu(x.length),...x])))) //code
+ sect(11,vect(data.map(x=>[0,65,...lebu(x.o),11,...lebu(x.d.length),...x.d]))) //data
  return new Uint8Array(o)})})()

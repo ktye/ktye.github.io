@@ -1,0 +1,9 @@
+/4 67305985
+/20 -1346458146
+f i:i export test
+ get 0
+ ldi
+dat 4 01020304
+dat 8 05060708
+dat 20 deadbeaf
+ 

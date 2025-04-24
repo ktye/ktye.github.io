@@ -1,0 +1,6 @@
+/0 -1
+cos f:f import math cos
+f i:i export test
+ f 3.141592653589793
+ cal cos
+ iof
