@@ -2,6 +2,9 @@ while read res arg op mne xx; do
  if [ ! -z "$op" ]; then
   res=`echo $res|sed 's/-//'`
   arg=`echo $arg|sed 's/-//'`
+  if echo "${res}${arg}"|grep \? >/dev/null; then
+   continue
+  fi
   echo "$mne $res:$arg export $mne"
   n=`echo $arg|wc -c`
   if [ "2" = $n ]; then

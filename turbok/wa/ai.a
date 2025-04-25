@@ -464,13 +464,6 @@ ngi i:i export ngi
 ngj j:j export ngj
  get 0
  ngj
-drp :? export drp
- get 0
- drp
-sel ?:mk export sel
- get 0
- get 1
- sel
 ldi i:i export ldi
  get 0
  ldi

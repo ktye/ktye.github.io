@@ -34,11 +34,13 @@ while      /0x02(block) type 0x03(loop) type
 do         /0x45(eqz) 0x0d(brif) 1(label) 
 end        /0x0c(br) 0(label) 0x0b 0x0b
 
-switch [type] /{1+2*x;x*4;5-x}[y-2]x
-.
- ..
-.
- ..
+{cond}          /condition is before switch
+switch 2 [type] /switch may have a return value
+ {case0}
+endcase
+ {case1}
+endcase
+ {default}
 end
 
 dat 0 0a0a0a0a /offset hex (subsequent sections are joined)
@@ -61,6 +63,7 @@ locs=x=>{let t={};Object.values(x.lo).forEach(x=>t[x]=(x in t?1+t[x]:1));let r=v
 asci=x=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0))],
 iota=x=>Array(x).fill(0).map((_,i)=>i),
 hexa=x=>x.match(/.{1,2}/g).map(x=>parseInt(x,16)),
+repa=(n,x)=>Array(n).fill(x).flat(),
 
 /*o-p-s*/
 
@@ -72,13 +75,13 @@ return(x=>{
  glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[c,...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:127,c:[42,7,11],i:0}
  tabl=[],addtab=(i,s)=>(i!=tabl.length?E(line,"index error"):(s in fns)?tabl[i]=fns[s]:E(line,"unknown function: "+s)),
  data=[],adddat=(i,s)=>(data.filter(x=>i==x.o+x.d.length).length?data[data.length-1].d.push(...hexa(s)):data.push({o:i,d:hexa(s)})), //{o:1,d:[1,2,3,4]}
- nest=[]
+ swtc=[],sw,sc,nest=[],whdo=_=>nest.length-nest.lastIndexOf("whdo")-1
  l=x.split("\n");
  l.forEach((x,line)=>{x=x.trim().split(" ");if(1<x.length&&x[1].includes(":")){fns[x[0]]=Object.keys(fns).length;addsig(x[1])}})
  l.forEach((x,line)=>{
   let im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1],
   numvar=(x,b)=>"-0123456789".includes(x[0])?(b?BigInt(x):parseFloat(x)):x,
-  int=x=>Number.isInteger(x)?x:E(line,"expect integer"),
+  int=a=>Number.isInteger(a)?a:E(line,"expect integer"),int1=a=>int(Number(im(a))),
   lup=(x,g)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x[0] in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
   x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
    ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],narg=s.length-s.indexOf(":")-1,e=(a[2]==="export"?a[3]:""),imp=(a[2]==="import"?a.slice(3):0))
@@ -90,14 +93,17 @@ return(x=>{
    :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=124):addglo(124,68,a[1])):c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))
    :"if"==a[0]?(nest.push("if"),c.push(4,[64,127,126,125,124][1+"ijef".indexOf(a[1])]))
    :"else"==a[0]?c.push(5)
-   :"end"==a[0]?(i=nest.pop(),i=="do"?c.push(13,0,11):i=="whdo"?c.push(12,0,11,11):c.push(11))
+   :"end"==a[0]?(i=nest.pop(),i=="do"?c.push(13,0,11):i=="whdo"?c.push(12,0,11,11):i=="swtc"?c.push(12,0,11):c.push(11))
    :a[0].includes(":")?(addsig(a[0]),c.push(17,...lebu(sigs.indexOf(a[0])),0))
    :"cal"==a[0]?c.push(16,...lebu(a[1] in fns?fns[a[1]]:E(line,"undefined function: "+a[1])))
    :"while"==a[0]?(nest.push("while"),c.push(2,64,3,64))
    :"do" ==a[0]?((nest[nest.length-1]==="while")?(nest[nest.length-1]="whdo",c.push(69,13,1)):(nest.push("do"),c.push(3,[64,127,126,125,124]["ijef".indexOf(a[1])+1])))
-   :"br" ==a[0]?c.push(12,int(Number(im(a))))
-   :"tab"==a[0]?(p(),addtab(int(Number(im(a))),a[2]))
-   :"dat"==a[0]?(p(),adddat(int(Number(im(a))),a[2]))
+   :"break"==a[0]?c.push(12,1+whdo())
+   :"continue"==a[0]?c.push(12,whdo())
+   :"switch"==a[0]?(i=int1(a)-1,sw=sigs.indexOf(addsig(ss=("ijef".indexOf(a[2])>=0?a[2]:"")+":i")),sc=sigs.indexOf(addsig(":i")),nest.push("swtc"),swtc.push(i),c.push(2,...lebu(sw),...repa(1+i,[2,...lebu(sc)]),14,i,...iota(i),i,11))
+   :"endcase"==a[0]?(i=swtc[swtc.length-1]--,c.push(12,i,11))
+   :"tab"==a[0]?(p(),addtab(int1(a),a[2]))
+   :"dat"==a[0]?(p(),adddat(int1(a),a[2]))
    :E(line,"unknown op "+a[0])
   }
  });p()

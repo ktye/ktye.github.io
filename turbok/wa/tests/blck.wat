@@ -15,6 +15,16 @@
     br 2
    end
    local.get 0
+   i32.const 6
+   i32.gt_s
+   if
+    local.get 0
+    i32.const 4
+    i32.add
+    local.set 0
+    br 1
+   end
+   local.get 0
    i32.const 1
    i32.add
    local.set 0
