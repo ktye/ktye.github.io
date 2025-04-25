@@ -1,0 +1,29 @@
+#define ex (*(e2*)&x)
+#define tx (7&x>>60)
+#define V6 __attribute((vector_size(1<<6),aligned(1)))
+typedef unsigned long U,j3,j6 V6;typedef char g0,g6 V6;typedef unsigned short h1;typedef unsigned i2,i6 V6;typedef float e2,e6 V6;typedef int s6 V6;static g6 
+z0,I0={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63};
+#define E1 (127<<23)
+#define cc g0 c
+#define ee e2 e
+#define ih i2 h
+#define ii i2 i
+#define ij i2 j
+#define ik i2 k
+#define il i2 l
+#define im i2 m
+#define in i2 n
+#define it i2 t
+#define ss g0*s
+#define sd g0*d
+#define Uf U f
+#define Ua U a
+#define Ub U b
+#define Ux U x
+#define zi z[i]
+#define Ai A[i]
+#define ZU static U
+#define Z0 static g0
+#define Z2 static i2
+#define Vd *(g6*)d
+#define Vs *(g6*)s

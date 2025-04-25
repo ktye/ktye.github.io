@@ -1,0 +1,62 @@
+#define V(t,n) t##n __attribute((vector_size(1<<n),aligned(1)))
+typedef unsigned long U,V(j,6);typedef char i0,V(g,4),V(g,5),V(g,6);typedef unsigned short i1;typedef unsigned i2,V(i,6),V(i,5),V(i,8);typedef float e2,V(e,6),V(e,5),V(e,8);typedef int V(s,6);
+#undef V
+#define I0 ((g6){0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63})
+#define I2 ((i6){0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15})
+#define E1 (127<<23)
+#define ZU static U
+#define Z0 static i0
+#define Z2 static i2
+#define Ze static e2
+#define ZG static g6
+#define ZI static i6
+#define ZE static e6
+#define ZJ static j6
+#define zi z[i]
+#define Rk R[k|i]
+#define Ri R[i] 
+#define Ai A[i]
+#define Xi X[i] 
+#define Uf U f
+#define Ua U a
+#define Ub U b
+#define Ux U x
+#define Va g6 a
+#define Vb g6 b
+#define Vx g6 x
+#define cc i0 c
+#define ee e2 e
+#define ih i2 h
+#define ii i2 i
+#define ij i2 j
+#define ik i2 k
+#define il i2 l
+#define im i2 m
+#define in i2 n
+#define it i2 t
+#define ss i0*s
+#define sd i0*d
+#define Vd *(g6*)d
+#define Vs *(g6*)s
+#define Sz s6 z
+#define Gz g6 z
+#define Iz i6 z
+#define Vz g6 z
+#define Ez e6 z
+#define Ea e6 a
+#define Ex e6 x
+#define X4 ((g4*)X)[i]
+#define X5 ((i5*)X)[i]
+#define X8 ((i8*)X)[i]
+#define Ae (e6)Ai
+#define Xe (e6)Xi
+#define IR i6*R
+#define IA i6*A
+#define IX i6*X
+#define EA e6*A
+#define EX e6*X
+#define iX i2*X
+#define iR i2*R
+#define eR e2*R
+#define eA e2*A
+#define eX e2*X

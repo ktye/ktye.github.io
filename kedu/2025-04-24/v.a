@@ -1,0 +1,32 @@
+#define ZI static i6
+#define ZE static e6
+#define ZJ static j6
+#define I2 ((i6){0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15})
+#define V(t,m,n) typedef t##m t##n __attribute((vector_size(1<<n),aligned(1)));
+V(g,0,4)V(g,0,5)V(i,2,5)V(i,2,8)V(e,2,5)V(e,2,8)V(j,3,7)ZE ze;ZI z2,BA=I2+1-I2%2*2;ZJ A={-1},B={0xc6a4a7935bd1e995};
+#define Vz g6 z
+#define Ez e6 z
+#define Ea e6 a
+#define Ex e6 x
+#define X4 ((g4*)X)[i]
+#define X5 ((i5*)X)[i]
+#define X8 ((i8*)X)[i]
+#define Rk R[k|i]
+#define U3 in,IR,IX
+#define Ae (e6)Ai
+#define Xe (e6)Xi
+#define Xi X[i] 
+#define Ri R[i] 
+#define Sz s6 z
+#define Gz g6 z
+#define Iz i6 z
+#define IR i6*R
+#define IA i6*A
+#define IX i6*X
+#define EA e6*A
+#define EX e6*X
+#define iX i2*X
+#define iR i2*R
+#define eR e2*R
+#define eA e2*A
+#define eX e2*X

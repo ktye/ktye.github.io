@@ -50,3 +50,6 @@
 2025-03-23:a.c a.h _.h k.h makefile z.c z.h z.k 
 2025-03-26:a.c a.h b.h c.h _.h k.h makefile z.c z.h z.k 
 2025-04-06:a.c a.h b.h c.h _.h k.h makefile z.c z.h z.k 
+2025-04-23:_.a a.a a.c _.d v.a v.c v.d z.a z.c z.z 
+2025-04-24:_.a a.a a.b a.c _.b makefile v.a v.b v.c z.c z.h z.z 
+2025-04-25:_.a a.a a.b a.c _.b makefile man v.b v.c z.b z.c z.z 

@@ -1,0 +1,38 @@
+#include"_.b"
+#define MF (1l<<54)
+#define px (t(1,0)>x)
+#define ax !(x>>63)
+#define ix (i2)x
+#define nx (i2)x
+#define jx (b(60)&x)
+#define mx (MF&x)
+#define vx (mx?nx/ux:nx)
+#define xu ((i2*)sx)
+#define xU ((U*)sx)
+#define xV ((g6*)sx)
+#define rV ((g6*)sr)
+#define VR g6*R
+#define Va g6 a
+#define Vb g6 b
+#define Vx g6 x
+#define hx (31&x>>55)
+#define ox (h1)(x>>32)
+#define Ox O[ox]
+#define u3 nx,sr,sx
+#define u5 sa,ux,n,sr,sx
+#define Na x(a,Nx)
+#define Nr x(r,Nx)
+#define qx (1l<<36>(U)sx-(1l<<32))
+#define bx b[tx]
+#define Nx (nx<<b[tx])
+#define ta x(a,tx)
+#define sa x(a,sx)
+#define na x(a,nx)
+#define aa x(a,ax)
+#define sr x(r,sx)
+#define pa x(a,px)
+#define ia x(a,ix)
+#define ea x(a,ex)
+#define ua x(a,ux)
+#define ma x(a,mx)
+#define va x(a,vx)
