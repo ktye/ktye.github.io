@@ -1,3 +1,4 @@
 #sh wat.mk
 sh wa.mk > wa.js
 #sh ai.mk > ai.a
+sh aj.mk > ai.js

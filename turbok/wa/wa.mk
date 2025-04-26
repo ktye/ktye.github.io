@@ -1,4 +1,4 @@
-sed '/o-p-s/q'      ../wa/wa_js     #head
+sed '/o-p-s/q'      wa_js  #head
 
 echo "ops={"
 
@@ -10,4 +10,4 @@ done < tab
 
 echo "}"
 
-sed -n '/o-p-s/,$p' ../wa/wa_js     #tail
+sed -n '/o-p-s/,$p' wa_js  #tail

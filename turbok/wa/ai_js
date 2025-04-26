@@ -1,4 +1,4 @@
-//let ai=x=>{
+//assembly interpreter
 
 let parse=(x,M,A)=>{ //source,import-object
  let G={} //globals {name:v}
@@ -7,39 +7,54 @@ let parse=(x,M,A)=>{ //source,import-object
  let U=new Uint8Array(A.memory.buffer),dd=(o,s)=>{for(let i=0;i<s.length;i+=2)U[o++]=parseInt(s.substr(i,2),16)} //data/heap
  let isvar=x=>!"-0123456789".includes(x[0])
  let args =x=>{let r={};x.forEach((t,i)=>r[i]="j"==t?0n:0);return r}
- x.split("\n").forEach((x,line)=>{x=x.trim(){let a=x.split(" "),a0=a[0].trim(),n=0,s="",c=[],l=0,im="",lo={}
+ let nest=[],addr=[],la=""
+ x.split("\n").forEach((x,line)=>{x=x.trim(){let i,a=x.split(" "),a0=a[0].trim(),a1=a[1].trim(),n=0,s="",c=[],l=0,im="",lo={}
   let p=_=>{if(!n)return;s=s.split(":");F[n]={r:s[0],a:s[1],c:im?["native",im]:c,lo:{...args(s[1]),...lo},l:l};if(ma)M=n;[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
   (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,im=(a[2]=="import")?a[3]:"")
-  :"tab"==a0?(p(),T.push(a[2]))
-  :"dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2]))
+  :   "tab"==a0?(p(),T.push(a[2]))
+  :   "dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2]))
+  :    "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0])
+  :  "else"==a0?(nest.pop(),i=addr.pop(),c[i][1]=c.length-i,nest.push("else"),addr.push(c.length),c.push(["jmp",0]))
+  : "while"==a0?(nest.push("while"),addr.push([c.length,c.length]),c.push(["nop"]))
+  :    "do"==a0?((nest[nest.length-1]=="while")?(la=addr.pop(),la[0]=c.length-la[0],la[1]=c.length,addr.push(la),c.push(["if",0]))//  (while)do
+                                               :(nest.push("do"),c.push(["nop",c.length])))                                       //    do(end)
+  :   "end"==a0?(la=nest.pop(),i=addr.pop(),(la==  "if"?c[i][1]=c.length-i,c.push(["nop"]))                                       //    (if)end
+                                            :la=="else"?c[i][1]=c.length-i,c.push(["nop"])                                        //  (else)end
+                                            :la==  "do"?c.push(["ifnot",c[i][1]-c.length])                                        //    (do)end
+//                                          :i.forEach(i=>c[i][1]=c.length-c[i][1]))                                              //(switch)end 
+//  :"switch"==a0? Array(Number(a1).fill(c.length)
+  //if-end if-else-end do-end while-do-end switch-endcase-end
   :(1==a0.length)&&"ijef".includes(a0))?(s?0:G[a[1]]=(a0=="j"?0n:0))
-  :n?(("i"==a0&&isvar(a[1]))?(c.push(a),lo[a[1]]=0 )
-    : ("j"==a0&&isvar(a[1]))?(c.push(a),lo[a[1]]=0n)
-    : ("e"==a0&&isvar(a[1]))?(c.push(a),lo[a[1]]=0 )
-    : ("f"==a0&&isvar(a[1]))?(c.push(a),lo[a[1]]=0 )
+  :n?(("i"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
+    : ("j"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n):c.push(["const",BigInt(a1)]))
+    : ("e"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
+    : ("f"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
     :c.push(a))
  }});p();return{G:G,S:S,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
 
+/*o-p-s*/
 
+let op=(m,s)=>{let[r,a]=ops[s];s=m.A[s](...m.S.splice(-a,a));if(r)m.S.push(s)}
 let exit=m=>{throw new error("exit")}
 let retu=m=>m.C.length?[m.f,m.l]=m.C.pop():exit()
 
 let step=m=>{let F=m.F[m.f];if(F.c.length==++m.l)return ret(m)
- let a=F[m.l],a0=a[0],x
+ let a=F[m.l],a0=a[0],a1=a[1],x
  let cal=f=>{m.C.push(m.f,1+m.l);m.f=f;m.l=-1;F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[i]=m.S.pop()}
  let icl=(x,s,f)=>{f=m.T[x];if(m.F[f].s!=s){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f)}
- let isvar=x=>!"-0123456789".includes(x[0])
-  "i"==a0?(isvar(x[1])?0:m.S.push(Number(x[1])))
- :"j"==a0?(isvar(x[1])?0:m.S.push(BigInt(x[1])))
- :"e"==a0?(isvar(x[1])?0:m.S.push(Number(x[1])))
- :"f"==a0?(isvar(x[1])?0:m.S.push(Number(x[1])))
- :"get"==a0?m.S.push(m.f.lo[a[1]])
- :"set"==a0?m.f.lo[a[1]]=m.S.pop()
- :"tee"==a0?m.f.lo[a[1]]=m.S[m.S.length-1]
- :"glo"==a0?m.S.push(m.G[a[1]])
- :"gst"==a0?m.G[a[1]]=m.S.pop()
- :"cal"==a0?cal(a[1])
- :a0.includes(":")?icl(m.S.pop(),a0)
- //todo if else do while break continue switch endcase end
- :op(a0)
-}
+   "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
+ :   "get"==a0?m.S.push(m.f.lo[a1])
+ :   "set"==a0?m.f.lo[a1]=m.S.pop()
+ :   "tee"==a0?m.f.lo[a1]=m.S[m.S.length-1]
+ :   "glo"==a0?m.S.push(m.G[a1])
+ :   "gst"==a0?m.G[a1]=m.S.pop()
+ :   "cal"==a0?cal(a1)
+ :    "if"==a0?m.l+=m.S.pop()?a1:0
+ : "ifnot"==a0?m.l+=m.S.pop()?0:a1              //do after while, end after do
+ :"switch"==a0?(x=1+m.S.pop(),m.l+=(x<a.length?a[x]:a[x.length-1]))
+ :   "jmp"==a0?m.l+=a1                          //else break continue endcase end
+ :   "nop"==a0?0                                //do while
+ :  "ical"==a0?icl(m.S.pop(),a1)
+ :op(m,a0)}
+
+let run=x=>{x.f="main";x.l=0;while(1)step()}

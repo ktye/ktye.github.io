@@ -34,8 +34,8 @@ while      /0x02(block) type 0x03(loop) type
 do         /0x45(eqz) 0x0d(brif) 1(label) 
 end        /0x0c(br) 0(label) 0x0b 0x0b
 
-{cond}
-switch 2 [type] /{1+2*x;x*4;5-x}[y-2]x
+{cond}          /condition is before switch
+switch 2 [type] /switch may have a return value
  {case0}
 endcase
  {case1}
