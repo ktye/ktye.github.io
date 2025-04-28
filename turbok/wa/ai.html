@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>turbok/ai</title>
+<style></style>
+</head><body>
+<script src="wa.js"></script>
+<script src="ai.js"></script>
+<script>
+
+let A
+fetch("ai.a").then(r=>r.text()).then(ai=>{ WebAssembly.instantiate(wa(ai)).then(r=>{
+ A=r.instance.exports
+ 
+})})
+
+/*
+run=T=>{let x=T?(o.textContent="",T):tests[tc++];if(tc>tests.length&&!T)return;
+ o.textContent+=x+".."
+ let tx="tests/"+x+"."
+ feta([tx+"a",tx+"wat",tx+"wasm"],r=>{
+  if(!T){let a=document.createElement("span");a.classList.add("L");a.onclick=_=>run(x);a.textContent=x;L.appendChild(a)}
+  W.textContent=r[1];xxd(Y,new Uint8Array(r[2]))
+  let t=r[0].split("\n").filter(x=>x[0]==="/").map(x=>x.slice(1).split(" ").map(Number));tst.textContent="";t.map(x=>tst.textContent+="test("+x[0]+")→"+x[1]+"\n")
+  r=r[0].split("\n").filter(x=>x[0]!=="/").join("\n")
+  A.textContent=lns(r)
+  try{
+   r=xxd(X,wa(r))
+   diff(X.textContent,Y.textContent)
+   WebAssembly.instantiate(r,{math:{cos:Math.cos}}).then(r=>{let m=r.instance.exports;
+    t.forEach(t=>{let q=m.test(t[0]);if(t[1]!=q){throw new Error("test("+t[0]+"): expected "+t[1]+" got "+q)}})
+    o.textContent+=" "+t.length+" ok\n"
+    if(!T)run()
+   }).catch(e=>{o.textContent+="\n"+e.message;throw(e)})
+  }catch(e){o.textContent+="\n"+e.message;throw(e)}
+ })
+}
+run()
+*/
+</script>
+</body></html>

@@ -2,7 +2,7 @@ sed '/o-p-s/q'      ai_js   #head
 
 echo "let ops={"
 
-awk '/:/{split($2,a,":");print $1 ":[" length(a[1]) "," length(a[2]) "]," }' ai.a
+awk '/:/{split($2,a,":");printf "%s", $1 ":" length(a[2]) ","; if(++x%16==0)printf("\n")  }' ai.a
 
 echo "}"
 

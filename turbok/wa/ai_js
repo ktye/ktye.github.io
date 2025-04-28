@@ -20,6 +20,8 @@
 
 */
 
+//let ai=(_=>{
+
 let parse=(x,M,A)=>{ //source,import-object
  let G={} //globals {name:v}
  let F={} //functions
@@ -28,33 +30,33 @@ let parse=(x,M,A)=>{ //source,import-object
  let isvar=x=>!"-0123456789".includes(x[0])
  let args =x=>{let r={};x.forEach((t,i)=>r[i]="j"==t?0n:0);return r}
  let nest=[],addr=[],la=""
- x.split("\n").forEach((x,line)=>{x=x.trim(){let i,j,a=x.split(" "),a0=a[0].trim(),a1=a[1].trim(),n=0,s="",c=[],l=0,im="",lo={}
+ x.split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=a[1].trim(),n=0,s="",c=[],l=0,im="",lo={}
   let p=_=>{if(!n)return;s=s.split(":");F[n]={r:s[0],a:s[1],c:im?["native",im]:c,lo:{...args(s[1]),...lo},l:l};if(ma)M=n;[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
   (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,im=(a[2]=="import")?a[3]:"")
   :    "tab"==a0?(p(),T.push(a[2]))
-  :    "dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2]))
-  :     "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0])
+  :    "dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2])))
+  :     "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0]))
   :   "else"==a0?(nest.pop(),i=addr.pop(),c[i][1]=c.length-i,nest.push("else"),addr.push(c.length),c.push(["jmp",0]))
   :  "while"==a0?(nest.push("while"),addr.push([c.length,c.length]),c.push(["nop"]))
   :     "do"==a0?((nest[nest.length-1]=="while")?(la=addr.pop(),la[0]=c.length-la[0],la[1]=c.length,addr.push(la),c.push(["if",0]))//  (while)do
                                                :(nest.push("do"),c.push(["nop",c.length])))                                       //    do(end)
   : "switch"==a0?(nest.push("switch"),addr.push(c.length),c.push(["switch",Number(a1),2,Array(Number(a1)-1).fill(c.length)]))
   :"endcase"==a0?(i=addr[addr.length-1],j=c[i][2]++,c[i][j]=c.length-c[i][j],c[i].push(c.length),c.push(["jmp",c.length]))
-  :    "end"==a0?(la=nest.pop(),i=addr.pop(),(la==  "if"?c[i][1]=c.length-i,c.push(["nop"]))                                             //    (if)end
-                                             :la=="else"?c[i][1]=c.length-i,c.push(["nop"])                                              //  (else)end
-                                             :la==  "do"?c.push(["ifnot",c[i][1]-c.length])                                              //    (do)end
-                                             :((for(let j=c[i][2];j<c[i].length;j++)c[c[i][j]][1]=c.length-c[c[i][j]][1]),c.push("nop")) //(switch)end 
-  :(1==a0.length)&&"ijef".includes(a0))?(s?0:G[a[1]]=(a0=="j"?0n:0))
-  :n?(("i"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-    : ("j"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n):c.push(["const",BigInt(a1)]))
-    : ("e"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-    : ("f"==a0)?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-    :c.push(a))
- }});p();return{G:G,S:S,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
+  :    "end"==a0?(la=nest.pop(),i=addr.pop(),(la==  "if"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //    (if)end
+                                             :la=="else"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //  (else)end
+                                             :la==  "do"?c.push(["ifnot",c[i][1]-c.length])                                            //    (do)end
+                                             :(j=c[i][2],c[i].slice(j).forEach((x,k)=>c[i][j+k]=c.length-c[i][j+k]),c.push(["nop"])))) //(switch)end 
+  :(1==a0.length&&"ijef".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
+                                          :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n):c.push(["const",BigInt(a1)]))
+                                          :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
+                                          :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)])))
+                                         :(G[a[1]]=(a0=="j"?0n:0)))
+  :c.push(a)
+ });p();return{G:G,S:S,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
 
 /*o-p-s*/
 
-let op=(m,s)=>{let[r,a]=ops[s];s=m.A[s](...m.S.splice(-a,a));if(r)m.S.push(s)}
+let op=(m,s,a)=>{a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
 let exit=m=>{throw new error("exit")}
 let retu=m=>m.C.length?[m.f,m.l]=m.C.pop():exit()
 
@@ -78,3 +80,5 @@ let step=m=>{let F=m.F[m.f];if(F.c.length==++m.l)return ret(m)
  :op(m,a0)}
 
 let run=x=>{x.f="main";x.l=0;while(1)step()}
+
+//})()
