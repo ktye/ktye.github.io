@@ -170,9 +170,10 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
   <legend class="center">New File</legend>
   <fieldset id="newfiletype" class="tui-input-fieldset">
    <legend>Type</legend>
-   <label class="tui-radio">k<input type="radio" name="filetype" value="k" checked/><span></span></label>
-   <label class="tui-radio">c<input type="radio" name="filetype" value="c" /><span></span></label>
-   <label class="tui-radio">assembly<input type="radio" name="filetype" value="a"/><span></span></label>
+   <label class="tui-radio">a(assembly)<input type="radio" name="filetype" value="a"/><span></span></label>
+   <label class="tui-radio">b(better c)<input type="radio" name="filetype" value="b" /><span></span></label>
+   <label class="tui-radio">c(c royale)<input type="radio" name="filetype" value="c" /><span></span></label>
+   <label class="tui-radio">k(kingkong)<input type="radio" name="filetype" value="k" checked/><span></span></label>
   </fieldset>
   <br>
   <fieldset class="tui-input-fieldset">
@@ -286,5 +287,6 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
 <script src="wa/wa.js"></script>
 <script src="wa/link.js"></script>
 <script src="wa/boot.js"></script>
+<script src="ac/cparse.js"></script>
 
 </body></html>
