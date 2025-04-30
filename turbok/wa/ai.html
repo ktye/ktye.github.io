@@ -1,39 +1,45 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>turbok/ai</title>
-<style></style>
+<html><head><meta charset="UTF-8"><title>turbok/wa.test</title>
+<style>*{font-family:monospace}
+span{color:blue}:hover{cursor:pointer}
+#T{display:flex;gap:1em}
+#O{display:inline-block;vertical-align:top;margin-top:0}
+</style>
 </head><body>
+<div    id="T"><button onclick="step()">step</button></div>
+<select id="S" multiple></select>
+<pre    id="O">x</pre>
+
 <script src="wa.js"></script>
 <script src="ai.js"></script>
+
 <script>
+let ce=s=>document.createElement(s)
+let tc=(t,x)=>(x.textContent=t,x)
+let ac=(p,x)=>(p.appendChild(x),x)
 
 let A
-fetch("ai.a").then(r=>r.text()).then(ai=>{ WebAssembly.instantiate(wa(ai)).then(r=>{
- A=r.instance.exports
- 
-})})
+let run=s=>{S.innerHTML="";let src=""
+ fetch("tests/"+s+".a").then(r=>r.text()).then(r=>{r.split("\n").filter(x=>x[0]!="/").forEach((x,_,a)=>{src+=x+"\n";tc(x,ac(S,ce("option")));S.size=a.length});
+  fetch("ai.a").then(r=>r.text()).then(r=>WebAssembly.instantiate(wa(r)).then(r=>{
+   A=ai.parse(src,{},r.instance.exports)   
+   A.f="f";A.l=0;S.selectedIndex=ai.line(A)
+   step()
+}))})}
 
-/*
-run=T=>{let x=T?(o.textContent="",T):tests[tc++];if(tc>tests.length&&!T)return;
- o.textContent+=x+".."
- let tx="tests/"+x+"."
- feta([tx+"a",tx+"wat",tx+"wasm"],r=>{
-  if(!T){let a=document.createElement("span");a.classList.add("L");a.onclick=_=>run(x);a.textContent=x;L.appendChild(a)}
-  W.textContent=r[1];xxd(Y,new Uint8Array(r[2]))
-  let t=r[0].split("\n").filter(x=>x[0]==="/").map(x=>x.slice(1).split(" ").map(Number));tst.textContent="";t.map(x=>tst.textContent+="test("+x[0]+")→"+x[1]+"\n")
-  r=r[0].split("\n").filter(x=>x[0]!=="/").join("\n")
-  A.textContent=lns(r)
-  try{
-   r=xxd(X,wa(r))
-   diff(X.textContent,Y.textContent)
-   WebAssembly.instantiate(r,{math:{cos:Math.cos}}).then(r=>{let m=r.instance.exports;
-    t.forEach(t=>{let q=m.test(t[0]);if(t[1]!=q){throw new Error("test("+t[0]+"): expected "+t[1]+" got "+q)}})
-    o.textContent+=" "+t.length+" ok\n"
-    if(!T)run()
-   }).catch(e=>{o.textContent+="\n"+e.message;throw(e)})
-  }catch(e){o.textContent+="\n"+e.message;throw(e)}
- })
-}
-run()
-*/
+let step=_=>{ai.step(A);S.selectedIndex=ai.line(A);O.textContent=state()}
+let state=r=>{
+ let c="instr: "+A.F[A.f].c[A.l].join(" ")
+ let f="func : "+A.f;
+ let s="stack: ";for(let i=0;i<A.S.length;i++)s+=A.S[A.S.length-1-i]+" "
+ let l="local: ",lo=A.F[A.f].lo
+ for(let v in lo)l+=v+":"+lo[v]+" "
+ let g="globl: ";for(v in A.G)g+=v+":"+A.G[v]	 
+ return[c,f,s,l,g].join("\n")}
+
+
+"blck data elif glob libm locs loop swtc tabl".split(" ").forEach(x=>{ac(T,tc(x,ce("span"))).onclick=e=>run(e.target.textContent)})
+run("glob")
+
 </script>
 </body></html>

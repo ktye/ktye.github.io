@@ -28,11 +28,12 @@ let parse=(x,M,A)=>{ //source,import-object
  let T=[] //indirect call table
  let U=new Uint8Array(A.memory.buffer),dd=(o,s)=>{for(let i=0;i<s.length;i+=2)U[o++]=parseInt(s.substr(i,2),16)} //data/heap
  let isvar=x=>!"-0123456789".includes(x[0])
- let args =x=>{let r={};x.forEach((t,i)=>r[i]="j"==t?0n:0);return r}
+ let args =x=>{let r={};x.split("").forEach((t,i)=>r[i]="j"==t?0n:0);return r}
  let nest=[],addr=[],la=""
- x.split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=a[1].trim(),n=0,s="",c=[],l=0,im="",lo={}
-  let p=_=>{if(!n)return;s=s.split(":");F[n]={r:s[0],a:s[1],c:im?["native",im]:c,lo:{...args(s[1]),...lo},l:l};if(ma)M=n;[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
-  (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,im=(a[2]=="import")?a[3]:"")
+ let n=0,s="",c=[],l=0,im="",lo={}
+ let p=_=>{if(!n)return;console.log("func",n,"l",l);s=s.split(":");F[n]={r:s[0],a:s[1],c:im?["native",im]:c,lo:{...args(s[1]),...lo},l:l};[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
+ x.split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=(a[1]?a[1].trim():"");
+  (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,im=(a[2]=="import")?a[3]:"",c.push(["nop"]))
   :    "tab"==a0?(p(),T.push(a[2]))
   :    "dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2])))
   :     "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0]))
@@ -52,7 +53,7 @@ let parse=(x,M,A)=>{ //source,import-object
                                           :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)])))
                                          :(G[a[1]]=(a0=="j"?0n:0)))
   :c.push(a)
- });p();return{G:G,S:S,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
+ });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
 
 /*o-p-s*/
 let ops={
@@ -73,17 +74,17 @@ let exit=m=>{throw new error("exit")}
 let retu=m=>m.C.length?[m.f,m.l]=m.C.pop():exit()
 
 let step=m=>{let F=m.F[m.f];if(F.c.length==++m.l)return ret(m)
- let a=F[m.l],a0=a[0],a1=a[1],x
+ let a=F.c[m.l],a0=a[0],a1=a[1],x
  let cal=f=>{m.C.push(m.f,1+m.l);m.f=f;m.l=-1;F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[i]=m.S.pop()}
  let icl=(x,s,f)=>{f=m.T[x];if(m.F[f].s!=s){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f)}
    "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
- :   "get"==a0?m.S.push(m.f.lo[a1])
+ :   "get"==a0?m.S.push(F.lo[a1])
  :   "set"==a0?m.f.lo[a1]=m.S.pop()
  :   "tee"==a0?m.f.lo[a1]=m.S[m.S.length-1]
  :   "glo"==a0?m.S.push(m.G[a1])
  :   "gst"==a0?m.G[a1]=m.S.pop()
  :   "cal"==a0?cal(a1)
- :    "if"==a0?m.l+=m.S.pop()?a1:0
+ :    "if"==a0?m.l+=m.S.pop()?0:a1
  : "ifnot"==a0?m.l+=m.S.pop()?0:a1              //do after while, end after do
  :"switch"==a0?(x=1+m.S.pop(),m.l+=(x<a.length?a[x]:a[x.length-1]))
  :   "jmp"==a0?m.l+=a1                          //else break continue endcase end
@@ -92,5 +93,5 @@ let step=m=>{let F=m.F[m.f];if(F.c.length==++m.l)return ret(m)
  :op(m,a0)}
 
 let run=x=>{x.f="main";x.l=0;while(1)step()}
-
-return{parse:parse,step:step}})()
+let line=x=>x.l+x.F[x.f].l
+return{parse:parse,step:step,line:line}})()
