@@ -10,6 +10,7 @@
  <pre id="X" class="p" style="background:#efe"></pre><pre id="Y" class="p" style="background:#eef"></pre>
 </div>
 <script src="wa.js"></script>
+<script src="ai.js"></script>
 <script>
 let tests="blck data elif glob libm locs loop swtc tabl".split(" "),tc=0
 
@@ -23,7 +24,7 @@ let diff=(x,y)=>{
 if(x.length!=y.length)throw new Error("binary length differs");for(let i=0;i<x.length;i++){
  if(x[i]!=y[i]){throw new Error("binary mismatch at "+Math.floor(i/3))}}}
 
-run=T=>{let x=T?(o.textContent="",T):tests[tc++];if(tc>tests.length&&!T)return;
+let run=T=>{let x=T?(o.textContent="",T):tests[tc++];if(tc>tests.length&&!T)return;
  o.textContent+=x+".."
  let tx="tests/"+x+"."
  feta([tx+"a",tx+"wat",tx+"wasm"],r=>{
@@ -38,11 +39,23 @@ run=T=>{let x=T?(o.textContent="",T):tests[tc++];if(tc>tests.length&&!T)return;
    WebAssembly.instantiate(r,{math:{cos:Math.cos}}).then(r=>{let m=r.instance.exports;
     t.forEach(t=>{let q=m.test(t[0]);if(t[1]!=q){throw new Error("test("+t[0]+"): expected "+t[1]+" got "+q)}})
     o.textContent+=" "+t.length+" ok\n"
-    if(!T)run()
+    
+    console.log("Ai",Ai)
+    ai.parse(A.textContent,{},Ai)
+ 		
+    fetch("ai.a").then(r=>r.text()).then(r=>WebAssembly.instantiate(wa(r))).then(r=>{
+     r=ai.parse(A.textContent,{},r.instance.exports)
+     console.log(r)
+     if(!T)run()
+    })   
+		
+    //if(!T)run()
    }).catch(e=>{o.textContent+="\n"+e.message;throw(e)})
   }catch(e){o.textContent+="\n"+e.message;throw(e)}
  })
 }
+
 run()
+
 </script>
 </body></html>

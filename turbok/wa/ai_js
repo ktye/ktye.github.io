@@ -20,7 +20,7 @@
 
 */
 
-//let ai=(_=>{
+let ai=(_=>{
 
 let parse=(x,M,A)=>{ //source,import-object
  let G={} //globals {name:v}
@@ -81,4 +81,4 @@ let step=m=>{let F=m.F[m.f];if(F.c.length==++m.l)return ret(m)
 
 let run=x=>{x.f="main";x.l=0;while(1)step()}
 
-//})()
+return{parse:parse,step:step}})()
