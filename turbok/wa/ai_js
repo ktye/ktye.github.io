@@ -1,25 +1,4 @@
 //assembly interpreter
-/*
- do    0
-  ..   1
- end   2
-
- while 0
-  ..   1
- do    2
-  ..   3
- end   4
-
- switch 3  0    // "switch" currentindex [..offset-addr-endcase-i] [..offset endcase-i-to-end]
-  ..       1
- endcase   2
-  ..       3
- endcase   4
-  ..       5
- end       6
-
-*/
-
 let ai=(_=>{
 
 let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
@@ -32,30 +11,34 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
  let args =x=>{let r={};x.split("").forEach((t,i)=>r[i]="j"==t?0n:0);return r}
  let nest=[],addr=[],la=""
  let n=0,s="",c=[],l=0,im="",lo={}
+ let brk=(a,b)=>{while(++a<b)if(c[a][0]=="break")c[a]=["jmp",b-a]}                   //fix break offset
+ let cnt=(a,b,i)=>{i=a;while(++a<b)if(c[a][0]=="continue")c[a]=["jmp",i-a];return i} //fix continue
+ let swc=(i,b)=>{c[i].slice(2).forEach((x,j)=>{c[x][1]=b-c[x][1],c[i][2+j]-=i});c.push(["nop"])} //fix switch
  let p=_=>{if(!n)return;s=s.split(":");F[n]={r:s[0],a:s[1],c:c,lo:{...args(s[1]),...lo},l:l};[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
  x.trimEnd().split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=(a[1]?a[1].trim():"");
   (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,c.push((a[2]=="import")?[M[a[3]][a[4]]]:["nop"]))
   :    "tab"==a0?(p(),T.push(a[2]))
-  :    "dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2])))
+  :    "dat"==a0?(p(),dd(Number(a1),a[2]))
   :     "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0]))
   :   "else"==a0?(nest.pop(),i=addr.pop(),c[i][1]=c.length-i,nest.push("else"),addr.push(c.length),c.push(["jmp",0]))
-  :  "while"==a0?(nest.push("while"),addr.push([c.length,c.length]),c.push(["nop"]))
-  :     "do"==a0?((nest[nest.length-1]=="while")?(la=addr.pop(),la[0]=c.length-la[0],la[1]=c.length,addr.push(la),c.push(["if",0]))//  (while)do
-                                               :(nest.push("do"),c.push(["nop",c.length])))                                       //    do(end)
-  : "switch"==a0?(nest.push("switch"),addr.push(c.length),c.push(["switch",Number(a1),2,Array(Number(a1)-1).fill(c.length)]))
-  :"endcase"==a0?(i=addr[addr.length-1],j=c[i][2]++,c[i][j]=c.length-c[i][j],c[i].push(c.length),c.push(["jmp",c.length]))
+  :  "while"==a0?(nest.push("while"),addr.push(c.length),c.push(["nop"]))
+  :     "do"==a0?((nest[nest.length-1]=="while")?(nest.push("whdo"),addr.push(c.length),c.push(["if",0]))//  (while)do
+                                               :(nest.push("do"),addr.push(c.length),c.push(["nop",c.length,a1])))                     //    do(end)
+  : "switch"==a0?(nest.push("switch"),addr.push(c.length),c.push(["switch",Number(a1)]))
+  :"endcase"==a0?(i=addr[addr.length-1],c[i].push(c.length),c.push(["jmp",c.length]))
   :    "end"==a0?(la=nest.pop(),i=addr.pop(),(la==  "if"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //    (if)end
+                                             :la=="whdo"?(brk(i,c.length),c[i][1]=c.length-i,nest.pop(),c.push(["jmp",cnt(addr.pop(),c.length)-c.length]))
                                              :la=="else"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //  (else)end
-                                             :la==  "do"?c.push(["ifnot",c[i][1]-c.length])                                            //    (do)end
-                                             :(j=c[i][2],c[i].slice(j).forEach((x,k)=>c[i][j+k]=c.length-c[i][j+k]),c.push(["nop"])))) //(switch)end 
+                                             :la==  "do"?c.push(["donot",c[i][1]-c.length,c[i][2]])                                            //    (do)end
+                                             :swc(i,c.length))) //(switch)end 
   :(1==a0.length&&"ijef".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
                                           :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n):c.push(["const",BigInt(a1)]))
                                           :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
                                           :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)])))
                                          :(G[a[1]]=(a0=="j"?0n:0)))
+  :a0.includes(":")?c.push(["ical",a0])
   :c.push(a)
  });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
-
 /*o-p-s*/
 
 let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
@@ -67,17 +50,17 @@ let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
 
 let step=(m,over)=>{let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
  let a=F.c[m.l],a0=a[0],a1=a[1],x
- let icl=(x,s,f)=>{f=m.T[x];if(m.F[f].s!=s){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m)}
+ let icl=(x,s,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m)}
    "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
  :   "get"==a0?m.S.push(F.lo[a1])
  :   "set"==a0?F.lo[a1]=m.S.pop()
  :   "tee"==a0?F.lo[a1]=m.S[m.S.length-1]
  :   "glo"==a0?m.S.push(m.G[a1])
  :   "gst"==a0?m.G[a1]=m.S.pop()
- :   "cal"==a0?cal(a1,m)   //(m.F.includes(a1)?cal(a1,m):m.M.)
- :    "if"==a0?m.l+=m.S.pop()?0:a1
- : "ifnot"==a0?m.l+=m.S.pop()?0:a1              //do after while, end after do
- :"switch"==a0?(x=1+m.S.pop(),m.l+=(x<a.length?a[x]:a[x.length-1]))
+ :   "cal"==a0?cal(a1,m)
+ :    "if"==a0?(m.l+=m.S.pop()?0:a1)
+ : "donot"==a0?(m.l+=m.S.pop()?(a[2]?m.S.pop():0,a1):0)   //end after do
+ :"switch"==a0?(x=m.S.pop(),m.l+=(x==0?0:(x>0&&x<a1)?a[1+x]:a[a1]))
  :   "jmp"==a0?m.l+=a1                          //else break continue endcase end
  :   "nop"==a0?0                                //do while
  :  "ical"==a0?icl(m.S.pop(),a1)

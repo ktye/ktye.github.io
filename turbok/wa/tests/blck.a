@@ -5,7 +5,7 @@ f i:i export test
   get 0
   i 10
   lti
- do i
+ do
   get 0
   i 5
   lti

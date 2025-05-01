@@ -21,6 +21,7 @@ span{color:blue}:hover{cursor:pointer}
 <script>
 let ce=s=>document.createElement(s)
 let tc=(t,x)=>(x.textContent=t,x)
+let ih=(t,x)=>(x.innerHTML=t.replaceAll(" ","&nbsp;"),x)
 let ac=(p,x)=>(p.appendChild(x),x)
 
 let E={math:{cos:Math.cos}}
@@ -29,7 +30,7 @@ fetch("ai.a").then(r=>r.text()).then(r=>{M=new WebAssembly.Module(wa(r));load("e
 
 let A,I,src,tests
 let load=s=>{S.innerHTML="";src="";let TC=x=>tests=x.map(x=>x.slice(1).split(" ").map(Number))
- fetch("tests/"+s+".a").then(r=>r.text()).then(r=>{TC(r.split("\n").filter(x=>x[0]=="/"));r.split("\n").filter(x=>x[0]!="/").forEach((x,_,a)=>{src+=x+"\n";tc(x,ac(S,ce("option")));S.size=a.length});
+ fetch("tests/"+s+".a").then(r=>r.text()).then(r=>{TC(r.split("\n").filter(x=>x[0]=="/"));r.split("\n").filter(x=>x[0]!="/").forEach((x,_,a)=>{src+=x+"\n";ih(x,ac(S,ce("option")));S.size=a.length});
   A=ai.parse(src,E,M);O.textContent=""
   if(tb.checked){while(tests.length)runt(tests.pop())}
   else{A.f="f";A.l=0;S.selectedIndex=ai.line(A);A.F.f.lo[0]=Number(arg.value);O.textContent=""}
