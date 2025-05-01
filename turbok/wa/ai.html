@@ -6,7 +6,12 @@ span{color:blue}:hover{cursor:pointer}
 #O{display:inline-block;vertical-align:top;margin-top:0}
 </style>
 </head><body>
-<div    id="T"><button onclick="step()">step</button></div>
+<div    id="T">
+<button onclick="step(1)">step over</button>
+<button onclick="step(0)">trace into</button>
+<input id="arg" type="number" style="width:3em" title="input" value="0">
+<div><input id="tb" type="checkbox" style="vertical-align:middle"><label for="tb">test</label></div>
+</div>
 <select id="S" multiple></select>
 <pre    id="O">x</pre>
 
@@ -18,28 +23,35 @@ let ce=s=>document.createElement(s)
 let tc=(t,x)=>(x.textContent=t,x)
 let ac=(p,x)=>(p.appendChild(x),x)
 
-let A
-let run=s=>{S.innerHTML="";let src=""
- fetch("tests/"+s+".a").then(r=>r.text()).then(r=>{r.split("\n").filter(x=>x[0]!="/").forEach((x,_,a)=>{src+=x+"\n";tc(x,ac(S,ce("option")));S.size=a.length});
-  fetch("ai.a").then(r=>r.text()).then(r=>WebAssembly.instantiate(wa(r)).then(r=>{
-   A=ai.parse(src,{},r.instance.exports)   
-   A.f="f";A.l=0;S.selectedIndex=ai.line(A)
-   step()
-}))})}
+let E={math:{cos:Math.cos}}
+let M
+fetch("ai.a").then(r=>r.text()).then(r=>{M=new WebAssembly.Module(wa(r));load("elif")})
 
-let step=_=>{ai.step(A);S.selectedIndex=ai.line(A);O.textContent=state()}
+let A,I,src,tests
+let load=s=>{S.innerHTML="";src="";let TC=x=>tests=x.map(x=>x.slice(1).split(" ").map(Number))
+ fetch("tests/"+s+".a").then(r=>r.text()).then(r=>{TC(r.split("\n").filter(x=>x[0]=="/"));r.split("\n").filter(x=>x[0]!="/").forEach((x,_,a)=>{src+=x+"\n";tc(x,ac(S,ce("option")));S.size=a.length});
+  A=ai.parse(src,E,M);O.textContent=""
+  if(tb.checked){while(tests.length)runt(tests.pop())}
+  else{A.f="f";A.l=0;S.selectedIndex=ai.line(A);A.F.f.lo[0]=Number(arg.value);O.textContent=""}
+})}
+
+let cmp=(a,b,r)=>{O.textContent+=(b==r)?"ok\n":"err: got "+r+"\n"}
+let runt=x=>{I=new WebAssembly.Instance(M);A=ai.parse(src,E,M)
+ try{ O.textContent+=x[0]+" "+x[1]+"? ";cmp(x[0],x[1],ai.run("f",[x[0]],A)) }
+ catch(e){O.textContent+="\nerror: "+e.message;throw(e)}
+}
+let step=o=>{ai.step(A,o);S.selectedIndex=ai.line(A);O.textContent=state()}
 let state=r=>{
  let c="instr: "+A.F[A.f].c[A.l].join(" ")
  let f="func : "+A.f;
- let s="stack: ";for(let i=0;i<A.S.length;i++)s+=A.S[A.S.length-1-i]+" "
+ let s="stack: ";A.S.forEach(x=>s+=x+" ")
  let l="local: ",lo=A.F[A.f].lo
  for(let v in lo)l+=v+":"+lo[v]+" "
  let g="globl: ";for(v in A.G)g+=v+":"+A.G[v]	 
  return[c,f,s,l,g].join("\n")}
 
 
-"blck data elif glob libm locs loop swtc tabl".split(" ").forEach(x=>{ac(T,tc(x,ce("span"))).onclick=e=>run(e.target.textContent)})
-run("glob")
+"blck data elif glob libm locs loop swtc tabl".split(" ").forEach(x=>{ac(T,tc(x,ce("span"))).onclick=e=>load(e.target.textContent)})
 
 </script>
 </body></html>

@@ -22,7 +22,8 @@
 
 let ai=(_=>{
 
-let parse=(x,M,A)=>{ //source,import-object
+let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
+ let A=new WebAssembly.Instance(aim,M).exports
  let G={} //globals {name:v}
  let F={} //functions
  let T=[] //indirect call table
@@ -31,9 +32,9 @@ let parse=(x,M,A)=>{ //source,import-object
  let args =x=>{let r={};x.split("").forEach((t,i)=>r[i]="j"==t?0n:0);return r}
  let nest=[],addr=[],la=""
  let n=0,s="",c=[],l=0,im="",lo={}
- let p=_=>{if(!n)return;console.log("func",n,"l",l);s=s.split(":");F[n]={r:s[0],a:s[1],c:im?["native",im]:c,lo:{...args(s[1]),...lo},l:l};[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
- x.split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=(a[1]?a[1].trim():"");
-  (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,im=(a[2]=="import")?a[3]:"",c.push(["nop"]))
+ let p=_=>{if(!n)return;s=s.split(":");F[n]={r:s[0],a:s[1],c:c,lo:{...args(s[1]),...lo},l:l};[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
+ x.trimEnd().split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=(a[1]?a[1].trim():"");
+  (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,c.push((a[2]=="import")?[M[a[3]][a[4]]]:["nop"]))
   :    "tab"==a0?(p(),T.push(a[2]))
   :    "dat"==a0?(p(),dd(Number(parseFloat(a[1]),a[2])))
   :     "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0]))
@@ -69,29 +70,32 @@ ngi:1,ngj:1,ldi:1,ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,st
 siz:0,grw:1,cpy:3,fil:3,}
 /*o-p-s*/
 
-let op=(m,s,a)=>{a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
-let exit=m=>{throw new error("exit")}
-let retu=m=>m.C.length?[m.f,m.l]=m.C.pop():exit()
+let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
+let exit=m=>{throw new Error("exit")}
+let ret=m=>{m.C.length?[m.f,m.l]=m.C.pop():exit()}
+let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
+let scal=(f,m)=>{m.C.push([m.f,m.l]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
+let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
 
-let step=m=>{let F=m.F[m.f];if(F.c.length==++m.l)return ret(m)
+let step=(m,over)=>{let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
  let a=F.c[m.l],a0=a[0],a1=a[1],x
- let cal=f=>{m.C.push(m.f,1+m.l);m.f=f;m.l=-1;F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[i]=m.S.pop()}
- let icl=(x,s,f)=>{f=m.T[x];if(m.F[f].s!=s){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f)}
+ let icl=(x,s,f)=>{f=m.T[x];if(m.F[f].s!=s){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m)}
    "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
  :   "get"==a0?m.S.push(F.lo[a1])
- :   "set"==a0?m.f.lo[a1]=m.S.pop()
- :   "tee"==a0?m.f.lo[a1]=m.S[m.S.length-1]
+ :   "set"==a0?F.lo[a1]=m.S.pop()
+ :   "tee"==a0?F.lo[a1]=m.S[m.S.length-1]
  :   "glo"==a0?m.S.push(m.G[a1])
  :   "gst"==a0?m.G[a1]=m.S.pop()
- :   "cal"==a0?cal(a1)
+ :   "cal"==a0?cal(a1,m)   //(m.F.includes(a1)?cal(a1,m):m.M.)
  :    "if"==a0?m.l+=m.S.pop()?0:a1
  : "ifnot"==a0?m.l+=m.S.pop()?0:a1              //do after while, end after do
  :"switch"==a0?(x=1+m.S.pop(),m.l+=(x<a.length?a[x]:a[x.length-1]))
  :   "jmp"==a0?m.l+=a1                          //else break continue endcase end
  :   "nop"==a0?0                                //do while
  :  "ical"==a0?icl(m.S.pop(),a1)
+ :  "ret"==a0?ret(m)
  :op(m,a0)}
 
-let run=x=>{x.f="main";x.l=0;while(1)step()}
+let run=(f,a,m)=>{m.f=f,m.l=0,a.forEach((v,i)=>m.F[f].lo[i]=v);try{ while(1)step(m,0) }catch(e){ if(e.message=="exit"){if(m.S.length)return m.S[0]}else{throw(e)} }}
 let line=x=>x.l+x.F[x.f].l
-return{parse:parse,step:step,line:line}})()
+return{parse:parse,step:step,run:run,line:line}})()
