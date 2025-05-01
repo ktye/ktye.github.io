@@ -1,0 +1,29 @@
+main i:i export main 
+ get 0
+ switch 3
+  get 0
+  i 2
+  adi
+  set 0
+ endcase
+  get 0
+  i 4
+  adi
+  set 0
+ endcase
+  get 0
+  cal g
+  set 0
+ end
+ get 0
+g i:i
+ get 0
+ switch 2 i
+  get 0
+  i 4
+  adi
+ endcase
+  get 0
+  i 4
+  sui
+ end

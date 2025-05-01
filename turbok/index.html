@@ -35,9 +35,9 @@ fullcol=x=>(x=x.closest(".tui-window"),x.style.flexGrow=(x.style.flexGrow?"":100
 show=x=>x.classList.add("active"),
 hide=x=>x.classList.add("hidden"),
 title=(w,t)=>w.querySelector("legend").innerHTML="&nbsp;"+t+"&nbsp;",
-loadfile=(name,text,h)=>{file={name:"",h:null};title(we,name.toUpperCase());ed.value=text,file.name=name,file.h=h},
+loadfile=(name,text,h)=>{ea.value="";file={name:"",h:null};title(we,name.toUpperCase());ed.value=text,file.name=name,file.h=h,ed.focus()},
 newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input')).filter(x=>x.checked)[0].value,""),
-loadexample=x=>{if(x=examplelist.value)fetch("wa/tests/"+x).then(r=>r.text()).then(r=>loadfile(x,r,null))}
+loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).then(r=>loadfile(x,r,null))}
 
 //openfile=f=>(f=openfilename.files[0],f.text().then(r=>loadfile(f.name,r)))
 
@@ -83,7 +83,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("wa/tests/"+x).then(r=>r.text()).th
     <ul>
      <li tabindex="19"> <a href="#!"> <span class="red-168-text">R</span>un <span class="tui-shortcut">Ctrl+F9</span></a> </li>
      <li tabindex="21"> <a href="#!"> <span class="red-168-text">G</span>oto cursor <span class="tui-shortcut">F4</span> </a> </li>
-     <li tabindex="22"> <a href="#!"> <span class="red-168-text">T</span>trace into<span class="tui-shortcut">F7</span> </a> </li>
+     <li tabindex="22"> <a href="#!"> <span class="red-168-text">T</span>race into<span class="tui-shortcut">F7</span> </a> </li>
      <li tabindex="23"> <a href="#!"> <span class="red-168-text">S</span>tep over <span class="tui-shortcut">F8</span> </a> </li>
      <li tabindex="24"> <a href="#!"> Start <span class="red-168-text">F</span>unction... </a> </li>
      <li tabindex="25"> <a href="#!"> <span class="red-168-text">A</span>rguments...</a> </li>
@@ -109,7 +109,8 @@ loadexample=x=>{if(x=examplelist.value)fetch("wa/tests/"+x).then(r=>r.text()).th
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
       <!--span class="tui-fieldset-text top right" style="margin-right: 50px">1</span-->
       <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;main:0&nbsp;</span>
-      <textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
+      <!--textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea-->
+      <select id="ea" size="9" class="tui-textarea full-width full-height" style="overflow:scroll"></select>
      </fieldset>
     </div>
    </div>
@@ -242,6 +243,8 @@ ed.onselectionchange=e=>{e=e.target
 
 let name=window.location.hash.slice(1);//if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
 let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},
+D, //D=ai.parse(src,{},A)
+W, //module
 help=_=>out.value="help..\n",
 save=async _=>{
  if(file.h==null)return
@@ -257,12 +260,15 @@ fileopen=async _=>{
  loadfile(f.name,t,h)
 },
 run=_=>out.value="compile&run..\n",
+stepover =_=>{(!ea.value)?compile():step(0);showstep()},
+traceinto=_=>{(!ea.value)?compile():step(1);showstep()},
 handle=(e,f)=>{e.preventDefault();f()},
 mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim()+"*&nbsp;"},
 unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"},
 download=(u,n)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=n;dl.click()}
 
 ed.onchange=mark(we)
+window.onerror=e=>O("error: "+e+"\n")
 window.onkeydown=e=>
  ("f"==e.key&&e.altKey)?handle(e,_=>fmenu.focus()):
  ("e"==e.key&&e.altKey)?handle(e,_=>emenu.focus()):
@@ -275,6 +281,8 @@ window.onkeydown=e=>
  ("F1"==e.key)?handle(e,help):
  ("F2"==e.key)?handle(e,save):
  ("F3"==e.key)?handle(e,fileopen):
+ ("F7"==e.key)?handle(e,traceinto):
+ ("F8"==e.key)?handle(e,stepover):
  ("F9"==e.key&&e.ctrlKey)?handle(e,run):
  ("F9"==e.key&&e.altKey)?handle(e,compile):
  ("F10"==e.key)?handle(e,_=>{fmenu.focus()}):true
@@ -313,17 +321,36 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
 )
 
 let compile=_=>{let x=file.name.slice(-1);
-  (x=="a")?ea.value=ed.value.trimEnd().split("\n").filter(x=>x[0]!="/").join("\n")
+  (x=="a")?asm(ed.value)
  :(x=="b")?O("$ab "+file.name+"\nnyi\n")
  :(x=="c")?O("$ac "+file.name+"\nnyi\n")
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
+examplelist.value="swtc.a";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
+<script src="wa/ai.js"></script>
 <script src="wa/link.js"></script>
 <script src="wa/boot.js"></script>
 <script src="ac/cparse.js"></script>
+
+<script>
+let ce=x=>document.createElement(x)
+let ac=(x,y)=>(x.appendChild(y),y)
+let ih=(t,x)=>((x.innerHTML=t.replaceAll(" ","&nbsp;")),x)
+
+let step=o=>{try{ai.step(D,o)}catch(e){if("exit"==e.message&&1==D.S.length)O("exit "+D.S.pop()+"\n");else throw(e)}}
+let showstep=_=>{ea.selectedIndex=ai.line(D)}
+
+let asm=a=>{
+ ea.innerHTML=""
+ a.trimEnd().split("\n").forEach(x=>ac(ea,ih(x,ce("option"))))
+ W=new WebAssembly.Module(wa(a))
+ D=ai.parse(a,{},A)
+ D.f="main";D.l=0
+}
+</script>
 
 </body></html>
