@@ -18,6 +18,7 @@
 .tui-dropdown li:focus{background:#00a800;outline:none}
 .tui-dropdown:focus>.tui-dropdown-content:first-of-type{display:block}
 .tui-dropdown:focus-within>.tui-dropdown-content:first-of-type{display:block}
+.tui-dropdown-content{min-width:300px}
 .tui-dropdown-content:focus{display:block}
 </style>
 </head><body>
@@ -32,16 +33,11 @@ fullscr=x=>x.closest(".tui-window").classList.toggle("fullscr"),
 fullcol=x=>(x=x.closest(".tui-window"),x.style.flexGrow=(x.style.flexGrow?"":1000)),
 
 show=x=>x.classList.add("active"),
-showall=_=>[w_a,w_k,w_c].forEach(x=>x.classList.remove("hidden")),
 hide=x=>x.classList.add("hidden"),
 title=(w,t)=>w.querySelector("legend").innerHTML="&nbsp;"+t+"&nbsp;",
-loadfile=(name,text,h)=>{[ek,ec,ea].forEach(x=>{x.value="";x.readOnly=true});showall();file={name:"",h:null,ed:null}
- let n=name.slice(0,-1).toUpperCase();title(w_k,n+"K");title(w_c,n+"C");title(w_a,n+"A")
- name.endsWith(".a")?(hide(w_k),hide(w_c),ea.value=text,ea.readOnly=false,file.name=name,file.h=h,file.ed=ea):
- name.endsWith(".c")?(hide(w_k)         ,ec.value=text,ec.readOnly=false,file.name=name,file.h=h,file.ed=ec):
- name.endsWith(".k")?(                  ek.value=text,ek.readOnly=false,file.name=name,file.h=h,file.ed=ek):"?"},
-
-newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input')).filter(x=>x.checked)[0].value,"")
+loadfile=(name,text,h)=>{file={name:"",h:null};title(we,name.toUpperCase());ed.value=text,file.name=name,file.h=h},
+newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input')).filter(x=>x.checked)[0].value,""),
+loadexample=x=>{if(x=examplelist.value)fetch("wa/tests/"+x).then(r=>r.text()).then(r=>loadfile(x,r,null))}
 
 //openfile=f=>(f=openfilename.files[0],f.text().then(r=>loadfile(f.name,r)))
 
@@ -58,6 +54,7 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
      <li tabindex="3" onclick="fileopen()"> <a href="#!"> <span class="red-168-text">O</span>pen...  <span class="tui-shortcut">F3</span> </a> </li>
      <li tabindex="4" > <a href="#!"> <span class="red-168-text">S</span>ave <span class="tui-shortcut">F2</span> </a> </li>
      <li tabindex="5" > <a href="#!">S<span class="red-168-text">a</span>ve as...</a> </li>
+     <li tabindex="6" > <a href="#!">Open <span class="red-168-text">E</span>xamples...</a></li>
     </ul>
    </li>
    <li id="emenu" tabindex="6" class="tui-dropdown"> <span class="red-168-text">E</span>dit <!--Undo Redo|Cut Copy Paste Clear Copy example|Show clipboard-->
@@ -68,8 +65,30 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
      <li tabindex="9"> <a href="#!"> <span class="red-168-text">P</span>aste </a> </li>
     </ul>
    </li>
-   <li id="smenu" class="tui-dropdown"> <span class="red-168-text">S</span>earch <!--Find Replace Search again|Go to line number... Previous error Next error Locate function...--> </li>
-   <li id="rmenu" class="tui-dropdown"> <span class="red-168-text">R</span>un <!--Run Ctrl+F9 Program reset Ctrl+F2 Go to cursor F4 Trace into F7 Step over F8 Arguments...--> </li>
+   <li id="smenu" tabindex="10" class="tui-dropdown"> <span class="red-168-text">S</span>earch <!--Find Replace Search again|Go to line number... Previous error Next error Locate function...--> 
+    <div class="tui-dropdown-content">
+    <ul>
+     <li tabindex="11"> <a href="#!"> <span class="red-168-text">F</span>ind... </a> </li>
+     <li tabindex="12"> <a href="#!"> <span class="red-168-text">R</span>eplace... </a> </li>
+     <li tabindex="13"> <a href="#!"> <span class="red-168-text">S</span>earch again <span class="tui-shortcut">Ctrl+L</span></a> </li>
+     <div class="tui-black-divider"></div>
+     <li tabindex="14"> <a href="#!"> <span class="red-168-text">G</span>oto line number...</a> </li>
+     <li tabindex="15"> <a href="#!"> <span class="red-168-text">P</span>previous error <span class="tui-shortcut">Alt+F7</span></a></li>
+     <li tabindex="16"> <a href="#!"> <span class="red-168-text">N</span>ext error <span class="tui-shortcut">Alt+F8</span></a></li>
+     <li tabindex="17"> <a href="#!"> <span class="red-168-text">L</span>ocate function...</a> </li>
+    </ul>
+   </li>
+   <li id="rmenu" tabindex="18" class="tui-dropdown"> <span class="red-168-text">R</span>un <!--Run Ctrl+F9 Program reset Ctrl+F2 Go to cursor F4 Trace into F7 Step over F8 Arguments...--> 
+    <div class="tui-dropdown-content">
+    <ul>
+     <li tabindex="19"> <a href="#!"> <span class="red-168-text">R</span>un <span class="tui-shortcut">Ctrl+F9</span></a> </li>
+     <li tabindex="21"> <a href="#!"> <span class="red-168-text">G</span>oto cursor <span class="tui-shortcut">F4</span> </a> </li>
+     <li tabindex="22"> <a href="#!"> <span class="red-168-text">T</span>trace into<span class="tui-shortcut">F7</span> </a> </li>
+     <li tabindex="23"> <a href="#!"> <span class="red-168-text">S</span>tep over <span class="tui-shortcut">F8</span> </a> </li>
+     <li tabindex="24"> <a href="#!"> Start <span class="red-168-text">F</span>unction... </a> </li>
+     <li tabindex="25"> <a href="#!"> <span class="red-168-text">A</span>rguments...</a> </li>
+    </ul>
+   </li>
    <li id="cmenu" class="tui-dropdown"> <span class="red-168-text">C</span>ompile <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages--> </li>
    <li id="dmenu" class="tui-dropdown"> <span class="red-168-text">D</span>ebug <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... --> <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches--> </li>
    <li id="wmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
@@ -85,11 +104,11 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
    
     <div id="w_a" class="tui-window full-width h2 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
-      <legend class="center">AI.A</legend>
-      <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+      <legend class="center">&nbsp;PROGRAM&nbsp;</legend>
+      <!--span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span-->
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
-      <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-      <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
+      <!--span class="tui-fieldset-text top right" style="margin-right: 50px">1</span-->
+      <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;main:0&nbsp;</span>
       <textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
      </fieldset>
     </div>
@@ -98,25 +117,14 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
   
    <div id="right" style="height:100%;width:70%;display:flex;flex-flow:column">
   
-    <div id="w_k" class="tui-window full-width h1 tui-no-shadow">
+    <div id="we" class="tui-window full-width h1 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
       <legend class="center">A.K</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
       <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
       <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-      <textarea id="ek" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
-     </fieldset>
-    </div>
-  
-    <div id="w_c" class="tui-window full-width h1 tui-no-shadow">
-     <fieldset class="tui-fieldset full-height">
-      <legend class="center">A.C</legend>
-      <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
-      <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
-      <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-      <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-      <textarea id="ec" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
+      <textarea id="ed" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
      </fieldset>
     </div>
   
@@ -190,6 +198,27 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
  </div>
 </div>
 
+<div id="examples" class="tui-modal center" >
+ <div class="tui-window">
+  <fieldset class="tui-fieldset">
+  <legend class="center">Examples</legend>
+  <fieldset id="examplefiles" class="tui-input-fieldset">
+   <select id="examplelist" class="tui-input" multiple>
+    <option>loop.a</option>
+    <option>swtc.a</option>
+    <option>tabl.a</option>
+   </select>
+  </fieldset>
+  <br>
+  <div class="tui-divider"></div>
+  <br>
+  <button class="tui-button tui-modal-close-button left white-255-text" data-modal="examples" onclick="loadexample()" >ok</button>
+  <span> </span>
+  <button class="tui-button tui-modal-close-button right white-255-text cyan-168" data-modal="examples">close</button>
+  </fieldset>
+ </div>
+</div>
+
 <!--div id="fileopen" class="tui-modal center">
  <div class="tui-window">
   <fieldset class="tui-fieldset">
@@ -206,20 +235,20 @@ newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input
 </div-->
 
 <script>
-[ek,ec,ea].forEach(x=>x.onselectionchange=e=>{e=e.target
+ed.onselectionchange=e=>{e=e.target
  let l=1,p=e.selectionStart,t=e.value.slice(0,p),i=t.indexOf("\n");
  while(i>=0&&i<p){l++;i=t.indexOf("\n",1+i)};let c=p-t.lastIndexOf("\n")
- e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"})
+ e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"}
 
-let name=window.location.hash.slice(1);if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
+let name=window.location.hash.slice(1);//if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
 let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},
 help=_=>out.value="help..\n",
 save=async _=>{
  if(file.h==null)return
  let w=await file.h.createWritable()
- await w.write(file.ed.value)
+ await w.write(ed.value)
  await w.close()
- unmark(file.ed.closest(".tui-window"))
+ unmark(ed.closest(".tui-window"))
 },
 fileopen=async _=>{
  let[h]=await window.showOpenFilePicker({types:[{accept:{"ktye/k":".k","ktye/c":".c","ktye/asm":".a"}}]});
@@ -227,14 +256,13 @@ fileopen=async _=>{
  let t=await f.text();
  loadfile(f.name,t,h)
 },
-compile=_=>out.value="compile..\n",
 run=_=>out.value="compile&run..\n",
 handle=(e,f)=>{e.preventDefault();f()},
 mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim()+"*&nbsp;"},
 unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"},
 download=(u,n)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=n;dl.click()}
 
-ea.onchange=mark(w_a);ek.onchange=mark(w_k);ec.onchange=mark(w_c)
+ed.onchange=mark(we)
 window.onkeydown=e=>
  ("f"==e.key&&e.altKey)?handle(e,_=>fmenu.focus()):
  ("e"==e.key&&e.altKey)?handle(e,_=>emenu.focus()):
@@ -254,6 +282,7 @@ window.onkeydown=e=>
 let accel={fmenu:{
 	"n":_=>show(filenew),
  	"o":fileopen,
+	"e":_=>show(examples),
 }}
 
 /*
@@ -282,6 +311,14 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
   true
  )
 )
+
+let compile=_=>{let x=file.name.slice(-1);
+  (x=="a")?ea.value=ed.value.trimEnd().split("\n").filter(x=>x[0]!="/").join("\n")
+ :(x=="b")?O("$ab "+file.name+"\nnyi\n")
+ :(x=="c")?O("$ac "+file.name+"\nnyi\n")
+ :(x=="k")?O("$ak "+file.name+"\nnyi\n")
+ :O("$compile "+file.name+"\n?\n")}
+
 </script>
 
 <script src="wa/wa.js"></script>
