@@ -242,7 +242,7 @@ ed.onselectionchange=e=>{e=e.target
  e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"}
 
 let name=window.location.hash.slice(1);//if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
-let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},
+let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},clr=_=>out.value="",
 D, //D=ai.parse(src,{},A)
 W, //module
 help=_=>out.value="help..\n",
@@ -259,7 +259,7 @@ fileopen=async _=>{
  let t=await f.text();
  loadfile(f.name,t,h)
 },
-run=_=>out.value="compile&run..\n",
+run=_=>{clr();compile();exec()},
 stepover =_=>{(!ea.value)?compile():step(0);showstep()},
 traceinto=_=>{(!ea.value)?compile():step(1);showstep()},
 handle=(e,f)=>{e.preventDefault();f()},
@@ -320,10 +320,15 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
  )
 )
 
+let exec=_=>{
+ O("$"+file.name+" 0\n")
+ let i=new WebAssembly.Instance(W)
+ O("exit "+i.exports.main(0)+"\n")
+}
 let compile=_=>{let x=file.name.slice(-1);
   (x=="a")?asm(ed.value)
  :(x=="b")?O("$ab "+file.name+"\nnyi\n")
- :(x=="c")?O("$ac "+file.name+"\nnyi\n")
+ :(x=="c")?(O("$ac "+file.name+"\n"),asm(ac(ed.value)))
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
@@ -335,22 +340,27 @@ examplelist.value="swtc.a";loadexample()
 <script src="wa/link.js"></script>
 <script src="wa/boot.js"></script>
 <script src="ac/cparse.js"></script>
+<script src="ac/ac.js"></script>
 
 <script>
 let ce=x=>document.createElement(x)
-let ac=(x,y)=>(x.appendChild(y),y)
+let ah=(x,y)=>(x.appendChild(y),y)
 let ih=(t,x)=>((x.innerHTML=t.replaceAll(" ","&nbsp;")),x)
 
 let step=o=>{try{ai.step(D,o)}catch(e){if("exit"==e.message&&1==D.S.length)O("exit "+D.S.pop()+"\n");else throw(e)}}
 let showstep=_=>{ea.selectedIndex=ai.line(D)}
 
 let asm=a=>{
+ O("$asm "+file.name+"\n")
  ea.innerHTML=""
- a.trimEnd().split("\n").forEach(x=>ac(ea,ih(x,ce("option"))))
- W=new WebAssembly.Module(wa(a))
+ a.trimEnd().split("\n").forEach(x=>ah(ea,ih(x,ce("option"))))
+ let w=wa(a)
+ O(w.length+" bytes\n")
+ W=new WebAssembly.Module(w)
  D=ai.parse(a,{},A)
  D.f="main";D.l=0
 }
+
 </script>
 
 </body></html>

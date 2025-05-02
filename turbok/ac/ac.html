@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>turbok/ac.test</title>
+<style>*{font-family:monospace}
+span{color:blue}
+span:hover{cursor:pointer}
+pre{vertical-align:top}
+#T{display:flex;gap:1em}
+#A{background:#efe;display:inline-block}
+#C{background:#eef;display:inline-block}
+#E{color:red}
+</style>
+</head><body>
+
+<div id="T"></div>
+<pre id="E"></pre>
+<div>
+<pre id="A">A</pre>
+<pre id="C">C</pre>
+</div>
+
+<script src="cparse.js"></script>
+<script src="ac.js"></script>
+
+<script>
+let tests="abcd retu elif glob loop pref dowh ifor aray swtc".split(" ")
+let ce=s=>document.createElement(s)
+let tc=(t,x)=>(x.textContent=t,x)
+let ah=(p,x)=>(p.appendChild(x),x)
+
+let run=x=>{[A,C,E].forEach(x=>x.textContent="");
+ fetch("tests/"+x+".c").then(r=>r.text()).then(x=>{tc(x,C);tc(ac(x),A)}).catch(e=>{E.textContent=e.message;throw(e)})}
+
+tests.forEach(x=>ah(T,tc(x,ce("span"))).onclick=e=>run(e.target.textContent))
+run("aray")
+
+</script>
+</body></html>

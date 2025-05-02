@@ -3,6 +3,12 @@
 Jakob Löw <jakob@m4gnus.de> wrote this code. As long as you retain this notice you
 can do whatever you want with this stuff. If we meet some day, and you think
 this stuff is worth it, you can buy me a beer in return.
+
+changes:
+ dense format, pos:char(not file/line) 
+ literals as strings, allow suffix f,l
+ parseBody: may omit {} after if/else/while/for
+ switch: throw error (not implemented)
 */
 var cparse = (function() {
  const ops = {"=":1,"+=":1,"-=":1,"*=":1,"/=":1,"%=":1,">>=":1,"<<=":1,"&=":1,"^=":1,"|=":1,"?":2,":":2,"||":3,"&&":4,
@@ -94,8 +100,9 @@ var cparse = (function() {
    consume(")");
    return args;
   }
-  function parseBody() {
+  function parseBody(short) {
    var stmts = [];
+   if(short&&curr!="{")return[parseStatement()]
    consume("{");
    while(!(curr == "}" || !curr)) {
     var pos = getPos();
@@ -113,13 +120,13 @@ var cparse = (function() {
     consume("(");
     var stmt = {type: "IfStatement", pos: pos};
     stmt.condition = parseExpression(")");
-    stmt.body = parseBody();
-    if(lookahead("else")) stmt.else = parseBody();
+    stmt.body = parseBody(1);
+    if(lookahead("else")) stmt.else = parseBody(1);
     return stmt;
    }
    else if(lookahead("while")) {
     consume("(");
-    return { type: "WhileStatement", condition: parseExpression(")"), body: parseBody(), pos: pos };
+    return { type: "WhileStatement", condition: parseExpression(")"), body: parseBody(1), pos: pos };
    } else if(lookahead("do")) {
     var stmt = {type: "DoWhileStatement", pos: pos};
     stmt.body = parseBody();
@@ -134,8 +141,10 @@ var cparse = (function() {
     stmt.init = parseStatement();
     stmt.condition = parseExpression(";");
     stmt.step = parseExpression(")");
-    stmt.body = parseBody();
+    stmt.body = parseBody(1);
     return stmt;
+   } else if(lookahead("switch")) {
+    unexpected("switch is not supported")
    } else if(definitionIncoming()) {
     var def = readDefinition();
     if(lookahead("=")) def.value = parseExpression(";");
@@ -228,7 +237,6 @@ var cparse = (function() {
    }
    return expr;
   }
-
   function definitionIncoming() {
    var _index = index;
    for(var i = 0; i < typeModifier.length; i++) {
@@ -242,14 +250,12 @@ var cparse = (function() {
    var name;
    var pos = getPos();
    var def = { type: "Type", modifier: [], pos: getPos() };
-
    do {
     var read = false;
     for(var i = 0; i < typeModifier.length; i++) {
      if(lookahead(typeModifier[i])) { def.modifier.push(typeModifier[i]); read = true; }
     }
    } while(read);
-
    for(var i = 0; i < typeNames.length; i++) {
     if(lookahead(typeNames[i])) {
      def.name = typeNames[i];
@@ -300,7 +306,7 @@ var cparse = (function() {
    unexpected("escape sequence");
   }
   function numberIncoming() { return curr && /[0-9]/.test(curr); }
-  function readNumber(keepBlanks) { var val = read(/[0-9\.]/, "Number", /[0-9]/, keepBlanks); return parseFloat(val); }
+  function readNumber(keepBlanks) { var val = read(/[0-9\.fl]/, "Number", /[0-9]/, keepBlanks); return val /*parseFloat(val);*/ }
   function identifierIncoming() { return curr && /[A-Za-z_]/.test(curr); }
   function readIdentifier(keepBlanks) { return read(/[A-Za-z0-9_]/, "Identifier", /[A-Za-z_]/, keepBlanks); }
   function read(reg, expected, startreg, keepBlanks) {
@@ -312,11 +318,11 @@ var cparse = (function() {
    if(!keepBlanks) skipBlanks();
    return val.join("");
   }
-  function getPos() { return { file: position.file, line: position.line }; }
+  function getPos() { return index; /*return { file: position.file, line: position.line };*/ }
   function unexpected(expected) {
    var pos = getPos();
    var _curr = JSON.stringify(curr || "EOF");
-   var msg = [ pos.file, ":", pos.line, ": Expecting ", JSON.stringify(expected), " got ", _curr, ].join("");
+   var msg = [ "cparse:", pos, ": Expecting ", JSON.stringify(expected), " got ", _curr, ].join("");
    throw new Error(msg);
   }
   function lookahead(str, keepBlanks) {
