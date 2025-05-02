@@ -2,7 +2,7 @@
 let ac=x=>{
  let A=[],O=x=>A.push(x)
  let c=cparse(x)
-
+//console.log(c)
  let pos=0,rtyp="i",args=[],locs={},globs={},funcs={}
  let ew=(x,y)=>x.endsWith(y)
  let ops={"+":"ad?","-":"su?","*":"mu?","/":"dv?","%":"mo?","=":"asn",
@@ -10,17 +10,20 @@ let ac=x=>{
  let mods="+ - * / % & << >> % ^ |".split(" ").map(x=>x+"=")
  let nt=(x,r)=>((r="?ijef".indexOf(x)),r=="?"?E("unknown type: "+x):r-1)
  let t2=(x,y)=>x==y?x:"ijef"[Math.max(nt(x),nt(y))]
- let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"&&x.modifier[0]=="long")?"long":x.name),(r="?ijef"[1+["int","long","float","double"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
- let tpp=(x,r)=>("Type"==x.target.type?"i" /*tp(x.target).toUpperCase()*/:E("unknown pointer type"))
+ let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"&&x.modifier[0]=="long")?"long":x.name),(r="?chijef"[1+["char","short","int","long","float","double"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
+ let tpp=(x,r)=>("Type"==x.target.type?tp(x.target).toUpperCase():E("unknown pointer type"))
+ let ptr=t=>"CHIJEF".includes(t)
+ let pts=t=>((t="CHIJEF".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1][t]),O("sli")):0)
+ let unp=t=>ptr(t)?"i":t
  let E=x=>{throw new Error("ac:"+pos+": "+x)}
- let cast=(r,x,t)=>(t=emit(x),(t!=r)?O(r+"o"+t):0,r)
+ let cast=(r,x,t)=>(t=emit(x),(unp(t)!=unp(r))?O(r+"o"+t):0,r)
  let bini=(x,y,op,o,t)=>{o=ops[op];
   return(op==":")?tern(x,y)
   :mods.includes(op)?assign(x,{type:"BinaryExpression",left:x,right:y,operator:op.slice(0,-1)})
   :(!o)?E("unknown operator: "+op)
   :"asn"==o?assign(x,y)
   :(ew(o,"?")||ew(o,"="))?dya(x,y,o):E("unknown operator: "+x)}
- let dya=(x,y,o)=>(x=emt(x),y=emt(y),t=t2(x[0],y[0]),cast(t,{type:"asm",t:x[0],v:x[1]}),cast(t,{type:"asm",t:y[0],v:y[1]}),O(String(o).slice(0,-1)+t),(ew(o,"=")?"i":t))
+ let dya=(x,y,o,c)=>(c=ew(o,"="),x=emt(x),y=emt(y),t=t2(x[0],y[0]),cast(t,{type:"asm",t:x[0],v:x[1]}),(ptr(y[0])&&(!c)?pts(y[0]):0),cast(t,{type:"asm",t:y[0],v:y[1]}),(ptr(x[0])&&(!c)?pts(x[0]):0),O(String(o).slice(0,-1)+t),(c?"i":t))
  let getset=x=>(x in args)?[args[x].t,"get "+args[x].i,"set "+args[x].i]:(x in locs)?[locs[x],"get "+x,"set "+x]:(x in globs)?[globs[x],"glo "+x,"gst "+x]:E("cannot locate variable: "+x)
  let incdec=(x,add,post,t,g,s)=>([t,g,s]=getset(x),O(g),O(t+" 1"),O(add?"adi":"sui"),O(s),O(g), (post?(O(t+" 1"),(O(add?"sui":"adi"))):0),t)
  let suf=(x,o,g,s)=>(x.type!="Identifier")?E("suffix expr: expect identifier"):o=="++"?incdec(x.value,1,1):o=="--"?incdec(x.value,0,1):E("unknown suffix operator: "+o)
@@ -45,15 +48,14 @@ let ac=x=>{
   :E("cannot locate variable: "+x)
   return"v"	  
  }
- let siz=t=>[0,1,2,4,8,4,8][1+[" chijef"].indexOf(t)]
+ //let siz=t=>[0,1,2,4,8,4,8][1+[" chijef"].indexOf(t)]
  let index=(x,y,t,s)=>{if(x.type!="Identifier")E("index: expect identifier on lhs")
-  s=siz(t=look(x.value));if(s>1){O("i "+s);O("adi")};O("ld"+t);return t}
- let look=(x,r)=>{
-  return("continue"==x||"break"==x)?(O(x),"v")
+  return((t=look(x.value)),O(y),pts(t),O("adi"),O("ld"+unp(t)),t)}
+ let look=(x,r)=>("continue"==x||"break"==x)?(O(x),"v")
   :(x in args)?(O("get "+args[x].i),args[x].t)
   :(x in locs)?(O("get "+x),locs[x])
   :(x in globs)?(O("glo "+x),globs[x])
-  :E("lookup: "+x)}
+  :E("lookup: "+x)
  let locl=(s,t)=>(t=tp(t),O(t+" "+s),locs[s]=t,"v")
  let lite=x=>(O(ew(x,"f")?"e "+x.slice(0,-1):ew(x,"l")?"j "+x.slice(0,-1):x.includes(".")?"f "+x:"i "+x),A[A.length-1][0])
  let call=(f,a,t)=>{let fn=funcs[f]
@@ -86,12 +88,12 @@ let ac=x=>{
   :E("unknown ast type:"+x.type)
  }
  let func=(x,h)=>{args={};locs={}
-  let s={r:tp(x.defType),a:x.arguments.map(x=>tp(x.defType)).join("")}
+  let s={r:unp(tp(x.defType)),a:x.arguments.map(x=>unp(tp(x.defType))).join("")}
   funcs[x.name]=s
   if(h)return
   x.arguments.forEach((x,i)=>{args[x.name]={i:i,t:tp(x.defType)}})
-  rtyp=tp(x.defType)
-  O(x.name+" "+s.r+":"+s.a)
+  rtyp=unp(tp(x.defType))
+  O(x.name+" "+s.r+":"+s.a+" export "+x.name)
   x.body.forEach((x,i,b)=>(x.type=="ReturnStatement"&&b.length==1+i)?cast(rtyp,x.value):emit(x))
  }
  c.forEach(x=>{pos=x.pos

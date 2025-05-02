@@ -22,7 +22,7 @@ pre{vertical-align:top}
 <script src="ac.js"></script>
 
 <script>
-let tests="abcd retu elif glob loop pref dowh ifor aray swtc".split(" ")
+let tests="abcd retu elif glob loop pref dowh ifor indx aray pont ical swtc".split(" ")
 let ce=s=>document.createElement(s)
 let tc=(t,x)=>(x.textContent=t,x)
 let ah=(p,x)=>(p.appendChild(x),x)
@@ -31,7 +31,7 @@ let run=x=>{[A,C,E].forEach(x=>x.textContent="");
  fetch("tests/"+x+".c").then(r=>r.text()).then(x=>{tc(x,C);tc(ac(x),A)}).catch(e=>{E.textContent=e.message;throw(e)})}
 
 tests.forEach(x=>ah(T,tc(x,ce("span"))).onclick=e=>run(e.target.textContent))
-run("aray")
+run("indx")
 
 </script>
 </body></html>
