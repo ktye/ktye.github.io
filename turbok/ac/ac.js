@@ -3,14 +3,14 @@ let ac=x=>{
  let A=[],O=x=>A.push(x)
  let c=cparse(x)
 //console.log(c)
- let pos=0,rtyp="i",args=[],locs={},globs={},funcs={}
+ let pos=0,rtyp="i",args=[],locs={},globs={},funcs={},tab={name:"",f:[]},imports={}
  let ew=(x,y)=>x.endsWith(y)
  let ops={"+":"ad?","-":"su?","*":"mu?","/":"dv?","%":"mo?","=":"asn",
   "==":"eq=","!=":"ne=","<=":"le=",">=":"ge=","<":"lt=",">":"gt="}
  let mods="+ - * / % & << >> % ^ |".split(" ").map(x=>x+"=")
  let nt=(x,r)=>((r="?ijef".indexOf(x)),r=="?"?E("unknown type: "+x):r-1)
  let t2=(x,y)=>x==y?x:"ijef"[Math.max(nt(x),nt(y))]
- let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"&&x.modifier[0]=="long")?"long":x.name),(r="?chijef"[1+["char","short","int","long","float","double"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
+ let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"&&x.modifier[0]=="long")?"long":x.name),(r="?vchijef"[1+["void","char","short","int","long","float","double"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
  let tpp=(x,r)=>("Type"==x.target.type?tp(x.target).toUpperCase():E("unknown pointer type"))
  let ptr=t=>"CHIJEF".includes(t)
  let pts=t=>((t="CHIJEF".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1][t]),O("sli")):0)
@@ -35,9 +35,8 @@ let ac=x=>{
   :E("unknown prefix operator: "+o)
  let tern=(x,y,t)=>{if(x.operator!="?")E("ternary: expect ? binary operator")
   t=emit(x.left),O("if "+t),emit(x.right),O("else"),emit(y),O("end");return t}
- let setheap=(x,i,y,t)=>{
-  if(x.type!="Identifier")E("array assign: expect identifier")
-  (t=look(x.value)),emit(i),O("adi"),emit(y),O("st"+t);return"v"
+ let setheap=(x,i,y,t)=>{ if(x.type!="Identifier")E("array assign: expect identifier");
+  return((t=look(x.value)),emit(i),pts(t),O("adi"),emit(y),(t=t.toLowerCase()),O("st"+t),"v")
  }
  let assign=(x,y)=>{
   if("IndexExpression"==x.type)return setheap(x.value,x.index,y)
@@ -50,7 +49,7 @@ let ac=x=>{
  }
  //let siz=t=>[0,1,2,4,8,4,8][1+[" chijef"].indexOf(t)]
  let index=(x,y,t,s)=>{if(x.type!="Identifier")E("index: expect identifier on lhs")
-  return((t=look(x.value)),O(y),pts(t),O("adi"),O("ld"+unp(t)),t)}
+  return((t=look(x.value)),emit(y),pts(t),O("adi"),O("ld"+(t=t.toLowerCase())),t)}
  let look=(x,r)=>("continue"==x||"break"==x)?(O(x),"v")
   :(x in args)?(O("get "+args[x].i),args[x].t)
   :(x in locs)?(O("get "+x),locs[x])
@@ -62,6 +61,12 @@ let ac=x=>{
   if(!(f in funcs))E("call "+f+": func not defined")
   if(a.length!=fn.a.length)E("call "+f+": wrong number of args")	
   a.forEach((x,i)=>(cast(fn.a[i],x)));O("cal "+f);return fn.r}
+ let ical=(x,r,s)=>(x.type=="CallExpression"&&x.base.type=="Identifier"&&x.base.value==tab.name)?
+  (s=r+":"+x.arguments.slice(1).map(emit).join(""),emit(x.arguments[0]),O(s),r):0
+ let tabl=x=>(
+  x.defType.type=="PointerType"&&x.defType.target.name=="void"&&x.value.type=="Literal"&&Array.isArray(x.value.value)?
+  (tab.name=x.name,tab.f=x.value.value.map(x=>x.value))
+  :0)
  let iff=(c,b,e)=>(cast("i",c),O("if"),emits(b),(e==undefined?0:(O("else"),emits(e))),O("end"))
  let whl=(c,b)=>(O("while"),emit(c),O("do"),emits(b),O("end"),"v")
  let dowh=(c,b)=>(O("do"),emits(b),O("while"),emit(c),O("end"),"v")
@@ -77,7 +82,7 @@ let ac=x=>{
   :"Literal"            ==x.type?lite(x.value)
   :"Identifier"         ==x.type?look(x.value)
   :"VariableDeclaration"==x.type?locl(x.name,x.defType)
-  :"CastExpression"     ==x.type?cast(tp(x.targetType),x.value)
+  :"CastExpression"     ==x.type?((tx=ical(x.value,unp(tp(x.targetType))))?tx:(cast(tp(x.targetType),x.value)))
   :"CallExpression"     ==x.type?call(x.base.value,x.arguments)
   :"IfStatement"        ==x.type?iff(x.condition,x.body,x.else)
   :"WhileStatement"     ==x.type?whl(x.condition,x.body)
@@ -89,18 +94,20 @@ let ac=x=>{
  }
  let func=(x,h)=>{args={};locs={}
   let s={r:unp(tp(x.defType)),a:x.arguments.map(x=>unp(tp(x.defType))).join("")}
-  funcs[x.name]=s
-  if(h)return
+  funcs[x.name]=s;imports[x.name]=1
+  if(h)return;    imports[x.name]=0
   x.arguments.forEach((x,i)=>{args[x.name]={i:i,t:tp(x.defType)}})
   rtyp=unp(tp(x.defType))
   O(x.name+" "+s.r+":"+s.a+" export "+x.name)
   x.body.forEach((x,i,b)=>(x.type=="ReturnStatement"&&b.length==1+i)?cast(rtyp,x.value):emit(x))
  }
- c.forEach(x=>{pos=x.pos
+ c.forEach(x=>{pos=x.pos;
    "FunctionDeclaration"==x.type?func(x,0)
   :"FunctionDefinition"==x.type?func(x,1)
-  :"GlobalVariableDeclaration"==x.type?(globs[x.name]=tp(x.defType))
+  :"GlobalVariableDeclaration"==x.type?(tabl(x)?0:globs[x.name]=tp(x.defType))
   :E("unknown toplevel ast type: "+x.type)
  })
- return A.join("\n")+"\n"
+ let h=Object.keys(imports).filter(x=>imports[x]).map(x=>x+" "+funcs[x].r+":"+funcs[x].a+" import env "+x)
+ let j=x=>(x.length?x.join("\n")+"\n":"")
+ return j(h)+j(A)+j(tab.f.map((x,i)=>"tab "+i+" "+x))
 }

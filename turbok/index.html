@@ -54,7 +54,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
      <li tabindex="3" onclick="fileopen()"> <a href="#!"> <span class="red-168-text">O</span>pen...  <span class="tui-shortcut">F3</span> </a> </li>
      <li tabindex="4" > <a href="#!"> <span class="red-168-text">S</span>ave <span class="tui-shortcut">F2</span> </a> </li>
      <li tabindex="5" > <a href="#!">S<span class="red-168-text">a</span>ve as...</a> </li>
-     <li tabindex="6" > <a href="#!">Open <span class="red-168-text">E</span>xamples...</a></li>
+     <li tabindex="7" onclick="show(examples)"> <a href="#!">Open <span class="red-168-text">E</span>xamples...</a></li>
     </ul>
    </li>
    <li id="emenu" tabindex="6" class="tui-dropdown"> <span class="red-168-text">E</span>dit <!--Undo Redo|Cut Copy Paste Clear Copy example|Show clipboard-->
@@ -89,7 +89,14 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
      <li tabindex="25"> <a href="#!"> <span class="red-168-text">A</span>rguments...</a> </li>
     </ul>
    </li>
-   <li id="cmenu" class="tui-dropdown"> <span class="red-168-text">C</span>ompile <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages--> </li>
+   <li id="cmenu" tabindex="26" class="tui-dropdown"> <span class="red-168-text">C</span>ompile <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages-->
+    <div class="tui-dropdown-content">
+    <ul>
+     <li tabindex="19" onclick="compile()"> <a href="#!"> <span class="red-168-text">C</span>ompile <span class="tui-shortcut">F9</span></a> </li>
+     <li tabindex="20" onclick="savewasm()"> <a href="#!"> Save <span class="red-168-text">w</span>asm</a> </li>
+    </ul>
+    </div>
+   </li>
    <li id="dmenu" class="tui-dropdown"> <span class="red-168-text">D</span>ebug <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... --> <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches--> </li>
    <li id="wmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
    <li id="hmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">W</span>indow </li>
@@ -163,7 +170,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
    <li><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
    <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
    <li><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
-   <li><a href="#!"><span class="red-168-text">Alt+F9</span> Compile</a></li>
+   <li><a href="#!"><span class="red-168-text">F9</span> Compile</a></li>
    <!--span class="tui-statusbar-divider"></span-->
    <li style="float:right;"><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
   </ul>
@@ -208,6 +215,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
     <option>loop.a</option>
     <option>swtc.a</option>
     <option>tabl.a</option>
+    <option>aray.c</option>
    </select>
   </fieldset>
   <br>
@@ -253,6 +261,7 @@ save=async _=>{
  await w.close()
  unmark(ed.closest(".tui-window"))
 },
+savewasm=async _=>{/*compile();*/ if(wasm)download(wasm,file.name.slice(0,-2)+".wasm")},
 fileopen=async _=>{
  let[h]=await window.showOpenFilePicker({types:[{accept:{"ktye/k":".k","ktye/c":".c","ktye/asm":".a"}}]});
  let f=await h.getFile();
@@ -284,22 +293,23 @@ window.onkeydown=e=>
  ("F7"==e.key)?handle(e,traceinto):
  ("F8"==e.key)?handle(e,stepover):
  ("F9"==e.key&&e.ctrlKey)?handle(e,run):
- ("F9"==e.key&&e.altKey)?handle(e,compile):
+ ("F9"==e.key)?handle(e,compile):
  ("F10"==e.key)?handle(e,_=>{fmenu.focus()}):true
 
-let accel={fmenu:{
-	"n":_=>show(filenew),
- 	"o":fileopen,
-	"e":_=>show(examples),
-}}
-
-/*
-fmenu.onkeydown=e=>console.log("fmenu key", e.key)
- ("n"==e.key)?handle(e,newfile):
- ("o"==e.key)?handle(e,open):
- ("s"==e.key)?handle(e,save):
- ("a"==e.key)?handle(e,saveas):false
- */
+let accel={
+ fmenu:{
+  "n":_=>show(filenew),
+  "o":fileopen,
+  "s":save,
+  //"a":saveas,
+  "w":savewasm,
+  "e":_=>show(examples),
+ },
+ cmenu:{
+  "c":x=>compile(),
+  "w":savewasm,
+ },
+}
 
 //left-right
 af(document.querySelectorAll(".tui-dropdown")).forEach((x,i,a)=>x.onkeydown=e=>{ 
@@ -325,14 +335,15 @@ let exec=_=>{
  let i=new WebAssembly.Instance(W)
  O("exit "+i.exports.main(0)+"\n")
 }
-let compile=_=>{let x=file.name.slice(-1);
+let wasm=0 //compiled binary
+let compile=_=>{let x=file.name.slice(-1);wasm=0;
   (x=="a")?asm(ed.value)
  :(x=="b")?O("$ab "+file.name+"\nnyi\n")
  :(x=="c")?(O("$ac "+file.name+"\n"),asm(ac(ed.value)))
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="swtc.a";loadexample()
+examplelist.value="aray.c";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
@@ -354,9 +365,9 @@ let asm=a=>{
  O("$asm "+file.name+"\n")
  ea.innerHTML=""
  a.trimEnd().split("\n").forEach(x=>ah(ea,ih(x,ce("option"))))
- let w=wa(a)
- O(w.length+" bytes\n")
- W=new WebAssembly.Module(w)
+ wasm=wa(a)
+ O(wasm.length+" bytes\n")
+ W=new WebAssembly.Module(wasm)
  D=ai.parse(a,{},A)
  D.f="main";D.l=0
 }
