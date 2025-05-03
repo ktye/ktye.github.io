@@ -1,7 +1,7 @@
 //c compiler
 let ac=x=>{
  let A=[],O=x=>A.push(x)
- let c=cparse(x)
+ let c=cparse(x)            //cparse.js
 //console.log(c)
  let pos=0,rtyp="i",args=[],locs={},globs={},funcs={},tab={name:"",f:[]},imports={}
  let ew=(x,y)=>x.endsWith(y)
@@ -12,7 +12,7 @@ let ac=x=>{
  let t2=(x,y)=>x==y?x:"ijef"[Math.max(nt(x),nt(y))]
  let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"&&x.modifier[0]=="long")?"long":x.name),(r="?vchijef"[1+["void","char","short","int","long","float","double"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
  let tpp=(x,r)=>("Type"==x.target.type?tp(x.target).toUpperCase():E("unknown pointer type"))
- let ptr=t=>"CHIJEF".includes(t)
+ let ptr=t=>"VCHIJEF".includes(t)
  let pts=t=>((t="CHIJEF".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1][t]),O("sli")):0)
  let unp=t=>ptr(t)?"i":"v"==t?"":t
  let E=x=>{throw new Error("ac:"+pos+": "+x)}

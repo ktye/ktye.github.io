@@ -1,4 +1,11 @@
-//assembly interpreter
+/* ai:assembly interpreter
+   ai interprets a(assembly) instead of compiling it.
+   it is used by the debugger and allows breakpoints, stepping and watches.
+
+   in a first pass the asm listing is translated to an internal array
+   which has jump offsets computed for structured program flow.
+   the number of lines still matches the original asm to stay in sync with the ui.  */
+
 let ai=(_=>{
 
 let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)

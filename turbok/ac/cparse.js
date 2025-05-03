@@ -4,7 +4,7 @@ Jakob Löw <jakob@m4gnus.de> wrote this code. As long as you retain this notice 
 can do whatever you want with this stuff. If we meet some day, and you think
 this stuff is worth it, you can buy me a beer in return.
 
-changes:
+ktye/changes:
  dense format, pos:char(not file/line) 
  literals as strings, allow suffix f,l
  parseBody: may omit {} after if/else/while/for

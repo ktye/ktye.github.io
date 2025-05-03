@@ -99,8 +99,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
     </div>
    </li>
    <li id="dmenu" class="tui-dropdown"> <span class="red-168-text">D</span>ebug <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... --> <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches--> </li>
-   <li id="wmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
-   <li id="hmenu" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">W</span>indow </li>
+   <li id="hmenu" onclick="help()" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
   </ul>
  </nav>
 
@@ -167,8 +166,8 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
  
  <div class="tui-statusbar absolute">
   <ul>
-   <li><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
-   <li><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
+   <li onclick="help()"><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
+   <li ><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
    <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
    <li><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
    <li><a href="#!"><span class="red-168-text">F9</span> Compile</a></li>
@@ -214,6 +213,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
   <fieldset id="examplefiles" class="tui-input-fieldset">
    <select id="examplelist" class="tui-input" multiple>
     <option>aray.c</option>
+    <option>malo.c</option>
     <option>swtc.a</option>
    </select>
   </fieldset>
@@ -223,6 +223,47 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
   <button class="tui-button tui-modal-close-button left white-255-text" data-modal="examples" onclick="loadexample()" >ok</button>
   <span> </span>
   <button class="tui-button tui-modal-close-button right white-255-text cyan-168" data-modal="examples">close</button>
+  </fieldset>
+ </div>
+</div>
+
+<div class="tui-overlap"></div>
+<div id="helpwin" class="tui-modal center" style="top:50px" >
+ <div class="tui-window">
+  <fieldset id="newfiletype" class="tui-input-fieldset">
+  <legend class="center">Help</legend>
+   <div style="display:flex">
+
+    <fieldset id="examplefiles" class="tui-input-fieldset">
+     <legend class="center">Section</legend>
+     <select id="examplelist" onchange="helptext(this.value)" class="blue-168 full-height" style="color:white" size="20">
+      <optgroup label="General">
+      </optgroup>
+      <optgroup label="Language">
+       <option value="help/a">a</option>
+       <option value="help/b">b</option>
+       <option value="help/c">c</option>
+       <option value="help/k">k</option>
+      </optgroup>
+      <optgroup label="Source">
+       <option value="wa/wa.js">wa(wasm compiler)</option>
+       <option value="wa/ai.js">ai(assembly interpreter)</option>
+       <option value="ac/ac.js">ac(c compiler)</option>
+       <option value="ac/cparse.js">cp(c parser)</option>
+       <option value="wa/opt.js">opt(assembly simplifier)</option>
+      </optgroup>
+      <option value="wa/tab">asm instruction list</option>
+     </select>
+    </fieldset>
+
+    <fieldset class="tui-fieldset tui-border-solid" style="width:100%">
+    <legend class="center">Document</legend>
+     <textarea id="helped" class="tui-input-fieldset tui-textarea" style="width:70vw;height:calc(100vh - 200px);white-space:nowrap;overflow:auto" spellcheck="false" >select topic..</textarea>
+    </fieldset>
+   </div>
+  </fieldset>
+  <div class="tui-divider"></div>
+  <button class="tui-button tui-modal-close-button center white-255-text cyan-168" data-modal="helpwin">close</button>
   </fieldset>
  </div>
 </div>
@@ -254,8 +295,11 @@ libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 c
 testsok,expect=(a,b)=>{if(a!=b){throw new Error("test #"+testsok+": "+a+" got "+b)};testsok++},
 D, //D=ai.parse(src,{},A)
 W, //module
-M={env:{expect:expect},math:libm}, //import object
-help=_=>out.value="help..\n",
+I, //instance
+malloc=x=>{x=((7+x)>>>3)<<3;let n=I.exports.memory.buffer.byteLength,t=I.top+x,r=I.top;console.log("malloc","I",I,"top",r,"n",n,"x",x);;if(t>n){I.exports.memory.grow((65535+(n-t))>>>16)};I.top=t;return r}
+M={env:{expect:expect,malloc:malloc},math:libm}, //import object
+help=_=>show(helpwin),
+helptext=x=>fetch(x).then(r=>r.text()).then(r=>helped.value=r).catch(e=>helped.value=e)
 save=async _=>{
  if(file.h==null)return
  let w=await file.h.createWritable()
@@ -282,22 +326,23 @@ download=(u,n)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=U
 ed.onchange=mark(we)
 window.onerror=e=>O("error: "+e+"\n")
 window.onkeydown=e=>
- ("f"==e.key&&e.altKey)?handle(e,_=>fmenu.focus()):
- ("e"==e.key&&e.altKey)?handle(e,_=>emenu.focus()):
- ("s"==e.key&&e.altKey)?handle(e,_=>smenu.focus()):
- ("r"==e.key&&e.altKey)?handle(e,_=>rmenu.focus()):
- ("c"==e.key&&e.altKey)?handle(e,_=>cmenu.focus()):
- ("d"==e.key&&e.altKey)?handle(e,_=>dmenu.focus()):
- ("w"==e.key&&e.altKey)?handle(e,_=>wmenu.focus()):
- ("h"==e.key&&e.altKey)?handle(e,_=>hmenu.focus()):
- ("F1"==e.key)?handle(e,help):
- ("F2"==e.key)?handle(e,save):
- ("F3"==e.key)?handle(e,fileopen):
- ("F7"==e.key)?handle(e,traceinto):
- ("F8"==e.key)?handle(e,stepover):
- ("F9"==e.key&&e.ctrlKey)?handle(e,run):
- ("F9"==e.key)?handle(e,compile):
- ("F10"==e.key)?handle(e,_=>run(1)):true
+ ("Escape"==e.key)?handle(e,_=>af(document.querySelectorAll(".active")).forEach(x=>x.classList.remove("active"))) //close dialogs
+ :("f"==e.key&&e.altKey)?handle(e,_=>fmenu.focus())
+ :("e"==e.key&&e.altKey)?handle(e,_=>emenu.focus())
+ :("s"==e.key&&e.altKey)?handle(e,_=>smenu.focus())
+ :("r"==e.key&&e.altKey)?handle(e,_=>rmenu.focus())
+ :("c"==e.key&&e.altKey)?handle(e,_=>cmenu.focus())
+ :("d"==e.key&&e.altKey)?handle(e,_=>dmenu.focus())
+ :("h"==e.key&&e.altKey)?handle(e,_=>help())
+ :("F1"==e.key)?handle(e,help)
+ :("F2"==e.key)?handle(e,save)
+ :("F3"==e.key)?handle(e,fileopen)
+ :("F7"==e.key)?handle(e,traceinto)
+ :("F8"==e.key)?handle(e,stepover)
+ :("F9"==e.key&&e.ctrlKey)?handle(e,run)
+ :("F9"==e.key)?handle(e,compile)
+ :("F10"==e.key)?handle(e,_=>run(1))
+ :true
  //("F10"==e.key)?handle(e,_=>{fmenu.focus()}):true
 
 let accel={
@@ -336,9 +381,9 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
 
 let exec=t=>{
  O("$"+(t?"test ./":"")+file.name.slice(0,-2)+"\n")
- let i=new WebAssembly.Instance(W,M)
- if(t){testsok=0;i.exports.test();O(testsok+" ok\n")}
- else O("exit "+i.exports.main(0)+"\n")
+ I=new WebAssembly.Instance(W,M);I.top=0
+ if(t){testsok=0;I.exports.test();O(testsok+" ok\n")}
+ else O("exit "+I.exports.main(0)+"\n")
 }
 let wasm=0 //compiled binary
 let compile=_=>{let x=file.name.slice(-1);wasm=0;
@@ -348,7 +393,7 @@ let compile=_=>{let x=file.name.slice(-1);wasm=0;
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="aray.c";loadexample()
+examplelist.value="malo.c";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
