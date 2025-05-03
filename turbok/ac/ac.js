@@ -14,7 +14,7 @@ let ac=x=>{
  let tpp=(x,r)=>("Type"==x.target.type?tp(x.target).toUpperCase():E("unknown pointer type"))
  let ptr=t=>"CHIJEF".includes(t)
  let pts=t=>((t="CHIJEF".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1][t]),O("sli")):0)
- let unp=t=>ptr(t)?"i":t
+ let unp=t=>ptr(t)?"i":"v"==t?"":t
  let E=x=>{throw new Error("ac:"+pos+": "+x)}
  let cast=(r,x,t)=>(t=emit(x),(unp(t)!=unp(r))?O(r+"o"+t):0,r)
  let bini=(x,y,op,o,t)=>{o=ops[op];
@@ -71,6 +71,7 @@ let ac=x=>{
  let whl=(c,b)=>(O("while"),emit(c),O("do"),emits(b),O("end"),"v")
  let dowh=(c,b)=>(O("do"),emits(b),O("while"),emit(c),O("end"),"v")
  let ifor=(i,c,s,b)=>(emit(i),O("while"),emit(c),O("do"),emits(b),emit(s),O("end"))
+ let drop=x=>(x=="v"||x=="")?0:O("drp")
  let emt=x=>{let r,t,a=A;A=[];t=emit(x);r=A;A=a;return[t,r]}
  let emits=x=>(x.forEach(emit),"v")
  let emit=x=>{let tx,ty
@@ -78,7 +79,7 @@ let ac=x=>{
   :"BinaryExpression"   ==x.type?bini(x.left,x.right,x.operator)
   :"SuffixExpression"   ==x.type?suf(x.value,x.operator)
   :"PrefixExpression"   ==x.type?pre(x.value,x.operator)
-  :"ExpressionStatement"==x.type?("v"!=emit(x.expression)?O("drp"):0,"v")
+  :"ExpressionStatement"==x.type?drop(emit(x.expression))
   :"Literal"            ==x.type?lite(x.value)
   :"Identifier"         ==x.type?look(x.value)
   :"VariableDeclaration"==x.type?locl(x.name,x.defType)

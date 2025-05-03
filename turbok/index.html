@@ -81,12 +81,13 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
    <li id="rmenu" tabindex="18" class="tui-dropdown"> <span class="red-168-text">R</span>un <!--Run Ctrl+F9 Program reset Ctrl+F2 Go to cursor F4 Trace into F7 Step over F8 Arguments...--> 
     <div class="tui-dropdown-content">
     <ul>
-     <li tabindex="19"> <a href="#!"> <span class="red-168-text">R</span>un <span class="tui-shortcut">Ctrl+F9</span></a> </li>
-     <li tabindex="21"> <a href="#!"> <span class="red-168-text">G</span>oto cursor <span class="tui-shortcut">F4</span> </a> </li>
-     <li tabindex="22"> <a href="#!"> <span class="red-168-text">T</span>race into<span class="tui-shortcut">F7</span> </a> </li>
-     <li tabindex="23"> <a href="#!"> <span class="red-168-text">S</span>tep over <span class="tui-shortcut">F8</span> </a> </li>
-     <li tabindex="24"> <a href="#!"> Start <span class="red-168-text">F</span>unction... </a> </li>
-     <li tabindex="25"> <a href="#!"> <span class="red-168-text">A</span>rguments...</a> </li>
+     <li tabindex="19" onclick="run()"> <a href="#!"> <span class="red-168-text">R</span>un <span class="tui-shortcut">Ctrl+F9</span></a> </li>
+     <li tabindex="21" onclick="nyi('goto')"> <a href="#!"> <span class="red-168-text">G</span>oto cursor <span class="tui-shortcut">F4</span> </a> </li>
+     <li tabindex="22" onclick="traceinto()"> <a href="#!"> <span class="red-168-text">T</span>race into<span class="tui-shortcut">F7</span> </a> </li>
+     <li tabindex="23" onclick="stepover()"> <a href="#!"> <span class="red-168-text">S</span>tep over <span class="tui-shortcut">F8</span> </a> </li>
+     <li tabindex="24" onclick="run(1)"> <a href="#!"> Run t<span class="red-168-text">e</span>sts <span class="tui-shortcut">F10</span> </a> </li>
+     <li tabindex="25"> <a href="#!"> Start <span class="red-168-text">F</span>unction... </a> </li>
+     <li tabindex="26"> <a href="#!"> <span class="red-168-text">A</span>rguments...</a> </li>
     </ul>
    </li>
    <li id="cmenu" tabindex="26" class="tui-dropdown"> <span class="red-168-text">C</span>ompile <!--Compile Alt-F9 Make F9 Link Build add|Information... Remove messages-->
@@ -172,7 +173,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
    <li><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
    <li><a href="#!"><span class="red-168-text">F9</span> Compile</a></li>
    <!--span class="tui-statusbar-divider"></span-->
-   <li style="float:right;"><a href="#!"><span class="red-168-text">F10</span> Menu</a></li>
+   <li style="float:right;"><a href="#!"><span class="red-168-text">F10</span> Test</a></li>
   </ul>
  </div>
 </div>
@@ -212,10 +213,8 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
   <legend class="center">Examples</legend>
   <fieldset id="examplefiles" class="tui-input-fieldset">
    <select id="examplelist" class="tui-input" multiple>
-    <option>loop.a</option>
-    <option>swtc.a</option>
-    <option>tabl.a</option>
     <option>aray.c</option>
+    <option>swtc.a</option>
    </select>
   </fieldset>
   <br>
@@ -251,8 +250,11 @@ ed.onselectionchange=e=>{e=e.target
 
 let name=window.location.hash.slice(1);//if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
 let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},clr=_=>out.value="",
+libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 cos cosh exp expm1 floor hypot sin cos log log10 log1p pow random round sign sin tan tanh trunc".split(" ").map(x=>({[x]:Math[x]})))),
+testsok,expect=(a,b)=>{if(a!=b){throw new Error("test #"+testsok+": "+a+" got "+b)};testsok++},
 D, //D=ai.parse(src,{},A)
 W, //module
+M={env:{expect:expect},math:libm}, //import object
 help=_=>out.value="help..\n",
 save=async _=>{
  if(file.h==null)return
@@ -268,7 +270,8 @@ fileopen=async _=>{
  let t=await f.text();
  loadfile(f.name,t,h)
 },
-run=_=>{clr();compile();exec()},
+nyi=x=>{throw new Error("nyi"+(x?" "+x:""))},
+run=t=>{clr();compile();exec(t)},
 stepover =_=>{(!ea.value)?compile():step(0);showstep()},
 traceinto=_=>{(!ea.value)?compile():step(1);showstep()},
 handle=(e,f)=>{e.preventDefault();f()},
@@ -294,7 +297,8 @@ window.onkeydown=e=>
  ("F8"==e.key)?handle(e,stepover):
  ("F9"==e.key&&e.ctrlKey)?handle(e,run):
  ("F9"==e.key)?handle(e,compile):
- ("F10"==e.key)?handle(e,_=>{fmenu.focus()}):true
+ ("F10"==e.key)?handle(e,_=>run(1)):true
+ //("F10"==e.key)?handle(e,_=>{fmenu.focus()}):true
 
 let accel={
  fmenu:{
@@ -330,10 +334,11 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
  )
 )
 
-let exec=_=>{
- O("$"+file.name+" 0\n")
- let i=new WebAssembly.Instance(W)
- O("exit "+i.exports.main(0)+"\n")
+let exec=t=>{
+ O("$"+(t?"test ./":"")+file.name.slice(0,-2)+"\n")
+ let i=new WebAssembly.Instance(W,M)
+ if(t){testsok=0;i.exports.test();O(testsok+" ok\n")}
+ else O("exit "+i.exports.main(0)+"\n")
 }
 let wasm=0 //compiled binary
 let compile=_=>{let x=file.name.slice(-1);wasm=0;
@@ -348,6 +353,7 @@ examplelist.value="aray.c";loadexample()
 
 <script src="wa/wa.js"></script>
 <script src="wa/ai.js"></script>
+<script src="wa/opt.js"></script>
 <script src="wa/link.js"></script>
 <script src="wa/boot.js"></script>
 <script src="ac/cparse.js"></script>
@@ -362,13 +368,14 @@ let step=o=>{try{ai.step(D,o)}catch(e){if("exit"==e.message&&1==D.S.length)O("ex
 let showstep=_=>{ea.selectedIndex=ai.line(D)}
 
 let asm=a=>{
- O("$asm "+file.name+"\n")
+ O("$as "+file.name.slice(0,-2)+".a\n")
  ea.innerHTML=""
+ a=opt(a.split("\n"),new WebAssembly.Instance(A).exports).join("\n")
  a.trimEnd().split("\n").forEach(x=>ah(ea,ih(x,ce("option"))))
  wasm=wa(a)
  O(wasm.length+" bytes\n")
  W=new WebAssembly.Module(wasm)
- D=ai.parse(a,{},A)
+ D=ai.parse(a,M,A)
  D.f="main";D.l=0
 }
 
