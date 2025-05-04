@@ -37,7 +37,7 @@ hide=x=>x.classList.add("hidden"),
 title=(w,t)=>w.querySelector("legend").innerHTML="&nbsp;"+t+"&nbsp;",
 loadfile=(name,text,h)=>{ea.value="";file={name:"",h:null};title(we,name.toUpperCase());ed.value=text,file.name=name,file.h=h,ed.focus()},
 newfile=x=>loadfile(newfilename.value+'.'+af(newfiletype.querySelectorAll('input')).filter(x=>x.checked)[0].value,""),
-loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).then(r=>loadfile(x,r,null))}
+loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).then(r=>loadfile(x,r,null))}
 
 //openfile=f=>(f=openfilename.files[0],f.text().then(r=>loadfile(f.name,r)))
 
@@ -52,8 +52,8 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
     <ul>
      <li tabindex="2" onclick="show(filenew)"> <a href="#!"> <span class="red-168-text">N</span>ew </a> </li>
      <li tabindex="3" onclick="fileopen()"> <a href="#!"> <span class="red-168-text">O</span>pen...  <span class="tui-shortcut">F3</span> </a> </li>
-     <li tabindex="4" > <a href="#!"> <span class="red-168-text">S</span>ave <span class="tui-shortcut">F2</span> </a> </li>
-     <li tabindex="5" > <a href="#!">S<span class="red-168-text">a</span>ve as...</a> </li>
+     <li tabindex="4" onclick="save()"> <a href="#!"> <span class="red-168-text">S</span>ave <span class="tui-shortcut">F2</span> </a> </li>
+     <li tabindex="5" onclick="saveas()"> <a href="#!">S<span class="red-168-text">a</span>ve as...</a> </li>
      <li tabindex="7" onclick="show(examples)"> <a href="#!">Open <span class="red-168-text">E</span>xamples...</a></li>
     </ul>
    </li>
@@ -104,11 +104,8 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
  </nav>
 
  <div style="position:absolute;top:20px;height:calc(100% - 45px);width:100%;display:flex;flex-flow:column">
-
   <div id="main" class="full-width" style="display:flex;flex-grow:2">
-
-   <div id="left" style="height:100%;width:30%;display:flex;flex-flow:column;resize:horizontal;overflow:auto">
-   
+   <div id="left" style="height:100%;width:30%;display:flex;flex-flow:column;overflow:auto">
     <div id="w_a" class="tui-window full-width h2 tui-no-shadow">
      <fieldset class="tui-fieldset full-height">
       <legend class="center">&nbsp;PROGRAM&nbsp;</legend>
@@ -117,7 +114,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
       <!--span class="tui-fieldset-text top right" style="margin-right: 50px">1</span-->
       <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;main:0&nbsp;</span>
       <!--textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea-->
-      <select id="ea" size="9" class="tui-textarea full-width full-height" style="overflow:scroll"></select>
+      <select id="ea" onclick="locate(1)" size="9" class="tui-textarea full-width full-height" style="overflow:scroll"></select>
      </fieldset>
     </div>
    </div>
@@ -167,12 +164,12 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
  <div class="tui-statusbar absolute">
   <ul>
    <li onclick="help()"><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
-   <li ><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
-   <li><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
-   <li><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
-   <li><a href="#!"><span class="red-168-text">F9</span> Compile</a></li>
+   <li onclick="save()"><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
+   <li onclick="fileopen()"><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
+   <li onclick="run()"><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
+   <li onclick="compile()"><a href="#!"><span class="red-168-text">F9</span> Compile</a></li>
    <!--span class="tui-statusbar-divider"></span-->
-   <li style="float:right;"><a href="#!"><span class="red-168-text">F10</span> Test</a></li>
+   <li onclick="run(1)" style="float:right;"><a href="#!"><span class="red-168-text">F10</span> Test</a></li>
   </ul>
  </div>
 </div>
@@ -215,6 +212,7 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
     <option>aray.c</option>
     <option>malo.c</option>
     <option>prnt.c</option>
+    <option>libm.c</option>
     <option>swtc.a</option>
    </select>
   </fieldset>
@@ -284,10 +282,11 @@ loadexample=x=>{if(x=examplelist.value)fetch("examples/"+x).then(r=>r.text()).th
 </div-->
 
 <script>
-ed.onselectionchange=e=>{e=e.target
+ed.onselectionchange=e=>{e=e.target   //show line:col and mark assembly
  let l=1,p=e.selectionStart,t=e.value.slice(0,p),i=t.indexOf("\n");
  while(i>=0&&i<p){l++;i=t.indexOf("\n",1+i)};let c=p-t.lastIndexOf("\n")
- e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"}
+ e.previousElementSibling.innerHTML="&nbsp;"+l+":"+c+"&nbsp;"
+ if(e.selectionEnd-e.selectionStart>0)locate(0,e.selectionStart)}
 
 let name=window.location.hash.slice(1);//if(name){fetch(name).then(r=>r.text()).then(t=>loadfile(name,t))}
 let O=x=>{out.value+=x;out.scrollTop=out.scrollHeight},clr=_=>out.value="",
@@ -304,6 +303,11 @@ printf=(x,j)=>{let s=str0(x),lo=x=>Number(BigInt.asUintN(32,x)),
  let i,p;for(i=0;i<f.length;i+=2)if(-1<(p=s.indexOf(f[i]))){s=s.slice(0,p)+f[1+i](j)+s.slice(p+f[i].length);O(s);return s.length}
  O(s);return s.length; },
 M={env:{...{expect:expect,malloc:malloc,printf:printf},...libm}}, //import object
+adloc=(s,p)=>((p=s.indexOf("@"))<0?-1:(!isNaN(p=Number(s.slice(1+p))))?p:-1),
+locations=[],
+locate=(a,p)=>{if(a&&-1<(p=adloc(ea.value)))ed.selectionStart=p,ed.selectionEnd=p,ed.focus()
+ if((!a)&&locations.length){let m=1e100,q=-1;locations.forEach((x,i)=>{if(x>=0&&x-p>=0&&x-p<m)(q=i,m=Math.min(m,x-p))})
+  if(q>=0)ea.selectedIndex=q}}
 help=_=>show(helpwin),
 helptext=x=>fetch(x).then(r=>r.text()).then(r=>helped.value=r).catch(e=>helped.value=e)
 save=async _=>{
@@ -399,7 +403,7 @@ let compile=_=>{let x=file.name.slice(-1);wasm=0;
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="prnt.c";loadexample()
+examplelist.value="aray.c";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
@@ -418,11 +422,11 @@ let ih=(t,x)=>((x.innerHTML=t.replaceAll(" ","&nbsp;")),x)
 let step=o=>{try{ai.step(D,o)}catch(e){if("exit"==e.message&&1==D.S.length)O("exit "+D.S.pop()+"\n");else throw(e)}}
 let showstep=_=>{ea.selectedIndex=ai.line(D)}
 
-let asm=a=>{
+let asm=a=>{locations=[];let loc=(x,p)=>(locations.push(-1<(p=adloc(x))?p:-1),x);
  O("$as "+file.name.slice(0,-2)+".a\n")
  ea.innerHTML=""
  //a=opt(a.split("\n"),new WebAssembly.Instance(A).exports).join("\n")
- a.trimEnd().split("\n").forEach(x=>ah(ea,ih(x,ce("option"))))
+ a.trimEnd().split("\n").forEach(x=>ah(ea,ih(loc(x),ce("option"))))
  wasm=wa(a)
  O(wasm.length+" bytes\n")
  W=new WebAssembly.Module(wasm)
