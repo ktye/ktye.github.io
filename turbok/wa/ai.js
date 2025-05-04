@@ -45,7 +45,7 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
                                          :(G[a[1]]=(a0=="j"?0n:0)))
   :a0.includes(":")?c.push(["ical",a0])
   :c.push(a)
- });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
+ });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],H:[0,1],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
 /*o-p-s*/
 let ops={
 ezi:1,eqi:2,nei:2,lti:2,ltu:2,gti:2,gtu:2,lei:2,leu:2,gei:2,geu:2,ezj:1,eqj:2,nej:2,ltj:2,ltl:2,
@@ -62,12 +62,14 @@ siz:0,grw:1,cpy:3,fil:3,}
 
 let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
 let exit=m=>{throw new Error("exit")}
-let ret=m=>{m.C.length?[m.f,m.l]=m.C.pop():exit()}
+let ret=m=>{m.C.length>1?[m.f,m.l]=m.C.pop():(m.exit=1,exit())}
 let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
 let scal=(f,m)=>{m.C.push([m.f,m.l]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
 let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
+let heap=(m,o)=>{if(o.startsWith("st")||o.startsWith("ld"))m.H=[m.S[m.S.length-1],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8}[o[2]]]} //store heap access
 
-let step=(m,over)=>{let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
+let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
+ if(!m.C.length)m.C.push([m.f,0])
  let a=F.c[m.l],a0=a[0],a1=a[1],x
  let icl=(x,s,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m)}
    "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
@@ -84,7 +86,7 @@ let step=(m,over)=>{let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)retur
  :   "nop"==a0?0                                //do while
  :  "ical"==a0?icl(m.S.pop(),a1)
  :  "ret"==a0?ret(m)
- :op(m,a0)}
+ :(heap(m,a0),op(m,a0))}
 
 let run=(f,a,m)=>{m.f=f,m.l=0,a.forEach((v,i)=>m.F[f].lo[i]=v);try{ while(1)step(m,0) }catch(e){ if(e.message=="exit"){if(m.S.length)return m.S[0]}else{throw(e)} }}
 let line=x=>x.l+x.F[x.f].l

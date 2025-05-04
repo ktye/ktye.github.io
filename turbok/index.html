@@ -8,7 +8,7 @@
 <script src="tuicss.min.js"></script>
 <link rel="stylesheet" href="tuicss.min.css">
 <style>
- textarea{resize:none}
+ textarea{resize:none;overflow:auto}
 #out{color:#ccc}
 .fullscr{width:100%!important;height:100%!important;position:absolute;left:0;top:0;z-index:9}
 .hidden{display:none}
@@ -20,6 +20,8 @@
 .tui-dropdown:focus-within>.tui-dropdown-content:first-of-type{display:block}
 .tui-dropdown-content{min-width:300px}
 .tui-dropdown-content:focus{display:block}
+#debugtable tbody tr th{border-color:white}
+#debugtable tbody tr td{border-color:white}
 </style>
 </head><body>
 
@@ -112,7 +114,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
       <!--span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span-->
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
       <!--span class="tui-fieldset-text top right" style="margin-right: 50px">1</span-->
-      <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;main:0&nbsp;</span>
+      <!--span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;main:0&nbsp;</span-->
       <!--textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea-->
       <select id="ea" onclick="locate(1)" size="9" class="tui-textarea full-width full-height" style="overflow:scroll"></select>
      </fieldset>
@@ -127,9 +129,8 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
       <legend class="center">A.K</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
-      <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
       <span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;1:1&nbsp;</span>
-      <textarea id="ed" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea>
+      <textarea id="ed" class="tui-textarea full-width full-height" style="white-space:nowrap;overflow:scroll;" spellcheck="false"></textarea>
      </fieldset>
     </div>
   
@@ -138,7 +139,6 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
       <legend class="center">&nbsp;OUT&nbsp;</legend>
       <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
       <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
-      <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
       <!--pre id="out" style="margin:0"></pre-->
       <textarea id="out" class="tui-textarea full-width full-height" spellcheck="false" readonly></textarea>
      </fieldset>
@@ -146,16 +146,25 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
    </div>
   </div>
 
-  <div id="wd" class="tui-window full-width h1 tui-no-shadow cyan-168 hidden">
-   <fieldset class="tui-fieldset full-height">
+  <div id="wd" class="tui-window full-width h1 tui-no-shadow cyan-168 hidden" style="flex-grow:0">
+   <fieldset class="tui-fieldset full-height" style="padding:0">
     <legend class="center">&nbsp;DEBUG&nbsp;</legend>
-    <span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span>
+    <!--span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span-->
     <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
-    <span class="tui-fieldset-text top right" style="margin-right: 50px">1</span>
-    <pre>
-    </pre>
-    <!--textarea class="tui-textarea full-width" style="height: 200px; overflow: scroll;" spllcheck="false">
-    </textarea-->
+    <div class="tui-content" style="height:100%">
+     <table class="tui-table-grid" id="debugtable" style="height:100%">
+     <tr><th>func</th><th>stack</th><th>call</th><th>global</th><th>heap @
+     <input onchange="showstep(1)" title="address" id="addr" spellcheck="false" style="width:5em;outline:none;border:none;background:#00a8a8"/><select onchange="showstep(1)" id="datasize" title="size: 1,2,4,8 bytes" style="width:2em;outline:none;float:right"><option value="1">c</option><option value="2">h</option><option value="4">i</option><option value="8">j</option></select> <select id="dataformat" onchange="showstep(1)" title="format:decimal/unsigned/hex/float" style="width:2em;outline:none;float:right"><option>%d</option><option>%u</option><option>%x</option><option>%f</option><option>%c</option></select>
+     </th></tr>
+     <tr style="height:100%">
+      <td id="funcinfo" style="white-space:pre"></td>
+      <td><select id="vstack" style="height:100%;width:100%;outline:none;background:#00a8a8" size="2">
+      </select></td>
+      <td><select id="cstack" style="height:100%;width:100%;outline:none;background:#00a8a8" size="2">
+      </select></td>
+      <td id="globinfo" style="white-space:pre">a b c</td>
+      <td id="heapinfo" style="white-space:pre">00 00 00</td>
+     </tr></table>
    </fieldset>
   </div>
  </div>
@@ -166,6 +175,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
    <li onclick="help()"><a href="#!"><span class="red-168-text">F1</span> Help</a></li>
    <li onclick="save()"><a href="#!"><span class="red-168-text">F2</span> Save</a></li>
    <li onclick="fileopen()"><a href="#!"><span class="red-168-text">F3</span> Open</a></li>
+   <li onclick="stepover()"><a href="#!"><span class="red-168-text">F8</span> Step</a></li>
    <li onclick="run()"><a href="#!"><span class="red-168-text">Ctrl+F9</span> Run</a></li>
    <li onclick="compile()"><a href="#!"><span class="red-168-text">F9</span> Compile</a></li>
    <!--span class="tui-statusbar-divider"></span-->
@@ -256,7 +266,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
 
     <fieldset class="tui-fieldset tui-border-solid" style="width:100%">
     <legend class="center">Document</legend>
-     <textarea id="helped" class="tui-input-fieldset tui-textarea" style="width:70vw;height:calc(100vh - 200px);white-space:nowrap;overflow:auto" spellcheck="false" >select topic..</textarea>
+     <textarea id="helped" class="tui-input-fieldset tui-textarea" style="width:70vw;height:calc(100vh - 200px);overflow:auto" spellcheck="false" >select topic..</textarea>
     </fieldset>
    </div>
   </fieldset>
@@ -326,8 +336,8 @@ fileopen=async _=>{
 },
 nyi=x=>{throw new Error("nyi"+(x?" "+x:""))},
 run=t=>{clr();compile();exec(t)},
-stepover =_=>{(!ea.value)?compile():step(0);showstep()},
-traceinto=_=>{(!ea.value)?compile():step(1);showstep()},
+stepover =_=>{(!ea.value)?compile():step(1);showstep()},
+traceinto=_=>{(!ea.value)?compile():step(0);showstep()},
 handle=(e,f)=>{e.preventDefault();f()},
 mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim()+"*&nbsp;"},
 unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"},
@@ -418,9 +428,44 @@ examplelist.value="aray.c";loadexample()
 let ce=x=>document.createElement(x)
 let ah=(x,y)=>(x.appendChild(y),y)
 let ih=(t,x)=>((x.innerHTML=t.replaceAll(" ","&nbsp;")),x)
+let tc=(t,x)=>((x.textContent=t),x)
+let sy=(s,x)=>((x.style=s),x)
 
 let step=o=>{try{ai.step(D,o)}catch(e){if("exit"==e.message&&1==D.S.length)O("exit "+D.S.pop()+"\n");else throw(e)}}
-let showstep=_=>{ea.selectedIndex=ai.line(D)}
+let showstep=u=>{wd.classList.remove("hidden");ea.selectedIndex=ai.line(D)
+ let lo=D.F[D.f].lo;
+ funcinfo.textContent=D.f+"\n"+Object.keys(lo).map(x=>x+": "+lo[x]).join("\n")
+ if(D.exit)funcinfo.insertBefore(sy("background:black;color:white;font-weight:bold",ih("terminated<br/>",ce("span"))),funcinfo.firstChild)
+ vstack.innerHTML="";D.S.forEach(x=>vstack.insertBefore(tc(x,ce("option")),vstack.firstChild));vstack.selectedIndex=0
+ cstack.innerHTML="";D.C.forEach(x=>cstack.insertBefore(tc(x.join(" "),ce("option")),cstack.firstChild));cstack.selectedIndex=0
+ globinfo.textContent=Object.keys(D.G).map(x=>x+": "+D.G[x]).join("\n")
+
+ if(u==undefined){addr.value=D.H[0];datasize.value=D.H[1]}
+
+ let a=+addr.value,s=+datasize.value,f=dataformat.value
+ u=(s==1&&f!="%d")?new     Uint8Array(D.A.memory.buffer)
+  :(s==1)         ?new      Int8Array(D.A.memory.buffer)
+  :(s==2&&f=="%d")?new     Int16Array(D.A.memory.buffer)
+  :(s==2)         ?new    Uint16Array(D.A.memory.buffer)
+  :(s==4&&f=="%d")?new     Int32Array(D.A.memory.buffer)
+  :(s==4&&f=="%f")?new   Float32Array(D.A.memory.buffer)
+  :(s==4)         ?new    Uint32Array(D.A.memory.buffer)
+  :(s==8&&f=="%d")?new  BigInt64Array(D.A.memory.buffer)
+  :(s==8&&f=="%f")?new   Float64Array(D.A.memory.buffer)
+  :                new BigUint64Array(D.A.memory.buffer),n=32,b=4
+ S=(f=="%x"&&s==4)?((n=32,b=4),(x=>x.toString(16).padStart( 8,"0")+" "))
+  :(f=="%x"&&s==8)?((n=16,b=2),(x=>x.toString(16).padStart(16,"0")+" "))
+  :(f=="%c"&&s==1)?((n=128,b=16),(x=>(x>31&&x<127)?String.fromCharCode(x):"."))
+  :(         s==1)?((n=64,b=8),(x=>x.toString().padStart(3," ")+" "))
+  :x=>x.toString()+" "
+
+ let B=0,o=Math.max(0,(((7+a)>>>3)<<3)-16)/s,m=D.A.memory.buffer.byteLength/s,adr=x=>(x*s).toString(16).padStart(8,'0')+": ";
+ heapinfo.innerHTML=adr(o)
+ for(let i=o;i<Math.min(o+n,m);i++){
+  heapinfo.innerHTML+=(a==i*s)?(console.log("y"),"<b style='color:yellow'>"+S(u[i])+"</b>"):S(u[i])
+  if(++B==b){B=0;heapinfo.innerHTML+="\n"+adr(1+i)}
+ }
+}
 
 let asm=a=>{locations=[];let loc=(x,p)=>(locations.push(-1<(p=adloc(x))?p:-1),x);
  O("$as "+file.name.slice(0,-2)+".a\n")
