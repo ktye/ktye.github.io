@@ -3,7 +3,7 @@ let ac=x=>{
  let A=[],O=x=>A.push(x)
  let c=cparse(x)            //cparse.js
 //console.log(c)
- let pos=0,rtyp="i",args=[],locs={},globs={},funcs={},tab={name:"",f:[]},imports={}
+ let pos=0,rtyp="i",args=[],locs={},globs={},funcs={},tab={name:"",f:[]},imports={},strings={},top=1
  let ew=(x,y)=>x.endsWith(y)
  let ops={"+":"ad?","-":"su?","*":"mu?","/":"dv?","%":"mo?","=":"asn",
   "==":"eq=","!=":"ne=","<=":"le=",">=":"ge=","<":"lt=",">":"gt="}
@@ -16,7 +16,8 @@ let ac=x=>{
  let pts=t=>((t="CHIJEF".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1][t]),O("sli")):0)
  let unp=t=>ptr(t)?"i":"v"==t?"":t
  let E=x=>{throw new Error("ac:"+pos+": "+x)}
- let cast=(r,x,t)=>(t=emit(x),(unp(t)!=unp(r))?O(r+"o"+t):0,r)
+ let glob=(t,s)=>(O(tp(t)+" "+s),(globs[s]=tp(t)))
+ let cast=(r,x,t)=>(t=emit(x),(unp(t)!=unp(r))?O(unp(r)+"o"+unp(t)):0,r)
  let bini=(x,y,op,o,t)=>{o=ops[op];
   return(op==":")?tern(x,y)
   :mods.includes(op)?assign(x,{type:"BinaryExpression",left:x,right:y,operator:op.slice(0,-1)})
@@ -55,12 +56,14 @@ let ac=x=>{
   :(x in locs)?(O("get "+x),locs[x])
   :(x in globs)?(O("glo "+x),globs[x])
   :E("lookup: "+x)
- let locl=(s,t)=>(t=tp(t),O(t+" "+s),locs[s]=t,"v")
+ let locl=(s,t)=>(t=tp(t),O(unp(t)+" "+s),locs[s]=t,"v")
  let lite=x=>(O(ew(x,"f")?"e "+x.slice(0,-1):ew(x,"l")?"j "+x.slice(0,-1):x.includes(".")?"f "+x:"i "+x),A[A.length-1][0])
+ let slit=x=>(O("i "+((x in strings)?strings[x]:((strings[x]=top),(top+=1+x.length),top-1-x.length))),"C")
+ let pf=(x,t)=>(t=emt(x),("e"==t[0]?(emit(x),O("ire"),O("jou")):"f"==t[0]?(emit(x),O("jrf")):cast("j",x))) //special case for e|f: dont auto cast but reinterpret to j
  let call=(f,a,t)=>{let fn=funcs[f]
   if(!(f in funcs))E("call "+f+": func not defined")
   if(a.length!=fn.a.length)E("call "+f+": wrong number of args")	
-  a.forEach((x,i)=>(cast(fn.a[i],x)));O("cal "+f);return fn.r}
+  a.forEach((x,i)=>(("printf"==f&&i==1)?pf(x):cast(fn.a[i],x)));O("cal "+f);return fn.r}
  let ical=(x,r,s)=>(x.type=="CallExpression"&&x.base.type=="Identifier"&&x.base.value==tab.name)?
   (s=r+":"+x.arguments.slice(1).map(emit).join(""),emit(x.arguments[0]),O(s),r):0
  let tabl=x=>(
@@ -72,6 +75,7 @@ let ac=x=>{
  let dowh=(c,b)=>(O("do"),emits(b),O("while"),emit(c),O("end"),"v")
  let ifor=(i,c,s,b)=>(emit(i),O("while"),emit(c),O("do"),emits(b),emit(s),O("end"))
  let drop=x=>(x=="v"||x=="")?0:O("drp")
+ let text=t=>Object.keys(strings).length?(t=new TextEncoder(),("00"+Object.keys(strings).map(x=>Array.from(t.encode(x)).map(x=>x.toString(16).padStart(2,"0")).join("")+"00").join("")).match(/.{1,32}/g).map((x,i)=>"dat "+(16*i)+" "+x+"\n").join("")):""
  let emt=x=>{let r,t,a=A;A=[];t=emit(x);r=A;A=a;return[t,r]}
  let emits=x=>(x.forEach(emit),"v")
  let emit=x=>{let tx,ty
@@ -80,7 +84,7 @@ let ac=x=>{
   :"SuffixExpression"   ==x.type?suf(x.value,x.operator)
   :"PrefixExpression"   ==x.type?pre(x.value,x.operator)
   :"ExpressionStatement"==x.type?drop(emit(x.expression))
-  :"Literal"            ==x.type?lite(x.value)
+  :"Literal"            ==x.type?(x.str?slit(x.value):lite(x.value))
   :"Identifier"         ==x.type?look(x.value)
   :"VariableDeclaration"==x.type?locl(x.name,x.defType)
   :"CastExpression"     ==x.type?((tx=ical(x.value,unp(tp(x.targetType))))?tx:(cast(tp(x.targetType),x.value)))
@@ -105,10 +109,10 @@ let ac=x=>{
  c.forEach(x=>{pos=x.pos;
    "FunctionDeclaration"==x.type?func(x,0)
   :"FunctionDefinition"==x.type?func(x,1)
-  :"GlobalVariableDeclaration"==x.type?(tabl(x)?0:globs[x.name]=tp(x.defType))
+  :"GlobalVariableDeclaration"==x.type?(tabl(x)?0:glob(x.defType,x.name))
   :E("unknown toplevel ast type: "+x.type)
  })
  let h=Object.keys(imports).filter(x=>imports[x]).map(x=>x+" "+funcs[x].r+":"+funcs[x].a+" import env "+x)
  let j=x=>(x.length?x.join("\n")+"\n":"")
- return j(h)+j(A)+j(tab.f.map((x,i)=>"tab "+i+" "+x))
+ return j(h)+j(A)+j(tab.f.map((x,i)=>"tab "+i+" "+x))+text()
 }

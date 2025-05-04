@@ -50,12 +50,12 @@ return(x=>{
   let im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1],
   numvar=(x,b)=>"-0123456789".includes(x[0])?(b?BigInt(x):parseFloat(x)):x,
   int=a=>Number.isInteger(a)?a:E(line,"expect integer"),int1=a=>int(Number(im(a))),
-  lup=(x,g)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x[0] in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
+  lup=(x,g)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
   x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
    ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],narg=s.length-s.indexOf(":")-1,e=(a[2]==="export"?a[3]:""),imp=(a[2]==="import"?a.slice(3):0))
    :(x in ops)?(Array.isArray(ops[x])?c.push(...ops[x]):c.push(ops[x]))
-   :(i="get set tee glo gst".indexOf(a[0]))>=0?c.push(32+i/4,...lup(im(a),2<i/4))
-   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=127):addglo(127,65,a[1])):c.push(65,...lebu(int(i)))))
+   :(3==a[0].length&&(i="get set tee glo gst ".indexOf(a[0]+" "))>=0)?c.push(32+i/4,...lup(im(a),2<i/4))
+   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=127):addglo(127,65,a[1])):c.push(65,...lebs(int(i)))))
    :"j"==a[0]?(("string"==typeof(i=numvar(im(a),1))?(s?(lo[a[1]]=126):addglo(126,66,a[1])):c.push(66,...lebn(i))))
    :"e"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=125):addglo(125,67,a[1])):c.push(67,...new Uint8Array(new Float32Array([i]).buffer))))
    :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=124):addglo(124,68,a[1])):c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))

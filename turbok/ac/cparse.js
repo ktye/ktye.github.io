@@ -6,7 +6,7 @@ this stuff is worth it, you can buy me a beer in return.
 
 ktye/changes:
  dense format, pos:char(not file/line) 
- literals as strings, allow suffix f,l
+ numeric literals as strings, allow suffix f,l, mark string literals
  parseBody: may omit {} after if/else/while/for
  switch: throw error (not implemented)
 */
@@ -211,7 +211,7 @@ var cparse = (function() {
     else next(true, true);
     consume("'");
     expr = { type: "Literal", source: "CharCode", value: val };
-   } else if(stringIncoming()) { expr = { type: "Literal", value: readString() };
+   } else if(stringIncoming()) { expr = { type: "Literal", value: readString(), str:1 };
    } else if(numberIncoming()) { expr = { type: "Literal", value: readNumber() };
    } else if(identifierIncoming()) { var val = readIdentifier(); expr = { type: "Identifier", value: val };
    } else { return; }
