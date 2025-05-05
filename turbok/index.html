@@ -219,6 +219,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
   <legend class="center">Examples</legend>
   <fieldset id="examplefiles" class="tui-input-fieldset">
    <select id="examplelist" class="tui-input" multiple>
+    <option>heap.c</option>
     <option>aray.c</option>
     <option>malo.c</option>
     <option>prnt.c</option>
@@ -413,7 +414,7 @@ let compile=_=>{let x=file.name.slice(-1);wasm=0;
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="aray.c";loadexample()
+examplelist.value="heap.c";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
@@ -462,7 +463,7 @@ let showstep=u=>{wd.classList.remove("hidden");ea.selectedIndex=ai.line(D)
  let B=0,o=Math.max(0,(((7+a)>>>3)<<3)-16)/s,m=D.A.memory.buffer.byteLength/s,adr=x=>(x*s).toString(16).padStart(8,'0')+": ";
  heapinfo.innerHTML=adr(o)
  for(let i=o;i<Math.min(o+n,m);i++){
-  heapinfo.innerHTML+=(a==i*s)?(console.log("y"),"<b style='color:yellow'>"+S(u[i])+"</b>"):S(u[i])
+  heapinfo.innerHTML+=(a==i*s)?("<b style='color:yellow'>"+S(u[i])+"</b>"):S(u[i])
   if(++B==b){B=0;heapinfo.innerHTML+="\n"+adr(1+i)}
  }
 }

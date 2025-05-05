@@ -54,7 +54,7 @@ let ret=m=>{m.C.length>1?[m.f,m.l]=m.C.pop():(m.exit=1,exit())}
 let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
 let scal=(f,m)=>{m.C.push([m.f,m.l]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
 let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
-let heap=(m,o)=>{if(o.startsWith("st")||o.startsWith("ld"))m.H=[m.S[m.S.length-1],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8}[o[2]]]} //store heap access
+let heap=(m,o,s)=>{if((s=o.startsWith("st"))||o.startsWith("ld"))m.H=[m.S[m.S.length-1-s],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8}[o[2]]]} //store heap access
 
 let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
  if(!m.C.length)m.C.push([m.f,0])
