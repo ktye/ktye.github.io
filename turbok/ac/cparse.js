@@ -7,6 +7,7 @@ this stuff is worth it, you can buy me a beer in return.
 ktye/changes:
  dense format, pos:char(not file/line) 
  numeric literals as strings, allow suffix f,l, mark string literals
+ use short/long as types not modifiers
  parseBody: may omit {} after if/else/while/for
  switch: throw error (not implemented)
 */
@@ -20,7 +21,7 @@ var cparse = (function() {
  const rightToLeftAssociativity = { "1": true, "2": true, "12": true };
  const stringEscapes = { "a": "\a", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t", "v": "\v", "\\": "\\", "'": "'", "\"": "\"", "?": "\?" };
  const defaultTypeNames = ["void", "char", "short", "int", "long", "float", "double"];
- const defaultTypeModifier = ["signed", "unsigned", "short", "long", "const", "struct", "enum"];
+ const defaultTypeModifier = ["signed", "unsigned",/* "short", "long",*/ "const", "struct", "enum"];
  return function(src, options) { var curr; var index = -1; options = options || {};
   var typeNames = options.types || defaultTypeNames.slice(0);
   var typeModifier = options.modifier || defaultTypeModifier.slice(0);

@@ -1,9 +1,9 @@
 //printf must be imported with a fixed signature:
-int printf(int x,long int y);
+int printf(int x,long y);
 
 /* 
   it needs a single argument after the format string.
-  the argument is converted to long int automatically,
+  the argument is converted to long automatically,
   except for floats, that keeps the bit pattern.
 
   only the following format strings are recognized by the

@@ -1,9 +1,9 @@
 
 int main(int x){
- char     *a;
- int      *i;
- short int*h;
- double   *d;
+ char  *a;
+ int   *i;
+ short *h;
+ double*d;
  a="abcd";
  i=4;
  i[0]=01020304;

@@ -1,6 +1,6 @@
 // most of the math functions that js contains can be imported directly.
 double cos(double x);
-int printf(int x,long int y);
+int printf(int x,long y);
 
 int main(int x){
  printf("cos(0)=%lf\n",cos(0));
