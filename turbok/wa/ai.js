@@ -45,7 +45,8 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
                                          :(G[a[1]]=(a0=="j"?0n:0)))
   :a0.includes(":")?c.push(["ical",a0])
   :c.push(a)
- });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],H:[0,1],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function)
+  if(a.length>1&&a[a.length-1].startsWith("@"))c[c.length-1]["@"]=Number(a[a.length-1].slice(1))
+ });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],H:[0,1],B:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function) H(heapmarks) B(breakpoints)
 /*o-p-s*/
 let ops={
 ezi:1,eqi:2,nei:2,lti:2,ltu:2,gti:2,gtu:2,lei:2,leu:2,gei:2,geu:2,ezj:1,eqj:2,nej:2,ltj:2,ltl:2,
@@ -64,30 +65,31 @@ let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s]
 let exit=m=>{throw new Error("exit")}
 let ret=m=>{m.C.length>1?[m.f,m.l]=m.C.pop():(m.exit=1,exit())}
 let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
-let scal=(f,m)=>{m.C.push([m.f,m.l]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
+let scal=(f,m,ad)=>{m.C.push([m.f,m.l,"@"+ad]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
 let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
 let heap=(m,o,s)=>{if((s=o.startsWith("st"))||o.startsWith("ld"))m.H=[m.S[m.S.length-1-s],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8}[o[2]]]} //store heap access
 
 let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
  if(!m.C.length)m.C.push([m.f,0])
- let a=F.c[m.l],a0=a[0],a1=a[1],x
- let icl=(x,s,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m)}
+ let a=F.c[m.l],a0=a[0],a1=a[1],ad=a["@"],x
+ let icl=(x,s,ad,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m,ad)}
    "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
  :   "get"==a0?m.S.push(F.lo[a1])
  :   "set"==a0?F.lo[a1]=m.S.pop()
  :   "tee"==a0?F.lo[a1]=m.S[m.S.length-1]
  :   "glo"==a0?m.S.push(m.G[a1])
  :   "gst"==a0?m.G[a1]=m.S.pop()
- :   "cal"==a0?cal(a1,m)
+ :   "cal"==a0?cal(a1,m,ad)
  :    "if"==a0?(m.l+=m.S.pop()?0:a1)
  : "donot"==a0?(m.l+=m.S.pop()?(a[2]?m.S.pop():0,a1):0)   //end after do
  :"switch"==a0?(x=m.S.pop(),m.l+=(x==0?0:(x>0&&x<a1)?a[1+x]:a[a1]))
  :   "jmp"==a0?m.l+=a1                          //else break continue endcase end
  :   "nop"==a0?0                                //do while
- :  "ical"==a0?icl(m.S.pop(),a1)
+ :  "ical"==a0?icl(m.S.pop(),a1,ad)
  :  "ret"==a0?ret(m)
  :(heap(m,a0),op(m,a0))}
 
+let runto=m=>{if(m.exit)return;if(m.B.includes(line(m)))step(m,1);do{if(m.B.includes(line(m)))return;step(m,0)}while(1)}
 let run=(f,a,m)=>{m.f=f,m.l=0,a.forEach((v,i)=>m.F[f].lo[i]=v);try{ while(1)step(m,0) }catch(e){ if(e.message=="exit"){if(m.S.length)return m.S[0]}else{throw(e)} }}
 let line=x=>x.l+x.F[x.f].l
-return{parse:parse,step:step,run:run,line:line}})()
+return{parse:parse,step:step,run:run,runto:runto,line:line}})()

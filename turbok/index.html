@@ -14,6 +14,7 @@
 .hidden{display:none}
 .h1{flex-grow:1}
 .h2{flex-grow:2.57}
+.breakpoint{border-left:0.2em solid red}
 .tui-dropdown:focus{background:#00a800;outline:none}
 .tui-dropdown li:focus{background:#00a800;outline:none}
 .tui-dropdown:focus>.tui-dropdown-content:first-of-type{display:block}
@@ -84,7 +85,8 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
     <div class="tui-dropdown-content">
     <ul>
      <li tabindex="19" onclick="run()"> <a href="#!"> <span class="red-168-text">R</span>un <span class="tui-shortcut">Ctrl+F9</span></a> </li>
-     <li tabindex="21" onclick="nyi('goto')"> <a href="#!"> <span class="red-168-text">G</span>oto cursor <span class="tui-shortcut">F4</span> </a> </li>
+     <li tabindex="20" onclick="runto()"> <a href="#!"> <span class="red-168-text">G</span>oto cursor <span class="tui-shortcut">F4</span> </a> </li>
+     <li tabindex="21" onclick="unbreak()"> <a href="#!"> Re<span class="red-168-text">m</span>ove all breakpoints</a> </li>
      <li tabindex="22" onclick="traceinto()"> <a href="#!"> <span class="red-168-text">T</span>race into<span class="tui-shortcut">F7</span> </a> </li>
      <li tabindex="23" onclick="stepover()"> <a href="#!"> <span class="red-168-text">S</span>tep over <span class="tui-shortcut">F8</span> </a> </li>
      <li tabindex="24" onclick="run(1)"> <a href="#!"> Run t<span class="red-168-text">e</span>sts <span class="tui-shortcut">F10</span> </a> </li>
@@ -100,7 +102,6 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
     </ul>
     </div>
    </li>
-   <li id="dmenu" class="tui-dropdown"> <span class="red-168-text">D</span>ebug <!--Inspect... Alt-F4 Evaluate/modify... Ctrl+F4 Call stack... Ctrl-F3 Watches→ Toggle breakpoint Ctrl-F8 Breakpoints... --> <!--Add watch... Ctrl-F7 Delete watch Edit watch... Remove all watches--> </li>
    <li id="hmenu" onclick="help()" class="tui-dropdown" style="float:right;margin-left:10px"> <span class="red-168-text">H</span>elp </li>
   </ul>
  </nav>
@@ -116,7 +117,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
       <!--span class="tui-fieldset-text top right" style="margin-right: 50px">1</span-->
       <!--span class="tui-fieldset-text" style="margin-left: 50px;">&nbsp;main:0&nbsp;</span-->
       <!--textarea id="ea" class="tui-textarea full-width full-height" style="overflow:scroll;" spellcheck="false"></textarea-->
-      <select id="ea" onclick="locate(1)" size="9" class="tui-textarea full-width full-height" style="overflow:scroll"></select>
+      <select id="ea" onclick="locate(1)" ondblclick="setbreak()" size="9" class="tui-textarea full-width full-height" style="overflow:scroll"></select>
      </fieldset>
     </div>
    </div>
@@ -149,7 +150,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
   <div id="wd" class="tui-window full-width h1 tui-no-shadow cyan-168 hidden" style="flex-grow:0">
    <fieldset class="tui-fieldset full-height" style="padding:0">
     <legend class="center">&nbsp;DEBUG&nbsp;</legend>
-    <!--span class="tui-fieldset-button" onclick="fullcol(this)"><span class="green-255-text">↕</span></span-->
+    <span class="tui-fieldset-button" onclick="hide(wd)"><span class="green-255-text">✖</span></span>
     <span class="tui-fieldset-button left" onclick="fullscr(this)"><span class="green-255-text">■</span></span>
     <div class="tui-content" style="height:100%">
      <table class="tui-table-grid" id="debugtable" style="height:100%">
@@ -223,6 +224,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
     <option>aray.c</option>
     <option>malo.c</option>
     <option>prnt.c</option>
+    <option>call.c</option>
     <option>libm.c</option>
     <option>swtc.a</option>
    </select>
@@ -336,9 +338,12 @@ fileopen=async _=>{
  loadfile(f.name,t,h)
 },
 nyi=x=>{throw new Error("nyi"+(x?" "+x:""))},
-run=t=>{clr();compile();exec(t)},
+run=t=>{compile();exec(t)},
 stepover =_=>{(!ea.value)?compile():step(1);showstep()},
 traceinto=_=>{(!ea.value)?compile():step(0);showstep()},
+runto=_=>{if(!ea.value)compile();if(D.B.length){ai.runto(D);showstep()}else O("no breakpoints: double click asm to add breaks\n")},
+setbreak=_=>{if(ea.selectedOptions[0].classList.toggle("breakpoint"))D.B.push(ea.selectedIndex);else D.B=D.B.filter(x=>x!=ea.selectedIndex)},
+unbreak=_=>{if(D)D.B=[];Array.from(ea.options).forEach(x=>x.classList.remove("breakpoint"))},
 handle=(e,f)=>{e.preventDefault();f()},
 mark=w=>e=>{e=w.querySelector("legend");if(!e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim()+"*&nbsp;"},
 unmark=w=>{let e=w.querySelector("legend");if(e.textContent.trim().endsWith("*"))e.innerHTML="&nbsp;"+e.textContent.trim().slice(0,-1)+"&nbsp;"},
@@ -358,6 +363,7 @@ window.onkeydown=e=>
  :("F1"==e.key)?handle(e,help)
  :("F2"==e.key)?handle(e,save)
  :("F3"==e.key)?handle(e,fileopen)
+ :("F4"==e.key)?handle(e,runto)
  :("F7"==e.key)?handle(e,traceinto)
  :("F8"==e.key)?handle(e,stepover)
  :("F9"==e.key&&e.ctrlKey)?handle(e,run)
@@ -378,6 +384,16 @@ let accel={
  cmenu:{
   "c":x=>compile(),
   "w":savewasm,
+ },
+ rmenu:{
+  "r":run,
+  "g":runto,
+  "m":unbreak,
+  "t":traceinto,
+  "s":stepover,
+  "e":x=>run(1),
+  //"f":
+  //"a":
  },
 }
 
@@ -407,14 +423,14 @@ let exec=t=>{
  else O("exit "+I.exports.main(0)+"\n")
 }
 let wasm=0 //compiled binary
-let compile=_=>{let x=file.name.slice(-1);wasm=0;
+let compile=_=>{clr();let x=file.name.slice(-1);wasm=0;
   (x=="a")?asm(ed.value)
  :(x=="b")?O("$ab "+file.name+"\nnyi\n")
  :(x=="c")?(O("$ac "+file.name+"\n"),asm(ac(ed.value)))
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="heap.c";loadexample()
+examplelist.value="call.c";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
@@ -434,16 +450,16 @@ let sy=(s,x)=>((x.style=s),x)
 
 let step=o=>{try{ai.step(D,o)}catch(e){if("exit"==e.message&&1==D.S.length)O("exit "+D.S.pop()+"\n");else throw(e)}}
 let showstep=u=>{wd.classList.remove("hidden");ea.selectedIndex=ai.line(D)
- let lo=D.F[D.f].lo;
- funcinfo.textContent=D.f+"\n"+Object.keys(lo).map(x=>x+": "+lo[x]).join("\n")
- if(D.exit)funcinfo.insertBefore(sy("background:black;color:white;font-weight:bold",ih("terminated<br/>",ce("span"))),funcinfo.firstChild)
- vstack.innerHTML="";D.S.forEach(x=>vstack.insertBefore(tc(x,ce("option")),vstack.firstChild));vstack.selectedIndex=0
- cstack.innerHTML="";D.C.forEach(x=>cstack.insertBefore(tc(x.join(" "),ce("option")),cstack.firstChild));cstack.selectedIndex=0
- globinfo.textContent=Object.keys(D.G).map(x=>x+": "+D.G[x]).join("\n")
+ let lo=D.F[D.f].lo,a=+addr.value,s=+datasize.value,f=dataformat.value,
+ fmt=x=>("%c"==f&&x>31&&x<127)?String.fromCharCode(x):("bigint"==typeof x)?("%u"==f?BigInt.asUintN(64,x).toString():"%x"==f?x.toString(16).padStart(16,'0'):x.toString()):(x==x>>0||x==x>>>0)?("%u"==f?(x>>>0).toString():"%x"==f?(x>>>0).toString(16).padStart(8,'0'):x.toString()):x.toString()
 
+ funcinfo.textContent=D.f+"\n"+Object.keys(lo).map(x=>x+": "+fmt(lo[x])).join("\n")
+ if(D.exit)funcinfo.insertBefore(sy("background:black;color:white;font-weight:bold",ih("terminated<br/>",ce("span"))),funcinfo.firstChild)
+ vstack.innerHTML="";D.S.forEach(x=>vstack.insertBefore(tc(fmt(x),ce("option")),vstack.firstChild));vstack.selectedIndex=0
+ cstack.innerHTML="";D.C.forEach(x=>cstack.insertBefore(tc(x.join(" "),ce("option")),cstack.firstChild));cstack.selectedIndex=0;cstack.onclick=(e,i)=>((i=adloc(cstack.value))>=0?(ed.selectionStart=i,ed.selectionEnd=i,ed.focus()):0)
+ globinfo.textContent=Object.keys(D.G).map(x=>x+": "+fmt(D.G[x])).join("\n")
  if(u==undefined){addr.value=D.H[0];datasize.value=D.H[1]}
 
- let a=+addr.value,s=+datasize.value,f=dataformat.value
  u=(s==1&&f!="%d")?new     Uint8Array(D.A.memory.buffer)
   :(s==1)         ?new      Int8Array(D.A.memory.buffer)
   :(s==2&&f=="%d")?new     Int16Array(D.A.memory.buffer)
