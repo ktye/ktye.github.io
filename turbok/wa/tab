@@ -158,6 +158,8 @@ z f -                    zof  [0xfd,0x14,0x41,0,0xb7,0xfd,0x22,1]
 f z -                    foz  [0xfd,0x21,0]
 f z -                    imz  [0xfd,0x21,1]
 z f -                    zrr  [0xfd,0x14]
+- iz -                   stz  [0xfd,0x0b,4,0]
+z i -                    ldz  [0xfd,0,4,0]
 
 i i i32.load             ldi  [0x28,2,0]
 j i i64.load             ldj  [0x29,3,0]

@@ -59,19 +59,19 @@ xoj:2,slj:2,srj:2,srl:2,rlj:2,rrj:2,abe:1,nge:1,cee:1,fle:1,tre:1,nae:1,sqe:1,ad
 dve:2,mie:2,mae:2,cse:2,abf:1,ngf:1,cef:1,flf:1,trf:1,naf:1,sqf:1,adf:2,suf:2,muf:2,dvf:2,mif:2,
 maf:2,csf:2,ioj:1,ioe:1,uoe:1,iof:1,iou:1,joi:1,jou:1,joe:1,loe:1,jof:1,lof:1,eoi:1,eou:1,eoj:1,
 eol:1,eof:1,foi:1,fou:1,foj:1,fol:1,foe:1,ire:1,jrf:1,eri:1,frj:1,ixg:1,ixh:1,jxg:1,jxh:1,jxi:1,
-ngi:1,ngj:1,adz:2,suz:2,scz:2,eqz:2,nez:2,ngz:1,zoi:1,zoj:1,zoe:1,zof:1,foz:1,imz:1,zrr:1,ldi:1,
-ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,sth:2,siz:0,grw:1,cpy:3,
-fil:3,}
+ngi:1,ngj:1,adz:2,suz:2,scz:2,eqz:2,nez:2,ngz:1,zoi:1,zoj:1,zoe:1,zof:1,foz:1,imz:1,zrr:1,stz:2,
+ldz:1,ldi:1,ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,sth:2,siz:0,
+grw:1,cpy:3,fil:3,}
 /*o-p-s*/
 
 let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
-let zop=(m,o,f,n)=>(f={adz:(x,y)=>[x[0]+y[0],x[1]+y[1]],suz:(x,y)=>[x[0]-y[0],x[1]-y[1]],scz:(x,y)=>[x[0]*y[0],x[1]*y[1]],eqz:(x,y)=>(x[0]==y[0]&&x[1]==y[1]),nez:(x,y)=>(x[0]!=y[0]||x[1]!=y[1]),ngz:x=>[-x[0],-y[0]],zoi:x=>[x,0],zoj:x=>[x,0],zoe:x=>[x,0],zof:x=>[x,0],foz:x=>x[0],imz:x=>x[1],zrr:x=>[x,x]}[o],f?(n=ops[o],m.S.push(f(...m.S.splice(-n,n)))):0)
+let zop=(m,o,f,n)=>(f={adz:(x,y)=>[x[0]+y[0],x[1]+y[1]],suz:(x,y)=>[x[0]-y[0],x[1]-y[1]],scz:(x,y)=>[x[0]*y[0],x[1]*y[1]],eqz:(x,y)=>(x[0]==y[0]&&x[1]==y[1]),nez:(x,y)=>(x[0]!=y[0]||x[1]!=y[1]),ngz:x=>[-x[0],-y[0]],zoi:x=>[x,0],zoj:x=>[x,0],zoe:x=>[x,0],zof:x=>[x,0],foz:x=>x[0],imz:x=>x[1],zrr:x=>[x,x],stz:(x,y)=>(m.A.stf(x,y[0]),m.A.stf(x+8,y[1])),ldz:x=>[m.A.ldf(x),m.A.ldf(x+8)]}[o],f?(n=ops[o],o=f(...m.S.splice(-n,n)),((o!=undefined)?m.S.push(o):1),1):0)
 let exit=m=>{throw new Error("exit")}
 let ret=m=>{m.C.length>1?[m.f,m.l]=m.C.pop():(m.exit=1,exit())}
 let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
 let scal=(f,m,ad)=>{m.C.push([m.f,m.l,"@"+ad]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
 let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
-let heap=(m,o,s)=>{if((s=o.startsWith("st"))||o.startsWith("ld"))m.H=[m.S[m.S.length-1-s],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8}[o[2]]]} //store heap access
+let heap=(m,o,s)=>{if((s=o.startsWith("st"))||o.startsWith("ld"))m.H=[m.S[m.S.length-1-s],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8,z:8}[o[2]]]} //store heap access
 
 let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
  if(!m.C.length)m.C.push([m.f,0])
@@ -91,7 +91,7 @@ let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.le
  :   "nop"==a0?0                                //do while
  :  "ical"==a0?icl(m.S.pop(),a1,ad)
  :  "ret"==a0?ret(m)
- :zop(m,a0)?0:(heap(m,a0),op(m,a0))}
+ :(heap(m,a0),zop(m,a0)?0:op(m,a0))}
 
 let runto=m=>{if(m.exit)return;if(m.B.includes(line(m)))step(m,1);do{if(m.B.includes(line(m)))return;step(m,0)}while(1)}
 let run=(f,a,m)=>{m.f=f,m.l=0,a.forEach((v,i)=>m.F[f].lo[i]=v);try{ while(1)step(m,0) }catch(e){ if(e.message=="exit"){if(m.S.length)return m.S[0]}else{throw(e)} }}

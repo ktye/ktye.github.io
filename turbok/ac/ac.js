@@ -24,7 +24,7 @@ let ac=x=>{
   :(!o)?E("unknown operator: "+op)
   :"asn"==o?assign(x,y)
   :(ew(o,"?")||ew(o,"="))?dya(x,y,o,p):E("unknown operator: "+x)}
- let dyz=(x,y,o,c,f)=>((f="z"==x[0]),"ad? su? eq? ne?".includes(o))?(cas("z",f?y:x),O(f?x[1]:y[1]),O(o.slice(0,2)+"z"),"z"):("mu?"==o)?(O(f?y[1]:x[1]),O("zrr"),O(f?x[1]:y[1]),O("scz"),"z"):E("complex op not supported: "+o)
+ let dyz=(x,y,o,c,f)=>((f="z"==x[0]),"ad? su? eq? ne?".includes(o))?(cas("z",f?y:x),O(f?x[1]:y[1]),O(o.slice(0,2)+"z"),"z"):("mu?"==o)?(cas("f",f?y:x),O("zrr"),O(f?x[1]:y[1]),O("scz"),"z"):E("complex op not supported: "+o)
  let cas=(t,x)=>cast(t,{type:"asm",t:x[0],v:x[1]})
  let dya=(x,y,o,p,c)=>(c=ew(o,"="),x=emt(x),y=emt(y),t=t2(x[0],y[0]))?(cas(t,x),(ptr(y[0])&&(!c)?pts(y[0]):0),cas(t,y),(ptr(x[0])&&(!c)?pts(x[0]):0),O(String(o).slice(0,-1)+t,p),(c?"i":t)):dyz(x,y,o,c)
  let getset=x=>(x in args)?[args[x].t,"get "+args[x].i,"set "+args[x].i]:(x in locs)?[locs[x],"get "+x,"set "+x]:(x in globs)?[globs[x],"glo "+x,"gst "+x]:E("cannot locate variable: "+x)
