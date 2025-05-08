@@ -17,6 +17,7 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
  let isvar=x=>!"-0123456789".includes(x[0])
  let args =x=>{let r={};x.split("").forEach((t,i)=>r[i]="j"==t?0n:0);return r}
  let nest=[],addr=[],la=""
+ let cmpl=(x,a,p)=>(p=(a=x[1]?x[1]:0)/180*Math.PI,x=x[0],a==0?[x,0]:a==90?[0,x]:a==180?[-x,0]:a==270?[0,-x]:[x*Math.cos(p),x*Math.sin(p)])
  let n=0,s="",c=[],l=0,im="",lo={}
  let brk=(a,b)=>{while(++a<b)if(c[a][0]=="break")c[a]=["jmp",b-a]}                   //fix break offset
  let cnt=(a,b,i)=>{i=a;while(++a<b)if(c[a][0]=="continue")c[a]=["jmp",i-a];return i} //fix continue
@@ -42,7 +43,7 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
                                            :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n   ):c.push(["const",BigInt(a1)]))
                                            :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
                                            :"f"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
-					   :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=[0,0]):c.push(["const",Number(a1),Number(a[2])])))
+					   :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=[0,0]):c.push(["const",cmpl(a1.split("a").map(Number))])))
                                           :(G[a[1]]=(a0=="j"?0n:0)))
   :a0.includes(":")?c.push(["ical",a0])
   :c.push(a)
@@ -64,6 +65,7 @@ fil:3,}
 /*o-p-s*/
 
 let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
+let zop=(m,o,f,n)=>(f={adz:(x,y)=>[x[0]+y[0],x[1]+y[1]],suz:(x,y)=>[x[0]-y[0],x[1]-y[1]],scz:(x,y)=>[x[0]*y[0],x[1]*y[1]],eqz:(x,y)=>(x[0]==y[0]&&x[1]==y[1]),nez:(x,y)=>(x[0]!=y[0]||x[1]!=y[1]),ngz:x=>[-x[0],-y[0]],zoi:x=>[x,0],zoj:x=>[x,0],zoe:x=>[x,0],zof:x=>[x,0],foz:x=>x[0],imz:x=>x[1],zrr:x=>[x,x]}[o],f?(n=ops[o],m.S.push(f(...m.S.splice(-n,n)))):0)
 let exit=m=>{throw new Error("exit")}
 let ret=m=>{m.C.length>1?[m.f,m.l]=m.C.pop():(m.exit=1,exit())}
 let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
@@ -75,7 +77,7 @@ let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.le
  if(!m.C.length)m.C.push([m.f,0])
  let a=F.c[m.l],a0=a[0],a1=a[1],ad=a["@"],x
  let icl=(x,s,ad,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m,ad)}
-   "const"==a0?m.S.push(a1)                    //ief(Number) j(BigNum)
+   "const"==a0?m.S.push(a1)                    //iefz(Number) j(BigNum)
  :   "get"==a0?m.S.push(F.lo[a1])
  :   "set"==a0?F.lo[a1]=m.S.pop()
  :   "tee"==a0?F.lo[a1]=m.S[m.S.length-1]
@@ -89,7 +91,7 @@ let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.le
  :   "nop"==a0?0                                //do while
  :  "ical"==a0?icl(m.S.pop(),a1,ad)
  :  "ret"==a0?ret(m)
- :(heap(m,a0),op(m,a0))}
+ :zop(m,a0)?0:(heap(m,a0),op(m,a0))}
 
 let runto=m=>{if(m.exit)return;if(m.B.includes(line(m)))step(m,1);do{if(m.B.includes(line(m)))return;step(m,0)}while(1)}
 let run=(f,a,m)=>{m.f=f,m.l=0,a.forEach((v,i)=>m.F[f].lo[i]=v);try{ while(1)step(m,0) }catch(e){ if(e.message=="exit"){if(m.S.length)return m.S[0]}else{throw(e)} }}
