@@ -14,9 +14,9 @@ lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&
 
 sect=(x,y)=>(y.length&&y[0]!=0)?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
-typs={"":0,g:1,i:127,j:126,e:125,f:124},
+typs={"":0,g:1,i:127,j:126,e:125,f:124,z:123},
 expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
-locs=x=>{let t={};Object.values(x.lo).forEach(x=>t[x]=(x in t?1+t[x]:1));let r=vect(Object.keys(t).map(x=>[...lebu(t[x]),Number(x)]));return r},
+locs=x=>{let t=new Map();Object.values(x.lo).forEach(x=>t.set(x,(t.has(x)?1+t.get(x):1)));let r=vect([...t.keys()].map(x=>[...lebu(t.get(x)),Number(x)]));return r},
 asci=x=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0))],
 iota=x=>Array(x).fill(0).map((_,i)=>i),
 hexa=x=>x.match(/.{1,2}/g).map(x=>parseInt(x,16)),
@@ -31,8 +31,9 @@ xoj:0x85,slj:0x86,srj:0x87,srl:0x88,rlj:0x89,rrj:0x8a,abe:0x8b,nge:0x8c,cee:0x8d
 dve:0x95,mie:0x96,mae:0x97,cse:0x98,abf:0x99,ngf:0x9a,cef:0x9b,flf:0x9c,trf:0x9d,naf:0x9e,sqf:0x9f,adf:0xa0,suf:0xa1,muf:0xa2,dvf:0xa3,mif:0xa4,
 maf:0xa5,csf:0xa6,ioj:0xa7,ioe:0xa8,uoe:0xa9,iof:0xaa,iou:0xab,joi:0xac,jou:0xad,joe:0xae,loe:0xaf,jof:0xb0,lof:0xb1,eoi:0xb2,eou:0xb3,eoj:0xb4,
 eol:0xb5,eof:0xb6,foi:0xb7,fou:0xb8,foj:0xb9,fol:0xba,foe:0xbb,ire:0xbc,jrf:0xbd,eri:0xbe,frj:0xbf,ixg:0xc0,ixh:0xc1,jxg:0xc2,jxh:0xc3,jxi:0xc4,
-ngi:[65,127,108],ngj:[66,127,127],drp:0x1a,sel:0x1b,ret:0x0f,ldi:[0x28,2,0],ldj:[0x29,3,0],lde:[0x2a,2,0],ldf:[0x2b,3,0],ldg:[0x2c,0,0],ldb:[0x2d,0,0],ldh:[0x2e,1,0],lds:[0x2f,1,0],sti:[0x36,2,0],stj:[0x37,3,0],ste:[0x38,2,0],
-stf:[0x39,3,0],stg:[0x3a,0,0],sth:[0x3b,1,0],siz:[0x3f,0],grw:[0x40,0],cpy:[0xfc,10,0,0],fil:[0xfc,11,0],}
+ngi:[65,127,108],ngj:[66,127,127],drp:0x1a,sel:0x1b,ret:0x0f,adz:[0xfd,0xf0,1],suz:[0xfd,0xf1,1],scz:[0xfd,0xf2,1],eqz:[0xfd,0x41,0xfd,0xc3,1],nez:[0xfd,0x42,0xfd,0x53],ngz:[0xfd,0xed,1],zoi:[0xb7,0xfd,0x14,0x41,0,0xb7,0xfd,0x22,1],zoj:[0xb9,0xfd,0x14,0x41,0,0xb7,0xfd,0x22,1],zoe:[0xbb,0xfd,0x14,0x41,0,0xb7,0xfd,0x22,1],zof:[0xfd,0x14,0x41,0,0xb7,0xfd,0x22,1],foz:[0xfd,0x21,0],
+imz:[0xfd,0x21,1],zrr:[0xfd,0x14],ldi:[0x28,2,0],ldj:[0x29,3,0],lde:[0x2a,2,0],ldf:[0x2b,3,0],ldg:[0x2c,0,0],ldb:[0x2d,0,0],ldh:[0x2e,1,0],lds:[0x2f,1,0],sti:[0x36,2,0],stj:[0x37,3,0],ste:[0x38,2,0],stf:[0x39,3,0],stg:[0x3a,0,0],sth:[0x3b,1,0],
+siz:[0x3f,0],grw:[0x40,0],cpy:[0xfc,10,0,0],fil:[0xfc,11,0],}
 /*o-p-s*/
 
 return(x=>{
@@ -40,35 +41,37 @@ return(x=>{
  let a,n=0,narg=0,s,e="",imp=0,c=[],lo={},i,p=_=>((n?funs.push({sig:s,lo:lo,code:c,name:n,export:e,import:imp}):0),[n,s,e,imp,c,lo]=[0,"","",0,[],{}]),
  sigs=[],addsig=x=>(sigs.includes(x)?x:sigs.push(x),x), //e.g. ["i:ii",":ij",..]
  fns={},funs=[],       //{sig:"i:ii",code:[1,2,..],name:"a","export":"A"}
- glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[c,...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:127,c:[42,7,11],i:0}
+ lsrt=_=>lo=Object.fromEntries(Object.entries(lo).sort(([,a],[,b])=>b-a)), //group locs by type (decreasing) ijefz
+ glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[...[c],...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:127,c:[42,7,11],i:0}
  tabl=[],addtab=(i,s)=>(i!=tabl.length?E(line,"index error"):(s in fns)?tabl[i]=fns[s]:E(line,"unknown function: "+s)),
  data=[],adddat=(i,s)=>(data.filter(x=>i==x.o+x.d.length).length?data[data.length-1].d.push(...hexa(s)):data.push({o:i,d:hexa(s)})), //{o:1,d:[1,2,3,4]}
  swtc=[],sw,sc,nest=[],whdo=_=>nest.length-nest.lastIndexOf("whdo")-1
  l=x.split("\n");
  l.forEach((x,line)=>{x=x.trim().split(" ");if(1<x.length&&x[1].includes(":")){fns[x[0]]=Object.keys(fns).length;addsig(x[1])}})
  l.forEach((x,line)=>{
-  let im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1],
-  numvar=(x,b)=>"-0123456789".includes(x[0])?(b?BigInt(x):parseFloat(x)):x,
+  let im=x=>(2>x.length)?E(line,x[0]+" expect immediate"):x[1],cmpl=(x,a,p)=>(p=(a=x[1]?x[1]:0)/180*Math.PI,x=x[0],a==0?[x,0]:a==90?[0,x]:a==180?[-x,0]:a==270?[0,-x]:[x*Math.cos(p),x*Math.sin(p)]),
+  numvar=(x,b)=>"-0123456789".includes(x[0])?(x.includes("a")?cmpl(x.split("a").map(parseFloat)):b?BigInt(x):parseFloat(x)):x,
   int=a=>Number.isInteger(a)?a:E(line,"expect integer"),int1=a=>int(Number(im(a))),
-  lup=(x,g)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
+  lup=(x,g,r)=>lebu(int("0123456789".includes(x[0])?Number(x[0]):g?(x in glob?glob[x].i:E(line,"global undefined")):(x in lo)?narg+Object.keys(lo).indexOf(x):E(line,"local undefined")))
   x=x.trim();if(x.length){a=(x.includes(" ")?x.split(" "):[x]);
    ((1<a.length)&&(a[1].includes(":")))?(p(),n=a[0],s=a[1],narg=s.length-s.indexOf(":")-1,e=(a[2]==="export"?a[3]:""),imp=(a[2]==="import"?a.slice(3):0))
    :(a[0]in ops)?(Array.isArray(ops[a[0]])?c.push(...ops[a[0]]):c.push(ops[a[0]]))
    :(3==a[0].length&&(i="get set tee glo gst ".indexOf(a[0]+" "))>=0)?c.push(32+i/4,...lup(im(a),2<i/4))
-   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=127):addglo(127,65,a[1])):c.push(65,...lebs(int(i)))))
-   :"j"==a[0]?(("string"==typeof(i=numvar(im(a),1))?(s?(lo[a[1]]=126):addglo(126,66,a[1])):c.push(66,...lebn(i))))
-   :"e"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=125):addglo(125,67,a[1])):c.push(67,...new Uint8Array(new Float32Array([i]).buffer))))
-   :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lo[a[1]]=124):addglo(124,68,a[1])):c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))
-   :"if"==a[0]?(nest.push("if"),c.push(4,[64,127,126,125,124][1+"ijef".indexOf(a[1])]))
+   :"i"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lsrt(lo[a[1]]=127)):addglo(127,[65],a[1]))    :c.push(65,...lebs(int(i)))))
+   :"j"==a[0]?(("string"==typeof(i=numvar(im(a),1))?(s?(lsrt(lo[a[1]]=126)):addglo(126,[66],a[1]))    :c.push(66,...lebn(i))))
+   :"e"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lsrt(lo[a[1]]=125)):addglo(125,[67],a[1]))    :c.push(67,...new Uint8Array(new Float32Array([i]).buffer))))
+   :"f"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lsrt(lo[a[1]]=124)):addglo(124,[68],a[1]))    :c.push(68,...new Uint8Array(new Float64Array([i]).buffer))))
+   :"z"==a[0]?(("string"==typeof(i=numvar(im(a),0))?(s?(lsrt(lo[a[1]]=123)):addglo(123,[253,12],a[1])):c.push(253,12,...new Uint8Array(new Float64Array(i).buffer))))
+   :"if"==a[0]?(nest.push("if"),c.push(4,[64,127,126,125,124,123][1+"ijefz".indexOf(a[1])]))
    :"else"==a[0]?c.push(5)
    :"end"==a[0]?(i=nest.pop(),i=="do"?c.push(13,0,11):i=="whdo"?c.push(12,0,11,11):i=="swtc"?c.push(12,0,11):c.push(11))
    :a[0].includes(":")?(addsig(a[0]),c.push(17,...lebu(sigs.indexOf(a[0])),0))
    :"cal"==a[0]?c.push(16,...lebu(a[1] in fns?fns[a[1]]:E(line,"undefined function: "+a[1])))
    :"while"==a[0]?(nest.push("while"),c.push(2,64,3,64))
-   :"do" ==a[0]?((nest[nest.length-1]==="while")?(nest[nest.length-1]="whdo",c.push(69,13,1)):(nest.push("do"),c.push(3,[64,127,126,125,124]["ijef".indexOf(a[1])+1])))
+   :"do" ==a[0]?((nest[nest.length-1]==="while")?(nest[nest.length-1]="whdo",c.push(69,13,1)):(nest.push("do"),c.push(3,[64,127,126,125,124,123]["ijefz".indexOf(a[1])+1])))
    :"break"==a[0]?c.push(12,1+whdo())
    :"continue"==a[0]?c.push(12,whdo())
-   :"switch"==a[0]?(i=int1(a)-1,sw=sigs.indexOf(addsig(ss=("ijef".indexOf(a[2])>=0?a[2]:"")+":i")),sc=sigs.indexOf(addsig(":i")),nest.push("swtc"),swtc.push(i),c.push(2,...lebu(sw),...repa(1+i,[2,...lebu(sc)]),14,i,...iota(i),i,11))
+   :"switch"==a[0]?(i=int1(a)-1,sw=sigs.indexOf(addsig(ss=("ijefz".indexOf(a[2])>=0?a[2]:"")+":i")),sc=sigs.indexOf(addsig(":i")),nest.push("swtc"),swtc.push(i),c.push(2,...lebu(sw),...repa(1+i,[2,...lebu(sc)]),14,i,...iota(i),i,11))
    :"endcase"==a[0]?(i=swtc[swtc.length-1]--,c.push(12,i,11))
    :"tab"==a[0]?(p(),addtab(int1(a),a[2]))
    :"dat"==a[0]?(p(),adddat(int1(a),a[2]))

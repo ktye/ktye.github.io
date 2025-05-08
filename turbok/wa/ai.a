@@ -464,6 +464,50 @@ ngi i:i export ngi
 ngj j:j export ngj
  get 0
  ngj
+adz z:zz export adz
+ get 0
+ get 1
+ adz
+suz z:zz export suz
+ get 0
+ get 1
+ suz
+scz z:zz export scz
+ get 0
+ get 1
+ scz
+eqz i:zz export eqz
+ get 0
+ get 1
+ eqz
+nez i:zz export nez
+ get 0
+ get 1
+ nez
+ngz z:z export ngz
+ get 0
+ ngz
+zoi z:i export zoi
+ get 0
+ zoi
+zoj z:j export zoj
+ get 0
+ zoj
+zoe z:e export zoe
+ get 0
+ zoe
+zof z:f export zof
+ get 0
+ zof
+foz f:z export foz
+ get 0
+ foz
+imz f:z export imz
+ get 0
+ imz
+zrr z:f export zrr
+ get 0
+ zrr
 ldi i:i export ldi
  get 0
  ldi

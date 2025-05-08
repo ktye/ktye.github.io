@@ -7,7 +7,7 @@ this stuff is worth it, you can buy me a beer in return.
 ktye/changes:
  dense format, pos:char(not file/line) 
  numeric literals as strings, allow suffix f,l, mark string literals
- use short/long as types not modifiers
+ use short/long as types not modifiers, add complex type
  parseBody: may omit {} after if/else/while/for
  switch: throw error (not implemented)
 */
@@ -20,7 +20,7 @@ var cparse = (function() {
  const suffixedOps = { "++":13, "--":13 };
  const rightToLeftAssociativity = { "1": true, "2": true, "12": true };
  const stringEscapes = { "a": "\a", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t", "v": "\v", "\\": "\\", "'": "'", "\"": "\"", "?": "\?" };
- const defaultTypeNames = ["void", "char", "short", "int", "long", "float", "double"];
+ const defaultTypeNames = ["void", "char", "short", "int", "long", "float", "double", "complex"];
  const defaultTypeModifier = ["signed", "unsigned",/* "short", "long",*/ "const", "struct", "enum"];
  return function(src, options) { var curr; var index = -1; options = options || {};
   var typeNames = options.types || defaultTypeNames.slice(0);
@@ -307,7 +307,7 @@ var cparse = (function() {
    unexpected("escape sequence");
   }
   function numberIncoming() { return curr && /[0-9]/.test(curr); }
-  function readNumber(keepBlanks) { var val = read(/[0-9\.fl]/, "Number", /[0-9]/, keepBlanks); return val /*parseFloat(val);*/ }
+  function readNumber(keepBlanks) { var val = read(/[0-9\.afl]/, "Number", /[0-9]/, keepBlanks); return val /*parseFloat(val);*/ }
   function identifierIncoming() { return curr && /[A-Za-z_]/.test(curr); }
   function readIdentifier(keepBlanks) { return read(/[A-Za-z0-9_]/, "Identifier", /[A-Za-z_]/, keepBlanks); }
   function read(reg, expected, startreg, keepBlanks) {

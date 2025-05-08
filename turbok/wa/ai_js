@@ -38,11 +38,12 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
                                              :la=="else"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //  (else)end
                                              :la==  "do"?c.push(["donot",c[i][1]-c.length,c[i][2]])                                            //    (do)end
                                              :swc(i,c.length))) //(switch)end 
-  :(1==a0.length&&"ijef".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-                                          :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n):c.push(["const",BigInt(a1)]))
-                                          :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-                                          :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)])))
-                                         :(G[a[1]]=(a0=="j"?0n:0)))
+  :(1==a0.length&&"ijefz".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+                                           :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n   ):c.push(["const",BigInt(a1)]))
+                                           :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+                                           :"f"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+					   :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=[0,0]):c.push(["const",Number(a1),Number(a[2])])))
+                                          :(G[a[1]]=(a0=="j"?0n:0)))
   :a0.includes(":")?c.push(["ical",a0])
   :c.push(a)
   if(a.length>1&&a[a.length-1].startsWith("@"))c[c.length-1]["@"]=Number(a[a.length-1].slice(1))

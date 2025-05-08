@@ -8,12 +8,12 @@ let ac=x=>{
  let ops={"+":"ad?","-":"su?","*":"mu?","/":"dv?","%":"mo?","=":"asn",
   "==":"eq=","!=":"ne=","<=":"le=",">=":"ge=","<":"lt=",">":"gt="}
  let mods="+ - * / % & << >> % ^ |".split(" ").map(x=>x+"=")
- let nt=(x,r)=>((r="?ijef".indexOf(x)),r=="?"?E("unknown type: "+x):r-1)
- let t2=(x,y)=>x==y?x:"ijef"[Math.max(nt(x),nt(y))]
- let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"?(x.modifier[0]=="long"?"long":x.modifier=="short"?"short":x.name):x.name)),(r="?vchijef"[1+["void","char","short","int","long","float","double"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
+ let nt=(x,r)=>((r="?ijefz".indexOf(x)),r=="?"?E("unknown type: "+x):r-1)
+ let t2=(x,y)=>x==y?x:("z"==x||"z"==y)?0:"ijefz"[Math.max(nt(x),nt(y))]
+ let tp=(x,r)=>("PointerType"==x.type)?tpp(x):((x=(x.name=="int"?(x.modifier[0]=="long"?"long":x.modifier=="short"?"short":x.name):x.name)),(r="?vchijefz"[1+["void","char","short","int","long","float","double","complex"].indexOf(x)]),r=="?"?E("unknown type: "+r):r)
  let tpp=(x,r)=>("Type"==x.target.type?tp(x.target).toUpperCase():E("unknown pointer type"))
- let ptr=t=>"VCHIJEF".includes(t)
- let pts=t=>((t="CHIJEF".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1][t]),O("sli")):0)
+ let ptr=t=>"VCHIJEFZ".includes(t)
+ let pts=t=>((t="CHIJEFZ".indexOf(t)),t>0?(O("i "+[0,1,2,3,2,1,4][t]),O("sli")):0)
  let unp=t=>ptr(t)?"i":"v"==t?"":t
  let E=x=>{throw new Error("ac:"+pos+": "+x)}
  let glob=(t,s)=>(O(tp(t)+" "+s),(globs[s]=tp(t)))
@@ -24,7 +24,9 @@ let ac=x=>{
   :(!o)?E("unknown operator: "+op)
   :"asn"==o?assign(x,y)
   :(ew(o,"?")||ew(o,"="))?dya(x,y,o,p):E("unknown operator: "+x)}
- let dya=(x,y,o,p,c)=>(c=ew(o,"="),x=emt(x),y=emt(y),t=t2(x[0],y[0]),cast(t,{type:"asm",t:x[0],v:x[1]}),(ptr(y[0])&&(!c)?pts(y[0]):0),cast(t,{type:"asm",t:y[0],v:y[1]}),(ptr(x[0])&&(!c)?pts(x[0]):0),O(String(o).slice(0,-1)+t,p),(c?"i":t))
+ let dyz=(x,y,o,c,f)=>((f="z"==x[0]),"ad? su? eq? ne?".includes(o))?(cas("z",f?y:x),O(f?x[1]:y[1]),O(o.slice(0,2)+"z"),"z"):("mu?"==o)?(O(f?y[1]:x[1]),O("zrr"),O(f?x[1]:y[1]),O("scz"),"z"):E("complex op not supported: "+o)
+ let cas=(t,x)=>cast(t,{type:"asm",t:x[0],v:x[1]})
+ let dya=(x,y,o,p,c)=>(c=ew(o,"="),x=emt(x),y=emt(y),t=t2(x[0],y[0]))?(cas(t,x),(ptr(y[0])&&(!c)?pts(y[0]):0),cas(t,y),(ptr(x[0])&&(!c)?pts(x[0]):0),O(String(o).slice(0,-1)+t,p),(c?"i":t)):dyz(x,y,o,c)
  let getset=x=>(x in args)?[args[x].t,"get "+args[x].i,"set "+args[x].i]:(x in locs)?[locs[x],"get "+x,"set "+x]:(x in globs)?[globs[x],"glo "+x,"gst "+x]:E("cannot locate variable: "+x)
  let incdec=(x,add,post,p,t,g,s)=>([t,g,s]=getset(x),O(g),O(t+" 1"),O(add?"adi":"sui",p),O(s,p),O(g,p),(post?(O(t+" 1",p),(O(add?"sui":"adi",p))):0),t)
  let suf=(x,o,g,s)=>(x.type!="Identifier")?E("suffix expr: expect identifier"):o=="++"?incdec(x.value,1,1,x.pos):o=="--"?incdec(x.value,0,1,x.pos):E("unknown suffix operator: "+o)
@@ -48,7 +50,6 @@ let ac=x=>{
   :E("cannot locate variable: "+x)
   return"v"	  
  }
- //let siz=t=>[0,1,2,4,8,4,8][1+[" chijef"].indexOf(t)]
  let index=(x,y,p,t,s)=>{if(x.type!="Identifier")E("index: expect identifier on lhs")
   return((t=look(x.value,p)),emit(y),pts(t),O("adi"),O("ld"+(t=t.toLowerCase())),t)}
  let look=(x,p,r)=>("continue"==x||"break"==x)?(O(x),"v")
@@ -57,7 +58,7 @@ let ac=x=>{
   :(x in globs)?(O("glo "+x,p),globs[x])
   :E("lookup: "+x)
  let locl=(s,t)=>(t=tp(t),O(unp(t)+" "+s),locs[s]=t,"v")
- let lite=(x,p)=>(O(ew(x,"f")?"e "+x.slice(0,-1):ew(x,"l")?"j "+x.slice(0,-1):x.includes(".")?"f "+x:"i "+x,p),A[A.length-1][0])
+ let lite=(x,p)=>(O(ew(x,"f")?"e "+x.slice(0,-1):ew(x,"l")?"j "+x.slice(0,-1):x.includes("a")?("z "+x):x.includes(".")?"f "+x:"i "+x,p),A[A.length-1][0])
  let slit=(x,p)=>(O("i "+((x in strings)?strings[x]:((strings[x]=top),(top+=1+x.length),top-1-x.length)),p),"C")
  let pf=(x,t)=>(t=emt(x),("e"==t[0]?(emit(x),O("ire"),O("jou")):"f"==t[0]?(emit(x),O("jrf")):cast("j",x))) //special case for e|f: dont auto cast but reinterpret to j
  let call=(f,a,p,t)=>{let fn=funcs[f];

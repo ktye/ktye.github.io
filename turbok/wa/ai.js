@@ -38,11 +38,12 @@ let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
                                              :la=="else"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //  (else)end
                                              :la==  "do"?c.push(["donot",c[i][1]-c.length,c[i][2]])                                            //    (do)end
                                              :swc(i,c.length))) //(switch)end 
-  :(1==a0.length&&"ijef".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-                                          :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n):c.push(["const",BigInt(a1)]))
-                                          :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)]))
-                                          :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=0 ):c.push(["const",Number(a1)])))
-                                         :(G[a[1]]=(a0=="j"?0n:0)))
+  :(1==a0.length&&"ijefz".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+                                           :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n   ):c.push(["const",BigInt(a1)]))
+                                           :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+                                           :"f"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+					   :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=[0,0]):c.push(["const",Number(a1),Number(a[2])])))
+                                          :(G[a[1]]=(a0=="j"?0n:0)))
   :a0.includes(":")?c.push(["ical",a0])
   :c.push(a)
   if(a.length>1&&a[a.length-1].startsWith("@"))c[c.length-1]["@"]=Number(a[a.length-1].slice(1))
@@ -57,8 +58,9 @@ xoj:2,slj:2,srj:2,srl:2,rlj:2,rrj:2,abe:1,nge:1,cee:1,fle:1,tre:1,nae:1,sqe:1,ad
 dve:2,mie:2,mae:2,cse:2,abf:1,ngf:1,cef:1,flf:1,trf:1,naf:1,sqf:1,adf:2,suf:2,muf:2,dvf:2,mif:2,
 maf:2,csf:2,ioj:1,ioe:1,uoe:1,iof:1,iou:1,joi:1,jou:1,joe:1,loe:1,jof:1,lof:1,eoi:1,eou:1,eoj:1,
 eol:1,eof:1,foi:1,fou:1,foj:1,fol:1,foe:1,ire:1,jrf:1,eri:1,frj:1,ixg:1,ixh:1,jxg:1,jxh:1,jxi:1,
-ngi:1,ngj:1,ldi:1,ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,sth:2,
-siz:0,grw:1,cpy:3,fil:3,}
+ngi:1,ngj:1,adz:2,suz:2,scz:2,eqz:2,nez:2,ngz:1,zoi:1,zoj:1,zoe:1,zof:1,foz:1,imz:1,zrr:1,ldi:1,
+ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,sth:2,siz:0,grw:1,cpy:3,
+fil:3,}
 /*o-p-s*/
 
 let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}

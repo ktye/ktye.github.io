@@ -224,6 +224,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
     <option>aray.c</option>
     <option>malo.c</option>
     <option>prnt.c</option>
+    <option>cplx.c</option>
     <option>call.c</option>
     <option>libm.c</option>
     <option>swtc.a</option>
@@ -430,7 +431,7 @@ let compile=_=>{clr();let x=file.name.slice(-1);wasm=0;
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="call.c";loadexample()
+examplelist.value="cplx.c";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
