@@ -59,6 +59,10 @@ wa(fn("add i:ii",ad(x,y)),fn("sub i:ii",su(x,y)))
 
 lo( )(c)(b)
 cn(a)(b)(c)
+fn("add:i:ii")
+wa("initialdata..",          //first arg may be the initial data section
+ fn("cos:f:f"),              //
+ fn("inc:i:i",ad(x,ic(1))))
 
 let o=[],p=(...x)=>(o.push(...x),x[0]),
 f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
@@ -76,9 +80,28 @@ f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
 [ ab, ng, ce, fl, tr, na, sq, mi, ma, cs]=[153,154,155,156,157,158,159,164,165,166].map(x=>f(x<<8)),
 io=x=>(p(167),0),fo=x=>(p(183),1),sz=x=>(p(63,0),0),gr=x=>(p(64,0),0),cp=x=>(p(252,10,0,0),-1),fi=x=>(p(252,11,0,0),-1),
 li=x=>(p(40,2,0),0),lf=x=>(p(43,3,0),1),lc=x=>(p(44,1,0),0),lb=x=>(p(45,1,0),0),st=(x,y)=>p(54+3*y,2+y,0),sc=(x,y)=>p(58,0,0)
-ec=x=>p(x)/*todo leb*/,ic=x=>(o.push(65),ec(x),0),
+eu=(x,b)=>{do{b=x&127;p((x>>>=7)?b|=128:b)}while(x)},
+ei=(x,b)=>{while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){p(b);break};p(b|128)}},
+ic=x=>(o.push(65),ei(x),0),
 fc=x=>(p(68,[...new Uint8Array(new Uint64Array([x]).buffer)]),1),
 lo=_=>(p(2,3),_=>(p(69,4,64),_=>p(14,0,11,11))),
 cn=_=>(p(4,64),_=>(p(5),_=>p(11)))
+
+sp=(x,y)=>x.split(y),
+ns=x=>sp(x,"").map(x=>x.charCodeAt(0)),
+ty=x=>[0,127,126,125,124][x],
+tp=x=>sp(".i.j.e.f",".").indexOf(x),
+fn=x=>(x={n:(x=sp(x,":"))[0],s:x[1]+":"+x[2],c:o},o=[],x),
+gl=(x,y)=>(x={n:x,t:y,c:o},o=[],x),
+ws=(x,y)=>(y.length&&y[0]!=0?p(x),eu(y.length),p(...y)):0, //section
+wv=x=>(eu(x.length),p(...x.flat())),                 //encode vector
+wx=x=>{},                                            //exports..
+wa=x=>{let m=ns(x.shift()),                          //data
+ f=x.filter(x=>x.s),                                 //funcs
+ s=f.map(x=>x.s).filter((x,i,a)=>i==a.indexOf(x)),   //signatures
+ n=f.map(x=>x.n),                                    //names
+ g=x.filter(x=>x.t),                                 //globals
+//...
+ return o}
 
 
