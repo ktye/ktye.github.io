@@ -85,10 +85,11 @@ ei=(x,b)=>{while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){p(b);break}
 ic=x=>(o.push(65),ei(x),0),
 fc=x=>(p(68,[...new Uint8Array(new Uint64Array([x]).buffer)]),1),
 lo=_=>(p(2,3),_=>(p(69,4,64),_=>p(14,0,11,11))),
-cn=_=>(p(4,64),_=>(p(5),_=>p(11)))
+cn=_=>(p(4,64),_=>(p(5),_=>p(11))),
+da=(x,y)=>[x,y], //da(offset,"str")
 
 sp=(x,y)=>x.split(y),
-ns=x=>sp(x,"").map(x=>x.charCodeAt(0)),
+ns=x=>[...eu(x.length),...sp(x,"").map(x=>x.charCodeAt(0))],
 ty=x=>[0,127,126,125,124][x],
 tp=x=>sp(".i.j.e.f",".").indexOf(x),
 fn=x=>(x={n:(x=sp(x,":"))[0],s:x[1]+":"+x[2],c:o},o=[],x),
@@ -96,12 +97,25 @@ gl=(x,y)=>(x={n:x,t:y,c:o},o=[],x),
 ws=(x,y)=>(y.length&&y[0]!=0?p(x),eu(y.length),p(...y)):0, //section
 wv=x=>(eu(x.length),p(...x.flat())),                 //encode vector
 wx=x=>{},                                            //exports..
-wa=x=>{let m=ns(x.shift()),                          //data
+wa=x=>{let d=x.filter(x=>x.length),                  //data
  f=x.filter(x=>x.s),                                 //funcs
+ F=f.filter(x=>x.c),                                 //funcs without imports
  s=f.map(x=>x.s).filter((x,i,a)=>i==a.indexOf(x)),   //signatures
  n=f.map(x=>x.n),                                    //names
  g=x.filter(x=>x.t),                                 //globals
 //...
+ o=[0,97,115,109,1,0,0,0]
+ ws(1,wv(s.map((x,r,a)=>([r,a]=sp(x,":"),[96,a.length,...sp(a,"").map(x=>ty(tp(x)),r.length,...sp(r,"").map(x=>ty(tp(x))))))))
+ ws(2,wv(f.filter(x=>!x.c).map(x=>[1,97,...ns(x.n),0,..eu(s.indexOf(x.s))])))  //imports
+ ws(3,wv(F.map(x=>eu(s.indexOf(x.s))))) //signature index list
+ ws(5,[1,0,1])          //memory 1seg,unshared,1block
+ ws(6,wv(g.map(x=>[ty(x.t),1,...x.c])))
+ ws(7,wv([...ns("memory"),2,0,...F.map((x,i)=>[...ns(x.n),0,...eu(i)]))) //export memory&all functions
+ //ws10
+ // sect(10,vect(funs.filter(x=>!x.import).map(x=>((x=[...locs(x),...x.code,11]),[...lebu(x.length),...x]))))
+ // locs=x=>{let t=new Map();Object.values(x.lo).forEach(x=>t.set(x,(t.has(x)?1+t.get(x):1)));let r=vect([...t.keys()].map(x=>[...lebu(t.get(x)),Number(x)]));return r}
+ //
+ if(x[0])ws(11,wv(d.map(x=>[0,65,...eu(x[0]),11,...ns(x[1])])))
  return o}
 
 
