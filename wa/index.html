@@ -8,9 +8,9 @@
 <body>
 <h1>wa</h1>
 <pre id="was" contenteditable style="background:#efe">
-wa(fn("add",pa("x","i"),pa("y","i"),ad(va(0),va(1))))
+wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y"))))
 </pre>
-<button onclick="out.textContent="";eval(was.textContent)">compile</button>
+<button onclick="out.textContent='';eval(was.textContent)">compile</button>
 <pre id="out" style="background:#fef">
 
 </pre>
@@ -18,6 +18,9 @@ wa(fn("add",pa("x","i"),pa("y","i"),ad(va(0),va(1))))
 <script src="wa.js"></script>
 <script>
 window.onerror=e=>out.textContent+=e+"\n"
+
+//eval(was.textContent)
+wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y"))))
 </script>
 
 </body></html>

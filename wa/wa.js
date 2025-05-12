@@ -80,7 +80,7 @@ f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
 [ ab, ng, ce, fl, tr, na, sq, mi, ma, cs]=[153,154,155,156,157,158,159,164,165,166].map(x=>f(x<<8)),
 io=x=>(p(167),0),fo=x=>(p(183),1),sz=x=>(p(63,0),0),gr=x=>(p(64,0),0),cp=x=>(p(252,10,0,0),-1),fi=x=>(p(252,11,0,0),-1),
 li=x=>(p(40,2,0),0),lf=x=>(p(43,3,0),1),lc=x=>(p(44,1,0),0),lb=x=>(p(45,1,0),0),st=(x,y)=>p(54+3*y,2+y,0),sc=(x,y)=>p(58,0,0)
-eu=(x,b)=>{do{b=x&127;p((x>>>=7)?b|=128:b)}while(x)},
+eu=(x,b,r)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r},
 ei=(x,b)=>{while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){p(b);break};p(b|128)}},
 ic=x=>(o.push(65),ei(x),0),
 fc=x=>(p(68,[...new Uint8Array(new Uint64Array([x]).buffer)]),1),
@@ -95,18 +95,20 @@ sp=(x,y)=>x.split(y?":":""),
 ns=x=>[...eu(x.length),...sp(x).map(x=>x.charCodeAt(0))],
 ty=x=>[0,127,126,125,124][1+x],
 tp=x=>sp("i:j:e:f",1).indexOf(x),
-fn=(x,...y)=>(x={n:x,s:Object.values(v).filter(x=>x.a).map(x=>x.t)+":"+y[y.length-1]},c:o,l:v},o=[],v={},x),
+fn=(x,...y)=>(x={n:x,s:Object.values(v).filter(x=>x.a).map(x=>x.t+":"+y[y.length-1]),c:o,l:v},o=[],v={},x),
 gl=(x,y)=>(x={n:x,t:y,c:o},o=[],x),
-ws=(x,y)=>y.length&&y[0]!=0?(p(x),eu(y.length),p(...y)):0, //section
-wv=x=>(eu(x.length),p(...x.flat())),                 //encode vector
+ws=(x,y)=>y.length&&y[0]!=0?(p(x,...eu(y.length),...y)):0, //section
+wv=x=>(p(...eu(x.length),...x.flat())),                 //encode vector
 wx=x=>{},                                            //exports..
-wa=x=>{let d=x.filter(x=>x.length),                  //data
+wa=(...x)=>{let d=x.filter(x=>x.length),                  //data
  f=x.filter(x=>x.s),                                 //funcs
  F=f.filter(x=>x.c),                                 //funcs without imports
  s=f.map(x=>x.s).filter((x,i,a)=>i==a.indexOf(x)),   //signatures
  n=f.map(x=>x.n),                                    //names
+// l=(f,x)=>Object.values(f.l).map(v=>v[x])
  g=x.filter(x=>x.t),                                 //globals
  v=(f,l)=>(l=Object.values(f.l),[eu(l.length),sp("ijef").map((t,i)=>(i=l.filter(x=>x.t==t).map(x=>x.i)),i.length?[i,ty(i)]:[])].flat())
+console.log("s",s)
  o=[0,97,115,109,1,0,0,0]
  ws(1,wv(s.map((x,r,a)=>([r,a]=sp(x,1),[96,a.length,...sp(a).map(x=>ty(tp(x))),r.length,...sp(r).map(x=>ty(tp(x)))]))))
  ws(2,wv(f.filter(x=>!x.c).map(x=>[1,97,...ns(x.n),0,...eu(s.indexOf(x.s))])))  //imports
