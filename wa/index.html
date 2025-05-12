@@ -7,6 +7,17 @@
 </head>
 <body>
 <h1>wa</h1>
+<pre id="was" contenteditable style="background:#efe">
+wa(fn("add",pa("x","i"),pa("y","i"),ad(va(0),va(1))))
+</pre>
+<button onclick="out.textContent="";eval(was.textContent)">compile</button>
+<pre id="out" style="background:#fef">
+
+</pre>
+
 <script src="wa.js"></script>
-abc
+<script>
+window.onerror=e=>out.textContent+=e+"\n"
+</script>
+
 </body></html>

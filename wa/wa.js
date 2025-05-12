@@ -84,7 +84,8 @@ eu=(x,b)=>{do{b=x&127;p((x>>>=7)?b|=128:b)}while(x)},
 ei=(x,b)=>{while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){p(b);break};p(b|128)}},
 ic=x=>(o.push(65),ei(x),0),
 fc=x=>(p(68,[...new Uint8Array(new Uint64Array([x]).buffer)]),1),
-as=(x,y)=>{if(!(x in v))v[x]={i:eu(Object.keys(v).length),t:y};p(33,...v[x])},
+pa=(x,y,l)=>(v[x]={i:eu(Object.keys(v).length),t:tp(y),a:!l},tp(y)),
+as=(x,y)=>(((!(x in v))?pa(x,y,1):0),p(33,...v[x].i),-1),
 va=x=>(p(32,...v[x].i),v[x].t),
 lo=_=>(p(2,3),_=>(p(69,4,64),_=>p(14,0,11,11))),
 cn=_=>(p(4,64),_=>(p(5),_=>p(11))),
@@ -92,11 +93,11 @@ da=(x,y)=>[x,y], //da(offset,"str")
 
 sp=(x,y)=>x.split(y?":":""),
 ns=x=>[...eu(x.length),...sp(x).map(x=>x.charCodeAt(0))],
-ty=x=>[0,127,126,125,124][x],
-tp=x=>sp(":i:j:e:f",1).indexOf(x),
-fn=x=>(x={n:(x=sp(x,1))[0],s:x[1]+":"+x[2],c:o,l:v},o=[],v={},x),
+ty=x=>[0,127,126,125,124][1+x],
+tp=x=>sp("i:j:e:f",1).indexOf(x),
+fn=(x,...y)=>(x={n:x,s:Object.values(v).filter(x=>x.a).map(x=>x.t)+":"+y[y.length-1]},c:o,l:v},o=[],v={},x),
 gl=(x,y)=>(x={n:x,t:y,c:o},o=[],x),
-ws=(x,y)=>(y.length&&y[0]!=0?p(x),eu(y.length),p(...y)):0, //section
+ws=(x,y)=>y.length&&y[0]!=0?(p(x),eu(y.length),p(...y)):0, //section
 wv=x=>(eu(x.length),p(...x.flat())),                 //encode vector
 wx=x=>{},                                            //exports..
 wa=x=>{let d=x.filter(x=>x.length),                  //data
@@ -107,12 +108,12 @@ wa=x=>{let d=x.filter(x=>x.length),                  //data
  g=x.filter(x=>x.t),                                 //globals
  v=(f,l)=>(l=Object.values(f.l),[eu(l.length),sp("ijef").map((t,i)=>(i=l.filter(x=>x.t==t).map(x=>x.i)),i.length?[i,ty(i)]:[])].flat())
  o=[0,97,115,109,1,0,0,0]
- ws(1,wv(s.map((x,r,a)=>([r,a]=sp(x,1),[96,a.length,...sp(a).map(x=>ty(tp(x)),r.length,...sp(r).map(x=>ty(tp(x))))))))
- ws(2,wv(f.filter(x=>!x.c).map(x=>[1,97,...ns(x.n),0,..eu(s.indexOf(x.s))])))  //imports
+ ws(1,wv(s.map((x,r,a)=>([r,a]=sp(x,1),[96,a.length,...sp(a).map(x=>ty(tp(x))),r.length,...sp(r).map(x=>ty(tp(x)))]))))
+ ws(2,wv(f.filter(x=>!x.c).map(x=>[1,97,...ns(x.n),0,...eu(s.indexOf(x.s))])))  //imports
  ws(3,wv(F.map(x=>eu(s.indexOf(x.s))))) //signature index list
  ws(5,[1,0,1])          //memory 1seg,unshared,1block
  ws(6,wv(g.map(x=>[ty(x.t),1,...x.c])))
- ws(7,wv([...ns("memory"),2,0,...F.map((x,i)=>[...ns(x.n),0,...eu(i)]))) //export memory&all functions
+ ws(7,wv([...ns("memory"),2,0,...F.map((x,i)=>[...ns(x.n),0,...eu(i)])])) //export memory&all functions
  ws(10,wv(F.map(x=>(x=[...v(F),...x.c,11]),[...eu(x.length),...x])))
  if(x[0])ws(11,wv(d.map(x=>[0,65,...eu(x[0]),11,...ns(x[1])])))
  return new Uint8Array(o)}
