@@ -10,17 +10,24 @@
 <pre id="was" contenteditable style="background:#efe">
 wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y"))))
 </pre>
-<button onclick="out.textContent='';eval(was.textContent)">compile</button>
+<button onclick="compile()">compile</button>
+<button onclick="download()">download</button>
 <pre id="out" style="background:#fef">
-
 </pre>
+<a id="dl" style="display:none"></a>
 
 <script src="wa.js"></script>
 <script>
 window.onerror=e=>out.textContent+=e+"\n"
 
+let u
+let O=x=>out.textContent+=x
+let xxd=x=>x.forEach((x,i)=>{if(i){if(0==i%4)O(" ");if(0==i%16)O(" ");if(0==i%32)O("\n")};O(x.toString(16).padStart(2,"0"))})
+let compile=x=>(out.textContent="",xxd(u=eval(was.textContent)))
+let download=()=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download="x.wasm";dl.click()}
+
 //eval(was.textContent)
-wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y"))))
+xxd(u=wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y")))))
 </script>
 
 </body></html>
