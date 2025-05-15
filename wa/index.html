@@ -12,22 +12,25 @@ wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y"))))
 </pre>
 <button onclick="compile()">compile</button>
 <button onclick="download()">download</button>
-<pre id="out" style="background:#fef">
-</pre>
+<pre id="out" style="background:#fef"></pre>
+<pre id="err" style="color:red"></pre>
 <a id="dl" style="display:none"></a>
 
 <script src="wa.js"></script>
 <script>
-window.onerror=e=>out.textContent+=e+"\n"
+window.onerror=e=>err.textContent=e+"\n"
 
 let u
 let O=x=>out.textContent+=x
-let xxd=x=>x.forEach((x,i)=>{if(i){if(0==i%4)O(" ");if(0==i%16)O(" ");if(0==i%32)O("\n")};O(x.toString(16).padStart(2,"0"))})
-let compile=x=>(out.textContent="",xxd(u=eval(was.textContent)))
+let xxd=(x,s)=>((s="  "),x.forEach((x,i)=>{
+ if(0==i%16)(O((i?s+"\n":"")+i.toString(16).padStart(8,'0')+":"),s="  ")
+ if(0==i%2)O(" ");O(x.toString(16).padStart(2,'0'));s+=(x>31&&x<127)?String.fromCharCode(x):"."}),(i=x.length%16),O(i?" ".repeat(2.5*(16-x.length%16)):""+s),x)
+let compile=x=>(out.textContent="",wacom(xxd(u=eval(was.textContent))))
+let wacom=x=>{new WebAssembly.Module(x)}
 let download=()=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download="x.wasm";dl.click()}
 
 //eval(was.textContent)
-xxd(u=wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y")))))
+wacom(xxd(u=wa(fn("add",pa("x","i"),pa("y","i"),ad(va("x"),va("y"))))))
 </script>
 
 </body></html>

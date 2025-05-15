@@ -1,4 +1,3 @@
-console.log("xx")
 /*
 ez eq ne lt lu gt gu
 cz ct pc
@@ -104,19 +103,17 @@ wa=(...x)=>{let r,d=x.filter(x=>x.length),           //data
  F=f.filter(x=>x.c),                                 //funcs without imports
  s=f.map(x=>x.s).filter((x,i,a)=>i==a.indexOf(x)),   //signatures
  n=f.map(x=>x.n),                                    //names
-// l=(f,x)=>Object.values(f.l).map(v=>v[x])
  g=x.filter(x=>x.t),                                 //globals
- v=f=>Object.values(f.l).filter(x=>!x.a).map(x=>[1,ty(x.t),...x.i]).flat()
-console.log(s)
+ v=f=>(f=Object.values(f.l).filter(x=>!x.a).map(x=>[1,ty(x.t),...x.i]),[...eu(f.length),...f.flat()])
  o=[0,97,115,109,1,0,0,0]
- ws(1,s.map((x,r,a)=>([r,a]=sp(x,1),[96,a.length,...sp(a).map(x=>ty(tp(x))),r.length,...sp(r).map(x=>ty(tp(x)))])))
+ ws(1,s.map((x,r,a)=>([r,a]=sp(x,1),[96,a.length,...sp(a).map(x=>ty(Number(x))),r.length,...sp(r).map(x=>ty(Number(x)))])))
  ws(2,f.filter(x=>!x.c).map(x=>[1,97,...ns(x.n),0,...eu(s.indexOf(x.s))]))  //imports
  ws(3,F.map(x=>eu(s.indexOf(x.s)))) //signature index list
  p(5,3,1,0,1)                       //memory 1seg,unshared,1block
  ws(6,g.map(x=>[ty(x.t),1,...x.c]))
- ws(7,[...ns("memory"),2,0,...F.map((x,i)=>[...ns(x.n),0,...eu(i)])]) //export memory&all functions
- ws(10,F.map(x=>(x=[...v(x),...x.c,11]),[...eu(x.length),...x]))
- if(x[0])ws(11,d.map(x=>[0,65,...eu(x[0]),11,...ns(x[1])]))
+ ws(7,[[...ns("memory"),2,0],...F.map((x,i)=>[...ns(x.n),0,...eu(i)])]) //export memory&all functions
+ ws(10,F.map((x,y)=>((y=[...v(x),...x.c,11]),[...eu(y.length),...y])))
+ ws(11,d.map(x=>[0,65,...eu(x[0]),11,...ns(x[1])]))
  r=new Uint8Array(o);o=[];v={};return r}
 
 
