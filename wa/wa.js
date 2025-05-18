@@ -69,6 +69,14 @@ f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
 [0xa0927c6a,0xa1937d6b,0xa2947e6c,0xa2947e6d,32878,0x635d5348,0x645e554a,
  0x655f574c,0x6660594e,21581,22091].map(f)
 console.log("o",o)
+
+ez ~x eq x=y ne x~y lt x<y lu x<'y gt x>'y gu x>'y le x<=y ge x>=y cz ct cx 
+ad x+y su x-y mu x*y di x%y du x%'y mo y\x rm y\'x an x&y or x|y xo x^y sl y\x sa y/x sr y/'x rl rr
+ab |x ng -x ce ^x fl _x tr na sq %x mi x&y ma x|y cs 
+0:"alpha"
+f:i:ii:x+y
+sum:i:jj:{r:0;r+:x.i+y.i;r}
+max:i:jj:{r:x 0;r|:x.i;r}
 */
 
 
