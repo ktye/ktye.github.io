@@ -13,13 +13,13 @@ even it's text format needs external tools (e.g. wat2wasm) to create binaries.</
 we'll write a small compiler that runs directly on the client (e.g. on this page).
 
 <h2>wasm encoding</h2>
-the ast of wasm functions is expressed expressions and structural control flow.
+the ast of wasm functions is composed by expressions and structural control flow.
 it uses local variables instead of registers and heap memory.
 the execution stack is not directly accessible and no pointers into it can be passed to other functions like in c.</p>
-wasm encodes the expressions in postscript notation with a mental stack, but does not contain stack operations (like swap or duplicate).
+wasm encodes the expressions in postfix notation with a stack model, but does not contain stack operations (like swap or duplicate).
 most operations are encoded with a single byte that take one or two arguments from the stack and push back the result,
 e.g. add is 0x6a for int32.</p>
-wasm has 4 base types for arithmetic operations (32 and 64 bit int and float) but has heap access also for for smaller types.</p>
+wasm has 4 base types for arithmetic operations (32 and 64 bit int and float) but has also heap access for smaller types.</p>
 
 the text format comes in two forms: nested and linear. e.g. x+y can be written as
 <pre>
@@ -28,7 +28,7 @@ the text format comes in two forms: nested and linear. e.g. x+y can be written a
 						    i32.add
 </pre>
 the binary encoding is 0x2000 0x2001 0x6a. &nbsp;0x20 is local.get, followed by an immediate, the operation 0x6a is at the end.</p>
-we see that the linear format is closer to the binary encoding but sometimes a nested ast is available as an intermediate form.
+we see that the linear format is closer to the binary encoding but sometimes a nested ast is more appropriate as an intermediate form.
 
 <h2>functional ast</h2>
 instead of representing the ast as a nested list, we describe it by nested function calls in javascript:
@@ -39,7 +39,7 @@ each function writes it's operation to the output but ignores the input.
 since the arguments are evaluated before the function is entered, this does an <b>automatic conversion</b> to postfix.
 the method only works for host languages that have a fixed evaluation order, e.g. not for c.</p>
 
-the functions could be defined as:
+the functions can be defined as:
 <pre>
 let o=[]  //output array
 let get   = x   =>o.push(0x20, x)
@@ -60,7 +60,7 @@ the type is the value 0..4 which is used as an index to select the corresponding
 
 with this method, the binary is written as a side effect while computing the node types.</p>
 
-this is the full compiler for arithmetic functions:
+these are the definitions for all arithmetic functions:
 <pre>
 let o=[],v={},p=(...x)=>o.push(...x),
 f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
@@ -73,7 +73,7 @@ f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
 
 <h2>control flow</h2>
 the above method works for most arithmetic opcodes, but there is a problem with control flow:
-e.g. a while loop, which takes a conditional and a body needs to emit some code before, between and after the arguments,
+e.g. a while loop takes a conditional and a body but needs to emit some code before, between and after the arguments,
 which does not work, if the arguments are evaluated first and write directly to the output:
 <pre>
  loop=(condition,body)=>...       //this does not work.
@@ -95,7 +95,7 @@ lo (while loop) is also a nested call of 3 functions but it needs to emit code b
 </pre>
 
 <h2>module</h2>
-the full module needs to be encoded in sections, with function signatures, function code, data blocks export names, globals, etc..
+the full module needs to be encoded in sections, with function signatures, function code, data blocks, export names, globals, etc..
 this is done by the function <a href="wa.js">wa()</a> with the following code:
 
 <pre>
