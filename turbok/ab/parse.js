@@ -10,10 +10,11 @@ let left="([{",right="}])"
 let op=":+-*%&|<>=~!,^#_$?@/\\",nm=".-0123456789"
 let parse=x=>{let[tok,pos]=x
 console.log("parse",tok)
- let ipos=0,typs="ijefIJEF"
+ let ipos=0,typs="ijefIJEF",it=t=>typs.indexOf(t)
  let l=x=>x[x.length-1]
  let perr=x=>{throw new Error("parse:"+ipos+" "+x)}
  let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes(".")?"f":"i"):"i")
+ let upty=(x,y)=>(x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push([y.t+"o"+x.t]),x.t=y.t):(y.push([x.t+"o"+y.t]),y.t=x.t),[x,y])
  let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=[r],r.t=t,r.p=pos.pop(),r))
  let peek=_=>tok[l(tok)]
  let term=(r,n)=>{
@@ -25,6 +26,7 @@ console.log("r",r)
   }
   return r}
  let mona=(x,y,i,m)=>((m="~iezi~jezj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
+ let dyad=(x,y,z,d,i)=>(d="+Tad*Tmu%Tdi", [x,z]=upty(x,z),z.push(...x),i=d.indexOf(y+"T"),i>=0?z.push(d.slice(2+i,4+i)+z.t+" @"+y.p):((i=d.indexOf(y+z.t)),i<0?perr("dyadic"): z.push(2+i,5+i+" @"+y.p))   ,z)
  let expr=x=>{if(!x)return x
   let y=term(),r,v=x=>!x.t
   if(!y)return x
@@ -37,7 +39,7 @@ console.log("r",r)
   if(!(v(x))) console.log("jux")
   return mona(x,r)
  }
- return expr(term())
+ return expr(term()).join("\n")
 }
 
 /*

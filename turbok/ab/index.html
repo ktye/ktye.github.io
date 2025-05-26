@@ -16,7 +16,7 @@
 <script>
 let run=(p,s)=>([s,p]=token(src.textContent),
  out.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n"),
- parse([s,p])
+ out.textContent+="\n-----\n"+parse([s,p])
 )
 run()
 </script>
