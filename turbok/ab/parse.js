@@ -25,19 +25,19 @@ console.log("r",r)
    n=next()//..
   }
   return r}
- let mona=(x,y,i,m)=>((m="~iezi~jezj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
- let dyad=(x,y,z,d,i)=>(d="+Tad*Tmu%Tdi", [x,z]=upty(x,z),z.push(...x),i=d.indexOf(y+"T"),i>=0?z.push(d.slice(2+i,4+i)+z.t+" @"+y.p):((i=d.indexOf(y+z.t)),i<0?perr("dyadic"): z.push(2+i,5+i+" @"+y.p))   ,z)
+ let mona=(x,y,i,m)=>((m="~iezi~jezj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
+ let nega=(x,p)=>("ij".includes(x.t)?(x.unshift(x.t+" 0"),x.push("su"+x.t+" @"+p)):x.push("ng"+x.t+" @"+p),x)
+ let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],[x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z)
  let expr=x=>{if(!x)return x
   let y=term(),r,v=x=>!x.t
   if(!y)return x
   if(v(y)&&!(v(x))){ console.log("dyad")
    r=expr(term())
    if(!r)perr("1+")
-   return dyad(x,y,r)
+   return"@"==y[0]?cali(x,r):dyad(x,y,r)
   }
   r=expr(y)
-  if(!(v(x))) console.log("jux")
-  return mona(x,r)
+  return(v(x))?mona(x,r):cali(x,r)
  }
  return expr(term()).join("\n")
 }
@@ -54,7 +54,7 @@ a[i]
 f[x]
 
 ez ~x eq x=y ne x~y lt x<y lu x<'y gt x>'y gu x>'y le x<=y ge x>=y cz ct cx 
-ad x+y su x-y mu x*y di x%y du x%'y mo y\x rm y\'x an x&y or x|y xo x^y sl y\x sa y/x sr y/'x rl rr
+ad x+y su x-y mu x*y di x%y du x%'y mo y!x rm y!'x an x&y or x|y xo x^y sl y\x sa y/x sr y/'x rl rr
 ab |x ng -x ce ^x fl _x tr na sq %x mi x&y ma x|y cs 
 0:"alpha"
 f:i:ii:x+y
