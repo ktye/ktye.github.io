@@ -7,14 +7,15 @@
 </head>
 
 <body>
-<pre id="src" contenteditable="true">1+-x</pre>
+<pre id="txt" contenteditable="true">g:i:ii{x-:y}</pre>
 <button onclick="run()">token</button>
 <pre id="out"></pre>
 <script src="token.js"></script>
 <script src="parse.js"></script>
+<script src="testk.js"></script>
 
 <script>
-let run=(p,s)=>([s,p]=token(src.textContent),
+let run=(p,s)=>([s,p]=token(txt.textContent),
  out.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n"),
  out.textContent+="\n-----\n"+parse([s,p])
 )
