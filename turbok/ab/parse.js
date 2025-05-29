@@ -24,13 +24,14 @@ console.log("r",r)
   if(left.includes(r[0]))return list()
   //console.log("r[0]",r[0],"lr0",l(r[0]))
   if(r.t&&nm.includes(n=r[0][0])){r[0]=r.t+" "+(typs.includes(l(r[0]))?r[0].slice(0,-1):r[0]);return r}
-  if(az.includes(n)){r[0]=(r[0]in locs?"get":r[0]in glob?"glo":r[0]in funs?"cal":perr("lookup"))+" "+r[0]}
+  if(az.includes(n)){n=r[0];[r[0],r.t]=(n in locs?["get",locs[n]]:n in glob?["glo",glob[n]]:n in funs?["cal",funs[n].r]:perr("lookup"));r[0]+=" "+n}
   return r}
  let mona=(x,y,i,m)=>((m="~iezi~jezj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
  let nega=(x,p)=>(console.log("nega",x),"ij".includes(x.t)?(x.unshift(x.t+" 0"),x.push("su"+x.t+" @"+p)):x.push("ng"+x.t+" @"+p),x)
  let dyad=(x,y,z,d,i,p)=>(console.log("Dyad",x,y,z),d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],console.log("dyad y",y),[x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z)
  let cast=(x,t)=>t==x.t?x:(x.push(t+"o"+x.t),x)
- let cali=(x,y,a)=>(y="l"!=y.t?[y]:y,x[0].startsWith("cal ")?(a=funs[x[0].slice(4)],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):perr("index"))
+ let indx=(x,y,t,s)=>((y.t!="i"||(!"BGHSIEJFZ".includes(t=x.t)))?perr("index type"+t):t=t.toLowerCase(),s="bghsiejfz".indexOf(t),s=s?["i "+(s>>1),"shl"]:[],x.push(...y,...s,"adi","ld"+t ),x.t=t,x)
+ let cali=(x,y,a)=>(y="l"!=y.t?[y]:y,x[0].startsWith("cal ")?(a=funs[x[0].slice(4)],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):(y.length!=1)?perr("index rank"):indx(x,y[0]))
  let asin=(x,a,y)=>(y=a[0]==":"?y:(a[0]=a[0][0],dyad(x,a,y)),x[0]=(x[0].startsWith("get")?"tee":"gst")+x[0].slice(3),y.push(x),x[0].startsWith("gst")?y.push("glo"+x[0].slice(3)):0,y)
  let expr=x=>{if(!x)return x
   let y=term(),r,v=x=>!x.t
