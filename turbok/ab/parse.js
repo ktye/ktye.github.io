@@ -2,19 +2,20 @@
 let ic=x=>x.split("").map(x=>x.charCodeAt(0))
 C=ic(C).map(x=>x-97);T=ic(T).map(x=>x-97)
 let cut=(x,i)=>i.map((_,k)=>x.slice(i[k],i[1+k]))
-let token=(x,s,i)=>(s=0,i=ic(x).map(x=>s=T[14*s+C[x]]).map((x,i)=>x>10?-1:i).filter(x=>x>=0),
+let token=(x,s,i,l)=>(s=0,i=ic(x).map(x=>s=T[14*s+C[x]]).map((x,i)=>x>10?-1:i).filter(x=>x>=0),
  x=cut(x,i),s=i.map((_,j)=>((x[j]==" ")||((j==0||x[j-1]==" "||x[j-1]=="\n")&&(x[j][0]=="/"&&x[j][1]!="'"))?0:1)),
+ l=0,s.forEach((y,i)=>{if(y)l=(";"==x[i]||"\n"==x[i]?((s[i]=l?0:1),1):0)}),
  [where(x,s).map(x=>x=="\n"?";":x).toReversed(),where(i,s).toReversed()])
 let where=(x,k)=>x.filter((_,i)=>k[i])
 let left="([{",right="}])"
 let op=":+-*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-let parse=x=>{let[tok,pos]=x,locs,funs={},glob={},tabl={}
+let parse=x=>{let[tok,pos]=x,locs,res,funs={},glob={},tabl={}
 console.log("parse",tok)
- let ipos=0,typs="ijefIJEF",it=t=>typs.indexOf(t)
- let l=x=>x[x.length-1]
+ let ipos=0,typs="ijefzIJEFZ",it=t=>typs.indexOf(t)
+ let l=x=>x[x.length-1],lop=x=>l(x).slice(0,3)
  let perr=x=>{throw new Error("parse:"+ipos+" "+x)}
  let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes(".")?"f":"i"):"i")
- let upty=(x,y)=>(x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push([y.t+"o"+x.t]),x.t=y.t):(y.push([x.t+"o"+y.t]),y.t=x.t),[x,y])
+ let upty=(x,y)=>(x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push(y.t+"o"+x.t),x.t=y.t):(y.push(x.t+"o"+y.t),y.t=x.t),[x,y])
  let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=[r],r.t=t,r.p=(ipos=pos.pop()),r))
  let peek=_=>l(tok)
  let list=p=>{let e,r=[];r.t="l";while(1){if(right.includes(peek())){next();return r};r.push(e=expr(term()));if(";"==peek())next();if(!e){ipos=p;perr("unclosed")}}}
@@ -28,11 +29,12 @@ console.log("r",r)
   return r}
  let mona=(x,y,i,m)=>((m="~iezi~jezj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
  let nega=(x,p)=>(console.log("nega",x),"ij".includes(x.t)?(x.unshift(x.t+" 0"),x.push("su"+x.t+" @"+p)):x.push("ng"+x.t+" @"+p),x)
- let dyad=(x,y,z,d,i,p)=>(console.log("Dyad",x,y,z),d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],console.log("dyad y",y),[x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z)
+ let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],[x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z)
  let cast=(x,t)=>t==x.t?x:(x.push(t+"o"+x.t),x)
  let indx=(x,y,t,s)=>((y.t!="i"||(!"BGHSIEJFZ".includes(t=x.t)))?perr("index type"+t):t=t.toLowerCase(),s="bghsiejfz".indexOf(t),s=s?["i "+(s>>1),"shl"]:[],x.push(...y,...s,"adi","ld"+t ),x.t=t,x)
  let cali=(x,y,a)=>(y="l"!=y.t?[y]:y,x[0].startsWith("cal ")?(a=funs[x[0].slice(4)],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):(y.length!=1)?perr("index rank"):indx(x,y[0]))
- let asin=(x,a,y)=>(y=a[0]==":"?y:(a[0]=a[0][0],dyad(x,a,y)),x[0]=(x[0].startsWith("get")?"tee":"gst")+x[0].slice(3),y.push(x),x[0].startsWith("gst")?y.push("glo"+x[0].slice(3)):0,y)
+ let asin=(x,a,y)=>(y=a[0]==":"?y:(a[0]=a[0][0],dyad(x,a,y)),x[0]=(x[0].startsWith("get")?"tee":"gst")+x[0].slice(3),y.push(...x),x[0].startsWith("gst")?y.push("glo"+x[0].slice(3)):0,y)
+ let drop=x=>{if("ijefz".includes(x.t)&&"ret"!=lop(x)){if("tee"==lop(x))x[x.length-1]="set"+x[x.length-1].slice(3);else x.push("drp")}}
  let expr=x=>{if(!x)return x
   let y=term(),r,v=x=>!x.t
   if(!y)return x
@@ -44,18 +46,17 @@ console.log("r",r)
   r=expr(y)
   return(v(x))?mona(x,r):cali(x,r)
  }
- let code=_=>expr(term()).join("\n")
+ let code=r=>(r=list(),r.forEach((x,i)=>{i==r.length-1?cast(x,res):drop(x);r[i]=x.join("\n")}),r.join("\n"))
 
  let ptop=_=>{while(";"==peek())next();let n=next(),a=next(),r;if(!n)return;if(a==0||a[0]!=":")perr("toplevel assignment")
   if(nm.includes(n[0][0]))perr("todo data/table")
   else{r=next();if(r&&nm.includes(r[0][0])){if(0!=Number(r[0]))perr("nonzero global");glob[n]=r.t;return}
    let f={n:n[0],p:n.p,r:r[0]};r=next();if(r[0]!=":")perr("signature");f.a=next()[0];r=next();if(r[0]!="{")perr("function body");if(peek()=="[")perr("todo custom arg names")
    if(!("l"in f)){f.l={};"xyzabcdefghijklmnopqrstuvw".slice(0,f.a.length).split("").forEach((x,i)=>f.l[x]=f.a[i])}
-   f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;if(r<0)break;f.tok.unshift(n);f.pos.unshift(a)};funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n)
-   console.log("func",f)
+   f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n)
   }
  }
- while(tok.length)ptop();for(let n in funs){let f=funs[n];locs=f.l;tok=f.tok,pos=f.pos;f.c="\n"+f.n+" "+f.r+":"+f.a+" @"+f.p+"\n"+code()}
+ while(tok.length)ptop();for(let n in funs){let f=funs[n];locs=f.l;tok=f.tok,pos=f.pos;res=f.r;f.c="\n"+f.n+" "+f.r+":"+f.a+" @"+f.p+"\n"+code()}
  return Object.keys(funs).map(x=>funs[x].c).join("\n")
 }
 
