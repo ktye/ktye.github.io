@@ -16,7 +16,7 @@ console.log("parse",tok)
  let perr=x=>{throw new Error("parse:"+ipos+" "+x)}
  let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes(".")?"f":"i"):"i")
  let avec=x=>vc.includes(x.t)?(lp=x.n,x.push("get i",...shift(x.t),"adi"),x.t=x.t.toLowerCase(),x):x
- let upty=(x,y)=>(x=avec(x),y=avec(y),x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push(y.t+"o"+x.t),x.t=y.t):(y.push(x.t+"o"+y.t),y.t=x.t),[x,y])
+ let upty=(x,y)=>(x=avec(x),y=avec(y),x=xloc(x,y),x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push(y.t+"o"+x.t),x.t=y.t):(y.push(x.t+"o"+y.t),y.t=x.t),[x,y])
  let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=[r],r.t=t,r.p=(ipos=pos.pop()),r))
  let peek=_=>l(tok)
  let loop=x=>lp?(temp("i","i"),temp("i","n"),drop(x),x=["i 0","set i",...lp,"set n","while","get i","get n","lti","do",...x,"end"],lp=0,x):x
@@ -30,7 +30,7 @@ console.log("parse",tok)
   if(r.t&&nm.includes(n=r[0][0])){r[0]=r.t+" "+(typs.includes(l(r[0]))?r[0].slice(0,-1):r[0]);return r}
   if(r[0]=="if"){[r,n]=cndl();r.push("if",...n,"end");r.t="";return r}
   if(r[0]=="while"){[r,n]=cndl();r.unshift("while");r.push("do",...n,"end");r.t="";return r}
-  if(az.includes(n)){n=r[0];[r[0],r.t]=(n in locs?["get",locs[n]]:n in glob?["glo",glob[n]]:n in funs?["cal",funs[n].r]:":"==peek()?["get","?"]:perr("lookup"));r[0]+=" "+argn(n);if(!r[0].startsWith("cal")){r.n=["get "+n,"i 32","sru","ioj"];r.n.t="i"}}
+  if(az.includes(n)){n=r[0];[r[0],r.t]=(n in locs?["get",locs[n]]:n in glob?["glo",glob[n]]:n in funs?["cal",funs[n].r]:peek().endsWith(":")?["get","?"]:perr("lookup"));r[0]+=" "+argn(n);if(!r[0].startsWith("cal")){r.n=["get "+n,"i 32","sru","ioj"];r.n.t="i"}}
   while("["==peek()){next();n=list();r=peek().endsWith(":")?amnd(r,(1!=n.length?(ipos=n.p,perr("rank assign")):n[0]),next(),expr(term())):cali(r,n)}
  console.log("r",r)
   return r}
@@ -39,14 +39,14 @@ console.log("parse",tok)
  let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],[x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z)
  let cast=(x,t)=>t==x.t?x:(x.push(t+"o"+x.t),x.t=t,x)
  let temp=(t,q,s)=>(s=(q?q:"$"+t),s in locs?s:(locs[s]=t,s))
+ let xloc=(x,y)=>x.t=="?"?(locs[x[0].slice(4)]=y.t,x.t=y.t,x):x
  let shift=(t,s)=>(s="bghsiejfz".indexOf(t.toLowerCase()),s=s?["i "+(s>>1),"shl"]:[])
  let mamd=(x,i,f,z)=>(x.push(...i,...shift(x.t),"tee "+temp("i","_i")),x.t=x.t.toLowerCase(),x.push("ld"+x.t),f[0]=f[0].slice(0,-1),x=dyad(x,f,z),x.push("set "+temp(x.t),"get _i","get "+temp(x.t),"st"+x.t,"get $"+x.t),x)
  let amnd=(x,i,f,z)=>f[0]!=":"?mamd(x,i,f,z): (x.push(...i,...shift(x.t),"adi",...z,"tee "+temp(z.t),"st"+x.t.toLowerCase(),"get "+temp(z.t)),x)
  let indx=(x,y,t,s)=>((y.t!="i"||(!vc.includes(t=x.t)))?perr("index type"+t):t=t.toLowerCase(),x.push(...y,...shift(t),"adi","ld"+t ),x.t=t,x)
  let cali=(x,y,a)=>(console.log("cali",x,y,a),y="l"!=y.t?[y]:y,x[0].startsWith("cal ")?(a=funs[x[0].slice(4)],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):(y.length!=1)?perr("index rank"):indx(x,y[0]))
- let asin=(x,a,y)=>(y=a[0]==":"?y:(a[0]=a[0][0],dyad(x,a,y)),x[0]=(x[0].startsWith("get")?"tee":"gst")+x[0].slice(3), x.t=="?"?(locs[x[0].slice(4)]=y.t):0, 
-  x=avec(x),y=avec(y),
-  y.push(...x),x[0].startsWith("gst")?y.push("glo"+x[0].slice(3)):0,y)
+ let asin=(x,a,y)=>(console.log("asin",x,a,y),y=a[0]==":"?y:(a[0]=a[0][0],dyad(x,a,y)),x[0]=(x[0].startsWith("get")?"tee":"gst")+x[0].slice(3),x=xloc(x,y), 
+  x=avec(x),y=avec(y),y.push(...x),x[0].startsWith("gst")?y.push("glo"+x[0].slice(3)):0,y)
  let drop=x=>{if(x.t&&"ijefz".includes(x.t)&&"ret"!=lop(x)){"tee"==lop(x)?(x[x.length-1]="set"+x[x.length-1].slice(3)):"get"==lop(x)?x.pop():x.push("drp")}}
  let expr=x=>{if(!x)return x
   let y=term(),r,v=x=>!x.t

@@ -6,8 +6,17 @@
 </style>
 </head>
 
-<body> <!-- f:i:i{if(x>0):1+x;2+x} -->
-<pre id="txt" contenteditable="true">f:i:i{while x>0{x+:1};2+x}</pre>
+<body> <!-- 
+ if r>0{1+r}{2+r}
+ x+${r>0;2+i;r<-5;3+i;4+i}
+ cond{a;b;c;d;e}
+ switch{i;1+x;2+x;3+x;4+x}
+ (r>0)?{1+r}{2+r}
+ sum:i:I{r+:x;r}
+ f:i:i{if x>0{:1+x};2+x} 
+ while x>0{}
+ -->
+<pre id="txt" contenteditable="true">f:i:I{r+:x;r}</pre>
 <button onclick="run()">token</button>
 <pre id="out"></pre>
 <script src="token.js"></script>
