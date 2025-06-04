@@ -1,87 +1,36 @@
 b: better c
 
 
-/types ijef GHIJEFZ
-/higher dimensional arrays: need explicit casting from J
-/  f F:J{ F?x.i }
-
-abcdef
-ghijef
-
-/functions
-m i:i        /no body: imported
-f i:ii{  }
-g :ii{   }
-
-/globals
-/any toplevel code runs in main
-a:0
-q:3.1
-a+q /return from main
-
-/index
-x i
-x[i]
-x.i (loops)
-
-/implicit loop (dot indexing extends to expression)
-f x.i  <-->  i:0;while i<#x{f[x[i]];i+:1}
-1+x x+1 x+y ? like 1+x.i or 1+j?x
-
-dot f:FF{ r+:x.i*y.i }  would not work as  r+:x*y
-
-matmul J:JJ{      /outer loop is explicit
- r:F?(#x)#0j      /2d array
- n:#y 0
- i:0;while i<#x{ r[i]:n#0.;  r[i]+:(F?x[i]).j*(F?y.j)[i]; i+:1 } }
+types ijefz(scalar) BGHSIEJFZ(vector)
+size  23234         001122334
+vectors are stored as j(64-bit int) as (count,addr)
 
 
-/or extend to 2d-loop: x.ij*y.ji
+g:0              /global
+0:"alpha"        /data
+10:fefefe        /data
+f:i:ii{x+y}      /func
+g:i:ii{[a;b]a+b} /explicit arg names
+h:i:ii           /import
+0:(f;g;h)        /call table
+
+autoloop:
+ f:i:I{r:0;r+:x;r}
+is the same as
+ f:i:I{r:0;i:0;n:#x;while i<x{r+:x[i]};r}
+autoloops use locals i and n. e.g. iota:
+ iota:I:I{i:0;x:i;x}
 
 
-/control
-/block :  {bl;o;ck}
-/loop  :  while cnd block
-/if    :  if cnd block
-/cond  :  $[a;b;c;..]
-/jump  :  (0;1;2;..;default)expr   (switch)
-/select:  (a;b)cnd                 (evaluate both?)
 
-e.g. abs i{(-x;x)x<0}
+:x                /return
+if    cnd{..}     /if..then
+if    cnd{..}{..} /if..then..else
+while cnd{..}
+$[a;b;c..]        /cond if a->b else if c->d .. otherwise->last
+?[i;a;b;c]        /switch/jump i=0->a i=2->b .. otherwise->last
 
-/literals
-3      i
-0x3    i
-0x3j   j
-3.     f
-"a"    i 97
-
-/array literals
-"abcd\n"   /initializes data section and returns C (length/pointer)
-1 2 3      /4 byte aligned
+if/while are statements, cond/switch expressions (all branches must have same type)
 
 
-/call table
-f:ii{x+y}
-g:ii{x-y}
-[f;g]               /toplevel
-h:iii{ [i?x][y;z] } /indirect call (arg types derived, return explicit)
-
-
-/allocator
-/lowlevel: malloc(bump allocator) + explicit cast    malloc C:i (extern)
-x:I?malloc 128       I? also changes the length(top 32 bit)
-
-/highlevel (refcounted) refcount is in x[-1]
-x:!5         
-x:5#3.14
-x:3^!6       /2d type J
-/refcounted variables are automatically decreased at return (if not returned)
-/and increased on function calls:
-
-this only works within a function. one level up we don't know it was an
-automatic array.
-or we could mark it?   x#:x  (x is counted)
-
-refcount primitives? +x _x?
 
