@@ -15,9 +15,15 @@
  sum:i:I{r+:x;r}
  f:i:i{if x>0{:1+x};2+x} 
  while x>0{}
+0:[f g]
+f:i:i{-x}
+g:i:i{2+x}
+h:i:iff{i?[1+x;2*y;3*z]+10}
  -->
-<pre id="txt" contenteditable="true">0:"al\"ph\naasdfasdfasdfasdfasdfasdf"
-f:i:i{?[x;2;3;4;5]}</pre>
+<pre id="txt" contenteditable="true">
+10:[f]
+f:i:i{j?0.1+2*x}
+</pre>
 <button onclick="run()">token</button>
 <pre id="out"></pre>
 <script src="token.js"></script>

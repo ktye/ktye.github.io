@@ -220,6 +220,8 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
   <legend class="center">Examples</legend>
   <fieldset id="examplefiles" class="tui-input-fieldset">
    <select id="examplelist" class="tui-input" multiple>
+    <option>swtc.a</option>
+    <option>prog.b</option>
     <option>heap.c</option>
     <option>aray.c</option>
     <option>malo.c</option>
@@ -227,7 +229,6 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
     <option>cplx.c</option>
     <option>call.c</option>
     <option>libm.c</option>
-    <option>swtc.a</option>
    </select>
   </fieldset>
   <br>
@@ -426,12 +427,12 @@ let exec=t=>{
 let wasm=0 //compiled binary
 let compile=_=>{clr();let x=file.name.slice(-1);wasm=0;
   (x=="a")?asm(ed.value)
- :(x=="b")?O("$ab "+file.name+"\nnyi\n")
+ :(x=="b")?(O("$ab "+file.name+"\n"),asm(ab(ed.value)))
  :(x=="c")?(O("$ac "+file.name+"\n"),asm(ac(ed.value)))
  :(x=="k")?O("$ak "+file.name+"\nnyi\n")
  :O("$compile "+file.name+"\n?\n")}
 
-examplelist.value="cplx.c";loadexample()
+examplelist.value="prog.b";loadexample()
 </script>
 
 <script src="wa/wa.js"></script>
@@ -439,6 +440,7 @@ examplelist.value="cplx.c";loadexample()
 <script src="wa/opt.js"></script>
 <script src="wa/link.js"></script>
 <script src="wa/boot.js"></script>
+<script src="ab/ab.js"></script>
 <script src="ac/cparse.js"></script>
 <script src="ac/ac.js"></script>
 

@@ -54,14 +54,14 @@ let ops={
 ezi:1,eqi:2,nei:2,lti:2,ltu:2,gti:2,gtu:2,lei:2,leu:2,gei:2,geu:2,ezj:1,eqj:2,nej:2,ltj:2,ltl:2,
 gtj:2,gtl:2,lej:2,lel:2,gej:2,gel:2,eqe:2,nee:2,lte:2,gte:2,lee:2,gee:2,eqf:2,nef:2,ltf:2,gtf:2,
 lef:2,gef:2,clz:1,ctz:1,pci:1,adi:2,sui:2,mui:2,dvi:2,dvu:2,moi:2,mou:2,ani:2,ori:2,xoi:2,sli:2,
-sri:2,sru:2,rli:2,rri:2,clj:1,ctj:1,pcj:1,adj:2,suj:2,muj:2,dvj:2,dvl:2,moj:2,mol:2,anj:2,orj:2,
-xoj:2,slj:2,srj:2,srl:2,rlj:2,rrj:2,abe:1,nge:1,cee:1,fle:1,tre:1,nae:1,sqe:1,ade:2,sue:2,mue:2,
-dve:2,mie:2,mae:2,cse:2,abf:1,ngf:1,cef:1,flf:1,trf:1,naf:1,sqf:1,adf:2,suf:2,muf:2,dvf:2,mif:2,
-maf:2,csf:2,ioj:1,ioe:1,uoe:1,iof:1,iou:1,joi:1,jou:1,joe:1,loe:1,jof:1,lof:1,eoi:1,eou:1,eoj:1,
-eol:1,eof:1,foi:1,fou:1,foj:1,fol:1,foe:1,ire:1,jrf:1,eri:1,frj:1,ixg:1,ixh:1,jxg:1,jxh:1,jxi:1,
-ngi:1,ngj:1,adz:2,suz:2,scz:2,eqz:2,nez:2,ngz:1,zoi:1,zoj:1,zoe:1,zof:1,foz:1,imz:1,zrr:1,stz:2,
-ldz:1,ldi:1,ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,sth:2,siz:0,
-grw:1,cpy:3,fil:3,}
+sri:2,sru:2,rli:2,rri:2,noi:1,clj:1,ctj:1,pcj:1,adj:2,suj:2,muj:2,dvj:2,dvl:2,moj:2,mol:2,anj:2,
+orj:2,xoj:2,slj:2,srj:2,srl:2,rlj:2,rrj:2,noj:1,abe:1,nge:1,cee:1,fle:1,tre:1,nae:1,sqe:1,ade:2,
+sue:2,mue:2,dve:2,mie:2,mae:2,cse:2,abf:1,ngf:1,cef:1,flf:1,trf:1,naf:1,sqf:1,adf:2,suf:2,muf:2,
+dvf:2,mif:2,maf:2,csf:2,ioj:1,ioe:1,uoe:1,iof:1,iou:1,joi:1,jou:1,joe:1,loe:1,jof:1,lof:1,eoi:1,
+eou:1,eoj:1,eol:1,eof:1,foi:1,fou:1,foj:1,fol:1,foe:1,ire:1,jrf:1,eri:1,frj:1,ixg:1,ixh:1,jxg:1,
+jxh:1,jxi:1,ngi:1,ngj:1,adz:2,suz:2,scz:2,eqz:2,nez:2,ngz:1,zoi:1,zoj:1,zoe:1,zof:1,foz:1,imz:1,
+zrr:1,stz:2,ldz:1,ldi:1,ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,
+sth:2,siz:0,grw:1,cpy:3,fil:3,}
 /*o-p-s*/
 
 let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}

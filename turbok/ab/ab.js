@@ -1,3 +1,7 @@
+//written my mk. do not edit.
+let ab=x=>{
+let C="aaaaaaaaaanaaaaaaaaaaaaaaaaaaaaaadhddddebcdddjgmggggggggggebdedddffffffffffffffffffffffffffblcddiffffkfffffffffffffffffffffbdcdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+let T="abcdefghijfdkbabcdefghijfdkbabcdefghidfddbabcdrfghijfddbabcdefghijfddbabcdemmhidmddbabcdennhidoddbppppppprpppqppabcdemghidmddbabcdefnhijfddblllllllllllllblllllllllllllbabcdemmhidmddbabcdennhidoddbabcdennhinnddbppppppprpppqppppppppppppppppabcdefghidfddb"
 
 let ic=x=>x.split("").map(x=>x.charCodeAt(0))
 C=ic(C).map(x=>x-97);T=ic(T).map(x=>x-97)
@@ -102,3 +106,4 @@ g:i:ii{[a;b]a+b} /explicit arg names
 h:i:ii           /import
 0:(f;g;h)        /call table
 */
+return parse(token(x))}

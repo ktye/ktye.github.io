@@ -12,7 +12,7 @@ g:0              /global
 f:i:ii{x+y}      /func
 g:i:ii{[a;b]a+b} /explicit arg names
 h:i:ii           /import
-0:(f;g;h)        /call table
+0:[f g h]        /call table
 
 autoloop:
  f:i:I{r:0;r+:x;r}
@@ -29,6 +29,8 @@ if    cnd{..}{..} /if..then..else
 while cnd{..}
 $[a;b;c..]        /cond if a->b else if c->d .. otherwise->last
 ?[i;a;b;c]        /switch/jump i=0->a i=2->b .. otherwise->last
+i?[x;y;..]        /indirect call: rtyp?[func table index;args..]
+t?..              /type cast
 
 if/while are statements, cond/switch expressions (all branches must have same type)
 

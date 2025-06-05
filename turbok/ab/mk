@@ -1,0 +1,4 @@
+echo "//written my mk. do not edit." > ab.js
+echo "let ab=x=>{"                   >>ab.js
+cat token.js parse.js                >>ab.js
+echo "return parse(token(x))}"       >>ab.js

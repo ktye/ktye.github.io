@@ -54,6 +54,7 @@ i ii i32.shr_s           sri 0x75
 i ii i32.shr_u           sru 0x76
 i ii i32.rotl            rli 0x77
 i ii i32.rotr            rri 0x78
+i i -                    noi [0x41,0x7f,0x73]
 
 j j i64.clz              clj 0x79
 j j i64.ctz              ctj 0x7a
@@ -73,6 +74,7 @@ j jj i64.shr_s           srj 0x87
 j jj i64.shr_u           srl 0x88
 j jj i64.rotl            rlj 0x89
 j jj i64.rotr            rrj 0x8a
+j j -                    noj [0x42,0x7f,0x85]
 
 e e f32.abs              abe 0x8b
 e e f32.neg              nge 0x8c

@@ -201,6 +201,9 @@ rri i:ii export rri
  get 0
  get 1
  rri
+noi i:i export noi
+ get 0
+ noi
 clj j:j export clj
  get 0
  clj
@@ -270,6 +273,9 @@ rrj j:jj export rrj
  get 0
  get 1
  rrj
+noj j:j export noj
+ get 0
+ noj
 abe e:e export abe
  get 0
  abe
