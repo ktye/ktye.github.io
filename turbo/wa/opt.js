@@ -14,6 +14,7 @@
  sli/adi/mli/*
 */
 
+/*
 let opt=(a,A)=>{ //input flat array (nonformatted), A:ai module exports
  if(a<1)return a
  let C="eqi nei lti ltu gti gtu lei leu gei geu adi sui mui dvi dvu moi mou ani ori xoi sli sri sru rli rri" //all(i:ii)
@@ -36,3 +37,15 @@ let opt=(a,A)=>{ //input flat array (nonformatted), A:ai module exports
 
   r[++j]=ai}
  return r}
+*/
+
+let opt=a=>{ //format
+ let s=""
+ for(let i=0;i<a.length;i++){let b=a[i]
+  if(b.includes(":")){s="";continue}
+   if(b.startsWith("else")||b.startsWith("do")||b.startsWith("end"))s=s.slice(1)
+   a[i]=s+b
+   if(b.startsWith("else")||b.startsWith("if")||b.startsWith("while")||b.startsWith("do"))s+=" "
+ }
+ return a
+}

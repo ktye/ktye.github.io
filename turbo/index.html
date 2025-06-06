@@ -4,10 +4,15 @@
 <meta charset="UTF-8">
 <link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAABSSURBVDhPY2RgWPGfgQLASLEB/4EA3QGMjCuxuun//3AMcUaYAbg04fIdzDAaGfA/ArvFjCvg4vhdMGoAAwPFYUBE0qZ+OkC2lKSkTHFmotQAAMNiZn1JrqSvAAAAAElFTkSuQmCC">
 
-<title>TURBO.K</title>
+<title>TURBO</title>
 <script src="tuicss.min.js"></script>
 <link rel="stylesheet" href="tuicss.min.css">
 <style>
+/*
+.tui-textarea{background:black}
+.tui-window{background:black}
+.tui-fieldset{border:1px solid grey}
+*/
  textarea{resize:none;overflow:auto}
 #out{color:#ccc}
 .fullscr{width:100%!important;height:100%!important;position:absolute;left:0;top:0;z-index:9}
@@ -263,6 +268,7 @@ loadexample=x=>{clr();ea.innerHTML="";if(x=examplelist.value)fetch("examples/"+x
        <option value="wa/ai.js">ai(assembly interpreter)</option>
        <option value="ac/ac.js">ac(c compiler)</option>
        <option value="ac/cparse.js">cp(c parser)</option>
+       <option value="ab/ab.js"><ab(b compiler)</option>
        <option value="wa/opt.js">opt(assembly simplifier)</option>
       </optgroup>
       <option value="wa/tab">asm instruction list</option>
@@ -491,7 +497,7 @@ let asm=a=>{locations=[];let loc=(x,p)=>(locations.push(-1<(p=adloc(x))?p:-1),x)
  O("$as "+file.name.slice(0,-2)+".a\n")
  ea.innerHTML=""
  //a=opt(a.split("\n"),new WebAssembly.Instance(A).exports).join("\n")
- a.trimEnd().split("\n").forEach(x=>ah(ea,ih(loc(x),ce("option"))))
+ opt(a.trimEnd().split("\n")).forEach(x=>ah(ea,ih(loc(x),ce("option"))))
  wasm=wa(a)
  O(wasm.length+" bytes\n")
  W=new WebAssembly.Module(wasm)

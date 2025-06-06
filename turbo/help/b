@@ -34,5 +34,6 @@ t?..              /type cast
 
 if/while are statements, cond/switch expressions (all branches must have same type)
 
-
-
+allocations
+n#i n#j ..  (allocates and fill using external alloc:i:i)
+n#I n_I ..  (returns adjusted pointer/length but does not change underlying memory)

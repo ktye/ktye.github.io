@@ -14,6 +14,15 @@ let where=(x,k)=>x.filter((_,i)=>k[i])
 let left="([{",right="}])"
 let op=":+-*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",vc="BGHSIEJFZ"
 let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data={},lp=0
+ let runt={
+  "alloc":{r:"i",a:"i",c:["alloc i:i import env alloc"]},
+  "fill.i":{r:"I",a:"ii",c:"fill.i j:ii\ni r\ni p\ni 2\nget 0\nsli\ncal alloc\nset r\nget 1\nif\nget r\nget 0\ni 2\nsli\nadi\nset p\nwhile\nget p\ni 4\nsui\ntee p\nget r\ngei\ndo\nget 1\nget p\nsti\nend\nend\nget r\njoi\nget 0\njoi\nj 32\nslj\norj\n"},
+  "fill.j":{r:"J",a:"ij",c:"fill.j j:ij\ni r\ni p\ni 3\nget 0\nsli\ncal alloc\nset r\nget 1\nj 0\neqj\nezi\nif\nget r\nget 0\ni 3\nsli\nadi\nset p\nwhile\nget p\ni 8\nsui\ntee p\nget r\ngei\ndo\nget 1\nget p\nstj\nend\nend\nget r\njoi\nget 0\njoi\nj 32\nslj\norj\n"},
+  "fill.e":{r:"E",a:"ie",c:"fill.e j:ie\ni r\ni p\ni 2\nget 0\nsli\ncal alloc\nset r\nget 1\ne 0\neqe\nezi\nif\nget r\nget 0\ni 2\nsli\nadi\nset p\nwhile\nget p\ni 4\nsui\ntee p\nget r\ngei\ndo\nget 1\nget p\nste\nend\nend\nget r\njoi\nget 0\njoi\nj 32\nslj\norj\n"},
+  "fill.f":{r:"F",a:"if",c:"fill.f j:if\ni r\ni p\ni 3\nget 0\nsli\ncal alloc\nset r\nget 1\nf 0\neqf\nezi\nif\nget r\nget 0\ni 3\nsli\nadi\nset p\nwhile\nget p\ni 8\nsui\ntee p\nget r\ngei\ndo\nget 1\nget p\nstf\nend\nend\nget r\njoi\nget 0\njoi\nj 32\nslj\norj\n"},
+  "fill.z":{r:"Z",a:"iz",c:"fill.z j:iz\ni r\ni p\ni 4\nget 0\nsli\ncal alloc\nset r\nget 1\nz 0\neqz\nezi\nif\nget r\nget 0\ni 4\nsli\nadi\nset p\nwhile\nget p\ni 16\nsui\ntee p\nget r\ngei\ndo\nget 1\nget p\nstz\nend\nend\nget r\njoi\nget 0\njoi\nj 32\nslj\norj\n"},
+ }
+ let mark=(...x)=>x.forEach(x=>(!(x in runt))?perr("no builtin: "+x):(x in funs)?0:funs[x]=runt[x])
  let ipos=0,typs="ijefzBGHSIJEFZ",it=t=>typs.indexOf(t)
  let l=x=>x[x.length-1],lop=x=>l(x).slice(0,3)
  let perr=(x,p)=>{p=p?p:ipos;if(ed){ed.selectionStart=ed.selectionEnd=p;ed.focus()};throw new Error("@"+p+": "+x)}
@@ -33,6 +42,8 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data={},lp=0
  let cond=(l,r)=>{if(l.length<3||1!=l.length%2)perr("cond length");r=[];r.t=l[l.length-1].t;l.forEach((x,i)=>(r.push(...x),(i==l.length-1)?r.push(...Array(l.length/2|0).fill("end")):r.push(i%2?(tyck(r.t,x.t,x.p),"else"):(tyck("i",x.t,x.p),"if "+r.t))));return r}
  let swtc=(l,r)=>{if(l.length<3)perr("switch length");r=[];r.t=l[l.length-1].t;l.forEach((x,i)=>(r.push(...x),tyck(x.t,r.t,x.p),r.push(i==0?"switch "+(l.length-1):i==l.length-1?"end":"endcase "+(i-1))));return r}
  let ical=(r,l,s)=>{r.pop();if(l.length<2)perr("icall length");s=r.t+":";if(!typs.includes(r.t))perr("icall return type");l.slice(1).forEach(x=>(s+=x.t,r.push(...x)));if(l[0].t!="i")perr("icall index type");r.push(...l[0],s);return r}
+ let take=(x,y,p,s,v)=>(p=" @"+p,tyck(x.t,"i",x.p),vc.includes(y.t)?(y.push("j 32","slj","j 32","srl"),x.push("joi"+p,"j 32","slj","orj"),y.push(...x),y):(x.push(...y,(mark("alloc","fill."+y.t),"cal fill."+y.t)),x.t=y.t.toUpperCase(),x))
+ let drup=(x,y,p,s,v)=>(p=" @"+p,tyck(x.t,"i",x.p),(vc.includes(y.t))?1:perr("type",y.p),y.push(...x,"joi"+p,"tee "+(n=temp("j","n.x")), "j "+("BCHSIEJFZZ".indexOf(y.t)/2|0),"slj","adj","get "+n,"j 32","slj","suj"+p),y)
  let term=(r,n)=>{r=peek();if(r)if(";"==r[0]||"{"==r[0]||right.includes(r[0]))return 0
   r=next();if(!r)return r
   if("("==r[0]){n=ipos;r=expr(term());if(")"!=peek())perr("unclosed)",n);next();return r}
@@ -43,13 +54,13 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data={},lp=0
   if(az.includes(n)){n=r[0];[r[0],r.t]=(peek()=="?"?(next(),["cast",n]):n in locs?["get",locs[n]]:n in glob?["glo",glob[n]]:n in funs?["cal",funs[n].r]:peek().endsWith(":")?["get","?"]:perr("lookup"));r[0]+=" "+argn(n);r[0]+=" @"+r.p;if(!r[0].startsWith("cal")){r.n=["get "+n,"i 32","sru","ioj"];r.n.t="i"}}
   while("["==peek()){next();n=list();if(r[0].startsWith("cast ")&&n.length>1)return ical(r,n);if(1==r.length&&"$?".includes(r[0])){return("$"==r[0]?cond(n):swtc(n))};r=peek().endsWith(":")?amnd(r,(1!=n.length?perr("rank assign",n.p):n[0]),next(),expr(term())):cali(r,n)}
   return r}
- let mona=(x,y,i,m)=>x[0]=="#"?(vc.includes(y.t)?(y.push("i 32","sru"),y.t="i",y):perr("rank")):x[0]==":"?(cast(y,res),y.push("ret"),y):(y=avec(y),(m="!iezi!jezj~inoi~jnoj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
+ let mona=(x,y,i,m)=>x[0]=="#"?(vc.includes(y.t)?(y.push("j 32","srl","ioj"),y.t="i",y):perr("rank")):x[0]==":"?(cast(y,res),y.push("ret"),y):(y=avec(y),(m="!iezi!jezj~inoi~jnoj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
  let nega=(x,p)=>("ij".includes(x.t)?(x.unshift(x.t+" 0"),x.push("su"+x.t+" @"+p)):x.push("ng"+x.t+" @"+p),x)
- let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],[x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z)
+ let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z))
  let cast=(x,t)=>t==x.t?x:(x.push(loty(t)+"o"+loty(x.t)),x.t=t,x)
  let temp=(t,q,s)=>(s=(q?q:"$"+t),s in locs?s:(locs[s]=t,s))
  let xloc=(x,y)=>x.t=="?"?(locs[immm(x[0])]=y.t,x.t=y.t,x):x
- let shift=(t,s)=>(s="bghsiejfz".indexOf(t.toLowerCase()),s=s?["i "+(s>>1),"shl"]:[])
+ let shift=(t,s)=>(s="bghsiejfz".indexOf(t.toLowerCase()),s=s?["i "+(s>>1),"sli"]:[])
  let mamd=(x,i,f,z)=>(x.push(...i,...shift(x.t),"tee "+temp("i","_i")),x.t=x.t.toLowerCase(),x.push("ld"+x.t),f[0]=f[0].slice(0,-1),x=dyad(x,f,z),x.push("set "+temp(x.t),"get _i","get "+temp(x.t),"st"+x.t,"get $"+x.t),x)
  let amnd=(x,i,f,z)=>f[0]!=":"?mamd(x,i,f,z): (x.push(...i,...shift(x.t),"adi",...z,"tee "+temp(z.t),"st"+x.t.toLowerCase(),"get "+temp(z.t)),x)
  let indx=(x,y,t,s)=>((y.t!="i"||(!vc.includes(t=x.t)))?perr("index type"+t):t=t.toLowerCase(),x.push(...y,...shift(t),"adi","ld"+t ),x.t=t,x)
@@ -76,15 +87,17 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data={},lp=0
  let ptop=_=>{while(";"==peek())next();let n=next(),a=next(),r;if(!n)return;if(a==0||a[0]!=":")perr("toplevel assignment")
   if(nm.includes(n[0][0])){a=Number(n[0]);n=next();if(n[0][0]=="["){while((n=next(),n&&n!="]"))az.includes(n[0][0])?tabl[a++]=[n[0],ipos]:perr("table syntax")}else data[a]=(n[0][0]=='"'?unqt(n[0].slice(1,-1)):unhx(n[0]))}
   else{r=next();if(r&&nm.includes(r[0][0])){if(0!=Number(r[0]))perr("nonzero global");glob[n]=r.t;return}
-   let f={n:n[0],p:n.p,r:r[0]};r=next();if(r[0]!=":")perr("signature");f.a=next()[0];r=next();if(r[0]!="{")perr("function body");if(peek()=="["){next();f.l={};f.a.split("").forEach((t,i,a,x)=>{x=next();if((!x)||(!az.includes(x[0][0])))perr("arg name:"+x[0][0]);f.l[x[0]]=t;x=next();if(x[0]!=(i<a.length-1?";":"]"))perr("arg length")})}
+   let f={n:n[0],p:n.p,r:r[0]};r=next();if(r[0]!=":")perr("signature");f.a=next()[0];r=next();if(r[0]!="{"){f.l={};funs[f.n]=f;return};if(peek()=="["){next();f.l={};f.a.split("").forEach((t,i,a,x)=>{x=next();if((!x)||(!az.includes(x[0][0])))perr("arg name:"+x[0][0]);f.l[x[0]]=t;x=next();if(x[0]!=(i<a.length-1?";":"]"))perr("arg length")})}
    if(!("l"in f)){f.l={};"xyzabcdefghijklmnopqrstuvw".slice(0,f.a.length).split("").forEach((x,i)=>f.l[x]=f.a[i])}
-   f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
+   f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
   }
  }
- while(tok.length)ptop();for(let n in funs){let f=funs[n];locs=f.l;args=Object.keys(locs);tok=f.tok,pos=f.pos;res=f.r;f.c="\n"+f.n+" "+f.r+":"+f.a+" export "+f.n+" @"+f.p+"\n"+code()}
+ while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+f.a+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
+ let I=Object.keys(funs).filter(x=>!funs[x].tok).map(x=>funs[x].c).join("\n")
+ let F=Object.keys(funs).filter(x=> funs[x].tok).map(x=>funs[x].c).join("\n")
  let t="";for(o in tabl){t+="\ntab "+o+" "+tabl[o][0];if(!(tabl[o][0]in funs))perr("unknown func in table: "+tabl[o][0],tabl[o][1])}
  let d="";for(o in data){d+=edat(Number(o),data[o][0])}
- return Object.keys(funs).map(x=>funs[x].c).join("\n")+"\n"+t+d
+ return I+F+t+d
 }
 
 /*
