@@ -12,6 +12,8 @@
  i .     fold
  i .
  sli/adi/mli/*
+
+ todo: - dont assign 0 at first set: (i 0;set x)->()  (i 0;tee x)->(i 0)
 */
 
 /*
