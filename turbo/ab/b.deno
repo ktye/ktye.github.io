@@ -3,17 +3,18 @@
 //embed
 
 let indicate=x=>{let i=b.lastIndexOf("\n",x),j=b.indexOf("\n",x);i=i<0?0:i;j=j<0?b.length:j;console.log(b.slice(i,j));console.log(" ".repeat(x-i)+"^")}
-let ed={selectionStart:0,selectionEnd:0,focus:_=>indicate(ed.selectionStart)},aout=0,xout=0,wout=0
+let ed={selectionStart:0,selectionEnd:0,focus:_=>indicate(ed.selectionStart)}
+let aout=0,xout=0,wout=0,aint=0
 let argv=process.argv.slice(2)
 if(argv.length&&argv[0].startsWith("-")){let a0=argv[0]
- a0=="-a"?aout=1:a0=="-w"?wout=1:"-x"==a0?xout=1:argv.push(1,2,3)
+ a0=="-a"?aout=1:a0=="-i"?aint=1:a0=="-w"?wout=1:"-x"==a0?xout=1:argv.push(1,2,3)
  argv=argv.slice(1)
 }
 if(1>argv.length||(!(argv[0].endsWith(".b")))){
  console.log(process.argv[0], process.argv[1])
  console.log("use:")
  console.log("$b    file.b [func args..] /run")
- console.log("$b -t file.b       /call test()")
+ console.log("$b -i file.b       /interpret")
  console.log("$b -a file.b       /print  asm")
  console.log("$b -x file.b       /hexdump wasm")
  console.log("$b -w file.b       /writes file.wasm")
@@ -36,15 +37,23 @@ let malloc=x=>{x=((7+x)>>>3)<<3;I.top=I.top?I.top:findtop();let n=I.exports.memo
 let libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 cos cosh exp expm1 floor hypot sin cos log log10 log1p pow random round sign sin tan tanh trunc".split(" ").map(x=>({[x]:Math[x]}))))
 
 let M={env:{...{/*..*/malloc:malloc},...libm}}
-let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
 
+
+let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
 let f;if(argv.length&&argv[1] in I.exports){f=argv[1];argv=argv.slice(2)}else{f="main";argv=argv.slice(1)}
 
 let findsig=f=>{let x=b.split("\n").filter(x=>x.startsWith(f+":"));if(1!=x.length){throw new Error("cannot find signature for: "+f)};return x[0].slice(f.length+1).replace(/{.*/,"").split(":")}
-let s=findsig(f),r=s[0];a=s[1]
-if(a.length!=argv.length){throw new Error("args should be: "+a+", got "+argv.length+": "+argv)}
+let s=findsig(f),r=s[0],args=s[1]
+if(args.length!=argv.length){throw new Error("args should be: "+args+", got "+argv.length+": "+argv)}
 //todo ..convert chars
 let unsup=x=>{throw new Error("unsupported argument type: "+x)}
-argv=argv.map((x,i)=>"ief".includes(a[i])?Number(x):"j"==a[i]?BigInt(x):"C"==a[i]?bstring(x):unsup(a[i]))
-console.log(I.exports[f](...argv.map(Number)))
+argv=argv.map((x,i)=>"ief".includes(args[i])?Number(x):"j"==args[i]?BigInt(x):"C"==args[i]?bstring(x):unsup(args[i]))
+
+if(aint){
+ let A=new WebAssembly.Module(wa(aia))
+ let I=ai.parse(a,M,A)
+ console.log(ai.run(f,argv,I))
+}else{
+ console.log(I.exports[f](...argv))
+}
 

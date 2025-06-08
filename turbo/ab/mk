@@ -7,5 +7,9 @@ echo "return parse(token(x))}"       >>ab.js
 sed       '/\/\/embed/q'   b.deno >b
 cat       ab.js                  >>b
 cat ../wa/wa.js                  >>b
+cat ../wa/ai.js                  >>b
+echo 'let aia="\\'               >>b
+cat ../wa/ai.a |sed 's/$/\\n \\/'>>b
+echo '"'                         >>b
 sed -n    '/\/\/embed/,$p' b.deno>>b
 chmod +x                           b

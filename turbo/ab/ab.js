@@ -115,5 +115,5 @@ X+:Y  amnd(x,i,f,avec(Y))
  let t="";for(o in tabl){t+="\ntab "+o+" "+tabl[o][0];if(!(tabl[o][0]in funs))perr("unknown func in table: "+tabl[o][0],tabl[o][1])}
  let n=(((7+data.length)>>3)<<3)
  let d="";{let o=0,x=data;while((((7+x.length)>>3)<<3)>x.length)x.push(0);if(x.length)x.push(...unqt("data end"));while(x.length){d+="0000000000000000"==(y=(x.length>8?x.slice(0,8):x).map(x=>x.toString(16).padStart(2,"0")).join(""))?"":"\ndat "+o+" "+y;o+=8;x=x.slice(8)}}
- return I+F+t+d}
+ return(I+F+t+d).trimStart()}
 return parse(token(x))}

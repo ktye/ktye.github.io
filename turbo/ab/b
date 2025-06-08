@@ -118,7 +118,7 @@ X+:Y  amnd(x,i,f,avec(Y))
  let t="";for(o in tabl){t+="\ntab "+o+" "+tabl[o][0];if(!(tabl[o][0]in funs))perr("unknown func in table: "+tabl[o][0],tabl[o][1])}
  let n=(((7+data.length)>>3)<<3)
  let d="";{let o=0,x=data;while((((7+x.length)>>3)<<3)>x.length)x.push(0);if(x.length)x.push(...unqt("data end"));while(x.length){d+="0000000000000000"==(y=(x.length>8?x.slice(0,8):x).map(x=>x.toString(16).padStart(2,"0")).join(""))?"":"\ndat "+o+" "+y;o+=8;x=x.slice(8)}}
- return I+F+t+d}
+ return(I+F+t+d).trimStart()}
 return parse(token(x))}
 /* wa:wasm compiler
    wa compiles a(assembly) to a wasm binary (uint8array)
@@ -215,20 +215,709 @@ return(x=>{
  sect(10,vect(funs.filter(x=>!x.import).map(x=>((x=[...locs(x),...x.code,11]),[...lebu(x.length),...x])))) //code
  sect(11,vect(data.map(x=>[0,65,...lebu(x.o),11,...lebu(x.d.length),...x.d]))) //data
  return new Uint8Array(o)})})()
+/* ai:assembly interpreter
+   ai interprets a(assembly) instead of compiling it.
+   it is used by the debugger and allows breakpoints, stepping and watches.
+
+   in a first pass the asm listing is translated to an internal array
+   which has jump offsets computed for structured program flow.
+   the number of lines still matches the original asm to stay in sync with the ui.  */
+
+let ai=(_=>{
+
+let parse=(x,M,aim)=>{ //source,import-object,ai.a(compiled module)
+ let A=new WebAssembly.Instance(aim,M).exports
+ let G={} //globals {name:v}
+ let F={} //functions
+ let T=[] //indirect call table
+ let U=new Uint8Array(A.memory.buffer),dd=(o,s)=>{for(let i=0;i<s.length;i+=2)U[o++]=parseInt(s.substr(i,2),16)} //data/heap
+ let isvar=x=>!"-0123456789".includes(x[0])
+ let args =x=>{let r={};x.split("").forEach((t,i)=>r[i]="j"==t?0n:0);return r}
+ let nest=[],addr=[],la=""
+ let cmpl=(x,a,p)=>(p=(a=x[1]?x[1]:0)/180*Math.PI,x=x[0],a==0?[x,0]:a==90?[0,x]:a==180?[-x,0]:a==270?[0,-x]:[x*Math.cos(p),x*Math.sin(p)])
+ let n=0,s="",c=[],l=0,im="",lo={}
+ let brk=(a,b)=>{while(++a<b)if(c[a][0]=="break")c[a]=["jmp",b-a]}                   //fix break offset
+ let cnt=(a,b,i)=>{i=a;while(++a<b)if(c[a][0]=="continue")c[a]=["jmp",i-a];return i} //fix continue
+ let swc=(i,b)=>{c[i].slice(2).forEach((x,j)=>{c[x][1]=b-c[x][1],c[i][2+j]-=i});c.push(["nop"])} //fix switch
+ let p=_=>{if(!n)return;s=s.split(":");F[n]={r:s[0],a:s[1],c:c,lo:{...args(s[1]),...lo},l:l};[n,s,c,l,im,lo]=[0,"",[],0,"",{}]}
+ x.trimEnd().split("\n").forEach((x,line)=>{let i,j,a=x.trim().split(" "),a0=a[0].trim(),a1=(a[1]?a[1].trim():"");
+  (1<a.length&&a[1].includes(":"))?(p(),n=a0,s=a[1],l=line,c.push((a[2]=="import")?[M[a[3]][a[4]]]:["nop"]))
+  :    "tab"==a0?(p(),T.push(a[2]))
+  :    "dat"==a0?(p(),dd(Number(a1),a[2]))
+  :     "if"==a0?(nest.push("if"),addr.push(c.length),c.push(["if",0]))
+  :   "else"==a0?(nest.pop(),i=addr.pop(),c[i][1]=c.length-i,nest.push("else"),addr.push(c.length),c.push(["jmp",0]))
+  :  "while"==a0?(nest.push("while"),addr.push(c.length),c.push(["nop"]))
+  :     "do"==a0?((nest[nest.length-1]=="while")?(nest.push("whdo"),addr.push(c.length),c.push(["if",0]))//  (while)do
+                                               :(nest.push("do"),addr.push(c.length),c.push(["nop",c.length,a1])))                     //    do(end)
+  : "switch"==a0?(nest.push("switch"),addr.push(c.length),c.push(["switch",Number(a1)]))
+  :"endcase"==a0?(i=addr[addr.length-1],c[i].push(c.length),c.push(["jmp",c.length]))
+  :    "end"==a0?(la=nest.pop(),i=addr.pop(),(la==  "if"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //    (if)end
+                                             :la=="whdo"?(brk(i,c.length),c[i][1]=c.length-i,nest.pop(),c.push(["jmp",cnt(addr.pop(),c.length)-c.length]))
+                                             :la=="else"?(c[i][1]=c.length-i,c.push(["nop"]))                                          //  (else)end
+                                             :la==  "do"?c.push(["donot",c[i][1]-c.length,c[i][2]])                                            //    (do)end
+                                             :swc(i,c.length))) //(switch)end 
+  :(1==a0.length&&"ijefz".includes(a0))?(n?("i"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+                                           :"j"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0n   ):c.push(["const",BigInt(a1)]))
+                                           :"e"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+                                           :"f"==a0?(isvar(a1)?(c.push(["nop"]),lo[a[1]]=0    ):c.push(["const",Number(a1)]))
+					   :        (isvar(a1)?(c.push(["nop"]),lo[a[1]]=[0,0]):c.push(["const",cmpl(a1.split("a").map(Number))])))
+                                          :(G[a[1]]=(a0=="j"?0n:0)))
+  :a0.includes(":")?c.push(["ical",a0])
+  :c.push(a)
+  if(a.length>1&&a[a.length-1].startsWith("@"))c[c.length-1]["@"]=Number(a[a.length-1].slice(1))
+ });p();return{A:A,G:G,F:F,T:T,M:M,S:[],C:[],H:[0,1],B:[],f:"",l:0}}  //S(value stack) C(call stack) f(current function name) l(line of function) H(heapmarks) B(breakpoints)
+/*o-p-s*/
+let ops={
+ezi:1,eqi:2,nei:2,lti:2,ltu:2,gti:2,gtu:2,lei:2,leu:2,gei:2,geu:2,ezj:1,eqj:2,nej:2,ltj:2,ltl:2,
+gtj:2,gtl:2,lej:2,lel:2,gej:2,gel:2,eqe:2,nee:2,lte:2,gte:2,lee:2,gee:2,eqf:2,nef:2,ltf:2,gtf:2,
+lef:2,gef:2,clz:1,ctz:1,pci:1,adi:2,sui:2,mui:2,dvi:2,dvu:2,moi:2,mou:2,ani:2,ori:2,xoi:2,sli:2,
+sri:2,sru:2,rli:2,rri:2,noi:1,clj:1,ctj:1,pcj:1,adj:2,suj:2,muj:2,dvj:2,dvl:2,moj:2,mol:2,anj:2,
+orj:2,xoj:2,slj:2,srj:2,srl:2,rlj:2,rrj:2,noj:1,abe:1,nge:1,cee:1,fle:1,tre:1,nae:1,sqe:1,ade:2,
+sue:2,mue:2,dve:2,mie:2,mae:2,cse:2,abf:1,ngf:1,cef:1,flf:1,trf:1,naf:1,sqf:1,adf:2,suf:2,muf:2,
+dvf:2,mif:2,maf:2,csf:2,ioj:1,ioe:1,uoe:1,iof:1,iou:1,joi:1,jou:1,joe:1,loe:1,jof:1,lof:1,eoi:1,
+eou:1,eoj:1,eol:1,eof:1,foi:1,fou:1,foj:1,fol:1,foe:1,ire:1,jrf:1,eri:1,frj:1,ixg:1,ixh:1,jxg:1,
+jxh:1,jxi:1,ngi:1,ngj:1,adz:2,suz:2,scz:2,eqz:2,nez:2,ngz:1,zoi:1,zoj:1,zoe:1,zof:1,foz:1,imz:1,
+zrr:1,stz:2,ldz:1,ldi:1,ldj:1,lde:1,ldf:1,ldg:1,ldb:1,ldh:1,lds:1,sti:2,stj:2,ste:2,stf:2,stg:2,
+sth:2,siz:0,grw:1,cpy:3,fil:3,}
+/*o-p-s*/
+
+let op=(m,s,a)=>{if(!s in ops)throw new Error("unknown op:",s);a=ops[s];a=m.A[s](...m.S.splice(-a,a));if(a!==undefined)m.S.push(a)}
+let zop=(m,o,f,n)=>(f={adz:(x,y)=>[x[0]+y[0],x[1]+y[1]],suz:(x,y)=>[x[0]-y[0],x[1]-y[1]],scz:(x,y)=>[x[0]*y[0],x[1]*y[1]],eqz:(x,y)=>(x[0]==y[0]&&x[1]==y[1]),nez:(x,y)=>(x[0]!=y[0]||x[1]!=y[1]),ngz:x=>[-x[0],-y[0]],zoi:x=>[x,0],zoj:x=>[x,0],zoe:x=>[x,0],zof:x=>[x,0],foz:x=>x[0],imz:x=>x[1],zrr:x=>[x,x],stz:(x,y)=>(m.A.stf(x,y[0]),m.A.stf(x+8,y[1])),ldz:x=>[m.A.ldf(x),m.A.ldf(x+8)]}[o],f?(n=ops[o],o=f(...m.S.splice(-n,n)),((o!=undefined)?m.S.push(o):1),1):0)
+let exit=m=>{throw new Error("exit")}
+let ret=m=>{m.C.length>1?[m.f,m.l]=m.C.pop():(m.exit=1,exit())}
+let ncal=(F,m)=>{let r=F.c[0][0](...Object.values(F.lo));if(F.r.length)m.S.push(r)} //native
+let scal=(f,m,ad)=>{m.C.push([m.f,m.l,"@"+ad]);m.f=f;m.l=0;let F=m.F[f];for(let i=0;i<F.a.length;i++)F.lo[F.a.length-1-i]=m.S.pop();if(1==F.c.length)ncal(F,m)}
+let dcal=(f,m)=>{let n=m.C.length;scal(f,m);while(m.C.length>n)step(m,1)}
+let heap=(m,o,s)=>{if((s=o.startsWith("st"))||o.startsWith("ld"))m.H=[m.S[m.S.length-1-s],{g:1,b:1,h:2,s:2,i:4,j:8,e:4,f:8,z:8}[o[2]]]} //store heap access
+
+let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
+ if(!m.C.length)m.C.push([m.f,0])
+ let a=F.c[m.l],a0=a[0],a1=a[1],ad=a["@"],x
+ if(a0=="")return
+ let icl=(x,s,ad,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m,ad)}
+   "const"==a0?m.S.push(a1)                    //iefz(Number) j(BigNum)
+ :   "get"==a0?m.S.push(F.lo[a1])
+ :   "set"==a0?F.lo[a1]=m.S.pop()
+ :   "tee"==a0?F.lo[a1]=m.S[m.S.length-1]
+ :   "glo"==a0?m.S.push(m.G[a1])
+ :   "gst"==a0?m.G[a1]=m.S.pop()
+ :   "cal"==a0?cal(a1,m,ad)
+ :    "if"==a0?(m.l+=m.S.pop()?0:a1)
+ : "donot"==a0?(m.l+=m.S.pop()?(a[2]?m.S.pop():0,a1):0)   //end after do
+ :"switch"==a0?(x=m.S.pop(),m.l+=(x==0?0:(x>0&&x<a1)?a[1+x]:a[a1]))
+ :   "jmp"==a0?m.l+=a1                          //else break continue endcase end
+ :   "nop"==a0?0                                //do while
+ :  "ical"==a0?icl(m.S.pop(),a1,ad)
+ :  "ret"==a0?ret(m)
+ :(heap(m,a0),zop(m,a0)?0:op(m,a0))}
+
+let runto=m=>{if(m.exit)return;if(m.B.includes(line(m)))step(m,1);do{if(m.B.includes(line(m)))return;step(m,0)}while(1)}
+let run=(f,a,m)=>{m.f=f,m.l=0,a.forEach((v,i)=>m.F[f].lo[i]=v);try{ while(1)step(m,0) }catch(e){ if(e.message=="exit"){if(m.S.length)return m.S[0]}else{throw(e)} }}
+let line=x=>x.l+x.F[x.f].l
+return{parse:parse,step:step,run:run,runto:runto,line:line}})()
+let aia="\
+ezi i:i export ezi\n \
+ get 0\n \
+ ezi\n \
+eqi i:ii export eqi\n \
+ get 0\n \
+ get 1\n \
+ eqi\n \
+nei i:ii export nei\n \
+ get 0\n \
+ get 1\n \
+ nei\n \
+lti i:ii export lti\n \
+ get 0\n \
+ get 1\n \
+ lti\n \
+ltu i:ii export ltu\n \
+ get 0\n \
+ get 1\n \
+ ltu\n \
+gti i:ii export gti\n \
+ get 0\n \
+ get 1\n \
+ gti\n \
+gtu i:ii export gtu\n \
+ get 0\n \
+ get 1\n \
+ gtu\n \
+lei i:ii export lei\n \
+ get 0\n \
+ get 1\n \
+ lei\n \
+leu i:ii export leu\n \
+ get 0\n \
+ get 1\n \
+ leu\n \
+gei i:ii export gei\n \
+ get 0\n \
+ get 1\n \
+ gei\n \
+geu i:ii export geu\n \
+ get 0\n \
+ get 1\n \
+ geu\n \
+ezj i:j export ezj\n \
+ get 0\n \
+ ezj\n \
+eqj i:jj export eqj\n \
+ get 0\n \
+ get 1\n \
+ eqj\n \
+nej i:jj export nej\n \
+ get 0\n \
+ get 1\n \
+ nej\n \
+ltj i:jj export ltj\n \
+ get 0\n \
+ get 1\n \
+ ltj\n \
+ltl i:jj export ltl\n \
+ get 0\n \
+ get 1\n \
+ ltl\n \
+gtj i:jj export gtj\n \
+ get 0\n \
+ get 1\n \
+ gtj\n \
+gtl i:jj export gtl\n \
+ get 0\n \
+ get 1\n \
+ gtl\n \
+lej i:jj export lej\n \
+ get 0\n \
+ get 1\n \
+ lej\n \
+lel i:jj export lel\n \
+ get 0\n \
+ get 1\n \
+ lel\n \
+gej i:jj export gej\n \
+ get 0\n \
+ get 1\n \
+ gej\n \
+gel i:jj export gel\n \
+ get 0\n \
+ get 1\n \
+ gel\n \
+eqe i:ee export eqe\n \
+ get 0\n \
+ get 1\n \
+ eqe\n \
+nee i:ee export nee\n \
+ get 0\n \
+ get 1\n \
+ nee\n \
+lte i:ee export lte\n \
+ get 0\n \
+ get 1\n \
+ lte\n \
+gte i:ee export gte\n \
+ get 0\n \
+ get 1\n \
+ gte\n \
+lee i:ee export lee\n \
+ get 0\n \
+ get 1\n \
+ lee\n \
+gee i:ee export gee\n \
+ get 0\n \
+ get 1\n \
+ gee\n \
+eqf i:ff export eqf\n \
+ get 0\n \
+ get 1\n \
+ eqf\n \
+nef i:ff export nef\n \
+ get 0\n \
+ get 1\n \
+ nef\n \
+ltf i:ff export ltf\n \
+ get 0\n \
+ get 1\n \
+ ltf\n \
+gtf i:ff export gtf\n \
+ get 0\n \
+ get 1\n \
+ gtf\n \
+lef i:ff export lef\n \
+ get 0\n \
+ get 1\n \
+ lef\n \
+gef i:ff export gef\n \
+ get 0\n \
+ get 1\n \
+ gef\n \
+clz i:i export clz\n \
+ get 0\n \
+ clz\n \
+ctz i:i export ctz\n \
+ get 0\n \
+ ctz\n \
+pci i:i export pci\n \
+ get 0\n \
+ pci\n \
+adi i:ii export adi\n \
+ get 0\n \
+ get 1\n \
+ adi\n \
+sui i:ii export sui\n \
+ get 0\n \
+ get 1\n \
+ sui\n \
+mui i:ii export mui\n \
+ get 0\n \
+ get 1\n \
+ mui\n \
+dvi i:ii export dvi\n \
+ get 0\n \
+ get 1\n \
+ dvi\n \
+dvu i:ii export dvu\n \
+ get 0\n \
+ get 1\n \
+ dvu\n \
+moi i:ii export moi\n \
+ get 0\n \
+ get 1\n \
+ moi\n \
+mou i:ii export mou\n \
+ get 0\n \
+ get 1\n \
+ mou\n \
+ani i:ii export ani\n \
+ get 0\n \
+ get 1\n \
+ ani\n \
+ori i:ii export ori\n \
+ get 0\n \
+ get 1\n \
+ ori\n \
+xoi i:ii export xoi\n \
+ get 0\n \
+ get 1\n \
+ xoi\n \
+sli i:ii export sli\n \
+ get 0\n \
+ get 1\n \
+ sli\n \
+sri i:ii export sri\n \
+ get 0\n \
+ get 1\n \
+ sri\n \
+sru i:ii export sru\n \
+ get 0\n \
+ get 1\n \
+ sru\n \
+rli i:ii export rli\n \
+ get 0\n \
+ get 1\n \
+ rli\n \
+rri i:ii export rri\n \
+ get 0\n \
+ get 1\n \
+ rri\n \
+noi i:i export noi\n \
+ get 0\n \
+ noi\n \
+clj j:j export clj\n \
+ get 0\n \
+ clj\n \
+ctj j:j export ctj\n \
+ get 0\n \
+ ctj\n \
+pcj j:j export pcj\n \
+ get 0\n \
+ pcj\n \
+adj j:jj export adj\n \
+ get 0\n \
+ get 1\n \
+ adj\n \
+suj j:jj export suj\n \
+ get 0\n \
+ get 1\n \
+ suj\n \
+muj j:jj export muj\n \
+ get 0\n \
+ get 1\n \
+ muj\n \
+dvj j:jj export dvj\n \
+ get 0\n \
+ get 1\n \
+ dvj\n \
+dvl j:jj export dvl\n \
+ get 0\n \
+ get 1\n \
+ dvl\n \
+moj j:jj export moj\n \
+ get 0\n \
+ get 1\n \
+ moj\n \
+mol j:jj export mol\n \
+ get 0\n \
+ get 1\n \
+ mol\n \
+anj j:jj export anj\n \
+ get 0\n \
+ get 1\n \
+ anj\n \
+orj j:jj export orj\n \
+ get 0\n \
+ get 1\n \
+ orj\n \
+xoj j:jj export xoj\n \
+ get 0\n \
+ get 1\n \
+ xoj\n \
+slj j:jj export slj\n \
+ get 0\n \
+ get 1\n \
+ slj\n \
+srj j:jj export srj\n \
+ get 0\n \
+ get 1\n \
+ srj\n \
+srl j:jj export srl\n \
+ get 0\n \
+ get 1\n \
+ srl\n \
+rlj j:jj export rlj\n \
+ get 0\n \
+ get 1\n \
+ rlj\n \
+rrj j:jj export rrj\n \
+ get 0\n \
+ get 1\n \
+ rrj\n \
+noj j:j export noj\n \
+ get 0\n \
+ noj\n \
+abe e:e export abe\n \
+ get 0\n \
+ abe\n \
+nge e:e export nge\n \
+ get 0\n \
+ nge\n \
+cee e:e export cee\n \
+ get 0\n \
+ cee\n \
+fle e:e export fle\n \
+ get 0\n \
+ fle\n \
+tre e:e export tre\n \
+ get 0\n \
+ tre\n \
+nae e:e export nae\n \
+ get 0\n \
+ nae\n \
+sqe e:e export sqe\n \
+ get 0\n \
+ sqe\n \
+ade e:ee export ade\n \
+ get 0\n \
+ get 1\n \
+ ade\n \
+sue e:ee export sue\n \
+ get 0\n \
+ get 1\n \
+ sue\n \
+mue e:ee export mue\n \
+ get 0\n \
+ get 1\n \
+ mue\n \
+dve e:ee export dve\n \
+ get 0\n \
+ get 1\n \
+ dve\n \
+mie e:ee export mie\n \
+ get 0\n \
+ get 1\n \
+ mie\n \
+mae e:ee export mae\n \
+ get 0\n \
+ get 1\n \
+ mae\n \
+cse e:ee export cse\n \
+ get 0\n \
+ get 1\n \
+ cse\n \
+abf f:f export abf\n \
+ get 0\n \
+ abf\n \
+ngf f:f export ngf\n \
+ get 0\n \
+ ngf\n \
+cef f:f export cef\n \
+ get 0\n \
+ cef\n \
+flf f:f export flf\n \
+ get 0\n \
+ flf\n \
+trf f:f export trf\n \
+ get 0\n \
+ trf\n \
+naf f:f export naf\n \
+ get 0\n \
+ naf\n \
+sqf f:f export sqf\n \
+ get 0\n \
+ sqf\n \
+adf f:ff export adf\n \
+ get 0\n \
+ get 1\n \
+ adf\n \
+suf f:ff export suf\n \
+ get 0\n \
+ get 1\n \
+ suf\n \
+muf f:ff export muf\n \
+ get 0\n \
+ get 1\n \
+ muf\n \
+dvf f:ff export dvf\n \
+ get 0\n \
+ get 1\n \
+ dvf\n \
+mif f:ff export mif\n \
+ get 0\n \
+ get 1\n \
+ mif\n \
+maf f:ff export maf\n \
+ get 0\n \
+ get 1\n \
+ maf\n \
+csf f:ff export csf\n \
+ get 0\n \
+ get 1\n \
+ csf\n \
+ioj i:j export ioj\n \
+ get 0\n \
+ ioj\n \
+ioe i:e export ioe\n \
+ get 0\n \
+ ioe\n \
+uoe i:e export uoe\n \
+ get 0\n \
+ uoe\n \
+iof i:f export iof\n \
+ get 0\n \
+ iof\n \
+iou i:f export iou\n \
+ get 0\n \
+ iou\n \
+joi j:i export joi\n \
+ get 0\n \
+ joi\n \
+jou j:i export jou\n \
+ get 0\n \
+ jou\n \
+joe j:e export joe\n \
+ get 0\n \
+ joe\n \
+loe j:e export loe\n \
+ get 0\n \
+ loe\n \
+jof j:f export jof\n \
+ get 0\n \
+ jof\n \
+lof j:f export lof\n \
+ get 0\n \
+ lof\n \
+eoi e:i export eoi\n \
+ get 0\n \
+ eoi\n \
+eou e:i export eou\n \
+ get 0\n \
+ eou\n \
+eoj e:j export eoj\n \
+ get 0\n \
+ eoj\n \
+eol e:j export eol\n \
+ get 0\n \
+ eol\n \
+eof e:f export eof\n \
+ get 0\n \
+ eof\n \
+foi f:i export foi\n \
+ get 0\n \
+ foi\n \
+fou f:i export fou\n \
+ get 0\n \
+ fou\n \
+foj f:j export foj\n \
+ get 0\n \
+ foj\n \
+fol f:j export fol\n \
+ get 0\n \
+ fol\n \
+foe f:e export foe\n \
+ get 0\n \
+ foe\n \
+ire i:e export ire\n \
+ get 0\n \
+ ire\n \
+jrf j:f export jrf\n \
+ get 0\n \
+ jrf\n \
+eri e:i export eri\n \
+ get 0\n \
+ eri\n \
+frj f:j export frj\n \
+ get 0\n \
+ frj\n \
+ixg i:i export ixg\n \
+ get 0\n \
+ ixg\n \
+ixh i:i export ixh\n \
+ get 0\n \
+ ixh\n \
+jxg j:j export jxg\n \
+ get 0\n \
+ jxg\n \
+jxh j:j export jxh\n \
+ get 0\n \
+ jxh\n \
+jxi j:j export jxi\n \
+ get 0\n \
+ jxi\n \
+ngi i:i export ngi\n \
+ get 0\n \
+ ngi\n \
+ngj j:j export ngj\n \
+ get 0\n \
+ ngj\n \
+adz z:zz export adz\n \
+ get 0\n \
+ get 1\n \
+ adz\n \
+suz z:zz export suz\n \
+ get 0\n \
+ get 1\n \
+ suz\n \
+scz z:zz export scz\n \
+ get 0\n \
+ get 1\n \
+ scz\n \
+eqz i:zz export eqz\n \
+ get 0\n \
+ get 1\n \
+ eqz\n \
+nez i:zz export nez\n \
+ get 0\n \
+ get 1\n \
+ nez\n \
+ngz z:z export ngz\n \
+ get 0\n \
+ ngz\n \
+zoi z:i export zoi\n \
+ get 0\n \
+ zoi\n \
+zoj z:j export zoj\n \
+ get 0\n \
+ zoj\n \
+zoe z:e export zoe\n \
+ get 0\n \
+ zoe\n \
+zof z:f export zof\n \
+ get 0\n \
+ zof\n \
+foz f:z export foz\n \
+ get 0\n \
+ foz\n \
+imz f:z export imz\n \
+ get 0\n \
+ imz\n \
+zrr z:f export zrr\n \
+ get 0\n \
+ zrr\n \
+stz :iz export stz\n \
+ get 0\n \
+ get 1\n \
+ stz\n \
+ldz z:i export ldz\n \
+ get 0\n \
+ ldz\n \
+ldi i:i export ldi\n \
+ get 0\n \
+ ldi\n \
+ldj j:i export ldj\n \
+ get 0\n \
+ ldj\n \
+lde e:i export lde\n \
+ get 0\n \
+ lde\n \
+ldf f:i export ldf\n \
+ get 0\n \
+ ldf\n \
+ldg i:i export ldg\n \
+ get 0\n \
+ ldg\n \
+ldb i:i export ldb\n \
+ get 0\n \
+ ldb\n \
+ldh i:i export ldh\n \
+ get 0\n \
+ ldh\n \
+lds i:i export lds\n \
+ get 0\n \
+ lds\n \
+sti :ii export sti\n \
+ get 0\n \
+ get 1\n \
+ sti\n \
+stj :ij export stj\n \
+ get 0\n \
+ get 1\n \
+ stj\n \
+ste :ie export ste\n \
+ get 0\n \
+ get 1\n \
+ ste\n \
+stf :if export stf\n \
+ get 0\n \
+ get 1\n \
+ stf\n \
+stg :ii export stg\n \
+ get 0\n \
+ get 1\n \
+ stg\n \
+sth :ii export sth\n \
+ get 0\n \
+ get 1\n \
+ sth\n \
+siz i: export siz\n \
+ siz\n \
+grw i:i export grw\n \
+ get 0\n \
+ grw\n \
+cpy :iii export cpy\n \
+ get 0\n \
+ get 1\n \
+ get 2\n \
+ cpy\n \
+fil :iii export fil\n \
+ get 0\n \
+ get 1\n \
+ get 2\n \
+ fil\n \
+"
 //embed
 
 let indicate=x=>{let i=b.lastIndexOf("\n",x),j=b.indexOf("\n",x);i=i<0?0:i;j=j<0?b.length:j;console.log(b.slice(i,j));console.log(" ".repeat(x-i)+"^")}
-let ed={selectionStart:0,selectionEnd:0,focus:_=>indicate(ed.selectionStart)},aout=0,xout=0,wout=0
+let ed={selectionStart:0,selectionEnd:0,focus:_=>indicate(ed.selectionStart)}
+let aout=0,xout=0,wout=0,aint=0
 let argv=process.argv.slice(2)
 if(argv.length&&argv[0].startsWith("-")){let a0=argv[0]
- a0=="-a"?aout=1:a0=="-w"?wout=1:"-x"==a0?xout=1:argv.push(1,2,3)
+ a0=="-a"?aout=1:a0=="-i"?aint=1:a0=="-w"?wout=1:"-x"==a0?xout=1:argv.push(1,2,3)
  argv=argv.slice(1)
 }
 if(1>argv.length||(!(argv[0].endsWith(".b")))){
  console.log(process.argv[0], process.argv[1])
  console.log("use:")
  console.log("$b    file.b [func args..] /run")
- console.log("$b -t file.b       /call test()")
+ console.log("$b -i file.b       /interpret")
  console.log("$b -a file.b       /print  asm")
  console.log("$b -x file.b       /hexdump wasm")
  console.log("$b -w file.b       /writes file.wasm")
@@ -251,15 +940,23 @@ let malloc=x=>{x=((7+x)>>>3)<<3;I.top=I.top?I.top:findtop();let n=I.exports.memo
 let libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 cos cosh exp expm1 floor hypot sin cos log log10 log1p pow random round sign sin tan tanh trunc".split(" ").map(x=>({[x]:Math[x]}))))
 
 let M={env:{...{/*..*/malloc:malloc},...libm}}
-let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
 
+
+let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
 let f;if(argv.length&&argv[1] in I.exports){f=argv[1];argv=argv.slice(2)}else{f="main";argv=argv.slice(1)}
 
 let findsig=f=>{let x=b.split("\n").filter(x=>x.startsWith(f+":"));if(1!=x.length){throw new Error("cannot find signature for: "+f)};return x[0].slice(f.length+1).replace(/{.*/,"").split(":")}
-let s=findsig(f),r=s[0];a=s[1]
-if(a.length!=argv.length){throw new Error("args should be: "+a+", got "+argv.length+": "+argv)}
+let s=findsig(f),r=s[0],args=s[1]
+if(args.length!=argv.length){throw new Error("args should be: "+args+", got "+argv.length+": "+argv)}
 //todo ..convert chars
 let unsup=x=>{throw new Error("unsupported argument type: "+x)}
-argv=argv.map((x,i)=>"ief".includes(a[i])?Number(x):"j"==a[i]?BigInt(x):"C"==a[i]?bstring(x):unsup(a[i]))
-console.log(I.exports[f](...argv.map(Number)))
+argv=argv.map((x,i)=>"ief".includes(args[i])?Number(x):"j"==args[i]?BigInt(x):"C"==args[i]?bstring(x):unsup(args[i]))
+
+if(aint){
+ let A=new WebAssembly.Module(wa(aia))
+ let I=ai.parse(a,M,A)
+ console.log(ai.run(f,argv,I))
+}else{
+ console.log(I.exports[f](...argv))
+}
 
