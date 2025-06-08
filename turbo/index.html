@@ -316,8 +316,8 @@ testsok,expect=(a,b)=>{if(a!=b){throw new Error("test #"+testsok+": "+a+" got "+
 D, //D=ai.parse(src,{},A)
 W, //module
 I, //instance
-findtop=_=>{let r=0,b=new BigInt64Array(I.exports.memory.buffer);for(i=0;i<b.length;b++)if(b[i])r=i;return 8*(1+r);}
-malloc=x=>{x=((7+x)>>>3)<<3;if(!I.top)findtop();let n=I.exports.memory.buffer.byteLength,t=I.top+x,r=I.top;console.log("malloc","I",I,"top",r,"n",n,"x",x);;if(t>n){I.exports.memory.grow((65535+(n-t))>>>16)};I.top=t;return r}
+findtop=_=>8*(1+new BigInt64Array(I.exports.memory.buffer).findLastIndex(x=>x))
+malloc=x=>{x=((7+x)>>>3)<<3;I.top=I.top?I.top:findtop();let n=I.exports.memory.buffer.byteLength,t=I.top+x,r=I.top;console.log("malloc","I",I,"top",r,"n",n,"x",x);;if(t>n){I.exports.memory.grow((65535+(n-t))>>>16)};I.top=t;return r}
 str0=x=>{let u=new Uint8Array(I.exports.memory.buffer,x);return new TextDecoder().decode(u=u.subarray(0,u.indexOf(0)))}
 printf=(x,j)=>{let s=str0(x),lo=x=>Number(BigInt.asUintN(32,x)),
  f=["%s",x=>str0(lo(x)), "%d",x=>BigInt.asIntN(32,x).toString(), "%ld",x=>x.toString(), "%u",x=>lo(x).toString(), "%lu",x=>BigInt.asUintN(64,x).toString(), "%x",x=>BigInt.asUintN(32,x).toString(16).padStart(8,"0"), "%lx",x=>BigInt.asUintN(64,x).toString(16).padStart(16,"0"), "%f",x=>(new Float32Array(new Uint32Array([lo(x)]).buffer)[0]).toString(), "%lf",x=>(new Float64Array(new BigInt64Array([x]).buffer)[0]).toString() ];
@@ -423,7 +423,6 @@ af(document.querySelectorAll(".tui-dropdown-content")).forEach(x=>
   true
  )
 )
-
 let exec=t=>{
  O("$"+(t?"test ./":"")+file.name.slice(0,-2)+"\n")
  I=new WebAssembly.Instance(W,M);I.top=0
@@ -431,7 +430,7 @@ let exec=t=>{
  else O("exit "+I.exports.main(0)+"\n")
 }
 let wasm=0 //compiled binary
-let compile=_=>{clr();let x=file.name.slice(-1);wasm=0;
+let compile=_=>{clr();I=null;let x=file.name.slice(-1);wasm=0;
   (x=="a")?asm(ed.value)
  :(x=="b")?(O("$ab "+file.name+"\n"),asm(ab(ed.value)))
  :(x=="c")?(O("$ac "+file.name+"\n"),asm(ac(ed.value)))
@@ -502,6 +501,7 @@ let asm=a=>{locations=[];let loc=(x,p)=>(locations.push(-1<(p=adloc(x))?p:-1),x)
  O(wasm.length+" bytes\n")
  W=new WebAssembly.Module(wasm)
  D=ai.parse(a,M,A)
+ I={top:0,exports:{memory:D.A.memory}} //for malloc
  D.f="main";D.l=0
 }
 

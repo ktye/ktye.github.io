@@ -10,8 +10,7 @@ let wa=(_=>{
 let o,O=x=>o.push(...(Array.isArray(x)?x:[x])),E=(l,x)=>{if(ea)ea.selectedIndex=l;throw new Error("wa: line "+l+": "+x)},
 lebu=(x,r,b)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r},                                                         //unsigned i32
 lebs=(x,r,b)=>{x|=0;r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r},        //signed i32
-lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&&(b&64))){r.push(b);break};r.push(b|128)};return r}  //signed BitInt
-
+lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&&(b&64))){r.push(b);break};r.push(b|128)};return r},  //signed BitInt
 sect=(x,y)=>(y.length&&y[0]!=0)?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124,z:123},
@@ -33,7 +32,7 @@ return(x=>{
  glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[...[c],...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:127,c:[42,7,11],i:0}
  tabl=[],addtab=(i,s)=>(i!=tabl.length?E(line,"index error"):(s in fns)?tabl[i]=fns[s]:E(line,"unknown function: "+s)),
  data=[],adddat=(i,s)=>(data.filter(x=>i==x.o+x.d.length).length?data[data.length-1].d.push(...hexa(s)):data.push({o:i,d:hexa(s)})), //{o:1,d:[1,2,3,4]}
- swtc=[],sw,sc,nest=[],whdo=_=>nest.length-nest.lastIndexOf("whdo")-1
+ swtc=[],sw,sc,nest=[],whdo=_=>nest.length-nest.lastIndexOf("whdo")-1,
  l=x.split("\n");
  l.forEach((x,line)=>{x=x.trim().split(" ");if(1<x.length&&x[1].includes(":")){fns[x[0]]=Object.keys(fns).length;addsig(x[1])}})
  l.forEach((x,line)=>{

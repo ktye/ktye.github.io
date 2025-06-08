@@ -1,0 +1,45 @@
+#!/usr/bin/env -S deno --allow-read --allow-write
+
+//embed
+
+let indicate=x=>{let i=b.lastIndexOf("\n",x),j=b.indexOf("\n",x);i=i<0?0:i;j=j<0?b.length:j;console.log(b.slice(i,j));console.log(" ".repeat(x-i)+"^")}
+let ed={selectionStart:0,selectionEnd:0,focus:_=>indicate(ed.selectionStart)},aout=0,xout=0,wout=0
+let argv=process.argv.slice(2)
+if(argv.length&&argv[0].startsWith("-")){let a0=argv[0]
+ a0=="-a"?aout=1:a0=="-w"?wout=1:"-x"==a0?xout=1:argv.push(1,2,3)
+ argv=argv.slice(1)
+}
+if(1>argv.length||(!(argv[0].endsWith(".b")))){
+ console.log(process.argv[0], process.argv[1])
+ console.log("use:")
+ console.log("$b    file.b [func args..] /run")
+ console.log("$b -t file.b       /call test()")
+ console.log("$b -a file.b       /print  asm")
+ console.log("$b -x file.b       /hexdump wasm")
+ console.log("$b -w file.b       /writes file.wasm")
+ process.exit(1)
+}
+let xxd=(x,s,i,o,O)=>(i=0,o="",O=x=>o+=x,s="  ",x.forEach((x,i)=>{
+ if(0==i%16)(O((i?s+"\n":"")+i.toString(16).padStart(8,'0')+":"),s="  ")
+ if(0==i%2)O(" ");O(x.toString(16).padStart(2,'0'));s+=(x>31&&x<127)?String.fromCharCode(x):"."}),(i=x.length%16),O(i?" ".repeat(2.5*(16-x.length%16)):""+s),o)
+
+//let xxd=x=>x.map(x=>x.toString(16).padStart(2,"0")).join(" ").match(/.{1,12}/g).join("\n").replaceAll(" \n","\n")
+let b=new TextDecoder("utf-8").decode(Deno.readFileSync(argv[0]))
+let a=ab(b)
+if(aout){console.log(a);process.exit(0)}
+let w=wa(a)
+if(xout){console.log(xxd(w));process.exit(0)}
+if(wout){a=argv[0].slice(0,-2)+".wasm";Deno.writeFileSync(a,w);process.exit(0)}
+
+
+
+let findtop=_=>8*(1+new BigInt64Array(I.exports.memory.buffer).findLastIndex(x=>x))
+let malloc=x=>{x=((7+x)>>>3)<<3;I.top=I.top?I.top:findtop();let n=I.exports.memory.buffer.byteLength,t=I.top+x,r=I.top;if(t>n){I.exports.memory.grow((65535+(n-t))>>>16)};I.top=t;return r}
+let libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 cos cosh exp expm1 floor hypot sin cos log log10 log1p pow random round sign sin tan tanh trunc".split(" ").map(x=>({[x]:Math[x]}))))
+
+let M={env:{...{/*..*/malloc:malloc},...libm}}
+let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
+
+let f;if(argv.length&&argv[1] in I.exports){f=I.exports[argv[1]];argv=argv.slice(1)}else{f=I.export.main}
+console.log(f(...argv.map(Number)))
+

@@ -63,6 +63,7 @@ let heap=(m,o,s)=>{if((s=o.startsWith("st"))||o.startsWith("ld"))m.H=[m.S[m.S.le
 let step=(m,over)=>{if(m.exit)return;let F=m.F[m.f],cal=over?dcal:scal;if(F.c.length<=++m.l)return ret(m)
  if(!m.C.length)m.C.push([m.f,0])
  let a=F.c[m.l],a0=a[0],a1=a[1],ad=a["@"],x
+ if(a0=="")return
  let icl=(x,s,ad,f)=>{f=m.T[x];x=m.F[f];if(s!=x.r+":"+x.a){throw new Error("line "+(F.l+m.l)+": signature mismatch for indirect function "+x)};cal(f,m,ad)}
    "const"==a0?m.S.push(a1)                    //iefz(Number) j(BigNum)
  :   "get"==a0?m.S.push(F.lo[a1])

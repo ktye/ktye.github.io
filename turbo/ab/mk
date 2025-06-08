@@ -2,3 +2,10 @@ echo "//written my mk. do not edit." > ab.js
 echo "let ab=x=>{"                   >>ab.js
 cat token.js parse.js                >>ab.js
 echo "return parse(token(x))}"       >>ab.js
+
+
+sed       '/\/\/embed/q'   b.deno >b
+cat       ab.js                  >>b
+cat ../wa/wa.js                  >>b
+sed -n    '/\/\/embed/,$p' b.deno>>b
+chmod +x                           b

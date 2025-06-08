@@ -1,6 +1,5 @@
 b: better c
 
-
 types ijefz(scalar) BGHSIEJFZ(vector)
 size  23234         001122334
 vectors are stored as j(64-bit int) as (count,addr)
