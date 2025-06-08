@@ -105,7 +105,7 @@ X+:Y  amnd(x,i,f,avec(Y))
    f.l.i="i";f.l.n="i";if(f.r)f.l.r=f.r;
    f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
  }}
- while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join())+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
+ while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join(""))+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
  let I=Object.keys(funs).filter(x=>!funs[x].tok).map(x=>funs[x].c).join("\n")
  let F=Object.keys(funs).filter(x=> funs[x].tok).map(x=>funs[x].c).join("\n")
  let t="";for(o in tabl){t+="\ntab "+o+" "+tabl[o][0];if(!(tabl[o][0]in funs))perr("unknown func in table: "+tabl[o][0],tabl[o][1])}

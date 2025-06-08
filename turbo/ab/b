@@ -112,7 +112,7 @@ X+:Y  amnd(x,i,f,avec(Y))
    f.l.i="i";f.l.n="i";if(f.r)f.l.r=f.r;
    f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
  }}
- while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join())+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
+ while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join(""))+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
  let I=Object.keys(funs).filter(x=>!funs[x].tok).map(x=>funs[x].c).join("\n")
  let F=Object.keys(funs).filter(x=> funs[x].tok).map(x=>funs[x].c).join("\n")
  let t="";for(o in tabl){t+="\ntab "+o+" "+tabl[o][0];if(!(tabl[o][0]in funs))perr("unknown func in table: "+tabl[o][0],tabl[o][1])}
@@ -246,8 +246,6 @@ let w=wa(a)
 if(xout){console.log(xxd(w));process.exit(0)}
 if(wout){a=argv[0].slice(0,-2)+".wasm";Deno.writeFileSync(a,w);process.exit(0)}
 
-
-
 let findtop=_=>8*(1+new BigInt64Array(I.exports.memory.buffer).findLastIndex(x=>x))
 let malloc=x=>{x=((7+x)>>>3)<<3;I.top=I.top?I.top:findtop();let n=I.exports.memory.buffer.byteLength,t=I.top+x,r=I.top;if(t>n){I.exports.memory.grow((65535+(n-t))>>>16)};I.top=t;return r}
 let libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz32 cos cosh exp expm1 floor hypot sin cos log log10 log1p pow random round sign sin tan tanh trunc".split(" ").map(x=>({[x]:Math[x]}))))
@@ -255,6 +253,13 @@ let libm=Object.assign(...("acos acosh asin asinh atan atan2 atanh cbrt ceil clz
 let M={env:{...{/*..*/malloc:malloc},...libm}}
 let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
 
-let f;if(argv.length&&argv[1] in I.exports){f=I.exports[argv[1]];argv=argv.slice(1)}else{f=I.export.main}
-console.log(f(...argv.map(Number)))
+let f;if(argv.length&&argv[1] in I.exports){f=argv[1];argv=argv.slice(2)}else{f="main";argv=argv.slice(1)}
+
+let findsig=f=>{let x=b.split("\n").filter(x=>x.startsWith(f+":"));if(1!=x.length){throw new Error("cannot find signature for: "+f)};return x[0].slice(f.length+1).replace(/{.*/,"").split(":")}
+let s=findsig(f),r=s[0];a=s[1]
+if(a.length!=argv.length){throw new Error("args should be: "+a+", got "+argv.length+": "+argv)}
+//todo ..convert chars
+let unsup=x=>{throw new Error("unsupported argument type: "+x)}
+argv=argv.map((x,i)=>"ief".includes(a[i])?Number(x):"j"==a[i]?BigInt(x):"C"==a[i]?bstring(x):unsup(a[i]))
+console.log(I.exports[f](...argv.map(Number)))
 
