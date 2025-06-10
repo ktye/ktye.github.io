@@ -12,6 +12,8 @@ let token=(x,s,i,l)=>(s=0,i=ic(x).map(x=>s=T[14*s+C[x]]).map((x,i)=>x>10?-1:i).f
  l=0,s.forEach((y,i)=>{if(y)l=(";"==x[i]||"\n"==x[i]?((s[i]=l?0:1),1):0)}),
  [where(x,s).map(x=>x=="\n"?";":x).toReversed(),where(i,s).toReversed()])
 let where=(x,k)=>x.filter((_,i)=>k[i])
+let min=Math.min
+let af=x=>Array.from(x)
 
 let left="([{",right="}])"
 let op=":+*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",vc="BGHSIEJFZ"
@@ -38,13 +40,13 @@ let term=(r,n)=>{r=peek();if(";"==r[0]||"{"==r[0]||right.includes(r[0]))return 0
   else if(":"==peek()){next();r=expr(term());R.v[n]={value:r[0],t:r.t};console.log("R.v",R.v);return r}
   else {console.log("n in v?",n in R.v);perr("lookup: "+n)}
  }
- while("["==peek()){next();n=list();if(r[0]=="$".includes(r[0])){return(cond(n))};r=peek().endsWith(":")?amnd(r,(1!=n.length?perr("rank assign",n.p):n[0]),next(),expr(term())):cali(r,n)}
+ while("["==peek()){next();n=list();if(r[0]=="$")perr("no-cond");r=peek().endsWith(":")?amnd(r,(1!=n.length?perr("rank assign",n.p):n[0]),next(),expr(term())):cali(r,n)}
  return r
 }
-let acal=(f,...x)=>(console.log("acall", f,...x),A.exports[f](...x))
-let cali=(x,y,a)=>(console.log("cali",x,y),x.t.includes(":")?(x.t=x.t.slice(0,x.t.indexOf(":")),x[0]=x[0](...y.map(x=>x[0])),x):perr("cali/nyi index"))
+let acal=(f,...x)=>R.A.exports[f](...x)
+let cali=(x,y,a)=>(x.t.includes(":")?(x.t=x.t.slice(0,x.t.indexOf(":")),x[0]=x[0](...y.map(x=>x[0])),x):perr("cali/nyi index"))
 let nega=(x,p)=>(("ijefz".includes(x.t)?x[0]=acal("ng"+x.t,x[0]):perr("neg on type "+x.t,p)),x)
-let dyad=(x,y,z,d,i,p)=>(console.log("dyad",x,y,z),d="+ad-ad*mu%dv%'dv\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",
+let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%dv%'dv\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",
  p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],
   i=d.indexOf(y),i>=0?z[0]=acal(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t),z,x):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z))
 let mona=(x,y,i,m)=>{console.log("monadic",x,y);return
@@ -54,7 +56,6 @@ let mona=(x,y,i,m)=>{console.log("monadic",x,y);return
 let expr=x=>{if(!x)return x
   let y=term(),r,v=x=>!x.t
   if(!y)return x
- console.log("vx,vy",v(x),v(y),x,y,"dy?",v(y)&&!(v(x)))
   if(v(y)&&!(v(x))){
    r=expr(term())
    if(!r)perr("1+")
@@ -64,7 +65,12 @@ let expr=x=>{if(!x)return x
   return(v(x))?mona(x,r)/*:x[0].startsWith("cast ")?cast(r,x.t)*/:cali(x,r)
 }
 //let vect=x=>{ x.t.toLowerCase()+"#"  200#i)..
-let exec=x=>{[tok,pos]=token(x.trim()+"}");if(l(tok)=="\\")return help();console.log("token",tok);x=l(list());return vc.includes(x.t)?vect(x):x.t+")"+x}
+//BGHSIEJFZ
+let dots=x=>x.length>70?x.slice(0,70)+"..":x
+let vstr=(n,a,f)=>dots(af(new f(I.exports.memory.buffer,a,min(36,n))).join(" "))
+let jspl=x=>[Number(x[0]>>32n),Number(x[0]&0xffffffffn)]
+let vect=(x,n,a,t)=>([n,a]=jspl(x),t=x.t,n+"#"+t+")"+vstr(n,a,t=="G"?Int8Array:t=="B"?Uint8Array:t=="H"?Int16Array:t=="S"?Uint16Array:t=="I"?Int32Array:t=="U"?Uint32Array:t=="J"?BigInt64Array:t=="L"?BigUint64Array:t=="E"?Float32Array:t=="F"?Float64Array:t=="Z"?perr("zvec-nyi"):perr("vectype:"+t)))
+let exec=x=>{[tok,pos]=token(x.trim()+"}");if(l(tok)=="\\")return help();x=l(list());return vc.includes(x.t)?vect(x):x.t+")"+x}
 let help=_=>"globals  : "+Object.keys(R.g).map(x=>x+":"+R.g[x]).join(" ")+"\n"+
             "new vars : "+Object.keys(R.v).filter(x=>!(x in R.g)).map(x=>x+":"+R.v[x].t).join(" ")+"\n"+
             "functions:\n"+Object.keys(R.f).map(x=>" "+x+" "+R.f[x].r+":"+R.f[x].a).join("\n")
