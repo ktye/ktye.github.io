@@ -1,15 +1,20 @@
 echo "//written my mk. do not edit." > ab.js
-echo "let ab=x=>{"                   >>ab.js
-cat token.js parse.js                >>ab.js
+echo "let ab=(x,B)=>{"               >>ab.js
+cat token.js ab_js                   >>ab.js
 echo "return parse(token(x))}"       >>ab.js
 
+echo "//written my mk. do not edit." > winter.js
+echo "let winter=(R,x)=>{"           >>winter.js
+cat token.js winter_js               >>winter.js
+echo "return exec(x)}"               >>winter.js
 
-sed       '/\/\/embed/q'   b.deno >b
-cat       ab.js                  >>b
-cat ../wa/wa.js                  >>b
-cat ../wa/ai.js                  >>b
-echo 'let aia="\\'               >>b
-cat ../wa/ai.a |sed 's/$/\\n \\/'>>b
-echo '"'                         >>b
-sed -n    '/\/\/embed/,$p' b.deno>>b
-chmod +x                           b
+sed       '/\/\/embed/q'   b.deno     >b
+cat       ab.js                      >>b
+cat ../wa/wa.js                      >>b
+cat ../wa/ai.js                      >>b
+echo 'let aia="\'                    >>b
+cat ../wa/ai.a |sed 's/$/\\n \\/'    >>b
+echo '"'                             >>b
+cat   winter.js                      >>b
+sed -n    '/\/\/embed/,$p' b.deno    >>b
+chmod +x                               b

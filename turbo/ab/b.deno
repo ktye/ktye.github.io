@@ -13,7 +13,8 @@ if(argv.length&&argv[0].startsWith("-")){let a0=argv[0]
 if(1>argv.length||(!(argv[0].endsWith(".b")))){
  console.log(process.argv[0], process.argv[1])
  console.log("use:")
- console.log("$b    file.b [func args..] /run")
+ console.log("$b    file.b       /repl")
+ console.log("$b    file.b func args.. /run")
  console.log("$b -i file.b       /interpret")
  console.log("$b -a file.b       /print  asm")
  console.log("$b -x file.b       /hexdump wasm")
@@ -25,8 +26,9 @@ let xxd=(x,s,i,o,O)=>(i=0,o="",O=x=>o+=x,s="  ",x.forEach((x,i)=>{
  if(0==i%2)O(" ");O(x.toString(16).padStart(2,'0'));s+=(x>31&&x<127)?String.fromCharCode(x):"."}),(i=x.length%16),O(i?" ".repeat(2.5*(16-x.length%16)):""+s),o)
 
 //let xxd=x=>x.map(x=>x.toString(16).padStart(2,"0")).join(" ").match(/.{1,12}/g).join("\n").replaceAll(" \n","\n")
+let R={}
 let b=new TextDecoder("utf-8").decode(Deno.readFileSync(argv[0]))
-let a=ab(b)
+let a=ab(b,R)
 if(aout){console.log(a);process.exit(0)}
 let w=wa(a)
 if(xout){console.log(xxd(w));process.exit(0)}
@@ -40,6 +42,9 @@ let M={env:{...{/*..*/malloc:malloc},...libm}}
 
 
 let m=new WebAssembly.Module(w),I=new WebAssembly.Instance(m,M)
+let repl=_=>{let buf=new Uint8Array(256),p=new Uint8Array([32]);R.A=new WebAssembly.Module(wa(aia));while(1){Deno.stdout.writeSync(p);let n=Deno.stdin.readSync(buf);if(!n)return;let x=new TextDecoder().decode(buf.subarray(0,n));try{console.log(winter(R,x.trim()))}catch(e){console.log(e)};}}
+
+if(1==argv.length){repl();process.exit(0)}
 let f;if(argv.length&&argv[1] in I.exports){f=argv[1];argv=argv.slice(2)}else{f="main";argv=argv.slice(1)}
 
 let findsig=f=>{let x=b.split("\n").filter(x=>x.startsWith(f+":"));if(1!=x.length){throw new Error("cannot find signature for: "+f)};return x[0].slice(f.length+1).replace(/{.*/,"").split(":")}

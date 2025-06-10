@@ -1,1 +1,6 @@
 assembly language
+
+i name   /global
+i name 3 /initialized
+
+..

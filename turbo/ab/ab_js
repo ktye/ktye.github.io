@@ -8,7 +8,7 @@ let token=(x,s,i,l)=>(s=0,i=ic(x).map(x=>s=T[14*s+C[x]]).map((x,i)=>x>10?-1:i).f
  [where(x,s).map(x=>x=="\n"?";":x).toReversed(),where(i,s).toReversed()])
 let where=(x,k)=>x.filter((_,i)=>k[i])
 let left="([{",right="}])"
-let op=":+-*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",vc="BGHSIEJFZ"
+let op=":+*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",vc="BGHSIEJFZ"
 let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
  let runt={
   "malloc":{r:"i",a:"i",c:["malloc i:i import env malloc"]},
@@ -22,7 +22,7 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
  let ipos=0,typs="ijefzBGHSIJEFZ",it=t=>typs.indexOf(t)
  let l=x=>x[x.length-1],lop=x=>l(x).slice(0,3),vt=x=>vc.includes(x.t)
  let perr=(x,p)=>{p=p?p:ipos;if(ed){ed.selectionStart=ed.selectionEnd=p;ed.focus()};throw new Error("@"+p+": "+x)}
- let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes(".")?"f":"i"):"i")
+ let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes("a")?"z":x.includes(".")?"f":"i"):"i")
  let tyck=(x,y,p)=>{if(x!=y)perr("type",p)}
  let avec=x=>(vt(x)?(lp=x.n,x.push("ioj","get "+temp("i","i"),...shift(x.t),"adi","ld"+x.t.toLowerCase()),x.t=x.t.toLowerCase(),x):x)
  let upty=(x,y)=>(x=avec(x),y=avec(y),x=xloc(x,y),x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push(y.t+"o"+x.t),x.t=y.t):(y.push(x.t+"o"+y.t),y.t=x.t),[x,y])
@@ -55,7 +55,7 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
   return r}
  let mona=(x,y,i,m)=>x[0]=="#"?(vt(y)?(y.push("j 32","srl","ioj"),y.t="i",y):perr("rank")):x[0]==":"?(cast(y,res),y.push("ret"),y):(y=avec(y),(m="!iezi!jezj~inoi~jnoj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
  let nega=(x,p)=>("ij".includes(x.t)?(x.unshift(x.t+" 0"),x.push("su"+x.t+" @"+p)):x.push("ng"+x.t+" @"+p),x)
- let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%di%'di\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z))
+ let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%dv%'dv\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],z.push(...x),i=d.indexOf(y),i>=0?z.push(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t)+" @"+p):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z))
  let cast=(x,t)=>t==x.t?x:(x.push(loty(t)+"o"+loty(x.t)),x.t=t,x)
  let temp=(t,q,s)=>(s=(q?q:"$"+t),s in locs?s:(locs[s]=t,s))
  let xloc=(x,y)=>x.t=="?"?(locs[immm(x[0])]=y.t,x.t=y.t,x):x
@@ -106,10 +106,11 @@ X+:Y  amnd(x,i,f,avec(Y))
    f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
  }}
  while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join(""))+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
+ let G=Object.keys(glob).map(x=>glob[x]+" "+x).join("\n");if(G.length)G+="\n"
  let I=Object.keys(funs).filter(x=>!funs[x].tok).map(x=>funs[x].c).join("\n")
  let F=Object.keys(funs).filter(x=> funs[x].tok).map(x=>funs[x].c).join("\n")
  let t="";for(o in tabl){t+="\ntab "+o+" "+tabl[o][0];if(!(tabl[o][0]in funs))perr("unknown func in table: "+tabl[o][0],tabl[o][1])}
  let n=(((7+data.length)>>3)<<3)
  let d="";{let o=0,x=data;while((((7+x.length)>>3)<<3)>x.length)x.push(0);if(x.length)x.push(...unqt("data end"));while(x.length){d+="0000000000000000"==(y=(x.length>8?x.slice(0,8):x).map(x=>x.toString(16).padStart(2,"0")).join(""))?"":"\ndat "+o+" "+y;o+=8;x=x.slice(8)}}
  if(B){B.f=funs,B.g=glob}
- return(I+F+t+d).trimStart()}
+ return(G+I+F+t+d).trimStart()}

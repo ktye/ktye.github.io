@@ -14,7 +14,7 @@ lebn=(x,r,b)=>{r=[];while(1){b=Number(x&127n);x>>=7n;if(x==0n&&!(b&64)||(x==-1n&
 sect=(x,y)=>(y.length&&y[0]!=0)?(O(x),O(lebu(y.length)),O(y)):0,
 vect=x=>[...lebu(x.length),...x.flat()],
 typs={"":0,g:1,i:127,j:126,e:125,f:124,z:123},
-expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),2*!i,...lebu(j[i])]),
+expo=(n,j)=>n.map((x,i)=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0)),(i==0?2:j[i]<0?3:0),...lebu(j[i]<0?-1-j[i]:j[i])]),
 locs=x=>{let t=new Map();Object.values(x.lo).forEach(x=>t.set(x,(t.has(x)?1+t.get(x):1)));let r=vect([...t.keys()].map(x=>[...lebu(t.get(x)),Number(x)]));return r},
 asci=x=>[...lebu(x.length),...x.split("").map(x=>x.charCodeAt(0))],
 iota=x=>Array(x).fill(0).map((_,i)=>i),
@@ -29,7 +29,7 @@ return(x=>{
  sigs=[],addsig=x=>(sigs.includes(x)?x:sigs.push(x),x), //e.g. ["i:ii",":ij",..]
  fns={},funs=[],       //{sig:"i:ii",code:[1,2,..],name:"a","export":"A"}
  lsrt=_=>lo=Object.fromEntries(Object.entries(lo).sort(([,a],[,b])=>b-a)), //group locs by type (decreasing) ijefz
- glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[...[c],...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length}}, //name:{t:127,c:[42,7,11],i:0}
+ glob={},addglo=(t,c,s)=>{glob[s]={t:t,c:[...[c],...Array(67==t?4:68==t?8:1).fill(0),11],i:Object.keys(glob).length,s:s}}, //name:{t:127,c:[42,7,11],i:0}
  tabl=[],addtab=(i,s)=>(i!=tabl.length?E(line,"index error"):(s in fns)?tabl[i]=fns[s]:E(line,"unknown function: "+s)),
  data=[],adddat=(i,s)=>(data.filter(x=>i==x.o+x.d.length).length?data[data.length-1].d.push(...hexa(s)):data.push({o:i,d:hexa(s)})), //{o:1,d:[1,2,3,4]}
  swtc=[],sw,sc,nest=[],whdo=_=>nest.length-nest.lastIndexOf("whdo")-1,
@@ -74,8 +74,8 @@ return(x=>{
  if(tabl.length)sect(4,[1,112,0,...lebu(tabl.length)])
  sect( 5,[1,0,1]) //memory: 1segment, unshared, 1block
  sect( 6,vect(Object.values(glob).map(x=>[x.t,1,...x.c]))) //global..
- sect( 7,vect(expo(["memory",...funs.filter(x=>x.export.length>0).map(x=>x.export)], //names
-                   [0,...funs.map((x,i)=>(x.export.length?i:-1)).filter(x=>x>=0)]))) //index
+ sect( 7,vect(expo(["memory",...funs.filter(x=>x.export.length>0).map(x=>x.export),...Object.keys(glob).map(x=>x)], //names
+                   [0,...funs.map((x,i)=>(x.export.length?i:-1)).filter(x=>x>=0),...Object.keys(glob).map(x=>-1-glob[x].i)]))) //index
  sect( 8,[]) //start
  if(tabl.length)sect(9,[1,0,65,0,11,...lebu(tabl.length),...tabl.map(lebu).flat()]) //elements(indirect function table)
  sect(10,vect(funs.filter(x=>!x.import).map(x=>((x=[...locs(x),...x.code,11]),[...lebu(x.length),...x])))) //code

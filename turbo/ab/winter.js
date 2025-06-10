@@ -1,0 +1,76 @@
+//written my mk. do not edit.
+let winter=(R,x)=>{
+let C="aaaaaaaaaanaaaaaaaaaaaaaaaaaaaaaadhddddebcdddjgmggggggggggebdedddffffffffffffffffffffffffffblcddiffffkfffffffffffffffffffffbdcdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+let T="abcdefghijfdkbabcdefghijfdkbabcdefghidfddbabcdrfghijfddbabcdefghijfddbabcdemmhidmddbabcdennhidoddbppppppprpppqppabcdemghidmddbabcdefnhijfddblllllllllllllblllllllllllllbabcdemmhidmddbabcdennhidoddbabcdennhinnddbppppppprpppqppppppppppppppppabcdefghidfddb"
+//winter(R,f) R.f(functions), R.g:(globals) filled by ab.js, R.v={} vars(globals&new vars)
+if(R.A.constructor!=WebAssembly.Instance)R.A=new WebAssembly.Instance(R.A)
+if(!("v"in R))R.v={}
+let perr=e=>{throw new Error(e)}
+if(!Object.keys(R).length)perr("not runtime information")
+
+let ic=x=>x.split("").map(x=>x.charCodeAt(0))
+C=ic(C).map(x=>x-97);T=ic(T).map(x=>x-97)
+let cut=(x,i)=>i.map((_,k)=>x.slice(i[k],i[1+k]))
+let token=(x,s,i,l)=>(s=0,i=ic(x).map(x=>s=T[14*s+C[x]]).map((x,i)=>x>10?-1:i).filter(x=>x>=0),
+ x=cut(x,i),s=i.map((_,j)=>((x[j]==" ")||((j==0||x[j-1]==" "||x[j-1]=="\n")&&(x[j][0]=="/"&&x[j][1]!="'"))?0:1)),
+ l=0,s.forEach((y,i)=>{if(y)l=(";"==x[i]||"\n"==x[i]?((s[i]=l?0:1),1):0)}),
+ [where(x,s).map(x=>x=="\n"?";":x).toReversed(),where(i,s).toReversed()])
+let where=(x,k)=>x.filter((_,i)=>k[i])
+
+let left="([{",right="}])"
+let op=":+*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",vc="BGHSIEJFZ"
+
+let tok,pos
+let ipos=0,typs="ijefzBGHSIJEFZ",it=t=>typs.indexOf(t)
+let l=x=>x[x.length-1],lop=x=>l(x).slice(0,3),vt=x=>vc.includes(x.t)
+let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes("a")?"z":x.includes(".")?"f":"i"):"?")
+let upty=(x,y)=>(/*x=avec(x),y=avec(y),*/x.t==y.t?[x,y]:it(x.t)<it(y.t)?[conv(x,y.t),y]:[x,conv(y,x.t)])
+let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=["if".includes(t)?parseFloat(r):"j"==t?BigInt(r.slice(0,-1)):r],r.t=t,r.p=(ipos=pos.pop()),r))
+let cast=(x,t)=>(x.t!=t)?perr("nyi:cast"):x
+let peek=_=>l(tok)
+let list=p=>{let e,r=[];r.t="l";while(1){if(right.includes(peek())){next();return r};r.push(e=expr(term()));if(";"==peek())next();if(!e)perr("unclosed",p)}}
+let asin=(n,a,y)=>(y=cast(y,R.g[n]),y=(a!=":")?perr("nyi:modified-assign"):y,I.exports[n].value=y[0],y)
+let term=(r,n)=>{r=peek();if(";"==r[0]||"{"==r[0]||right.includes(r[0]))return 0
+ r=next();if(!r)return r
+ if("("==r[0]){n=ipos;r=expr(term());if(")"!=peek())perr("unclosed)",n);next();return r}
+ if(left.includes(r[0]))return list() //todo
+ if('"'==r[0][0])return char(r)       //todo
+ n=r[0][0];if(az.includes(n)){n=r[0]
+       if(n in R.g){R.v[n]=I.exports[n];R.v[n].t=R.g[n];if(peek().endsWith(":")){return asin(n,next(),expr(term()))};r[0]=R.v[n].value;r.t=R.v[n].t}
+  else if(n in R.v){                                   ;if(peek().endsWith(":")){return asin(n,next(),expr(term()))};r[0]=R.v[n].value;r.t=R.v[n].t}
+  else if(n in R.f){if(peek().endsWith(":"))perr("reassign function "+n);r[0]=I.exports[n];r.t=R.f[n].r+":"+R.f[n].a}
+  else if(":"==peek()){next();r=expr(term());R.v[n]={value:r[0],t:r.t};console.log("R.v",R.v);return r}
+  else {console.log("n in v?",n in R.v);perr("lookup: "+n)}
+ }
+ while("["==peek()){next();n=list();if(r[0]=="$".includes(r[0])){return(cond(n))};r=peek().endsWith(":")?amnd(r,(1!=n.length?perr("rank assign",n.p):n[0]),next(),expr(term())):cali(r,n)}
+ return r
+}
+let acal=(f,...x)=>(console.log("acall", f,...x),A.exports[f](...x))
+let cali=(x,y,a)=>(console.log("cali",x,y),x.t.includes(":")?(x.t=x.t.slice(0,x.t.indexOf(":")),x[0]=x[0](...y.map(x=>x[0])),x):perr("cali/nyi index"))
+let nega=(x,p)=>(("ijefz".includes(x.t)?x[0]=acal("ng"+x.t,x[0]):perr("neg on type "+x.t,p)),x)
+let dyad=(x,y,z,d,i,p)=>(console.log("dyad",x,y,z),d="+ad-ad*mu%dv%'dv\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",
+ p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],
+  i=d.indexOf(y),i>=0?z[0]=acal(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t),z,x):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z))
+let mona=(x,y,i,m)=>{console.log("monadic",x,y);return
+ x[0]=="#"?(vt(y)?(nyi()):perr("rank")):x[0]==":"?perr(":x (cannot return)"):(/*y=avec(y),*/(m="!iezi!jezj~inoi~jnoj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y[0]=acal(m.slice(2+i,5+i),y[0])),y)
+}
+
+let expr=x=>{if(!x)return x
+  let y=term(),r,v=x=>!x.t
+  if(!y)return x
+ console.log("vx,vy",v(x),v(y),x,y,"dy?",v(y)&&!(v(x)))
+  if(v(y)&&!(v(x))){
+   r=expr(term())
+   if(!r)perr("1+")
+   return"@"==y[0]?cali(x,r):y[0].endsWith(":")?asxy(x,y,r):dyad(x,y,r)
+  }
+  r=expr(y)
+  return(v(x))?mona(x,r)/*:x[0].startsWith("cast ")?cast(r,x.t)*/:cali(x,r)
+}
+//let vect=x=>{ x.t.toLowerCase()+"#"  200#i)..
+let exec=x=>{[tok,pos]=token(x.trim()+"}");if(l(tok)=="\\")return help();console.log("token",tok);x=l(list());return vc.includes(x.t)?vect(x):x.t+")"+x}
+let help=_=>"globals  : "+Object.keys(R.g).map(x=>x+":"+R.g[x]).join(" ")+"\n"+
+            "new vars : "+Object.keys(R.v).filter(x=>!(x in R.g)).map(x=>x+":"+R.v[x].t).join(" ")+"\n"+
+            "functions:\n"+Object.keys(R.f).map(x=>" "+x+" "+R.f[x].r+":"+R.f[x].a).join("\n")
+
+return exec(x)}
