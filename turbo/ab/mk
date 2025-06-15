@@ -1,10 +1,8 @@
-echo "//written my mk. do not edit." > ab.js
-echo "let ab=(x,B)=>{"               >>ab.js
+echo "let ab=(x,B)=>{"                >ab.js
 cat token.js ab_js                   >>ab.js
 echo "return parse(token(x))}"       >>ab.js
 
-echo "//written my mk. do not edit." > winter.js
-echo "let winter=(R,x)=>{"           >>winter.js
+echo "let winter=(R,x)=>{"            >winter.js
 cat token.js winter_js               >>winter.js
 echo "return exec(x)}"               >>winter.js
 

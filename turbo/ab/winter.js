@@ -1,4 +1,3 @@
-//written my mk. do not edit.
 let winter=(R,x)=>{
 let C="aaaaaaaaaanaaaaaaaaaaaaaaaaaaaaaadhddddebcdddjgmggggggggggebdedddffffffffffffffffffffffffffblcddiffffkfffffffffffffffffffffbdcdaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 let T="abcdefghijfdkbabcdefghijfdkbabcdefghidfddbabcdrfghijfddbabcdefghijfddbabcdemmhidmddbabcdennhidoddbppppppprpppqppabcdemghidmddbabcdefnhijfddblllllllllllllblllllllllllllbabcdemmhidmddbabcdennhidoddbabcdennhinnddbppppppprpppqppppppppppppppppabcdefghidfddb"
@@ -41,7 +40,7 @@ let term=(r,n)=>{r=peek();if(";"==r[0]||"{"==r[0]||right.includes(r[0]))return 0
        if(n in R.g){R.v[n]=I.exports[n];R.v[n].t=R.g[n];if(peek().endsWith(":")){return asin(n,next(),expr(term()))};r[0]=R.v[n].value;r.t=R.v[n].t}
   else if(n in R.v){                                   ;if(peek().endsWith(":")){return asin(n,next(),expr(term()))};r[0]=R.v[n].value;r.t=R.v[n].t}
   else if(n in R.f){if(peek().endsWith(":"))perr("reassign function "+n);r[0]=I.exports[n];r.t=R.f[n].r+":"+R.f[n].a}
-  else if(":"==peek()){next();r=expr(term());R.v[n]={value:r[0],t:r.t};console.log("R.v",R.v);return r}
+  else if(":"==peek()){next();r=expr(term());R.v[n]={value:r[0],t:r.t};return r}
   else {console.log("n in v?",n in R.v);perr("lookup: "+n)}
  }
  while("["==peek()){next();n=list();if(r[0]=="$")perr("no-cond");r=peek().endsWith(":")?amnd(r,(1!=n.length?perr("rank assign",n.p):n[0]),next(),expr(term())):cali(r,n)}
@@ -53,7 +52,7 @@ let nega=(x,p)=>(("ijefz".includes(x.t)?x[0]=acal("ng"+x.t,x[0]):perr("neg on ty
 let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%dv%'dv\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",
  p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],
   i=d.indexOf(y),i>=0?z[0]=acal(d.slice(i+y.length,2+i+y.length)+(y[1]=="'"?("j"==z.t?"l":"u"):z.t),z,x):(perr("dyadic"+y)),z.t="~<=>".includes(y[0])?"i":z.t,z))
-let mona=(x,y,i,m)=>{console.log("monadic",x,y);return
+let mona=(x,y,i,m)=>{console.log("monadic-nyi",x,y);return
  x[0]=="#"?(vt(y)?(nyi()):perr("rank")):x[0]==":"?perr(":x (cannot return)"):(/*y=avec(y),*/(m="!iezi!jezj~inoi~jnoj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y[0]=acal(m.slice(2+i,5+i),y[0])),y)
 }
 
@@ -66,7 +65,7 @@ let expr=x=>{if(!x)return x
    return"@"==y[0]?cali(x,r):y[0].endsWith(":")?asxy(x,y,r):dyad(x,y,r)
   }
   r=expr(y)
-  return(v(x))?mona(x,r)/*:x[0].startsWith("cast ")?cast(r,x.t)*/:cali(x,r)
+  return(v(x))?mona(x,r)/*:x[0].startsWith("cast ")?cast(r,x.t)*/:cali(x,[r])
 }
 //let vect=x=>{ x.t.toLowerCase()+"#"  200#i)..
 //BGHSIEJFZ
