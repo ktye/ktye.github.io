@@ -28,7 +28,7 @@ let xxd=(x,s,i,o,O)=>(i=0,o="",O=x=>o+=x,s="  ",x.forEach((x,i)=>{
 //let xxd=x=>x.map(x=>x.toString(16).padStart(2,"0")).join(" ").match(/.{1,12}/g).join("\n").replaceAll(" \n","\n")
 let R={}
 let b=new TextDecoder("utf-8").decode(Deno.readFileSync(argv[0]))
-let a=ab(b,R);a=opt(a.split("\n")).join("\n")
+let a=ab(b,R);a=opt(zwrap(a.split("\n"))).join("\n")
 if(aout){console.log(a);process.exit(0)}
 let w=wa(a)
 if(xout){console.log(xxd(w));process.exit(0)}

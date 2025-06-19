@@ -26,7 +26,8 @@ let ipos=0,typs="ijefzBGHSIJEFZ",it=t=>typs.indexOf(t)
 let l=x=>x[x.length-1],lop=x=>l(x).slice(0,3),vt=x=>vc.includes(x.t)
 let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes("a")?"z":x.includes(".")?"f":"i"):"?")
 let upty=(x,y)=>(/*x=avec(x),y=avec(y),*/x.t==y.t?[x,y]:it(x.t)<it(y.t)?[conv(x,y.t),y]:[x,conv(y,x.t)])
-let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=["if".includes(t)?parseFloat(r):"j"==t?BigInt(r.slice(0,-1)):r],r.t=t,r.p=(ipos=pos.pop()),r))
+let parz=(s,a)=>(s=s.split("a").map(parseFloat),s[1]==0?[s[0],0]:s[1]==90?[0,s[0]]:s[1]==180?[-s[0],0]:s[1]==270?[0,-s[0]]:(a=s[1]*Math.PI/180,[s[0]*Math.cos(a),s[0]*Math.sin(a)]))
+let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=["if".includes(t)?parseFloat(r):"j"==t?BigInt(r.slice(0,-1)):"z"==t?parz(r):r],r.t=t,r.p=(ipos=pos.pop()),r))
 let cast=(x,t)=>(x.t!=t)?perr("nyi:cast"):x
 let peek=_=>l(tok)
 let list=p=>{let e,r=[];r.t="l";while(1){if(right.includes(peek())){next();return r};r.push(e=expr(term()));if(";"==peek())next();if(!e)perr("unclosed",p)}}
@@ -47,7 +48,7 @@ let term=(r,n)=>{r=peek();if(";"==r[0]||"{"==r[0]||right.includes(r[0]))return 0
  return r
 }
 let acal=(f,...x)=>R.A.exports[f](...x)
-let cali=(x,y,a)=>(x.t.includes(":")?(x.t=x.t.slice(0,x.t.indexOf(":")),x[0]=x[0](...y.map(x=>x[0])),x):perr("cali/nyi index"))
+let cali=(x,y,a)=>(x.t.includes(":")?(x.t=x.t.slice(0,x.t.indexOf(":")),x[0]=x[0](...y.map(x=>x[0]).flat()),x):perr("cali/nyi index"))
 let nega=(x,p)=>(("ijefz".includes(x.t)?x[0]=acal("ng"+x.t,x[0]):perr("neg on type "+x.t,p)),x)
 let dyad=(x,y,z,d,i,p)=>(d="+ad-ad*mu%dv%'dv\\sl/sr/'sr=eq~ne<ge>le<=gt>=lt<'gt>'lt",
  p=y.p,y=y[0],y=="#"?take(x,z,p):y=="_"?drup(x,z,p):([x,z]=upty(x,z),z=("-"==y?nega(z,z.p):z),[x,z]="%"==y[0]?[z,x]:[x,z],
@@ -73,9 +74,12 @@ let dots=x=>x.length>70?x.slice(0,70)+"..":x
 let vstr=(n,a,f)=>dots(af(new f(I.exports.memory.buffer,a,min(36,n))).join(" "))
 let jspl=x=>[Number(x[0]>>32n),Number(x[0]&0xffffffffn)]
 let vect=(x,n,a,t)=>([n,a]=jspl(x),t=x.t,n+"#"+t+")"+vstr(n,a,t=="G"?Int8Array:t=="B"?Uint8Array:t=="H"?Int16Array:t=="S"?Uint16Array:t=="I"?Int32Array:t=="U"?Uint32Array:t=="J"?BigInt64Array:t=="L"?BigUint64Array:t=="E"?Float32Array:t=="F"?Float64Array:t=="Z"?perr("zvec-nyi"):perr("vectype:"+t)))
-let exec=x=>{[tok,pos]=token(x.trim()+"}");if(l(tok)=="\\")return help();x=l(list());return vc.includes(x.t)?vect(x):x.t+")"+x}
+let zstr=(x,r,a)=>(r=Math.hypot(x[0],x[1]),a=Math.atan2(x[1],x[0])*180/Math.PI,r+"a"+(a<0?(a+360==360?0:a+360):a))
+let exec=x=>{[tok,pos]=token(x.trim()+"}");if(l(tok)=="\\")return help();x=l(list());return vc.includes(x.t)?vect(x):x.t+")"+("z"==x.t?zstr(x[0]):x)}
 let help=_=>"globals  : "+Object.keys(R.g).map(x=>x+":"+R.g[x]).join(" ")+"\n"+
             "new vars : "+Object.keys(R.v).filter(x=>!(x in R.g)).map(x=>x+":"+R.v[x].t).join(" ")+"\n"+
             "functions:\n"+Object.keys(R.f).map(x=>" "+x+" "+R.f[x].r+":"+R.f[x].a).join("\n")
+
+//todo: 1a0+2a0 wrappers for adz.. instructions
 
 return exec(x)}

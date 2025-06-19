@@ -13,6 +13,7 @@ cat ../wa/ai.js                      >>b
 echo 'let aia="\'                    >>b
 cat ../wa/ai.a |sed 's/$/\\n \\/'    >>b
 echo '"'                             >>b
+cat ../wa/zwrap.js                   >>b
 cat ../wa/opt.js                     >>b
 cat   winter.js                      >>b
 sed -n    '/\/\/embed/,$p' b.deno    >>b
