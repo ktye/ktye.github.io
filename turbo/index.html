@@ -450,6 +450,7 @@ examplelist.value="prog.b";loadexample()
 
 <script src="wa/wa.js"></script>
 <script src="wa/ai.js"></script>
+<script src="wa/zwrap.js"></script>
 <script src="wa/opt.js"></script>
 <script src="wa/link.js"></script>
 <script src="wa/boot.js"></script>
@@ -505,6 +506,8 @@ let asm=a=>{locations=[];let loc=(x,p)=>(locations.push(-1<(p=adloc(x))?p:-1),x)
  O("$as "+file.name.slice(0,-2)+".a\n")
  ea.innerHTML=""
  //a=opt(a.split("\n"),new WebAssembly.Instance(A).exports).join("\n")
+ a=zwrap(a.trimEnd().split("\n")).join("\n")
+ //todo: for now, opt is just fmt
  opt(a.trimEnd().split("\n")).forEach(x=>ah(ea,ih(loc(x),ce("option"))))
  wasm=wa(a)
  O(wasm.length+" bytes\n")
