@@ -1,0 +1,27 @@
+#define l(a,b) _(typeof(b)$=b;(a)<$?(a):$)
+#define m(a,b) _(typeof(b)$=b;(a)>$?(a):$) //#define MZ __attribute((minsize)) //noinline
+#define U_(g,z,x...)  U g(x){return _(z);}
+#define g_(g,z) U_(g,z,ii,Ux)
+#define G_(g,z) U_(g,z,ii,Ua,Ux)
+#define t(t,z) ((U)(t)<<60|(z))
+#define tx ( 7&x>>60)
+#define ex (*(e2*)&x)
+Ui(tb,t(1,i))Ui(ti,t(2,i))U(te,t(5,*(i2*)&e),ee)f(iz,3>tx?x:(int)ex)
+#define px (t(1,0)>x)
+#define ax !(x>>63)
+#define ix (i2)x
+#define jx (b(60)&x)
+#define nx (i2)x
+#define mx (  1&x>>53)
+#define vx (mx?nx/ux:nx)
+#define sr x(r,sx)
+#define rV ((g6*)sr)
+#define xV ((g6*)sx)
+#define xu ((i2*)sx)
+#define xU ((U*)sx)
+#define Q(b) if(b)(ws(__func__),_k(1));
+#define _a(z...) _(typeof(_(z))z9=_(z);_r(a);z9)
+#define _x(z...) _(typeof(_(z))z9=_(z);_r(x);z9)
+#define aa x(a,ax)
+#define ta x(a,tx)
+#define na x(a,nx)

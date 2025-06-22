@@ -1,0 +1,39 @@
++   - *   %    &and |or <   >    =    ~   !     @     ?inv #take _drop ^cut , . rms sig in min max sum avg var dev [:~]F'/\
+abs - sqr sqrt flip rev asc desc freq not index first uniq count floor sort , . log exp in min max sum avg var dev [!.]f'/\
+while if else case select[count in first last min max sum avg var dev]by from where !int ^rule ?rand [&|<>=]matrix #grid 
+:+-*%&|<>=~!@? #_^,[:+-*%~_ &|<>=^?#!@,] 16+4list 9+11list 10+10aggr 20math 10gen 10'10/10\ W[TABC]RENLMSUVD
+
+k-torch E(sigmoid a*x%1+E-x) R(rms a*x%%G*x) $(softmax x%Sx:Ex-Mx) llama3.2-1b(1+.3) 17*13**d:2048 128256 
+e:: j:a?y:hRx; k:l.b?y;z:f?y:iRx+:d?jS$k?l.c?y;x+g?zEe?y /prefill
+f::jl:a@y:hRx;kl:l.b@y;z:f@y:iRx+:d@jS$k@l.c@y;x+g@zEe@y /forward
+g::x?Mx:c@bR(a,i)f/cx  /i(x@i:<x:$c@..)??0.9
+j:k:10#,@|a:.`;a,:(j;k);10g\ae/c@" "\"mary had"
+t::a+0|b?d^0|c?d^x /temporal convolution network
+
+mathematics from 60000BC
+5,1 3 5(*,%)3       /scale                    divje             babe -60000 diatonic
+s:1'                /qsort        s rand 16                     uruk  -4400 divide&impera
+q:avg/1>+           /quadrant     q grid 96                   thebes  -3200 
+a:+\|               /fibonacci    a 2 3       pingala         ujjain   -300
+b:!\|               /gcdivisor    b 6 4       euclid      alexandria   -300
+p::(+x*)/1 2 3      /polynomial   p rand 16   al-khwarizmi   baghdad    820
+r::(-x*)/1 3 5      /taylorseries r rand 16   madhava         kerala   1390 arc cos sin
+e::+/x*log x%+/x    /entropy      e freq kj   napier         louvain   1572 rate zeno
+f:(+,-!)0'          /fft          f rand 16   gauss        brunswick   1805 divide&impera
+w:(k log)w'         /wordle       w 2315      boltzmann         graz   1872 divide&impera
+m::2>+(x+*)/x       /mandelbrot   m grid 96   fatou&julia      paris   1915 
+
+(e.)=x+.y /euler   1748 good
+.=lx+.y   /cotes   1714 better
+e=x+y.    /madhava 1390 best   exp:(+x*)/!! cos:(-X*)/!2*! sin:x*(-X*)/!1+2*! arc:x*(-X*)/%1+2*! log:(+x*)/%! 
+
+rosetta punc  infix               prefix              postfix
+k       ()[;] :+-*%&|<>=~@? ^#_,  +-*%~_&|<>=^? !#@,  f'/\             2024
+apl     ()[;] :+-*%^v<>=~ I  TD,  +-  ~_&|UD    IR ,  f'/\             1964
+python3 ()[,] =+-*/&|<>ZZ w [:]a  a-ss~_tra  su as ,  [f(x)for x in x] 2008
+ numpy.[where append][floor abs square sqrt][transpose reverse argsort arange unique sort size]
+
+parse(file;line;char) "+'[(0a"/"(+2)*'+/m[1;2]" a:+2;a*'+/m12[301020200'*+2/+m12]
+gpu(1$GBs) cpu(2$GBs) mem(2$GB) m3max(400/1.2+?+40T) amd8840hs(90/.5+?+4T(780M))
+core(`lxyz..) util(`cj..) math ipc .. f'/\ norm(%# %S %%A* %SE-M) 
+$wget shakti.com/edu/k.zip;unzip k;make

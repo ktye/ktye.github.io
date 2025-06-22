@@ -1,0 +1,18 @@
+#include"v.h"//ai aI Ai AI IA iA abcdlmopq PQGIJEF([:+*&|=~]'/\ [-%<>]' &|*%RE..)  
+#define e4(g,Y,y,a...) e(g,Ae(r(E0,n=n4(n);Ez[4]={};i(n/4,i(4,zi+=Y*Z++))i(n%4,r+=y Zi)i(4,r+=zi)))[15],a)
+#define ft(m,o,O,t,T) T##f(O##t,i(m,z=O##T(z,S##T(i,z)))z)U(o##t,O##t(r((T){},i(nm(m,n),r=O##T(r,Zi))))[b(m)],in,EZ)V(o##T,T z=Z0;i(nm(m,n),Ri=z=O##T(z[b(m)]-(T){},O##t(Zi))),in,IR,IZ)
+ft(6,a,A,g,G)ft(6,m,M,g,G)ft(6-2,a,A,i,I)ft(6-2,m,M,i,I)U(sb,Ai(r(Z2,i(n9(n),r+=SB(Zi))))[15],in,EZ)e4(ae,,,in,EZ)e(me,ii=mi(n,Z);*(e*)&i,in,EZ)e4(vv,*Y++*,Yi*,in,EY,EZ)
+#define mM(n,i) ik=1<<i;h(1<<6-n-1-i,j(k,ii=2*h*k+j;zi=l##n(zi,r(zk,zk=h##n(zi,r)))))
+V(t0,i(I>>6,j(J>>6,Gz[1<<6];i(1<<6,zi=Zi)i(6,mM(0,i))i(1<<6,Ri=zi))),IJ)V(t2,i(I>>4,j(J>>4,Gz[1<<4];i(1<<4,zi=Zi)i(4,mM(2,i))i(1<<4,Ri=zi))),IJ)
+V(m0,i(3+I>>2,j(J,Ez[4]={};h(H,k(4,z[k]+=Y[H*(4*i+k)+h]*Z[J*h+j]))k(4,t?R[J*(4*i+k)+j]+=z[k]:(R[J*(4*i+k)+j]=z[k])))),it,iH,IJ)
+V(mm,J/=16;$(H*J-1>>12,i(I*J,Ri=Z0)h(H/64,j(J/4,m0(1,64,I,4,Y+H*64+h,R+J*4+j,Z+J*H*(64+h)+j))))m0(0,H,I,J,R,Y,Z),iH,IJ)
+V(mv,i(I,((e*)R)[i]=vv(J,Y+J*i,Z)),IJ)V(vm,J/=16;j(J/4,Ez[4]={};i(I,j(4,zj+=Yi*Zj)Z+=J)j(4,*R++=zj)Z-=I*J-4)i(J%4,Ri=r(E0,i(I,r+=Yi*Z[J*i])++Z)),IJ)
+V(sX,ee=me(n,Z);N2(E_((E)Zi-e))e=1/ae(n,R);N2((E)Ri*e),in,IR,IZ)V(r0,N0(R0(Zz)),in,IR,IZ)v1(r2,R2(Zz))v1(q_,Q_(Zi))v1(_q,_Q(Zi))v1(gb,GB(((U*)Z)[i]))v1(ig,IG(_Z))v1(ei,EI(Zi))v1(ie,IE(Zi))v1(ex,E_(Zi))
+
+v2(iA,m+Zi)v2(iB,m-Zi)v2(iC,m*Zi)v2(iD,z(m%65536*Zi>>16,m>>16?Zi-(m>>16)*z:z))e2(eA,e+Zi)e2(eB,e-Zi)e2(eC,e*Zi)e2(eD,e/Zi)bZ(og,m<Zi)bZ(pg,m>Zi)bZ(qg,m==Zi)bZ(oi,GI(m<Z_))bZ(pi,GI(m>Z_))bZ(qi,GI(m==Z_))
+V(RX,ee=1/(_Q(vv(n,Z,Z)/n-E0))[0];N2(e*(E)Yi*Zi),in,IR,IY,IZ)V2(IA,Yi+Zi)V2(IB,Yi-Zi)V2(IC,Yi*Zi)V2(EA,(E)Yi+Zi)V2(EB,(E)Yi-Zi)V2(EC,(E)Yi*Zi)V2(ED,(E)Yi*Zi)V2(A2,GA(Y,Zi,2))V2(EX,(E)Yi*Zi/(1+E_(-(E)Zi)))
+V(v,$5(i-11,5>bz?r0:r2,mI,aI,ie,21>i?$4(i-17,q_,_q,sX,ex):4>tz?gb:6>tz?ig:ei)(nz,R,sz),ii,IR,Uz)//''''''''''.|ma_..*%RE..GIE   //+-*%&|<>=~ @       RE
+V_(av,!y?v(i,R,z):ay?4>i?7>tz?$4(i,iA,iB,iC,iD)(nz,R,iy,sz):$4(i,eA,eB,eC,eD)(nz,R,ey,sz):$6(bz?i-3:i-6,og,pg,qg,oi,pi,qi)(nz,R,iy,sz):(4>i?$7(7>tz?i:3+i,IA,IB,IC,EA,EB,EC,ED):$3(i-19,RX,EX,A2))(nz,R,sy,sz),ii,IR,Uy,Uz)
+G_(a,14>tz?(bz?$4(tz-4|i,mg,ag,mi,ai):sb)(nz,sz):ue(y?vv(nz,sy,sz):(i?ae:me)(nz,sz)))
+V_(MM,my*mz?mm(uz,uy,vz,R,sy,sz):(my?mv:vm)(uy,vz,R,sy,sz),IR,Uy,Uz)V_(FF,(5>bz?t0:t2)(vz,uz,R,0,sz),IR,Uz)
+V_(dz,GR=y/8;GZ=z/8;$(z%8,UR=y/64;UZ=z/64;ij=z%64;i(n6(n),Ri=Zi>>j|Z[1+i]<<64-j))i(n9(n),Ri=Zi),Un,Uy,Uz)V_(n0,N2(JJ()),in,IR)V_(n1,N2(I2|16*i),in,IR)V_(nx,i(n9(n),Ri=m-Z2),im,Un,IR)

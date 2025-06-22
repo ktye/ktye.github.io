@@ -1,0 +1,9 @@
+#include"a.b"
+#define di d[i]
+#define sj s[j]
+#define si s[i]
+#define Gi G[i]
+#define Fi F[i]
+#define Ci C[i]
+#define bi b[i]
+#define ri ((i2*)sr)[i]

@@ -1,0 +1,11 @@
+#include"a.a"
+#define di d[i]
+#define sj s[j]
+#define si s[i]
+#define Gi G[i]
+#define Fi F[i]
+#define Ci C[i]
+#define bi b[i]
+#define xe ((e2*)sx)[i]
+#define re ((e2*)sr)[i]
+#define ri ((i2*)sr)[i]

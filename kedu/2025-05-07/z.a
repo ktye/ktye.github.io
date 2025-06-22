@@ -1,0 +1,11 @@
+#define ins(g,z) U(g,z,ii,in,ss)
+#include"a.a"
+#define si s[i]
+#define ux k_(2,x)
+#define sx ((i0*)k_(3,x))
+#define Gi G[i]
+#define xe ((e2*)sx)[i]
+#define pf x(f,px)
+#define Fi F[i]
+#define Ci C[i]
+#define bi b[i]

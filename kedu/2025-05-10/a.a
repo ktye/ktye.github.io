@@ -1,0 +1,49 @@
+#define Eb e6 b
+#define R(t,n,z) r(tn(t,n),z)
+#define G(g,z) U(g,z,ii,Ua,Ux)
+#define pr x(r,px)
+#include"_.b"
+#define ax !(x>>63)
+#define tx ( 7&x>>60)
+#define ex (*(e2*)&x)
+#define ix (i2)x
+Ui(tb,t(1,i))Ui(ti,t(2,i))U(te,t(5,*(i2*)&e),ee)f(iz,3>tx?x:(int)ex)
+#define px (t(1,0)>x)
+#define hx ( 31&x>>54)
+#define mx (  1&x>>53)
+#define ox (255&x>>32)
+#define vx (mx?nx/ux:nx)
+#define Ox O[ox]
+#define qx !(1l<<36>(U)sx-(1l<<32))
+#define jx (b(60)&x)
+#define bx b[tx]
+#define nx (i2)x
+#define Nx (nx<<b[tx])
+#define ru ((i2*)sr)
+#define aV ((g6*)sa)
+#define rV ((g6*)sr)
+#define xV ((g6*)sx)
+#define xu ((i2*)sx)
+#define xU ((U*)sx)
+#define pa x(a,px)
+#define aa x(a,ax)
+#define ta x(a,tx)
+#define ma x(a,mx)
+#define ua x(a,ux)
+#define va x(a,vx)
+#define sa x(a,sx)
+#define na x(a,nx)
+#define Na x(a,Nx)
+#define ia x(a,ix)
+#define ea x(a,ex)
+#define sr x(r,sx)
+#define nr x(r,nx)
+#define Nr x(r,Nx)
+#define xg sx[i]
+#define xi xu[i]
+#define xj xU[i]
+#define rj x(r,xU)[i]
+#define ag sa[i]
+#define zl z[l]
+#define Xh X[h]
+#define Rh R[h]

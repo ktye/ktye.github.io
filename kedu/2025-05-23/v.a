@@ -1,0 +1,22 @@
+#include"a.b"
+#define aX iI,iJ,ER,eA,EX
+#define R4 ((g4*)R)[i]
+#define X4 ((g4*)X)[i]
+#define X5 ((i5*)X)[i]
+#define A8 ((i8*)A)[i]
+#define X8 ((i8*)X)[i]
+#define u3 nx,sr,sx 
+#define zk z[i|k]
+#define AI (i6)Ai
+#define XG (g6)Xi
+#define XI (i6)Xi
+#define IA i6*A
+#define IX i6*X
+#define Gz g6 z
+#define Iz i6 z
+#define Ez e6 z
+#define eR e2*R
+#define eA e2*A
+#define eX e2*X
+#define iH i2 H
+#define iJ i2 J

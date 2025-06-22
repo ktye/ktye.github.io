@@ -1,0 +1,3 @@
+-fno-builtin -funsigned-char -fno-unwind-tables
+-W -Wfatal-errors -Wno-psabi -Wno-multichar -Wno-parentheses -Wno-pointer-type-mismatch -Wno-incompatible-pointer-types
+-s -mavx512f -mavx512dq -mavx512vbmi -mavx512vnni

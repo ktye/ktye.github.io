@@ -1,0 +1,70 @@
+#define ins(g,z) U(g,z,ii,in,ss)
+#define cc i0 c
+#define in i2 n
+#define U3 in,i6*R,i6*X
+#define V(t,n) t##n __attribute((vector_size(1<<n),aligned(1)))
+typedef unsigned long U,V(j,6);typedef char i0,V(g,4),V(g,5),V(g,6);typedef unsigned short i1;typedef unsigned i2,V(i,6),V(i,5),V(i,8);typedef float e2,V(e,6),V(e,5),V(e,8);typedef int V(s,6);
+#undef V
+#define _(z) ({z;})
+#define W(z) while(_(z))
+#define V(g,z,x...) static void g(x){z;}
+#define D(t,g,z,x...) static t g(x){return _(z);}
+#define U(g,z,x...) D(U,g,z,x)
+#define f(g,z)  U(g,z,U x)
+#define o(o) __builtin_##o
+#define Ui(g,z) U(g,z,ii)
+#define is(g,z) U(g,z,ii,ss)
+#define Us(g,z) U(g,z,ss)
+#define ii i2 i
+#define ss i0*s
+#define sd i0*d
+#define Z0 static i0
+#define r(b,z) _(typeof(b)r=_(b);z;r)
+U _k(U),m_(U*,ss),_m(U,U),w_(i2,ss);f(nu,o(popcountl)(x))f(iu,x?o(ctzl)(x):64)f(lu,--x?64-o(clzl)(x):0)Ui(n3,7+i>>3)Ui(n4,15+i>>4)Ui(n6,63+i>>6)
+Ui(wc,w_(1,&i);0)is(wl,w_(i,s);wc(10))is(ic,sd=s;W(i!=*s)++s;s-d)Us(ws,wl(ic(0,s),s))Ui(wi,r(i,Z0 b[12];in=i>>31;i=n?-i:i;ss=b+11;do*--s=48+i%10;W(i/=10);if(n)*--s='-';ws(s)))
+
+#define g(g,z)  U(g,z,ii,U x)
+#define I0 ((g6){0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63})
+#define P(b,z) if(b){return _(z);}
+#define b(z) ((1l<<(z))-1)
+#define x(b,z) _(typeof(b)x=_(b);z)
+#define h(b,z) {i2 $=b;i2 h=0;while(h<$){z;++h;}}
+#define i(b,z) {i2 $=b;i2 i=0;while(i<$){z;++i;}}
+#define j(b,z) {i2 $=b;i2 j=0;while(j<$){z;++j;}}
+#define ZU static U
+#define Z2 static i2
+#define Ze static e2
+#define Ux U x
+#define Vx g6 x
+#define Jx j6 x
+#define Uf U f
+#define Ua U a
+#define Ub U b
+#define Vd *(g6*)d
+#define Vs *(g6*)s
+#define ee e2 e
+#define ih i2 h
+#define ij i2 j
+#define ik i2 k
+#define il i2 l
+#define im i2 m
+#define it i2 t
+#define zi z[i]
+#define Ri R[i] 
+#define Ai A[i]
+#define Bi B[i]
+#define Xi X[i] 
+#define oo ws("oo")
+#define ZG static g6
+#define ZI static i6
+#define ZE static e6
+#define ZJ static j6
+ZG z0;ZE ze;ZI z2;
+#define $3(z,a,b,c)           _(i2 $=z;!$?_(a):1==$?_(b):_(c))
+#define $4(z,a,b,c,d)         _(i2 $=z;!$?_(a):1==$?_(b):2==$?_(c):_(d))
+#define $5(z,a,b,c,d,e)       _(i2 $=z;!$?_(a):1==$?_(b):2==$?_(c):3==$?_(d):_(e))
+#define $6(z,a,b,c,d,e,f)     _(i2 $=z;!$?_(a):1==$?_(b):2==$?_(c):3==$?_(d):4==$?_(e):_(f))
+#define $7(z,a,b,c,d,e,f,g)   _(i2 $=z;!$?_(a):1==$?_(b):2==$?_(c):3==$?_(d):4==$?_(e):5==$?_(f):_(g))
+#define $8(z,a,b,c,d,e,f,g,h) _(i2 $=z;!$?_(a):1==$?_(b):2==$?_(c):3==$?_(d):4==$?_(e):5==$?_(f):6==$?_(g):_(h))
+#define $9(z,a,b,c,d,e,f,g,h,i) _(i2 $=z;!$?_(a):1==$?_(b):2==$?_(c):3==$?_(d):4==$?_(e):5==$?_(f):6==$?_(g):7==$?_(h):_(i))
+#define $(b,z) if(b){z;}else

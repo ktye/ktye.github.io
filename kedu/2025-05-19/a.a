@@ -1,0 +1,56 @@
+#define u nx,sr,sx 
+#include"_.c"//.bqgie..  .bpqghijklm..efz 30123456789..566
+Z0*A="30235506";
+#define bx (A[tx]%16)
+#define Nx n3(nx<<bx)
+#define gn (i0)n
+#define zl z[l]
+#define Xh X[h]
+#define Rh R[h]
+#define Eb e6 b
+#define aV ((g6*)sa)
+#define rj ((U*)sr)[i]
+#define rz ((g6*)sr)[i]
+#define ru ((i2*)sr)
+#define rV ((g6*)sr)
+#define xV ((g6*)sx)
+#define xu ((i2*)sx)
+#define xU ((U*)sx)
+#define xb (1&sx[i/64]>>i%64)
+#define xg sx[i]
+#define xi xu[i]
+#define xj xU[i]
+#define Ox O[ox]
+#define ox (255&x>>36)
+#define rx (63&Ox)
+#define hx (31&x>>54)
+#define mx (31&x>>31)
+#define ux (mx?b(mx)&ix:ix)
+#define vx ((b(31)&ix)>>mx)
+#define nx (mx?ux*vx:ix)
+#define qx !(1l<<36>(U)sx-(1l<<32))
+#define ax !(x>>63)
+#define px (1l<<60>x)
+#define jx ((1l<<60)-1&x)
+
+#define tr x(r,tx)
+#define pf x(f,px)
+#define fi x(f,xi)
+#define pa x(a,px)
+#define aa x(a,ax)
+#define ta x(a,tx)
+#define ma x(a,mx)
+#define ua x(a,ux)
+#define va x(a,vx)
+#define sa x(a,sx)
+#define na x(a,nx)
+#define Na x(a,Nx)
+#define ia x(a,ix)
+#define ea x(a,ex)
+#define ha x(a,hx)
+#define sr x(r,sx)
+#define nr x(r,nx)
+#define Nr x(r,Nx)
+#define pr x(r,px)
+#define nf x(f,nx)
+

@@ -1,0 +1,11 @@
+#define sx ((i0*)k_(2,x))
+#include"a.a"
+#define si s[i]
+#define Gi G[i]
+#define xe ((e2*)sx)[i]
+#define Fi F[i]
+#define Ci C[i]
+#define bi b[i]
+#define pf x(f,px)
+#define fi x(f,xi)
+#define tf x(f,tx)

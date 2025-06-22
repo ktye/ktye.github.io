@@ -1,0 +1,49 @@
+#define l(b,z) {i2 $=b;i2 l=0;while(l<$){z;++l;}}
+#define c(a,x)    o(convertvector)(a,x)
+#define p(a,x...) o(shufflevector)(a,x)
+#define V2(g,z,x...) V(g,i(n4(I),Ri=z),x)
+#define V0(g,z,x...) V(g,i(n6(I),Ri=z),x)
+#define Y(o,y...) i5*X=&x;i(2,Xi=O(o)(y))x 
+#define p6(z,a,b,c,d,e,f) _(e6 $=z;(e2)(a)+$*((e2)b+$*((e2)c+$*((e2)d+$*((e2)e+$*(e2)f)))))
+#define g6(g,z,x...) D(g6,g,z,x)
+#define i6(g,z,x...) D(i6,g,z,x)
+#define e6(g,z,x...) D(e6,g,z,x)
+#define j6(g,z,x...) D(j6,g,z,x)
+#define Gf(g,z) g6(g,z,Vx)
+#define Gg(g,z) g6(g,z,ii,Vx)
+#define GF(g,z) g6(g,z,g6 a,Vx)
+#define G3(g,z) g6(g,z,g6 a,g6 b,Vx)
+#define If(g,z) i6(g,z,i6 x)
+#define Ig(g,z) i6(g,z,ii,i6 x)
+#define IF(g,z) i6(g,z,i6 a,i6 x)
+#define Ef(g,z) e6(g,z,e6 x)
+#define EF(g,z) e6(g,z,e6 a,e6 x)
+#include"a.b"
+#define IR iI,ER
+#define RX iI,ER,EX
+#define RAX iI,iJ,ER,eA,EX
+#define ARX EA,RX
+#define AI (i6)Ai
+#define XI (i6)Xi
+#define IA i6*A
+#define IX i6*X
+#define bt b[t]
+#define Gz g6 z
+#define Iz i6 z
+#define Ez e6 z
+#define Xk X[k|i]
+#define Rk R[k|i]
+#define X4 ((g4*)X)[i]
+#define X5 ((i5*)X)[i]
+#define X8 ((i8*)X)[i]
+#define Ag (g6)Ai
+#define Xg (g6)Xi
+#define eR e2*R
+#define eA e2*A
+#define eX e2*X
+#define ER e6*R
+#define EA e6*A
+#define EX e6*X
+#define iH i2 H
+#define iI i2 I
+#define iJ i2 J

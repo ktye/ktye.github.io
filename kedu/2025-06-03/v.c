@@ -1,0 +1,18 @@
+#include"v.b"//ABCD.MLGE vv mv sX RX SX DX
+e(_v,Ae(r(E0,Ez[4]={};i(n/4,i(4,zi+=*Z++))i(n%4,r+=Zi)i(4,r+=zi))),in,EZ)e(vv,Ae(r(E0,Ez[4]={};i(n/4,i(4,zi+=*Y++**Z++))i(n%4,r+=Yi*Zi)i(4,r+=zi))),in,EY,EZ)
+#define ft(m,T,F,f,O) u(F,i(6-m,z=O(z,S##m(i,z)))((T)z)[b(6-m)],Iz)V(f,T z={};i(n,z=O(z,Zi))*R=F(z),in,EZ)
+ZI r;Zu*R=&r;ft(2,I,Mi,mi,IM)ft(2,I,Ai,ai,IA)ft(0,G,Mg,mg,GM)ft(0,G,Ag,ag,GA)u(au,*R=ue(_v(n,Z)),in,EZ)e(me,mi(n,Z);eu(*R),in,EZ)
+U_(a,P(2>t,p0(n,Z);Ai(r(Z2,i(n9(n),r+=SB(Zi)))))p3(n*=6>t?1:4,Z);n=n6(n);r*=0;_ _=$6(j=(14>t?t:8)-4|j,mg,ag,mi,ai,mi,au);_(n,Z);$6(j,Mg,Ag,Mi,Ai,Mi,Au)(r),ij,it,in,IR,IZ)
+V_(r0,N0(R0(*--Z)),in,IR,IZ)V_(r2,N2(R2(*--Z)),in,IR,IZ)//''''''''''..\\_^.*%RE//+-*%&|<>=~//abcd.mlge
+V(v,$(19==j,ee=me(n,Z);N2(E_((E)Zi-e))e=1/_v(n,R);N2((E)Ri*e))N2($6(j-14,IE(Zi),4>t?GB(((U*)Z)[i]):6>t?IG(_Z):EI(Zi),Z2,Q_(Zi),_Q(Zi),E_(Zi))),ij,it,in,IR,IZ)
+V_(a2,p3(4*n,Z);N2(AT(Y,Zi,2)),in,IR,IY,IZ)
+v2(aI,m+Zi)v2(bI,m-Zi)v2(cI,m*Zi)v2(dI,z(m%i1*Zi/i1,m/i1?Zi-m/i1*z:z))e2(aE,e+Zi)e2(bE,e-Zi)e2(cE,e*Zi)e2(dE,e/Zi)V(RX,ee=1/(_Q(vv(n4(n),Z,Z)/n-E0))[0];N2(e*(E)Yi*Zi),in,IR,IY,IZ)
+bZ(lG,m<Zi)bZ(gG,m>Zi)bZ(eG,m==Zi)bZ(lI,GI(m<Z_))bZ(gI,GI(m>Z_))bZ(eI,GI(m==Z_))V2(AI,Yi+Zi)V2(BI,Yi-Zi)V2(CI,Yi*Zi)V2(AE,(E)Yi+Zi)V2(BE,(E)Yi-Zi)V2(CE,(E)Yi*Zi)V2(DE,(E)Yi*Zi)
+V_(av,!y?v(j,t,n,R,Z):ty?4>j?7>t?$4(j,aI,bI,cI,dI)(n,R,iy,Z):$4(j,aE,bE,cE,dE)(n,R,ey,Z):$6(6>t?j-6:j-3,lG,gG,eG,lI,gI,eI)(n,R,iy,Z):$8(7>t?j:3+j,AI,BI,CI,AE,BE,CE,DE,RX)(n,R,y,Z),ij,it,in,IR,Uy,IZ)
+V_(n0,N2(JJ()),in,IR)V_(n1,N2(I2|16*i),in,IR)V_(nx,i(n9(n),Ri=m-Z2),Un,IR,im)V_(dz,GR=r/8;GZ=z/8;$(z%8,UR=r/64;UZ=z/64;ij=z%64;i(n6(n),Ri=Zi>>j|Z[1+i]<<64-j))i(n9(n),Ri=Zi),Un,Ur,Uz)
+#define mM(n,i) ik=1<<i;h(1<<6-n-1-i,j(k,ii=2*h*k+j;zi=l##n(zi,r(zk,zk=h##n(zi,r)))))
+V_(t0,i(I>>6,j(J>>6,Gz[1<<6];i(1<<6,zi=Zi)i(6,mM(0,i))i(1<<6,Ri=zi))),IJ)V_(t2,i(I>>4,j(J>>4,Gz[1<<4];i(1<<4,zi=Zi)i(4,mM(2,i))i(1<<4,Ri=zi))),IJ)
+V(m0,i(3+I>>2,j(J,Ez[4]={};h(H,k(4,z[k]+=Y[H*(4*i+k)+h]*Z[J*h+j]))k(4,m?R[J*(4*i+k)+j]+=z[k]:(R[J*(4*i+k)+j]=z[k])))),im,iH,IJ)
+V_(mm,J/=16;$(H*J-1>>12,i(I*J,Ri=Z0)h(H/64,j(J/4,m0(1,64,I,4,Y+H*64+h,R+J*4+j,Z+J*H*(64+h)+j))))m0(0,H,I,J,R,Y,Z),iH,IJ)
+V_(vm,J/=16;j(J/4,Ez[4]={};i(I,j(4,zj+=Yi*Zj)Z+=J)j(4,*R++=zj)Z-=I*J-4)i(J%4,Ri=r(E0,i(I,r+=Yi*Z[J*i])++Z)),IJ)V_(mv,p3(J*=4,Z);J=n6(J);i(I,((e*)R)[i]=vv(J,Y+J*i,Z)),IJ)
+//V2(EX,(E)Yi*Zi/(1+E_(-(E)Zi)))

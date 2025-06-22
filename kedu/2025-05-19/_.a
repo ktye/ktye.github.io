@@ -1,0 +1,63 @@
+#define tx ( 7&x>>60)
+#define ix (i2)x
+#define ex (*(e2*)&x)
+#define oo ws("oo")
+#define I0 ((g6){0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63})
+#define I2 ((i6){0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15})
+#define ER e6*R
+#define EA e6*A
+#define Di D[i]
+#define EX e6*X
+#define zh z[h]
+#define zi z[i]
+#define zj z[j]
+#define zk z[i|k]
+#define ai a[i]
+#define aj a[j]
+#define bi b[i]
+#define bj b[j]
+#define Xi X[i] 
+#define Xj X[j]
+#define Ri R[i] 
+#define Ai A[i]
+#define Bi B[i]
+#define Zi Z[i] 
+#define Oi O[i] 
+#define Uf U f
+#define Ua U a
+#define Ub U b
+#define Ux U x
+#define Un U n
+#define gg i0 g
+#define ee e2 e
+#define sd i0*d
+#define ss i0*s
+#define st i0*t
+#define ih i2 h
+#define ii i2 i
+#define ij i2 j
+#define ik i2 k
+#define il i2 l
+#define im i2 m
+#define in i2 n
+#define it i2 t
+#define Vx g6 x
+#define Jx j6 x
+#define Vd *(g6*)d
+#define Vs *(g6*)s
+#define UR U*R
+#define GA g6*A
+#define GX g6*X
+#define iR i2*R
+#define y0 (i5){}
+#define z0 (g6){}
+#define z2 (i6){}
+#define ze (e6){}
+#define ZU static U
+#define Z0 static i0
+#define Ze static e2
+#define Z2 static i2
+#define ZG static g6
+#define ZI static i6
+#define ZE static e6
+#define ZJ static j6

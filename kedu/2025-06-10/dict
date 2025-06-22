@@ -1,0 +1,15 @@
+vars ryzRYZ
+type U(unsigned long)[ryz] gieGIE[RYZ] (g-byte i-int e-float) gg ee i[hij..]
+attr [abehimnopstuv][ryz] atom bits e(float) h(bucket) int matrix n object prim s(address) type u(rows) v(cols)
+index [rz][01..logbits]
+const [IZ][02..logbytes]
+ 
+macro
+def U(f,e,args) common cases: f(z) g(i,z) F(y,z) G(i,y,z)
+deref _y(e) _z(e)
+result r(e,) z(e,)
+while W(b)
+ifelse $(b,y)z
+case $[3..](i,) 
+loop [hijk](n,)
+
