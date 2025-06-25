@@ -65,7 +65,7 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
  let shift=(t,s)=>(s="bghsiejfz".indexOf(t.toLowerCase()),s=s?["i "+(s>>1),"sli"]:[])
  let mamd=(x,i,f,z)=>(x.push("ioj",...i,...shift(x.t),"tee "+temp("i","_i")),x.t=x.t.toLowerCase(),x.push("ld"+x.t),f[0]=f[0].slice(0,-1),x=dyad(x,f,z),x.push("set "+temp(x.t),"get _i","get "+temp(x.t),"st"+x.t,"get $"+x.t),x)
  let amnd=(x,i,f,z)=>(f[0]!=":"?mamd(x,i,f,z):(x.push("ioj",...i,...shift(x.t),"adi",...z,"tee "+temp(z.t),"st"+x.t.toLowerCase(),"get "+temp(z.t)),x.t=z.t,x))
- let indx=(x,y,t,s)=>((y.t!="i"||(t=x.t,!vt(x)))?perr("index type"+t):t=t.toLowerCase(),x.push("ioj",...y,...shift(t),"adi","ld"+t ),x.t=t,x)
+ let indx=(x,y,t,s)=>((y.t!="i"||(t=x.t,!vt(x)))?perr("index type:"+t):t=t.toLowerCase(),x.push("ioj",...y,...shift(t),"adi","ld"+t ),x.t=t,x)
  let cali=(x,y,a)=>(y="l"!=y.t?[y]:y,x[0].startsWith("cal ")?(a=funs[immm(x[0])],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):(y.length!=1)?perr("index rank"):indx(x,y[0]))
 
 /*
@@ -106,9 +106,9 @@ X+:Y  amnd(x,i,f,avec(Y))
    let f={n:n[0],p:n.p,r:r[0]};r=next();if(r[0]!=":")perr("signature");f.a=next()[0];r=next();if(r[0]!="{"){f.l={};funs[f.n]=f;return};if(peek()=="["){next();f.l={};f.a.split("").forEach((t,i,a,x)=>{x=next();if((!x)||(!az.includes(x[0][0])))perr("arg name:"+x[0][0]);f.l[x[0]]=t;x=next();if(x[0]!=(i<a.length-1?";":"]"))perr("arg length")})}
    if(!("l"in f)){f.l={};"xyzabcdefghijklmnopqrstuvw".slice(0,f.a.length).split("").forEach((x,i)=>f.l[x]=f.a[i])}
    f.l.i="i";f.l.n="i";if(f.r)f.l.r=f.r;
-   f.tok=[],f.pos=[];r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
+   f.tok=[],f.pos=[];f.gen=(f.r+f.a).toLowerCase().includes("t");r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
  }}
- while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join(""))+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
+ while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;if(f.gen)continue;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join(""))+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
  let G=Object.keys(glob).map(x=>glob[x]+" "+x).join("\n");if(G.length)G+="\n"
  let I=Object.keys(funs).filter(x=>!funs[x].tok).map(x=>funs[x].c).join("\n")
  let F=Object.keys(funs).filter(x=> funs[x].tok).map(x=>funs[x].c).join("\n")
