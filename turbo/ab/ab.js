@@ -33,6 +33,7 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
  let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=[r],r.t=t,r.p=(ipos=pos.pop()),r))
  let peek=_=>l(tok)
  let immm=(x,i)=>(x=x.slice(4),(i=x.indexOf(" @"),i)?x.slice(0,i):x)
+ let addr=(x,i)=>(i=x.indexOf(" @"),i>0?x.slice(i):"")
  let loop=x=>lp?(drop(x),x=[...lp,"set n","i -1","set i","while","get i","i 1","adi","tee i","get n","lti","do",...x,"end"],x.t=0,lp=0,x):x
  let list=p=>{let e,r=[];r.t="l";while(1){if(right.includes(peek())){next();return r};r.push(e=loop(expr(term())));if(";"==peek())next();if(!e)perr("unclosed",p)}}
  let seql=(l,r)=>{if(!l.t=="l")return l;if(!l.length)return["nop"];r=[];l.forEach((x,i)=>{drop(x);r.push(...x)});r.t="";return r}
@@ -53,7 +54,7 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
   if(r.t&&nm.includes(n=r[0][0])){r[0]=r.t+" "+(typs.includes(l(r[0]))?r[0].slice(0,-1):r[0])+" @"+r.p;return r}
   if(r[0]=="if"){[r,n]=cndl();r.push("if",...n);"{"!=peek()?r.push("end"):(next(),r.push("else",...seql(list()),"end"));r.t="";return r}
   if(r[0]=="while"){[r,n]=cndl();r.unshift("while");r.push("do",...n,"end");r.t="";return r}
-  if(az.includes(n)){n=r[0];[r[0],r.t]=(peek()=="?"?(next(),["cast",n]):n in locs?["get",locs[n]]:n in glob?["glo",glob[n]]:n in funs?["cal",funs[n].r]:peek().endsWith(":")?["get","?"]:perr("lookup"));r[0]+=" "+argn(n);r[0]+=" @"+r.p;if(!r[0].startsWith("cal")){r.n=["get "+argn(n),"j 32","srl","ioj"];r.n.t="i"}}
+  if(az.includes(n)){n=r[0];[r[0],r.t]=(peek()=="?"?(next(),["cast",n]):n in locs?["get",locs[n]]:n in glob?["glo",glob[n]]:n in funs?[("cal"+(funs[n].gen?"?":"")),funs[n].r]:peek().endsWith(":")?["get","?"]:perr("lookup"));r[0]+=" "+argn(n);r[0]+=" @"+r.p;if(!r[0].startsWith("cal")){r.n=["get "+argn(n),"j 32","srl","ioj"];r.n.t="i"}}
   while("["==peek()){next();n=list();if(r[0].startsWith("cast ")&&n.length>1)return ical(r,n);if(1==r.length&&"$?".includes(r[0])){return("$"==r[0]?cond(n):swtc(n))};r=peek().endsWith(":")?amnd(r,(1!=n.length?perr("rank assign",n.p):n[0]),next(),expr(term())):cali(r,n)}
   return r}
  let mona=(x,y,i,m)=>x[0]=="#"?(vt(y)?(y.push("j 32","srl","ioj"),y.t="i",y):perr("rank")):x[0]==":"?(cast(y,res),y.push("ret"),y):(y=avec(y),(m="!iezi!jezj~inoi~jnoj-ingi-jngj-enge-fngf|eabe|fabf_efle_fflf%esqe%fsqf"),(i=m.indexOf(x[0]+y.t))<0?perr("monadic"):(y.push(m.slice(2+i,5+i)+" @"+x.p),y))
@@ -66,7 +67,13 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
  let mamd=(x,i,f,z)=>(x.push("ioj",...i,...shift(x.t),"tee "+temp("i","_i")),x.t=x.t.toLowerCase(),x.push("ld"+x.t),f[0]=f[0].slice(0,-1),x=dyad(x,f,z),x.push("set "+temp(x.t),"get _i","get "+temp(x.t),"st"+x.t,"get $"+x.t),x)
  let amnd=(x,i,f,z)=>(f[0]!=":"?mamd(x,i,f,z):(x.push("ioj",...i,...shift(x.t),"adi",...z,"tee "+temp(z.t),"st"+x.t.toLowerCase(),"get "+temp(z.t)),x.t=z.t,x))
  let indx=(x,y,t,s)=>((y.t!="i"||(t=x.t,!vt(x)))?perr("index type:"+t):t=t.toLowerCase(),x.push("ioj",...y,...shift(t),"adi","ld"+t ),x.t=t,x)
- let cali=(x,y,a)=>(y="l"!=y.t?[y]:y,x[0].startsWith("cal ")?(a=funs[immm(x[0])],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):(y.length!=1)?perr("index rank"):indx(x,y[0]))
+ let tsub=(x,tT)=>x.replaceAll("t",tT[0]).replaceAll("T",tT[1])
+ let gent=(t,p,i)=>(t==t.toLowerCase()?t+t.toUpperCase():(i="BGHSIEJFZ".indexOf(t),i<0?perr("type",p):("iiiiijjfz"[i])+t))
+ let genf=(f,t,n)=>{n=f.n+"."+t;if(!(n in funs)){
+  let[Locs,Args,Tok,Res]=[locs,args,tok,res],tT=gent(t,f.p),F={n:n,p:f.p,tT:tT,l:{},r:tsub(f.r,tT),a:tsub(f.a,tT),tok:f.tok.slice(),pos:f.pos.slice(),gen:false};Object.keys(f.l).forEach(k=>F.l[k]=tsub(f.l[k],tT));
+  [locs,args,tok,res]=[F.l,Object.keys(F.l).slice(0,f.a.length),F.tok,F.r];F.c="\n"+F.n+" "+loty(F.r)+":"+(F.a.split("").map(loty).join(""))+" export "+f.n+" @"+f.p+"\n"+code();funs[n]=F;[locs,args,tok,res]=[Locs,Args,Tok,Res]};return n}
+ let gena=(x,y,f,a,i)=>(f=funs[immm(x.slice(1))],a=y.map(x=>x.t).join(""),(a.length!=f.a.length)?perr("arity"):0,i=f.a.indexOf("T"),(i=i>=0?i:f.a.indexOf("t")),"cal "+genf(f,a[i])+addr(x))
+ let cali=(x,y,a)=>(y="l"!=y.t?[y]:y,x[0].startsWith("cal?")?x[0]=gena(x[0],y):0,x[0].startsWith("cal ")?(a=funs[immm(x[0])],a.a.length!=y.length?perr("arity"):(y=y.map((x,i)=>cast(x,a.a[i]))),y=y.flat(),y.push(x),y.t=a.r,y):(y.length!=1)?perr("index rank"):indx(x,y[0]))
 
 /*
 x :y  asin
@@ -106,7 +113,7 @@ X+:Y  amnd(x,i,f,avec(Y))
    let f={n:n[0],p:n.p,r:r[0]};r=next();if(r[0]!=":")perr("signature");f.a=next()[0];r=next();if(r[0]!="{"){f.l={};funs[f.n]=f;return};if(peek()=="["){next();f.l={};f.a.split("").forEach((t,i,a,x)=>{x=next();if((!x)||(!az.includes(x[0][0])))perr("arg name:"+x[0][0]);f.l[x[0]]=t;x=next();if(x[0]!=(i<a.length-1?";":"]"))perr("arg length")})}
    if(!("l"in f)){f.l={};"xyzabcdefghijklmnopqrstuvw".slice(0,f.a.length).split("").forEach((x,i)=>f.l[x]=f.a[i])}
    f.l.i="i";f.l.n="i";if(f.r)f.l.r=f.r;
-   f.tok=[],f.pos=[];f.gen=(f.r+f.a).toLowerCase().includes("t");r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
+   f.tok=[],f.pos=[];f.gen=f.a.toLowerCase().includes("t");r=0;while(tok.length){n=tok.pop(),a=pos.pop();r+=n=="{"?1:n=="}"?-1:0;f.tok.unshift(n);f.pos.unshift(a);if(r<0)break};if(f.n in funs)perr("func "+f.n+" already defined",f.p);funs[f.n]=f;if(r>=0)perr("function unclosed: "+f.n,f.p)
  }}
  while(tok.length)ptop();for(let n in funs){let f=funs[n],imp=f.tok?0:1;locs=f.l;args=Object.keys(locs).slice(0,f.a.length);tok=f.tok,pos=f.pos;if(f.gen)continue;res=f.r;f.c=f.c?f.c:"\n"+f.n+" "+loty(f.r)+":"+(f.a.split("").map(loty).join(""))+(imp?" import env ":" export ")+f.n+" @"+f.p+(imp?"":"\n"+code())}
  let G=Object.keys(glob).map(x=>glob[x]+" "+x).join("\n");if(G.length)G+="\n"
