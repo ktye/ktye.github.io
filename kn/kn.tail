@@ -1,0 +1,13 @@
+
+argv.forEach(x=>{("-p"==x)?(_p=1):x.endsWith(".js")?eval(readfile(x)):x.endsWith(".k")?string(eval(parse(readfile(x)))):"-e"==x?os.Exit(0):use()})
+
+let _k=1,repl=_=>{
+ let buf=new Uint8Array(256),p=new Uint8Array([107,110,41]);
+ while(1){Deno.stdout.writeSync(p);let n=Deno.stdin.readSync(buf);if(!n)return;
+ if(n&&buf[n-1]==10)--n;if(n&&buf[n-1]==13)--n;
+ let x=new TextDecoder().decode(buf.subarray(0,n));
+ if(x=="\\"){p=new Uint8Array(_k?[106,115,41]:[107,110,41]),_k=1-_k;continue}
+ try{      console.log(_k?string(eval( (_p?x=>(console.log(x),x):x=>x)(parse(x)))):eval(x))
+ }catch(e){console.log(e)}}}
+
+repl()

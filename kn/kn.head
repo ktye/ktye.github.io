@@ -1,0 +1,12 @@
+#!/usr/bin/env -S deno --allow-read 
+//--allow-write
+
+//embed
+let argv=process.argv.slice(2),_p=0,readfile=x=>new TextDecoder("utf-8").decode(Deno.readFileSync(x)),end=0
+let use=_=>{
+ console.log("ktye.github.io/kn(deno):")
+ console.log("$kn [file.js] [file.k] [-e]")
+ console.log("$kn -p ..             /print parse")
+ process.exit(1)
+}
+

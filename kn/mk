@@ -1,0 +1,1 @@
+cat kn.head k.js kn.tail > kn
