@@ -36,3 +36,8 @@ if/while are statements, cond/switch expressions (all branches must have same ty
 allocations
 n#i n#j ..  (allocates and fill using external alloc:i:i)
 n#I n_I ..  (returns adjusted pointer/length but does not change underlying memory)
+
+type parametric functions tT are atom/vector types
+f:t:iT{y x}       /when called as g:i:H{f[0;x]} it generates a function:
+f.H:i:iH{y x}     /and replaces f with f.H
+
