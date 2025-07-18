@@ -1,71 +1,91 @@
-<head><meta charset="utf-8"><title>j</title></head>
-<link rel=icon href="kelas16.png">
-<style>
-
- html{font-family:monospace;}
- body{overflow:hidden}
- textarea{background:black;color:#cccccc;resize:none;border:none}textarea:focus{color:white;}
- #term{position:absolute;width:40%;height:100%;left:0;top:0;background:#ffffea;color:black}
- #run{position:absolute;top:0;right:60%;font-family:monospace}
- #cnv{position:absolute;width:60%;height:70%;right:0;top:0}
- #deb{position:absolute;width:60%;height:30%;right:0;bottom:0}
- 
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>js</title>
+<style>*{font-family:monospace;margin:0;border:none;padding:0;}
+body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
+[contenteditable="true"]{background-color:#000;color:#fff;border:none;outline:none}
+#i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
+#o{flex-grow:1;min-height:4em;background-color:#fff;width:100vw;bottom:0;overflow:auto}
+.b:hover{cursor:pointer}
+.w{background:white;color:black}
+@media(orientation:portrait){*{font-size:x-large}}
 </style>
-<script src=pako.min.js></script><!--zip/unzip url-->
+<script>
+let pi=Math.PI,sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,min=Math.min,max=Math.max
+let solve=(A,b)=>{let P=lup(A);return lupsolve(A,P,b)} //A:complex(n x 2*n) modified
+let lup=(A, P)=>{let n=A.length;P=Array(n).fill(0).map((_,i)=>i)
+ for(let i=0;i<n;i++){
+  let mx=0,mi=0;for(let k=i;k<n;k++){let a=A[k][2*i]*A[k][2*i]+A[k][2*i+1]*A[k][2*i+1];if(a>mx){mx=a;mi=k}}
+  if(mi!=i){let t=P[i];P[i]=P[mi];P[mi]=t;t=A[i];A[i]=A[mi];A[mi]=t}
+  let a=A[i][2*i],b=A[i][2*i+1],c=1/(a+b*b/a),d=-1/(b+a*a/b)
+  for(let j=1+i;j<n;j++){a=A[j][2*i];b=A[j][2*i+1];A[j][2*i]=a*c-b*d;A[j][2*i+1]=a*d+b*c;a=A[j][2*i];b=A[j][2*i+1]
+   for(let k=2+2*i;k<2*n;k+=2){let e=A[i][k],f=A[i][1+k];A[j][k]-=a*e-b*f;A[j][1+k]-=a*f+b*e}}}
+ return P} 
+let lupsolve=(A,P,b)=>{let n=A.length,x=new Float64Array(2*n)
+ for(let i=0;i<n;i++){let xr=b[2*P[i]],xi=b[1+2*P[i]]
+  for(let k=0;k<2*i;k+=2){let a=A[i][k],b=A[i][1+k],c=x[k],d=x[1+k];xr-=a*c-b*d;xi-=a*d+b*c}
+  x[2*i]=xr;x[2*i+1]=xi}
+ for(let i=n-1;i>=0;i--){let xr=x[2*i],xi=x[2*i+1]
+  for(let k=2+2*i;k<2*n;k+=2){let a=A[i][k],b=A[i][1+k],c=x[k],d=x[1+k];xr-=a*c-b*d;xi-=a*d+b*c}
+  let a=A[i][2*i],b=A[i][2*i+1],c=1/(a+b*b/a),d=-1/(b+a*a/b);x[2*i]=xr*c-xi*d;x[2*i+1]=xr*d+xi*c
+ };return x}
+
+let lsq=(A,b)=>qrsolve(qr(A),b)  //A:list of columns(complex): [ Float64Array([r,i,r,i,..]), .. ]
+let qr=A=>{const n=A.length,m2=A[0].length
+ let d=new Float64Array(2*n)
+ for(let j=0;j<n;j++){let j2=2*j,j3=1+j2,Aj=A[j]
+  let s=norm(Aj.subarray(j2)),h=s/hypot(Aj[j2],Aj[j3]);d[j2]=-h*Aj[j2];d[j3]=-h*Aj[j3];let f=sqrt(s*(s+hypot(Aj[j2],Aj[j3])));Aj[j2]-=d[j2];Aj[j3]-=d[j3]
+  for(let k=j2;k<m2;k++)Aj[k]/=f
+  for(let i=1+j;i<n;i++){let a=0,b=0,Ai=A[i]
+   for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*Ai[k2]+Aj[k3]*Ai[k3];b+=Aj[k2]*Ai[k3]-Aj[k3]*Ai[k2]}
+   for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}
+ return[A,d]}
+let qrsolve=(Q,x)=>{let[A,d]=Q,m2=A[0].length
+ for(let j=0;j<A.length;j++){let Aj=A[j],a=0,b=0
+  for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]}
+  for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}
+ for(let i=A.length-1;i>=0;i--){const i2=2*i,i3=1+i2
+  for(let j=1+i;j<A.length;j++){const j2=2*j,j3=1+j2;x[i2]-=A[j][i2]*x[j2]-A[j][i3]*x[j3];x[i3]-=A[j][i2]*x[j3]+A[j][i3]*x[j2]}
+  let[a,b]=zdiv(x[i2],x[i3],d[i2],d[i3]);x[i2]=a;x[i3]=b}
+ return b.subarray(0,2*A.length)}
+let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
+let norm=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*sqrt(r)} //s*s*r if no sqrt
+
+let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0],f)
+ let init=N=>{let l=log2(N),P=Array(8).fill(0),n=1,S=new Float64Array(N),C=new Float64Array(N);for(let p=0;p<l;p++){for(let i=0;i<n;i++){P[i]<<=1;P[i+n]=1+P[i]};n<<=1};for(let i=0;i<N;i++){const p=-2*pi*i/N;C[i]=cos(p);S[i]=sin(p)};return[l,P,C,S,N]}
+ let perm=(x,P)=>{P.forEach((p,i)=>{if(i<p){const a=2*i,b=1+a,c=2*p,d=1+c,A=x[a],B=x[b];x[a]=x[c];x[b]=x[d];x[c]=A;x[d]=B}})}
+ if("number"==typeof x)return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
+ for(let p=1;p<=l;p++){s>>=1;for(let b=0;b<s;b++){const o=2*b*n;for(let k=0;k<n;k++){const i=(k+o)<<1,j=i+(n<<1),ks=k*s,kn=s*(k+n);let xi0=x[i],xi1=x[1+i],xj0=x[j];x[i]+=C[ks]*x[j]-S[ks]*x[1+j];x[1+i]+=C[ks]*x[1+j]+S[ks]*x[j];x[j]=xi0+C[kn]*x[j]-S[kn]*x[1+j];x[1+j]=xi1+C[kn]*x[1+j]+S[kn]*xj0}};n<<=1}
+ return x}
+</script>
 <script>
 
-var J,JJ,C,U,I,B,jj,ctx,ani
-function ge(x){return document.getElementById(x)};
-function us(s){return new TextEncoder("utf-8").encode(s)}
-function su(u){return new TextDecoder("utf-8").decode(u)}
-function sy(x,u){u=[];x>>>=2;while(x>0){u.push(96+x%32);x>>>=5};return su(new Uint8Array(u.reverse()))}
-function ys(s,y,i){y=0;for(i=0;i<s.length;i++){y*=32;y+=s.charCodeAt(i)-96};return 2+4*y}
-function input(t,a,b,s){a=t.selectionStart;b=t.selectionEnd;s=t.value;return (b-a)>0?s.substring(a,b):s}
-function surl(){window.location.hash=btoa(c1(pako.deflate(us(term.value))))}
-function gurl(x){x=window.location.hash.slice(1);try{return x?su(pako.inflate(c0(atob(x)))):''}catch(x){return''}}
-function c1(x,r,i){r='';for(i=0;i<x.length;i++)r+=chr(x[i]);return r};var chr=String.fromCharCode;
-function c0(x,r,i){r=new Uint8Array(x.length);for(i=0;i<x.length;i++)r[i]=x.charCodeAt(i);return r}
-function start(w,h){surl();w=cnv.clientWidth;h=cnv.clientHeight;cnv.width=w;cnv.height=h;jtry(us(input(term).replaceAll("\n"," ")),w,h)}
-function stop(){window.cancelAnimationFrame(ani);run.innerText="run";run.onclick=start}
-function started(){run.innerText="stop";run.onclick=stop}
-function jtry(u,w,h){C.set(B);asi("w",w);asi("h",h);jju(jj);
- try     {jju(u);JJ(33);JJ(10);ani=window.requestAnimationFrame(animate)}
- catch(e){console.log(e);deb.value="!"}}
-function jju(u){for(var i=0;i<u.length;i++)JJ(u[i])}
-function stk(x){deb.value=X(U[1])}
-function X(x){return(x==0)?"!!":(!(x&7))?LX(x):(x&1)?(x>>1).toString():(x&2)?sy(x):(x&4)?chr(33+(x>>>3)):"!!!"}
-function LX(x,n){n=nn(x);x=2+(x>>>2);var r=new Array(n);for(var i=0;i<n;i++)r[i]=X(U[x+i]);return "["+r.join(" ")+"]"}
-function SX(x,n){n=nn(x);x=2+(x>>>2);var r=new Uint8Array(n);for(var i=0;i<n;i++)r[i]=U[x+i]>>1;return su(r)}
-function AX(x,n,u){n=nn(x);x=2+(x>>>2);var r=new Array(n);for(var i=0;i<n;i++){u=U[x+i];r[i]=(u&1)?u>>1:sy(u)};return r}
-function nn(x){return U[1+(x>>>2)]}
-function asi(s,v){JJ(91);jju(us((v).toString()));JJ(93);JJ(91);jju(us(s));JJ(93);JJ(58)}
-function draw(x,y){if((0!=(x&7))||(0!=(y&7)))return;var a=AX(x);var s=SX(y);a=rad(s,a)
- if(typeof(ctx[s])==="function")ctx[s](...a);else ctx[s]=a}
-function rad(s,a){var r=function(...i){for(var k=0;k<i.length;k++){a[i[k]]*=Math.PI/180};return a};
- return(s=="arc")?r(3,4):(s=="ellipse")?r(4,5,6):(s=="rotate")?r(0):a} //degree to radians (j has only ints)
-function animate(t){
- try     {JJ(102);JJ(114);JJ(97);JJ(109);JJ(101);JJ(10);ani=window.requestAnimationFrame(animate);started()}
- catch(e){window.cancelAnimationFrame(ani)}}
+let cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
+_jdo=s=>{s=i.innerText.trim();
+ if(s){
+  o.textContent=String(eval(s));
+}}
 
+window.init=()=>{_jdo()
+ let f=window.location.hash;if(f)i.innerText=decodeURIComponent(f.slice(1))
+ i.onblur=e=>{if(!o.textContent)_jdo()}
+ i.oninput=e=>o.textContent=""
+}
+window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
+ if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
+ else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
+ window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
+window.onerror=(m,s,l,c,e)=>{o.textContent+="\n"+s+m}
+window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
 
 </script>
+</head>
 
-
-<body>
-<textarea id="term" class="term" wrap="off" spellcheck="false"></textarea>
-<button   id="run">run</button>
-<canvas   id="cnv"></canvas>
-<textarea id="deb" class="term" wrap="off" spellcheck="false" readonly></textarea>
-
-<script>term=ge("term");cnv=ge("cnv");deb=ge("deb");ctx=cnv.getContext('2d');run=ge("run")
-function jload(){fetch('j.j').then(r=>r.arrayBuffer()).then(u=>jj=new Uint8Array(u))}
-function msl(b){J.exports.mem.grow(3);b=J.exports.mem.buffer;C=new Uint8Array(b);U=new Uint32Array(b);I=new Int32Array(b);JJ=J.exports.j;JJ(18);B=C.slice(0);jload()}
-fetch('j.wasm').then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,{"ext":{"stk":stk,"draw":draw} })).then(r=>{J=r.instance;msl();})
-cnv.addEventListener('click', function(e){jju(us(" ["+String(e.pageX-cnv.offsetLeft)+" "+String(e.clientY)+"]click "));JJ(10)}, true)
-
-term.value=gurl()
-deb.value=""
-run.onclick=start
-</script>
-
+<body onload="window.init()">
+<pre id="i" contenteditable="true" spellcheck="false" autofocus></pre>
+<pre id="o">
+solve lup lupsolve lsq qr qrsolve zdiv norm fft </pre></pre>
+<span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
 </body></html>
