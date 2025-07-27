@@ -6,15 +6,21 @@
 <style>*{font-family:monospace;margin:0;border:none;padding:0;}
 body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
 [contenteditable="true"]{background-color:#000;color:#fff;border:none;outline:none}
-#i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
-#o{flex-grow:1;min-height:4em;background-color:#fff;width:100vw;bottom:0;overflow:auto}
+#_i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
+#_o{flex-grow:1;min-height:4em;background-color:#fff;width:100vw;bottom:0;overflow:auto}
 .b:hover{cursor:pointer}
 .w{background:white;color:black}
 @media(orientation:portrait){*{font-size:x-large}}
 </style>
 <script>
-let pi=Math.PI,sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,min=Math.min,max=Math.max
-let solve=(A,b)=>{let P=lup(A);return lupsolve(A,P,b)} //A:complex(n x 2*n) modified
+let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max;const pi=Math.PI
+let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
+let norm=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*sqrt(r)} //s*s*r if no sqrt
+let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*s*r}
+let eyez=n=>new Array(n).fill(0).map((_,i)=>{let r=new Float64Array(2*n);r[2*i]=1;return r})
+let grade=(x, r)=>Array.from(x.keys()).sort((a,b)=>x[a]-x[b])
+
+let solve=(A,b)=>{let P=lup(A);return lupsolve(A,P,b)} //A:list of complex rows: [Float64Array([r,i,r,i,..]), row2, ..]
 let lup=(A, P)=>{let n=A.length;P=Array(n).fill(0).map((_,i)=>i)
  for(let i=0;i<n;i++){
   let mx=0,mi=0;for(let k=i;k<n;k++){let a=A[k][2*i]*A[k][2*i]+A[k][2*i+1]*A[k][2*i+1];if(a>mx){mx=a;mi=k}}
@@ -31,8 +37,8 @@ let lupsolve=(A,P,b)=>{let n=A.length,x=new Float64Array(2*n)
   for(let k=2+2*i;k<2*n;k+=2){let a=A[i][k],b=A[i][1+k],c=x[k],d=x[1+k];xr-=a*c-b*d;xi-=a*d+b*c}
   let a=A[i][2*i],b=A[i][2*i+1],c=1/(a+b*b/a),d=-1/(b+a*a/b);x[2*i]=xr*c-xi*d;x[2*i+1]=xr*d+xi*c
  };return x}
-
-let lsq=(A,b)=>qrsolve(qr(A),b)  //A:list of columns(complex): [ Float64Array([r,i,r,i,..]), .. ]
+ 
+let lsq=(A,b)=>qrsolve(qr(A),b)  //A:list of complex columns: [Float64Array([r,i,r,i,..]), col2, ..]
 let qr=A=>{const n=A.length,m2=A[0].length
  let d=new Float64Array(2*n)
  for(let j=0;j<n;j++){let j2=2*j,j3=1+j2,Aj=A[j]
@@ -49,9 +55,20 @@ let qrsolve=(Q,x)=>{let[A,d]=Q,m2=A[0].length
  for(let i=A.length-1;i>=0;i--){const i2=2*i,i3=1+i2
   for(let j=1+i;j<A.length;j++){const j2=2*j,j3=1+j2;x[i2]-=A[j][i2]*x[j2]-A[j][i3]*x[j3];x[i3]-=A[j][i2]*x[j3]+A[j][i3]*x[j2]}
   let[a,b]=zdiv(x[i2],x[i3],d[i2],d[i3]);x[i2]=a;x[i3]=b}
- return b.subarray(0,2*A.length)}
-let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
-let norm=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*sqrt(r)} //s*s*r if no sqrt
+ return x.subarray(0,2*A.length)}
+
+let svd=A=>{ //A:list of complex columns (see qr)
+ let svq=A=>{let[h,d]=qr(A),n=A.length,m2=A[0].length,r=Array(A.length).fill([]).map(x=>new Float64Array(2*A.length).fill(0));for(let i=1;i<h.length;i++){let ri=r[i],hi=h[i];for(let k=0;k<2*i;k+=2){ri[k]=hi[k];ri[1+k]=hi[1+k]}};for(let i=0;i<h.length;i++){r[i][2*i]=d[2*i];r[i][1+2*i]=d[1+2*i]};
+  let Q=x=>{let y=new Float64Array(m2);y.set(x);for(let i=0;i<n;i++){let j=n-1-i,hj=h[j],a=0,b=0;for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;a+=hj[k2]*y[k2]+hj[k3]*y[k3];b+=hj[k2]*y[k3]-hj[k3]*y[k2]};for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;y[k2]-=a*hj[k2]-b*hj[k3];y[k3]-=a*hj[k3]+b*hj[k2]}};return y}
+  let[u,s,v]=svd(r);return[u.map(Q),s,v]}
+ if(A[0].length>2*A.length)return svq(A) //using qr decomposition for slender input.
+ let n=A.length,V=eyez(n)
+ let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
+ let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
+ let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
+ let F=A=>{let f=true;while(f){for(let i=0;i<n-1;i++){for(let k=1+i;k<n;k++){let[zr,zi]=d(A[i],A[k]);f=1e-14<hypot(zr,zi);if(f){let[c,sr,si]=J(A[i],A[k],zr,zi);R(c,sr,si,V[i],V[k]);R(c,sr,si,A[i],A[k])}}}}}
+ F(A);let s=A.map(norm);for(let i=0;i<A.length;i++){let t=1/s[i],Ai=A[i];for(let k=0;k<Ai.length;k++)Ai[k]*=t}
+ let g=grade(s);g.reverse();return[A.map((_,i)=>A[g[i]]),s.map((_,i)=>s[g[i]]),V.map((_,i)=>V[g[i]])]}
 
 let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0],f)
  let init=N=>{let l=log2(N),P=Array(8).fill(0),n=1,S=new Float64Array(N),C=new Float64Array(N);for(let p=0;p<l;p++){for(let i=0;i<n;i++){P[i]<<=1;P[i+n]=1+P[i]};n<<=1};for(let i=0;i<N;i++){const p=-2*pi*i/N;C[i]=cos(p);S[i]=sin(p)};return[l,P,C,S,N]}
@@ -59,33 +76,50 @@ let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);f
  if("number"==typeof x)return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
  for(let p=1;p<=l;p++){s>>=1;for(let b=0;b<s;b++){const o=2*b*n;for(let k=0;k<n;k++){const i=(k+o)<<1,j=i+(n<<1),ks=k*s,kn=s*(k+n);let xi0=x[i],xi1=x[1+i],xj0=x[j];x[i]+=C[ks]*x[j]-S[ks]*x[1+j];x[1+i]+=C[ks]*x[1+j]+S[ks]*x[j];x[j]=xi0+C[kn]*x[j]-S[kn]*x[1+j];x[1+j]=xi1+C[kn]*x[1+j]+S[kn]*xj0}};n<<=1}
  return x}
+
+let ravg3=(x,n)=>{let f=(x,n)=>{let a=0,b=0,p=0,s=1/n;for(let i=0;i<n;i++)a+=x[i];b=s*a;for(let i=n;i<x.length;i++){a+=x[i]-x[p];x[p]=x[i];x[i]=s*a;if(n==++p)p=0};x[n-1]=b;return x.subarray(n-1)}
+ n=floor((9+n)/10);return(!n)?x:n>x.length?x.subarray(0,0):f(f(f(x,5*n),3*n),2*n)}
+let zavg3=(x,n)=>{let f=(x,n)=>{let ar=0,ai=0,br=0,bi=0,p=0,s=1/n;for(let i=0;i<n;i++){ar+=x[i];ai+=x[++i]};br=s*ar;bi=s*ai;
+  for(let i=n;i<x.length;i+=2){ar+=x[i]-x[p];ai+=x[1+i]-x[1+p];x[p]=x[i];x[1+p]=x[1+i];x[i]=s*ar;x[1+i]=s*ai;p+=2;if(n==p)p=0}
+  x[n-2]=br;x[n-1]=bi;return x.subarray(n-2)}
+ n=2*floor((9+n)/10);return(!n)?x:n>x.length?x.subarray(0,0):f(f(f(x,5*n),3*n),2*n)}
+
+let bench=_=>{
+ let vec=x=>{x=new Float64Array(x);for(let i=0;i<x.length;i++)x[i]=Math.random()-0.5;return x}
+ let mat=(n,m)=>Array(n).fill([]).map(x=>vec(m))
+ let t={
+  lsq:_=>{let q=qr(mat(4,2000)),y,x=vec(2000);for(let i=0;i<1000;i++)y=qrsolve(q,x)},
+  fft:_=>{let f=fft(1024),x=vec(1024);for(let i=0;i<1024;i++){x=fft(x,f);for(let j=0;j<1024;j++)x[j]*=0.03125}},
+ }
+ let o="";for(let k in t){let t0=performance.now();t[k]();o+=k+" "+(performance.now()-t0)+"\n";};return o
+}
 </script>
 <script>
 
 let cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
-_jdo=s=>{s=i.innerText.trim();
+_jdo=s=>{s=_i.innerText.trim();
  if(s){
-  o.textContent=String(eval(s));
+  _o.textContent=String(eval(s));
 }}
 
 window.init=()=>{_jdo()
- let f=window.location.hash;if(f)i.innerText=decodeURIComponent(f.slice(1))
- i.onblur=e=>{if(!o.textContent)_jdo()}
- i.oninput=e=>o.textContent=""
+ let f=window.location.hash;if(f)_i.innerText=decodeURIComponent(f.slice(1))
+ _i.onblur=e=>{if(!_o.textContent)_jdo()}
+ _i.oninput=e=>_o.textContent=""
 }
 window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
  if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
  else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
  window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
-window.onerror=(m,s,l,c,e)=>{o.textContent+="\n"+s+m}
-window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
+window.onerror=(m,s,l,c,e)=>{_o.textContent+="\n"+s+m}
+window.onunhandledrejection=e=>{_o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
 
 </script>
 </head>
 
 <body onload="window.init()">
-<pre id="i" contenteditable="true" spellcheck="false" autofocus></pre>
-<pre id="o">
-solve lup lupsolve lsq qr qrsolve zdiv norm fft </pre></pre>
+<pre id="_i" contenteditable="true" spellcheck="false" autofocus></pre>
+<pre id="_o">
+zdiv norm norm2 eyez grade solve lup lupsolve lsq qr qrsolve svd fft ravg3 zavg3 bench </pre></pre>
 <span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
 </body></html>
