@@ -1,7 +1,7 @@
-/ original system matrix  m:5  n:10
+/ original system     m:5  n:10
 / 00 01 02 -- -- -- -- -- -- --
-/ 10 11 12 13 -- -- -- -- -- --    -: A[0;:]*a10%a00    a01*a10%a00
-/ 20 21 22 23 24 -- -- -- -- --
+/ 10 11 12 13 -- -- -- -- -- --  -: A0*a10%a00
+/ 20 21 22 23 24 -- -- -- -- --  -: A0*a20%a00
 / -- 31 32 33 34 35 -- -- -- --
 / -- -- 42 43 44 45 45 -- -- --
 / -- -- -- 53 54 55 56 57 -- --
@@ -19,31 +19,52 @@
 
 lub:{[A;m;n]
 /while the bandwidth is m, the overlap between two rows is d:m-1 elements
-/n:10           /number of columns (system order)
-/m:5            /number of rows of packed matrix is the bandwidth
-d:m-1           /number of upper+lower diagonals
-h:d%2           /number of one-sided   diagonals
-k:h*1+h         /number of all sub elements per step
+/n:10          /number of columns (system order)
+/m:5           /number of rows of packed matrix is the bandwidth
+d:m-1          /number of upper+lower diagonals
+h:d%2          /number of one-sided   diagonals
+k:h*1+h        /number of all sub elements per step
 
 /the leading row has 1+h nonzero elements. in each step we need to update
-/h subrows, which are k:h*1+k nonzero elements
+/h subrows, which are k:h*1+h nonzero elements
 
-o:h                 /row offset for all following indexes    2 (increased by m)
-I0:,/h#'d*!1+h      /top row indexes interleaved h times     0 0 4 4 8 8
-AI:k#,/1+!h         /divident element indexes (all subrows)  1 2 1 2 1 2
-IJ:I0+AI            /all h sub row indexes                   1 2 5 6 9 10
-a0:0                /pivot element index                     0
-
+o:h            /row index offset                        2 (increased by m)
+t:,/h#'d*!1+h  /top row indexes interleaved h times     0 0 4 4 8 8
+p:0            /pivot element index                     0
+q:1+!h         /leading indexes of sub rows             1 2
+Q:k#!h         /divident element indexes (all subrows)  0 1 0 1 0 1
+j:t+k#q        /all h sub row indexes                   1 2 5 6 9 10
 
 
 while[n-:1
- A[o+IJ]-:A[o+I0]*A[o+AI]%p:A o+a0
+ l:A[o+q]%A o+p          /scale factors for h subrows
+ A[o+j]-:A[o+t]*l Q      /eliminate leading elements of subrows
+ A[o+q]:l                /store factors as lower band matrix
  o+:m]
-A}
+ A}                      /return LU decomposition
+
+lubsolve:{[A;m;n;b]      /A:packed,  b:rhs
+ A:lub[A;m;n]            /decomposition                       e.g. m:5 n:10
+ h:(m-1)%2                                                    2
+ j:-h-!h                 /offset to h previous element in b   -2 -1
+ J:j*m                   /previous lower column index offset  -10 -5
+ A:(0*m#b),A             /prepend zero column to A            
+ b:(0*h#b),b             /prepend h zero elements to b      
+ d:h                     /index to current diagonal element   2
+ i:h                     /current rhs index                   2
+ while[i<n               /forward substitution
+  b[i]:(b[i]-+/A[d+J]*b i+j)%A d
+  i+:1;d+:m]
+ while[i>0;i-:1]         /back substitution
+}
+  
+
 
 P:{`< (`l@+(-m)^x),\"\n"}
 m:5
-h:(m-2)%2
+h:(m-1)%2
 n:10
 A:(?m*n),(m*h)#0.
-P lub[A;m;n]
+
+
+/P lub[A;m;n]
