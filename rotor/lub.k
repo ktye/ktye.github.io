@@ -1,3 +1,5 @@
+/lu decomposition with symmetrical band storage
+
 / original system     m:5  n:10
 / 00 01 02 -- -- -- -- -- -- --
 / 10 11 12 13 -- -- -- -- -- --  -: A0*a10%a00
@@ -10,12 +12,15 @@
 / -- -- -- -- -- -- 86 87 88 89
 / -- -- -- -- -- -- -- 97 98 99
 /
-/ band storage
+/ band storage   (flat column major vector)
 / -- -- 02 13 24 35 45 57 68 79 -- --
 / -- 01 12 23 34 45 56 67 78 89 -- --
 / 00 11 22 33 44 55 66 77 88 99 -- --
 / 10 21 32 43 54 65 77 87 98 -- -- --
 / 20 31 42 53 64 75 86 97 -- -- -- --
+/                               ^^ ^^
+/ padding is needed for the edges, so we always update full diagonals.
+/ if k returned 0 for outdexing and ignored amend outside the domain x[i]-:.. we would not need to pad.
 
 lub:{[A;m;n]
  /while the bandwidth is m, the overlap between two rows is d:m-1 elements
@@ -54,15 +59,3 @@ lubsolve:{[A;m;n;b]      /A:packed lu decomposition, b:rhs
  while[i>h;i-:1;d-:m;b[i]:(b[i]-+/A[d-J]*b i-j)%A d] /back substitution
  b h+!n}
   
-/P:{`< (`l@+(-m)^x),\"\n"}
-/m:5
-/h:(m-1)%2
-/n:10
-//A:(?m*n),(m*h)#0.
-/
-/flat:{(,/+x),(m*h)#0.}
-/
-/B:lub[flat A;m;n]
-/c:lubsolve[B;m;n;b]
-
-/P lub[A;m;n]
