@@ -1,13 +1,13 @@
 /lu decomposition with symmetrical band storage
 
-/ original system     m:5  n:10
+/ original system     m:5  n:10  
 / 00 01 02 -- -- -- -- -- -- --
 / 10 11 12 13 -- -- -- -- -- --  -: A0*a10%a00
 / 20 21 22 23 24 -- -- -- -- --  -: A0*a20%a00
 / -- 31 32 33 34 35 -- -- -- --
 / -- -- 42 43 44 45 45 -- -- --
-/ -- -- -- 53 54 55 56 57 -- --
-/ -- -- -- -- 64 65 66 67 68 --
+/ -- -- -- 53 54 55 56 57 -- --  full:   n^3
+/ -- -- -- -- 64 65 66 67 68 --  band: n*m^2 (linear)
 / -- -- -- -- -- 75 76 77 78 79
 / -- -- -- -- -- -- 86 87 88 89
 / -- -- -- -- -- -- -- 97 98 99
@@ -35,13 +35,12 @@ lub:{[A;m;n]
  
  o:h            /row index offset                        2 (increased by m)
  t:,/h#'d*!1+h  /top row indexes interleaved h times     0 0 4 4 8 8
- p:0            /pivot element index                     0
  q:1+!h         /leading indexes of sub rows             1 2
  Q:k#!h         /divident element indexes (all subrows)  0 1 0 1 0 1
  j:t+k#q        /all h sub row indexes                   1 2 5 6 9 10
  
  while[n-:1
-  l:A[o+q]%A o+p          /scale factors for h subrows
+  l:A[o+q]%A o            /scale factors for h subrows
   A[o+j]-:A[o+t]*l Q      /eliminate leading elements of subrows
   A[o+q]:l;o+:m]          /store factors as lower band matrix
  A}                       /return LU decomposition
