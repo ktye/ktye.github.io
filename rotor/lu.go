@@ -3,21 +3,43 @@ package main
 import (
 	"fmt"
 	"math"
+	"io"
+	"os"
+	"bytes"
 	"math/rand"
 )
 
 func main() {
+	var buf bytes.Buffer
+
 	m, n := 5, 10
 	A, b := system(m, n)
+	AA := Copy(A)
 	B := band(A, m)
+	K("A", B, &buf)
 	M("A", A)
 	M("B", B)
 	V("b", b)
+	F("b", b, &buf)
 	P := lu(A)
 	M("LU", A)
 	fmt.Println("P", P)
+	x := lusolve(A, P, b)
+	V("x", x)
+	Ax := mul(AA, x)
+	V("Ax", Ax)
+	fmt.Println("Ax=b", cmp(Ax, b))
 	lub(B)
 	M("LUB",B)
+	K("B", B, &buf)
+	f := forward(B, b)
+	F("f", f, &buf)
+	y := lubsolve(B, b)
+	F("y", y, &buf)
+	V("y", y)
+	fmt.Println("x=y", cmp(x, y))
+
+	os.WriteFile("t.k", buf.Bytes(), 0644)
 }
 func band(A [][]float64, m int) [][]float64 {
 	B := make([][]float64, m)
@@ -51,6 +73,26 @@ func M(s string, A [][]float64) {
 			fmt.Printf(" %6.3f", a)
 		}
 		fmt.Println()
+	}
+}
+func F(s string, x []float64, w io.Writer) {
+	fmt.Fprintf(w, "%s:", s)
+	for _, v := range x {
+		fmt.Fprintf(w, " %v", v)
+	}
+	fmt.Fprintln(w)
+}
+func K(s string, A [][]float64, w io.Writer) {
+	fmt.Fprintf(w, "%s:(", s)
+	for i := range A {
+		for _, a := range A[i] {
+			fmt.Fprintf(w, " %v", a)
+		}
+		if i == len(A) - 1 {
+			fmt.Fprintf(w, ")\n")
+		} else {
+			fmt.Fprintln(w)
+		}
 	}
 }
 func system(m, n int) (A [][]float64, b []float64) {
@@ -93,10 +135,10 @@ func lu(A [][]float64) (P []int) {
 	for i := range P {
 		P[i] = i
 	}
-	for i := range A {
-		mx, mi := 0.0, 0
-		for k := i; k < n; k++ { if a := math.Abs(A[k][i]); a > mx { mx, mi = a, k } }
-		if mi != i { P[i], P[mi] = P[mi], P[i]; A[i], A[mi] = A[mi], A[i] }
+	for i := range A { //disable pivoting
+//		mx, mi := 0.0, 0
+//		for k := i; k < n; k++ { if a := math.Abs(A[k][i]); a > mx { mx, mi = a, k } }
+//		if mi != i { P[i], P[mi] = P[mi], P[i]; A[i], A[mi] = A[mi], A[i] }
 		for j := 1 + i; j < n; j++ {
 			A[j][i] /= A[i][i]
 			for k := 1 + i; k < n; k++ {
@@ -105,6 +147,46 @@ func lu(A [][]float64) (P []int) {
 		}
 	}
 	return P
+}
+func forward(A [][]float64, rhs []float64) (x []float64) {
+	n := len(A[0])
+	m := len(A)
+	h := (m-1)/2
+	x = make([]float64, n)
+	copy(x, rhs)
+	for i := range n {
+		for k := i-h; k<i; k++ {
+			j := i-k+h
+			if j >= 0 && j < m && k >= 0{
+				x[i] -= A[j][k] * x[k]
+			}
+		}
+	}
+	return x
+}
+func lubsolve(A [][]float64, rhs []float64) (x []float64) {
+	n := len(A[0])
+	m := len(A)
+	h := (m-1)/2
+	x = make([]float64, n)
+	copy(x, rhs)
+	for i := range n {
+		for k := i-h; k<i; k++ {
+			j := i-k+h
+			if j >= 0 && j < m && k >= 0{
+				x[i] -= A[j][k] * x[k]
+			}
+		}
+	}
+	for i := n-1; i>= 0; i-- {
+		for k := 1; k<=h; k++ {
+			if h + k < m && i+k<n {
+				x[i] -= A[h-k][i+k] * x[i+k]
+			}
+		}
+		x[i] /= A[h][i]
+	}
+	return x
 }
 func lusolve(A [][]float64, P []int, rhs []float64) (x []float64) {
 	n := len(A)
@@ -123,4 +205,31 @@ func lusolve(A [][]float64, P []int, rhs []float64) (x []float64) {
 	}
 	return x
 }
-
+func Copy(A [][]float64) (R [][]float64) {
+	R = make([][]float64, len(A))
+	for i := range R {
+		R[i] = make([]float64, len(A[i]))
+		copy(R[i], A[i])
+	}
+	return R
+}
+func mul(A [][]float64, x []float64) (r []float64) {
+	r = make([]float64, len(x))
+	for i := range A {
+		for k := range A {
+			r[i] += A[i][k] * x[k]
+		}
+	}
+	return r
+}
+func cmp(x, y []float64) bool {
+	if len(x) != len(y) {
+		panic("len")
+	}
+	for i := range x {
+		if e := math.Abs(x[i] - y[i]); e > 1e-12 {
+			return false
+		}
+	}
+	return true
+}
