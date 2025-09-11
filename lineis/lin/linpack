@@ -1,0 +1,1180 @@
+<title>LINPACK</title>
+<meta name="waisindex" value="nse">
+<h1>LINPACK</h1>
+
+Click <A HREF="http://www.netlib.org/master_counts2.html#linpack">here</A> to see the number of accesses to this library.
+
+<p>
+LINPACK is a collection of Fortran subroutines that analyze and
+solve linear equations and linear least-squares problems.  The
+package solves linear systems whose matrices are general, banded,
+symmetric indefinite, symmetric positive definite, triangular,
+and tridiagonal square.  In addition, the package computes
+the QR and singular value decompositions of rectangular matrices
+and applies them to least-squares problems.  LINPACK uses
+column-oriented algorithms to increase efficiency by preserving
+locality of reference.
+<p>
+
+LINPACK was designed for supercomputers in use in the 1970s and
+early 1980s.  LINPACK has been largely superceded by
+<a href="http://www.netlib.org/lapack">LAPACK</a>, which has
+been designed to run efficiently on shared-memory, vector
+supercomputers.
+<p>
+
+<hr>
+<pre>
+#	Netlib Index for LINPACK
+#
+#	NOTE:
+#	1.  Entries are arranged in alphabetical order by the real routine name.
+#	(If you are looking for a specific complex Hermitian routine, you
+#	will find it listed with its real symmetric equivalent.)
+#	2.  Specifications for pairs of real and complex routines have been
+#	merged.  In a few cases, specifications of three routines have been
+#	merged, one for real symmetric, one for complex symmetric, and one
+#	for complex Hermitian matrices.
+#	3.  Specifications are given only for single precision routines.  To
+#	adapt them for the double precision version of the software, simply
+#	interpret REAL as DOUBLE PRECISION and COMPLEX and COMPLEX*16 (or
+#	DOUBLE COMPLEX).
+
+
+file	<a href="readme">readme</a>
+for	README file for LINPACK
+
+
+lib	<a href="chk/">chk</a>
+for	test drivers for LINPACK
+
+
+file	<a href="schdc.f">schdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/schdc.f">schdc.f plus dependencies</a>
+gams	D2b1b
+for	computes the Cholesky decomposition of a positive definite matrix,
+,	a pivoting option allows the user to estimate the condition of a
+,	positive definite matrix or determine the rank of a positive
+,	semidefinite matrix
+prec	single
+
+file	<a href="dchdc.f">dchdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dchdc.f">dchdc.f plus dependencies</a>
+gams	D2b1b
+for	computes the Cholesky decomposition of a positive definite matrix,
+,	a pivoting option allows the user to estimate the condition of a
+,	positive definite matrix or determine the rank of a positive
+,	semidefinite matrix
+prec	double
+
+file	<a href="cchdc.f">cchdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cchdc.f">cchdc.f plus dependencies</a>
+gams	D2d1b
+for	computes the Cholesky decomposition of a positive definite matrix,
+,	a pivoting option allows the user to estimate the condition of a
+,	positive definite matrix or determine the rank of a positive
+,	semidefinite matrix
+prec	complex
+
+file	<a href="zchdc.f">zchdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zchdc.f">zchdc.f plus dependencies</a>
+gams	D2d1b
+for	computes the Cholesky decomposition of a positive definite matrix,
+,	a pivoting option allows the user to estimate the condition of a
+,	positive definite matrix or determine the rank of a positive
+,	semidefinite matrix
+prec	doublecomplex
+
+
+file	<a href="schdd.f">schdd.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/schdd.f">schdd.f plus dependencies</a>
+gams	D7b
+for	downdates an augmented Cholesky decomposition or the triangular
+,	factor of an augmented QR decomposition
+prec	single
+
+file	<a href="dchdd.f">dchdd.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dchdd.f">dchdd.f plus dependencies</a>
+gams	D7b
+for	downdates an augmented Cholesky decomposition or the triangular
+,	factor of an augmented QR decomposition
+prec	double
+
+file	<a href="cchdd.f">cchdd.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cchdd.f">cchdd.f plus dependencies</a>
+gams	D7b
+for	downdates an augmented Cholesky decomposition or the triangular
+,	factor of an augmented QR decomposition
+prec	complex
+
+file	<a href="zchdd.f">zchdd.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zchdd.f">zchdd.f plus dependencies</a>
+gams	D7b
+for	downdates an augmented Cholesky decomposition or the triangular
+,	factor of an augmented QR decomposition
+prec	doublecomplex
+
+
+file	<a href="schex.f">schex.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/schex.f">schex.f plus dependencies</a>
+gams	D7b
+for	updates the Cholesky factorization
+prec	single
+
+file	<a href="dchex.f">dchex.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dchex.f">dchex.f plus dependencies</a>
+gams	D7b
+for	updates the Cholesky factorization
+prec	double
+
+file	<a href="cchex.f">cchex.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cchex.f">cchex.f plus dependencies</a>
+gams	D7b
+for	updates the Cholesky factorization
+prec	complex
+
+file	<a href="zchex.f">zchex.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zchex.f">zchex.f plus dependencies</a>
+gams	D7b
+for	updates the Cholesky factorization
+prec	doublecomplex
+
+
+file	<a href="schud.f">schud.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/schud.f">schud.f plus dependencies</a>
+gams	D7b
+for	updates an augmented Cholesky decomposition or the triangular
+,	part of an augmented QR decomposition
+prec	single
+
+file	<a href="dchud.f">dchud.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dchud.f">dchud.f plus dependencies</a>
+gams	D7b
+for	updates an augmented Cholesky decomposition or the triangular
+,	part of an augmented QR decomposition
+prec	double
+
+file	<a href="cchud.f">cchud.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cchud.f">cchud.f plus dependencies</a>
+gams	D7b
+for	updates an augmented Cholesky decomposition or the triangular
+,	part of an augmented QR decomposition
+prec	complex
+
+file	<a href="zchud.f">zchud.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zchud.f">zchud.f plus dependencies</a>
+gams	D7b
+for	updates an augmented Cholesky decomposition or the triangular
+,	part of an augmented QR decomposition
+prec	doublecomplex
+
+
+file	<a href="sgbco.f">sgbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgbco.f">sgbco.f plus dependencies</a>
+gams	D2a2
+for	factors a real band matrix by Gaussian elimination and
+,	estimates the condition number of the matrix
+prec	single
+
+file	<a href="dgbco.f">dgbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgbco.f">dgbco.f plus dependencies</a>
+gams	D2a2
+for	factors a real band matrix by Gaussian elimination and
+,	estimates the condition number of the matrix
+prec	double
+
+file	<a href="cgbco.f">cgbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgbco.f">cgbco.f plus dependencies</a>
+gams	D2c2
+for	factors a complex band matrix by Gaussian elimination and
+,	estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zgbco.f">zgbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgbco.f">zgbco.f plus dependencies</a>
+gams	D2c2
+for	factors a complex band matrix by Gaussian elimination and
+,	estimates the condition number of the matrix
+prec	doublecomplex
+
+
+file	<a href="sgbdi.f">sgbdi.f</a>
+gams	D3a2
+for	computes the determinant of a band matrix using the factors
+,	computed by (linpack/sgbco) or (linpack/sgbfa), if the inverse
+,	is needed use (linpack/sgbsl) n times
+prec	single
+
+file	<a href="dgbdi.f">dgbdi.f</a>
+gams	D3a2
+for	computes the determinant of a band matrix using the factors
+,	computed by (linpack/dgbco) or (linpack/dgbfa), if the inverse
+,	is needed use (linpack/dgbsl) n times
+prec	double
+
+file	<a href="cgbdi.f">cgbdi.f</a>
+gams	D3c2
+for	computes the determinant of a band matrix using the factors
+,	computed by (linpack/cgbco) or (linpack/cgbfa), if the inverse
+,	is needed use (linpack/cgbsl) n times
+prec	complex
+
+file	<a href="zgbdi.f">zgbdi.f</a>
+gams	D3c2
+for	computes the determinant of a band matrix using the factors
+,	computed by (linpack/zgbco) or (linpack/zgbfa), if the inverse
+,	is needed use (linpack/zgbsl) n times
+prec	doublecomplex
+
+
+file	<a href="sgbfa.f">sgbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgbfa.f">sgbfa.f plus dependencies</a>
+gams	D2a2
+for	factors a band matrix by elimination
+prec	single
+
+file	<a href="dgbfa.f">dgbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgbfa.f">dgbfa.f plus dependencies</a>
+gams	D2a2
+for	factors a band matrix by elimination
+prec	double
+
+file	<a href="cgbfa.f">cgbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgbfa.f">cgbfa.f plus dependencies</a>
+gams	D2c2
+for	factors a band matrix by elimination
+prec	complex
+
+file	<a href="zgbfa.f">zgbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgbfa.f">zgbfa.f plus dependencies</a>
+gams	D2c2
+for	factors a band matrix by elimination
+prec	doublecomplex
+
+
+file	<a href="sgbsl.f">sgbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgbsl.f">sgbsl.f plus dependencies</a>
+gams	D2a2
+for	solves the real band system Ax = b or trans(A)x = b using
+,	the factors computed by (linpack/sgbco) or (linpack/sgbfa)
+prec	single
+
+file	<a href="dgbsl.f">dgbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgbsl.f">dgbsl.f plus dependencies</a>
+gams	D2a2
+for	solves the real band system Ax = b or trans(A)x = b using
+,	the factors computed by (linpack/dgbco) or (linpack/dgbfa)
+prec	double
+
+file	<a href="cgbsl.f">cgbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgbsl.f">cgbsl.f plus dependencies</a>
+gams	D2c2
+for	solves the complex band system Ax = b or trans(A)x = b using
+,	the factors computed by (linpack/cgbco) or (linpack/cgbfa)
+prec	complex
+
+file	<a href="zgbsl.f">zgbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgbsl.f">zgbsl.f plus dependencies</a>
+gams	D2c2
+for	solves the complex band system Ax = b or trans(A)x = b using
+,	the factors computed by (linpack/zgbco) or (linpack/zgbfa)
+prec	doublecomplex
+
+
+file	<a href="sgeco.f">sgeco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgeco.f">sgeco.f plus dependencies</a>
+gams	D2a1
+for	factors a matrix by Gaussian elimination and estimates the
+,	condition number of the matrix
+prec	single
+
+file	<a href="dgeco.f">dgeco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgeco.f">dgeco.f plus dependencies</a>
+gams	D2a1
+for	factors a matrix by Gaussian elimination and estimates the
+,	condition number of the matrix
+prec	double
+
+file	<a href="cgeco.f">cgeco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgeco.f">cgeco.f plus dependencies</a>
+gams	D2c1
+for	factors a matrix by Gaussian elimination and estimates the
+,	condition number of the matrix
+prec	complex
+
+file	<a href="zgeco.f">zgeco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgeco.f">zgeco.f plus dependencies</a>
+gams	D2c1
+for	factors a matrix by Gaussian elimination and estimates the
+,	condition number of the matrix
+prec	doublecomplex
+
+
+file	<a href="sgedi.f">sgedi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgedi.f">sgedi.f plus dependencies</a>
+gams	D3a1, D2a1
+for	computes the determinant and inverse of a matrix using the 
+,	factors computed by (linpack/sgeco) or (linpack/sgefa)
+prec	single
+
+file	<a href="dgedi.f">dgedi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgedi.f">dgedi.f plus dependencies</a>
+gams	D3a1, D2a1
+for	computes the determinant and inverse of a matrix using the 
+,	factors computed by (linpack/dgeco) or (linpack/dgefa)
+prec	double
+
+file	<a href="cgedi.f">cgedi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgedi.f">cgedi.f plus dependencies</a>
+gams	D2c1, D3c1
+for	computes the determinant and inverse of a matrix using the 
+,	factors computed by (linpack/cgeco) or (linpack/cgefa)
+prec	complex
+
+file	<a href="zgedi.f">zgedi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgedi.f">zgedi.f plus dependencies</a>
+gams	D2c1, D3c1
+for	computes the determinant and inverse of a matrix using the 
+,	factors computed by (linpack/zgeco) or (linpack/zgefa)
+prec	doublecomplex
+
+
+file	<a href="sgefa.f">sgefa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgefa.f">sgefa.f plus dependencies</a>
+gams	D2a1
+for	factors a real matrix by Gaussian elimination
+prec	single
+
+file	<a href="dgefa.f">dgefa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgefa.f">dgefa.f plus dependencies</a>
+gams	D2a1
+for	factors a real matrix by Gaussian elimination
+prec	double
+
+file	<a href="cgefa.f">cgefa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgefa.f">cgefa.f plus dependencies</a>
+gams	D2c1
+for	factors a complex matrix by Gaussian elimination
+prec	complex
+
+file	<a href="zgefa.f">zgefa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgefa.f">zgefa.f plus dependencies</a>
+gams	D2c1
+for	factors a complex matrix by Gaussian elimination
+prec	doublecomplex
+
+
+file	<a href="sgesl.f">sgesl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sgesl.f">sgesl.f plus dependencies</a>
+gams	D2a1
+for	solves the real system Ax = b or trans(A)x = b using 
+,	the factors computed by (linpack/sgeco) or (linpack/sgefa)
+prec	single
+
+file	<a href="dgesl.f">dgesl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dgesl.f">dgesl.f plus dependencies</a>
+gams	D2a1
+for	solves the real system Ax = b or trans(A)x = b using 
+,	the factors computed by (linpack/dgeco) or (linpack/dgefa)
+prec	double
+
+file	<a href="cgesl.f">cgesl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cgesl.f">cgesl.f plus dependencies</a>
+gams	D2c1
+for	solves the complex system Ax = b or trans(A)x = b using 
+,	the factors computed by (linpack/cgeco) or (linpack/cgefa)
+prec	complex
+
+file	<a href="zgesl.f">zgesl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zgesl.f">zgesl.f plus dependencies</a>
+gams	D2c1
+for	solves the complex system Ax = b or trans(A)x = b using 
+,	the factors computed by (linpack/zgeco) or (linpack/zgefa)
+prec	doublecomplex
+
+
+file	<a href="sgtsl.f">sgtsl.f</a>
+gams	D2a2a
+for	given a general tridiagonal matrix and a right hand side will 
+,	find the solution
+prec	single
+
+file	<a href="dgtsl.f">dgtsl.f</a>
+gams	D2a2a
+for	given a general tridiagonal matrix and a right hand side will 
+,	find the solution
+prec	double
+
+file	<a href="cgtsl.f">cgtsl.f</a>
+gams	D2c2a
+for	given a general tridiagonal matrix and a right hand side will 
+,	find the solution
+prec	complex
+
+file	<a href="zgtsl.f">zgtsl.f</a>
+gams	D2c2a
+for	given a general tridiagonal matrix and a right hand side will 
+,	find the solution
+prec	doublecomplex
+
+
+file	<a href="spbco.f">spbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/spbco.f">spbco.f plus dependencies</a>
+gams	D2b2
+for	factors a real symmetric positive definite matrix stored
+,	in band form and estimates the condition of the matrix
+prec	single
+
+file	<a href="dpbco.f">dpbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dpbco.f">dpbco.f plus dependencies</a>
+gams	D2b2
+for	factors a real symmetric positive definite matrix stored
+,	in band form and estimates the condition of the matrix
+prec	double
+
+file	<a href="cpbco.f">cpbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cpbco.f">cpbco.f plus dependencies</a>
+gams	D2d2
+for	factors a complex hermitian positive definite matrix stored
+,	in band form and estimates the condition of the matrix
+prec	complex
+
+file	<a href="zpbco.f">zpbco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zpbco.f">zpbco.f plus dependencies</a>
+gams	D2d2
+for	factors a complex hermitian positive definite matrix stored
+,	in band form and estimates the condition of the matrix
+prec	doublecomplex
+
+
+file	<a href="spbdi.f">spbdi.f</a>
+gams	D3b2
+for	computes the determinant of a real symmetric positive
+,	definite band matrix using the factors computed by (linpack/spbco)
+,	or (linpack/spbfa), if the inverse is needed use (linpack/spbsl)
+,	n times
+prec	single
+
+file	<a href="dpbdi.f">dpbdi.f</a>
+gams	D3b2
+for	computes the determinant of a real symmetric positive
+,	definite band matrix using the factors computed by (linpack/dpbco)
+,	or (linpack/dpbfa), if the inverse is needed use (linpack/dpbsl)
+,	n times
+prec	double
+
+file	<a href="cpbdi.f">cpbdi.f</a>
+gams	D3d2
+for	computes the determinant of a complex hermitian positive
+,	definite band matrix using the factors computed by (linpack/cpbco)
+,	or (linpack/cpbfa), if the inverse is needed use (linpack/cpbsl)
+,	n times
+prec	complex
+
+file	<a href="zpbdi.f">zpbdi.f</a>
+gams	D3d2
+for	computes the determinant of a complex hermitian positive
+,	definite band matrix using the factors computed by (linpack/zpbco)
+,	or (linpack/zpbfa), if the inverse is needed use (linpack/zpbsl)
+,	n times
+prec	doublecomplex
+
+
+file	<a href="spbfa.f">spbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/spbfa.f">spbfa.f plus dependencies</a>
+gams	D2b2
+for	factors a real symmetric positive definite matrix stored
+,	in band form
+prec	single
+
+file	<a href="dpbfa.f">dpbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dpbfa.f">dpbfa.f plus dependencies</a>
+gams	D2b2
+for	factors a real symmetric positive definite matrix stored
+,	in band form
+prec	double
+
+file	<a href="cpbfa.f">cpbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cpbfa.f">cpbfa.f plus dependencies</a>
+gams	D2d2
+for	factors a complex hermitian positive definite matrix stored
+,	in band form
+prec	complex
+
+file	<a href="zpbfa.f">zpbfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zpbfa.f">zpbfa.f plus dependencies</a>
+gams	D2d2
+for	factors a complex hermitian positive definite matrix stored
+,	in band form
+prec	doublecomplex
+
+
+file	<a href="spbsl.f">spbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/spbsl.f">spbsl.f plus dependencies</a>
+gams	D2b2
+for	solves the real symmetric positive definite band system
+,	Ax = b using the factors computed by (linpack/spbco) or (linpack/spbfa)
+prec	single
+
+file	<a href="dpbsl.f">dpbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dpbsl.f">dpbsl.f plus dependencies</a>
+gams	D2b2
+for	solves the real symmetric positive definite band system
+,	Ax = b using the factors computed by (linpack/dpbco) or (linpack/dpbfa)
+prec	double
+
+file	<a href="cpbsl.f">cpbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cpbsl.f">cpbsl.f plus dependencies</a>
+gams	D2d2
+for	solves the complex hermitian positive definite band system
+,	Ax = b using the factors computed by (linpack/cpbco) or (linpack/cpbfa)
+prec	complex
+
+file	<a href="zpbsl.f">zpbsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zpbsl.f">zpbsl.f plus dependencies</a>
+gams	D2d2
+for	solves the complex hermitian positive definite band system
+,	Ax = b using the factors computed by (linpack/zpbco) or (linpack/zpbfa)
+prec	doublecomplex
+
+
+file	<a href="spoco.f">spoco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/spoco.f">spoco.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix and
+,	estimates the condition number of the matrix
+prec	single
+
+file	<a href="dpoco.f">dpoco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dpoco.f">dpoco.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix and
+,	estimates the condition number of the matrix
+prec	double
+
+file	<a href="cpoco.f">cpoco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cpoco.f">cpoco.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix and
+,	estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zpoco.f">zpoco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zpoco.f">zpoco.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix and
+,	estimates the condition number of the matrix
+prec	doublecomplex
+
+
+file	<a href="spodi.f">spodi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/spodi.f">spodi.f plus dependencies</a>
+gams	D2b1b,D3b1b
+for	computes the determinant and inverse of a certain real
+,	symmetric positive definite matrix using the factors computed by
+,	(linpack/spoco), (linpack/spofa) or (linpack/sqrdc)
+prec	single
+
+file	<a href="dpodi.f">dpodi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dpodi.f">dpodi.f plus dependencies</a>
+gams	D2b1b,D3b1b
+for	computes the determinant and inverse of a certain real
+,	symmetric positive definite matrix using the factors computed by
+,	(linpack/dpoco), (linpack/dpofa) or (linpack/dqrdc)
+prec	double
+
+file	<a href="cpodi.f">cpodi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cpodi.f">cpodi.f plus dependencies</a>
+gams	D2d1b, D3d1b
+for	computes the determinant and inverse of a certain complex
+,	hermitian positive definite matrix using the factors computed by
+,	(linpack/cpoco), (linpack/cpofa) or (linpack/cqrdc)
+prec	complex
+
+file	<a href="zpodi.f">zpodi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zpodi.f">zpodi.f plus dependencies</a>
+gams	D2d1b, D3d1b
+for	computes the determinant and inverse of a certain complex
+,	hermitian positive definite matrix using the factors computed by
+,	(linpack/zpoco), (linpack/zpofa) or (linpack/zqrdc)
+prec	doublecomplex
+
+
+file	<a href="spofa.f">spofa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/spofa.f">spofa.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix
+prec	single
+
+file	<a href="dpofa.f">dpofa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dpofa.f">dpofa.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix
+prec	double
+
+file	<a href="cpofa.f">cpofa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cpofa.f">cpofa.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix
+prec	complex
+
+file	<a href="zpofa.f">zpofa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zpofa.f">zpofa.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix
+prec	doublecomplex
+
+
+file	<a href="sposl.f">sposl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sposl.f">sposl.f plus dependencies</a>
+gams	D2b1b
+for	solves the real symmetric positive definite system
+,	Ax = b using the factors computed by (linpack/spoco) or
+,	(linpack/spofa)
+prec	single
+
+file	<a href="dposl.f">dposl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dposl.f">dposl.f plus dependencies</a>
+gams	D2b1b
+for	solves the real symmetric positive definite system
+,	Ax = b using the factors computed by (linpack/dpoco) or
+,	(linpack/dpofa)
+prec	double
+
+file	<a href="cposl.f">cposl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cposl.f">cposl.f plus dependencies</a>
+gams	D2d1b
+for	solves the complex hermitian positive definite system
+,	Ax = b using the factors computed by (linpack/cpoco) or
+,	(linpack/cpofa)
+prec	complex
+
+file	<a href="zposl.f">zposl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zposl.f">zposl.f plus dependencies</a>
+gams	D2d1b
+for	solves the complex hermitian positive definite system
+,	Ax = b using the factors computed by (linpack/zpoco) or
+,	(linpack/zpofa)
+prec	doublecomplex
+
+
+file	<a href="sppco.f">sppco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sppco.f">sppco.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix stored
+,	in packed form and estimates the condition number of the matrix
+prec	single
+
+file	<a href="dppco.f">dppco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dppco.f">dppco.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix stored
+,	in packed form and estimates the condition number of the matrix
+prec	double
+
+file	<a href="cppco.f">cppco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cppco.f">cppco.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix stored
+,	in packed form and estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zppco.f">zppco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zppco.f">zppco.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix stored
+,	in packed form and estimates the condition number of the matrix
+prec	doublecomplex
+
+
+file	<a href="sppdi.f">sppdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sppdi.f">sppdi.f plus dependencies</a>
+gams	D2b1b,D3b1b
+for	computes the determinant and inverse of a real symmetric
+,	positive definite matrix using the factors computed by
+,	(linpack/sppco) or (linpack/sppfa)
+prec	single
+
+file	<a href="dppdi.f">dppdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dppdi.f">dppdi.f plus dependencies</a>
+gams	D2b1b,D3b1b
+for	computes the determinant and inverse of a real symmetric
+,	positive definite matrix using the factors computed by
+,	(linpack/dppco) or (linpack/dppfa)
+prec	double
+
+file	<a href="cppdi.f">cppdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cppdi.f">cppdi.f plus dependencies</a>
+gams	D2d1b, D3d1b
+for	computes the determinant and inverse of a complex hermitian
+,	positive definite matrix using the factors computed by
+,	(linpack/cppco) or (linpack/cppfa)
+prec	complex
+
+file	<a href="zppdi.f">zppdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zppdi.f">zppdi.f plus dependencies</a>
+gams	D2d1b, D3d1b
+for	computes the determinant and inverse of a complex hermitian
+,	positive definite matrix using the factors computed by
+,	(linpack/zppco) or (linpack/zppfa)
+prec	doublecomplex
+
+
+file	<a href="sppfa.f">sppfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sppfa.f">sppfa.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix stored
+,	in packed form
+prec	single
+
+file	<a href="dppfa.f">dppfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dppfa.f">dppfa.f plus dependencies</a>
+gams	D2b1b
+for	factors a real symmetric positive definite matrix stored
+,	in packed form
+prec	double
+
+file	<a href="cppfa.f">cppfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cppfa.f">cppfa.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix stored
+,	in packed form
+prec	complex
+
+file	<a href="zppfa.f">zppfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zppfa.f">zppfa.f plus dependencies</a>
+gams	D2d1b
+for	factors a complex hermitian positive definite matrix stored
+,	in packed form
+prec	doublecomplex
+
+
+file	<a href="sppsl.f">sppsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sppsl.f">sppsl.f plus dependencies</a>
+gams	D2b1b
+for	solves the real symmetric positive definite system
+,	Ax = b using the factors computed by (linpack/sppco) or
+,	(linpack/sppfa)
+prec	single
+
+file	<a href="dppsl.f">dppsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dppsl.f">dppsl.f plus dependencies</a>
+gams	D2b1b
+for	solves the real symmetric positive definite system
+,	Ax = b using the factors computed by (linpack/dppco) or
+,	(linpack/dppfa)
+prec	double
+
+file	<a href="cppsl.f">cppsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cppsl.f">cppsl.f plus dependencies</a>
+gams	D2d1b
+for	solves the complex hermitian positive definite system
+,	Ax = b using the factors computed by (linpack/cppco) or
+,	(linpack/cppfa)
+prec	complex
+
+file	<a href="zppsl.f">zppsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zppsl.f">zppsl.f plus dependencies</a>
+gams	D2d1b
+for	solves the complex hermitian positive definite system
+,	Ax = b using the factors computed by (linpack/zppco) or
+,	(linpack/zppfa)
+prec	doublecomplex
+
+
+file	<a href="sptsl.f">sptsl.f</a>
+gams	D2b2a
+for	given a positive definite tridiagonal matrix and a right hand
+,	side will find the solution
+prec	single
+
+file	<a href="dptsl.f">dptsl.f</a>
+gams	D2b2a
+for	given a positive definite tridiagonal matrix and a right hand
+,	side will find the solution
+prec	double
+
+file	<a href="cptsl.f">cptsl.f</a>
+gams	D2d2a
+for	given a positive definite tridiagonal matrix and a right hand
+,	side will find the solution
+prec	complex
+
+file	<a href="zptsl.f">zptsl.f</a>
+gams	D2d2a
+for	given a positive definite tridiagonal matrix and a right hand
+,	side will find the solution
+prec	doublecomplex
+
+
+file	<a href="sqrdc.f">sqrdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sqrdc.f">sqrdc.f plus dependencies</a>
+gams	D5
+for	uses Householder transformations to compute the QR factorization,
+,	column pivoting based on the 2-norms of the reduced columns may
+,	be performed at the user's option
+prec	single
+
+file	<a href="dqrdc.f">dqrdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dqrdc.f">dqrdc.f plus dependencies</a>
+gams	D5
+for	uses Householder transformations to compute the QR factorization,
+,	column pivoting based on the 2-norms of the reduced columns may
+,	be performed at the user's option
+prec	double
+
+file	<a href="cqrdc.f">cqrdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cqrdc.f">cqrdc.f plus dependencies</a>
+gams	D5
+for	uses Householder transformations to compute the QR factorization,
+,	column pivoting based on the 2-norms of the reduced columns may
+,	be performed at the user's option
+prec	complex
+
+file	<a href="zqrdc.f">zqrdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zqrdc.f">zqrdc.f plus dependencies</a>
+gams	D5
+for	uses Householder transformations to compute the QR factorization,
+,	column pivoting based on the 2-norms of the reduced columns may
+,	be performed at the user's option
+prec	doublecomplex
+
+
+file	<a href="sqrsl.f">sqrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sqrsl.f">sqrsl.f plus dependencies</a>
+gams	D2a1, D9a1
+for	applies the output of (linpack/sqrdc) to compute coordinate
+,	transformations, projections, and least squares solutions
+prec	single
+
+file	<a href="dqrsl.f">dqrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dqrsl.f">dqrsl.f plus dependencies</a>
+gams	D2a1, D9a1
+for	applies the output of (linpack/dqrdc) to compute coordinate
+,	transformations, projections, and least squares solutions
+prec	double
+
+file	<a href="cqrsl.f">cqrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cqrsl.f">cqrsl.f plus dependencies</a>
+gams	D9a1, D2c1
+for	applies the output of (linpack/cqrdc) to compute coordinate
+,	transformations, projections, and least squares solutions
+prec	complex
+
+file	<a href="zqrsl.f">zqrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zqrsl.f">zqrsl.f plus dependencies</a>
+gams	D9a1, D2c1
+for	applies the output of (linpack/zqrdc) to compute coordinate
+,	transformations, projections, and least squares solutions
+prec	doublecomplex
+
+
+file	<a href="ssico.f">ssico.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ssico.f">ssico.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix by elimination with symmetric
+,	pivoting and estimates the condition number of the matrix
+prec	single
+
+file	<a href="dsico.f">dsico.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dsico.f">dsico.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix by elimination with symmetric
+,	pivoting and estimates the condition number of the matrix
+prec	double
+
+file	<a href="csico.f">csico.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/csico.f">csico.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix by eliminatin with symmetric
+,	pivoting and estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zsico.f">zsico.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zsico.f">zsico.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix by eliminatin with symmetric
+,	pivoting and estimates the condition number of the matrix
+prec	doublecomplex
+
+file	<a href="chico.f">chico.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chico.f">chico.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix by elimination with symmetric
+,	pivoting and estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zhico.f">zhico.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhico.f">zhico.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix by elimination with symmetric
+,	pivoting and estimates the condition number of the matrix
+prec	doublecomplex
+
+
+file	<a href="ssidi.f">ssidi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ssidi.f">ssidi.f plus dependencies</a>
+gams	D2b1a, D3b1a
+for	computes the determinant, inertia and inverse of a real symmetric
+,	matrix using the factors from linpack/ssifa
+prec	single
+
+file	<a href="dsidi.f">dsidi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dsidi.f">dsidi.f plus dependencies</a>
+gams	D2b1a, D3b1a
+for	computes the determinant, inertia and inverse of a real symmetric
+,	matrix using the factors from linpack/dsifa
+prec	double
+
+file	<a href="csidi.f">csidi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/csidi.f">csidi.f plus dependencies</a>
+gams	D2c1, D3c1
+for	computes the determinant, inertia and inverse of a complex symmetric
+,	matrix using the factors from linpack/csifa
+prec	complex
+
+file	<a href="zsidi.f">zsidi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zsidi.f">zsidi.f plus dependencies</a>
+gams	D2c1, D3c1
+for	computes the determinant, inertia and inverse of a complex symmetric
+,	matrix using the factors from linpack/zsifa
+prec	doublecomplex
+
+file	<a href="chidi.f">chidi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chidi.f">chidi.f plus dependencies</a>
+gams	D2d1a, D3d1a
+for	computes the determinant, inertia and inverse of a complex
+,	Hermitian matrix using the factors from linpack/chifa
+prec	complex
+
+file	<a href="zhidi.f">zhidi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhidi.f">zhidi.f plus dependencies</a>
+gams	D2d1a, D3d1a
+for	computes the determinant, inertia and inverse of a complex
+,	Hermitian matrix using the factors from linpack/zhifa)
+prec	doublecomplex
+
+
+file	<a href="ssifa.f">ssifa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ssifa.f">ssifa.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix by elimination with symmetric
+,	pivoting
+prec	single
+
+file	<a href="dsifa.f">dsifa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dsifa.f">dsifa.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix by elimination with symmetric
+,	pivoting
+prec	double
+
+file	<a href="csifa.f">csifa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/csifa.f">csifa.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix
+,	by elimination with symmetric pivoting
+prec	complex
+
+file	<a href="zsifa.f">zsifa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zsifa.f">zsifa.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix
+,	by elimination with symmetric pivoting
+prec	doublecomplex
+
+file	<a href="chifa.f">chifa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chifa.f">chifa.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix
+,	by elimination with symmetric pivoting
+prec	complex
+
+file	<a href="zhifa.f">zhifa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhifa.f">zhifa.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix
+,	by elimination with symmetric pivoting
+prec	doublecomplex
+
+
+file	<a href="ssisl.f">ssisl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ssisl.f">ssisl.f plus dependencies</a>
+gams	D2b1a
+for	solves the real symmetric system
+,	Ax = b using the factors computed by linpack/ssifa
+prec	single
+
+file	<a href="dsisl.f">dsisl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dsisl.f">dsisl.f plus dependencies</a>
+gams	D2b1a
+for	solves the real symmetric system
+,	Ax = b using the factors computed by linpack/dsifa
+prec	double
+
+file	<a href="csisl.f">csisl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/csisl.f">csisl.f plus dependencies</a>
+gams	D2c1
+for	solves the complex symmetric system
+,	Ax = b using the factors computed by linpack/csifa
+prec	complex
+
+file	<a href="zsisl.f">zsisl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zsisl.f">zsisl.f plus dependencies</a>
+gams	D2c1
+for	solves the complex symmetric system
+,	Ax = b using the factors computed by linpack/zsifa
+prec	doublecomplex
+
+file	<a href="chisl.f">chisl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chisl.f">chisl.f plus dependencies</a>
+gams	D2d1a
+for	solves the complex Hermitian system
+,	Ax = b using the factors computed by linpack/chifa
+prec	complex
+
+file	<a href="zhisl.f">zhisl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhisl.f">zhisl.f plus dependencies</a>
+gams	D2d1a
+for	solves the complex Hermitian system
+,	Ax = b using the factors computed by linpack/zhifa
+prec	doublecomplex
+
+
+file	<a href="sspco.f">sspco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sspco.f">sspco.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting and
+,	estimates the condition number of the matrix
+prec	single
+
+file	<a href="dspco.f">dspco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dspco.f">dspco.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting and
+,	estimates the condition number of the matrix
+prec	double
+
+file	<a href="cspco.f">cspco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cspco.f">cspco.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting and
+,	estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zspco.f">zspco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zspco.f">zspco.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting and
+,	estimates the condition number of the matrix
+prec	doublecomplex
+
+file	<a href="chpco.f">chpco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chpco.f">chpco.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix
+,	stored in packed form by elimination with symmetric pivoting and
+,	estimates the condition number of the matrix
+prec	complex
+
+file	<a href="zhpco.f">zhpco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhpco.f">zhpco.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix
+,	stored in packed form by elimination with symmetric pivoting and
+,	estimates the condition number of the matrix
+prec	doublecomplex
+
+
+file	<a href="sspdi.f">sspdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sspdi.f">sspdi.f plus dependencies</a>
+gams	D2b1a, D3b1a
+for	computes the determinant, inertia and inverse of a
+,	real symmetric matrix using the factors from linpack/sspfa,
+,	where the matrix is stored in packed form
+prec	single
+
+file	<a href="dspdi.f">dspdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dspdi.f">dspdi.f plus dependencies</a>
+gams	D2b1a, D3b1a
+for	computes the determinant, inertia and inverse of a
+,	real symmetric matrix using the factors from linpack/dspfa,
+,	where the matrix is stored in packed form
+prec	double
+
+file	<a href="cspdi.f">cspdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cspdi.f">cspdi.f plus dependencies</a>
+gams	D2c1, D3c1
+for	computes the determinant, inertia and inverse of a
+,	complex symmetric matrix using the factors from linpack/cspfa,
+,	where the matrix is stored in packed form
+prec	complex
+
+file	<a href="zspdi.f">zspdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zspdi.f">zspdi.f plus dependencies</a>
+gams	D2c1, D3c1
+for	computes the determinant, inertia and inverse of a
+,	complex symmetric matrix using the factors from linpack/zspfa,
+,	where the matrix is stored in packed form
+prec	doublecomplex
+
+file	<a href="chpdi.f">chpdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chpdi.f">chpdi.f plus dependencies</a>
+gams	D2d1a, D3d1a
+for	computes the determinant, inertia and inverse of a
+,	complex Hermitian matrix using the factors from linpack/chpfa,
+,	where the matrix is stored in packed form
+prec	complex
+
+file	<a href="zhpdi.f">zhpdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhpdi.f">zhpdi.f plus dependencies</a>
+gams	D2d1a, D3d1a
+for	computes the determinant, inertia and inverse of a
+,	complex Hermitian matrix using the factors from linpack/zhpfa,
+,	where the matrix is stored in packed form
+prec	doublecomplex
+
+
+file	<a href="sspfa.f">sspfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sspfa.f">sspfa.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting
+prec	single
+
+file	<a href="dspfa.f">dspfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dspfa.f">dspfa.f plus dependencies</a>
+gams	D2b1a
+for	factors a real symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting
+prec	double
+
+file	<a href="cspfa.f">cspfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cspfa.f">cspfa.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting
+prec	complex
+
+file	<a href="zspfa.f">zspfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zspfa.f">zspfa.f plus dependencies</a>
+gams	D2c1
+for	factors a complex symmetric matrix
+,	stored in packed form by elimination with symmetric pivoting
+prec	doublecomplex
+
+file	<a href="chpfa.f">chpfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chpfa.f">chpfa.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix
+,	stored in packed form by elimination with symmetric pivoting
+prec	complex
+
+file	<a href="zhpfa.f">zhpfa.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhpfa.f">zhpfa.f plus dependencies</a>
+gams	D2d1a
+for	factors a complex Hermitian matrix
+,	stored in packed form by elimination with symmetric pivoting
+prec	doublecomplex
+
+
+file	<a href="sspsl.f">sspsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/sspsl.f">sspsl.f plus dependencies</a>
+gams	D2b1a
+for	solves the real symmetric system
+,	Ax = b using the factors computed by linpack/sspfa
+prec	single
+
+file	<a href="dspsl.f">dspsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dspsl.f">dspsl.f plus dependencies</a>
+gams	D2b1a
+for	solves the real symmetric system
+,	Ax = b using the factors computed by linpack/dspfa
+prec	double
+
+file	<a href="cspsl.f">cspsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/cspsl.f">cspsl.f plus dependencies</a>
+gams	D2c1
+for	solves the complex symmetric system
+,	Ax = b using the factors computed by linpack/cspfa
+prec	complex
+
+file	<a href="zspsl.f">zspsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zspsl.f">zspsl.f plus dependencies</a>
+gams	D2c1
+for	solves the complex symmetric system
+,	Ax = b using the factors computed by linpack/zspfa
+prec	doublecomplex
+
+file	<a href="chpsl.f">chpsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/chpsl.f">chpsl.f plus dependencies</a>
+gams	D2d1a 
+for	solves the complex Hermitian system
+,	Ax = b using the factors computed by linpack/chpfa
+prec	complex
+
+file	<a href="zhpsl.f">zhpsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zhpsl.f">zhpsl.f plus dependencies</a>
+gams	D2d1a 
+for	solves the complex Hermitian system
+,	Ax = b using the factors computed by linpack/zhpfa
+prec	doublecomplex
+
+
+file	<a href="ssvdc.f">ssvdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ssvdc.f">ssvdc.f plus dependencies</a>
+gams	D6
+for	reduces a real matrix to diagonal form by orthogonal/unitary
+,	transformations
+prec	single
+
+file	<a href="dsvdc.f">dsvdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dsvdc.f">dsvdc.f plus dependencies</a>
+gams	D6
+for	reduces a real matrix to diagonal form by orthogonal/unitary
+,	transformations
+prec	double
+
+file	<a href="csvdc.f">csvdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/csvdc.f">csvdc.f plus dependencies</a>
+gams	D6
+for	reduces a complex matrix to diagonal form by orthogonal/unitary
+,	transformations
+prec	complex
+
+file	<a href="zsvdc.f">zsvdc.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/zsvdc.f">zsvdc.f plus dependencies</a>
+gams	D6
+for	reduces a complex matrix to diagonal form by orthogonal/unitary
+,	transformations
+prec	doublecomplex
+
+
+file	<a href="strco.f">strco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/strco.f">strco.f plus dependencies</a>
+gams	D2a3
+for	estimates the condition number of a triangular matrix
+prec	single
+
+file	<a href="dtrco.f">dtrco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dtrco.f">dtrco.f plus dependencies</a>
+gams	D2a3
+for	estimates the condition number of a triangular matrix
+prec	double
+
+file	<a href="ctrco.f">ctrco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ctrco.f">ctrco.f plus dependencies</a>
+gams	D2c3
+for	estimates the condition number of a triangular matrix
+prec	complex
+
+file	<a href="ztrco.f">ztrco.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ztrco.f">ztrco.f plus dependencies</a>
+gams	D2c3
+for	estimates the condition number of a triangular matrix
+prec	doublecomplex
+
+
+file	<a href="strdi.f">strdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/strdi.f">strdi.f plus dependencies</a>
+gams	D2a3, D3a3
+for	computes the determinant and inverse of a triangular matrix
+prec	single
+
+file	<a href="dtrdi.f">dtrdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dtrdi.f">dtrdi.f plus dependencies</a>
+gams	D2a3, D3a3
+for	computes the determinant and inverse of a triangular matrix
+prec	double
+
+file	<a href="ctrdi.f">ctrdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ctrdi.f">ctrdi.f plus dependencies</a>
+gams	D2c3, D3c3
+for	computes the determinant and inverse of a triangular matrix
+prec	complex
+
+file	<a href="ztrdi.f">ztrdi.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ztrdi.f">ztrdi.f plus dependencies</a>
+gams	D2c3, D3c3
+for	computes the determinant and inverse of a triangular matrix
+prec	doublecomplex
+
+
+file	<a href="strsl.f">strsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/strsl.f">strsl.f plus dependencies</a>
+gams	D2a3
+for	solves systems of the form Tx = b or trans(T)x = b where T is
+,	a triangular matrix of order n, trans(T) denotes the transpose 
+,	of the matrix T
+prec	single
+
+file	<a href="dtrsl.f">dtrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/dtrsl.f">dtrsl.f plus dependencies</a>
+gams	D2a3
+for	solves systems of the form Tx = b or trans(T)x = b where T is
+,	a triangular matrix of order n, trans(T) denotes the transpose 
+,	of the matrix T
+prec	double
+
+file	<a href="ctrsl.f">ctrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ctrsl.f">ctrsl.f plus dependencies</a>
+gams	D2c3
+for	solves systems of the form Tx = b or trans(T)x = b where T is
+,	a triangular matrix of order n, trans(T) denotes the transpose 
+,	of the matrix T
+prec	complex
+
+file	<a href="ztrsl.f">ztrsl.f</a>  <a href="/cgi-bin/netlibfiles.pl?filename=/linpack/ztrsl.f">ztrsl.f plus dependencies</a>
+gams	D2c3
+for	solves systems of the form Tx = b or trans(T)x = b where T is
+,	a triangular matrix of order n, trans(T) denotes the transpose 
+,	of the matrix T
+prec	doublecomplex
+</pre>
+</body>
+</html>

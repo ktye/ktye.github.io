@@ -1,0 +1,5 @@
+rm -f *.o *.ll
+flang-new --target=i386-unknown-linux -emit-llvm -S *.f
+for file in *.ll; do llc-19 --march=wasm32 -filetype=obj $file ; done
+wasm-ld-19 --allow-undefined --no-entry --export-all *.o -o eis.wasm
+wasm2wat eis.wasm > eis.wat

@@ -1,0 +1,7 @@
+rm -f *.o *.ll
+clang --target=i386-unknown-linux -emit-llvm -S *.c
+flang-new --target=i386-unknown-linux -emit-llvm -S *.f
+flang-new --target=i386-unknown-linux -emit-llvm -S *.f90
+for file in *.ll; do llc-19 --march=wasm32 -filetype=obj $file ; done
+wasm-ld-19 --allow-undefined --no-entry --export-all *.o -o lin.wasm
+wasm2wat lin.wasm > lin.wat
