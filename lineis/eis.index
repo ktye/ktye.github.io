@@ -1,0 +1,71 @@
+bakvec back transformation, sign-symmetric matrix
+balanc scaling, general matrix
+balbak back scaling, general matrix
+bandr reduction, symmetric band matrix
+bandv some eigenvectors, symmetric band matrix
+bisect some eigenvalues, symmetric tridiagonal matrix
+bqr some eigenvalues, symmetric band matrix
+cbabk2 back scaling, complex matrix
+cbal scaling, complex matrix
+cg find eigenvalues and eigenvectors, complex general matrix
+ch find eigenvalues and eigenvectors, complex Hermitian matrix
+cinvit some eigenvectors, complex Hessenberg matrix
+combak back transformation, complex matrix
+comhes reduction, complex matrix
+comlr all eigenvalues, complex Hessenberg matrix
+comlr2 all eigenvalues and eigenvectors, complex Hessenberg matrix
+comqr all eigenvalues, complex Hessenberg matrix
+comqr2 all eigenvalues and eigenvectors, complex Hessenberg matrix
+cortb back transformation, complex matrix
+corth reduction, complex matrix
+elmbak back transformation, real matrix
+elmhes reduction, real matrix
+eltran reduction, real matrix
+figi reduction, sign-symmetric matrix
+figi2 reduction, sign-symmetric matrix
+hqr all eigenvalues, real Hessenberg matrix
+hqr2 all eigenvalues and eigenvectors, real Hessenberg matrix
+htrib3 back transformation, Hermitian packed matrix
+htribk back transformation, Hermitian matrix
+htrid3 reduction, Hermitian packed matrix
+htridi reduction, Hermitian matrix
+imtql1 all eigenvalues, symmetric tridiagonal matrix
+imtql2 all eigenvalues and eigenvectors, symmetric tridiagonal matrix
+imtqlv all eigenvalues, symmetric tridiagonal matrix
+invit some eigenvectors, real Hessenberg matrix
+minfit least squares, real matrix
+ortbak back transformation, real matrix
+orthes reduction, real matrix
+ortran reduction, real matrix
+qzhes reduction, generalized matrix
+qzit further reduction, generalized Hessenberg matrix
+qzval all eigenvalues, generalized Hessenberg matrix
+qzvec all eigenvectors, generalized Hessenberg matrix
+ratqr some eigenvalues, symmetric tridiagonal matrix
+rebak back transformation, symmetric generalized matrix
+rebakb back transformation, symmetric generalized matrix
+reduc reduction, symmetric generalized matrix
+reduc2 reduction, symmetric generalized matrix
+rg find eigenvalues and eigenvectors, general matrix
+rgg find eigenvalues and eigenvectors, generalized matrix
+rs find eigenvalues and eigenvectors, symmetric matrix
+rsb find eigenvalues and eigenvectors, band symmetric matrix
+rsg find eigenvalues and eigenvectors, generalized symmetric matrix
+rsgab find eigenvalues and eigenvectors, generalized symmetric matrix
+rsgba find eigenvalues and eigenvectors, generalized symmetric matrix
+rsm find eigenvalues and eigenvectors, symmetric matrix
+rsp find eigenvalues and eigenvectors, packed symmetric matrix
+rst find eigenvalues and eigenvectors, tridiagonal symmetric matrix
+rt find eigenvalues and eigenvectors, sign-symmetric tridiagonal matrix
+svd singular value decomposition, real matrix
+tinvit some eigenvectors, symmetric tridiagonal matrix
+tql1 all eigenvalues, symmetric tridiagonal matrix
+tql2 all eigenvalues and eigenvectors, symmetric tridiagonal matrix
+tqlrat all eigenvalues, symmetric tridiagonal matrix
+trbak1 back transformation, symmetric matrix
+trbak3 back transformation, packed symmetric matrix
+tred1 reduction, symmetric matrix
+tred2 reduction, symmetric matrix
+tred3 reduction, packed symmetric matrix
+tridib some eigenvalues, symmetric tridiagonal matrix
+tsturm some eigenvalues and eigenvectors, symmetric tridiagonal matrix

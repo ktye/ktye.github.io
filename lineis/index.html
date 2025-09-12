@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>lineïs</title>
+<style>*{font-family:monospace;margin:0;border:none;padding:0;}
+body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
+[contenteditable="true"]{background-color:#000;color:#fff;border:none;outline:none}
+#_i{flex-grow:1;min-height:4em;width:100vw;top:0;overflow:auto;resize:vertical}
+#_o{flex-grow:1;min-height:4em;background-color:#fff;width:100vw;bottom:0;overflow:auto}
+.b:hover{cursor:pointer}
+.c{color:darkgreen}
+.w{background:white;color:black}
+.ln{color:blue}
+.ln:hover{cursor:pointer}
+@media(orientation:portrait){*{font-size:x-large}}
+</style>
+<!--script src="lineis.js"></script-->
+<script>
+
+let cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
+_jdo=s=>{s=_i.innerText.trim();
+ if(s){
+  _o.textContent=String(eval(s));
+}}
+
+window.init=()=>{_jdo()
+ let f=window.location.hash;if(f)_i.innerText=decodeURIComponent(f.slice(1))
+ _i.onblur=e=>{if(!_o.textContent)_jdo()}
+ _i.oninput=e=>_o.textContent=""
+ _help()
+}
+window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
+ if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
+ else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
+ window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
+window.onerror=(m,s,l,c,e)=>{_o.textContent+="\n"+s+m}
+window.onunhandledrejection=e=>{_o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
+
+let _q={};window.onhashchange=_=>{let h=window.location.hash.slice(1);if(h=="")return _help();fetch(h).then(r=>r.text()).then(r=>{_o.textContent=r;
+  let i=0;s=_o.innerHTML;o="";
+  for(const m of s.matchAll(/([a-zA-Z0-9]+)\(/g)){
+   console.log(m[0],m.index,m.length)
+   o+=s.slice(i,m.index);let w=m[0].slice(0,-1)
+   if(w.toLowerCase() in _q)o+=`<span class="ln" onclick='window.location.hash="${_q[w]}"'>${w}</span>(`
+   else                     o+=m[0]
+   i=m.index+m[0].length}
+  o+=s.slice(i); o=o.split("\n").map(x=>(x.length&&(x[0]=="c"||x[0]=="C"||x[0]=="*"||x[0]=="!"))?"<span class='c'>"+x+"</span>":x).join("\n");  _o.innerHTML=o
+ })}
+
+_help=_=>{
+ _o.innerHTML='<div style="display:flex;gap:1em"><div id="_eis"></div><div id="_lin"></div></div>'
+ fetch("index").then(r=>r.text()).then(r=>{r.split("\n").forEach(s=>_q[s.slice(4,-2)]=s);
+  fetch("eis.index").then(r=>r.text()).then(r=>r.split("\n").forEach(x=>{let y=x.split(" ");
+   if(y[0]in _q)_eis.innerHTML+=`<span class="ln" onclick='window.location.hash="${_q[y[0]]}"'>${y[0]}</span> `+y.slice(1).join(" ")+"\n"
+   else        _eis.innerHTML+=x+"\n"}))
+  fetch("lin.index").then(r=>r.text()).then(r=>r.split("\n").forEach(x=>{let y=x.split(" ");
+   if(y[0]in _q)_lin.innerHTML+=`<span class="ln" onclick='window.location.hash="${_q[y[0]]}"'>${y[0]}</span> `+y.slice(1).join(" ")+"\n"
+   else        _lin.innerHTML+=x+"\n"}))
+ })
+}
+
+</script>
+</head>
+
+<body onload="window.init()">
+<div style="position:absolute;top:0;right:0"><span class="ln" style="color:#ccc" onclick="_help()">help</span> <a style="color:#ccc" href="about.html">about</a></div>
+<pre id="_i" contenteditable="true" spellcheck="false" autofocus></pre>
+<pre id="_o">
+</pre></pre>
+<span id="measure" style="position:absolute;top:0;z-index:-1">0123456789</span>
+</body></html>
