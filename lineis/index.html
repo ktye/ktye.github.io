@@ -15,19 +15,20 @@ body{overflow:hidden;height:100dvh;display:grid;grid-template-rows:auto 1fr}
 .ln:hover{cursor:pointer}
 @media(orientation:portrait){*{font-size:x-large}}
 </style>
-<!--script src="lineis.js"></script-->
+<script src="lineis.js"></script>
 <script>
 
 let cols=()=>Math.floor(document.body.getBoundingClientRect().width/cw),
 _jdo=s=>{s=_i.innerText.trim();
  if(s){
-  _o.textContent=String(eval(s));
+  _o.textContent=form(eval(s));
 }}
 
-window.init=()=>{_jdo()
+let $,$0,$I,$F;window.init=()=>{_jdo()
  let f=window.location.hash;if(f)_i.innerText=decodeURIComponent(f.slice(1))
  _i.onblur=e=>{if(!_o.textContent)_jdo()}
  _i.oninput=e=>_o.textContent=""
+ WebAssembly.instantiateStreaming(fetch("lineis.wasm")).then(r=>{$=r.instance.exports;$0=$.__heap_base;$I=new Int32Array($.memory.buffer);$F=new Float64Array($.memory.buffer)})
  _help()
 }
 window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
@@ -40,7 +41,6 @@ window.onunhandledrejection=e=>{_o.textContent+="\n"+e.reason+"\n";console.log(e
 let _q={};window.onhashchange=_=>{let h=window.location.hash.slice(1);if(h=="")return _help();fetch(h).then(r=>r.text()).then(r=>{_o.textContent=r;
   let i=0;s=_o.innerHTML;o="";
   for(const m of s.matchAll(/([a-zA-Z0-9]+)\(/g)){
-   console.log(m[0],m.index,m.length)
    o+=s.slice(i,m.index);let w=m[0].slice(0,-1)
    if(w.toLowerCase() in _q)o+=`<span class="ln" onclick='window.location.hash="${_q[w]}"'>${w}</span>(`
    else                     o+=m[0]
@@ -49,13 +49,17 @@ let _q={};window.onhashchange=_=>{let h=window.location.hash.slice(1);if(h=="")r
  })}
 
 _help=_=>{
- _o.innerHTML='<div style="display:flex;gap:1em"><div id="_eis"></div><div id="_lin"></div></div>'
+ _o.innerHTML='<details id="_eis"><summary>eispack</summary></details><details id="_lin"><summary>linpack</summary></details><details><summary>lineis.js</summary><span id="_js"></span></details><details open><summary>about</summary><span id="_ab"></span></details>'
+ fetch("lineis.js").then(r=>r.text()).then(r=>_js.innerText=r)
+ fetch("about").then(r=>r.text()).then(r=>_ab.innerText=r)
  fetch("index").then(r=>r.text()).then(r=>{r.split("\n").forEach(s=>_q[s.slice(4,-2)]=s);
   fetch("eis.index").then(r=>r.text()).then(r=>r.split("\n").forEach(x=>{let y=x.split(" ");
-   if(y[0]in _q)_eis.innerHTML+=`<span class="ln" onclick='window.location.hash="${_q[y[0]]}"'>${y[0]}</span> `+y.slice(1).join(" ")+"\n"
+   let[w,s]=[y[0].slice(1),y[0][0]=="*"];if(!s){}
+   else if(w in _q)_eis.innerHTML+=`<span class="ln" onclick='window.location.hash="${_q[w]}"'>${w}</span> `+y.slice(1).join(" ")+"\n"
    else        _eis.innerHTML+=x+"\n"}))
   fetch("lin.index").then(r=>r.text()).then(r=>r.split("\n").forEach(x=>{let y=x.split(" ");
-   if(y[0]in _q)_lin.innerHTML+=`<span class="ln" onclick='window.location.hash="${_q[y[0]]}"'>${y[0]}</span> `+y.slice(1).join(" ")+"\n"
+   let[w,s]=[y[0].slice(1),y[0][0]=="*"];if(!s){}
+   else if(w in _q)_lin.innerHTML+=`<span class="ln" onclick='window.location.hash="${_q[w]}"'>${w}</span> `+y.slice(1).join(" ")+"\n"
    else        _lin.innerHTML+=x+"\n"}))
  })
 }
@@ -64,7 +68,7 @@ _help=_=>{
 </head>
 
 <body onload="window.init()">
-<div style="position:absolute;top:0;right:0"><span class="ln" style="color:#ccc" onclick="_help()">help</span> <a style="color:#ccc" href="about.html">about</a></div>
+<div style="position:absolute;top:0;right:0"><span class="ln" style="color:#ccc" onclick="_help()">help</span></div>
 <pre id="_i" contenteditable="true" spellcheck="false" autofocus></pre>
 <pre id="_o">
 </pre></pre>

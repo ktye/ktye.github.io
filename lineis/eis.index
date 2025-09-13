@@ -7,8 +7,8 @@ bisect some eigenvalues, symmetric tridiagonal matrix
 bqr some eigenvalues, symmetric band matrix
 cbabk2 back scaling, complex matrix
 cbal scaling, complex matrix
-cg find eigenvalues and eigenvectors, complex general matrix
-ch find eigenvalues and eigenvectors, complex Hermitian matrix
+*cg find eigenvalues and eigenvectors, complex general matrix
+*ch find eigenvalues and eigenvectors, complex Hermitian matrix
 cinvit some eigenvectors, complex Hessenberg matrix
 combak back transformation, complex matrix
 comhes reduction, complex matrix
@@ -46,17 +46,17 @@ rebak back transformation, symmetric generalized matrix
 rebakb back transformation, symmetric generalized matrix
 reduc reduction, symmetric generalized matrix
 reduc2 reduction, symmetric generalized matrix
-rg find eigenvalues and eigenvectors, general matrix
-rgg find eigenvalues and eigenvectors, generalized matrix
-rs find eigenvalues and eigenvectors, symmetric matrix
-rsb find eigenvalues and eigenvectors, band symmetric matrix
-rsg find eigenvalues and eigenvectors, generalized symmetric matrix
-rsgab find eigenvalues and eigenvectors, generalized symmetric matrix
-rsgba find eigenvalues and eigenvectors, generalized symmetric matrix
-rsm find eigenvalues and eigenvectors, symmetric matrix
+*rg find eigenvalues and eigenvectors, general matrix
+*rgg find eigenvalues and eigenvectors, generalized matrix
+*rs find eigenvalues and eigenvectors, symmetric matrix
+*rsb find eigenvalues and eigenvectors, band symmetric matrix
+*rsg find eigenvalues and eigenvectors, generalized symmetric matrix
+*rsgab find eigenvalues and eigenvectors, generalized symmetric matrix
+*rsgba find eigenvalues and eigenvectors, generalized symmetric matrix
+*rsm find eigenvalues and eigenvectors, symmetric matrix
 rsp find eigenvalues and eigenvectors, packed symmetric matrix
-rst find eigenvalues and eigenvectors, tridiagonal symmetric matrix
-rt find eigenvalues and eigenvectors, sign-symmetric tridiagonal matrix
+*rst find eigenvalues and eigenvectors, tridiagonal symmetric matrix
+*rt find eigenvalues and eigenvectors, sign-symmetric tridiagonal matrix
 svd singular value decomposition, real matrix
 tinvit some eigenvectors, symmetric tridiagonal matrix
 tql1 all eigenvalues, symmetric tridiagonal matrix

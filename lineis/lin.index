@@ -56,9 +56,9 @@ dqrsl applies the output of (linpack/dqrdc) to compute coordinate transformation
 zqrsl applies the output of (linpack/zqrdc) to compute coordinate transformations, projections, and least squares solutions 
 dsico factors a real symmetric matrix by elimination with symmetric pivoting and estimates the condition number of the matrix 
 zsico factors a complex symmetric matrix by eliminatin with symmetric pivoting and estimates the condition number of the matrix 
-zhico factors a complex Hermitian matrix by elimination with symmetric pivoting and estimates the condition number of the matrix 
+*zhico factors a complex Hermitian matrix by elimination with symmetric pivoting and estimates the condition number of the matrix 
 dsidi computes the determinant, inertia and inverse of a real symmetric matrix using the factors from linpack/dsifa 
-zsidi computes the determinant, inertia and inverse of a complex symmetric matrix using the factors from linpack/zsifa 
+*zsidi computes the determinant, inertia and inverse of a complex symmetric matrix using the factors from linpack/zsifa 
 zhidi computes the determinant, inertia and inverse of a complex Hermitian matrix using the factors from linpack/zhifa) 
 dsifa factors a real symmetric matrix by elimination with symmetric pivoting 
 zsifa factors a complex symmetric matrix by elimination with symmetric pivoting 

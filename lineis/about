@@ -1,0 +1,88 @@
+───────────────────────────────────────────────────
+this is eispack&linpack compiled to webassembly.
+
+the black box above on top of the page is a repl
+to test the routines.  
+see lineis.js for predefined functions.
+
+e.g. type this in to the repl:
+
+ A=rand(4,4)
+ rg(A)
+
+(click elsewhere to evaluate)
+the last statement is printed in matrix form.
+click on help to get back to the intro.
+
+
+───────────────────────────────────────────────────
+matrix storage
+
+js matrices are represented as Float64Arrays in col
+major order.  attributes m and n store number of
+rows and columns, e.g.
+
+ A=new Float64Array(6);A.m=2;A.n=3
+
+is a 2x3 matrix of zeros.
+you can use A=zeros(2,3) instead. also rand() eye()
+
+─ complex matrices use real and imag numbers
+interleaved. this is compabible with linpack/lapack
+but differs from eispack which takes two arguments
+for the real and imag arrays. the conversion is
+done in the interface.
+js marks a complex matrix in the .z attribute.
+
+conversions are:
+ Z=imag(R,I)    R=real(Z)  I=imag(Z)
+   conj(Z)       trans(Z)    flip(Z)
+
+─ packed formats
+eispack and linpack support different kinds of
+packed formats. here only band and tridiagonal
+storage is supported.  the other functions are not
+exported.  band storage is restricted to
+rectangular where the number of lower and upper
+diagonals matches.
+
+use
+ B=band(A,h) /h:num off diagonals, bandwidth: 1+2*h
+ T=tri(A)  or  T=tri(lower,diag,upper)
+to convert a full matrix to band and tridiagonal
+form and the functions   unband() and untri()
+to convert back.
+
+
+───────────────────────────────────────────────────
+compilation to wasm
+
+───────────────────────────────────────────────────
+wasm interface and memory management
+
+llvm reserves lower part of wasm memory for data
+and stack. there are otherwise no heap allocations
+within the module, e.g. no call to memory.grow.
+all fortran functions expect the data in memory
+managed by the caller and the function arguments
+as addresses.  the conversion is done by the
+functions  int() float() array() which allocate
+memory and copy the js values inside.
+after converting the results back to js, free()
+is called to reset $0. it does not actually free
+memory from the instance, which is not possible.
+
+$ : exports of wasm instance
+$F: wasm memory as float64 array
+$I: wasm memory as int32 array
+$0: top of used memory
+alloc(x): increase $0 by x, check if
+          $0<total memory, otherwise grow total
+free(x): reset $0 to __heap_base
+
+store js values in wasm memory and return addr:
+int()  float()  array()
+
+convert results back to js values:
+$i()  $f()  $$(x,m,n,z)
+═══════════════════════════════════════════════════
