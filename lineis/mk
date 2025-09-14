@@ -6,7 +6,8 @@ if [ "$1" = "lineis" ]; then
  clang --target=i386-unknown-linux -emit-llvm -S             lin/*.c
  flang-new --target=i386-unknown-linux -emit-llvm -S eis/*.f lin/*.f lin/*.f90
  for file in *.ll; do llc-19 --march=wasm32 -filetype=obj $file ; done
- wasm-ld-19 --allow-undefined --no-entry --export-all *.o -o lineis.wasm
+ x=`cat eis.index lin.index|awk '/^\*/{sub(/./,"",$1);printf" --export "$1"_"}'`
+ wasm-ld-19 --allow-undefined --no-entry --export __heap_base $x *.o -o lineis.wasm
  wasm2wat lineis.wasm > lineis.wat
  rm *.o *.ll
 fi

@@ -11,11 +11,12 @@ let rand=(m,n)=>attr(zeros(m,n).map(Math.random),m,n?n:m)
 let randz=(m,n)=>imag(rand(m,n),rand(m,n))
 let real=Z=>attr(Z.filter((x,i)=>!(i&1)),Z.m,Z.n)
 let conj=Z=>{Z=copy(Z);if(!Z.z)return z;for(let i=1;i<Z.length;i+=2)Z[i]=-Z[i];return Z}
-let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return attr(Z.filter((x,i)=>i&1),Z.m,Z.n)}
+let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return attr(A.filter((x,i)=>i&1),A.m,A.n)}
 let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>abs(x-B[i])<eps)}
 let trans=A=>flip(A.z?conj(A):A)
 let flip=A=>{let B=copy(A);let k=0,n=A.n;for(let i=0;i<A.m;i++)if(A.z){for(let j=0;j<2*n;j+=2){B[k++]=A[i+n*j];B[k++]=A[i+n*j+1]}}else{for(let j=0;j<n;j++)B[k++]=A[i+n*j]};return attr(B,A.n,A.m,A.z)}
 let band=(A,h)=>{}
+let bands=A=>{} //convert band to real sym band packed, see rsb
 let tri=(A,b,c)=>{}
 let unband=A=>{}
 let untri=A=>{}
@@ -23,24 +24,79 @@ let ij=(A,f)=>{let B=copy(A),k=0,n=A.n,m=(A.z?2:1)*A.m;for(let j=0;j<n;j++){if(A
 let scale=(a,A)=>A.z&&Array.isArray(a)?ij(A,(x,y,i,j)=>{return[x*a[0]-y*a[1]*y,x*a[1]+y*a[0]]}):attr(A.map((x,i)=>x*a),A.m,A.n,A.z)
 let add=(A,B)=>attr(A.map((x,i)=>x+B[i]),A.m,A.n,A.z)
 
-let prec=4,form=A=>{if(A.constructor!=Float64Array)return String(A);
+let eig=(A,B)=>evp_(A,B,0)
+let evp=(A,B)=>evp_(A,B,1)
+let evp_=(A,v)=>B?rgg(A,B,v):A.z?(isherm(A)?ch(A,v):cg(A,v)):(A.m<A.n?rsb(A,v):issym(A)?rs(A,v):rg(A,v))
+
+let factor=A=>((A.m<A.n?(A.z?zgbfa:dgbfa):A.m>A.n?(A.z?zqrdc:dqrdc):A.z?(isherm(A)?zhifa:zgefa):issym(A)?dsifa:dgefa)(A))
+
+let cond=A=>((A.z?(isherm(A)?zhico:zgeco):issym(A)?dsico:dgeco)(A))
+
+let solve=(A,b)=>(A=A.constructor==Float64Array?factor(A):A, ({dgbfa:dgbsl,zgbfa:zgbsl,dgefa:dgesl,zgefa:zgesl,dpbfa:dpbsl,zpbfa:zpbsl,dpofa:dposl,zpofa:zposl,dqrdc:dqrsl,zqrdc:zqrsl,dsidc:dsisl,zhidc:zhisl}[A.q])(A,b))
+
+let det=A=>(A=A.contstructor==Float64Array?factor(A):A,({dgbfa:dgbdi,zgbfa:zgbdi,dgefa:dgedi,zgefa:zgedi,dpbfa:dpbdi,zpbfa:zpbdi,dpofa:dpodi,zpofa:zpodi,dqrdc:dqrdi,zqrdc:zqrdi,dsidc:dsidi,zhidc:zhidi}[A.q])(A))
+let qr=A=>(A.z?zqrdc:dqrdc)(A)
+let svd=(A,d)=>(A.z?zsvdc:dsvdc)(A,d)
+let chol=A=>(A.z?zchdc:dchdc)(A)
+
+let prec=4,form=A=>{
+ if(Array.isArray(A))return"array("+A.length+"):\n"+A.map(form).join("\n")
+ if(A.constructor!=Float64Array)return String(A);
  if(A.m*A.n==0)return A.m+"x"+A.n
  let c=Array(min(A.n,10)).fill(0).map(x=>[]),z=A.z,o="",f=x=>prec<0?String(x):x&&(abs(x)<1e-3||abs(x)>=10000)?x.toExponential(prec):x.toFixed(prec)
  for(let i=0;i<min(30,A.m);i++){for(let j=0;j<min(10,A.n);j++){let ij=j+i*A.n*(z?2:1);c[j].push(f(A[ij++])+(z?((A[ij]>=0?"+":"")+f(A[ij])+"i"):""))}}
  c.forEach((x,i)=>{let m=max(...x.map(x=>x.length));c[i]=x.map(x=>x.padStart(1+m," "))})
  m=c[0].length;for(let i=0;i<m;i++){c.forEach(x=>o+=x[i]+" ");o+=A.n>10?"..\n":"\n"};return o+(A.n>30?".."+A.m+"x"+A.n:"")}
+let show=(...A)=>{A.forEach(x=>_o.textContent+=form(x)+"\n")}
 
 let alloc=(x, g)=>($0+=x,((g=$0-$.memory.buffer.byteLength-$0)>0?($.memory.grow((65535+g)>>16),$I=new Int32Array($.memory.buffer),$F=new Float64Array($.memory.buffer)):0),$0-x)
 let free=_=>$0=$.__heap_base
 let int=(x, p)=>($I[(p=alloc(8))>>2]=x,p)
 let float=(x, p)=>($F[(p=alloc(8))>>3]=x,p)
-let array=(x, p)=>($F.set(x,p=alloc(x.m*x.n*(x.z?16:8))>>3),p)
+let array=(x, p)=>($F.set(x,(p=alloc(x.m*x.n*(x.z?16:8)))>>3),p)
 let i$=x=>$I[x>>2]
 let f$=x=>$F[x>>3]
-let $$=(x,m,n,z)=>attr(new Float64Array($0.memory.buffer,x,m*n*(z?2:1)),m,n,z)
+let I$=(x,n)=>new Int32Array($.memory.buffer,x,n)
+let $$=(x,m,n,z)=>attr(new Float64Array($.memory.buffer,x,m*n*(z?2:1)),m,n,z)
+let check=(x,s)=>{if(x)throw new Error(s)}
 
-let rg=(A,v)=>{let m=A.m,n=A.n,wr=alloc(8*n),wi=alloc(8*n),z=v?alloc(8*m*n):0,fv1=alloc(8*n),iv1=alloc(4*n),e=int(0)
- free($.rg_(int(m),int(n),array(A),wr,wi,int(v),z,iv1,fv1,e))
- A=imag($$(wr,n,1),$$(wi,n,1));return v?[A,$$(z,m,n)]:A}
- 
+let cg=(A,v)=>{let m=A.m,n=A.n,N=8*n,M=m*N,ar=array(real(A)),ai=array(imag(A)),wr=alloc(N),wi=alloc(N),zr=v?alloc(M):0,zi=v?alloc(M):0,fv1=alloc(N),fv2=alloc(N),fv3=alloc(N),e=int(0)
+ free($.cg_(int(m),int(n),ar,ai,wr,wi,int(v),zr,zi,fv1,fv2,fv3,e));check(i$(e),"cg")
+ let w=imag($$(wr,n,1),$$(wi,n,1));return v?[w,imag($$(zr,m,n),$$(zi,m,n))]:w}
+let rg=(A,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,wr=alloc(N),wi=alloc(N),z=v?alloc(M):0,fv1=alloc(N),iv1=alloc(N),e=int(0)
+ free($.rg_(int(m),int(n),array(A),wr,wi,int(v),z,iv1,fv1,e));check(i$(e),"rg")
+ let w=imag($$(wr,n,1),$$(wi,n,1));return v?[w,$$(z,m,n)]:w}
+let rgg=(A,B,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,ar=alloc(N),ai=alloc(N),b=alloc(N),z=v?alloc(M):0,e=int(0)
+ free($.rgg_(int(m),int(n),array(A),array(B),ar,ai,b,int(v),z,e));check(i$(e),"rgg")
+ let f=(ai,z, zi,r,i)=>{zi=zeros(m,n)
+  for(let j=0;j<n;j++)if(ai[j]){ //unpack complex eigenvectors
+   r=z.slice(m*j,m*j+n);i=z.slice(m*j+n,m*j+2*n)
+   zi.set(i,m*j);zi.set(i.map(x=>-x),m*j+n);z.set(r,m*j+n);j++}
+  return imag(z,zi)}
+ b=$$(b,n,1);ar=attr($$(ar,n,1).map((x,i)=>x/b[i]),n,1);ai=attr($$(ai,n,1).map((x,i)=>x/b[i]),n,1);b=imag(ar,ai);return v?[b,f(ai,$$(z,m,n))]:b}
+let rs=(A,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,w=alloc(N),z=v?alloc(M):0,fv1=alloc(N),fv2=alloc(N),e=int(0)
+ free($.rs_(int(m),int(n),array(A),w,int(v),z,fv1,fv2,e));check(i$(e),"rs")
+ w=$$(w,n,1);return v?[w,$$(z,m,n)]:w}
+let rsb=(A,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,a=bands(A),w=alloc(N),z=v?alloc(M):0,fv1=alloc(N),fv2=alloc(N),e=int(0)
+ free($.rsb_(int(m),int(n),a,w,int(v),z,fv1,fv2,e));check(i$(e),"rsb")
+ w=$$(w,n,1);return v?[w,$$(z,m,n)]:w}
+let rsg=(A,B,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,w=alloc(N),z=v?alloc(M):0,fv1=alloc(N),fv2=alloc(N),e=int(0)
+ free($.rsg_(int(m),int(n),array(A),array(B),w,int(v),z,fv1,fv2,e));check(i$(e),"rsg")
+ w=$$(w,n,1);return v?[w,$$(z,m,n)]:w}
+let rsgab=(A,B,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,w=alloc(N),z=v?alloc(M):0,fv1=alloc(N),fv2=alloc(N),e=int(0)
+ free($.rsgab_(int(m),int(n),array(A),array(B),w,int(v),z,fv1,fv2,e));check(i$(e),"rsgab")
+ w=$$(w,n,1);return v?[w,$$(z,m,n)]:w}
+let rsgba=(A,B,v)=>{let m=A.m,n=A.n,N=8*n,M=N*m,w=alloc(N),z=v?alloc(M):0,fv1=alloc(N),fv2=alloc(N),e=int(0)
+ free($.rsgba_(int(m),int(n),array(A),array(B),w,int(v),z,fv1,fv2,e));check(i$(e),"rsgba")
+ w=$$(w,n,1);return v?[w,$$(z,m,n)]:w}
+  
+let mark=(s,A)=>(A.q=s,A)
+let dchdc=A=>{let m=A.m,a=array(A),p=alloc(8*m),e=int(0)
+ free($.dchdc_(a,int(m),int(m),array(zeros(m,1)),p,int(1),e));check(i$(e)!=m,"dchdc")
+ return[$$(a,m,m),I$(p,m)]}
 
+let dgefa=A=>{let m=A.m,n=A.n,a=array(A),p=alloc(8*n),e=int(0)
+ free($.dgefa_(a,int(m),int(n),p,e));check(i$(e),"dgefa")
+ return mark("dgefa",$$(a,m,n))}
+
+//todo..

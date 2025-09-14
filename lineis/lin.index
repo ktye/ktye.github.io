@@ -1,45 +1,45 @@
-dchdc computes the Cholesky decomposition of a positive definite matrix, a pivoting option allows the user to estimate the condition of a positive definite matrix or determine the rank of a positive semidefinite matrix 
-zchdc computes the Cholesky decomposition of a positive definite matrix, a pivoting option allows the user to estimate the condition of a positive definite matrix or determine the rank of a positive semidefinite matrix 
+*dchdc computes the Cholesky decomposition of a positive definite matrix, a pivoting option allows the user to estimate the condition of a positive definite matrix or determine the rank of a positive semidefinite matrix 
+*zchdc computes the Cholesky decomposition of a positive definite matrix, a pivoting option allows the user to estimate the condition of a positive definite matrix or determine the rank of a positive semidefinite matrix 
 dchdd downdates an augmented Cholesky decomposition or the triangular factor of an augmented QR decomposition 
 zchdd downdates an augmented Cholesky decomposition or the triangular factor of an augmented QR decomposition 
 dchex updates the Cholesky factorization 
 zchex updates the Cholesky factorization 
 dchud updates an augmented Cholesky decomposition or the triangular part of an augmented QR decomposition 
 zchud updates an augmented Cholesky decomposition or the triangular part of an augmented QR decomposition 
-dgbco factors a real band matrix by Gaussian elimination and estimates the condition number of the matrix 
-zgbco factors a complex band matrix by Gaussian elimination and estimates the condition number of the matrix 
-dgbdi computes the determinant of a band matrix using the factors computed by (linpack/dgbco) or (linpack/dgbfa), if the inverse is needed use (linpack/dgbsl) n times 
-zgbdi computes the determinant of a band matrix using the factors computed by (linpack/zgbco) or (linpack/zgbfa), if the inverse is needed use (linpack/zgbsl) n times 
-dgbfa factors a band matrix by elimination 
-zgbfa factors a band matrix by elimination 
-dgbsl solves the real band system Ax = b or trans(A)x = b using the factors computed by (linpack/dgbco) or (linpack/dgbfa) 
-zgbsl solves the complex band system Ax = b or trans(A)x = b using the factors computed by (linpack/zgbco) or (linpack/zgbfa) 
-dgeco factors a matrix by Gaussian elimination and estimates the condition number of the matrix 
-zgeco factors a matrix by Gaussian elimination and estimates the condition number of the matrix 
-dgedi computes the determinant and inverse of a matrix using the  factors computed by (linpack/dgeco) or (linpack/dgefa) 
-zgedi computes the determinant and inverse of a matrix using the  factors computed by (linpack/zgeco) or (linpack/zgefa) 
-dgefa factors a real matrix by Gaussian elimination 
-zgefa factors a complex matrix by Gaussian elimination 
-dgesl solves the real system Ax = b or trans(A)x = b using  the factors computed by (linpack/dgeco) or (linpack/dgefa) 
-zgesl solves the complex system Ax = b or trans(A)x = b using  the factors computed by (linpack/zgeco) or (linpack/zgefa) 
+*dgbco factors a real band matrix by Gaussian elimination and estimates the condition number of the matrix 
+*zgbco factors a complex band matrix by Gaussian elimination and estimates the condition number of the matrix 
+*dgbdi computes the determinant of a band matrix using the factors computed by (linpack/dgbco) or (linpack/dgbfa), if the inverse is needed use (linpack/dgbsl) n times 
+*zgbdi computes the determinant of a band matrix using the factors computed by (linpack/zgbco) or (linpack/zgbfa), if the inverse is needed use (linpack/zgbsl) n times 
+*dgbfa factors a band matrix by elimination 
+*zgbfa factors a band matrix by elimination 
+*dgbsl solves the real band system Ax = b or trans(A)x = b using the factors computed by (linpack/dgbco) or (linpack/dgbfa) 
+*zgbsl solves the complex band system Ax = b or trans(A)x = b using the factors computed by (linpack/zgbco) or (linpack/zgbfa) 
+*dgeco factors a matrix by Gaussian elimination and estimates the condition number of the matrix 
+*zgeco factors a matrix by Gaussian elimination and estimates the condition number of the matrix 
+*dgedi computes the determinant and inverse of a matrix using the  factors computed by (linpack/dgeco) or (linpack/dgefa) 
+*zgedi computes the determinant and inverse of a matrix using the  factors computed by (linpack/zgeco) or (linpack/zgefa) 
+*dgefa factors a real matrix by Gaussian elimination 
+*zgefa factors a complex matrix by Gaussian elimination 
+*dgesl solves the real system Ax = b or trans(A)x = b using  the factors computed by (linpack/dgeco) or (linpack/dgefa) 
+*zgesl solves the complex system Ax = b or trans(A)x = b using  the factors computed by (linpack/zgeco) or (linpack/zgefa) 
 dgtsl given a general tridiagonal matrix and a right hand side will  find the solution 
 zgtsl given a general tridiagonal matrix and a right hand side will  find the solution 
-dpbco factors a real symmetric positive definite matrix stored in band form and estimates the condition of the matrix 
-zpbco factors a complex hermitian positive definite matrix stored in band form and estimates the condition of the matrix 
-dpbdi computes the determinant of a real symmetric positive definite band matrix using the factors computed by (linpack/dpbco) or (linpack/dpbfa), if the inverse is needed use (linpack/dpbsl) n times 
-zpbdi computes the determinant of a complex hermitian positive definite band matrix using the factors computed by (linpack/zpbco) or (linpack/zpbfa), if the inverse is needed use (linpack/zpbsl) n times 
-dpbfa factors a real symmetric positive definite matrix stored in band form 
-zpbfa factors a complex hermitian positive definite matrix stored in band form 
-dpbsl solves the real symmetric positive definite band system Ax = b using the factors computed by (linpack/dpbco) or (linpack/dpbfa) 
-zpbsl solves the complex hermitian positive definite band system Ax = b using the factors computed by (linpack/zpbco) or (linpack/zpbfa) 
-dpoco factors a real symmetric positive definite matrix and estimates the condition number of the matrix 
-zpoco factors a complex hermitian positive definite matrix and estimates the condition number of the matrix 
-dpodi computes the determinant and inverse of a certain real symmetric positive definite matrix using the factors computed by (linpack/dpoco), (linpack/dpofa) or (linpack/dqrdc) 
-zpodi computes the determinant and inverse of a certain complex hermitian positive definite matrix using the factors computed by (linpack/zpoco), (linpack/zpofa) or (linpack/zqrdc) 
-dpofa factors a real symmetric positive definite matrix 
-zpofa factors a complex hermitian positive definite matrix 
-dposl solves the real symmetric positive definite system Ax = b using the factors computed by (linpack/dpoco) or (linpack/dpofa) 
-zposl solves the complex hermitian positive definite system Ax = b using the factors computed by (linpack/zpoco) or (linpack/zpofa) 
+*dpbco factors a real symmetric positive definite matrix stored in band form and estimates the condition of the matrix 
+*zpbco factors a complex hermitian positive definite matrix stored in band form and estimates the condition of the matrix 
+*dpbdi computes the determinant of a real symmetric positive definite band matrix using the factors computed by (linpack/dpbco) or (linpack/dpbfa), if the inverse is needed use (linpack/dpbsl) n times 
+*zpbdi computes the determinant of a complex hermitian positive definite band matrix using the factors computed by (linpack/zpbco) or (linpack/zpbfa), if the inverse is needed use (linpack/zpbsl) n times 
+*dpbfa factors a real symmetric positive definite matrix stored in band form 
+*zpbfa factors a complex hermitian positive definite matrix stored in band form 
+*dpbsl solves the real symmetric positive definite band system Ax = b using the factors computed by (linpack/dpbco) or (linpack/dpbfa) 
+*zpbsl solves the complex hermitian positive definite band system Ax = b using the factors computed by (linpack/zpbco) or (linpack/zpbfa) 
+*dpoco factors a real symmetric positive definite matrix and estimates the condition number of the matrix 
+*zpoco factors a complex hermitian positive definite matrix and estimates the condition number of the matrix 
+*dpodi computes the determinant and inverse of a certain real symmetric positive definite matrix using the factors computed by (linpack/dpoco), (linpack/dpofa) or (linpack/dqrdc) 
+*zpodi computes the determinant and inverse of a certain complex hermitian positive definite matrix using the factors computed by (linpack/zpoco), (linpack/zpofa) or (linpack/zqrdc) 
+*dpofa factors a real symmetric positive definite matrix 
+*zpofa factors a complex hermitian positive definite matrix 
+*dposl solves the real symmetric positive definite system Ax = b using the factors computed by (linpack/dpoco) or (linpack/dpofa) 
+*zposl solves the complex hermitian positive definite system Ax = b using the factors computed by (linpack/zpoco) or (linpack/zpofa) 
 dppco factors a real symmetric positive definite matrix stored in packed form and estimates the condition number of the matrix 
 zppco factors a complex hermitian positive definite matrix stored in packed form and estimates the condition number of the matrix 
 dppdi computes the determinant and inverse of a real symmetric positive definite matrix using the factors computed by (linpack/dppco) or (linpack/dppfa) 
@@ -50,22 +50,22 @@ dppsl solves the real symmetric positive definite system Ax = b using the factor
 zppsl solves the complex hermitian positive definite system Ax = b using the factors computed by (linpack/zppco) or (linpack/zppfa) 
 dptsl given a positive definite tridiagonal matrix and a right hand side will find the solution 
 zptsl given a positive definite tridiagonal matrix and a right hand side will find the solution 
-dqrdc uses Householder transformations to compute the QR factorization, column pivoting based on the 2-norms of the reduced columns may be performed at the user's option 
-zqrdc uses Householder transformations to compute the QR factorization, column pivoting based on the 2-norms of the reduced columns may be performed at the user's option 
-dqrsl applies the output of (linpack/dqrdc) to compute coordinate transformations, projections, and least squares solutions 
-zqrsl applies the output of (linpack/zqrdc) to compute coordinate transformations, projections, and least squares solutions 
-dsico factors a real symmetric matrix by elimination with symmetric pivoting and estimates the condition number of the matrix 
-zsico factors a complex symmetric matrix by eliminatin with symmetric pivoting and estimates the condition number of the matrix 
+*dqrdc uses Householder transformations to compute the QR factorization, column pivoting based on the 2-norms of the reduced columns may be performed at the user's option 
+*zqrdc uses Householder transformations to compute the QR factorization, column pivoting based on the 2-norms of the reduced columns may be performed at the user's option 
+*dqrsl applies the output of (linpack/dqrdc) to compute coordinate transformations, projections, and least squares solutions 
+*zqrsl applies the output of (linpack/zqrdc) to compute coordinate transformations, projections, and least squares solutions 
+*dsico factors a real symmetric matrix by elimination with symmetric pivoting and estimates the condition number of the matrix 
+*zsico factors a complex symmetric matrix by eliminatin with symmetric pivoting and estimates the condition number of the matrix 
 *zhico factors a complex Hermitian matrix by elimination with symmetric pivoting and estimates the condition number of the matrix 
-dsidi computes the determinant, inertia and inverse of a real symmetric matrix using the factors from linpack/dsifa 
+*dsidi computes the determinant, inertia and inverse of a real symmetric matrix using the factors from linpack/dsifa 
 *zsidi computes the determinant, inertia and inverse of a complex symmetric matrix using the factors from linpack/zsifa 
-zhidi computes the determinant, inertia and inverse of a complex Hermitian matrix using the factors from linpack/zhifa) 
-dsifa factors a real symmetric matrix by elimination with symmetric pivoting 
-zsifa factors a complex symmetric matrix by elimination with symmetric pivoting 
-zhifa factors a complex Hermitian matrix by elimination with symmetric pivoting 
-dsisl solves the real symmetric system Ax = b using the factors computed by linpack/dsifa 
-zsisl solves the complex symmetric system Ax = b using the factors computed by linpack/zsifa 
-zhisl solves the complex Hermitian system Ax = b using the factors computed by linpack/zhifa 
+*zhidi computes the determinant, inertia and inverse of a complex Hermitian matrix using the factors from linpack/zhifa) 
+*dsifa factors a real symmetric matrix by elimination with symmetric pivoting 
+*zsifa factors a complex symmetric matrix by elimination with symmetric pivoting 
+*zhifa factors a complex Hermitian matrix by elimination with symmetric pivoting 
+*dsisl solves the real symmetric system Ax = b using the factors computed by linpack/dsifa 
+*zsisl solves the complex symmetric system Ax = b using the factors computed by linpack/zsifa 
+*zhisl solves the complex Hermitian system Ax = b using the factors computed by linpack/zhifa 
 dspco factors a real symmetric matrix stored in packed form by elimination with symmetric pivoting and estimates the condition number of the matrix 
 zspco factors a complex symmetric matrix stored in packed form by elimination with symmetric pivoting and estimates the condition number of the matrix 
 zhpco factors a complex Hermitian matrix stored in packed form by elimination with symmetric pivoting and estimates the condition number of the matrix 
@@ -78,8 +78,8 @@ zhpfa factors a complex Hermitian matrix stored in packed form by elimination wi
 dspsl solves the real symmetric system Ax = b using the factors computed by linpack/dspfa 
 zspsl solves the complex symmetric system Ax = b using the factors computed by linpack/zspfa 
 zhpsl solves the complex Hermitian system Ax = b using the factors computed by linpack/zhpfa 
-dsvdc reduces a real matrix to diagonal form by orthogonal/unitary transformations 
-zsvdc reduces a complex matrix to diagonal form by orthogonal/unitary transformations 
+*dsvdc reduces a real matrix to diagonal form by orthogonal/unitary transformations 
+*zsvdc reduces a complex matrix to diagonal form by orthogonal/unitary transformations 
 dtrco estimates the condition number of a triangular matrix 
 ztrco estimates the condition number of a triangular matrix 
 dtrdi computes the determinant and inverse of a triangular matrix 

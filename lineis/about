@@ -7,14 +7,67 @@ see lineis.js for predefined functions.
 
 e.g. type this in to the repl:
 
- A=rand(4,4)
+ A=rand(4)
  rg(A)
 
 (click elsewhere to evaluate)
 the last statement is printed in matrix form.
 click on help to get back to the intro.
+───────────────────────────────────────────────────
+eispack
 
+the highlevel interface to eispack are 2 functions:
+taking one or two arguments:
 
+ e=eig(A)  e=eig(A,B)  [e,V]=evp(A)  [e,V]=evp(A,B)
+
+eig calculates eigenvalues only and evp both values
+and vectors.
+the input matrix is banded if it contains fewer rows
+than columns, otherwise it is checked for symmetry.
+
+eig and evp solve the standard eigenvalue problem,
+if called with one argument and the general problem
+when called with two arguments.
+use the lowlevel rsgab(A,B) or rsgba(A,B) for
+symmetric/positive definite generalized problems.
+ 
+        A v = λ v              A v = λ B v
+
+only right eigenvectors are calculated.
+
+the lowlevel interface are the names of the fortran
+routines   cg ch rg rgg rs rsb rsgab rsgba
+called as  rs(A) or rs(A,1) where the additional
+parameter indicates that also eigenvectors are
+requested as a second return argument.
+───────────────────────────────────────────────────
+linpack
+
+──highlevel:      det cond factor qr solve chol svd
+
+solve can take a matrix as input or the result of
+factor:
+  x=solve(A,b)  or  f=factor(A); x=solve(f,b)
+ 
+least squares:  x=solve(qr(A),b)
+
+──linpack function names are composed of 5 letters:
+
+ dchdc     d ch dc
+ zgbsl     │ │  └── dc(decompose)
+ dpoco     │ │      co(factor&condition)
+ ..        │ │      di(determinante and/or inverse)
+	   │ │      fa(factor)
+	   │ │      sl(solve)
+           │ └───── matrix form or decomposition
+           └─────── d(real) z(complex)
+
+matrix names are:
+ gb(general band) ge(general) hi(herm indef)
+ pb(pos def band) po(pos def) si(sym indef)
+
+decompositions are:  ch(cholesky) sv(svd) qr
 ───────────────────────────────────────────────────
 matrix storage
 
@@ -25,26 +78,26 @@ rows and columns, e.g.
  A=new Float64Array(6);A.m=2;A.n=3
 
 is a 2x3 matrix of zeros.
-you can use A=zeros(2,3) instead. also rand() eye()
+you can use A=zeros(2,3) instead.  other generators
+are: ones onez eye eyez rand randz
 
 ─ complex matrices use real and imag numbers
 interleaved. this is compabible with linpack/lapack
 but differs from eispack which takes two arguments
 for the real and imag arrays. the conversion is
-done in the interface.
-js marks a complex matrix in the .z attribute.
+done in the wasm interface.
+js marks a complex matrix with the .z attribute.
 
 conversions are:
  Z=imag(R,I)    R=real(Z)  I=imag(Z)
-   conj(Z)       trans(Z)    flip(Z)
+   conj(Z)
 
 ─ packed formats
 eispack and linpack support different kinds of
-packed formats. here only band and tridiagonal
-storage is supported.  the other functions are not
-exported.  band storage is restricted to
-rectangular where the number of lower and upper
-diagonals matches.
+packed formats. we only support band and tridiagonal
+storage.  band storage is restricted to rectangular
+where the number of lower and upper diagonals
+matches.
 
 use
  B=band(A,h) /h:num off diagonals, bandwidth: 1+2*h
@@ -52,11 +105,39 @@ use
 to convert a full matrix to band and tridiagonal
 form and the functions   unband() and untri()
 to convert back.
-
-
 ───────────────────────────────────────────────────
 compilation to wasm
 
+all files from from netlib.org/eispack
+and all double/complex functions netlib.org/linpack
+are compiled with llvm flang-19.
+
+e.g. 
+flang --target=i386-unknown-linux -emit-llvm -S x.f
+llc --march=wasm32 -filetype obj x.f
+wasm-ld --allow-undefined --noentry --export-all \
+ -o x.wasm 
+wasm2wat x.wasm > x.wat
+
+we compile all f77 files to llvm 32bit intermediate
+files, and then to wasm.
+since we don't link runtime libraries there are
+a few missing functions.  we use allow-undefined
+to proceed and then inspect the text format.
+all missing functions are marked as imports.
+e.g. pythag  csqrt cabs __divdc3 (complex division)
+and a few blas routines for linpack.
+these functions are added as f77, f90 or c
+until there are no more imports in the wasm module.
+
+to shrink the binary, we don't need to export all
+functions.  e.g. some packed storage routines are
+omitted.  eis.index and lin.index list all source
+files, and exported functions are marked.
+shrinking happens at link time, we don't need to
+figure out the dependencies in the source files.
+
+see file mk for the details of the compilation.
 ───────────────────────────────────────────────────
 wasm interface and memory management
 

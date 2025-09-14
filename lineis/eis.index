@@ -53,10 +53,10 @@ reduc2 reduction, symmetric generalized matrix
 *rsg find eigenvalues and eigenvectors, generalized symmetric matrix
 *rsgab find eigenvalues and eigenvectors, generalized symmetric matrix
 *rsgba find eigenvalues and eigenvectors, generalized symmetric matrix
-*rsm find eigenvalues and eigenvectors, symmetric matrix
+rsm find eigenvalues and eigenvectors, symmetric matrix
 rsp find eigenvalues and eigenvectors, packed symmetric matrix
-*rst find eigenvalues and eigenvectors, tridiagonal symmetric matrix
-*rt find eigenvalues and eigenvectors, sign-symmetric tridiagonal matrix
+rst find eigenvalues and eigenvectors, tridiagonal symmetric matrix
+rt find eigenvalues and eigenvectors, sign-symmetric tridiagonal matrix
 svd singular value decomposition, real matrix
 tinvit some eigenvectors, symmetric tridiagonal matrix
 tql1 all eigenvalues, symmetric tridiagonal matrix
