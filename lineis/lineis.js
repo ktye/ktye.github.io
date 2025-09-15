@@ -3,10 +3,12 @@ let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r
 let attr=(A,m,n,z)=>(A.m=m,A.n=n,A.z=z,A)
 let copy=A=>attr(A.slice(),A.m,A.n,A.z)
 let zeros=(m,n)=>{let A=new Float64Array(m*(n=(n?n:m)));A.m=m;A.n=n;return A}
+let zeroz=(m,n)=>attr(zeros(m,2*(n?n:m)),m,n?n:m,1)
 let ones=(m,n)=>attr(zeros(m,n).map(x=>1),m,n?n:m)
 let onez=(m,n)=>attr(zeros(m,2*(n?n:m)).map((x,i)=>1-(1&i)),m,n?n:m,1)
 let eye=n=>{let A=zeros(n,n);for(let i=0;i<n;i++)A[i+n*i]=1;return A}
 let eyez=n=>imag(eye(n),zeros(n))
+let iota=(m,n)=>attr(new Float64Array(m*(n?n:m)).map((x,i)=>i),m,n?n:m)
 let rand=(m,n)=>attr(zeros(m,n).map(Math.random),m,n?n:m)
 let randz=(m,n)=>imag(rand(m,n),rand(m,n))
 let real=Z=>attr(Z.filter((x,i)=>!(i&1)),Z.m,Z.n)
@@ -14,7 +16,8 @@ let conj=Z=>{Z=copy(Z);if(!Z.z)return z;for(let i=1;i<Z.length;i+=2)Z[i]=-Z[i];r
 let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return attr(A.filter((x,i)=>i&1),A.m,A.n)}
 let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>abs(x-B[i])<eps)}
 let trans=A=>flip(A.z?conj(A):A)
-let flip=A=>{let B=copy(A);let k=0,n=A.n;for(let i=0;i<A.m;i++)if(A.z){for(let j=0;j<2*n;j+=2){B[k++]=A[i+n*j];B[k++]=A[i+n*j+1]}}else{for(let j=0;j<n;j++)B[k++]=A[i+n*j]};return attr(B,A.n,A.m,A.z)}
+//let flip=A=>{let B=copy(A);let k=0,n=A.n,m=A.m;for(let i=0;i<m;i++)if(A.z){for(let j=0;j<2*n;j+=2){B[k++]=A[i+m*j];B[k++]=A[i+m*j+1]}}else{for(let j=0;j<n;j++)B[k++]=A[i+m*j]};return attr(B,A.n,A.m,A.z)}
+let flip=A=>{let B=copy(A);let k=0,n=A.m,m=A.n,z=A.z;for(let j=0;j<A.m;j++)for(let i=0;i<A.n;i++)B[j+n*i]=A[k++];return attr(B,m,n,z)}
 let band=(A,h)=>{}
 let bands=A=>{} //convert band to real sym band packed, see rsb
 let tri=(A,b,c)=>{}
@@ -43,11 +46,11 @@ let prec=4,form=A=>{
  if(Array.isArray(A))return"array("+A.length+"):\n"+A.map(form).join("\n")
  if(A.constructor!=Float64Array)return String(A);
  if(A.m*A.n==0)return A.m+"x"+A.n
- let c=Array(min(A.n,10)).fill(0).map(x=>[]),z=A.z,o="",f=x=>prec<0?String(x):x&&(abs(x)<1e-3||abs(x)>=10000)?x.toExponential(prec):x.toFixed(prec)
- for(let i=0;i<min(30,A.m);i++){for(let j=0;j<min(10,A.n);j++){let ij=j+i*A.n*(z?2:1);c[j].push(f(A[ij++])+(z?((A[ij]>=0?"+":"")+f(A[ij])+"i"):""))}}
- c.forEach((x,i)=>{let m=max(...x.map(x=>x.length));c[i]=x.map(x=>x.padStart(1+m," "))})
+ let m,c=Array(min(A.n,10)).fill(0).map(x=>[]),z=A.z,o="",f=x=>prec<0?String(x):x&&(abs(x)<1e-3||abs(x)>=10000)?x.toExponential(prec):x.toFixed(prec)
+ for(let i=0;i<min(30,A.m);i++){for(let j=0;j<min(10,A.n);j++){let ij=(i+j*A.m)*(z?2:1);c[j].push(f(A[ij++])+(z?((A[ij]>=0?"+":"")+f(A[ij])+"i"):""))}}
+ c.forEach((x,i)=>{m=max(...x.map(x=>x.length));c[i]=x.map(x=>x.padStart(1+m," "))})
  m=c[0].length;for(let i=0;i<m;i++){c.forEach(x=>o+=x[i]+" ");o+=A.n>10?"..\n":"\n"};return o+(A.n>30?".."+A.m+"x"+A.n:"")}
-let show=(...A)=>{A.forEach(x=>_o.textContent+=form(x)+"\n")}
+let show=(...A)=>{A.forEach(x=>typeof(_o)!="undefined"?_o.textContent+=form(x)+"\n":console.log(form(x)))}
 
 let alloc=(x, g)=>($0+=x,((g=$0-$.memory.buffer.byteLength-$0)>0?($.memory.grow((65535+g)>>16),$I=new Int32Array($.memory.buffer),$F=new Float64Array($.memory.buffer)):0),$0-x)
 let free=_=>$0=$.__heap_base
