@@ -1,0 +1,42 @@
+
+
+
+for(i=n-1;i>0;i--){
+ for(j=0;j<i;j++) b[i]-=A[i][j]*b[j]
+ b[i]/=b[i][i]
+}
+
+
+for(i=n-1;i>0;i--){
+ s=bi-dot(Ai,bj,i-1)   //for(j=0;j<i;j++)s-=Aij*bj
+ bi=s/bii
+}
+
+for(i=n-1;i>0;i--){
+ bi=(bi-dot(Ai,b,i-1))/bii
+}
+
+dot:x,y,n::r=0;for(i=0;i<n;i++)r+=xi*yi;r
+
+iN0 bi=(bi-dot(Ai,b,i-1))/bii
+
+ido[N_0;
+ s=bi
+ s-=dot(Ai,b,i-1)
+ bi=s/bii
+ bi=(bi-dot(Ai,b))
+]
+
+
+for(i=n-1;i>0;i--){
+ for(j=0;j<i;j++)*bi-=Aij*bj
+ bi/=bii
+}
+
+j2:
+for(i=n-1;i>0;i--){bi=b[i],Ai=A[i]
+ for(j=0;j<i;j++)bi-=Ai[j]*b[j]
+ //for(j=0;j<i;j++){Aij=Ai[j];bj=b[j];bi-=Aij*bj}  //dont replace if used once
+ bi/=bii
+}
+

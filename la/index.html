@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../../kelas16.png">
+<title>b</title>
+<style>*{font-family:monospace}
+</style>
+</head>
+
+<body><pre id="txt" contenteditable="true">
+/lax
+
+</pre>
+<button onclick="run()">token</button>
+<pre id="out"></pre>
+<script src="lax.js"></script>
+
+<script>
+let run=(p,s)=>([s,p]=token(txt.textContent),
+ out.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n"),
+ out.textContent+="\n-----\n"+parse([s,p])
+)
+run()
+</script>
+</body></html>
