@@ -103,8 +103,7 @@ use
  B=band(A,h) /h:num off diagonals, bandwidth: 1+2*h
  T=tri(A)  or  T=tri(lower,diag,upper)
 to convert a full matrix to band and tridiagonal
-form and the functions   unband() and untri()
-to convert back.
+form and the function unband() to convert back.
 ───────────────────────────────────────────────────
 compilation to wasm
 

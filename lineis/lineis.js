@@ -2,6 +2,7 @@ let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let attr=(A,m,n,z)=>(A.m=m,A.n=n,A.z=z,A)
 let copy=A=>attr(A.slice(),A.m,A.n,A.z)
+let size=A=>[A.m,A.n]
 let zeros=(m,n)=>{let A=new Float64Array(m*(n=(n?n:m)));A.m=m;A.n=n;return A}
 let zeroz=(m,n)=>attr(zeros(m,2*(n?n:m)),m,n?n:m,1)
 let ones=(m,n)=>attr(zeros(m,n).map(x=>1),m,n?n:m)
@@ -13,7 +14,7 @@ let rand=(m,n)=>attr(zeros(m,n).map(Math.random),m,n?n:m)
 let randz=(m,n)=>imag(rand(m,n),rand(m,n))
 let real=Z=>attr(Z.filter((x,i)=>!(i&1)),Z.m,Z.n)
 let conj=Z=>{Z=copy(Z);if(!Z.z)return z;for(let i=1;i<Z.length;i+=2)Z[i]=-Z[i];return Z}
-let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return attr(A.filter((x,i)=>i&1),A.m,A.n)}
+let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return A.z?attr(A.filter((x,i)=>i&1),A.m,A.n):zeros(...size(A))}
 let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>abs(x-B[i])<eps)}
 let trans=A=>flip(A.z?conj(A):A)
 //let flip=A=>{let B=copy(A);let k=0,n=A.n,m=A.m;for(let i=0;i<m;i++)if(A.z){for(let j=0;j<2*n;j+=2){B[k++]=A[i+m*j];B[k++]=A[i+m*j+1]}}else{for(let j=0;j<n;j++)B[k++]=A[i+m*j]};return attr(B,A.n,A.m,A.z)}
@@ -22,10 +23,12 @@ let band=(A,h)=>{}
 let bands=A=>{} //convert band to real sym band packed, see rsb
 let tri=(A,b,c)=>{}
 let unband=A=>{}
-let untri=A=>{}
 let ij=(A,f)=>{let B=copy(A),k=0,n=A.n,m=(A.z?2:1)*A.m;for(let j=0;j<n;j++){if(A.z){for(let i=0;i<m;i+=2){let r=f(A[i+n*2*j],A[1+i+n*2*j],i,j);B[k++]=r[0];B[k++]=r[1]}}else{for(let i=0;i<m;i++)B[k++]=f(A[j+i*n],i,j)}};return B}
 let scale=(a,A)=>A.z&&Array.isArray(a)?ij(A,(x,y,i,j)=>{return[x*a[0]-y*a[1]*y,x*a[1]+y*a[0]]}):attr(A.map((x,i)=>x*a),A.m,A.n,A.z)
 let add=(A,B)=>attr(A.map((x,i)=>x+B[i]),A.m,A.n,A.z)
+let dot=(A,B)=>{[A,B]=A.z&&!B.z?[A,imag(B,zeros(...size(B)))]:B.z&&!A.z?[imag(A,zeros(...size(A))),B]:[A,B];if(A.n!=B.m)throw("inner: "+A.n+"!="+B.m);let C=A.z?zeroz(A.m,B.n):zeros(A.m,B.n),a,b,c;
+ if(A.z)for(let i=0;i<A.m;i++)for(let j=0;j<B.n;j++)for(let k=0;k<A.n;k++){C[2*i+2*j*C.m]+=A[2*i+k*2*A.m]*B[2*k+j*2*B.m]-A[1+2*i+k*2*A.m]*B[1+2*k+j*2*B.m];C[1+2*i+2*j*C.m]+=A[1+2*i+k*2*A.m]*B[2*k+j*2*B.m]+A[2*i+k*2*A.m]*B[1+2*k+j*2*B.m]}
+ else for(let i=0;i<A.m;i++)for(let j=0;j<B.n;j++)for(let k=0;k<A.n;k++)C[i+j*C.m]+=A[i+k*A.m]*B[k+j*B.m];return C}
 
 let eig=(A,B)=>evp_(A,B,0)
 let evp=(A,B)=>evp_(A,B,1)
