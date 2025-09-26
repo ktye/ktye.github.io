@@ -1,12 +1,14 @@
 let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI
+let error=s=>{throw new Error(s)}
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let attr=(A,m,n,z)=>(A.m=m,A.n=n,A.z=z,A)
 let copy=A=>attr(A.slice(),A.m,A.n,A.z)
 let size=A=>[A.m,A.n]
 let zeros=(m,n)=>{let A=new Float64Array(m*(n=(n?n:m)));A.m=m;A.n=n;return A}
 let zeroz=(m,n)=>attr(zeros(m,2*(n?n:m)),m,n?n:m,1)
-let ones=(m,n)=>attr(zeros(m,n).map(x=>1),m,n?n:m)
-let onez=(m,n)=>attr(zeros(m,2*(n?n:m)).map((x,i)=>1-(1&i)),m,n?n:m,1)
+let fill=(A,x)=>attr(A.z?(Array.isArray(x)?A.map((y,i)=>x[1&i]):A.map((y,i)=>1&i?0:x)):A.slice().fill(x),A.m,A.n,A.z)
+let ones=(m,n)=>zeros(m,n).fill(1)
+let onez=(m,n)=>fill(zeroz(m,n),[1,0])
 let eye=n=>{let A=zeros(n,n);for(let i=0;i<n;i++)A[i+n*i]=1;return A}
 let eyez=n=>imag(eye(n),zeros(n))
 let iota=(m,n)=>attr(new Float64Array(m*(n?n:m)).map((x,i)=>i),m,n?n:m)
@@ -18,6 +20,11 @@ let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]
 let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>abs(x-B[i])<eps)}
 let trans=A=>flip(A.z?conj(A):A)
 let flip=A=>{let B=copy(A);let k=0,m=A.m,n=A.n,m2=2*m,z=A.z;for(let i=0;i<m;i++)if(A.z){let i2=2*i;for(let j=0;j<n;j++){B[k++]=A[i2+m2*j];B[k++]=A[1+i2+m2*j]}}else{for(let j=0;j<n;j++)B[k++]=A[i+m*j]};return attr(B,n,m,z)}
+
+let isnum=x=>"number"==typeof x
+let ismat=x=>x.constructor==Float64Array
+let conform=(A,B)=>(ismat(A)?(ismat(B)?(A.n==B.n&&A.m==B.m?(A.z&&B.z?[A,B]:A.z?[A,imag(B,zeros(...size(B)))]:B.z?[imag(A,zeros(...size(A))),B]:[A,B]):error("conform")):conform(A,extend(B,A))):ismat(B)?conform(extend(A,B),B):error("conform"))
+let extend=(a,B)=>fill((B.z?zeroz:zeros)(...size(B)),a)
 
 let band=(A,h)=>{}
 let bands=A=>{} //convert band to real sym band packed, see rsb
@@ -38,7 +45,7 @@ let factor=A=>((A.m<A.n?(A.z?zgbfa:dgbfa):A.m>A.n?(A.z?zqrdc:dqrdc):A.z?(isherm(
 
 let cond=A=>((A.z?(isherm(A)?zhico:zgeco):issym(A)?dsico:dgeco)(A))
 
-let solve=(A,b)=>(A=A.constructor==Float64Array?factor(A):A, ({dgbfa:dgbsl,zgbfa:zgbsl,dgefa:dgesl,zgefa:zgesl,dpbfa:dpbsl,zpbfa:zpbsl,dpofa:dposl,zpofa:zposl,dqrdc:dqrsl,zqrdc:zqrsl,dsidc:dsisl,zhidc:zhisl}[A.q])(A,b))
+let solve=(A,b)=>(A=ismat(A)?factor(A):A, ({dgbfa:dgbsl,zgbfa:zgbsl,dgefa:dgesl,zgefa:zgesl,dpbfa:dpbsl,zpbfa:zpbsl,dpofa:dposl,zpofa:zposl,dqrdc:dqrsl,zqrdc:zqrsl,dsidc:dsisl,zhidc:zhisl}[A.q])(A,b))
 
 let det=A=>(A=A.contstructor==Float64Array?factor(A):A,({dgbfa:dgbdi,zgbfa:zgbdi,dgefa:dgedi,zgefa:zgedi,dpbfa:dpbdi,zpbfa:zpbdi,dpofa:dpodi,zpofa:zpodi,dqrdc:dqrdi,zqrdc:zqrdi,dsidc:dsidi,zhidc:zhidi}[A.q])(A))
 let qr=A=>(A.z?zqrdc:dqrdc)(A)
@@ -47,7 +54,7 @@ let chol=A=>(A.z?zchdc:dchdc)(A)
 
 let prec=4,form=A=>{
  if(Array.isArray(A))return"array("+A.length+"):\n"+A.map(form).join("\n")
- if(A.constructor!=Float64Array)return String(A);
+ if(!ismat(A))return String(A);
  if(A.m*A.n==0)return A.m+"x"+A.n
  let m,c=Array(min(A.n,10)).fill(0).map(x=>[]),z=A.z,o="",f=x=>prec<0?String(x):x&&(abs(x)<1e-3||abs(x)>=10000)?x.toExponential(prec):x.toFixed(prec)
  for(let i=0;i<min(30,A.m);i++){for(let j=0;j<min(10,A.n);j++){let ij=(i+j*A.m)*(z?2:1);c[j].push(f(A[ij++])+(z?((A[ij]>=0?"+":"")+f(A[ij])+"i"):""))}}
