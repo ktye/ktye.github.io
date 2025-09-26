@@ -1,4 +1,7 @@
-let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI
+let monadic=(f,g)=>A=>{if(isnum(A))return f(A);if(A.z){copy(A);for(let i=0;i<A.length;i+=2)[A[i],A[i+1]]=g(A[i],A[i+2]);return A};return attr(A.map(f),A.m,A.n)}
+let dyadic=(f,g)=>(A,B)=>{[A,B]=conform(A,B);if(isnum(A))return f(A,B);A=copy(A);if(A.z){for(let i=0;i<A.length;i+=2)[A[i],A[i+1]]=g(A[i],A[i+1],B[i],B[i+1])}else{A.forEach((x,i)=>A[i]=f(x,B[i]))};return A}
+let sin=monadic(Math.sin),cos=monadic(Math.cos),atan2=dyadic(Math.atan2),sqrt=monadic(Math.sqrt),hypot=dyadic(Math.hypot),log=monadic(Math.log),log10=monadic(Math.log10),log2=monadic(Math.log2),exp=monadic(Math.exp)
+let sign=monadic(Math.sign),floor=monadic(Math.floor),ceil=monadic(Math.ceil),round=monadic(Math.round),random=Math.random;const pi=Math.PI
 let error=s=>{throw new Error(s)}
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let attr=(A,m,n,z)=>(A.m=m,A.n=n,A.z=z,A)
@@ -13,7 +16,7 @@ let eye=n=>{let A=zeros(n,n);for(let i=0;i<n;i++)A[i+n*i]=1;return A}
 let eyez=n=>imag(eye(n),zeros(n))
 let iota=(m,n)=>attr(new Float64Array(m*(n?n:m)).map((x,i)=>i),m,n?n:m)
 let rand=(m,n)=>attr(zeros(m,n).map(Math.random),m,n?n:m)
-let randz=(m,n)=>imag(rand(m,n),rand(m,n))
+let ranz=(m,n)=>imag(rand(m,n),rand(m,n))
 let real=Z=>attr(Z.filter((x,i)=>!(i&1)),Z.m,Z.n)
 let conj=Z=>{Z=copy(Z);if(!Z.z)return z;for(let i=1;i<Z.length;i+=2)Z[i]=-Z[i];return Z}
 let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return A.z?attr(A.filter((x,i)=>i&1),A.m,A.n):zeros(...size(A))}
@@ -23,16 +26,24 @@ let flip=A=>{let B=copy(A);let k=0,m=A.m,n=A.n,m2=2*m,z=A.z;for(let i=0;i<m;i++)
 
 let isnum=x=>"number"==typeof x
 let ismat=x=>x.constructor==Float64Array
-let conform=(A,B)=>(ismat(A)?(ismat(B)?(A.n==B.n&&A.m==B.m?(A.z&&B.z?[A,B]:A.z?[A,imag(B,zeros(...size(B)))]:B.z?[imag(A,zeros(...size(A))),B]:[A,B]):error("conform")):conform(A,extend(B,A))):ismat(B)?conform(extend(A,B),B):error("conform"))
+let conform=(A,B)=>(ismat(A)?(ismat(B)?(A.n==B.n&&A.m==B.m?(A.z&&B.z?[A,B]:A.z?[A,imag(B,zeros(...size(B)))]:B.z?[imag(A,zeros(...size(A))),B]:[A,B]):error("conform")):conform(A,extend(B,A))):ismat(B)?conform(extend(A,B),B):[A,B])
 let extend=(a,B)=>fill((B.z?zeroz:zeros)(...size(B)),a)
+let neg=monadic(x=>-x,(xr,xi)=>[-xr,-xi])
+let add=dyadic((x,y)=>x+y,(xr,xi,yr,yi)=>[xr+yr,xi+yi])
+let sub=dyadic((x,y)=>x-y,(xr,xi,yr,yi)=>[xr-yr,xi-yi])
+let mul=dyadic((x,y)=>x*y,(xr,xi,yr,yi)=>[xr*yr-xi*yi,xr*yi+xi*yi])
+let div=dyadic((x,y)=>x/y,zdiv)
+let abs=A=>(isnum(A)?Math.abs(A):(A=monadic(Math.abs,(xr,xi)=>[Math.hypot(xr,xi),0])(A),A.z?real(A):A))
+let reduce=f=>(A,ax)=>{let r=zeros(1,A.n);if(1!==ax&&A.m==1)ax=2;if(2===ax){A=flip(A);r=flip(r)};for(let j=0;j<A.m;j++){r[j]=A[j*A.m];for(let i=1;i<A.m;i++)r[j]=f(r[j],A[i+j*A.m])};return r}
+let sum=reduce((x,y)=>x+y)
+let min=reduce(Math.min)
+let max=reduce(Math.max)
 
 let band=(A,h)=>{}
 let bands=A=>{} //convert band to real sym band packed, see rsb
 let tri=(A,b,c)=>{}
 let unband=A=>{}
 let ij=(A,f)=>{let B=copy(A),k=0,n=A.n,m=(A.z?2:1)*A.m;for(let j=0;j<n;j++){if(A.z){for(let i=0;i<m;i+=2){let r=f(A[i+n*2*j],A[1+i+n*2*j],i,j);B[k++]=r[0];B[k++]=r[1]}}else{for(let i=0;i<m;i++)B[k++]=f(A[j+i*n],i,j)}};return B}
-let scale=(a,A)=>A.z&&Array.isArray(a)?ij(A,(x,y,i,j)=>{return[x*a[0]-y*a[1]*y,x*a[1]+y*a[0]]}):attr(A.map((x,i)=>x*a),A.m,A.n,A.z)
-let add=(A,B)=>attr(A.map((x,i)=>x+B[i]),A.m,A.n,A.z)
 let dot=(A,B)=>{[A,B]=A.z&&!B.z?[A,imag(B,zeros(...size(B)))]:B.z&&!A.z?[imag(A,zeros(...size(A))),B]:[A,B];if(A.n!=B.m)throw("inner: "+A.n+"!="+B.m);let C=A.z?zeroz(A.m,B.n):zeros(A.m,B.n),a,b,c;
  if(A.z)for(let i=0;i<A.m;i++)for(let j=0;j<B.n;j++)for(let k=0;k<A.n;k++){C[2*i+2*j*C.m]+=A[2*i+k*2*A.m]*B[2*k+j*2*B.m]-A[1+2*i+k*2*A.m]*B[1+2*k+j*2*B.m];C[1+2*i+2*j*C.m]+=A[1+2*i+k*2*A.m]*B[2*k+j*2*B.m]+A[2*i+k*2*A.m]*B[1+2*k+j*2*B.m]}
  else for(let i=0;i<A.m;i++)for(let j=0;j<B.n;j++)for(let k=0;k<A.n;k++)C[i+j*C.m]+=A[i+k*A.m]*B[k+j*B.m];return C}
@@ -52,13 +63,14 @@ let qr=A=>(A.z?zqrdc:dqrdc)(A)
 let svd=(A,d)=>(A.z?zsvdc:dsvdc)(A,d)
 let chol=A=>(A.z?zchdc:dchdc)(A)
 
+let eps=1e-12,test=(A,B)=>abs(sub(A,B)).some(x=>x>eps?error("fail"):1)
 let prec=4,form=A=>{
  if(Array.isArray(A))return"array("+A.length+"):\n"+A.map(form).join("\n")
  if(!ismat(A))return String(A);
  if(A.m*A.n==0)return A.m+"x"+A.n
- let m,c=Array(min(A.n,10)).fill(0).map(x=>[]),z=A.z,o="",f=x=>prec<0?String(x):x&&(abs(x)<1e-3||abs(x)>=10000)?x.toExponential(prec):x.toFixed(prec)
- for(let i=0;i<min(30,A.m);i++){for(let j=0;j<min(10,A.n);j++){let ij=(i+j*A.m)*(z?2:1);c[j].push(f(A[ij++])+(z?((A[ij]>=0?"+":"")+f(A[ij])+"i"):""))}}
- c.forEach((x,i)=>{m=max(...x.map(x=>x.length));c[i]=x.map(x=>x.padStart(1+m," "))})
+ let m,c=Array(Math.min(A.n,10)).fill(0).map(x=>[]),z=A.z,o="",f=x=>prec<0?String(x):x&&(abs(x)<1e-3||abs(x)>=10000)?x.toExponential(prec):x.toFixed(prec)
+ for(let i=0;i<Math.min(30,A.m);i++){for(let j=0;j<Math.min(10,A.n);j++){let ij=(i+j*A.m)*(z?2:1);c[j].push(f(A[ij++])+(z?((A[ij]>=0?"+":"")+f(A[ij])+"i"):""))}}
+ c.forEach((x,i)=>{m=Math.max(...x.map(x=>x.length));c[i]=x.map(x=>x.padStart(1+m," "))})
  m=c[0].length;for(let i=0;i<m;i++){c.forEach(x=>o+=x[i]+" ");o+=A.n>10?"..\n":"\n"};return o+(A.n>30?".."+A.m+"x"+A.n:"")}
 let show=(...A)=>{A.forEach(x=>typeof(_o)!="undefined"?_o.textContent+=form(x)+"\n":console.log(form(x)))}
 
