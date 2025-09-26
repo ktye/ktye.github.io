@@ -17,8 +17,8 @@ let conj=Z=>{Z=copy(Z);if(!Z.z)return z;for(let i=1;i<Z.length;i+=2)Z[i]=-Z[i];r
 let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return A.z?attr(A.filter((x,i)=>i&1),A.m,A.n):zeros(...size(A))}
 let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>abs(x-B[i])<eps)}
 let trans=A=>flip(A.z?conj(A):A)
-//let flip=A=>{let B=copy(A);let k=0,n=A.n,m=A.m;for(let i=0;i<m;i++)if(A.z){for(let j=0;j<2*n;j+=2){B[k++]=A[i+m*j];B[k++]=A[i+m*j+1]}}else{for(let j=0;j<n;j++)B[k++]=A[i+m*j]};return attr(B,A.n,A.m,A.z)}
-let flip=A=>{let B=copy(A);let k=0,n=A.m,m=A.n,z=A.z;for(let j=0;j<A.m;j++)for(let i=0;i<A.n;i++)B[j+n*i]=A[k++];return attr(B,m,n,z)}
+let flip=A=>{let B=copy(A);let k=0,m=A.m,n=A.n,m2=2*m,z=A.z;for(let i=0;i<m;i++)if(A.z){let i2=2*i;for(let j=0;j<n;j++){B[k++]=A[i2+m2*j];B[k++]=A[1+i2+m2*j]}}else{for(let j=0;j<n;j++)B[k++]=A[i+m*j]};return attr(B,n,m,z)}
+
 let band=(A,h)=>{}
 let bands=A=>{} //convert band to real sym band packed, see rsb
 let tri=(A,b,c)=>{}
@@ -54,6 +54,15 @@ let prec=4,form=A=>{
  c.forEach((x,i)=>{m=max(...x.map(x=>x.length));c[i]=x.map(x=>x.padStart(1+m," "))})
  m=c[0].length;for(let i=0;i<m;i++){c.forEach(x=>o+=x[i]+" ");o+=A.n>10?"..\n":"\n"};return o+(A.n>30?".."+A.m+"x"+A.n:"")}
 let show=(...A)=>{A.forEach(x=>typeof(_o)!="undefined"?_o.textContent+=form(x)+"\n":console.log(form(x)))}
+
+let loadstr=s=>{s=s.trim();let z=s.includes("i"),A,k=0
+ let im=s=>{for(let i=1;i<s.length;i++)if((s[i]=="+"||s[i]=="-")&&(s[i-1]!="e"||s[i-1]!="E"))return s.slice(i)}
+ s=s.split("\n").map(s=>s.trim());let n=s.length,m;
+ s.forEach((x,i)=>{x=x.split(/[ \t]+/);
+  if(!i){m=x.length;A=z?zeroz(m,n):zeros(m,n)};
+  if(z)x.forEach(x=>{A[k++]=parseFloat(x);A[k++]=parseFloat(im(x))})
+  else x.forEach(x=> A[k++]=parseFloat(x))
+ });return flip(attr(A,m,n,z))}
 
 let alloc=(x, g)=>($0+=x,((g=$0-$.memory.buffer.byteLength-$0)>0?($.memory.grow((65535+g)>>16),$I=new Int32Array($.memory.buffer),$F=new Float64Array($.memory.buffer)):0),$0-x)
 let free=_=>$0=$.__heap_base
