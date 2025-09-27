@@ -17,16 +17,46 @@ let token=(x,s,i,l)=>(s=0,i=ic(x).map(x=>s=T[14*s+C[x]]).map((x,i)=>x>10?-1:i).f
  where=(x,k)=>x.filter((_,i)=>k[i]),
  [where(x,s).map(x=>x=="\n"?";":x).toReversed(),where(i,s).toReversed()])
 
-let left="([{",right="}])"
-let op=":+-*%&|<>=~!,^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+let left="([{",right="}])",sep=",;"
+let op=":+-*%&|<>=~!^#_$?@/\\",nm=".-0123456789",az="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+let l=x=>x[x.length-1]
 let parse=x=>{let[tok,pos]=x,ipos=0,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
- let l=x=>x[x.length-1]
- let next=(r,t)=>(r=tok.pop(),r==undefined?0:(t=type(r),r=[r],r.t=t,r.p=(ipos=pos.pop()),r))
+let rpos=(x,p)=>(x.p=p,x)
+console.log("parse: tok/pos", tok,pos)
+ let perr=(x,p)=>{p=p?p:ipos;/*if(ed){ed.selectionStart=ed.selectionEnd=p;ed.focus()}*/;throw new Error("@"+p+": "+x)}
+ let next=(r,t)=>(r=tok.pop(),r==undefined?0:(r=new String(r),r.v=op.includes(r),r.p=(ipos=pos.pop()),r))
  let peek=_=>l(tok)
+ let dyad=(x,o,y)=>{let r=[o,y,x];r.p=o.p;return r}
+ let asxy=(x,a,y)=>{let r=[a,x,y];r.p=a.p;return r}
+ let cali=(x,a)=>{let r=[x,a];r.p=x.p;return r}
 
- //term..
- //code.. list..
+ let term=(r,n)=>{let a,i;r=peek();if(r)if(sep.includes(r)||"{"==r||right.includes(r))return 0
+  if(!(r=next()))return r
+  if(left.includes(r))return list()
+  if(az.includes(r[0])&&"["==peek()){next();i=list();return peek().endsWith(":")?rpos([(a=next()),r,i,expr(term())],a.p):rpos(["@",r,i],i.p)}
+  //
+  return r}
 
+ let list=p=>{let r=[],q;r.t="l";
+  while(tok.length){
+   if(sep.includes(q=peek()))next()
+   else if(right.includes(q)){next();break}
+   else if((e=expr(term())))r.push(e)}
+  return 1==r.length?r[0]:r}
+
+ let expr=x=>{if(!x)return x
+  let y=term(),r
+  if(!y)return x
+  if(y.v&&!(x.v)){
+   r=expr(term())
+   if(!r)perr("1+")
+   return"@"==y?cali(x,r):y.endsWith(":")?asxy(x,y,r):dyad(x,y,r)
+  }
+  r=expr(y)
+  return(x.v)?mona(x,r):cali(x,r)
+ }
+
+ return list()
 }
 
 /*
@@ -51,7 +81,6 @@ let parse=x=>{let[tok,pos]=x,locs,args,res,funs={},glob={},tabl={},data=[],lp=0
  let ipos=0,typs="ijefzBGHSIJEFZ",it=t=>typs.indexOf(t)
  let l=x=>x[x.length-1],lop=x=>l(x).slice(0,3),vt=x=>vc.includes(x.t)
  let perr=(x,p)=>{p=p?p:ipos;if(ed){ed.selectionStart=ed.selectionEnd=p;ed.focus()};throw new Error("@"+p+": "+x)}
- let type=(x,t)=>x=="-"||op.includes(x[0])?0:(nm.includes(x[0])?(typs.includes(l(x))?l(x):x.includes(".")?"f":"i"):"i")
  let tyck=(x,y,p)=>{if(x!=y)perr("type",p)}
  let avec=x=>(vt(x)?(lp=x.n,x.push("ioj","get "+temp("i","i"),...shift(x.t),"adi","ld"+x.t.toLowerCase()),x.t=x.t.toLowerCase(),x):x)
  let upty=(x,y)=>(x=avec(x),y=avec(y),x=xloc(x,y),x.t==y.t?[x,y]:it(x.t)<it(y.t)?(x.push(y.t+"o"+x.t),x.t=y.t):(y.push(x.t+"o"+y.t),y.t=x.t),[x,y])

@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <head><meta charset="utf-8">
 <link rel="icon" type="image/png" sizes="16x16" href="../../kelas16.png">
-<title>b</title>
+<title>lax</title>
 <style>*{font-family:monospace}
 </style>
 </head>
 
 <body><pre id="txt" contenteditable="true">
 /lax
-
+x:f(a+2)
+y:g(-5,x)
+A[i+1]+:5
 </pre>
-<button onclick="run()">token</button>
-<pre id="out"></pre>
+<button onclick="run()">parse</button>
+<details><summary>tokens</summary>
+ <pre id="tok"></pre>
+</details>
+<pre id="par"></pre>
 <script src="lax.js"></script>
 
 <script>
 let run=(p,s)=>([s,p]=token(txt.textContent),
- out.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n"),
- out.textContent+="\n-----\n"+parse([s,p])
+ tok.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n"),
+ par.textContent=JSON.stringify(parse([s,p]))
 )
 run()
 </script>
