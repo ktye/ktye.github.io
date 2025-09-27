@@ -20,9 +20,9 @@ let ranz=(m,n)=>imag(rand(m,n),rand(m,n))
 let real=Z=>attr(Z.filter((x,i)=>!(i&1)),Z.m,Z.n)
 let conj=Z=>{Z=copy(Z);if(!Z.z)return z;for(let i=1;i<Z.length;i+=2)Z[i]=-Z[i];return Z}
 let imag=(A,B)=>{if(B){let R=zeros(A.m,2*A.n);for(let i=0;i<A.length;i++){R[2*i]=A[i];R[2*i+1]=B[i]};return attr(R,A.m,A.n,1)};return A.z?attr(A.filter((x,i)=>i&1),A.m,A.n):zeros(...size(A))}
-let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>abs(x-B[i])<eps)}
 let trans=A=>flip(A.z?conj(A):A)
 let flip=A=>{let B=copy(A);let k=0,m=A.m,n=A.n,m2=2*m,z=A.z;for(let i=0;i<m;i++)if(A.z){let i2=2*i;for(let j=0;j<n;j++){B[k++]=A[i2+m2*j];B[k++]=A[1+i2+m2*j]}}else{for(let j=0;j<n;j++)B[k++]=A[i+m*j]};return attr(B,n,m,z)}
+let nearly=(A,B,eps)=>{eps=eps?eps:1e-12;return A.every((x,i)=>Math.abs(x-B[i])<eps)}
 
 let isnum=x=>"number"==typeof x
 let ismat=x=>x.constructor==Float64Array
@@ -34,7 +34,7 @@ let sub=dyadic((x,y)=>x-y,(xr,xi,yr,yi)=>[xr-yr,xi-yi])
 let mul=dyadic((x,y)=>x*y,(xr,xi,yr,yi)=>[xr*yr-xi*yi,xr*yi+xi*yi])
 let div=dyadic((x,y)=>x/y,zdiv)
 let abs=A=>(isnum(A)?Math.abs(A):(A=monadic(Math.abs,(xr,xi)=>[Math.hypot(xr,xi),0])(A),A.z?real(A):A))
-let reduce=f=>(A,ax)=>{let r=zeros(1,A.n);if(1!==ax&&A.m==1)ax=2;if(2===ax){A=flip(A);r=flip(r)};for(let j=0;j<A.m;j++){r[j]=A[j*A.m];for(let i=1;i<A.m;i++)r[j]=f(r[j],A[i+j*A.m])};return r}
+let reduce=f=>(A,ax)=>{if((1===ax&&1==A.m)||(2===ax&&1==A.n))return copy(A);if(1!==ax&&A.m==1)ax=2;let r=zeros(...(2==ax?[A.m,1]:[1,A.n]));if(2===ax)A=flip(A);for(let j=0;j<A.m;j++){r[j]=A[j*A.m];for(let i=1;i<A.m;i++)r[j]=f(r[j],A[i+j*A.m])};return r}
 let sum=reduce((x,y)=>x+y)
 let min=reduce(Math.min)
 let max=reduce(Math.max)
@@ -50,7 +50,7 @@ let dot=(A,B)=>{[A,B]=A.z&&!B.z?[A,imag(B,zeros(...size(B)))]:B.z&&!A.z?[imag(A,
 
 let eig=(A,B)=>evp_(A,B,0)
 let evp=(A,B)=>evp_(A,B,1)
-let evp_=(A,v)=>B?rgg(A,B,v):A.z?(isherm(A)?ch(A,v):cg(A,v)):(A.m<A.n?rsb(A,v):issym(A)?rs(A,v):rg(A,v))
+let evp_=(A,B,v)=>B?rgg(A,B,v):A.z?(isherm(A)?ch(A,v):cg(A,v)):(A.m<A.n?rsb(A,v):issym(A)?rs(A,v):rg(A,v))
 
 let factor=A=>((A.m<A.n?(A.z?zgbfa:dgbfa):A.m>A.n?(A.z?zqrdc:dqrdc):A.z?(isherm(A)?zhifa:zgefa):issym(A)?dsifa:dgefa)(A))
 
@@ -63,7 +63,6 @@ let qr=A=>(A.z?zqrdc:dqrdc)(A)
 let svd=(A,d)=>(A.z?zsvdc:dsvdc)(A,d)
 let chol=A=>(A.z?zchdc:dchdc)(A)
 
-let eps=1e-12,test=(A,B)=>abs(sub(A,B)).some(x=>x>eps?error("fail"):1)
 let prec=4,form=A=>{
  if(Array.isArray(A))return"array("+A.length+"):\n"+A.map(form).join("\n")
  if(!ismat(A))return String(A);

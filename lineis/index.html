@@ -26,7 +26,7 @@ let $,$0,$I,$F;window.init=()=>{
  let f=window.location.hash;if(f)_i.textContent=decodeURIComponent(f.slice(1))
  _i.onblur=e=>{if(!_o.textContent)_jdo()}
  _i.oninput=e=>_o.textContent=""
- WebAssembly.instantiateStreaming(fetch("lineis.wasm")).then(r=>{$=r.instance.exports;$0=$.__heap_base;$I=new Int32Array($.memory.buffer);$F=new Float64Array($.memory.buffer);})
+  WebAssembly.instantiateStreaming(fetch("lineis.wasm")).then(r=>{$=r.instance.exports;$0=$.__heap_base;$I=new Int32Array($.memory.buffer);$F=new Float64Array($.memory.buffer);}).catch(e=>_i.textContent+="//error: cannot load lineis.wasm (no eispack/linpack calls available)")
  _help()
 }
 window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
