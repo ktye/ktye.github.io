@@ -30,11 +30,14 @@ console.log("parse: tok/pos", tok,pos)
  let asxy=(x,a,y)=>{let r=[a,x,y];r.p=a.p;return r}
  let cali=(x,a)=>{let r=[x,a];r.p=x.p;return r}
 
- let term=(r,n)=>{let a,i;r=peek();if(r)if(sep.includes(r)||"{"==r||right.includes(r))return 0
+ let term=(r,n)=>{let a,i;r=peek();if(r)if(sep.includes(r)||right.includes(r))return 0
   if(!(r=next()))return r
   if(left.includes(r))return list()
-  if(az.includes(r[0])&&"["==peek()){next();i=list();return peek().endsWith(":")?rpos([(a=next()),r,i,expr(term())],a.p):rpos(["@",r,i],i.p)}
+  if("do"==r)return rpos(["do",expr(term())],r.p)
+  if("if"==r)return rpos(["if",expr(term()),expr(term())],r.p)
+  if(az.includes(r)&&"["==peek()){next();i=list();return peek().endsWith(":")?rpos([(a=next()),r,i,expr(term())],a.p):rpos(["@",r,i],i.p)}
   //
+  console.log("term",r)
   return r}
 
  let list=p=>{let r=[],q;r.t="l";
@@ -42,6 +45,7 @@ console.log("parse: tok/pos", tok,pos)
    if(sep.includes(q=peek()))next()
    else if(right.includes(q)){next();break}
    else if((e=expr(term())))r.push(e)}
+   console.log("list",r)
   return 1==r.length?r[0]:r}
 
  let expr=x=>{if(!x)return x
@@ -49,7 +53,7 @@ console.log("parse: tok/pos", tok,pos)
   if(!y)return x
   if(y.v&&!(x.v)){
    r=expr(term())
-   if(!r)perr("1+")
+   if(!r)return rpos([new String(y+y),x],y.p) //a-
    return"@"==y?cali(x,r):y.endsWith(":")?asxy(x,y,r):dyad(x,y,r)
   }
   r=expr(y)
