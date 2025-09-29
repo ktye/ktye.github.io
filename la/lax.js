@@ -1,3 +1,13 @@
+/*
+la           | parse                                                         | j2        | j1   |
+-------------+---------------------------------------------------------------+-----------+------+
+Ai            ["@","A","i"]                                                    A[i]        Ai
+Aik           ["@",["@","A","i"],"k"]                                          A[i][k]
+Aik:5         [":","A","i","k",5]                                              A[i][k]=5   Ai[k]=5
+Aik/=n        ["/:","A","i","k","n"]                                           A[i][k]/=5  Ai[k]/=5          modified assign for +: -: *: /:
+if(x){f y}    ["if","x",[".","f","y"]]                                         if(x)f(y)
+do{a+;i-;i>0} ["do",[["++","a"],["--","i"],">",0,"i"]]                         do{a++;i--;}while(i>0)        postfix: +-  inc/dec statements
+*/
 let ic=x=>x.split("").map(x=>x.charCodeAt(0))
 let C=ic(`
 aaaaaaaaaanaaaaaaaaaaaaaaaaaaaaaadhddddebcdddjgmggggggggggebdedd
@@ -33,8 +43,8 @@ console.log("parse: tok/pos", tok,pos)
  let term=(r,n)=>{let a,i;r=peek();if(r)if(sep.includes(r)||right.includes(r))return 0
   if(!(r=next()))return r
   if(left.includes(r))return list()
-  if("do"==r)return rpos(["do",expr(term())],r.p)
-  if("if"==r)return rpos(["if",expr(term()),expr(term())],r.p)
+  if("do"==r){return rpos(["do",expr(term())],r.p)}
+  if("if"==r){if("("!=peek())perr("if:missing(");next();let c=expr(term());if(!c)perr("if:condition");if(")"!=peek())perr("missing)");next();return rpos(["if",c,expr(term())],r.p)}
   if(az.includes(r)&&"["==peek()){next();i=list();return peek().endsWith(":")?rpos([(a=next()),r,i,expr(term())],a.p):rpos(["@",r,i],i.p)}
   //
   console.log("term",r)

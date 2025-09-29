@@ -8,12 +8,12 @@
 
 <body><pre id="txt" contenteditable="true">
 /lax
-/x:f(a+2)
-/y:g(-5,x)
-/A[i+1]+:5
-/1
+x:f(a+2)
+y:g(-5,x)
+A[i+1]+:5
+1
 if(x)1+2 /howto stop the expr at (x)?
-/do{a:1;i-;i>0}
+do{a:1;i-;i>0}
 /2
 1+2
 </pre>
@@ -25,10 +25,13 @@ if(x)1+2 /howto stop the expr at (x)?
 <script src="lax.js"></script>
 
 <script>
-let run=(p,s)=>([s,p]=token(txt.textContent),
- tok.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n"),
- par.textContent=JSON.stringify(parse([s,p]))
-)
+let run=(p,s)=>{
+ try{
+  [s,p]=token(txt.textContent);
+  tok.textContent=p.map((x,i)=>(x+"").padStart(2,'0')+": "+s[i]).join("\n");
+  par.textContent=JSON.stringify(parse([s,p]))
+ }catch(e){par.textContent+="\n"+e}
+}
 run()
 </script>
 </body></html>
