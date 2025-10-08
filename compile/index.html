@@ -5,8 +5,7 @@
 <title>compile</title>
 <style>
 body{font-family:georgia,serif;overflow-x:clip}
-/* *{font-family:monospace} */
-textarea{padding:1em;width:100%;field-sizing:content;background:#ffe;border:none;outline:none}
+textarea{font-family:monospace;padding:1em;width:100%;field-sizing:content;background:#ffe;border:none;outline:none}
 .o{background:#efe}
 @media(orientation:portrait){*{font-size:x-large}}
 </style></head><body>
@@ -88,5 +87,5 @@ let k=af(document.querySelectorAll(".k"));
 { let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value);kinit()}) }
 
 //kinit()
-af(document.querySelectorAll("textarea")).forEach(x=>x.onchange=kinit)
+af(document.querySelectorAll("textarea")).forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false})
 </script></body></html>
