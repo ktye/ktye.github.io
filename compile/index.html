@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel=icon href="../kelas16.png">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1">
+<title>compile</title>
+<style>
+body{font-family:georgia,serif;overflow-x:clip}
+/* *{font-family:monospace} */
+textarea{padding:1em;width:100%;field-sizing:content;background:#ffe;border:none;outline:none}
+.o{background:#efe}
+@media(orientation:portrait){*{font-size:x-large}}
+</style></head><body>
+
+the following text includes an interactive repl. all yellow fields are k inputs, green is k output.<p/>
+<pre class="o" id="banner"></pre>
+
+let's start with an intermediate representation of a program
+<textarea class="k" data-src="asn.k"></textarea>
+<pre class="o"></pre>
+
+for now we only care about <i>P</i>, the parent vector:
+<textarea class="k">P</textarea>
+<pre class="o"></pre>
+
+let's draw the tree:
+<textarea class="k" data-src="tree.k"></textarea>
+<pre class="o"></pre>
+
+<textarea class="k">t:tree[];  `0</textarea>
+<pre class="o"></pre>
+
+we can see that the tree is in depth first order, showing the parent before the children.<br/>
+How can we reorder the tree, such that the children come first, but their order is kept?</p>
+
+Let's calculate an address for each node, e.g. node 13 should have the address 0-1-7-12-13, by tracing back the parent vector:
+<textarea class="k">(P@)\P   /fix-point scan</textarea>
+<pre class="o"></pre>
+
+add index vector and a large value (e.g. the size of the tree):
+<textarea class="k">(,(#P)##P) , (,!#P) , (P@)\P </textarea>
+<pre class="o"></pre>
+
+reverse, transpose and remove the uniq zeros:
+<textarea class="k">a:?'+|(,(#P)##P),(,!#P),(P@)\P
+a</textarea>
+<pre class="o"></pre>
+
+<textarea class="k">a 13</textarea>
+<pre class="o"></pre>
+this is the address for the node, except for the large terminating number.</p>
+
+now we can sort by this address, the large number is chose, such that the parents sort after the children.
+<textarea class="k">i:&lt;a; i</textarea>
+<pre class="o"></pre>
+
+show the original tree and the newly ordered tree side by side, we use key-table syntax:
+<textarea class="k">t!t i</textarea>
+<pre class="o"></pre>
+
+
+<script>
+let K,o,lo=x=>Number(BigInt.asUintN(32,x)),af=Array.from
+let C=()=>new Int8Array(K.memory.buffer)
+let KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r}
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let kenv={env:{ 
+ Exit:  function(x      ){},
+ Args:  function(       ){return 0},
+ Arg:   function(x,y    ){return 0},
+ Read:  function(a,b,c  ){return -1},
+ Write: function(a,b,c,d){let u=new Uint8Array(K.memory.buffer),v=u.slice(c,c+d),f=u.slice(a,a+b);o.textContent+=su(v);return 0},
+ ReadIn:function(x,y    ){return 0},
+ Native:function(x,y  ,i){return 0}}}
+
+let kinit=_=>{
+ let n,nk=x=>{n=x.byteLength;return x}
+ fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
+ K=r.instance.exports;K.kinit();
+ banner.textContent="ktye/k "+n
+ K.repl(KC('`l:(.`"lxy.")100 30'))
+ let k=af(document.querySelectorAll(".k"))
+ k.forEach(x=>x.nextElementSibling.textContent="") //clear output
+ k.forEach(x=>{o=x.nextElementSibling;K.repl(KC(x.value))})})}
+
+
+
+let k=af(document.querySelectorAll(".k"));
+{ let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value);kinit()}) }
+
+//kinit()
+af(document.querySelectorAll("textarea")).forEach(x=>x.onchange=kinit)
+</script></body></html>
