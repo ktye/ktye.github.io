@@ -5,9 +5,9 @@
 <meta name="format-detection" content="telephone=no">
 <title>compile</title>
 <style>
-body{font-family:georgia,serif;overflow-x:clip}
-textarea{font-family:monospace;padding:1em;width:100%;field-sizing:content;background:#ffe;border:none;outline:none}
-.o{background:#efe}
+body{font-family:georgia,serif;/*overflow-x:clip*/}
+textarea{font-family:monospace;width:100%;background:#ffe;border:none;outline:none;white-space:pre;overflow-wrap:normal;overflow:hidden}
+.o{background:#efe;overflow:clip}
 @media(orientation:portrait){*{font-size:x-large}}
 </style></head><body>
 
@@ -79,6 +79,7 @@ let kinit=_=>{
  banner.textContent="ktye/k "+n
  K.repl(KC('`l:(.`"lxy.")100 30'))
  let k=af(document.querySelectorAll(".k"))
+ k.forEach(x=>{x.style.height="0px";x.style.height=x.scrollHeight+3+"px"})
  k.forEach(x=>x.nextElementSibling.textContent="") //clear output
  k.forEach(x=>{o=x.nextElementSibling;K.repl(KC(x.value))})})}
 
@@ -88,5 +89,5 @@ let k=af(document.querySelectorAll(".k"));
 { let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value);kinit()}) }
 
 //kinit()
-af(document.querySelectorAll("textarea")).forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false})
+af(document.querySelectorAll("textarea")).forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false;x.oninput=_=>{x.style.height="";x.style.height=x.scrollHeight+3+"px"}})
 </script></body></html>
