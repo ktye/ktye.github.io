@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8">
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<title>tty</title>
+<style>*{font-family:monospace}
+html,body{height:calc(100% - 1em)}
+.tty{background:black;color:#ccc;width:50em;height:20em}
+.tty:focus{color:#eee}
+</style></head>
+<body>
+
+<pre id="tty" onkeydown="keydown(event)" class="tty" tabindex="0">
+$asdflj beta gamma delta█</pre></div>
+
+<script>
+let blinker
+let blink=t=>{let s=t.textContent;t.textContent=s.slice(0,-1)+(s[s.length-1]==" "?"█":" ");}
+let activate=(t,x)=>{if(!x)clearInterval(blinker);let s=t.textContent;t.textContent=s.slice(0,-1)+(x?"█":"▁");if(x)blinker=setInterval(blink,800,tty) }
+tty.onfocus=e=>activate(e.target,1)
+tty.onblur=e=>activate(e.target,0)
+tty.focus()
+let keydown=e=>{let k=e.key,t=e.target.textContent,c=t[t.length-1];t=t.slice(0,-1)
+ if(1==k.length){e.target.textContent=t+k+c} 
+ if("Backspace"==k){if(t.length==1||t[t.length-1]=="\n")return;e.target.textContent=t.slice(0,-1)+c}
+ else console.log(e.key)
+}
+</script></body></html>
