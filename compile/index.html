@@ -26,7 +26,7 @@ let's draw the tree:
 <textarea class="k" data-src="tree.k"></textarea>
 <pre class="o"></pre>
 
-<textarea class="k">t:tree[];  `0</textarea>
+<textarea class="k">`&lt;t:tree[]; `0</textarea>
 <pre class="o"></pre>
 
 we can see that the tree is in depth first order, showing the parent before the children.<br/>
@@ -53,9 +53,18 @@ now we can sort by this address, the large number is chosen, such that the paren
 <textarea class="k">i:&lt;a; i</textarea>
 <pre class="o"></pre>
 
-show the original tree and the newly ordered tree side by side, using key-table syntax:
-<textarea class="k">t!t i</textarea>
+to reorder the tree, we index all vectors with i, except for P which needs to be adjusted to the new order:
+<textarea class="k">P:(i?P)i;T:T i;I:I i;S:S i</textarea>
 <pre class="o"></pre>
+
+printing the tree needs some adjustments as well.
+<textarea class="k" data-src="ptree.k"></textarea>
+<pre class="o"></pre>
+
+we show both trees side by side:
+<textarea class="k">`<"\n"/-1_("\n"\t),'" ║ ",/"\n"\ptree[]; `0</textarea>
+<pre class="o"></pre>
+
 
 
 <script>
