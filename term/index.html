@@ -10,7 +10,45 @@ html,body{height:calc(100% - 1em)}
 <body>
 
 <pre id="tty" onkeydown="keydown(event)" class="tty" tabindex="0">
-$asdflj beta gamma delta█</pre></div>
+$█</pre>
+
+<pre id="cpu">
+
+┌r0──────┬r0d─────┬r1──────┬r1d─────┬r2──────┬r2d─────┬r3──────┬r3d─────┐
+│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│
+├r4──────┼────────┬r5──────┼────────┬r6──────┼────────┬r7──────┼────────┤
+│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│
+├r8──────┼────────┼r9──────┼────────┼r10─────┼────────┼r11─────┼────────┤
+│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│
+├r12─────┼────────┼r13─────┼────────┼r14─────┼────────┼r15─────┼────────┤
+│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│aabbccdd aabbccdd│
+├────────┼────────┼────────┴────────┴────────┴────────┴────────┴────────┤
+│heap    │aabbccdd│                                                     │
+├────────┴────────┴─────────────────────────────────────────────────────┤
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+├────────┬────────┬─────────────────────────────────────────────────────┤
+│stack   │aabbccdd│                                                     │
+├────────┴────────┴─────────────────────────────────────────────────────┤
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+│aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd aabbccdd│
+├────────┬────────┬─────────────────────────────────────────────────────┤
+│call    │aabbccdd│                                                     │
+├────────┴────────┼─────────────────┬─────────────────┬─────────────────┤
+│init     aabbccdd│                 │                 │                 │
+│init     aabbccdd│                 │                 │                 │
+│init     aabbccdd│                 │                 │                 │ 
+│                 │                 │                 │                 │
+└─────────────────┴─────────────────┴─────────────────┴─────────────────┘
+</pre>
 
 <script>
 let blinker
