@@ -65,8 +65,29 @@ we show both trees side by side:
 <textarea class="k">`<"\n"/("\n"\t),'"    ",/"\n"\ptree[]; `0</textarea>
 <pre class="o"></pre>
 
+parallel move: (todo)
+<textarea class="k">
+pmov:{[x;y]n:#x;s:n#0;M:!0
+ m:{M,:(x,y)}
+ f:{[i]i; $[~(x i)=y i;:0;0]
+  s[i]:1
+  {[j]$[y[j]=x[j];$[~sj:s j; f j; 1=sj; [m[t;y j];y[j]:t];0]  ;0]}'!n
+  m[x i;y i]
+  s[i]:2
+ }
+ {$[s x;0;f x]}'!n
+ M}
+</textarea>
+<pre class="o"></pre>
 
 
+assembling the tree uses a reduction of function "as" over the nodes.<br/>
+"as" calls a function depending on the node type with the node index as first argument and return values from the evaluation of it's children as 2nd argument.<br/>
+each node function may produce output calling "O" and returns an integer for the current register.
+<textarea class="k" data-src="as.k"></textarea>
+<pre class="o"></pre>
+
+<script src="pmov.js"></script>
 <script>
 let K,o,lo=x=>Number(BigInt.asUintN(32,x)),af=Array.from
 let C=()=>new Int8Array(K.memory.buffer)
