@@ -6,6 +6,8 @@
 <title>compile</title>
 <style>
 body{font-family:georgia,serif;/*overflow-x:clip*/}
+summary{font-size:large;font-weight:bold}
+details:open>summary{margin-bottom:1em}
 textarea{font-family:monospace;width:100%;background:#ffe;border:none;outline:none;white-space:pre;overflow-wrap:normal;overflow:hidden}
 .o{background:#efe;overflow:clip}
 @media(orientation:portrait){*{font-size:x-large}}
@@ -13,6 +15,8 @@ textarea{font-family:monospace;width:100%;background:#ffe;border:none;outline:no
 
 the following text includes an interactive repl. all yellow fields are k inputs, green is k output.<p/>
 <pre class="o" id="banner"></pre>
+
+<details id="postfix" open><summary>intermediate representation and transform to postfix</summary>
 
 let's start with an intermediate representation of a program
 <textarea class="k" data-src="asn.k"></textarea>
@@ -65,6 +69,9 @@ we show both trees side by side:
 <textarea class="k">`<"\n"/("\n"\t),'"    ",/"\n"\ptree[]; `0</textarea>
 <pre class="o"></pre>
 
+</details>
+<details id="pmov"><summary>parallel register moves</summary>
+
 parallel move:
 <textarea class="k">
 /sequentialize parallel register moves
@@ -83,6 +90,9 @@ pmov:{[x;y;t]q:(n:#y)#0;m:!0
 </textarea>
 <pre class="o"></pre>
 
+</details>
+
+<details id="assemble"><summary>assemble</summary>
 
 assembling the tree uses a reduction of function "as" over the nodes.<br/>
 "as" calls a function depending on the node type with the node index as first argument and return values from the evaluation of it's children as 2nd argument.<br/>
@@ -90,9 +100,11 @@ each node function may produce output calling "O" and returns an integer for the
 <textarea class="k" data-src="as.k"></textarea>
 <pre class="o"></pre>
 
+</details>
+
 <script src="pmov.js"></script>
 <script>
-let K,o,lo=x=>Number(BigInt.asUintN(32,x)),af=Array.from
+let K,o,lo=x=>Number(BigInt.asUintN(32,x)),af=Array.from,qa=x=>af(document.querySelectorAll(x))
 let C=()=>new Int8Array(K.memory.buffer)
 let KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r}
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
@@ -111,16 +123,16 @@ let kinit=_=>{
  K=r.instance.exports;K.kinit();
  banner.textContent="ktye/k "+n
  K.repl(KC('`l:(.`"lxy.")100 30'))
- let k=af(document.querySelectorAll(".k"))
+ let k=qa(".k") //.filter(x=>x.parentElement.open)
  k.forEach(x=>{x.style.height="0px";x.style.height=x.scrollHeight+3+"px"})
  k.forEach(x=>x.nextElementSibling.textContent="") //clear output
  k.forEach(x=>{o=x.nextElementSibling;K.repl(KC(x.value))})})}
 
+qa("details").forEach(d=>d.ontoggle=e=>{ if(!e.target.open)return; qa("details").forEach(x=>{x.open=x===e.target}); /*kinit()*/  })
 
-
-let k=af(document.querySelectorAll(".k"));
+let k=qa(".k");
 { let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value);kinit()}) }
 
 //kinit()
-af(document.querySelectorAll("textarea")).forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false;x.oninput=_=>{x.style.height="";x.style.height=x.scrollHeight+3+"px"}})
+qa("textarea").forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false;x.oninput=_=>{x.style.height="";x.style.height=x.scrollHeight+3+"px"}})
 </script></body></html>
