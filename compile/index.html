@@ -9,11 +9,12 @@ body{font-family:georgia,serif;/*overflow-x:clip*/}
 summary{font-size:large;font-weight:bold}
 details:open>summary{margin-bottom:1em}
 textarea{font-family:monospace;width:100%;background:#ffe;border:none;outline:none;white-space:pre;overflow-wrap:normal;overflow:hidden}
+.c{margin-left:1em;margin-top:0.5em;display:block}
 .o{background:#efe;overflow:clip}
 @media(orientation:portrait){*{font-size:x-large}}
 </style></head><body>
 
-the following text includes an interactive repl. all yellow fields are k inputs, green is k output.<p/>
+the following text includes an interactive repl. all yellow fields are k inputs, green is k output.<p>
 <pre class="o" id="banner"></pre>
 
 <details id="postfix" open><summary>intermediate representation and transform to postfix</summary>
@@ -70,39 +71,50 @@ we show both trees side by side:
 <pre class="o"></pre>
 
 </details>
-<details id="pmov"><summary>parallel register moves</summary>
-
-parallel move:
-<textarea class="k">
-/sequentialize parallel register moves
-pmov:{[x;y;t]q:(n:#y)#0;m:!0
- q0:{[i]q[i]:1;r:2,i,,/{0,j x}'&x[i]=y j:|!n ;r}
- q1:{[i]m,:t,y i;y[i]:t;!0}
- g0:{[i]((q0;q1;:)[q i])[i]}
- g1:{[i]m,:x[i],y[i];q[i]:2;!0}
- f:{[i]s:0,i;while[0<l:-1+#s;g:s l-1;i:s l;s:-2_s;$[x[i]~y i;0;s,:$[g;g1 i;g0 i]]]}
- {[i]$[~q i;f i;0]}'!n;m}
-
- /pmov[dst;src;tmp]
- \pmov[1 2 3;1 2 3;-1] /!0            => do nothing
- \pmov[1 2 3;3 2 3;-1] /1 3           => mov r1,r3
- \pmov[1 2 3;3 2 1;-1] /-1 3 3 1 1 -1 => mov t,r3;mov r3,r1;mov r1,t
-</textarea>
-<pre class="o"></pre>
-
-</details>
 
 <details id="assemble"><summary>assemble</summary>
 
-assembling the tree uses a reduction of function "as" over the nodes.<br/>
-"as" calls a function depending on the node type with the node index as first argument and return values from the evaluation of it's children as 2nd argument.<br/>
+<p>
+assembling the tree uses a reduction with function <code>as</code> over the nodes:<br/>
+<code class="c">as/[();!#P;nc P]</code>
+</p>
+<p>
+<code>as</code> calls a function depending on the node type <code>(.T y)</code> with the node index as first argument and return values from the evaluation of it's children as 2nd argument:<br/>
+<code class="c">as:{c:(0,(#x)-z)^x;(c 0),,,/(.T y)[y;c 1]}</code>
+</p>
 each node function may produce output calling "O" and returns an integer for the current register.
+
+<textarea hidden class="k" data-src="postfix.k"></textarea>
+<pre class="o"></pre>
+
+<textarea hidden class="k" data-src="asn.k"></textarea>
+<pre class="o"></pre>
+
+<textarea hidden class="k" >postfix[];`0</textarea>
+<pre class="o"></pre>
+
+
 <textarea class="k" data-src="as.k"></textarea>
 <pre class="o"></pre>
 
 </details>
 
-<script src="pmov.js"></script>
+<details id="pmov"><summary>parallel register moves</summary>
+<p>
+before calling a function, the child nodes are evaluated to a list of registers for the function arguments.<br/>
+all active registers are pushed to the stack and the arguments must be reordered from the current argument list to expected calling order.<br/>
+in general this cannot be done sequentially because some registers may be overwritten.
+</p>
+<p>
+<a href="https://compiler.club/parallel-moves">here</a> is a description of an algorithm that finds a sequence of moves which is equivalent to a parallel assignment of all src to dst registers.
+</p>
+<code>pmov[dst;src;tmp]</code> tmp is a temporary register, which is needed if there is a cycle.
+<textarea class="k" data-src="pmov.k"></textarea>
+<pre class="o"></pre>
+
+</details>
+
+
 <script>
 let K,o,lo=x=>Number(BigInt.asUintN(32,x)),af=Array.from,qa=x=>af(document.querySelectorAll(x))
 let C=()=>new Int8Array(K.memory.buffer)
@@ -123,16 +135,15 @@ let kinit=_=>{
  K=r.instance.exports;K.kinit();
  banner.textContent="ktye/k "+n
  K.repl(KC('`l:(.`"lxy.")100 30'))
- let k=qa(".k") //.filter(x=>x.parentElement.open)
+ let k=qa(".k").filter(x=>x.parentElement.open)
  k.forEach(x=>{x.style.height="0px";x.style.height=x.scrollHeight+3+"px"})
  k.forEach(x=>x.nextElementSibling.textContent="") //clear output
  k.forEach(x=>{o=x.nextElementSibling;K.repl(KC(x.value))})})}
 
-qa("details").forEach(d=>d.ontoggle=e=>{ if(!e.target.open)return; qa("details").forEach(x=>{x.open=x===e.target}); /*kinit()*/  })
+qa("details").forEach(d=>d.ontoggle=e=>{if(!e.target.open)return; qa("details").forEach(x=>{x.open=x===e.target}); kinit()})
 
 let k=qa(".k");
-{ let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value);kinit()}) }
+{ let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value); kinit() }) }
 
-//kinit()
 qa("textarea").forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false;x.oninput=_=>{x.style.height="";x.style.height=x.scrollHeight+3+"px"}})
 </script></body></html>
