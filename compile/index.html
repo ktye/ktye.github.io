@@ -17,7 +17,7 @@ textarea{font-family:monospace;width:100%;background:#ffe;border:none;outline:no
 the following text includes an interactive repl. all yellow fields are k inputs, green is k output.<p>
 <pre class="o" id="banner"></pre>
 
-<details id="postfix" open><summary>intermediate representation and transform to postfix</summary>
+<details id="postfix"><summary>intermediate representation and transform to postfix</summary>
 
 let's start with an intermediate representation of a program
 <textarea class="k" data-src="asn.k"></textarea>
@@ -107,13 +107,24 @@ each node function may produce output calling "O" and returns an integer for the
 <textarea hidden class="k" data-src="asn.k"></textarea><pre class="o"></pre>
 <textarea hidden class="k" >postfix[];`0</textarea><pre class="o"></pre>
 
-
-<textarea class="k" data-src="as.k"></textarea>
+<textarea class="k" data-src="as0.k"></textarea>
 <pre class="o"></pre>
 
 </details>
 
+<details id="as" open><summary>as</summary>
 
+<textarea hidden class="k" data-src="pmov.k"></textarea><pre class="o"></pre>
+<textarea hidden class="k" data-src="postfix.k"></textarea><pre class="o"></pre>
+  <textarea hidden class="k" data-src="tests/a.k"></textarea><pre class="o"></pre>
+  <textarea hidden class="k">postfix[];`0</textarea><pre class="o"></pre>
+  <textarea hidden class="k" data-src="ptree.k"></textarea>
+  <textarea class="k">`&lt;ptree[]; `0</textarea><pre class="o"></pre>
+<textarea hidden class="k" data-src="tests/a.k"></textarea><pre class="o"></pre>
+<textarea class="k" data-src="as.k"></textarea>
+<pre class="o"></pre>
+
+</details>
 
 
 <script>
