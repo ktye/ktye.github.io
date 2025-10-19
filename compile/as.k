@@ -42,17 +42,20 @@ cal:{y;O"call ",$S x;0}
 drp:{free[*y];0}
 add:{O mov[r:alloc[S x];y 0];O xyz["add";r;y 1];free[S x]'y;r}
 
-sys:"section .data
-brk: dd 0x00000000
+sys:"format ELF64 executable
+segment readable writable ;.data
+_a: dq 0 ;args
+_b: dq 0 ;break
 heap:
 ",$[#D;,/{"dq 0x",(`x x),"\n"}'|'-8^D,_&7;""],"
-section .text
- global _start
+segment readable executable ;.text
+ entry _start ;global _start
 _start:
+ mov qword [_a],rsp
  mov rax,12
  mov rdi,0
  syscall
- mov qword [brk],rax
+ mov qword [_b],rax
  jmp main
 Write:
  mov rdx,rdi ;len
