@@ -117,19 +117,26 @@ each node function may produce output calling "O" and returns an integer for the
   <textarea hidden class="k" data-src="tests/a.k"></textarea><pre class="o"></pre>
   <textarea hidden class="k" data-src="postfix.k"></textarea><pre class="o"></pre>
   <textarea hidden class="k">postfix[];`0</textarea><pre class="o"></pre>
-  <textarea hidden class="k" data-src="ptree.k"></textarea>
+  <textarea hidden class="k" data-src="ptree.k"></textarea><pre class="o"></pre>
   
 to insert nodes, we cut the vectors <code>T P I S</code> at the insertion points, append the new items and join:<br/>
-<p> <code class="c">ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}</code><p/>
-the parent vector needs to be adjusted
+<p> <code class="c">ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}  /insert y into x at i</code></p>
+the parent vector needs to be adjusted after insertion because nodes are shifted
 <p> <code class="c">P:(0,i)'P+ins[i;P;p]</code></p>
-<p> e.g. we want to insert a marker before the else clause in a conditional.
-a <code>cnd</code> has 2 or 3 children, if there are 3 insert a node with type <code>els</code> before the last child:<p/>
+<p> e.g. we want to insert a marker before the else clause in a conditional to emit jump labels.<br/>
+an if statement is a <code>cnd</code> node with 2 or 3 children depending on the presence of an else clause.<br/>
+we need to insert the new nodes before the else clauses, e.g. directly after the second children:</p>
 
 <textarea class="k">
-insert:{[j;t;p;i;s]T::ins[j;T;t];P::(0,j)'P+ins[j;P;p];I::ins[j;I;i]P::ins[j;S;s]}
-else:(lc P)i@&3=(nc P)@i:&`cnd=T
-else
+nc:{n:{x[y]+:1}/(,&#x),x;n[-1+#n]-:1}  /num children
+sb:{c:&#x;{c[x]+:1;-1+c x}'x}          /sibling number
+lc:{@[!#x;x;!#x]}                      /last child
+
+ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}
+insert:{[j;t;p;i;s]T::ins[j;T;t];P::((0,j)'P)+P::ins[j;P;p];I::ins[j;I;i];S::ins[j;S;s]}
+
+e:&(1=sb P)&(3=(nc P)P)&`cnd=T P       /look for 2nd of 3 children of a node type `cnd
+i:insert[1+e;n#`els;P e;n#0;(n:#e)#`]  /insert els nodes
 </textarea><pre class="o"></pre>
 
 <textarea hidden class="k">`&lt;ptree[]; `0</textarea><pre class="o"></pre>
