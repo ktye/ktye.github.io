@@ -11,11 +11,12 @@ details:open>summary{margin-bottom:1em}
 textarea{font-family:monospace;width:100%;background:#ffe;border:none;outline:none;white-space:pre;overflow-wrap:normal;overflow:hidden}
 .c{margin-left:1em;margin-top:0.5em;display:block}
 .o{background:#efe;overflow:clip}
+.d{border:1px solid blue}
 @media(orientation:portrait){*{font-size:x-large}}
 </style></head><body>
 
 the following text includes an interactive repl. all yellow fields are k inputs, green is k output.<p>
-<pre class="o" id="banner"></pre>
+<pre class="o" id="banner"></pre><a id="dl" hidden></a>
 
 <details id="postfix"><summary>intermediate representation and transform to postfix</summary>
 
@@ -112,7 +113,31 @@ each node function may produce output calling "O" and returns an integer for the
 
 </details>
 
-<details id="as" open><summary>as</summary>
+<details id="insert" open><summary>insert nodes</summary>
+  <textarea hidden class="k" data-src="tests/a.k"></textarea><pre class="o"></pre>
+  <textarea hidden class="k" data-src="postfix.k"></textarea><pre class="o"></pre>
+  <textarea hidden class="k">postfix[];`0</textarea><pre class="o"></pre>
+  <textarea hidden class="k" data-src="ptree.k"></textarea>
+  
+to insert nodes, we cut the vectors <code>T P I S</code> at the insertion points, append the new items and join:<br/>
+<p> <code class="c">ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}</code><p/>
+the parent vector needs to be adjusted
+<p> <code class="c">P:(0,i)'P+ins[i;P;p]</code></p>
+<p> e.g. we want to insert a marker before the else clause in a conditional.
+a <code>cnd</code> has 2 or 3 children, if there are 3 insert a node with type <code>els</code> before the last child:<p/>
+
+<textarea class="k">
+insert:{[j;t;p;i;s]T::ins[j;T;t];P::(0,j)'P+ins[j;P;p];I::ins[j;I;i]P::ins[j;S;s]}
+else:(lc P)i@&3=(nc P)@i:&`cnd=T
+else
+</textarea><pre class="o"></pre>
+
+<textarea hidden class="k">`&lt;ptree[]; `0</textarea><pre class="o"></pre>
+  
+  
+</details>
+
+<details id="as" ><summary>as</summary>
 
 <textarea hidden class="k" data-src="pmov.k"></textarea><pre class="o"></pre>
 <textarea hidden class="k" data-src="postfix.k"></textarea><pre class="o"></pre>
@@ -122,7 +147,7 @@ each node function may produce output calling "O" and returns an integer for the
   <textarea class="k">`&lt;ptree[]; `0</textarea><pre class="o"></pre>
 <textarea hidden class="k" data-src="tests/a.k"></textarea><pre class="o"></pre>
 <textarea class="k" data-src="as.k"></textarea>
-<pre class="o"></pre>
+<pre class="o d"></pre>
 
 </details>
 
@@ -152,10 +177,13 @@ let kinit=_=>{
  k.forEach(x=>x.nextElementSibling.textContent="") //clear output
  k.forEach(x=>{o=x.nextElementSibling;K.repl(KC(x.value))})})}
 
+let download=(f,u)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=f;dl.click()}
+
 qa("details").forEach(d=>d.ontoggle=e=>{if(!e.target.open)return; qa("details").forEach(x=>{x.open=x===e.target}); kinit()})
 
 let k=qa(".k");
 { let x=[],F={};k.forEach((k,i)=>{let s=k.dataset.src;if(s)x.push(fetch(s).then(r=>r.text()).then(r=>F[s]=r))});Promise.all(x).then(_=>{k.forEach(k=>k.value=k.dataset.src?F[k.dataset.src]:k.value); kinit() }) }
 
+qa(".d").forEach(x=>x.ondblclick=_=>download("x.as",us(x.textContent)))
 qa("textarea").forEach(x=>{x.onchange=kinit;x.spellcheck=false;x.autocorrect=false;x.oninput=_=>{x.style.height="";x.style.height=x.scrollHeight+3+"px"}})
 </script></body></html>
