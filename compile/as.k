@@ -21,14 +21,22 @@ I[i]:n i:&`cnd=T                       /store number of children in cnd nodes
 e:&(1=sb P)&(3=n P)&`cnd=T P           /look for 2nd of 3 children of a node type `cnd
 i:insert[1+e;n#`els;P e;n#0;(n:#e)#`]  /insert els nodes
 
-s:`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
-T[i@&(#s)>s?T 1+i:& (`lit=T)&~`f=S]:`Lit  /replace literal nodes with `Lit where they can be used as immediates
+s:`var`con`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
+T[i@&(#s)>s?T 1+i:&(`lit=T)&~`f=S]:`Lit  /replace literal nodes with `Lit where they can be used as immediates
+
+cons:(S i)!I1+i:&`con=T /replace Get-const with literal node
+i:i@&(#cons)>(!cons)?S i:&`Get=T;T[i]:`Lit;I[i]:cons S[i]
+
+t:(I i)!S i:&`tab=T                    /function pointers
+tabl:,/{"dq ",$[`~x;"0";$x],"\n"}'t@!|/I i
 
 T[&(`cal=T)&`Exit=S]:`exi     /replace special node type `exi
-rets:(S P a)! S a:&`res=T /ret types `g`h!`i`i
-args:(S   a).=P a:&`arg=T /arg types `g`h!(`f`i`i;`i`j)
+rets:(S P a)! S a:&`res=T     /ret types `g`h!`i`i
+args:(S   a).=P a:&`arg=T     /arg types `g`h!(`f`i`i;`i`j)
 rets,:`Read`Write!`i`i
 args,:`Read`Write!(`i`i`i;`i`i`i`i)
+glob:|^(S i)!(`i`u`j`k`f!4 4 8 8 8)S 1+i:&`var=T  /`g1`g2!4 8  global!size
+/lits:{$[(S x)?`i`u;$I x;"0x",`x@|C(I x)+!8]}
 
 rs:{$[`i~@x;rj x;x]}
 xyz:{x," ",(rs y),",",(rs z)}
@@ -39,6 +47,10 @@ free:{$[`f~x;$[y<af;0;tf[y]:1];$[y<ai;0;ti[y]:1]]}
 prg:{y;out::(,sys),out;0}
 fun:{y;o::(,($S x),":")," ",/o;out,:o;o::();ai::0;af::0;ti::(#ri)#1;tf::(#rf)#1;R::(0#`)!!0;0}
 ast:{("\n"/y),"\n"}
+mem:{y;0}
+var:{y;0}
+con:{y;0}
+tab:{y;0}
 
 arg:{y;$[`f=S x;af+:1;ai+:1];0}
 loc:arg
@@ -48,6 +60,7 @@ res:{y;0}
 ast:{y;0}
 ret:{O mov[0;y 0];O"ret";0}
 get:{y;R S x}
+
 lit:{y;r:$[`asn~T a:P x;R S a;alloc[S x]];O mov[r;$I x];r}
 Lit:{y;0}
 asn:{O mov[r:R S x;y 0];r}
@@ -82,7 +95,8 @@ sys:"format ELF64 executable
 segment readable writable ;.data
 _a: dq 0 ;args
 _b: dq 0 ;break
-_h:      ;heap
+_t:
+",tabl,(,/{(": "/$x)," 0\n"}'(!glob),'`dq`dw 8=.glob),"_h:      ;heap
 ",$[#D;,/{"dq 0x",(`x x),"\n"}'|'-8^D;""],"
 segment readable executable ;.text
  entry _start ;global _start
@@ -102,7 +116,7 @@ Write:
  ret"
 
 nc:{n:{x[y]+:1}/(,&#x),x;n[-1+#n]-:1}
-as:{c:(0,(#x)-z)^x;(c 0),,,/(.T y)[y;c 1]}
+as:{c:(0,(#x)-z)^x;(c 0),,,/(. \T y)[y;c 1]}
 as/[();!#P;nc P]
 
 `<("\n"/out),"\n"; `0
