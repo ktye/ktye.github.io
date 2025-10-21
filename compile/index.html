@@ -113,7 +113,7 @@ each node function may produce output calling "O" and returns an integer for the
 
 </details>
 
-<details id="insert" open><summary>insert nodes</summary>
+<details id="insert"><summary>insert nodes</summary>
   <textarea hidden class="k" data-src="tests/a.k"></textarea><pre class="o"></pre>
   <textarea hidden class="k" data-src="postfix.k"></textarea><pre class="o"></pre>
   <textarea hidden class="k">postfix[];`0</textarea><pre class="o"></pre>
@@ -130,7 +130,6 @@ we need to insert the new nodes before the else clauses, e.g. directly after the
 <textarea class="k">
 nc:{n:{x[y]+:1}/(,&#x),x;n[-1+#n]-:1}  /num children
 sb:{c:&#x;{c[x]+:1;-1+c x}'x}          /sibling number
-lc:{@[!#x;x;!#x]}                      /last child
 
 ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}
 insert:{[j;t;p;i;s]T::ins[j;T;t];P::((0,j)'P)+P::ins[j;P;p];I::ins[j;I;i];S::ins[j;S;s]}
@@ -144,7 +143,7 @@ i:insert[1+e;n#`els;P e;n#0;(n:#e)#`]  /insert els nodes
   
 </details>
 
-<details id="as" ><summary>as</summary>
+<details id="as" open><summary>as</summary>
 
 <textarea hidden class="k" data-src="pmov.k"></textarea><pre class="o"></pre>
 <textarea hidden class="k" data-src="postfix.k"></textarea><pre class="o"></pre>

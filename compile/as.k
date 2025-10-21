@@ -9,15 +9,20 @@ ai:0;af:0     /number of args int/float
 R:(0#`)!!0    /map sym to reg
 sy:`Args`Arg`Read`Write`ReadIn`Native
 nc:{n:{x[y]+:1}/(,&#x),x;n[-1+#n]-:1}  /num children
-lc:{@[!#x;x;!#x]}                      /last child
+sb:{c:&#x;{c[x]+:1;-1+c x}'x}          /sibling number
 
 i:<?'+|(,(#P)##P),(,!#P),(P@)\P;P::(i?P)i;T@:i;I@:i;S@:i /postfix
 
-`lc \lc P
+ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}
+insert:{[j;t;p;i;s]T::ins[j;T;t];P::((0,j)'P)+P::ins[j;P;p];I::ins[j;I;i];S::ins[j;S;s]}
 
-insert:{[j;t;p;i;s]T::ins[j;T;t];P::(0,j)'P+ins[j;P;p];I::ins[j;I;i]P::ins[j;S;s]};ins:{[i;x;y];-1_,/((0,i)^x),'y,*y}
-else:(lc P)i@&3=(nc P)@i:&`cnd=T /if-else
-insert[else;n#`els;1+else;1+else;(n:#else)#`]
+n:nc P
+I[i]:n i:&`cnd=T                       /store number of children in cnd nodes
+e:&(1=sb P)&(3=n P)&`cnd=T P           /look for 2nd of 3 children of a node type `cnd
+i:insert[1+e;n#`els;P e;n#0;(n:#e)#`]  /insert els nodes
+
+s:`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
+T[i@&(#s)>s?T 1+i:& (`lit=T)&~`f=S]:`Lit  /replace literal nodes with `Lit where they can be used as immediates
 
 T[&(`cal=T)&`Exit=S]:`exi     /replace special node type `exi
 rets:(S P a)! S a:&`res=T /ret types `g`h!`i`i
@@ -44,20 +49,34 @@ ast:{y;0}
 ret:{O mov[0;y 0];O"ret";0}
 get:{y;R S x}
 lit:{y;r:$[`asn~T a:P x;R S a;alloc[S x]];O mov[r;$I x];r}
+Lit:{y;0}
 asn:{O mov[r:R S x;y 0];r}
 exi:{O mov[3;*y];O"mov rax,60";O"syscall";0}
 
 /cal:{O'"push ",/s:rs'&~tmp;$[#m:pmov[!#y;y;t:alloc[]];O'mov.'-2^m;0];free t;O"call ",$S x; O mov[r:alloc[];0]; O'"pop ",/|s;   r}
 cal:{y;O"call ",$S x;0}
 drp:{free[*y];0}
-add:{O mov[r:alloc[S x];y 0];O xyz["add";r;y 1];free[S x]'y;r}
+
+op2:{free[S y]'z;O mov[r:alloc[S y];z 0];O xyz[$x;r;z 1];r}
+add:op2`add;sub:op2`sub;and:op2`and;orr:op2`or;xor:op2`xor;mul:op2`imul
+bor:{r:orr[x;y];$[`cnd~P x;iff[`ne;P x];r]}
+bnd:{r:and[x;y];$[`cnd~P x;iff[`ne;P x];r]}
+
+neg:{i:*y;free[S x;i];r:alloc[S y];O mov[r;i];O "neg",rs r;r}
+not:{i:*y;free[S x;i];r:alloc[S y];O mov[r;i];O "not",rs r;r}
+ant:{and[x;(y 0),not[x;y 1]]}
+
+sh:{x; a:*z;b:z 1; free[S y]'z; r:alloc[S y];b:$[`Lit~T y-1;$I y-1;[O"mov cl,",(rb b);"cl"]]; O($x)," ",(rs r),",",b; r}
+shl:sh`shl;shr:{sh[`shr`sar(S x)?`u`k;x;y]}
 
 // <les =eql >mor <=lte !=neq >=gte &&bnd &and ||bor |or &^ant -sub +add *mul /div %mod >>shr <<shl
 // js:<0 jns:>=0 >0 
-cnd:{O@$*y }
-cmp:{[c;x;y]O xyz["cmp";y 0;y 1];free[S x]'y;$[`cnd~T P x;r:c(S x)?`u`k;O "setg ",rb r:alloc[S x]];r}
-mor:cmp`ja`jg;les:cmp`jb`jl;eql:cmp`je`je
-lte:cmp`jle`jbe;neq:cmp`jne`jne;gte:cmp`jge`jae
+cnd:{y;O".en",($I x),":";0}
+iff:{O@("j",$x)," .e",("ln"3=I y),$y;0}
+els:{y;O"jmp .en",i:$P x;O".el",i,":";0}
+cmp:{[c;x;y]O xyz[$`cmp`comisd@`f~S x;y 0;y 1];free[S x]'y;$[`cnd~T P x;r:iff[c 2+(S x)?`u`k;P x];O("set",$c(S x)?`u`k),rb r:alloc[S x]];r}
+mor:cmp`a`g`le`be;les:cmp`b`l`ge`ae;eql:cmp`e`e`ne`ne
+lte:cmp`le`be`a`q;gte:cmp`ge`ae`b`l;neq:cmp`ne`ne`e`e
 
 sys:"format ELF64 executable
 segment readable writable ;.data
