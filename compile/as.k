@@ -21,14 +21,21 @@ I[i]:n i:&`cnd=T                       /store number of children in cnd nodes
 e:&(1=sb P)&(3=n P)&`cnd=T P           /look for 2nd of 3 children of a node type `cnd
 i:insert[1+e;n#`els;P e;n#0;(n:#e)#`]  /insert els nodes
 
-s:`var`con`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
+c:sb P;n:#i:&`swc=T P                  /insert `cas nodes before each case in a switch
+insert[1+i;n#`cas;P i;c i;n#`]
+
+i:i@&`lit=T@-1+i:&`cst=T               /replace (cst (lit typ)) with lit
+/replace[i;T i-1;P i;I i-1;S i-2]
+
+
+s:`var`con`cst`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
 T[i@&(#s)>s?T 1+i:&(`lit=T)&~`f=S]:`Lit  /replace literal nodes with `Lit where they can be used as immediates
 
 cons:(S i)!I1+i:&`con=T /replace Get-const with literal node
 i:i@&(#cons)>(!cons)?S i:&`Get=T;T[i]:`Lit;I[i]:cons S[i]
 
 t:(I i)!S i:&`tab=T                    /function pointers
-tabl:,/{"dq ",$[`~x;"0";$x],"\n"}'t@!|/I i
+tabl:$[#t;,/{"dq ",$[`~x;"0";$x],"\n"}'t@!|/I i;""]
 
 T[&(`cal=T)&`Exit=S]:`exi     /replace special node type `exi
 rets:(S P a)! S a:&`res=T     /ret types `g`h!`i`i
@@ -65,6 +72,9 @@ lit:{y;r:$[`asn~T a:P x;R S a;alloc[S x]];O mov[r;$I x];r}
 Lit:{y;0}
 asn:{O mov[r:R S x;y 0];r}
 exi:{O mov[3;*y];O"mov rax,60";O"syscall";0}
+
+typ:{y;`i`u`j`k`f?S x}
+cst:{s:`i`u`j`k`f@*y;0+`nyi}
 
 /cal:{O'"push ",/s:rs'&~tmp;$[#m:pmov[!#y;y;t:alloc[]];O'mov.'-2^m;0];free t;O"call ",$S x; O mov[r:alloc[];0]; O'"pop ",/|s;   r}
 cal:{y;O"call ",$S x;0}
