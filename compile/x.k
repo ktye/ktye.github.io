@@ -31,5 +31,10 @@ insert:{[j;t;p;i;s]T::ins[j;T;t];P::((0,j)'P)+P::ins[j;P;p];I::ins[j;I;i];S::ins
 c:sb P
 n:#i:`i \&`swc=T P
 insert[1+i;n#`swi;P i;c i;n#`]
+P[i]:1+i:-1+&(I=0)&T=`swi
+
+i:i@&`lit=T@-1+i:&`cst=T               /replace (cst (lit typ)) with lit
+T[i]:`Lit;I[i]:I[i-1];S[i]:S[i-2];T[i-1]:`nop;T[i-2]:`nop
+
 
 `<ptree[]

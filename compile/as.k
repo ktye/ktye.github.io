@@ -22,17 +22,20 @@ e:&(1=sb P)&(3=n P)&`cnd=T P           /look for 2nd of 3 children of a node typ
 i:insert[1+e;n#`els;P e;n#0;(n:#e)#`]  /insert els nodes
 
 c:sb P;n:#i:&`swc=T P                  /insert `cas nodes before each case in a switch
+I[j]:(nc P)j:&`swc=T                   /mark number of cases
 insert[1+i;n#`cas;P i;c i;n#`]
+P[i]:1+i:-1+&(I=0)&T=`cas              /set switch expr as a child to the first case
 
 i:i@&`lit=T@-1+i:&`cst=T               /replace (cst (lit typ)) with lit
-/replace[i;T i-1;P i;I i-1;S i-2]
+T[i]:`Lit;I[i]:I[i-1];S[i]:S[i-2];T[i-1]:`nop;T[i-2]:`nop
 
-
-s:`var`con`cst`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
+s:`var`con`cst`asn`add`sub`mul`shl`shr`and`orr`mor`les`eql`gte`lte`neq
 T[i@&(#s)>s?T 1+i:&(`lit=T)&~`f=S]:`Lit  /replace literal nodes with `Lit where they can be used as immediates
 
 cons:(S i)!I1+i:&`con=T /replace Get-const with literal node
 i:i@&(#cons)>(!cons)?S i:&`Get=T;T[i]:`Lit;I[i]:cons S[i]
+
+T[&(S=`Args)&`cal=T]:`argc             /replace (call Args) with argc
 
 t:(I i)!S i:&`tab=T                    /function pointers
 tabl:$[#t;,/{"dq ",$[`~x;"0";$x],"\n"}'t@!|/I i;""]
@@ -58,6 +61,7 @@ mem:{y;0}
 var:{y;0}
 con:{y;0}
 tab:{y;0}
+nop:{y;0}
 
 arg:{y;$[`f=S x;af+:1;ai+:1];0}
 loc:arg
@@ -68,9 +72,9 @@ ast:{y;0}
 ret:{O mov[0;y 0];O"ret";0}
 get:{y;R S x}
 
-lit:{y;r:$[`asn~T a:P x;R S a;alloc[S x]];O mov[r;$I x];r}
+lit:{y;r:alloc[S x];O mov[r;$I x];r}
 Lit:{y;0}
-asn:{O mov[r:R S x;y 0];r}
+asn:{O mov[r:R S x;$[`Lit=T x-1;$I x-1;y 0]];r}
 exi:{O mov[3;*y];O"mov rax,60";O"syscall";0}
 
 typ:{y;`i`u`j`k`f?S x}
@@ -101,6 +105,12 @@ cmp:{[c;x;y]O xyz[$`cmp`comisd@`f~S x;y 0;y 1];free[S x]'y;$[`cnd~T P x;r:iff[c 
 mor:cmp`a`g`le`be;les:cmp`b`l`ge`ae;eql:cmp`e`e`ne`ne
 lte:cmp`le`be`a`q;gte:cmp`ge`ae`b`l;neq:cmp`ne`ne`e`e
 
+swi:{s:".s",$x;O"test ",r,",",r:rj y;O"jz ",s,"c0";n:I x;{O"cmp ",r,",",$x;O"je ",s,"c",$x}'1+!n-3;O"jmp ",s,"def\n ",s,"c0:"}
+cas:{y;s:".s",$P x;$[(1+x)~P x;0;(I P x)=2+I x;O s,"def:";I x;O"jmp ",s,"\n ",s,"c",($I x),":";swi[P x;*y]];0}
+swc:{y;O ".s",$x;0}
+
+argc:{y;r:alloc[`j];O"mov ",(rj r),",[_a]";r}
+
 sys:"format ELF64 executable
 segment readable writable ;.data
 _a: dq 0 ;args
@@ -126,7 +136,7 @@ Write:
  ret"
 
 nc:{n:{x[y]+:1}/(,&#x),x;n[-1+#n]-:1}
-as:{c:(0,(#x)-z)^x;(c 0),,,/(. \T y)[y;c 1]}
+as:{c:(0,(#x)-z)^x;(c 0),,,/(.T y)[y;c 1]}
 as/[();!#P;nc P]
 
 `<("\n"/out),"\n"; `0
