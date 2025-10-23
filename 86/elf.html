@@ -1,0 +1,10 @@
+<!doctype html>
+<html><head><meta charset=utf-8><title>elf</title>
+<style></style>
+</head>
+<body>
+<script src="elf.js"></script>
+<script>
+fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>console.log(elf(new Uint8Array(r))))
+</script>
+</body>
