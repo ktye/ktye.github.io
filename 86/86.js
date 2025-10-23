@@ -4,3 +4,17 @@ let loadelf=u=>{let U=new Uint32Array(u.buffer,0,u.buffer.byteLength>>>2),H=new 
 
 let show=_=>{let s="";for(let i=0;i<10;i++)s+=M[rip+i].toString(16).padStart("0")+" ";return s}
 
+
+/* fasm syscalls:
+0x0    0  read
+0x1    1  write
+0x2    2  open
+0x3    3  close
+0x8    8  lseek
+0x9    9  mmap         only for large alloc
+0xb   11  munmap       .. 
+0xc   12  brk
+0x3c  60  exit
+0x60  96  gettimeofday
+0xc9 201  time
+*/
