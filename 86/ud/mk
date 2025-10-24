@@ -1,0 +1,7 @@
+# this is: https://github.com/vmt/udis86 libusid86 + main.c
+# itab.h is generated using "python2.7 ../scripts/ud_itab.py ../docs/x86/optable.xml ." in the source.
+
+#cc -o ud *.c
+
+c:/local/LLVM-14/bin/clang -D__UD_STANDALONE__  -DWASM -target wasm32 -nostdlib -Wl,--no-entry -Wl,--export=dis_init  -Wl,--export=offset  -Wl,--export=length  -Wl,--export=dis udis86.c decode.c itab.c dis.c -o dis.wasm 
+

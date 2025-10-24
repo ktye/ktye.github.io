@@ -5,6 +5,20 @@
 </style></head><body>
 <script src="86.js"></script>
 <script>
+
 fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>console.log(loadelf(new Uint8Array(r))))
+let D;WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>D=r.instance.exports)
+
+let decode=_=>{
+ D.dis_init(rip);
+ let b = new Uint8Array(16)
+ let u = new Uint32Array(b.buffer)
+ for(let i=0;i<16;i++)b[i]=M[rip+i];
+ 
+ console.log("decode", D.dis(u[0],u[1],u[2],u[3]));
+ console.log("offset", D.offset())
+ console.log("length", D.length())
+}
+
 </script>
 </body>
