@@ -3,5 +3,5 @@
 
 #cc -o ud *.c
 
-c:/local/LLVM-14/bin/clang -D__UD_STANDALONE__  -DWASM -target wasm32 -nostdlib -Wl,--no-entry -Wl,--export=dis_init  -Wl,--export=offset  -Wl,--export=length  -Wl,--export=dis udis86.c decode.c itab.c dis.c -o dis.wasm 
-
+# c:/local/LLVM-14/bin/clang 
+clang -D__UD_STANDALONE__  -DWASM -target wasm32 -nostdlib -Wl,--no-entry -Wl,--export=dis_init -Wl,--export=dis udis86.c decode.c itab.c dis.c -o dis.wasm 

@@ -8,7 +8,12 @@ int hook(struct ud*u){
  if(p==16)return UD_EOI;
  return 0xff&b[p++];
 }
-void dis_init(uint32_t pc){p=0;ud_init(&ud_obj);ud_set_pc(&ud_obj,(uint64_t)pc);ud_set_mode(&ud_obj,64);ud_set_input_hook(&ud_obj,&hook);}
+
+//uint32_t ptrdiff(void*a,void*b){return((uint32_t)b-(uint32_t)a);}
+//uint32_t dis_init(uint32_t x){return ptrdiff(&ud_obj,&ud_obj.xxx);}
+
+ud_t*dis_init(uint32_t pc){p=0;ud_init(&ud_obj);ud_set_pc(&ud_obj,(uint64_t)pc);ud_set_mode(&ud_obj,64);ud_set_input_hook(&ud_obj,&hook);return&ud_obj;}
+
 
 
 
@@ -17,8 +22,8 @@ int dis(uint32_t A,uint32_t B,uint32_t C,uint32_t D){
  int r=ud_disassemble(&ud_obj);
  return r;
 }
-uint32_t offset(void){return(uint32_t)ud_obj.insn_offset;}
-uint32_t length(void){return ud_obj.inp_ctr;}
+//uint32_t offset(void){return(uint32_t)ud_obj.insn_offset;}
+//uint32_t length(void){return ud_obj.inp_ctr;}
 // uint32_t op(void){return ud_obj.mnemonic;}
 
 
