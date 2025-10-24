@@ -13,7 +13,7 @@ let D;WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{D=r.instan
  fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{
   console.log(loadelf(new Uint8Array(r)))
   let ud=D.dis_init(rip)
-  for(let i=0;i<30;i++)decode(ud)
+  for(let i=0;i<50;i++)decode(ud)
  })
 })
 
@@ -47,14 +47,16 @@ let decode=ud=>{
  let regstr=x=>regtab[x-1]
 
  let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0"),hx8=(h,l,n)=>"0x"+h.toString(16).padStart(8,"0")+l.toString(16).padStart(8,"0")
+ let hs=(x,n)=>(x<0)?"-"+hx(-x,n):hx(x,n)
  let uword=l=>hx(l,4),dword=l=>hx(l,8),qword=(h,l)=>hx8(h,l)
- let disp=(o,b,i,l,h)=>"+"+(o==16?uword(l):o==32?dword(l):o==64?qword(h,l):"displ?o="+o)
- let indx=(i,s,o)=>"index/scale?"+[i,s]
+ let disp=(o,b,i,l,h)=>((b==0&&i==0)?(o==16?uword(l):o==32?dword(l):o==64?qword(h,l):"disp?o="+o) : ("+"+(o==8?hs((l<<24)>>24,2):o==16?hs((l<<16)>>16,4):o==32?hs(l,8):("displ?"+o))))
+ let indx=(b,i,s,o)=>((b?"+":"")+regstr(i)+(s?("*"+s):""))
  let opsize=x=>(x==0?"":x==8?"byte ":x==16?"word ":x==32?"dword ":x==64?"qword ":x==80?"tword ":x==128?"oword ":x==256?"yword ":"(size?)")
  let opmem=x=>{ let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff, o=(u[4+x]>>>8)&0xff;
-  return opsize(s)+"["+(b?regstr(b)+(i?indx(i,sc):""):"")+(o?disp(o,b,i,u[x+6],u[x+7]):"")+"]"}
+  return opsize(s)+"["+(b?regstr(b)+(i?indx(b,i,sc):""):"")+(o?disp(o,b,i,u[x+6],u[x+7]):"")+"]"}
  let imm=x=>{let s=u[1+x],l=u[x+6],h=u[x+7];return s==8?hx(l,2):s==16?hx(l,4):s==32?hx(l,8):s==64?hx8(h,l):("imm-size?"+s)}
- let oper=i=>{let x=1+12*i;t=u[x];return t==0?"":t==156?regstr(u[2+x]):t==157?opmem(x):t==159?imm(x):"oper?"+t}
+ let jmm=x=>{let s=u[1+x],l=u[x+6],h=u[x+7];return s==8?hx(l+rip,2):s==16?hx(l+rip,4):s==32?hx(l+rip,8):("jmm-size?"+s)}
+ let oper=i=>{let x=1+12*i;t=u[x];return t==0?"":t==156?regstr(u[2+x]):t==157?opmem(x):t==159?imm(x):t==160?jmm(x):"oper?"+t}
  let operands=_=>[oper(0),oper(1),oper(2),oper(3)].filter(x=>x!="").join(",")
 
  disa.textContent+=hx(rip-b[20],8)+" "+(mne[u[0]]).padEnd(4," ")+" "+operands()+"\n"
