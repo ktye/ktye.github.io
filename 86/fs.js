@@ -8,7 +8,6 @@ let fpeek=u=>af(u.slice(0,16)).map(x=>(x>31&&x<127)?String.fromCharCode(x):".").
 let fsdel=x=>(x=fs.findIndex(f=>f.name==x),x<0?0:(fs.splice(x,1),fsshow()))
 let fsshow=_=>{
  let r=""
- console.log(fs)
  fs.forEach(x=>r+=`<span class="l" onclick='ed("${x.name}")'>${x.name}</span>`+(" ".repeat(18-x.name.length-String(x.u.length).length))+x.u.length+"  "+fpeek(x.u)+"\n")
  disk.innerHTML=r
 }

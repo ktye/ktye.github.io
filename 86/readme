@@ -16,7 +16,7 @@ example:
 $wget ../k.wasm  (any files from ktye.github.io)
 
 source:
-$wget 86.js sh.js ed.js fs.js index.html
+$wget 86.js sh.js ed.js fs.js k.js index.html
 $wget ud/dis.c
 
 execution
