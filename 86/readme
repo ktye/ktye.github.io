@@ -1,0 +1,37 @@
+ktye/linux(x86-64)
+
+this is a small linux system in js.
+it can execute statically linked elf files.
+
+you can use fasm to assemble executable files.
+
+shell built-ins: ls cp rm mv cat xxd k head
+                 wget ed/vi/emacs/nano
+redirections:    $a<b>c   no pipe/append/here
+no interpolation, no quoting
+
+^C
+
+example:
+$wget ../k.wasm  (any files from ktye.github.io)
+
+source:
+$wget 86.js sh.js ed.js fs.js index.html
+$wget ud/dis.c
+
+execution
+elf files are expected to be statically linked
+all segments from the program header table are
+loaded to virtual memory M.
+the first is expected to be executable.
+the program counter rip is set to the entry point.
+
+instructions are decoded using udis86 c library
+compiled to wasm, see $wget ud/dis.c ud/mk
+
+syscalls are handled by javascript.
+execution pauses on read from stdin if no input
+file has been redirected, and waits for user input.
+
+debug
+$kdb prog arg

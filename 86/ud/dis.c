@@ -1,30 +1,28 @@
 #include"udis86.h"
 
-uint32_t word;
-int p;
-uint8_t b[16];
-ud_t ud_obj;
-int hook(struct ud*u){
- if(p==16)return UD_EOI;
- return 0xff&b[p++];
-}
+//exported: dis_init and dis
+//dis_init returns pointer to ud_obj
+//ud_obj.inp_buf contains the pointer to the input buffer.
+//fill this buffer with the next 16 bytes relative to rip,
+//and call dis(). the result is stored in ud_obj.
+//increment rip by the return from dis(), and interprete ud_obj.
+
+ud_t    ud_obj;
+uint8_t buf[16];
 
 //uint32_t ptrdiff(void*a,void*b){return((uint32_t)b-(uint32_t)a);}
-//uint32_t dis_init(uint32_t x){return ptrdiff(&ud_obj,&ud_obj.xxx);}
+//uint32_t dis_init(uint32_t x){return ptrdiff(&ud_obj,&ud_obj.inp_buf);}
 
-ud_t*dis_init(uint32_t pc){p=0;ud_init(&ud_obj);ud_set_pc(&ud_obj,(uint64_t)pc);ud_set_mode(&ud_obj,64);ud_set_input_hook(&ud_obj,&hook);return&ud_obj;}
-
-
-
-
-int dis(uint32_t A,uint32_t B,uint32_t C,uint32_t D){
- uint32_t *u=(uint32_t*)b;u[0]=A;u[1]=B;u[2]=C;u[3]=D;p=0;
- int r=ud_disassemble(&ud_obj);
- return r;
+ud_t*dis_init(uint32_t pc){
+ ud_init(&ud_obj);
+ ud_set_pc(&ud_obj,(uint64_t)pc);
+ ud_set_mode(&ud_obj,64);
+ ud_obj.inp_buf=buf;
+ return&ud_obj;
 }
-//uint32_t offset(void){return(uint32_t)ud_obj.insn_offset;}
-//uint32_t length(void){return ud_obj.inp_ctr;}
-// uint32_t op(void){return ud_obj.mnemonic;}
 
-
-
+int dis(void){
+ ud_set_input_buffer(&ud_obj,buf,16);
+ int r=ud_disassemble(&ud_obj);
+ return r?ud_obj.inp_ctr:0;
+}
