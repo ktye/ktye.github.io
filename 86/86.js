@@ -9,10 +9,13 @@ const mne="aaa,aad,aam,aas,adc,add,addpd,addps,addsd,addss,addsubpd,addsubps,aes
 let show=_=>{let s="";for(let i=0;i<10;i++)s+=M[rip+i].toString(16).padStart("0")+" ";return s}
 
 let execv=a=>{
- let u=fsget(a[0]),M,rip,eop;if(u===0){progexit();return}
- try{[M,rip,eop]=loadelf(u)}
+ let u=fsget(a[0]),elf;if(u===0){progexit();return}
+ try{elf=loadelf(u)}
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
- disasm(M,rip,eop)
+ WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
+  disasm(elf,d)
+  execute(elf,d)
+ })
 }
 
 
@@ -30,27 +33,26 @@ let execv=a=>{
 0xc9 201  time
 */
 let err=s=>{throw new error(s)}
-let execute=(elf,D)=>{ //pc R 
+let execute=(elf,D)=>{
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,mne;
-  let H=new Uint16Array(M.buffer),U=new Uint32Array(M.buffer),R=new Uint32Array(M.buffer,0,320);R[308]=rip;   // [156 regs][4 imm]
+  let H=new Uint16Array(M.buffer,0,M.buffer.length>>1),U=new Uint32Array(M.buffer,0,M.buffer.length>>2),R=new Uint32Array(M.buffer,0,320);R[308]=rip;   // [156 regs][4 imm]
   let Rat=x=>R[(x-1)*2],raddr=x=>(x-1)*8,simm=(i,l,h, a)=>(a=312+2*i,R[a]=l,R[1+a]=h,a)
   for(let i=0;i<1;i++){
    console.log("rip",R[308])
    for(let j=0;j<16;j++)ibuf[j]=M[j+R[308]];let n=D.dis();if(!n)break;R[308]+=n
-   sz=b[538+9];adrmode=b[538+10];console.log("oprmode",oprmode,"adrmode",adrmode)
+   sz=b[538+9];adrmode=b[538+10]; //console.log("oprmode",oprmode,"adrmode",adrmode)
       
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,       (8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,R[308]+(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let disp=(o,b,i,l,h)=>{ console.log("disp",o,b,i,l,h,(8==0?0xff:16==o?0xffff:0xffffffff)&l);  return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
    let indx=(i,s)=>{ return Rat(i)*(s?s:1) }
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff;  return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
-   let oper=i=>{let x=1+12*i,t=u[x]; console.log("oper",i,t); return(t==0)?0:t==156?raddr(u[2+x]):t==157?opmem(x):t==159?imm(x):t==160?jmm(x):(err("operand type:"+t),0)}
+   let oper=i=>{let x=1+12*i,t=u[x];return(t==0)?0:t==156?raddr(u[2+x]):t==157?opmem(x):t==159?imm(x):t==160?jmm(x):(err("operand type:"+t),0)}
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
-   console.log("u0",u[0],x,y)
    switch(u[0]){
-   case 303: 8==sz?(M[x]=M[y]):16==sz?(H[x>>1]=H[y>>1]):(U[x>>2]=U[y>>1],64==sz?(U[1+(x>>2)]=U[1+(y>>2)]):0); console.log("mov",oprmode,x,y); return[x,y]; break; //mov
+   case 303: 8==sz?(M[x]=M[y]):16==sz?(H[x>>1]=H[y>>1]):(U[x>>2]=U[y>>1],64==sz?(U[1+(x>>2)]=U[1+(y>>2)]):0); return[x,y]; break; //mov
    //case 269: lea
    //case  36: call
    default: throw new Error("unknown instr", u[0], mne[u[0]]);
@@ -59,22 +61,19 @@ let execute=(elf,D)=>{ //pc R
  }
 }
 
-
-let disasm=(M,rip,eop)=>{asm=[];disa.innerHTML=""
- WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
-  let ud=d.dis_init(rip)
-  let bp  =new Uint32Array(d.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
-  let ibuf=new Uint8Array(d.memory.buffer,bp,16);
-  let b=new Uint8Array(d.memory.buffer,ud,576),u=new Uint32Array(d.memory.buffer,ud+340,59)
+let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
+  let ud=D.dis_init(rip)
+  let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
+  let ibuf=new Uint8Array(D.memory.buffer,bp,16);
+  let b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59)
   
   let s;while(1){
    for(let i=0;i<16;i++)ibuf[i]=M[rip+i];
-   let n=d.dis();if(!n)break;rip+=n;
+   let n=D.dis();if(!n)break;rip+=n;
    s=decode(rip,b,u);asm.push(s);if(rip>=eop)break
   }
   let n=Math.min(30,asm.length)
   for(let i=0;i<n;i++)disa.appendChild(asm[i]);disa.firstChild.classList.add("b")
- })
 }
 
 
