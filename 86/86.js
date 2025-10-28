@@ -40,17 +40,17 @@ let execute=(elf,D)=>{
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,mne;
   let H=new Uint16Array(M.buffer,0,M.buffer.length>>1),U=new Uint32Array(M.buffer,0,M.buffer.length>>2),R=new Uint32Array(M.buffer,0,69);R[64]=rip;   // [156 regs][4 imm]
-  let Rat=x=>R[regmap[x]>>2],simm=(i,l,h, a)=>(a=65+2*i,R[a]=l,R[1+a]=h,a)
+  let Rat=x=>R[regmap[x]>>2],simm=(i,l,h, a)=>(a=65+2*i,R[a]=l,R[1+a]=h,a<<2)
   return _=>{
    for(let j=0;j<16;j++)ibuf[j]=M[j+R[64]];let n=D.dis();if(!n)return 0;rip+=n;R[64]=rip
    sz=b[538+9];adrmode=b[538+10]; //console.log("oprmode",oprmode,"adrmode",adrmode)
       
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,      (8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,R[64]+(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
-   let disp=(o,b,i,l,h)=>{ console.log("disp",o,b,i,l,h,(8==0?0xff:16==o?0xffff:0xffffffff)&l);  return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
+   let disp=(o,b,i,l,h)=>{ return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
    let indx=(i,s)=>{ return Rat(i)*(s?s:1) }
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff;  return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
-   let oper=i=>{let x=1+12*i,t=u[x]; console.log("oper",i,t,u[2+x]); return(t==0)?0:t==156?regmap(u[2+x]):t==157?opmem(x):t==159?imm(x):t==160?jmm(x):(err("operand type:"+t),0)}
+   let oper=i=>{let x=1+12*i,t=u[x]; return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
    
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
    switch(u[0]){
@@ -125,11 +125,12 @@ let decode=(rip,b,u)=>{
   
 }
 
-let mark=(rip,x,y)=>{let pc=hx(rip,8); console.log("mark rip",rip,x,y)
+let mark=(rip,x,y)=>{let pc=hx(rip,8); 
  let a=af(disa.childNodes);a.forEach(x=>x.classList.remove("b"))
  let i=a.findIndex(x=>x.id==pc);if(i>=0)a[i].classList.add("b")
  a=af(regs.children);a.forEach(x=>x.classList.remove("b"))
- let mk=x=>{ console.log("mk",x,regmap[x>>>3],"reg"+regmap[x>>>3]); x<256?ge("reg"+regmap[x>>>3]).classList.add("b"):0 };mk(x);mk(y)
+
+ let mk=x=>{ x<256?ge("reg"+(x>>>3)).classList.add("b"):0 };mk(x);mk(y)
 }
 
 if("undefined"!=typeof Deno){ //$deno --allow-read 86.js fasm.elf args..  or $deno repl --allow-read --eval-file=86.js -- fasm.elf args..
