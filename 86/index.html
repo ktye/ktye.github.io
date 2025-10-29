@@ -2,20 +2,20 @@
 <html><head><meta charset=utf-8><title>86</title>
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
 <style>
-*{box-sizing:border-box;overflow:clip;font-family:monospace}
+*{box-sizing:border-box;/*overflow:clip;*/font-family:monospace}
 html{height:100vh}
-body{display:flex;flex-direction:column;height:100%;}
+body{display:flex;flex-direction:column;}
 button{padding:0}
-#tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc}
+#tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
 #editor{background:#ffe;outline:none;border:1px solid black;width:80ch;height:20rem;overflow:scroll;resize:none;margin-block:1em;margin-bottom:0}
-.b{font-weight:bold}
+.b{background:#444;color:white}
 .l{color:blue}
 .l:hover{cursor:pointer}
 </style></head><body>
 
-<div style="display:flex;gap:1em">
+<div style="display:flex;flex-wrap:wrap;gap:1em">
  <textarea id="editor" rows="20" cols="80" hidden></textarea>
  <pre id="tty"><span id="out" tabindex="-1">linux/x86-64 [read write open close lseek brk exit] 1core 1proc 2g</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
  <div style="display:flex;flex-flow:column;justify-content:space-between">
@@ -30,8 +30,8 @@ button{padding:0}
   </div>
  </div>
 </div>
-<div style="display:flex;gap:1em">
- <pre id="disa"></pre>
+<div style="display:flex;flex-wrap:wrap;justify-content:space-between">
+ <pre id="disa" hidden></pre>
  <div style="display:flex;flex-flow:column">
   <pre id="regs">
  rax rsp r8 r12   rcx rbp r9 r13   rdx rsi r10 r14  rbx rdi r11 r15
