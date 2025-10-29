@@ -10,6 +10,9 @@ button{padding:0}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
 #editor{background:#ffe;outline:none;border:1px solid black;width:80ch;height:20rem;overflow:scroll;resize:none;margin-block:1em;margin-bottom:0}
+#disa:focus{outline:1px solid}
+#regs:focus{outline:1px solid}
+#heap:focus{outline:1px solid}
 .b{background:#444;color:white}
 .l{color:blue}
 .l:hover{cursor:pointer}
@@ -31,9 +34,9 @@ button{padding:0}
  </div>
 </div>
 <div style="display:flex;flex-wrap:wrap;justify-content:space-between">
- <pre id="disa" hidden></pre>
+ <pre id="disa" hidden tabindex="-1"></pre>
  <div style="display:flex;flex-flow:column">
-  <pre id="regs">
+  <pre id="regs" tabindex="-1">
  rax rsp r8 r12   rcx rbp r9 r13   rdx rsi r10 r14  rbx rdi r11 r15
  <span id="reg0" >0000000000000000</span> <span id="reg1" >0000000000000000</span> <span id="reg2" >0000000000000000</span> <span id="reg3" >0000000000000000</span>
 ┌<span id="reg4" >0000000000000000</span> <span id="reg5" >0000000000000000</span> <span id="reg6" >0000000000000000</span> <span id="reg7" >0000000000000000</span>
@@ -66,7 +69,7 @@ button{padding:0}
 <span id="stk15"> 0000000000000000 0000000000000000</span>
   </pre>
  </div>
- <pre id="mem">heap
+ <pre id="heap" tabindex="-1">heap
 00000000 0000000000000000 0000000000000000 ........ ........
  </pre>
 </div>
