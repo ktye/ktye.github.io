@@ -7,6 +7,7 @@ const regtab="xx al cl dl bl ah ch dh bh spl bpl sil dil r8b r9b r10b r11b r12b 
 const mne="aaa,aad,aam,aas,adc,add,addpd,addps,addsd,addss,addsubpd,addsubps,aesdec,aesdeclast,aesenc,aesenclast,aesimc,aeskeygenassist,and,andnpd,andnps,andpd,andps,arpl,blendpd,blendps,blendvpd,blendvps,bound,bsf,bsr,bswap,bt,btc,btr,bts,call,cbw,cdq,cdqe,clc,cld,clflush,clgi,cli,clts,cmc,cmova,cmovae,cmovb,cmovbe,cmovg,cmovge,cmovl,cmovle,cmovno,cmovnp,cmovns,cmovnz,cmovo,cmovp,cmovs,cmovz,cmp,cmppd,cmpps,cmpsb,cmpsd,cmpsq,cmpss,cmpsw,cmpxchg,cmpxchg16b,cmpxchg8b,comisd,comiss,cpuid,cqo,crc32,cvtdq2pd,cvtdq2ps,cvtpd2dq,cvtpd2pi,cvtpd2ps,cvtpi2pd,cvtpi2ps,cvtps2dq,cvtps2pd,cvtps2pi,cvtsd2si,cvtsd2ss,cvtsi2sd,cvtsi2ss,cvtss2sd,cvtss2si,cvttpd2dq,cvttpd2pi,cvttps2dq,cvttps2pi,cvttsd2si,cvttss2si,cwd,cwde,daa,das,dec,div,divpd,divps,divsd,divss,dppd,dpps,emms,enter,extractps,f2xm1,fabs,fadd,faddp,fbld,fbstp,fchs,fclex,fcmovb,fcmovbe,fcmove,fcmovnb,fcmovnbe,fcmovne,fcmovnu,fcmovu,fcom,fcom2,fcomi,fcomip,fcomp,fcomp3,fcomp5,fcompp,fcos,fdecstp,fdiv,fdivp,fdivr,fdivrp,femms,ffree,ffreep,fiadd,ficom,ficomp,fidiv,fidivr,fild,fimul,fincstp,fist,fistp,fisttp,fisub,fisubr,fld,fld1,fldcw,fldenv,fldl2e,fldl2t,fldlg2,fldln2,fldpi,fldz,fmul,fmulp,fndisi,fneni,fninit,fnop,fnsave,fnsetpm,fnstcw,fnstenv,fnstsw,fpatan,fprem,fprem1,fptan,frndint,frstor,frstpm,fscale,fsin,fsincos,fsqrt,fst,fstp,fstp1,fstp8,fstp9,fsub,fsubp,fsubr,fsubrp,ftst,fucom,fucomi,fucomip,fucomp,fucompp,fxam,fxch,fxch4,fxch7,fxrstor,fxsave,fxtract,fyl2x,fyl2xp1,getsec,haddpd,haddps,hlt,hsubpd,hsubps,idiv,imul,in,inc,insb,insd,insertps,insw,int,int1,int3,into,invd,invept,invlpg,invlpga,invvpid,iretd,iretq,iretw,ja,jae,jb,jbe,jcxz,jecxz,jg,jge,jl,jle,jmp,jno,jnp,jns,jnz,jo,jp,jrcxz,js,jz,lahf,lar,lddqu,ldmxcsr,lds,lea,leave,les,lfence,lfs,lgdt,lgs,lidt,lldt,lmsw,lock,lodsb,lodsd,lodsq,lodsw,loop,loope,loopne,lsl,lss,ltr,maskmovdqu,maskmovq,maxpd,maxps,maxsd,maxss,mfence,minpd,minps,minsd,minss,monitor,montmul,mov,movapd,movaps,movbe,movd,movddup,movdq2q,movdqa,movdqu,movhlps,movhpd,movhps,movlhps,movlpd,movlps,movmskpd,movmskps,movntdq,movntdqa,movnti,movntpd,movntps,movntq,movq,movq2dq,movsb,movsd,movshdup,movsldup,movsq,movss,movsw,movsx,movsxd,movupd,movups,movzx,mpsadbw,mul,mulpd,mulps,mulsd,mulss,mwait,neg,nop,not,or,orpd,orps,out,outsb,outsd,outsw,pabsb,pabsd,pabsw,packssdw,packsswb,packusdw,packuswb,paddb,paddd,paddq,paddsb,paddsw,paddusb,paddusw,paddw,palignr,pand,pandn,pavgb,pavgusb,pavgw,pblendvb,pblendw,pclmulqdq,pcmpeqb,pcmpeqd,pcmpeqq,pcmpeqw,pcmpestri,pcmpestrm,pcmpgtb,pcmpgtd,pcmpgtq,pcmpgtw,pcmpistri,pcmpistrm,pextrb,pextrd,pextrq,pextrw,pf2id,pf2iw,pfacc,pfadd,pfcmpeq,pfcmpge,pfcmpgt,pfmax,pfmin,pfmul,pfnacc,pfpnacc,pfrcp,pfrcpit1,pfrcpit2,pfrsqit1,pfrsqrt,pfsub,pfsubr,phaddd,phaddsw,phaddw,phminposuw,phsubd,phsubsw,phsubw,pi2fd,pi2fw,pinsrb,pinsrd,pinsrq,pinsrw,pmaddubsw,pmaddwd,pmaxsb,pmaxsd,pmaxsw,pmaxub,pmaxud,pmaxuw,pminsb,pminsd,pminsw,pminub,pminud,pminuw,pmovmskb,pmovsxbd,pmovsxbq,pmovsxbw,pmovsxdq,pmovsxwd,pmovsxwq,pmovzxbd,pmovzxbq,pmovzxbw,pmovzxdq,pmovzxwd,pmovzxwq,pmuldq,pmulhrsw,pmulhrw,pmulhuw,pmulhw,pmulld,pmullw,pmuludq,pop,popa,popad,popcnt,popfd,popfq,popfw,por,prefetch,prefetchnta,prefetcht0,prefetcht1,prefetcht2,psadbw,pshufb,pshufd,pshufhw,pshuflw,pshufw,psignb,psignd,psignw,pslld,pslldq,psllq,psllw,psrad,psraw,psrld,psrldq,psrlq,psrlw,psubb,psubd,psubq,psubsb,psubsw,psubusb,psubusw,psubw,pswapd,ptest,punpckhbw,punpckhdq,punpckhqdq,punpckhwd,punpcklbw,punpckldq,punpcklqdq,punpcklwd,push,pusha,pushad,pushfd,pushfq,pushfw,pxor,rcl,rcpps,rcpss,rcr,rdmsr,rdpmc,rdrand,rdtsc,rdtscp,rep,repne,ret,retf,rol,ror,roundpd,roundps,roundsd,roundss,rsm,rsqrtps,rsqrtss,sahf,salc,sar,sbb,scasb,scasd,scasq,scasw,seta,setae,setb,setbe,setg,setge,setl,setle,setno,setnp,setns,setnz,seto,setp,sets,setz,sfence,sgdt,shl,shld,shr,shrd,shufpd,shufps,sidt,skinit,sldt,smsw,sqrtpd,sqrtps,sqrtsd,sqrtss,stc,std,stgi,sti,stmxcsr,stosb,stosd,stosq,stosw,str,sub,subpd,subps,subsd,subss,swapgs,syscall,sysenter,sysexit,sysret,test,ucomisd,ucomiss,ud2,unpckhpd,unpckhps,unpcklpd,unpcklps,vaddpd,vaddps,vaddsd,vaddss,vaddsubpd,vaddsubps,vaesdec,vaesdeclast,vaesenc,vaesenclast,vaesimc,vaeskeygenassist,vandnpd,vandnps,vandpd,vandps,vblendpd,vblendps,vblendvpd,vblendvps,vbroadcastsd,vbroadcastss,vcmppd,vcmpps,vcmpsd,vcmpss,vcomisd,vcomiss,vcvtdq2pd,vcvtdq2ps,vcvtpd2dq,vcvtpd2ps,vcvtps2dq,vcvtps2pd,vcvtsd2si,vcvtsd2ss,vcvtsi2sd,vcvtsi2ss,vcvtss2sd,vcvtss2si,vcvttpd2dq,vcvttps2dq,vcvttsd2si,vcvttss2si,vdivpd,vdivps,vdivsd,vdivss,vdppd,vdpps,verr,verw,vextractf128,vextractps,vhaddpd,vhaddps,vhsubpd,vhsubps,vinsertf128,vinsertps,vlddqu,vmaskmovdqu,vmaskmovpd,vmaskmovps,vmaxpd,vmaxps,vmaxsd,vmaxss,vmcall,vmclear,vminpd,vminps,vminsd,vminss,vmlaunch,vmload,vmmcall,vmovapd,vmovaps,vmovd,vmovddup,vmovdqa,vmovdqu,vmovhlps,vmovhpd,vmovhps,vmovlhps,vmovlpd,vmovlps,vmovmskpd,vmovmskps,vmovntdq,vmovntdqa,vmovntpd,vmovntps,vmovq,vmovsd,vmovshdup,vmovsldup,vmovss,vmovupd,vmovups,vmpsadbw,vmptrld,vmptrst,vmread,vmresume,vmrun,vmsave,vmulpd,vmulps,vmulsd,vmulss,vmwrite,vmxoff,vmxon,vorpd,vorps,vpabsb,vpabsd,vpabsw,vpackssdw,vpacksswb,vpackusdw,vpackuswb,vpaddb,vpaddd,vpaddq,vpaddsb,vpaddsw,vpaddusb,vpaddusw,vpaddw,vpalignr,vpand,vpandn,vpavgb,vpavgw,vpblendvb,vpblendw,vpclmulqdq,vpcmpeqb,vpcmpeqd,vpcmpeqq,vpcmpeqw,vpcmpestri,vpcmpestrm,vpcmpgtb,vpcmpgtd,vpcmpgtq,vpcmpgtw,vpcmpistri,vpcmpistrm,vperm2f128,vpermilpd,vpermilps,vpextrb,vpextrd,vpextrq,vpextrw,vphaddd,vphaddsw,vphaddw,vphminposuw,vphsubd,vphsubsw,vphsubw,vpinsrb,vpinsrd,vpinsrq,vpinsrw,vpmaddubsw,vpmaddwd,vpmaxsb,vpmaxsd,vpmaxsw,vpmaxub,vpmaxud,vpmaxuw,vpminsb,vpminsd,vpminsw,vpminub,vpminud,vpminuw,vpmovmskb,vpmovsxbd,vpmovsxbq,vpmovsxbw,vpmovsxwd,vpmovsxwq,vpmovzxbd,vpmovzxbq,vpmovzxbw,vpmovzxdq,vpmovzxwd,vpmovzxwq,vpmuldq,vpmulhrsw,vpmulhuw,vpmulhw,vpmulld,vpmullw,vpor,vpsadbw,vpshufb,vpshufd,vpshufhw,vpshuflw,vpsignb,vpsignd,vpsignw,vpslld,vpslldq,vpsllq,vpsllw,vpsrad,vpsraw,vpsrld,vpsrldq,vpsrlq,vpsrlw,vpsubb,vpsubd,vpsubq,vpsubsb,vpsubsw,vpsubusb,vpsubusw,vpsubw,vptest,vpunpckhbw,vpunpckhdq,vpunpckhqdq,vpunpckhwd,vpunpcklbw,vpunpckldq,vpunpcklqdq,vpunpcklwd,vpxor,vrcpps,vrcpss,vroundpd,vroundps,vroundsd,vroundss,vrsqrtps,vrsqrtss,vshufpd,vshufps,vsqrtpd,vsqrtps,vsqrtsd,vsqrtss,vstmxcsr,vsubpd,vsubps,vsubsd,vsubss,vtestpd,vtestps,vucomisd,vucomiss,vunpckhpd,vunpckhps,vunpcklpd,vunpcklps,vxorpd,vxorps,vzeroall,vzeroupper,wait,wbinvd,wrmsr,xadd,xchg,xcryptcbc,xcryptcfb,xcryptctr,xcryptecb,xcryptofb,xgetbv,xlatb,xor,xorpd,xorps,xrstor,xsave,xsetbv,xsha1,xsha256,xstore,invalid,3dnow,none,db,pause".split(",")
 
 let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0")
+let h8=(h,l)=>h.toString(16).padStart(8,"0")+l.toString(16).padStart(8,"0")
 let show=_=>{let s="";for(let i=0;i<10;i++)s+=M[rip+i].toString(16).padStart("0")+" ";return s}
 
 let execv=a=>{ kdbut.hidden=false
@@ -15,11 +16,14 @@ let execv=a=>{ kdbut.hidden=false
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
   disasm(elf,d)
-  let stp=execute(elf,d);kdbut.onclick=_=>stp()
+  let S=stackinit(elf,a)
+  let stp=execute(elf,d,S);kdbut.onclick=_=>stp()
  })
 }
 
-
+let showstack=(S,t,rsp)=>{for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*i-8?"│":rsp==-8*i-8?"└":" ")+h8(0xffffffff,t-8*i)+" "+h8(S[2*i],S[2*i+1])}
+let markrbp=(S,rbp)=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=parseInt(s.slice(9,17),16);s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
+let stackinit=(d,a)=>{let S=new Uint32Array(1024),rsp=-16,I=new Int32Array(d[0].buffer,0,32);I[10]=rsp;I[11]=-1; showstack(S,4294967288,rsp); return S  /*todo push argv*/}
 
 /* fasm syscalls:
 0x0    0  read
@@ -35,12 +39,14 @@ let execv=a=>{ kdbut.hidden=false
 0xc9 201  time
 */
 let err=s=>{throw new error(s)}
-let execute=(elf,D)=>{
+let execute=(elf,D,S)=>{
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,mne;
-  let H=new Uint16Array(M.buffer,0,M.buffer.length>>1),U=new Uint32Array(M.buffer,0,M.buffer.length>>2),R=new Uint32Array(M.buffer,0,69);R[64]=rip;   // [156 regs][4 imm]
-  let Rat=x=>R[regmap[x]>>2],simm=(i,l,h, a)=>(a=65+2*i,R[a]=l,R[1+a]=h,a<<2)
+  let H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),R=new Uint32Array(M.buffer,0,69),I=new Int32Array(M.buffer,0,69);R[64]=rip;   // [156 regs][4 imm]
+  let Rat=x=>R[regmap[x]>>2],simm=(i,l,h, a)=>(a=65+2*i,console.log("simm",a,a<<2),R[a]=l,R[1+a]=h,a<<2)
+  let push8=x=>(push4(x),push4(4+x)),push4=x=>(console.log("S",-I[10],U[x>>2]),(S[(-I[10])>>2]=U[x>>2]),R[10]-=4);
+  mark(R,S,rip,40,0,0,0)
   return _=>{
    for(let j=0;j<16;j++)ibuf[j]=M[j+R[64]];let n=D.dis();if(!n)return 0;rip+=n;R[64]=rip
    sz=b[538+9];adrmode=b[538+10]; //console.log("oprmode",oprmode,"adrmode",adrmode)
@@ -50,16 +56,16 @@ let execute=(elf,D)=>{
    let disp=(o,b,i,l,h)=>{ return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
    let indx=(i,s)=>{ return Rat(i)*(s?s:1) }
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff;  return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
-   let oper=i=>{let x=1+12*i,t=u[x]; return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
+   let oper=i=>{let x=1+12*i,t=u[x]; console.log("t",i,t); return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
    
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
    switch(u[0]){
-   case 303: 8==sz?(M[x]=M[y]):16==sz?(H[x>>1]=H[y>>1]):(U[x>>2]=U[y>>2],64==sz?(U[1+(x>>2)]=U[1+(y>>2)]):0); break; //mov
+   case  36: push8(256); console.log("call",x); y=40, z=R[40]; break;//call
+   case 303: 8==sz?(M[x]=M[y]):16==sz?(H[x>>1]=H[y>>1]):(U[x>>2]=U[y>>2],64==sz?(U[1+(x>>2)]=U[1+(y>>2)]):0); console.log("mov",sz,"#U",U.length,"xy",x,y,"x>>2",x>>2,U[x>>2],U[y>>2]); break; //mov
    //case 269: lea
-   //case  36: call
    default: throw new Error("unknown instr", u[0], mne[u[0]]);
    }
-   mark(rip,x,y)
+   mark(R,S,rip-n,x,y,z,zz)
    return 1
  }
 }
@@ -76,9 +82,7 @@ let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
    s=decode(rip,b,u);asm.push(s);if(rip>=eop)break
   }
   let n=Math.min(30,asm.length)
-  for(let i=0;i<n;i++)disa.appendChild(asm[i]);disa.firstChild.classList.add("b")
-}
-
+  for(let i=0;i<n;i++)disa.appendChild(asm[i]);}
 
 let decode=(rip,b,u)=>{
  //sizeofud:  576
@@ -90,14 +94,8 @@ let decode=(rip,b,u)=>{
  //prim.opc: +557
  //userdata: +560
  // enum UD_OP_REG(156) MEM(157)
-
- //console.log("op0","type",u[1],"size",u[2],"base",u[3],"index",u[4],"u5",u[5],"scale",u[5]&0xff,"offset",0xff&(u[5]>>>8),"lval",u[7],u[8])
- //console.log("op1","type",u[1+12],"size",u[2+12],"base",u[3+12],"index",u[4+12],"u5",u[5+12],"scale",u[5+12]&0xff,"offset",0xff&(u[5+12]>>>8),"lval",u[7+12],u[8+12])
  let oprmode=b[538+9],adrmode=b[538+10]
- //console.log("rex", b[538], "opr", oprmode, "adr", adrmode, "_oprcode", b[575])
-
  let regstr=x=>regtab[x]
-
  let hx8=(h,l,n)=>"0x"+h.toString(16).padStart(8,"0")+l.toString(16).padStart(8,"0")
  let hs=(x,n)=>(x<0)?"-"+hx(-x,n):hx(x,n)
  let uword=l=>hx(l,4),dword=l=>hx(l,8),qword=(h,l)=>hx8(h,l)
@@ -110,33 +108,26 @@ let decode=(rip,b,u)=>{
  let jmm=x=>{let s=u[1+x],l=u[x+6],h=u[x+7];return s==8?hx(l+rip,2):s==16?hx(l+rip,4):s==32?hx(l+rip,8):("jmm-size?"+s)}
  let oper=i=>{let x=1+12*i;t=u[x];return t==0?"":t==156?regstr(u[2+x]):t==157?opmem(x):t==159?imm(x):t==160?jmm(x):"oper?"+t}
  let operands=_=>[oper(0),oper(1),oper(2),oper(3)].filter(x=>x!="").join(",")
-
  let sp=ce("span");sp.id=hx(rip-b[20],8);sp.textContent=hx(rip-b[20],8)+" "+(mne[u[0]]).padEnd(4," ")+" "+operands()+"\n"
- return sp;
+ return sp;}
 
-/*
- switch(u[0]){
- case 303: console.log("mov "+operands()); break
- case 269: console.log("lea "+operands()); break
- case  36: console.log("call "+operands()); break
- default : console.log("unknown instr", u[0], mne[u[0]])
- }
-*/
-  
-}
-
-let mark=(rip,x,y)=>{let pc=hx(rip,8); 
+let mark=(R,S,rip,x,y,z,zz)=>{let pc=hx(rip,8);  console.log("mark",x,y,z,zz)
  let a=af(disa.childNodes);a.forEach(x=>x.classList.remove("b"))
  let i=a.findIndex(x=>x.id==pc);if(i>=0)a[i].classList.add("b")
  a=af(regs.children);a.forEach(x=>x.classList.remove("b"))
-
- let mk=x=>{ x<256?ge("reg"+(x>>>3)).classList.add("b"):0 };mk(x);mk(y)
-}
+ let h=x=>R[1+(x>>2)].toString(16).padStart(8,"0")+R[x>>2].toString(16).padStart(8,"0");
+ let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")
+ tc(h(256),reg32) //rip
+ let ps=x=>{console.log("print stack", x)}
+ let st=x=>{let sb=(1+~x),su=sb>>2,sk=sb>>>3,top=1+~Number("0x"+stk0.textContent.substr(8,16));console.log("sk",top,sk);
+  if(sk-top<0||sk-top>10)ps(min(0,sk-10));
+  let s=ge("stk"+(sk-top));s.classList.add("b");console.log("su",su,S.slice(0,8));s.textContent=H(su,x)
+ }
+ let mk=x=>{ (!x)?0:x<=256?( tc( h(x) ,ge("reg"+((x>>>3)-1))).classList.add("b"),(40==x?markrbp(S,R[10]):0) ):x>0x7fffffff?st(x) :0 };mk(x);mk(y);mk(z);mk(zz)}
 
 if("undefined"!=typeof Deno){ //$deno --allow-read 86.js fasm.elf args..  or $deno repl --allow-read --eval-file=86.js -- fasm.elf args..
  let argv=Deno.args;if(!argv.length)Deno.exit(0)
  let D=new WebAssembly.Instance(new WebAssembly.Module(Deno.readFileSync("ud/dis.wasm"))).exports
  let elf=loadelf(Deno.readFileSync(argv[0]))
- execute(elf,D)
-}
+ execute(elf,D)}
 

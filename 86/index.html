@@ -20,7 +20,7 @@ button{padding:0}
  <pre id="tty"><span id="out" tabindex="-1">linux/x86-64 [read write open close lseek brk exit] 1core 1proc 2g</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
  <div style="display:flex;flex-flow:column;justify-content:space-between">
   <pre id="disk">$ls</pre>
-  <div id="kdbut" hidden><button>step</button></div>
+  <div id="kdbut" ><button onclick="execv(['fasm'])">fasm</button> <button>step</button></div>
   <div id="edbut" hidden>
    <button onclick="edshow(0)">close</button>
    <button onclick="edwrite()" id="edbutw">write</button>
@@ -34,26 +34,36 @@ button{padding:0}
  <pre id="disa"></pre>
  <div style="display:flex;flex-flow:column">
   <pre id="regs">
-rax rsp r8 r12   rcx rbp r9 r13   rdx rsi r10 r14  rbx rdi r11 r15
-<span id="reg0" >0000000000000000</span> <span id="reg1" >0000000000000000</span> <span id="reg2" >0000000000000000</span> <span id="reg3" >0000000000000000</span>
-<span id="reg4" >0000000000000000</span> <span id="reg5" >0000000000000000</span> <span id="reg6" >0000000000000000</span> <span id="reg7" >0000000000000000</span>
-<span id="reg8" >0000000000000000</span> <span id="reg9" >0000000000000000</span> <span id="reg10">0000000000000000</span> <span id="reg11">0000000000000000</span>
-<span id="reg12">0000000000000000</span> <span id="reg13">0000000000000000</span> <span id="reg14">0000000000000000</span> <span id="reg15">0000000000000000</span>
-
-xmm0 4 8 12      xmm1 5 9 13      xmm2 6 10 14     xmm3 7 11 15
-<span id="reg16">0000000000000000</span> <span id="reg17">0000000000000000</span> <span id="reg18">0000000000000000</span> <span id="reg19">0000000000000000</span>
-<span id="reg20">0000000000000000</span> <span id="reg21">0000000000000000</span> <span id="reg22">0000000000000000</span> <span id="reg23">0000000000000000</span>
-<span id="reg24">0000000000000000</span> <span id="reg25">0000000000000000</span> <span id="reg26">0000000000000000</span> <span id="reg27">0000000000000000</span>
-<span id="reg28">0000000000000000</span> <span id="reg29">0000000000000000</span> <span id="reg30">0000000000000000</span> <span id="reg31">0000000000000000</span>
-</pre>
-  <pre id="stak">stack
-0000000000000000 0000000000000000              rip <span id="reg64">0000000000000000</span>
-0000000000000000 0000000000000000              brk <span id="brk">0000000000000000</span>
-0000000000000000 0000000000000000           rlfags <span id="rflags">0000000000000000</span>
-0000000000000000 0000000000000000
-0000000000000000 0000000000000000
-0000000000000000 0000000000000000
-0000000000000000 0000000000000000
+ rax rsp r8 r12   rcx rbp r9 r13   rdx rsi r10 r14  rbx rdi r11 r15
+ <span id="reg0" >0000000000000000</span> <span id="reg1" >0000000000000000</span> <span id="reg2" >0000000000000000</span> <span id="reg3" >0000000000000000</span>
+┌<span id="reg4" >0000000000000000</span> <span id="reg5" >0000000000000000</span> <span id="reg6" >0000000000000000</span> <span id="reg7" >0000000000000000</span>
+│<span id="reg8" >0000000000000000</span> <span id="reg9" >0000000000000000</span> <span id="reg10">0000000000000000</span> <span id="reg11">0000000000000000</span>
+│<span id="reg12">0000000000000000</span> <span id="reg13">0000000000000000</span> <span id="reg14">0000000000000000</span> <span id="reg15">0000000000000000</span>
+│
+│xmm0 4 8 12      xmm1 5 9 13      xmm2 6 10 14     xmm3 7 11 15
+│<span id="reg16">0000000000000000</span> <span id="reg17">0000000000000000</span> <span id="reg18">0000000000000000</span> <span id="reg19">0000000000000000</span>
+│<span id="reg20">0000000000000000</span> <span id="reg21">0000000000000000</span> <span id="reg22">0000000000000000</span> <span id="reg23">0000000000000000</span>
+│<span id="reg24">0000000000000000</span> <span id="reg25">0000000000000000</span> <span id="reg26">0000000000000000</span> <span id="reg27">0000000000000000</span>
+│<span id="reg28">0000000000000000</span> <span id="reg29">0000000000000000</span> <span id="reg30">0000000000000000</span> <span id="reg31">0000000000000000</span>
+│
+│
+│stack
+<span id="stk0"> 0000000000000000 0000000000000000</span>              rip <span id="reg32">0000000000000000</span>
+<span id="stk1"> 0000000000000000 0000000000000000</span>              brk <span id="brk">0000000000000000</span>
+<span id="stk2"> 0000000000000000 0000000000000000</span>           rlfags <span id="rflags">0000000000000000</span>
+<span id="stk3"> 0000000000000000 0000000000000000</span>
+<span id="stk4"> 0000000000000000 0000000000000000</span>
+<span id="stk5"> 0000000000000000 0000000000000000</span>
+<span id="stk6"> 0000000000000000 0000000000000000</span>
+<span id="stk7"> 0000000000000000 0000000000000000</span>
+<span id="stk8"> 0000000000000000 0000000000000000</span>
+<span id="stk9"> 0000000000000000 0000000000000000</span>
+<span id="stk10"> 0000000000000000 0000000000000000</span>
+<span id="stk11"> 0000000000000000 0000000000000000</span>
+<span id="stk12"> 0000000000000000 0000000000000000</span>
+<span id="stk13"> 0000000000000000 0000000000000000</span>
+<span id="stk14"> 0000000000000000 0000000000000000</span>
+<span id="stk15"> 0000000000000000 0000000000000000</span>
   </pre>
  </div>
  <pre id="mem">heap
@@ -61,8 +71,9 @@ xmm0 4 8 12      xmm1 5 9 13      xmm2 6 10 14     xmm3 7 11 15
  </pre>
 </div>
 <script>
-let af=x=>Array.from(x),pd=e=>{e.preventDefault();e.stopPropagation()},ce=x=>document.createElement(x),ge=x=>document.getElementById(x)
+let af=x=>Array.from(x),pd=e=>{e.preventDefault();e.stopPropagation()},ce=x=>document.createElement(x),ge=x=>document.getElementById(x),tc=(t,x)=>(x.textContent=t,x)
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let min=Math.min,max=Math.max
 </script>
 <script src="k.js"></script>
 <script src="fs.js"></script>
