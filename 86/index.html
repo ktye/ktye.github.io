@@ -14,6 +14,8 @@ button{padding:0}
 #regs:focus{outline:1px solid}
 #heap:focus{outline:1px solid}
 .b{background:#444;color:white}
+.p{border:1px solid}
+.p:hover{cursor:pointer}
 .l{color:blue}
 .l:hover{cursor:pointer}
 </style></head><body>
@@ -73,6 +75,15 @@ button{padding:0}
 00000000 0000000000000000 0000000000000000 ........ ........
  </pre>
 </div>
+<div style="display:flex;justify-content:space-between">
+ <span class="p" onclick="pager.scroll(0)"><span class="b">&nbsp;↑↓&nbsp;</span> sroll&nbsp;</span>
+ <span class="p" onclick="disa.stepover()"><span class="b">&nbsp;s&nbsp;</span> step over&nbsp;</span>
+ <span class="p" onclick="disa.traceinto()"><span class="b">&nbsp;→&nbsp;</span> trace into&nbsp;</span>
+ <span class="p" onclick="disa.ret()"><span class="b">&nbsp;←&nbsp;</span> run to ret&nbsp;</span>
+ <span class="p" onclick="disa.break()"><span class="b">&nbsp;b&nbsp;</span> breakpoint&nbsp;</span>
+ <span class="p" onclick="disa.runto()"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
+ <span class="p" onclick="pager.find()"><span class="b">&nbsp;/&nbsp;</span> find&nbsp;</span>
+</div>
 <script>
 let af=x=>Array.from(x),pd=e=>{e.preventDefault();e.stopPropagation()},ce=x=>document.createElement(x),ge=x=>document.getElementById(x),tc=(t,x)=>(x.textContent=t,x)
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
@@ -87,6 +98,17 @@ let min=Math.min,max=Math.max
 <script>
  fe("fasm.elf","fasm")
  fe("readme","readme")
+ 
+ let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
+ disa.onkeydown=(e,k)=>(k=e.key,"ArrowUp"==k?disa.move(1):"ArrowDown"==k?disa.move(0):"PageUp"==k?disa.scroll(1):"PageDown"==k?disa.scroll(0):"ArrowLeft"==k?disa.ret():"ArrowRight"==k?disa.traceinto():"s"==k?disa.stepover():"b"==k?disa.break():"Enter"==k?disa.runto():"/"==k?disa.find():0)
+ disa.scroll=up=>console.log("disa scroll "+(up?"up":"down"))
+ disa.move=up=>console.log("disa move "+(up?"up":"down"))
+ disa.ret=_=>console.log("disa ret")
+ disa.traceinto=_=>console.log("disa trace into")
+ disa.stepover=_=>console.log("disa step over")
+ disa.break=_=>console.log("disa break")
+ disa.runto=_=>console.log("disa run to break")
+ disa.find=_=>console.log("disa find")
 </script>
 </body>
 
