@@ -35,8 +35,8 @@ button{padding:0}
   </div>
  </div>
 </div>
-<div style="display:flex;flex-wrap:wrap;justify-content:space-between">
- <pre id="disa" hidden tabindex="-1"></pre>
+<div id="kdb" style="display:flex;flex-wrap:wrap;justify-content:space-between;display:none">
+ <pre id="disa" tabindex="-1" data-i="0" data-n="30" data-src="asm"></pre>
  <div style="display:flex;flex-flow:column">
   <pre id="regs" tabindex="-1">
  rax rsp r8 r12   rcx rbp r9 r13   rdx rsi r10 r14  rbx rdi r11 r15
@@ -71,21 +71,22 @@ button{padding:0}
 <span id="stk15"> 0000000000000000 0000000000000000</span>
   </pre>
  </div>
- <pre id="heap" tabindex="-1">heap
-00000000 0000000000000000 0000000000000000 ........ ........
+ <pre id="heap" tabindex="-1" data-i="0" data-n="32">00000000 0000000000000000 0000000000000000 ........ ........
  </pre>
-</div>
-<div style="display:flex;justify-content:space-between">
- <span class="p" onclick="pager.scroll(0)"><span class="b">&nbsp;↑↓&nbsp;</span> sroll&nbsp;</span>
- <span class="p" onclick="disa.stepover()"><span class="b">&nbsp;s&nbsp;</span> step over&nbsp;</span>
- <span class="p" onclick="disa.traceinto()"><span class="b">&nbsp;→&nbsp;</span> trace into&nbsp;</span>
- <span class="p" onclick="disa.ret()"><span class="b">&nbsp;←&nbsp;</span> run to ret&nbsp;</span>
- <span class="p" onclick="disa.break()"><span class="b">&nbsp;b&nbsp;</span> breakpoint&nbsp;</span>
- <span class="p" onclick="disa.runto()"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
- <span class="p" onclick="pager.find()"><span class="b">&nbsp;/&nbsp;</span> find&nbsp;</span>
+ <div style="display:flex;justify-content:space-between;width:100%">
+  <span class="p" onclick="pager.move(1)"><span class="b">&nbsp;↑↓&nbsp;</span> sroll&nbsp;</span>
+  <span class="p" onclick="disa.stepover()"><span class="b">&nbsp;s&nbsp;</span> step over&nbsp;</span>
+  <span class="p" onclick="disa.traceinto()"><span class="b">&nbsp;→&nbsp;</span> trace into&nbsp;</span>
+  <span class="p" onclick="disa.ret()"><span class="b">&nbsp;←&nbsp;</span> run to ret&nbsp;</span>
+  <span class="p" onclick="disa.break()"><span class="b">&nbsp;b&nbsp;</span> breakpoint&nbsp;</span>
+  <span class="p" onclick="disa.runto()"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
+  <span class="p" onclick="pager.find()"><span class="b">&nbsp;/&nbsp;</span> find&nbsp;</span>
+ </div>
 </div>
 <script>
+var asm
 let af=x=>Array.from(x),pd=e=>{e.preventDefault();e.stopPropagation()},ce=x=>document.createElement(x),ge=x=>document.getElementById(x),tc=(t,x)=>(x.textContent=t,x)
+let rM=p=>{while(p.firstChild)p.removeChild(p.firstChild);return p}
 let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
 let min=Math.min,max=Math.max
 </script>
@@ -99,16 +100,21 @@ let min=Math.min,max=Math.max
  fe("fasm.elf","fasm")
  fe("readme","readme")
  
+ 
  let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
- disa.onkeydown=(e,k)=>(k=e.key,"ArrowUp"==k?disa.move(1):"ArrowDown"==k?disa.move(0):"PageUp"==k?disa.scroll(1):"PageDown"==k?disa.scroll(0):"ArrowLeft"==k?disa.ret():"ArrowRight"==k?disa.traceinto():"s"==k?disa.stepover():"b"==k?disa.break():"Enter"==k?disa.runto():"/"==k?disa.find():0)
- disa.scroll=up=>console.log("disa scroll "+(up?"up":"down"))
- disa.move=up=>console.log("disa move "+(up?"up":"down"))
+ let keydown=p=>(e,k)=>(k=e.key,console.log(k),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"b"==k?togglebreak():"Enter"==k?runto():"/"==k?p.find():0)
+ disa.onkeydown=keydown(disa);disa.move=d=>{let p=disa,i=+p.dataset.i,n=+p.dataset.n,src=window[p.dataset.src],N=src.length,j=i+d;rM(p);i=min(max(0,j),N-n),j=i+n;p.dataset.i=i;while(i<j)p.appendChild(src[i++]);}
+ regs.onkeydown=keydown(regs);regs.move=d=>{let i=+regs.dataset.i,n=+regs.dataset.n,j=i+d;i=min(max(0,j),1024);rsp=-(1+~parseInt(reg4.textContent.slice(8),16));showstack(i,rsp);regs.dataset.i=i;}
+ heap.onkeydown=keydown(heap);heap.move=d=>{let i=parseInt(heap.textContent.slice(0,8),16),j=i+16*d;i=min(max(0,j),parseInt(brk.textContent,16)-16*32);console.log("i",i);showheap(i);}
+
+/*
  disa.ret=_=>console.log("disa ret")
  disa.traceinto=_=>console.log("disa trace into")
  disa.stepover=_=>console.log("disa step over")
  disa.break=_=>console.log("disa break")
  disa.runto=_=>console.log("disa run to break")
  disa.find=_=>console.log("disa find")
+*/
 </script>
 </body>
 

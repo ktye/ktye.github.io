@@ -1,4 +1,4 @@
-let rip,asm
+let rip
 let loadelf=u=>{let U=new Uint32Array(u.buffer,0,u.buffer.byteLength>>>2),H=new Uint16Array(u.buffer,0,u.buffer.byteLength>>>1),n=H[28],p=U[8]>>>2,i,s=[],m=0,M,R,rip=U[6],eop
  eop=U[p+4]+U[p+8];for(i=0;i<n;i++){s.push({o:U[p+2],va:U[p+4],fs:U[p+8]});m=Math.max(m,U[p+4]+U[p+10]);p+=14};M=new Uint8Array(m);s.forEach(x=>M.set(u.subarray(x.o,x.o+x.fs),x.va));return[M,rip,eop]}
 
@@ -11,20 +11,23 @@ let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0")
 let h4=x=>x.toString(16).padStart(8,"0"),h8=(h,l)=>h4(h)+h4(l)
 let show=_=>{let s="";for(let i=0;i<10;i++)s+=M[rip+i].toString(16).padStart("0")+" ";return s}
 
-let execv=a=>{ kdbut.hidden=false; disa.hidden=false
+let execv=a=>{ kdbut.hidden=false; kdb.style.display="flex"
  let u=fsget(a[0]),elf;if(u===0){progexit();return}
  try{elf=loadelf(u)}
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
   disasm(elf,d)
   let S=stackinit(elf,a)
+  showheap=shhep(elf[0]);brk.textContent="0000000000800000"
   let stp=execute(elf,d,S);kdbut.onclick=_=>stp()
  })
 }
 
-let showstack=(S,t,rsp)=>{for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*i-8?"│":rsp==-8*i-8?"└":" ")+h8(0xffffffff,t-8*i)+" "+h8(S[2*i],S[2*i+1])}
+let showstack,showheap
+let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxd(new Uint8Array(M.buffer,t,16*32),t))
+let shstk=S=>(h,rsp)=>{console.log("h",h);const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)],S[2*(i+h)+1])}
 let markrbp=(S,rbp)=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=parseInt(s.slice(9,17),16);s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
-let stackinit=(d,a)=>{let S=new Uint32Array(1024),rsp=-16,I=new Int32Array(d[0].buffer,0,32);I[10]=rsp;I[11]=-1; showstack(S,4294967288,rsp); return S  /*todo push argv*/}
+let stackinit=(d,a)=>{let S=new Uint32Array(8192),rsp=-16,I=new Int32Array(d[0].buffer,0,32);I[10]=rsp;I[11]=-1; showstack=shstk(S);showstack(0,rsp); return S  /*todo push argv*/}
 
 /* fasm syscalls:
 0x0    0  read
