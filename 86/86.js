@@ -18,14 +18,15 @@ let execv=a=>{ kdbut.hidden=false; kdb.style.display="flex"
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
   disasm(elf,d)
   let S=stackinit(elf,a)
-  showheap=shhep(elf[0]);brk.textContent="0000000000800000"
-  let stp=execute(elf,d,S);kdbut.onclick=_=>stp()
+  showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);brk.textContent="0000000000800000"
+  let stp=execute(elf,d,S);traceinto=stp;stepover=stp;runto=stp;
  })
 }
 
 let showstack,showheap
-let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxd(new Uint8Array(M.buffer,t,16*32),t))
-let shstk=S=>(h,rsp)=>{console.log("h",h);const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)],S[2*(i+h)+1])}
+let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*32),s=Array(32).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2;s[i]=h4(t+j)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j<<2,16+(j<<2))) });return s.join("\n")}
+let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
+let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)],S[2*(i+h)+1])}
 let markrbp=(S,rbp)=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=parseInt(s.slice(9,17),16);s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
 let stackinit=(d,a)=>{let S=new Uint32Array(8192),rsp=-16,I=new Int32Array(d[0].buffer,0,32);I[10]=rsp;I[11]=-1; showstack=shstk(S);showstack(0,rsp); return S  /*todo push argv*/}
 
@@ -46,33 +47,47 @@ let err=s=>{throw new error(s)}
 let execute=(elf,D,S)=>{
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
-  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,mne;
+  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode;
   let H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),R=new Uint32Array(M.buffer,0,69),I=new Int32Array(M.buffer,0,69);R[64]=rip;   // [156 regs][4 imm]
   let Rat=x=>R[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,R[a]=l,R[1+a]=h,a<<2)
   let push8=x=>(push4(x),push4(4+x)),push4=x=>((S[(-I[10])>>2]=U[x>>2]),R[10]-=4);
-  mark(R,S,rip,40,0,0,0)
+  let pop4=_=>(R[10]+=4,S[(-I[10])>>2])
+  let lpc=rip;mark(R,S,rip,40,0,0,0)
   return _=>{
    for(let j=0;j<16;j++)ibuf[j]=M[j+R[64]];let n=D.dis();if(!n)return 0;rip+=n;R[64]=rip
-   sz=b[538+9];adrmode=b[538+10]; //console.log("oprmode",oprmode,"adrmode",adrmode)
+   sz=b[538+9];adrmode=b[538+10],rep=b[544]?"rep":b[545]?"repe":b[546]?"repne":"" ; //console.log("oprmode",oprmode,"adrmode",adrmode)
       
-   let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,       (8==s?0xff:16==s?0xffff:0xffffffff)&l)}
-   let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,R[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
+   let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
+   let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];               return simm(i,R[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
    let disp=(o,b,i,l,h)=>{ return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
    let indx=(i,s)=>{ return Rat(i)*(s?s:1) }
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff;  return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
-   let oper=i=>{let x=1+12*i,t=u[x]; return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
+   let oper=i=>{let x=1+12*i,t=u[x];return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
    
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
+   let x1=x>>1,y1=y>>1,x2=x>>2,y2=y>>2,x3=1+x2,y3=1+y2
    switch(u[0]){
-   case  36: push8(256); R[64]=I[x>>2];rip=R[64]; y=R[10]+8; z=40; break;//call
-   case 303: 8==sz?(M[x]=M[y]):16==sz?(H[x>>1]=H[y>>1]):(U[x>>2]=U[y>>2],64==sz?(U[1+(x>>2)]=U[1+(y>>2)]):0); break; //mov
-   //case 269: lea
-   default: throw new Error("unknown instr", u[0], mne[u[0]]);
+   case  36/*call*/: push8(256); R[64]=I[x2];rip=R[64]; y=R[10]+8; z=40; break;
+   case 303/*mov */: 8==sz?(M[x] =M[y]):16==sz?(H[x1] =H[y1]):(U[x2] =U[y2],64==sz?(U[x3] =U[y3]):0); break;
+   case 347/*neg */: 8==sz?(M[x]=-M[x]):16==sz?(H[x1]=-H[x1]):(U[x2]=-U[x2],64==sz?(U[x3]=-U[y3]):0); break;
+   case 350/*or  */: 8==sz?(M[x]|=M[y]):16==sz?(H[x1]|=H[y1]):(U[x2]|=U[y2],64==sz?(U[x3]|=U[y3]):0); break;
+   case 532/*ret */: pop4();rip=pop4();R[64]=rip;x=40;y=64; break;
+   case 547/*scasb*/:let nnn=34;while(nnn--){ //eax:8 edi:64 ecx:16
+	      let a=M[8],b=M[U[64>>2]];
+              U[64>>2]++; if(rep=="")break;let c=--U[16>>2]; //todo: dirflag cld/std
+              if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64; break
+   case 593/*sub */: 8==sz?(M[x]-=M[y]):16==sz?(H[x1]-=H[y1]):(U[x2]-=U[y2],64==sz?(U[x3]-=U[y3]):0); break;
+   case 599/*sysc*/: U[8>>2]=syscall(M,U[8>>2],U[64>>2],U[56>>2],U[24>>2]); x=8;y=64;z=56;zz=24; break;
+   case 894/*xor */: 8==sz?(M[x]^=M[y]):16==sz?(H[x1]^=H[y1]):(U[x2]^=U[y2],64==sz?(U[x3]^=U[y3]):0); break;
+   //case 269/*lea */: break
+   default: throw new Error("unknown instr "+u[0]+": "+mne[u[0]]);
    }
-   mark(R,S,rip-n,x,y,z,zz)
+   mark(R,S,lpc,x,y,z,zz);lpc=rip
    return 1
  }
 }
+
+let syscall=(M,rax,rdi,rsi,rdx)=>1==rax?(O(M.subarray(rsi,rsi+rdx)),rdx):err("unknown syscall: "+rax)
 
 let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
   let ud=D.dis_init(rip)
@@ -86,7 +101,7 @@ let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
    s=decode(rip,b,u);asm.push(s);if(rip>=eop)break
   }
   let n=Math.min(30,asm.length)
-  for(let i=0;i<n;i++)disa.appendChild(asm[i]);}
+  for(let i=0;i<n;i++)disa.appendChild(tc(asm[i]+"\n",ce("span")));}
 
 let decode=(rip,b,u)=>{
  //sizeofud:  576
@@ -95,10 +110,11 @@ let decode=(rip,b,u)=>{
  //mnemonic: +340
  //operand : +344, 392, 440, 488
  //pfx_rex : +538
+ //pfx_rep : +540  repe(541)  repne(542)
  //prim.opc: +557
  //userdata: +560
  // enum UD_OP_REG(156) MEM(157)
- let oprmode=b[538+9],adrmode=b[538+10]
+ let oprmode=b[538+9],adrmode=b[538+10],rep=b[544]?"rep ":b[545]?"repe ":b[546]?"repne ":""
  let regstr=x=>regtab[x]
  let hx8=(h,l,n)=>"0x"+h.toString(16).padStart(8,"0")+l.toString(16).padStart(8,"0")
  let hs=(x,n)=>(x<0)?"-"+hx(-x,n):hx(x,n)
@@ -108,17 +124,16 @@ let decode=(rip,b,u)=>{
  let opsize=x=>(x==0?"":x==8?"byte ":x==16?"word ":x==32?"dword ":x==64?"qword ":x==80?"tword ":x==128?"oword ":x==256?"yword ":"(size?)")
  let opmem=x=>{ let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff, o=(u[4+x]>>>8)&0xff;
   return opsize(s)+"["+(b?regstr(b)+(i?indx(b,i,sc):""):"")+(o?disp(o,b,i,u[x+6],u[x+7]):"")+"]"}
- let imm=x=>{let s=u[1+x],l=u[x+6],h=u[x+7];return s==8?hx(l,2):s==16?hx(l,4):s==32?hx(l,8):s==64?hx8(h,l):("imm-size?"+s)}
+ let imm=x=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=s!=oprmode&&46==u[x+10];return sn?(s==8?hs(l<<24>>24):hs(l<<0>>0)):s==8?hx(l,2):s==16?hx(l,4):s==32?hx(l,8):s==64?hx8(h,l):("imm-size?"+s)}
  let jmm=x=>{let s=u[1+x],l=u[x+6],h=u[x+7];return s==8?hx(l+rip,2):s==16?hx(l+rip,4):s==32?hx(l+rip,8):("jmm-size?"+s)}
  let oper=i=>{let x=1+12*i;t=u[x];return t==0?"":t==156?regstr(u[2+x]):t==157?opmem(x):t==159?imm(x):t==160?jmm(x):"oper?"+t}
  let operands=_=>[oper(0),oper(1),oper(2),oper(3)].filter(x=>x!="").join(",")
- let sp=ce("span");sp.id=h4(rip-b[20]);sp.textContent=h4(rip-b[20])+" "+(mne[u[0]]).padEnd(4," ")+" "+operands()+"\n"
- return sp;}
+ return h4(rip-b[20])+" "+rep+(mne[u[0]]).padEnd(4," ")+" "+operands()}
 
 let stkx=[stk0,stk1,stk2,stk3,stk4,stk5,stk6,stk7,stk8,stk9,stk10,stk11,stk12,stk13,stk14,stk15]
-let mark=(R,S,rip,x,y,z,zz)=>{let pc=h4(rip); 
+let mark=(R,S,rip,x,y,z,zz)=>{let pc=h4(rip);
  let a=af(disa.childNodes);a.forEach(unbold)
- let i=a.findIndex(x=>x.id==pc);if(i>=0)bold(a[i])
+ let i=a.findIndex(x=>x.textContent.startsWith(pc));if(i<0){i=asm.findIndex(x=>x.startsWith(pc));if(i>=0){disa.dataset.i=i-1;disa.move(1);bold(disa.firstChild)}}else bold(a[i]);
  a=af(regs.children);a.forEach(unbold)
  let h=x=>R[1+(x>>2)].toString(16).padStart(8,"0")+R[x>>2].toString(16).padStart(8,"0");
  let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")

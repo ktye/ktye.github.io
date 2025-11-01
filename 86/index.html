@@ -10,9 +10,9 @@ button{padding:0}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
 #editor{background:#ffe;outline:none;border:1px solid black;width:80ch;height:20rem;overflow:scroll;resize:none;margin-block:1em;margin-bottom:0}
-#disa:focus{outline:1px solid}
-#regs:focus{outline:1px solid}
-#heap:focus{outline:1px solid}
+#disa:focus{border-bottom:1px solid;outline:none}
+#regs:focus{border-bottom:1px solid;outline:none}
+#heap:focus{border-bottom:1px solid;outline:none}
 .b{background:#444;color:white}
 .p{border:1px solid}
 .p:hover{cursor:pointer}
@@ -36,7 +36,7 @@ button{padding:0}
  </div>
 </div>
 <div id="kdb" style="display:flex;flex-wrap:wrap;justify-content:space-between;display:none">
- <pre id="disa" tabindex="-1" data-i="0" data-n="30" data-src="asm"></pre>
+ <pre id="disa" tabindex="-1" data-i="0" data-n="30"></pre>
  <div style="display:flex;flex-flow:column">
   <pre id="regs" tabindex="-1">
  rax rsp r8 r12   rcx rbp r9 r13   rdx rsi r10 r14  rbx rdi r11 r15
@@ -97,15 +97,15 @@ let min=Math.min,max=Math.max
 <script src="sh.js"></script>
 <script>sh()</script>
 <script>
- fe("fasm.elf","fasm")
+// fe("fasm.elf","fasm")
  fe("readme","readme")
- 
+fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{fsadd("fasm",new Uint8Array(r)); execv(["fasm"]); disa.focus()} )
  
  let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
- let keydown=p=>(e,k)=>(k=e.key,console.log(k),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"b"==k?togglebreak():"Enter"==k?runto():"/"==k?p.find():0)
- disa.onkeydown=keydown(disa);disa.move=d=>{let p=disa,i=+p.dataset.i,n=+p.dataset.n,src=window[p.dataset.src],N=src.length,j=i+d;rM(p);i=min(max(0,j),N-n),j=i+n;p.dataset.i=i;while(i<j)p.appendChild(src[i++]);}
+ let keydown=p=>(e,k)=>(k=e.key,pd(e),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"b"==k?togglebreak():"Enter"==k?runto():"/"==k?p.find():0)
+ disa.onkeydown=keydown(disa);disa.move=d=>{let p=disa,i=+p.dataset.i,n=+p.dataset.n,N=asm.length,j=i+d,pc=reg32.textContent.slice(8,16);rM(p);i=min(max(0,j),N-n),j=i+n;p.dataset.i=i;while(i<j){ p.appendChild( tc(asm[i++]+"\n",ce("span")));if(asm[i].startsWith(pc))bold(p.lastChild) } ;}
  regs.onkeydown=keydown(regs);regs.move=d=>{let i=+regs.dataset.i,n=+regs.dataset.n,j=i+d;i=min(max(0,j),1024);rsp=-(1+~parseInt(reg4.textContent.slice(8),16));showstack(i,rsp);regs.dataset.i=i;}
- heap.onkeydown=keydown(heap);heap.move=d=>{let i=parseInt(heap.textContent.slice(0,8),16),j=i+16*d;i=min(max(0,j),parseInt(brk.textContent,16)-16*32);console.log("i",i);showheap(i);}
+ heap.onkeydown=keydown(heap);heap.move=d=>{let i=parseInt(heap.textContent.slice(0,8),16),j=i+16*d;i=min(max(0,j),parseInt(brk.textContent,16)-16*32);showheap(i);}
 
 /*
  disa.ret=_=>console.log("disa ret")
