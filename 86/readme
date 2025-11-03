@@ -33,5 +33,3 @@ syscalls are handled by javascript.
 execution pauses on read from stdin if no input
 file has been redirected, and waits for user input.
 
-debug
-$kdb prog arg

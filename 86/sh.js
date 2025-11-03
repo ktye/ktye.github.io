@@ -6,7 +6,7 @@ let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return 
 let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 
-let prmt=x=>{prm.textContent=x?"█":"";rdl.focus()}
+let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 rdl.onkeydown=(e,k)=>(k=e.key,"Enter"==k?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==k?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==k?(pd(e),rlnext(rdl.textContent)):("c"==k&&e.ctrlKey)?(pd(e),progexit()):"Escape"==k?(pd(e),rdl.textContent=""):"Tab"==k?(pd(e),complete(rdl.textContent)):0)
 tty.onclick=_=>rdl.focus()
 
@@ -38,7 +38,7 @@ let exec=x=>{ out.textContent+=x+"\n";rdl.textContent="";
  else{x=fsget(a[0]); 
   if(x===0)out.textContent+="no file: "+a[0]+"\n";
   else if(String(af(x.slice(0,4)))!="127,69,76,70")out.textContent+="no elf: "+a[0]+"\n"
-  else {prog=a[0];return execv(a)}
+  else {prog=a[0];prmt(0);return execv(a)}
  }
  stdflush()
  shprmt("$")

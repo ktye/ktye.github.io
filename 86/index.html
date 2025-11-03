@@ -25,7 +25,7 @@ button{padding:0}
  <pre id="tty"><span id="out" tabindex="-1">linux/x86-64 [read write open close lseek brk exit] 1core 1proc 2g</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
  <div style="display:flex;flex-flow:column;justify-content:space-between">
   <pre id="disk">$ls</pre>
-  <div id="kdbut" ><button onclick="execv(['fasm'])">fasm</button> <button onclick="traceinto()">step</button></div>
+  <div id="kdbut" ><input id="deb" name="deb" type="checkbox"/><label for="deb">debug</label></div>
   <div id="edbut" hidden>
    <button onclick="edshow(0)">close</button>
    <button onclick="edwrite()" id="edbutw">write</button>
@@ -55,7 +55,7 @@ button{padding:0}
 │stack
 <span id="stk0"> 0000000000000000 0000000000000000</span>              rip <span id="reg32">0000000000000000</span>
 <span id="stk1"> 0000000000000000 0000000000000000</span>              brk <span id="brk">0000000000000000</span>
-<span id="stk2"> 0000000000000000 0000000000000000</span>           rlfags <span id="rflags">0000000000000000</span>
+<span id="stk2"> 0000000000000000 0000000000000000</span>              flg <span id="flags">----------------</span>
 <span id="stk3"> 0000000000000000 0000000000000000</span>
 <span id="stk4"> 0000000000000000 0000000000000000</span>
 <span id="stk5"> 0000000000000000 0000000000000000</span>                <span id="cal10"></span>
@@ -75,11 +75,11 @@ button{padding:0}
  </pre>
  <div style="display:flex;justify-content:space-between;width:100%">
   <span class="p" onclick="pager.move(1)"><span class="b">&nbsp;↑↓&nbsp;</span> sroll&nbsp;</span>
-  <span class="p" onclick="disa.stepover()"><span class="b">&nbsp;s&nbsp;</span> step over&nbsp;</span>
-  <span class="p" onclick="disa.traceinto()"><span class="b">&nbsp;→&nbsp;</span> trace into&nbsp;</span>
-  <span class="p" onclick="disa.ret()"><span class="b">&nbsp;←&nbsp;</span> run to ret&nbsp;</span>
-  <span class="p" onclick="disa.break()"><span class="b">&nbsp;b&nbsp;</span> breakpoint&nbsp;</span>
-  <span class="p" onclick="disa.runto()"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
+  <span class="p" onclick="stepover()"><span class="b">&nbsp;s&nbsp;</span> step over&nbsp;</span>
+  <span class="p" onclick="traceinto()"><span class="b">&nbsp;→&nbsp;</span> trace into&nbsp;</span>
+  <span class="p" onclick="gotoret()"><span class="b">&nbsp;←&nbsp;</span> run to ret&nbsp;</span>
+  <span class="p" onclick="togglebreak()"><span class="b">&nbsp;b&nbsp;</span> breakpoint&nbsp;</span>
+  <span class="p" onclick="runto()"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
   <span class="p" onclick="pager.find()"><span class="b">&nbsp;/&nbsp;</span> find&nbsp;</span>
  </div>
 </div>
@@ -97,10 +97,10 @@ let min=Math.min,max=Math.max
 <script src="sh.js"></script>
 <script>sh()</script>
 <script>
-// fe("fasm.elf","fasm")
 
+fe("fasm.elf","fasm")
 fe("readme","readme")
-fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{fsadd("fasm",new Uint8Array(r)); execv(["fasm"]); disa.focus()} )
+//fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{fsadd("fasm",new Uint8Array(r)); execv(["fasm"]); disa.focus()} )
  
 let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
 let keydown=p=>(e,k)=>(k=e.key,pd(e),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"b"==k?togglebreak():"Enter"==k?runto():"/"==k?p.find():0)
