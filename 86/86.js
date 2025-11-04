@@ -27,7 +27,9 @@ let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*32),s=Array(32).fi
 let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
 let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)],S[2*(i+h)+1])}
 let markrbp=rbp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=xs(s.slice(9,17));s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
-let stackinit=(d,a)=>{let rsp=-16,I=new Int32Array(d[0].buffer,0,32);I[10]=rsp;I[11]=-1; showstack=shstk(new Uint32Array(d[0].buffer,d[3]));showstack(0,rsp);  /*todo push argv*/}
+let stackinit=(d,a)=>{let rsp=-32,I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;I[10]=rsp;
+ a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[3+2*i]=p;U[2+2*i]=0});U[3+2*a.length]=a.length;U[2+2*a.length]=0;rsp=-8*(2+a.length);I[10]=rsp;
+ showstack=shstk(new Uint32Array(d[0].buffer,d[3]));showstack(0,rsp);}
 
 /* fasm syscalls:
 0x0    0  read

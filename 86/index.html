@@ -110,7 +110,7 @@ heap.onkeydown=keydown(heap);heap.move=d=>{let i=xs(heap.textContent.slice(0,8))
 
 disa.ondblclick=e=>{let s=e.target.textContent,x,pc=xs(e.target.nextSibling.textContent.slice(0,8)),sel=document.getSelection().toString();x=xs(sel);isNaN(x)?0:show(x+(s.indexOf("rip+"+sel)<0?0:pc))}
 regs.ondblclick=s=>(s=xs(document.getSelection().toString()),isNaN(s)?0:show(s))
-let show=x=>{let e=xs(asm[asm.length-1].slice(0,8)),s=h4(x);if(x<e){let i=asm.findIndex(x=>x.startsWith(s));if(i>0){disa.dataset.i=i;disa.move(0)}}else{showheap((x+15)>>4<<4)}}
+let show=x=>{let a=xs(asm[0]),e=xs(asm[asm.length-1].slice(0,8)),s=h4(x);if(x>=a&&x<e){let i=asm.findIndex(x=>x.startsWith(s));if(i>0){disa.dataset.i=i;disa.move(0)}}else{showheap(x>>4<<4)}}
  
 /*
  disa.ret=_=>console.log("disa ret")
