@@ -25,10 +25,10 @@ let execv=a=>{ kdbut.hidden=false; kdb.style.display="flex";
 let showstack,showheap
 let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*32),s=Array(32).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
 let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
-let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)],S[2*(i+h)+1])}
+let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
 let markrbp=rbp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=xs(s.slice(9,17));s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
-let stackinit=(d,a)=>{let rsp=-32,I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;I[10]=rsp;
- a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[3+2*i]=p;U[2+2*i]=0});U[3+2*a.length]=a.length;U[2+2*a.length]=0;rsp=-8*(2+a.length);I[10]=rsp;
+let stackinit=(d,a)=>{let rsp=-32,I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
+ a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=-8*(2+a.length);I[10]=rsp;I[11]=-1;
  showstack=shstk(new Uint32Array(d[0].buffer,d[3]));showstack(0,rsp);}
 
 /* fasm syscalls:
@@ -51,7 +51,7 @@ let execute=(elf,D)=>{ //brk S R
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
   let H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
   let Rat=x=>U[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
-  let push8=x=>(push4(x),push4(4+x)),push4=x=>(U[10]-=4,(U[bk+(-I[10])>>2]=U[x>>2]));
+  let push8=x=>(U[10]-=4,push4(x),push4(x+4),U[10]+=4),push4=x=>(U[10]-=4,(U[bk+(-I[10])>>2]=U[x>>2]));
   let pop4=r=>((r=U[bk+(-I[10])>>2]),(U[10]+=4),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<12?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<10?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,bk,flag,40,0,0,0)
