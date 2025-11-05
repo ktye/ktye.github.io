@@ -19,8 +19,9 @@ let execv=a=>{ kdbut.hidden=false; kdb.style.display="flex";
   stackinit(elf,a)
   showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);brk.textContent=h8(0,elf[3])
   let stp=execute(elf,d);traceinto=stp;stepover=stp;runto=stp;
-  if(deb.checked==false){let lpc;while(1){let pc=stp();if("string"==typeof pc){console.log("lpc",lpc);O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
+  if(deb.checked==false){let lpc;while(1){let pc=stp();if("string"==typeof pc){if(""==pc)return;console.log("lpc",lpc);O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
 }
+let exit=x=>{if(x)O("exit "+x+"\n");progexit();return""}
 
 let showstack,showheap
 let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*32),s=Array(32).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
@@ -51,8 +52,8 @@ let execute=(elf,D)=>{ //brk S R
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
   let H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
   let Rat=x=>U[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
-  let push8=x=>(U[10]-=4,push4(x),push4(x+4),U[10]+=4),push4=x=>(U[10]-=4,(U[bk+(-I[10])>>2]=U[x>>2]));
-  let pop4=r=>((r=U[bk+(-I[10])>>2]),(U[10]+=4),r)
+  let push=(x, i)=>(U[10]-=8,i=bk+(-I[10])>>2,U[i]=U[x>>2],U[1+i]=U[1+(x>>2)])
+  let popl=x=>((r=U[bk+(-I[10])>>2]),(U[10]+=8),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<12?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<10?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,bk,flag,40,0,0,0)
   return _=>{
@@ -62,23 +63,24 @@ let execute=(elf,D)=>{ //brk S R
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];               return simm(i,U[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
    let disp=(o,b,i,l,h)=>{ return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
-   let indx=(i,s)=>{ return Rat(i)*(s?s:1) }
-   let st=x=>x>0x7fffffff?bk-(1+~x):x
+   let indx=(i,s)=>Rat(i)*(s?s:1)
+   let st=x=>(x>0x7fffffff?bk-8+(1+~x):x)
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
-   let flg=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag=x==0?"Z":(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])?"S":"";console.log("flag",flag)}
+   let flg=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag=x==0?"Z":(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])?"S":""}
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
    let x1=x>>1,y1=y>>1,x2=x>>2,y2=y>>2,x3=x>>3,y3=y>>3
    switch(u[0]){
    case   5/*add */: 8==sz?(M[x]+=M[y]):16==sz?(H[x1]+=H[y1]):32==sz?(U[x2]+=U[y2]):(J[x3]+=J[y3]); flg(x);  break;
-   case  36/*call*/: push8(256); U[64]=I[x2];rip=U[64]; y=U[10]+8; z=40; pucal(lpc,rip); break;
+   case  36/*call*/: push(256); U[64]=I[x2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip); break;
    case 105/*dec */: 8==sz?(M[x]--    ):16==sz?(H[x1]--     ):32==sz?(U[x2]--     ):(J[x3]--);      flg(x);  break;
+   case 263/*jz  */: if("Z"==flag)rip=U[x>>2];                                                               break;
    case 269/*lea */: 8==sz?(M[x] =  y ):16==sz?(H[x1] =  y1 ):32==sz?(U[x2] =  y2 ):(J[x3] =B(y3));          break;
    case 303/*mov */: 8==sz?(M[x] =M[y]):16==sz?(H[x1] =H[y1]):32==sz?(U[x2] =U[y2]):(J[x3] =J[y3]);          break;
    case 347/*neg */: 8==sz?(M[x]=-M[x]):16==sz?(H[x1]=-H[x1]):32==sz?(U[x2]=-U[x2]):(J[x3]=-J[y3]); flg(x);  break;
    case 350/*or  */: 8==sz?(M[x]|=M[y]):16==sz?(H[x1]|=H[y1]):32==sz?(U[x2]|=U[y2]):(J[x3]|=J[y3]); flg(x);  break;
-   case 532/*ret */: pop4();rip=pop4();U[64]=rip;x=40;y=64; pocal(); break;
+   case 532/*ret */: rip=popl();U[64]=rip;x=40;y=64; pocal(); break;
    case 547/*scasb*/:let nnn=34;while(nnn--){ //eax:8 edi:64 ecx:16
 	      let a=M[8],b=M[U[64>>2]];
               U[64>>2]++; if(rep=="")break;let c=--U[16>>2]; //todo: dirflag cld/std
@@ -86,7 +88,7 @@ let execute=(elf,D)=>{ //brk S R
    case 593/*sub */: 8==sz?(M[x]-=M[y]):16==sz?(H[x1]-=H[y1]):32==sz?(U[x2]-=U[y2]):(J[x3]-=J[y3]); flg(x);  break;
    case 599/*sysc*/: U[8>>2]=syscall(M,U[8>>2],U[64>>2],U[56>>2],U[24>>2]); x=8;y=64;z=56;zz=24;    flg(8);  break;
    case 894/*xor */: 8==sz?(M[x]^=M[y]):16==sz?(H[x1]^=H[y1]):32==sz?(U[x2]^=U[y2]):(J[x3]^=J[y3]); flg(x);  break;
-   default: return "unknown instr "+u[0]+": "+mne[u[0]];
+   default: O(`\n${h4(lpc)}:unknown instr ${u[0]}: ${mne[u[0]]}\n`); return exit(1);
    }
    mark(U,lpc,bk,flag,x,y,z,zz);lpc=rip
    return rip
