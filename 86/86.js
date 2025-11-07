@@ -10,7 +10,7 @@ let bold=x=>x.classList.add("b"),unbold=x=>x.classList.remove("b")
 let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0")
 let h4=x=>x.toString(16).padStart(8,"0"),h8=(h,l)=>h4(h)+h4(l)
 
-let execv=a=>{ kdbut.hidden=false; kdb.style.display="flex";
+let execv=a=>{ kdbut.hidden=false;kdb(1);
  let u=fsget(a[0]),elf;if(u===0){progexit();return}
  try{elf=loadelf(u)}
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
@@ -21,10 +21,10 @@ let execv=a=>{ kdbut.hidden=false; kdb.style.display="flex";
   let stp=execute(elf,d);traceinto=stp;stepover=stp;runto=stp;
   if(deb.checked==false){let lpc;while(1){let pc=stp();if("string"==typeof pc){if(""==pc)return;console.log("lpc",lpc);O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
 }
-let exit=x=>{if(x)O("exit "+x+"\n");progexit();return""}
+let exit=x=>{if(x)O("exit "+x+"\n");progexit();kdb(0);return""}
 
 let showstack,showheap
-let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*32),s=Array(32).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
+let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*16),s=Array(16).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
 let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
 let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
 let markrbp=rbp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=xs(s.slice(9,17));s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
@@ -108,7 +108,7 @@ let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
    let n=D.dis();if(!n)break;rip+=n;
    s=decode(rip,b,u);asm.push(s);if(rip>=eop)break
   }
-  let n=Math.min(30,asm.length)
+  let n=Math.min(16,asm.length)
   for(let i=0;i<n;i++)disa.appendChild(tc(asm[i]+"\n",ce("span")));}
 
 let decode=(rip,b,u)=>{
