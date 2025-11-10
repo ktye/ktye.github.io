@@ -17,7 +17,7 @@ let execv=a=>{ kdbut.hidden=false;kdb(1);
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
   disasm(elf,d)
   stackinit(elf,a)
-  showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);brk.textContent=h8(0,elf[3])
+  showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);brk.textContent=h8(0,elf[3]);
   let stp=execute(elf,d);traceinto=stp;stepover=stp;runto=stp;
   if(deb.checked==false){let lpc;while(1){let pc=stp();if("string"==typeof pc){if(""==pc)return;console.log("lpc",lpc);O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
 }
@@ -27,6 +27,7 @@ let showstack,showheap
 let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*16),s=Array(16).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
 let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
 let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
+let showcal=c=>{c.slice(c.length-16,c.length).forEach((x,i)=>tc(h4(x[0])+": "+h4(x[1]),ge("cal"+i)))}
 let markrbp=rbp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=xs(s.slice(9,17));s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
 let stackinit=(d,a)=>{let rsp=-32,I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
  a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=-8*(2+a.length);I[10]=rsp;I[11]=-1;
@@ -46,15 +47,15 @@ let stackinit=(d,a)=>{let rsp=-32,I=new Int32Array(d[0].buffer,0,32),b=new Uint8
 0xc9 201  time
 */
 let err=s=>{throw new error(s)}
-let execute=(elf,D)=>{ //brk S R
-  let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[],bk=elf[3],flag=""
+let execute=(elf,D)=>{ //brk S R B(
+  let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag="";showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
-  let H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
-  let Rat=x=>U[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
+  let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
+  let Rat=x=>U[regmap[1+x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
   let push=(x, i)=>(U[10]-=8,i=bk+(-I[10])>>2,U[i]=U[x>>2],U[1+i]=U[1+(x>>2)])
   let popl=x=>((r=U[bk+(-I[10])>>2]),(U[10]+=8),r)
-  let pucal=(x,y)=>{cal.push([x,y]),cal.length<12?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<10?tc("",ge("cal"+cal.length)):showcal(cal)}
+  let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,bk,flag,40,0,0,0)
   return _=>{
    for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip
@@ -62,32 +63,34 @@ let execute=(elf,D)=>{ //brk S R
       
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];               return simm(i,U[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
-   let disp=(o,b,i,l,h)=>{ return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
+   let disp=(o,b,i,l,h)=>{ console.log("disp",o,b,i,l.h); return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
    let indx=(i,s)=>Rat(i)*(s?s:1)
    let st=x=>(x>0x7fffffff?bk-8+(1+~x):x)
-   let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
+   let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; console.log("opmem b",b,regmap[b],regmap[b]>>2,Rat(b),"i",i); return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
    let flg=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag=x==0?"Z":(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])?"S":""}
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
    let x1=x>>1,y1=y>>1,x2=x>>2,y2=y>>2,x3=x>>3,y3=y>>3
+   let G2=f=>(console.log("G2",sz,h4(x),h4(y)),16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(x,f(V.getBigUint64(x,1),V.getBigUint64(y,1)),1)) //unaligned
+   let F2=f=>(x%(sz>>3)||x%(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x1]=f(H[x1],H[y1]):32==sz?U[x2]=f(U[x2],U[y2]):J[x3]=f(J[x3],J[y3])
    switch(u[0]){
-   case   5/*add */: 8==sz?(M[x]+=M[y]):16==sz?(H[x1]+=H[y1]):32==sz?(U[x2]+=U[y2]):(J[x3]+=J[y3]); flg(x);  break;
-   case  36/*call*/: push(256); U[64]=I[x2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip); break;
+   case   5/*add */: F2((x,y)=>x+y);                                                                flg(x);  break;
+   case  36/*call*/: push(256); U[64]=I[x2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);                        break;
    case 105/*dec */: 8==sz?(M[x]--    ):16==sz?(H[x1]--     ):32==sz?(U[x2]--     ):(J[x3]--);      flg(x);  break;
    case 263/*jz  */: if("Z"==flag)rip=U[x>>2];                                                               break;
-   case 269/*lea */: 8==sz?(M[x] =  y ):16==sz?(H[x1] =  y1 ):32==sz?(U[x2] =  y2 ):(J[x3] =B(y3));          break;
-   case 303/*mov */: 8==sz?(M[x] =M[y]):16==sz?(H[x1] =H[y1]):32==sz?(U[x2] =U[y2]):(J[x3] =J[y3]);          break;
-   case 347/*neg */: 8==sz?(M[x]=-M[x]):16==sz?(H[x1]=-H[x1]):32==sz?(U[x2]=-U[x2]):(J[x3]=-J[y3]); flg(x);  break;
-   case 350/*or  */: 8==sz?(M[x]|=M[y]):16==sz?(H[x1]|=H[y1]):32==sz?(U[x2]|=U[y2]):(J[x3]|=J[y3]); flg(x);  break;
+   case 269/*lea */: 8==sz?(M[x] =  y ):16==sz?(H[x1] =  y1 ):32==sz?(U[x2] =  y2 ):(J[x3] =B(y3));          break; //todo nonalign  y2 or y B(y3) or B(y)? z??
+   case 303/*mov */: F2((x,y)=>y);                                                                           break;
+   case 347/*neg */: F3((x,y)=>0-y);                                                                flg(x);  break;
+   case 350/*or  */: F2((x,y)=>x|y);                                                                flg(x);  break;
    case 532/*ret */: rip=popl();U[64]=rip;x=40;y=64; pocal(); break;
    case 547/*scasb*/:let nnn=34;while(nnn--){ //eax:8 edi:64 ecx:16
 	      let a=M[8],b=M[U[64>>2]];
               U[64>>2]++; if(rep=="")break;let c=--U[16>>2]; //todo: dirflag cld/std
               if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64; break
-   case 593/*sub */: 8==sz?(M[x]-=M[y]):16==sz?(H[x1]-=H[y1]):32==sz?(U[x2]-=U[y2]):(J[x3]-=J[y3]); flg(x);  break;
+   case 593/*sub */: F2((x,y)=>x-y);                                                                flg(x);  break;
    case 599/*sysc*/: U[8>>2]=syscall(M,U[8>>2],U[64>>2],U[56>>2],U[24>>2]); x=8;y=64;z=56;zz=24;    flg(8);  break;
-   case 894/*xor */: 8==sz?(M[x]^=M[y]):16==sz?(H[x1]^=H[y1]):32==sz?(U[x2]^=U[y2]):(J[x3]^=J[y3]); flg(x);  break;
+   case 894/*xor */: F2((x,y)=>x^y);                                                                flg(x);  break;
    default: O(`\n${h4(lpc)}:unknown instr ${u[0]}: ${mne[u[0]]}\n`); return exit(1);
    }
    mark(U,lpc,bk,flag,x,y,z,zz);lpc=rip

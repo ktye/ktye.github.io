@@ -10,8 +10,8 @@ let ed=x=>{if("string"==typeof x)x=[x];if(1!=x.length){O("use: ed file\n");retur
  edshow(1)
 }
 let edshow=x=>{
- if(x){editor.hidden=false;tty.hidden=true;edbut.hidden=false}
- else {tty.hidden=false;editor.hidden=true;edbut.hidden=true}
+ if(x){editor.hidden=false;tty.style.display="none";edbut.hidden=false}
+ else {tty.style.display="inline-block";editor.hidden=true;edbut.hidden=true}
 }
 let edwrite=x=>{fsadd(filename.textContent,us(editor.value));fsshow()}
 let xxd=(x,t, s,i,o,O)=>(t=t?t:0,i=0,o="",O=x=>o+=x,s="  ",x.forEach((x,i)=>{
