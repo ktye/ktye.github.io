@@ -29,8 +29,8 @@ let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.b
 let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
 let showcal=c=>{c.slice(c.length-16,c.length).forEach((x,i)=>tc(h4(x[0])+": "+h4(x[1]),ge("cal"+i)))}
 let markrbp=rbp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=xs(s.slice(9,17));s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
-let stackinit=(d,a)=>{let rsp=-32,I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
- a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=-8*(2+a.length);I[10]=rsp;I[11]=-1;
+let stackinit=(d,a)=>{let I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
+ a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[4+2*i]=p;U[5+2*i]=0});U[4+2*a.length]=a.length;U[5+2*a.length]=0;rsp=-8*(3+a.length);I[10]=rsp;I[11]=-1;
  showstack=shstk(new Uint32Array(d[0].buffer,d[3]));showstack(0,rsp);}
 
 /* fasm syscalls:
@@ -50,36 +50,37 @@ let err=s=>{throw new Error(s)}
 let execute=(elf,D)=>{ //brk S R B(
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag="";showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
-  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
+  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>64==sz?BigInt(x):x,b_=x=>Number(x);
   let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
-  let Rat=x=>U[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
+  let Rat=x=>64==sz?J[regmap[x]>>3]:U[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
   let push=(x, i)=>(U[10]-=8,i=bk+(-I[10])>>2,U[i]=U[x>>2],U[1+i]=U[1+(x>>2)])
   let popl=x=>((r=U[bk+(-I[10])>>2]),(U[10]+=8),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,bk,flag,40,0,0,0)
   return _=>{
-   for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip
+   for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip;let lea=u[0]==269;
    sz=b[538+9];adrmode=b[538+10],rep=b[544]?"rep":b[545]?"repe":b[546]?"repne":"" ; //console.log("oprmode",oprmode,"adrmode",adrmode)
-      
+   
+   const zero=64==sz?0n:0,one=64==sz?1n:1;   
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];               return simm(i,U[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
-   let disp=(o,b,i,l,h)=>{ console.log("disp",o,b,i,l.h); return(8==0?0xff:16==o?0xffff:0xffffffff)&l }
+   let disp=(o,b,i,l,h)=>B((8==0?0xff:16==o?0xffff:0xffffffff)&l)
    let indx=(i,s)=>Rat(i)*(s?s:1)
-   let st=x=>(x>0x7fffffff?bk-8+(1+~x):x)
-   let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; console.log("opmem b",b,regmap[b],regmap[b]>>2,Rat(b),"i",i); return(b?Rat(b)+(i?indx(i,sc):0):0)+(o?disp(o,b,i,u[x+6],u[x+7]):0)}
+   let st=x=>lea?x:x.constructor==BigInt?(x>0x7fffffffffffffffn?B(bk-8)+(BigInt.asUintN(64,1n+~x)):x):x>0x7fffffff?bk-8+(1+~x):x;
+   let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; console.log("opmem b",b,regmap[b],regmap[b]>>2,Rat(b),"i",i); return(b?Rat(b)+(i?indx(i,sc):zero):zero)+(o?disp(o,b,i,u[x+6],u[x+7]):zero)}
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
    let flg=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag=x==0?"Z":(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])?"S":""}
    let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
-   let x1=x>>1,y1=y>>1,x2=x>>2,y2=y>>2,x3=x>>3,y3=y>>3
-   let G2=f=>(console.log("G2",sz,h4(x),h4(y)),16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(x,f(V.getBigUint64(x,1),V.getBigUint64(y,1)),1)) //unaligned
-   let F2=f=>(x%(sz>>3)||x%(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x1]=f(H[x1],H[y1]):32==sz?U[x2]=f(U[x2],U[y2]):J[x3]=f(J[x3],J[y3])
+   let G2=f=>(console.log("G2",sz,x,h4(x),h4(y)),16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(b_(x),f(V.getBigUint64(b_(x),1),V.getBigUint64(b_(y),1)),1)) //unaligned
+   let F2=f=>(x%B(sz>>3)||x%B(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x>>1]=f(H[x>>1],H[y>>1]):32==sz?U[x>>2]=f(U[x>>2],U[y>>2]):J[x>>3]=f(J[x>>3],J[y>>3])
+  console.log("op",u[0]);
    switch(u[0]){
    case   5/*add */: F2((x,y)=>x+y);                                                  flg(x);  break;
-   case  36/*call*/: push(256); U[64]=I[x2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);          break;
+   case  36/*call*/: push(256); U[64]=I[x>>2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);        break;
    case 105/*dec */: 64==sz?F2(x=>x-1n):F2(x=>x-1);                                   flg(x);  break;
    case 263/*jz  */: if("Z"==flag)rip=U[x>>2];                                                 break;
-   case 269/*lea */: 64==sz?F2(_=>B(y)):F2(_=>y);                                     y=0;     break;
+   case 269/*lea */: F2(_=>B(y));                                                     y=0;     break;
    case 303/*mov */: F2((x,y)=>y);                                                             break;
    case 347/*neg */: F2(x=>-x);                                                       flg(x);  break;
    case 350/*or  */: F2((x,y)=>x|y);                                                  flg(x);  break;
