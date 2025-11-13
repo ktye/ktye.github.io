@@ -8,7 +8,7 @@ const mne="aaa,aad,aam,aas,adc,add,addpd,addps,addsd,addss,addsubpd,addsubps,aes
 
 let bold=x=>x.classList.add("b"),unbold=x=>x.classList.remove("b")
 let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0")
-let h4=x=>x.toString(16).padStart(8,"0"),h8=(h,l)=>h4(h)+h4(l)
+let h2=x=>x.toString(16).padStart(2,"0"),h4=x=>x.toString(16).padStart(8,"0"),h8=(h,l)=>h4(h)+h4(l)
 
 let execv=a=>{ kdbut.hidden=false;kdb(1);
  let u=fsget(a[0]),elf;if(u===0){progexit();return}
@@ -24,7 +24,11 @@ let execv=a=>{ kdbut.hidden=false;kdb(1);
 let exit=x=>{if(x)O("exit "+x+"\n");progexit();kdb(0);return""}
 
 let showstack,showheap
-let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*16),s=Array(16).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
+//let xxD=(b,t)=>{let u=new Uint32Array(b.buffer,b.byteOffset,4*16),s=Array(16).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("");s.forEach((_,i)=>{let j=i<<2,j4=i<<4;s[i]=h4(t+j4)+" "+h4(u[j])+h4(u[1+j])+" "+h4(u[2+j])+h4(u[3+j])+" "+ss(b.subarray(j4,16+j4)) });return s.join("\n")}
+let xxD=(b,t)=>{ //let s=Array(16).fill(""),ss=b=>af(b).map(x=>x>31&&x<127?String.fromCharCode(x):".").join("")
+ let h=(i,o)=>h2(b[o+i*16])+h2(b[1+o+i*16])+" "+h2(b[2+o+i*16])+h2(b[3+o+i*16]),s=x=>Array(16).fill("-").map(x=>x>31&&x<127?String.fromCharCode(x):".").join("")
+ return Array(16).fill(0).map((_,i)=>h4(t+i*16)+" "+h(i,0)+" "+h(i,4)+" "+h(i,8)+" "+h(i,12)+" "+s(i*16)).join("\n")
+}
 let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
 let shstk=S=>(h,rsp)=>{const t=4294967288;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
 let showcal=c=>{c.slice(c.length-16,c.length).forEach((x,i)=>tc(h4(x[0])+": "+h4(x[1]),ge("cal"+i)))}
@@ -47,12 +51,12 @@ let stackinit=(d,a)=>{let I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[
 0xc9 201  time
 */
 let err=s=>{throw new Error(s)}
-let execute=(elf,D)=>{ //brk S R B(
+let execute=(elf,D)=>{ //brk S R B( lo=
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag="";showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
-  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>64==sz?BigInt(x):x,b_=x=>Number(x);
+  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x),lo=x=>x.constructor==BigInt?Number(BigInt.asUintN(32,x)):x;
   let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
-  let Rat=x=>64==sz?J[regmap[x]>>3]:U[regmap[x]>>2],simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
+  let Rat=x=>B(8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[regmap[x]>>2]:J[regmap[x]>>3]),simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
   let push=(x, i)=>(U[10]-=8,i=bk+(-I[10])>>2,U[i]=U[x>>2],U[1+i]=U[1+(x>>2)])
   let popl=x=>((r=U[bk+(-I[10])>>2]),(U[10]+=8),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
@@ -61,26 +65,25 @@ let execute=(elf,D)=>{ //brk S R B(
    for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip;let lea=u[0]==269;
    sz=b[538+9];adrmode=b[538+10],rep=b[544]?"rep":b[545]?"repe":b[546]?"repne":"" ; //console.log("oprmode",oprmode,"adrmode",adrmode)
    
-   const zero=64==sz?0n:0,one=64==sz?1n:1;   
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];               return simm(i,U[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
-   let disp=(o,b,i,l,h)=>B((8==0?0xff:16==o?0xffff:0xffffffff)&l)
-   let indx=(i,s)=>Rat(i)*(s?s:1)
-   let st=x=>lea?x:x.constructor==BigInt?(x>0x7fffffffffffffffn?B(bk-8)+(BigInt.asUintN(64,1n+~x)):x):x>0x7fffffff?bk-8+(1+~x):x;
-   let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; console.log("opmem b",b,regmap[b],regmap[b]>>2,Rat(b),"i",i); return(b?Rat(b)+(i?indx(i,sc):zero):zero)+(o?disp(o,b,i,u[x+6],u[x+7]):zero)}
+   let disp=(o,b,i,l,h)=>(8==0?0xff:16==o?0xffff:0xffffffff)&l
+   let indx=(i,s)=>Rat(i)*B(s?s:1)
+   let st=x=>lea?x:x>0x7fffffffffffffffn?B(bk-8)+(BigInt.asUintN(64,1n+~x)):x  //:x>0x7fffffff?bk-8+(1+~x):x;
+   let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; console.log("opmem b",b,regmap[b],regmap[b]>>2,Rat(b),"i",i); return(b?Rat(b)+(i?indx(i,sc):0n):0n)+B(o?disp(o,b,i,u[x+6],u[x+7]):0n)}
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
    let flg=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag=x==0?"Z":(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])?"S":""}
-   let x=oper(0),y=oper(1),z=oper(2),zz=oper(3),na=(x!=0)+(y!=0)+(z!=0)+(zz!=0);
-   let G2=f=>(console.log("G2",sz,x,h4(x),h4(y)),16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(b_(x),f(V.getBigUint64(b_(x),1),V.getBigUint64(b_(y),1)),1)) //unaligned
-   let F2=f=>(x%B(sz>>3)||x%B(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x>>1]=f(H[x>>1],H[y>>1]):32==sz?U[x>>2]=f(U[x>>2],U[y>>2]):J[x>>3]=f(J[x>>3],J[y>>3])
+   let X=oper(0),Y=oper(1),Z=oper(2),ZZ=oper(3),x=lo(X),y=lo(Y),z=lo(Z),zz=lo(ZZ),na=(X!=0n)+(Y!=0n)+(Z!=0n)+(ZZ!=0n);
+   let F2=f=>(8==sz?(M[x]=f(M[x],M[y])):16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(x,f(V.getBigUint64(x,1),V.getBigUint64(y,1)),1))
+   //let F2=f=>(x%(sz>>3)||x%(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x>>1]=f(H[x>>1],H[y>>1]):32==sz?U[x>>2]=f(U[x>>2],U[y>>2]):J[x>>3]=f(J[x>>3],J[y>>3])
   console.log("op",u[0]);
    switch(u[0]){
    case   5/*add */: F2((x,y)=>x+y);                                                  flg(x);  break;
    case  36/*call*/: push(256); U[64]=I[x>>2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);        break;
    case 105/*dec */: 64==sz?F2(x=>x-1n):F2(x=>x-1);                                   flg(x);  break;
    case 263/*jz  */: if("Z"==flag)rip=U[x>>2];                                                 break;
-   case 269/*lea */: F2(_=>B(y));                                                     y=0;     break;
+   case 269/*lea */: G2(_=>B(Y));                                                     y=0;     break;
    case 303/*mov */: F2((x,y)=>y);                                                             break;
    case 347/*neg */: F2(x=>-x);                                                       flg(x);  break;
    case 350/*or  */: F2((x,y)=>x|y);                                                  flg(x);  break;
