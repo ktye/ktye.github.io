@@ -52,7 +52,7 @@ let stackinit=(d,a)=>{let I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[
 */
 let err=s=>{throw new Error(s)}
 let execute=(elf,D)=>{ //brk S R B( lo=
-  let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag="";showcal(cal)
+  let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag={};showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x),lo=x=>x.constructor==BigInt?Number(BigInt.asUintN(32,x)):x;
   let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
@@ -75,33 +75,46 @@ let execute=(elf,D)=>{ //brk S R B( lo=
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; /*console.log("opmem b",b,regmap[b],regmap[b]>>2,Rat(b),"i",i);*/ return(b?Rat(b)+(i?indx(i,sc):0n):0n)+B(o?disp(o,b,i,u[x+6],u[x+7]):0n)}
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
-   let flg=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag=x==0?"Z":(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])?"S":""}
+   //flags see https://github.com/jart/blink/blob/master/blink/alu.c
+   let fl0={flag.A=0;flag.C=0;flag.O=0}
+   let fla=(r,x,y)=>{}
+   let fsz=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag.Z=x==0;flag.S=(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])}
    let X=oper(0),Y=oper(1),Z=oper(2),ZZ=oper(3),x=lo(X),y=lo(Y),z=lo(Z),zz=lo(ZZ),na=(X!=0n)+(Y!=0n)+(Z!=0n)+(ZZ!=0n);
    let F2 =f=>(prot(x),8==sz?(M[x]=f(M[x],M[y])):16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(x,f(V.getBigUint64(x,1),V.getBigUint64(y,1)),1))
    //let F2=f=>(x%(sz>>3)||x%(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x>>1]=f(H[x>>1],H[y>>1]):32==sz?U[x>>2]=f(U[x>>2],U[y>>2]):J[x>>3]=f(J[x>>3],J[y>>3])
    switch(u[0]){
-   case   5/*add */: F2((x,y)=>x+y);                                                  flg(x);  break;
+   case   5/*add */: F2((x,y)=>x+y,fla);                                          /*  fsz(x);*/  break;
    case  36/*call*/: push(256); U[64]=I[x>>2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);        break;
-   case 105/*dec */: 64==sz?F2(x=>x-1n):F2(x=>x-1);                                   flg(x);  break;
-   case 263/*jz  */: if("Z"==flag)U[64]=U[x>>2];rip=U[64];                                     break;
+   case 105/*dec */: 64==sz?F2(x=>x-1n,fla):F2(x=>x-1,fla);                    /*   fsz(x);*/  break;
+   case 246/*jb/c*/: if(flag.C)U[64]=U[x>>2];rip=U[64];                                        break;
+   case 263/*jz  */: if(flag.Z)U[64]=U[x>>2];rip=U[64];                                        break;
    case 269/*lea */: prot(x);(8==sz?(M[x]=y):16==sz?V.setUint16(x,y,1):32==sz?V.setUint32(x,y,1):V.setBigUint64(x,Y,1)); y=0; break;
-   case 303/*mov */: F2((x,y)=>y);                                                             break;
-   case 347/*neg */: F2(x=>-x);                                                       flg(x);  break;
-   case 350/*or  */: F2((x,y)=>x|y);                                                  flg(x);  break;
+   case 303/*mov */: F2((x,y)=>y,(a,b,c)=>{});                                                 break;
+   case 347/*neg */: F2(x=>-x,fla);                                           /*  fsz(x); */   break;
+   case 350/*or  */: F2((x,y)=>x|y,fl0);                                      /*  fsz(x); */   break;  //fl0 also for and
    case 532/*ret */: rip=popl();U[64]=rip;x=40;y=64; pocal();                                  break;
    case 547/*scasb*/:let nnn=34;while(nnn--){ //eax:8 edi:64 ecx:16
 	      let a=M[8],b=M[U[64>>2]];
               U[64>>2]++; if(rep=="")break;let c=--U[16>>2]; //todo: dirflag cld/std
               if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64;           break;
-   case 593/*sub */: F2((x,y)=>x-y);                                                  flg(x);  break;
-   case 599/*sysc*/: U[8>>2]=syscall(M,U[8>>2],U[64>>2],U[56>>2],U[24>>2]); x=8;y=64;z=56;zz=24;flg(8);break;
-   case 894/*xor */: F2((x,y)=>x^y);                                                  flg(x);  break;
+   case 583/*stc */: flag.C=1;                                                                 break;
+   case 593/*sub */: F2((x,y)=>x-y,fla);                                        /*    fsz(x);*/  break;
+   case 599/*sysc*/: U[8>>2]=syscall(M,U[8>>2],U[64>>2],U[56>>2],U[24>>2]); x=8;y=64;z=56;zz=24;fsz(8);break;
+   case 894/*xor */: F2((x,y)=>x^y,fl0);                                         /* fsz(x); */ break;
    default: O(`\n${h4(lpc)}:unknown instr ${u[0]}: ${mne[u[0]]}\n`); return exit(1);
    }
    mark(U,lpc,bk,flag,x,y,z,zz);lpc=rip
    return rip
  }
 }
+
+//todo flags:  arithmetic sets: OSZACP    carry/overflow: https://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
+//P parity (1even) number of bits (low byte only?)
+//C carry (1carry)
+//A auxiliary carry/adjust (1carry)
+//Z zero (1zero)
+//S sign (1negative)
+//O overflow (1over)
 
 let syscall=(M,rax,rdi,rsi,rdx)=>1==rax?(O(M.subarray(rsi,rsi+rdx)),rdx):(O("unknown syscall: "+rax+"\n"),exit(1))
 
@@ -150,7 +163,7 @@ let stkx=[stk0,stk1,stk2,stk3,stk4,stk5,stk6,stk7,stk8,stk9,stk10,stk11,stk12,st
 let mark=(U,rip,bk,flg,x,y,z,zz)=>{let pc=h4(rip); //S R
  let a=af(disa.childNodes);a.forEach(unbold)
  let i=a.findIndex(x=>x.textContent.startsWith(pc));if(i<0){i=asm.findIndex(x=>x.startsWith(pc));if(i>=0){disa.dataset.i=i-1;disa.move(1);bold(disa.firstChild)}}else bold(a[i]);
- a=af(regs.children);a.forEach(unbold);flags.textContent=flg
+ a=af(regs.children);a.forEach(unbold);flags.textContent=Object.keys(flg).filter(x=>flg[x]).join("")
  let h=x=>U[1+(x>>2)].toString(16).padStart(8,"0")+U[x>>2].toString(16).padStart(8,"0");
  let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")
  tc(h(256),reg32) //rip
