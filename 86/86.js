@@ -51,7 +51,7 @@ let stackinit=(d,a)=>{let I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[
 0xc9 201  time
 */
 let err=s=>{throw new Error(s)}
-let execute=(elf,D)=>{ //brk S R B( lo=
+let execute=(elf,D)=>{ //brk S R B( lo= flag
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag={};showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x),lo=x=>x.constructor==BigInt?Number(BigInt.asUintN(32,x)):x;
@@ -76,12 +76,12 @@ let execute=(elf,D)=>{ //brk S R B( lo=
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
    //flags see https://github.com/jart/blink/blob/master/blink/alu.c
-   let fl0={flag.A=0;flag.C=0;flag.O=0}
-   let fla=(r,x,y)=>{}
-   let fsz=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag.Z=x==0;flag.S=(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])}
+   let aco=(a,c,o)=>{flag.A=+a;flag.C=+c;flag.O=+o},fsz=r=>(flag.Z=r==0,flag.S=(r>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3]))
+   let fl0=(x,y,r)=>(aco(0,0,0),fsz(r),r)
+   let fla=(r,x,y)=>(aco((r&15)<(y&15),r<y,((r^x)&(r^y))>>(sz-1)),fsz(r),r)
+   //let fsz=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag.Z=x==0;flag.S=(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])}
    let X=oper(0),Y=oper(1),Z=oper(2),ZZ=oper(3),x=lo(X),y=lo(Y),z=lo(Z),zz=lo(ZZ),na=(X!=0n)+(Y!=0n)+(Z!=0n)+(ZZ!=0n);
-   let F2 =f=>(prot(x),8==sz?(M[x]=f(M[x],M[y])):16==sz?V.setUint16(x,f(V.getUint16(x,1),V.getUint16(y,1)),1):32==sz?V.setUint32(x,f(V.getUint32(x,1),V.getUint32(y,1)),1):V.setBigUint64(x,f(V.getBigUint64(x,1),V.getBigUint64(y,1)),1))
-   //let F2=f=>(x%(sz>>3)||x%(sz>>3))?G2(f):8==sz?M[x]=f(M[x],M[y]):16==sz?H[x>>1]=f(H[x>>1],H[y>>1]):32==sz?U[x>>2]=f(U[x>>2],U[y>>2]):J[x>>3]=f(J[x>>3],J[y>>3])
+   let F2=(f,fl, xx,yy)=>(prot(x),8==sz?(M[x]=fl(xx,yy,f(xx=M[x],yy=M[y]))):16==sz?V.setUint16(x,fl(xx,yy,f(xx=V.getUint16(x,1),yy=V.getUint16(y,1))),1):32==sz?V.setUint32(x,fl(xx,yy,f(xx=V.getUint32(x,1),yy=V.getUint32(y,1))),1):V.setBigUint64(x,fl(xx,yy,f(V.getBigUint64(x,1),V.getBigUint64(y,1))),1))
    switch(u[0]){
    case   5/*add */: F2((x,y)=>x+y,fla);                                          /*  fsz(x);*/  break;
    case  36/*call*/: push(256); U[64]=I[x>>2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);        break;
@@ -89,7 +89,7 @@ let execute=(elf,D)=>{ //brk S R B( lo=
    case 246/*jb/c*/: if(flag.C)U[64]=U[x>>2];rip=U[64];                                        break;
    case 263/*jz  */: if(flag.Z)U[64]=U[x>>2];rip=U[64];                                        break;
    case 269/*lea */: prot(x);(8==sz?(M[x]=y):16==sz?V.setUint16(x,y,1):32==sz?V.setUint32(x,y,1):V.setBigUint64(x,Y,1)); y=0; break;
-   case 303/*mov */: F2((x,y)=>y,(a,b,c)=>{});                                                 break;
+   case 303/*mov */: F2((x,y)=>y,(a,b,r)=>r);                                                 break;
    case 347/*neg */: F2(x=>-x,fla);                                           /*  fsz(x); */   break;
    case 350/*or  */: F2((x,y)=>x|y,fl0);                                      /*  fsz(x); */   break;  //fl0 also for and
    case 532/*ret */: rip=popl();U[64]=rip;x=40;y=64; pocal();                                  break;
