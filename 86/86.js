@@ -54,6 +54,7 @@ let err=s=>{throw new Error(s)}
 let execute=(elf,D)=>{ //brk S R B( lo= flag
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag={};showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
+  let u8_=new Uint8Array(1),u16_=new Uint16Array(1),u32_=new Uint32Array(1),u8=x=>(u8_[0]=x,u8_[0]),u16=x=>(u16_[0]=x,u16_[0]),u32=x=>(u32_[0]=x,u32_[0]),u64=x=>BigInt.asUintN(64,x),uint=x=>sz==8?u8(x):sz==16?u16(x):sz==32?u32(x):u64(x)
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x),lo=x=>x.constructor==BigInt?Number(BigInt.asUintN(32,x)):x;
   let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
   let Rat=x=>B(8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[regmap[x]>>2]:J[regmap[x]>>3]),simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
@@ -66,6 +67,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
   return _=>{ if(!iasm.includes(U[64])){O(`\nillegal rip: ${h4(U[64])}\n`);return exit(1);}
    for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip;let lea=u[0]==269;
    sz=b[538+9];adrmode=b[538+10],rep=b[544]?"rep":b[545]?"repe":b[546]?"repne":"" ; //console.log("oprmode",oprmode,"adrmode",adrmode)
+   let bs=x=>sz==64?BigInt(x):x
    
    let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];               return simm(i,U[64]+((8==s?0xff:16==s?0xffff:0xffffffff)&l))}
@@ -76,31 +78,34 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
    let oper=i=>{let x=1+12*i,t=u[x]; return st((t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0))}
    
    //flags see https://github.com/jart/blink/blob/master/blink/alu.c
-   let aco=(a,c,o)=>{flag.A=+a;flag.C=+c;flag.O=+o},fsz=r=>(flag.Z=r==0,flag.S=(r>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3]))
-   let fl0=(x,y,r)=>(aco(0,0,0),fsz(r),r)
-   let fla=(r,x,y)=>(aco((r&15)<(y&15),r<y,((r^x)&(r^y))>>(sz-1)),fsz(r),r)
-   //let fsz=x=>{x=8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[x>>2]:J[x>>3];flag.Z=x==0;flag.S=(x>[0,0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][sz>>3])}
+   let aco=(a,c,o)=>{flag.A=+a;flag.C=+c;flag.O=+o},fsz=r=>(flag.Z=r==0,flag.S=(r>[0x7f,0x7fff,0x7fffffff,0x7fffffffffffffffn][Math.log2(sz)>>3]))
+   let fl0=(x,y,r)=>(aco(0,0,0),fsz(uint(r)),r)
+   let fla=(x,y,r)=>(aco((r&bs(15))<(y&bs(15)),r<y,!!(((r^x)&(r^y))>>bs(sz-1))),fsz(r),r)
+   let fls=(x,y,r)=>(aco((x&bs(15))<(r&bs(15)),x<r,!!(((x^y)&(r^x))>>bs(sz-1))),fsz(r),r)
    let X=oper(0),Y=oper(1),Z=oper(2),ZZ=oper(3),x=lo(X),y=lo(Y),z=lo(Z),zz=lo(ZZ),na=(X!=0n)+(Y!=0n)+(Z!=0n)+(ZZ!=0n);
-   let F2=(f,fl, xx,yy)=>(prot(x),8==sz?(M[x]=fl(xx,yy,f(xx=M[x],yy=M[y]))):16==sz?V.setUint16(x,fl(xx,yy,f(xx=V.getUint16(x,1),yy=V.getUint16(y,1))),1):32==sz?V.setUint32(x,fl(xx,yy,f(xx=V.getUint32(x,1),yy=V.getUint32(y,1))),1):V.setBigUint64(x,fl(xx,yy,f(V.getBigUint64(x,1),V.getBigUint64(y,1))),1))
+   let F2=(f,fl, r,xx,yy)=>(prot(x),8==sz?(r=u8(f(xx=M[x],yy=M[y])),M[x]=fl(xx,yy,r))
+                                  :16==sz?(r=u16(f(xx=V.getUint16(   x,1),yy=V.getUint16(   y,1))),V.setUint16(   x,fl(xx,yy,r),1))
+                                  :32==sz?(r=u32(f(xx=V.getUint32(   x,1),yy=V.getUint32(   y,1))),V.setUint32(   x,fl(xx,yy,r),1))
+                                  :       (r=u64(f(xx=V.getBigUint64(x,1),yy=V.getBigUint64(y,1))),V.setBigUint64(x,fl(xx,yy,r),1)));
    switch(u[0]){
-   case   5/*add */: F2((x,y)=>x+y,fla);                                          /*  fsz(x);*/  break;
+   case   5/*add */: F2((x,y)=>x+y,fla);                                                       break;
    case  36/*call*/: push(256); U[64]=I[x>>2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);        break;
-   case 105/*dec */: 64==sz?F2(x=>x-1n,fla):F2(x=>x-1,fla);                    /*   fsz(x);*/  break;
+   case 105/*dec */: let c=flag.C;64==sz?F2(x=>x-1n,fla):F2(x=>x-1,fls); flag.C=c;             break; //keep carry also for inc
    case 246/*jb/c*/: if(flag.C)U[64]=U[x>>2];rip=U[64];                                        break;
    case 263/*jz  */: if(flag.Z)U[64]=U[x>>2];rip=U[64];                                        break;
    case 269/*lea */: prot(x);(8==sz?(M[x]=y):16==sz?V.setUint16(x,y,1):32==sz?V.setUint32(x,y,1):V.setBigUint64(x,Y,1)); y=0; break;
-   case 303/*mov */: F2((x,y)=>y,(a,b,r)=>r);                                                 break;
-   case 347/*neg */: F2(x=>-x,fla);                                           /*  fsz(x); */   break;
-   case 350/*or  */: F2((x,y)=>x|y,fl0);                                      /*  fsz(x); */   break;  //fl0 also for and
+   case 303/*mov */: F2((x,y)=>y,(a,b,r)=>r);                                                  break;
+   case 347/*neg */: F2(x=>-x,(x,y,r)=>(aco(+!!x,+!!x,+(r==x)),fsz(r),r));                     break;
+   case 350/*or  */: F2((x,y)=>x|y,fl0);                                                       break;  //fl0 also for and
    case 532/*ret */: rip=popl();U[64]=rip;x=40;y=64; pocal();                                  break;
    case 547/*scasb*/:let nnn=34;while(nnn--){ //eax:8 edi:64 ecx:16
 	      let a=M[8],b=M[U[64>>2]];
               U[64>>2]++; if(rep=="")break;let c=--U[16>>2]; //todo: dirflag cld/std
-              if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64;           break;
+              if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64;           break; //todo flag: OF, SF, ZF, AF, PF, and CF flags are set according to the temporary result of the comparison.
    case 583/*stc */: flag.C=1;                                                                 break;
-   case 593/*sub */: F2((x,y)=>x-y,fla);                                        /*    fsz(x);*/  break;
+   case 593/*sub */: F2((x,y)=>x-y,fls);                                                       break;
    case 599/*sysc*/: U[8>>2]=syscall(M,U[8>>2],U[64>>2],U[56>>2],U[24>>2]); x=8;y=64;z=56;zz=24;fsz(8);break;
-   case 894/*xor */: F2((x,y)=>x^y,fl0);                                         /* fsz(x); */ break;
+   case 894/*xor */: F2((x,y)=>x^y,fl0);                                                       break;
    default: O(`\n${h4(lpc)}:unknown instr ${u[0]}: ${mne[u[0]]}\n`); return exit(1);
    }
    mark(U,lpc,bk,flag,x,y,z,zz);lpc=rip
@@ -160,7 +165,7 @@ let decode=(rip,b,u)=>{
  return h4(rip-b[20])+" "+rep+(mne[u[0]]).padEnd(4," ")+" "+operands()}
 
 let stkx=[stk0,stk1,stk2,stk3,stk4,stk5,stk6,stk7,stk8,stk9,stk10,stk11,stk12,stk13,stk14,stk15]
-let mark=(U,rip,bk,flg,x,y,z,zz)=>{let pc=h4(rip); //S R
+let mark=(U,rip,bk,flg,x,y,z,zz)=>{let pc=h4(rip); console.log("flag",flg); //S R
  let a=af(disa.childNodes);a.forEach(unbold)
  let i=a.findIndex(x=>x.textContent.startsWith(pc));if(i<0){i=asm.findIndex(x=>x.startsWith(pc));if(i>=0){disa.dataset.i=i-1;disa.move(1);bold(disa.firstChild)}}else bold(a[i]);
  a=af(regs.children);a.forEach(unbold);flags.textContent=Object.keys(flg).filter(x=>flg[x]).join("")
