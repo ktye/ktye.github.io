@@ -9,7 +9,7 @@ button{padding:0}
 #tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;display:inline-block}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
-#editor{background:#ffe;outline:none;border:1px solid black;width:80ch;height:20rem;overflow:scroll;resize:none;margin-block:1em;margin-bottom:0}
+#editor{background:#ffe;outline:none;margin:0;border:1px solid black;width:80ch;height:22rem;overflow:scroll;resize:none}
 #disa:focus{border-bottom:1px solid;outline:none}
 #regs:focus{border-bottom:1px solid;outline:none}
 #heap:focus{border-bottom:1px solid;outline:none}
@@ -104,9 +104,9 @@ flg <span id="flags">----------------</span>
  <span class="p" onclick="stepover()"><span class="b">&nbsp;s&nbsp;</span> step over&nbsp;</span>
  <span class="p" onclick="traceinto()"><span class="b">&nbsp;→&nbsp;</span> trace into&nbsp;</span>
  <span class="p" onclick="gotoret()"><span class="b">&nbsp;←&nbsp;</span> run to ret&nbsp;</span>
- <span class="p" onclick="togglebreak()"><span class="b">&nbsp;b&nbsp;</span> breakpoint&nbsp;</span>
- <span class="p" onclick="runto()"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
- <span class="p" onclick="pager.find()"><span class="b">&nbsp;/&nbsp;</span> find&nbsp;</span>
+ <span class="p" onclick="runto(parseInt(debstr.value,16))"><span class="b">&nbsp;↵&nbsp;</span> run to break&nbsp;</span>
+ <input class="p" id="debstr" value="40021c"/>
+ <span class="p" onclick="pager.find(parseInt(debstr.value,16))"><span class="b">&nbsp;/&nbsp;</span> find&nbsp;</span>
 </div>
 
 <script>
@@ -131,7 +131,7 @@ fe("readme","readme")
 //fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{fsadd("fasm",new Uint8Array(r)); execv(["fasm"]); disa.focus()} )
  
 let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
-let keydown=p=>(e,k)=>(k=e.key,pd(e),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"b"==k?togglebreak():"Enter"==k?runto():"/"==k?p.find():0)
+let keydown=p=>(e,k)=>(k=e.key,pd(e),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"Enter"==k?runto(parseInt(debstr.value,16)):"/"==k?p.find(parseInt(debstr.value,16)):0)
 disa.onkeydown=keydown(disa);disa.move=d=>{let p=disa,i=+p.dataset.i,n=+p.dataset.n,N=asm.length,j=i+d,pc=reg32.textContent.slice(8,16);rM(p);i=min(max(0,j),N-n),j=i+n;p.dataset.i=i;while(i<j){ p.appendChild( tc(asm[i++]+"\n",ce("span")));if(asm[i].startsWith(pc))bold(p.lastChild) } ;}
 stac.onkeydown=keydown(regs);regs.move=d=>{let i=+stac.dataset.i,n=+datc.dataset.n,j=i+d;i=min(max(0,j),1024);rsp=-(1+~xs(reg4.textContent.slice(8)));showstack(i,rsp);stac.dataset.i=i;}
 heap.onkeydown=keydown(heap);heap.move=d=>{let i=xs(heap.textContent.slice(0,8)),j=i+16*d;i=min(max(0,j),xs(brk.textContent)-16*32);showheap(i);}
@@ -140,16 +140,11 @@ disa.ondblclick=e=>{let s=e.target.textContent,x,pc=xs(e.target.nextSibling.text
 regs.ondblclick=s=>(s=xs(document.getSelection().toString()),isNaN(s)?0:show(s))
 stac.ondblclick=s=>(s=xs(document.getSelection().toString()),isNaN(s)?0:show(s))
 for(let i=0;i<16;i++)ge("cal"+i).ondblclick=s=>(s=xs(document.getSelection().toString()),isNaN(s)?0:show(s))
-let show=x=>{let a=xs(asm[0]),e=xs(asm[asm.length-1].slice(0,8)),s=h4(x);console.log("show",x,a,e);if(x>=a&&x<e){let i=asm.findIndex(x=>x.startsWith(s));if(i>=0){disa.dataset.i=i;disa.move(0)}}else{console.log("showheap",x,x>>4<<4);showheap(x>>4<<4)}}
- 
-/*
- disa.ret=_=>console.log("disa ret")
- disa.traceinto=_=>console.log("disa trace into")
- disa.stepover=_=>console.log("disa step over")
- disa.break=_=>console.log("disa break")
- disa.runto=_=>console.log("disa run to break")
- disa.find=_=>console.log("disa find")
-*/
+let show=x=>{let a=xs(asm[0]),e=xs(asm[asm.length-1].slice(0,8)),s=h4(x);debstr.value=s;if(x>=a&&x<e){let i=asm.findIndex(x=>x.startsWith(s));if(i>=0){disa.dataset.i=i;disa.move(0)}}else{console.log("showheap",x,x>>4<<4);showheap(x>>4<<4)}}
+
+disa.find=x=>{let s=h4(x),i=asm.findIndex(x=>x.startsWith(s));if(i>=0){disa.dataset.i=i;disa.move(0)}}
+heap.find=x=>showheap(x>>4<<4)
+
 </script>
 </body>
 
