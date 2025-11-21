@@ -39,19 +39,6 @@ let stackinit=(d,a)=>{let J=new BigUint64Array(d[0].buffer,0,32),b=new Uint8Arra
  a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=stacktop-BigInt(8*(1+a.length));J[5]=rsp; console.log("stackinit",H8(J[5]));
  showstack=shstk(new BigUint64Array(d[0].buffer,d[3]));showstack(0,rsp);}
 
-/* fasm syscalls:
-0x0    0  read
-0x1    1  write
-0x2    2  open
-0x3    3  close
-0x8    8  lseek
-0x9    9  mmap         only for large alloc
-0xb   11  munmap       .. 
-0xc   12  brk
-0x3c  60  exit
-0x60  96  gettimeofday
-0xc9 201  time
-*/
 let err=s=>{throw new Error(s)}
 let execute=(elf,D)=>{ //brk S R B( lo= flag
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag={};showcal(cal)
@@ -60,13 +47,14 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
   let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3) /*,I=new Int32Array(M.buffer,0,69)*/;U[64]=rip;   // [156 regs][4 imm]
   let Rat=x=>B(8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[regmap[x]>>2]:J[regmap[x]>>3]),simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
-  let push=(x, i)=>(J[5]-=8n, i=(bk+Number(J[5]-stacktop))>>2,   console.log("push",h4(U[x>>2]),stacktop-J[5],h4(bk+Number(stacktop-J[5])),i>>1),   U[i]=U[x>>2],U[1+i]=U[1+(x>>2)], console.log(H8(J[i>>1])) )
+  let push=(x, i)=>(J[5]-=8n, i=(bk+Number(stacktop-J[5]))>>2, U[i]=U[x>>2],U[1+i]=U[1+(x>>2)] )
   let popl=x=>((r=U[(bk+Number(stacktop-J[5]))>>2]),(J[5]+=8n),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,bk,40,0,0,0)
   let prot=x=>{if(x>=rip&&x<=eop)throw new Error("write protection");return x}
   let iasm=asm.map(x=>xs(x.slice(0,8)))
   return _=>{ if(!iasm.includes(U[64])){O(`\nillegal rip: ${h4(U[64])}\n`);return exit(1);}
+   console.log("stk",H8(J[5]),H8(J[(bk+Number(stacktop-J[5]))>>3]), "brk",H8(BigInt(bk)+stacktop-J[5]), "d", stacktop-J[5])
    for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip;let lea=u[0]==269;
    sz=b[538+9];adrmode=b[538+10],rep=b[544]?"rep":b[545]?"repe":b[546]?"repne":"" ; //console.log("oprmode",oprmode,"adrmode",adrmode)
    let bs=x=>sz==64?BigInt(x):x
@@ -92,7 +80,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
                                   :       (V.setBigUint64(x,   r=u64(f(xx=V.getBigUint64(x,1),yy=V.getBigUint64(y,1))),1),fl(xx,yy,r)));
    switch(u[0]){
    case   5/*add */: F2((x,y)=>x+y,fla);                                                       break;
-   case  36/*call*/: push(256); U[64]=U[x>>2];rip=U[64]; for(i=0;i<32;i+=8)console.log(H8(BigInt(bk+i)),(bk+i)>>3,H8(J[(bk+i)>>3])); console.log("call", x,y,z,J[5]); Y=J[5]; Z=40; pucal(lpc,rip);        break;
+   case  36/*call*/: push(256); U[64]=U[x>>2];rip=U[64]; Y=J[5]; Z=40; pucal(lpc,rip);        break;
    case  63/*cmp */: F2((x,y)=>x,(x,y,r)=>fls(x,y,x-y));                                       break;
    case 105/*dec */: let c=flag.C;64==sz?F2(x=>x-1n,fla):F2(x=>x-1,fls); flag.C=c;             break; //keep carry also for inc
    case 246/*jb/c*/: if(flag.C)U[64]=U[x>>2];rip=U[64];                                        break;
@@ -123,14 +111,19 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
  }
 }
 
-//todo flags:  arithmetic sets: OSZACP    carry/overflow: https://teaching.idallen.com/dat2343/10f/notes/040_overflow.txt
-//P parity (1even) number of bits (low byte only?)
-//C carry (1carry)
-//A auxiliary carry/adjust (1carry)
-//Z zero (1zero)
-//S sign (1negative)
-//O overflow (1over)
-
+/* fasm syscalls:
+0x0    0  read
+0x1    1  write
+0x2    2  open
+0x3    3  close
+0x8    8  lseek
+0x9    9  mmap         only for large alloc
+0xb   11  munmap       .. 
+0xc   12  brk
+0x3c  60  exit
+0x60  96  gettimeofday
+0xc9 201  time
+*/
 let syscall=(M,rax,rdi,rsi,rdx)=>1==rax?(O(M.subarray(rsi,rsi+rdx)),rdx):(O("unknown syscall: "+rax+"\n"),exit(1))
 
 let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
@@ -138,26 +131,11 @@ let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let ibuf=new Uint8Array(D.memory.buffer,bp,16);
   let b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59)
-  
-  let s;while(1){
-   for(let i=0;i<16;i++)ibuf[i]=M[rip+i];
-   let n=D.dis();if(!n)break;rip+=n;
-   s=decode(rip,b,u);asm.push(s);if(rip>=eop)break
-  }
+  let s;while(1){for(let i=0;i<16;i++)ibuf[i]=M[rip+i];let n=D.dis();if(!n)break;rip+=n;s=decode(rip,b,u);asm.push(s);if(rip>=eop)break}
   let n=Math.min(16,asm.length)
-  for(let i=0;i<n;i++)disa.appendChild(tc(asm[i]+"\n",ce("span")));}
+  for(let i=0;i<n;i++)disa.appendChild(tc(asm[i]+"\n",ce("span")))}
 
-let decode=(rip,b,u)=>{
- //sizeofud:  576
- //inp_buf:  +  4
- //inp_ctr:  + 20 (length)
- //mnemonic: +340
- //operand : +344, 392, 440, 488
- //pfx_rex : +538
- //pfx_rep : +540  repe(541)  repne(542)
- //prim.opc: +557
- //userdata: +560
- // enum UD_OP_REG(156) MEM(157)
+let decode=(rip,b,u)=>{ //sizeofud(576) inp_buf(+4) inp_ctr(+20 length) mnemonic(+340) operand:(+344 392 440 488) pfx_rex(+538) pfx_rep:(+540) repe(541) repne(542) prim.opc(+557) userdata(+560)
  let oprmode=b[538+9],adrmode=b[538+10],rep=b[544]?"rep ":b[545]?"repe ":b[546]?"repne ":""
  let regstr=x=>regtab[x]
  let hx8=(h,l,n)=>"0x"+h.toString(16).padStart(8,"0")+l.toString(16).padStart(8,"0")
@@ -182,9 +160,8 @@ let mark=(U,rip,bk,x,y,z,zz)=>{let pc=h4(rip),rsp=BigInt(U[10])|(BigInt(U[11])<<
  let h=x=>U[1+(x>>2)].toString(16).padStart(8,"0")+U[x>>2].toString(16).padStart(8,"0");
  let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")
  tc(h(256),reg32) //rip
- let st=x=>{console.log("st",x); //let s,b=(1+~x),u=(bk+b)>>2,sx=h4(x),i=stkx.findIndex(y=>sx==y.textContent.substring(9,17));
-  //if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}
-  //todo: ps
+ let st=x=>{let s=H8(x),i=stkx.findIndex(y=>s==y.textContent.substring(1,17)),u=bk+Number(stacktop-rsp)>>2;
+  if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}
  }
  console.log("mark",rsp.toString(16).padStart(16,"0"),x,y,z);
  let mk=x=>{if(x.constructor==BigInt){if(x>BigInt(bk))return st(x);x=lo(x)}; (!x)?0:x<=256?(bold(tc(h(x),ge("reg"+((x>>>3)-1)))),(40==x?markrsp(rsp):0)):0};mk(x);mk(y);mk(z);mk(zz)}
