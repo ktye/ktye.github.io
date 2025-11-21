@@ -1,4 +1,5 @@
-let rip
+//memory layout: 0..256 registers (0:eflags) 256(rip)  argstrings entrypoint..program code (eop) heap (brk)stack
+let rip;const stacktop=0x7faee69ffec0n
 let loadelf=u=>{let U=new Uint32Array(u.buffer,0,u.buffer.byteLength>>>2),H=new Uint16Array(u.buffer,0,u.buffer.byteLength>>>1),n=H[28],p=U[8]>>>2,i,s=[],m=0,M,R,rip=U[6],eop,brk=0
  eop=U[p+4]+U[p+8];for(i=0;i<n;i++){s.push({o:U[p+2],va:U[p+4],fs:U[p+8]});brk=Math.max(brk,U[p+4]+U[p+10]);p+=14};brk=(15+brk)>>4<<4;M=new Uint8Array(brk+1024);s.forEach(x=>M.set(u.subarray(x.o,x.o+x.fs),x.va));return[M,rip,eop,brk]}
 
@@ -7,20 +8,22 @@ const regtab="xx al cl dl bl ah ch dh bh spl bpl sil dil r8b r9b r10b r11b r12b 
 const mne="aaa,aad,aam,aas,adc,add,addpd,addps,addsd,addss,addsubpd,addsubps,aesdec,aesdeclast,aesenc,aesenclast,aesimc,aeskeygenassist,and,andnpd,andnps,andpd,andps,arpl,blendpd,blendps,blendvpd,blendvps,bound,bsf,bsr,bswap,bt,btc,btr,bts,call,cbw,cdq,cdqe,clc,cld,clflush,clgi,cli,clts,cmc,cmova,cmovae,cmovb,cmovbe,cmovg,cmovge,cmovl,cmovle,cmovno,cmovnp,cmovns,cmovnz,cmovo,cmovp,cmovs,cmovz,cmp,cmppd,cmpps,cmpsb,cmpsd,cmpsq,cmpss,cmpsw,cmpxchg,cmpxchg16b,cmpxchg8b,comisd,comiss,cpuid,cqo,crc32,cvtdq2pd,cvtdq2ps,cvtpd2dq,cvtpd2pi,cvtpd2ps,cvtpi2pd,cvtpi2ps,cvtps2dq,cvtps2pd,cvtps2pi,cvtsd2si,cvtsd2ss,cvtsi2sd,cvtsi2ss,cvtss2sd,cvtss2si,cvttpd2dq,cvttpd2pi,cvttps2dq,cvttps2pi,cvttsd2si,cvttss2si,cwd,cwde,daa,das,dec,div,divpd,divps,divsd,divss,dppd,dpps,emms,enter,extractps,f2xm1,fabs,fadd,faddp,fbld,fbstp,fchs,fclex,fcmovb,fcmovbe,fcmove,fcmovnb,fcmovnbe,fcmovne,fcmovnu,fcmovu,fcom,fcom2,fcomi,fcomip,fcomp,fcomp3,fcomp5,fcompp,fcos,fdecstp,fdiv,fdivp,fdivr,fdivrp,femms,ffree,ffreep,fiadd,ficom,ficomp,fidiv,fidivr,fild,fimul,fincstp,fist,fistp,fisttp,fisub,fisubr,fld,fld1,fldcw,fldenv,fldl2e,fldl2t,fldlg2,fldln2,fldpi,fldz,fmul,fmulp,fndisi,fneni,fninit,fnop,fnsave,fnsetpm,fnstcw,fnstenv,fnstsw,fpatan,fprem,fprem1,fptan,frndint,frstor,frstpm,fscale,fsin,fsincos,fsqrt,fst,fstp,fstp1,fstp8,fstp9,fsub,fsubp,fsubr,fsubrp,ftst,fucom,fucomi,fucomip,fucomp,fucompp,fxam,fxch,fxch4,fxch7,fxrstor,fxsave,fxtract,fyl2x,fyl2xp1,getsec,haddpd,haddps,hlt,hsubpd,hsubps,idiv,imul,in,inc,insb,insd,insertps,insw,int,int1,int3,into,invd,invept,invlpg,invlpga,invvpid,iretd,iretq,iretw,ja,jae,jb,jbe,jcxz,jecxz,jg,jge,jl,jle,jmp,jno,jnp,jns,jnz,jo,jp,jrcxz,js,jz,lahf,lar,lddqu,ldmxcsr,lds,lea,leave,les,lfence,lfs,lgdt,lgs,lidt,lldt,lmsw,lock,lodsb,lodsd,lodsq,lodsw,loop,loope,loopne,lsl,lss,ltr,maskmovdqu,maskmovq,maxpd,maxps,maxsd,maxss,mfence,minpd,minps,minsd,minss,monitor,montmul,mov,movapd,movaps,movbe,movd,movddup,movdq2q,movdqa,movdqu,movhlps,movhpd,movhps,movlhps,movlpd,movlps,movmskpd,movmskps,movntdq,movntdqa,movnti,movntpd,movntps,movntq,movq,movq2dq,movsb,movsd,movshdup,movsldup,movsq,movss,movsw,movsx,movsxd,movupd,movups,movzx,mpsadbw,mul,mulpd,mulps,mulsd,mulss,mwait,neg,nop,not,or,orpd,orps,out,outsb,outsd,outsw,pabsb,pabsd,pabsw,packssdw,packsswb,packusdw,packuswb,paddb,paddd,paddq,paddsb,paddsw,paddusb,paddusw,paddw,palignr,pand,pandn,pavgb,pavgusb,pavgw,pblendvb,pblendw,pclmulqdq,pcmpeqb,pcmpeqd,pcmpeqq,pcmpeqw,pcmpestri,pcmpestrm,pcmpgtb,pcmpgtd,pcmpgtq,pcmpgtw,pcmpistri,pcmpistrm,pextrb,pextrd,pextrq,pextrw,pf2id,pf2iw,pfacc,pfadd,pfcmpeq,pfcmpge,pfcmpgt,pfmax,pfmin,pfmul,pfnacc,pfpnacc,pfrcp,pfrcpit1,pfrcpit2,pfrsqit1,pfrsqrt,pfsub,pfsubr,phaddd,phaddsw,phaddw,phminposuw,phsubd,phsubsw,phsubw,pi2fd,pi2fw,pinsrb,pinsrd,pinsrq,pinsrw,pmaddubsw,pmaddwd,pmaxsb,pmaxsd,pmaxsw,pmaxub,pmaxud,pmaxuw,pminsb,pminsd,pminsw,pminub,pminud,pminuw,pmovmskb,pmovsxbd,pmovsxbq,pmovsxbw,pmovsxdq,pmovsxwd,pmovsxwq,pmovzxbd,pmovzxbq,pmovzxbw,pmovzxdq,pmovzxwd,pmovzxwq,pmuldq,pmulhrsw,pmulhrw,pmulhuw,pmulhw,pmulld,pmullw,pmuludq,pop,popa,popad,popcnt,popfd,popfq,popfw,por,prefetch,prefetchnta,prefetcht0,prefetcht1,prefetcht2,psadbw,pshufb,pshufd,pshufhw,pshuflw,pshufw,psignb,psignd,psignw,pslld,pslldq,psllq,psllw,psrad,psraw,psrld,psrldq,psrlq,psrlw,psubb,psubd,psubq,psubsb,psubsw,psubusb,psubusw,psubw,pswapd,ptest,punpckhbw,punpckhdq,punpckhqdq,punpckhwd,punpcklbw,punpckldq,punpcklqdq,punpcklwd,push,pusha,pushad,pushfd,pushfq,pushfw,pxor,rcl,rcpps,rcpss,rcr,rdmsr,rdpmc,rdrand,rdtsc,rdtscp,rep,repne,ret,retf,rol,ror,roundpd,roundps,roundsd,roundss,rsm,rsqrtps,rsqrtss,sahf,salc,sar,sbb,scasb,scasd,scasq,scasw,seta,setae,setb,setbe,setg,setge,setl,setle,setno,setnp,setns,setnz,seto,setp,sets,setz,sfence,sgdt,shl,shld,shr,shrd,shufpd,shufps,sidt,skinit,sldt,smsw,sqrtpd,sqrtps,sqrtsd,sqrtss,stc,std,stgi,sti,stmxcsr,stosb,stosd,stosq,stosw,str,sub,subpd,subps,subsd,subss,swapgs,syscall,sysenter,sysexit,sysret,test,ucomisd,ucomiss,ud2,unpckhpd,unpckhps,unpcklpd,unpcklps,vaddpd,vaddps,vaddsd,vaddss,vaddsubpd,vaddsubps,vaesdec,vaesdeclast,vaesenc,vaesenclast,vaesimc,vaeskeygenassist,vandnpd,vandnps,vandpd,vandps,vblendpd,vblendps,vblendvpd,vblendvps,vbroadcastsd,vbroadcastss,vcmppd,vcmpps,vcmpsd,vcmpss,vcomisd,vcomiss,vcvtdq2pd,vcvtdq2ps,vcvtpd2dq,vcvtpd2ps,vcvtps2dq,vcvtps2pd,vcvtsd2si,vcvtsd2ss,vcvtsi2sd,vcvtsi2ss,vcvtss2sd,vcvtss2si,vcvttpd2dq,vcvttps2dq,vcvttsd2si,vcvttss2si,vdivpd,vdivps,vdivsd,vdivss,vdppd,vdpps,verr,verw,vextractf128,vextractps,vhaddpd,vhaddps,vhsubpd,vhsubps,vinsertf128,vinsertps,vlddqu,vmaskmovdqu,vmaskmovpd,vmaskmovps,vmaxpd,vmaxps,vmaxsd,vmaxss,vmcall,vmclear,vminpd,vminps,vminsd,vminss,vmlaunch,vmload,vmmcall,vmovapd,vmovaps,vmovd,vmovddup,vmovdqa,vmovdqu,vmovhlps,vmovhpd,vmovhps,vmovlhps,vmovlpd,vmovlps,vmovmskpd,vmovmskps,vmovntdq,vmovntdqa,vmovntpd,vmovntps,vmovq,vmovsd,vmovshdup,vmovsldup,vmovss,vmovupd,vmovups,vmpsadbw,vmptrld,vmptrst,vmread,vmresume,vmrun,vmsave,vmulpd,vmulps,vmulsd,vmulss,vmwrite,vmxoff,vmxon,vorpd,vorps,vpabsb,vpabsd,vpabsw,vpackssdw,vpacksswb,vpackusdw,vpackuswb,vpaddb,vpaddd,vpaddq,vpaddsb,vpaddsw,vpaddusb,vpaddusw,vpaddw,vpalignr,vpand,vpandn,vpavgb,vpavgw,vpblendvb,vpblendw,vpclmulqdq,vpcmpeqb,vpcmpeqd,vpcmpeqq,vpcmpeqw,vpcmpestri,vpcmpestrm,vpcmpgtb,vpcmpgtd,vpcmpgtq,vpcmpgtw,vpcmpistri,vpcmpistrm,vperm2f128,vpermilpd,vpermilps,vpextrb,vpextrd,vpextrq,vpextrw,vphaddd,vphaddsw,vphaddw,vphminposuw,vphsubd,vphsubsw,vphsubw,vpinsrb,vpinsrd,vpinsrq,vpinsrw,vpmaddubsw,vpmaddwd,vpmaxsb,vpmaxsd,vpmaxsw,vpmaxub,vpmaxud,vpmaxuw,vpminsb,vpminsd,vpminsw,vpminub,vpminud,vpminuw,vpmovmskb,vpmovsxbd,vpmovsxbq,vpmovsxbw,vpmovsxwd,vpmovsxwq,vpmovzxbd,vpmovzxbq,vpmovzxbw,vpmovzxdq,vpmovzxwd,vpmovzxwq,vpmuldq,vpmulhrsw,vpmulhuw,vpmulhw,vpmulld,vpmullw,vpor,vpsadbw,vpshufb,vpshufd,vpshufhw,vpshuflw,vpsignb,vpsignd,vpsignw,vpslld,vpslldq,vpsllq,vpsllw,vpsrad,vpsraw,vpsrld,vpsrldq,vpsrlq,vpsrlw,vpsubb,vpsubd,vpsubq,vpsubsb,vpsubsw,vpsubusb,vpsubusw,vpsubw,vptest,vpunpckhbw,vpunpckhdq,vpunpckhqdq,vpunpckhwd,vpunpcklbw,vpunpckldq,vpunpcklqdq,vpunpcklwd,vpxor,vrcpps,vrcpss,vroundpd,vroundps,vroundsd,vroundss,vrsqrtps,vrsqrtss,vshufpd,vshufps,vsqrtpd,vsqrtps,vsqrtsd,vsqrtss,vstmxcsr,vsubpd,vsubps,vsubsd,vsubss,vtestpd,vtestps,vucomisd,vucomiss,vunpckhpd,vunpckhps,vunpcklpd,vunpcklps,vxorpd,vxorps,vzeroall,vzeroupper,wait,wbinvd,wrmsr,xadd,xchg,xcryptcbc,xcryptcfb,xcryptctr,xcryptecb,xcryptofb,xgetbv,xlatb,xor,xorpd,xorps,xrstor,xsave,xsetbv,xsha1,xsha256,xstore,invalid,3dnow,none,db,pause".split(",")
 
 let bold=x=>x.classList.add("b"),unbold=x=>x.classList.remove("b")
-let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0"),log2=Math.log2
-let h2=x=>x.toString(16).padStart(2,"0"),h4=x=>x.toString(16).padStart(8,"0"),h8=(h,l)=>h4(h)+h4(l)
+let hx=(x,n)=>"0x"+x.toString(16).padStart(n,"0"),log2=Math.log2,lo=x=>x.constructor==BigInt?Number(BigInt.asUintN(32,x)):x
+let h2=x=>x.toString(16).padStart(2,"0"),h4=x=>x.toString(16).padStart(8,"0"),h8=(h,l)=>h4(h)+h4(l),H8=x=>x.toString(16).padStart(16,"0")
 
+let cpulog=(l,elf)=>{if(!l)return x=>x;let L=su(l).split("\n"),U=new Uint32Array(elf[0].buffer,0,260),n=0,f=x=>af("OSZAPC").map((s,i)=>(1&(x>>(5-i)))?s:".").join("");
+ return x=>{if("string"==typeof(x))return x;let s=String(n)+" "+U[64].toString(16)+" "+f(U[0]);console.log(n,s,L[n]);if(!L[n].startsWith(s)){O("\n"+s+"\n"+L[n]+"\n");return"cpu mismatch"};n++}}
+ 
 let execv=a=>{ kdbut.hidden=false;kdb(1);
  let u=fsget(a[0]),elf;if(u===0){progexit();return}
  try{elf=loadelf(u)}
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
-  disasm(elf,d)
-  stackinit(elf,a)
+  disasm(elf,d);stackinit(elf,a);
   showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);brk.textContent=h8(0,elf[3]);
-  let stp=execute(elf,d);traceinto=stp;stepover=stp;
+  let stp=execute(elf,d),cpu=cpulog(fsget("x.cpulog"),elf);cpu();traceinto=stp;stepover=stp;
   runto=bp=>{console.log("bp",bp);while(1){let pc=stp();if(pc==bp)return;if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return}}};
-  if(deb.checked==false){let lpc;while(1){let pc=stp();if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
+  if(deb.checked==false){let lpc;while(1){let pc=cpu(stp());if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
 }
 let exit=x=>{if(x)O("exit "+x+"\n");progexit();kdb(0);return""}
 
@@ -28,12 +31,13 @@ let showstack,showheap
 let xxD=(b,t)=>{let h=(i,o)=>h2(b[o+i*16])+h2(b[1+o+i*16])+" "+h2(b[2+o+i*16])+h2(b[3+o+i*16]),s=o=>Array(16).fill("-").map((x,i)=>(x=b[o+i],x>31&&x<127?String.fromCharCode(x):".")).join("")
  return Array(16).fill(0).map((_,i)=>h4(t+i*16)+" "+h(i,0)+" "+h(i,4)+" "+h(i,8)+" "+h(i,12)+" "+s(i*16)).join("\n")}
 let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
-let shstk=S=>(h,rsp)=>{const t=0xfffffff8;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
+//let shstk=S=>(h,rsp)=>{const t=0xfffffff8;for(let i=0;i<16;i++)ge("stk"+i).textContent=(rsp<-8*(i+h)-8?"│":rsp==-8*(i+h)-8?"└":" ")+h8(0xffffffff,t-8*(i+h))+" "+h8(S[2*(i+h)+1],S[2*(i+h)])}
+let shstk=S=>(h,rsp)=>{for(let i=0;i<16;i++){let j=stacktop-BigInt(8*(i+h)); ge("stk"+i).textContent=(rsp>j?"│":rsp==j?"└":" ")+H8(j)+" "+H8(S[(i+h)])}  }
 let showcal=c=>{c.slice(c.length-16,c.length).forEach((x,i)=>tc(h4(x[0])+": "+h4(x[1]),ge("cal"+i)))}
-let markrbp=rbp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=xs(s.slice(9,17));s=(a>rbp?"│":a<rbp?" ":"└")+s.slice(1);e.textContent=s}}
-let stackinit=(d,a)=>{let I=new Int32Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
- a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[4+2*i]=p;U[5+2*i]=0});U[4+2*a.length]=a.length;U[5+2*a.length]=0;rsp=-8*(3+a.length);I[10]=rsp;I[11]=-1;
- showstack=shstk(new Uint32Array(d[0].buffer,d[3]));showstack(0,rsp);}
+let markrsp=rsp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=BigInt("0x"+s.slice(1,17));s=(a>rsp?"│":a<rsp?" ":"└")+s.slice(1);e.textContent=s}}
+let stackinit=(d,a)=>{let J=new BigUint64Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
+ a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=stacktop-BigInt(8*(1+a.length));J[5]=rsp; console.log("stackinit",H8(J[5]));
+ showstack=shstk(new BigUint64Array(d[0].buffer,d[3]));showstack(0,rsp);}
 
 /* fasm syscalls:
 0x0    0  read
@@ -53,13 +57,13 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
   let[M,rip,eop]=elf,ud=D.dis_init(rip),b=new Uint8Array(D.memory.buffer,ud,576),u=new Uint32Array(D.memory.buffer,ud+340,59),cal=[[0,rip]],bk=elf[3],flag={};showcal(cal)
   let bp  =new Uint32Array(D.memory.buffer,4+ud,1)[0]; //pointer to ibuf stored within ud struct
   let u8_=new Uint8Array(1),u16_=new Uint16Array(1),u32_=new Uint32Array(1),u8=x=>(u8_[0]=x,u8_[0]),u16=x=>(u16_[0]=x,u16_[0]),u32=x=>(u32_[0]=x,u32_[0]),u64=x=>BigInt.asUintN(64,x),uint=x=>sz==8?u8(x):sz==16?u16(x):sz==32?u32(x):u64(x)
-  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x),lo=x=>x.constructor==BigInt?Number(BigInt.asUintN(32,x)):x;
-  let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3),I=new Int32Array(M.buffer,0,69);U[64]=rip;   // [156 regs][4 imm]
+  let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
+  let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3) /*,I=new Int32Array(M.buffer,0,69)*/;U[64]=rip;   // [156 regs][4 imm]
   let Rat=x=>B(8==sz?M[x]:16==sz?H[x>>1]:32==sz?U[regmap[x]>>2]:J[regmap[x]>>3]),simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
-  let push=(x, i)=>(U[10]-=8,i=bk+(-I[10])>>2,U[i]=U[x>>2],U[1+i]=U[1+(x>>2)])
-  let popl=x=>((r=U[bk+(-I[10])>>2]),(U[10]+=8),r)
+  let push=(x, i)=>(J[5]-=8n, i=(bk+Number(J[5]-stacktop))>>2,   console.log("push",h4(U[x>>2]),stacktop-J[5],h4(bk+Number(stacktop-J[5])),i>>1),   U[i]=U[x>>2],U[1+i]=U[1+(x>>2)], console.log(H8(J[i>>1])) )
+  let popl=x=>((r=U[(bk+Number(stacktop-J[5]))>>2]),(J[5]+=8n),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
-  let lpc=rip;mark(U,rip,bk,flag,40,0,0,0)
+  let lpc=rip;mark(U,rip,bk,40,0,0,0)
   let prot=x=>{if(x>=rip&&x<=eop)throw new Error("write protection");return x}
   let iasm=asm.map(x=>xs(x.slice(0,8)))
   return _=>{ if(!iasm.includes(U[64])){O(`\nillegal rip: ${h4(U[64])}\n`);return exit(1);}
@@ -88,7 +92,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
                                   :       (V.setBigUint64(x,   r=u64(f(xx=V.getBigUint64(x,1),yy=V.getBigUint64(y,1))),1),fl(xx,yy,r)));
    switch(u[0]){
    case   5/*add */: F2((x,y)=>x+y,fla);                                                       break;
-   case  36/*call*/: push(256); U[64]=I[x>>2];rip=U[64]; y=U[10]; z=40; pucal(lpc,rip);        break;
+   case  36/*call*/: push(256); U[64]=U[x>>2];rip=U[64]; for(i=0;i<32;i+=8)console.log(H8(BigInt(bk+i)),(bk+i)>>3,H8(J[(bk+i)>>3])); console.log("call", x,y,z,J[5]); Y=J[5]; Z=40; pucal(lpc,rip);        break;
    case  63/*cmp */: F2((x,y)=>x,(x,y,r)=>fls(x,y,x-y));                                       break;
    case 105/*dec */: let c=flag.C;64==sz?F2(x=>x-1n,fla):F2(x=>x-1,fls); flag.C=c;             break; //keep carry also for inc
    case 246/*jb/c*/: if(flag.C)U[64]=U[x>>2];rip=U[64];                                        break;
@@ -107,13 +111,14 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
               if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64;           break; //todo flag: OF, SF, ZF, AF, PF, and CF flags are set according to the temporary result of the comparison.
    case 583/*stc */: flag.C=1;                                                                 break;
    case 593/*sub */: F2((x,y)=>x-y,fls);                                                       break;
-   case 599/*sysc*/: if(60==U[2])return exit(U[16]);U[2]=syscall(M,U[2],U[16],U[14],U[6]); x=8;y=64;z=56;zz=24;fsz(8);break;
+   case 599/*sysc*/: if(60==U[2])return exit(U[16]);U[2]=syscall(M,U[2],U[16],U[14],U[6]); X=8;Y=64;Z=56;zz=24;fsz(8);break;
    case 603/*test*/: F2((x,y)=>x,(x,y,r)=>fsz(uint(x&y)));aco(0,0,0);                          break;
    case 894/*xor */: F2((x,y)=>x^y,fl0);                                                       break;  
    case 280/*lodsb*/:x=8;y=56;F2((x,y)=>0xff&y,(a,b,r)=>r);U[14]+=(flag.D?-1:1)*log2(sz)-2; if(rep!=""){O("todo lodsb rep");return exit(1)}; console.log("lodsb",sz,x,y,z,rep); break
    default: O(`\n${h4(lpc)}:unknown instr ${u[0]}: ${mne[u[0]]}\n`); return exit(1);
    }
-   mark(U,lpc,bk,flag,x,y,z,zz);lpc=rip
+   U[0]=(+!!flag.C)|((+!!flag.P)<<1)|((+!!flag.A)<<2)|((+!!flag.Z)<<3)|((+!!flag.S)<<4)|((+!!flag.O)<<5)   
+   mark(U,lpc,bk,X,Y,Z,ZZ);lpc=rip
    return rip
  }
 }
@@ -170,18 +175,19 @@ let decode=(rip,b,u)=>{
  return h4(rip-b[20])+" "+rep+(mne[u[0]]).padEnd(4," ")+" "+operands()}
 
 let stkx=[stk0,stk1,stk2,stk3,stk4,stk5,stk6,stk7,stk8,stk9,stk10,stk11,stk12,stk13,stk14,stk15]
-let mark=(U,rip,bk,flg,x,y,z,zz)=>{let pc=h4(rip); //S R
+let mark=(U,rip,bk,x,y,z,zz)=>{let pc=h4(rip),rsp=BigInt(U[10])|(BigInt(U[11])<<32n); //S R flg
  let a=af(disa.childNodes);a.forEach(unbold)
  let i=a.findIndex(x=>x.textContent.startsWith(pc));if(i<0){i=asm.findIndex(x=>x.startsWith(pc));if(i>=0){disa.dataset.i=i-1;disa.move(1);bold(disa.firstChild)}}else bold(a[i]);
- a=af(regs.children);a.forEach(unbold);flags.textContent=Object.keys(flg).filter(x=>flg[x]).join("")
+ a=af(regs.children);a.forEach(unbold);flags.textContent="CPAZSO".split("").filter((c,i)=>1&(U[0]>>i)).join("");
  let h=x=>U[1+(x>>2)].toString(16).padStart(8,"0")+U[x>>2].toString(16).padStart(8,"0");
  let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")
  tc(h(256),reg32) //rip
- let st=x=>{let s,b=(1+~x),u=(bk+b)>>2,sx=h4(x),i=stkx.findIndex(y=>sx==y.textContent.substring(9,17));
-  if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}
+ let st=x=>{console.log("st",x); //let s,b=(1+~x),u=(bk+b)>>2,sx=h4(x),i=stkx.findIndex(y=>sx==y.textContent.substring(9,17));
+  //if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}
   //todo: ps
  }
- let mk=x=>{ (!x)?0:x<=256?( bold(tc( h(x) ,ge("reg"+((x>>>3)-1)))),(40==x?markrbp(U[10]):0) ):x>0x7fffffff?st(x) :0 };mk(x);mk(y);mk(z);mk(zz)}
+ console.log("mark",rsp.toString(16).padStart(16,"0"),x,y,z);
+ let mk=x=>{if(x.constructor==BigInt){if(x>BigInt(bk))return st(x);x=lo(x)}; (!x)?0:x<=256?(bold(tc(h(x),ge("reg"+((x>>>3)-1)))),(40==x?markrsp(rsp):0)):0};mk(x);mk(y);mk(z);mk(zz)}
 
 if("undefined"!=typeof Deno){ //$deno --allow-read 86.js fasm.elf args..  or $deno repl --allow-read --eval-file=86.js -- fasm.elf args..
  let argv=Deno.args;if(!argv.length)Deno.exit(0)

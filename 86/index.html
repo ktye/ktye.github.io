@@ -128,12 +128,15 @@ let kdb=x=>{let s=document.styleSheets[0],r=s.rules;for(let i=0;i<r.length;i++)i
 
 fe("fasm.elf","fasm")
 fe("readme","readme")
+fe("x.as","x.as");
+fe("x.cpulog","x.cpulog")
+rdl.textContent="fasm"
 //fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{fsadd("fasm",new Uint8Array(r)); execv(["fasm"]); disa.focus()} )
  
 let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
 let keydown=p=>(e,k)=>(k=e.key,pd(e),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"Enter"==k?runto(parseInt(debstr.value,16)):"/"==k?p.find(parseInt(debstr.value,16)):0)
 disa.onkeydown=keydown(disa);disa.move=d=>{let p=disa,i=+p.dataset.i,n=+p.dataset.n,N=asm.length,j=i+d,pc=reg32.textContent.slice(8,16);rM(p);i=min(max(0,j),N-n),j=i+n;p.dataset.i=i;while(i<j){ p.appendChild( tc(asm[i++]+"\n",ce("span")));if(asm[i].startsWith(pc))bold(p.lastChild) } ;}
-stac.onkeydown=keydown(regs);regs.move=d=>{let i=+stac.dataset.i,n=+datc.dataset.n,j=i+d;i=min(max(0,j),1024);rsp=-(1+~xs(reg4.textContent.slice(8)));showstack(i,rsp);stac.dataset.i=i;}
+stac.onkeydown=keydown(regs);regs.move=d=>{let i=+stac.dataset.i,n=+datc.dataset.n,j=i+d;i=min(max(0,j),1024);rsp=BigInt("0x"+reg4.textContent);showstack(i,rsp);stac.dataset.i=i;}
 heap.onkeydown=keydown(heap);heap.move=d=>{let i=xs(heap.textContent.slice(0,8)),j=i+16*d;i=min(max(0,j),xs(brk.textContent)-16*32);showheap(i);}
 
 disa.ondblclick=e=>{let s=e.target.textContent,x,pc=xs(e.target.nextSibling.textContent.slice(0,8)),sel=document.getSelection().toString();x=xs(sel);isNaN(x)?0:show(x+(s.indexOf("rip+"+sel)<0?0:pc))}
