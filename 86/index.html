@@ -36,8 +36,8 @@ xmm0  4   8   12 1    5    9   13 2    6   10   14 3    7   11   15
 <span id="reg28">0000000000000000</span> <span id="reg29">0000000000000000</span> <span id="reg30">0000000000000000</span> <span id="reg31">0000000000000000</span></pre>
 </div>
 <div style="display:flex;justify-content:space-between"><pre id="stac" data-i="0" data-n="16" style="margin:0;display:inline-block" class="w">
-│rip              brk  flg <span id="flags"></span>
-│<span id="reg32">0000000000000000</span> <span id="brk">0000000000000000</span>
+│rip              flg <span id="flags">......</span>   brk
+│<span id="reg32">0000000000000000</span> <span id="br">0000000000000000</span>
 │stack
 <span id="stk0"> 0000000000000000 0000000000000000</span> 
 <span id="stk1"> 0000000000000000 0000000000000000</span> 
@@ -60,7 +60,7 @@ xmm0  4   8   12 1    5    9   13 2    6   10   14 3    7   11   15
 <div style="display:flex;flex-wrap:wrap;gap:1em"><textarea id="editor" rows="20" cols="80" hidden></textarea></div>
 <div style="display:flex;flex-flow:column;justify-content:space-between">
  <pre id="disk" style="margin:0;margin-left:1em">$ls</pre>
- <div id="kdbut" ><input id="deb" name="deb" type="checkbox" checked/><label for="deb">debug</label></div>
+ <div id="kdbut" ><input id="deb" name="deb" type="checkbox" /><label for="deb">debug</label></div>
  <div id="edbut" hidden>
   <button onclick="edshow(0)">close</button>
   <button onclick="edwrite()" id="edbutw">write</button>
@@ -125,14 +125,14 @@ fe("fasm.elf","fasm")
 fe("readme","readme")
 fe("x.as","x.as");
 fe("x.cpulog","x.cpulog")
-rdl.textContent="fasm"
+rdl.textContent="fasm x.as"
 //fetch("fasm.elf").then(r=>r.arrayBuffer()).then(r=>{fsadd("fasm",new Uint8Array(r)); execv(["fasm"]); disa.focus()} )
  
 let pager=disa;disa.onfocus=_=>pager=disa;regs.onfocus=_=>pager=regs;heap.onfocus=_=>pager=heap;
 let keydown=p=>(e,k)=>(k=e.key,pd(e),"Home"==k?p.move(-Infinity):"End"==k?p.move(Infinity):"ArrowUp"==k?p.move(-1):"ArrowDown"==k?p.move(1):"PageUp"==k?p.move(-+p.dataset.n):"PageDown"==k?p.move(+p.dataset.n):"ArrowLeft"==k?gotoret():"ArrowRight"==k?traceinto():"s"==k?stepover():"Enter"==k?runto(parseInt(debstr.value,16)):"/"==k?p.find(parseInt(debstr.value,16)):0)
 disa.onkeydown=keydown(disa);disa.move=d=>{let p=disa,i=+p.dataset.i,n=+p.dataset.n,N=asm.length,j=i+d,pc=reg32.textContent.slice(8,16);rM(p);i=min(max(0,j),N-n),j=i+n;p.dataset.i=i;while(i<j){ p.appendChild( tc(asm[i++]+"\n",ce("span")));if(asm[i].startsWith(pc))bold(p.lastChild) } ;}
 stac.onkeydown=keydown(regs);regs.move=d=>{let i=+stac.dataset.i,n=+datc.dataset.n,j=i+d;i=min(max(0,j),1024);rsp=BigInt("0x"+reg4.textContent);showstack(i,rsp);stac.dataset.i=i;}
-heap.onkeydown=keydown(heap);heap.move=d=>{let i=xs(heap.textContent.slice(0,8)),j=i+16*d;i=min(max(0,j),xs(brk.textContent)-16*32);showheap(i);}
+heap.onkeydown=keydown(heap);heap.move=d=>{let i=xs(heap.textContent.slice(0,8)),j=i+16*d;i=min(max(0,j),xs(br.textContent)-16*32);showheap(i);}
 
 disa.ondblclick=e=>{let s=e.target.textContent,x,pc=xs(e.target.nextSibling.textContent.slice(0,8)),sel=document.getSelection().toString();x=xs(sel);isNaN(x)?0:show(x+(s.indexOf("rip+"+sel)<0?0:pc))}
 regs.ondblclick=s=>(s=xs(document.getSelection().toString()),isNaN(s)?0:show(s))
