@@ -1,6 +1,6 @@
-//memory layout: 0..256 registers (0:eflags) 256(rip)  argstrings entrypoint..program code (eop) heap (brk)stack
 
-let rip,brk;const stacktop=0x7faee69ffed8n
+
+let rip,eop,brk;const stacktop=0x7faee69ffed8n
 let loadelf=u=>{let U=new Uint32Array(u.buffer,0,u.buffer.byteLength>>>2),H=new Uint16Array(u.buffer,0,u.buffer.byteLength>>>1),n=H[28],p=U[8]>>>2,i,s=[],m=0,M,R,rip=U[6],eop,brk=0
  eop=U[p+4]+U[p+8];for(i=0;i<n;i++){s.push({o:U[p+2],va:U[p+4],fs:U[p+8]});brk=Math.max(brk,U[p+4]+U[p+10]);p+=14};brk=(15+brk)>>4<<4;M=new Uint8Array(brk+1024);s.forEach(x=>M.set(u.subarray(x.o,x.o+x.fs),x.va));return[M,rip,eop,brk]}
 
@@ -37,7 +37,7 @@ let execv=a=>{ kdbut.hidden=false;kdb(1);
  try{elf=loadelf(u)}
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
-  disasm(elf,d);stackinit(elf,a);rdxinit(elf,0x7faee69ffff9n);brk=elf[3];
+  disasm(elf,d);stackinit(elf,a);rdxinit(elf,0x7faee69ffff9n);eop=BigInt(elf[2]);brk=elf[3];
   showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);br.textContent=h8(0,brk);
   let stp=execute(elf,d),cpu=cpulog(fsget("x.cpulog"),elf);cpu();traceinto=stp;stepover=stp;
   runto=bp=>{console.log("bp",bp);while(1){let pc=stp();if(pc==bp)return;if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return}}};
@@ -56,6 +56,10 @@ let stackinit=(d,a)=>{let J=new BigUint64Array(d[0].buffer,0,32),b=new Uint8Arra
  a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=stacktop-BigInt(8*(1+a.length));J[5]=rsp; 
  showstack=shstk(new BigUint64Array(d[0].buffer,d[3]));showstack(0,rsp);}
 let rdxinit=(d,rdx)=>{let J=new BigUint64Array(d[0].buffer,0,32);J[3]=rdx}
+
+//memory layout: 0..256 registers (0:eflags) 256(rip)  argstrings entrypoint..program code (eop) heap (brk)stack
+//let vat=x=>x<eop?lo(x)
+
 
 let err=s=>{throw new Error(s)}
 let execute=(elf,D)=>{ //brk S R B( lo= flag
