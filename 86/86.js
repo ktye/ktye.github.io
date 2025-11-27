@@ -1,6 +1,6 @@
 
 
-let rip,eop,eod,brk,brk0=Infinity;const stacktop=0x7faee69ffed8n,arg1=0x7faee69fffddn
+let rip,eop,eod,brk,br0=Infinity;const stacktop=0x7faee69ffed8n,stsz=8192,arg1=0x7faee69fffddn
 let loadelf=u=>{let U=new Uint32Array(u.buffer,0,u.buffer.byteLength>>>2),H=new Uint16Array(u.buffer,0,u.buffer.byteLength>>>1),n=H[28],p=U[8]>>>2,i,s=[],m=0,M,R,rip=U[6],eop,eod=0
  eop=U[p+4]+U[p+8];for(i=0;i<n;i++){s.push({o:U[p+2],va:U[p+4],fs:U[p+8]});eod=Math.max(eod,U[p+4]+U[p+10]);p+=14};eod=(15+eod)>>4<<4;M=new Uint8Array(eod+1024);s.forEach(x=>M.set(u.subarray(x.o,x.o+x.fs),x.va));return[M,rip,eop,eod]}
 
@@ -39,7 +39,7 @@ let execv=a=>{ kdbut.hidden=false;kdb(1);
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
   disasm(elf,d);stackinit(elf,a);rdxinit(elf,0x7faee69ffff9n);eop=BigInt(elf[2]);eod=elf[3];
-  showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);br.textContent=h8(0,brk0);
+  showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);br.textContent=h8(0,br0);
   let stp=execute(elf,d),cpu=cpulog(fsget("x.cpulog"),elf);cpu();traceinto=stp;stepover=stp;
   runto=bp=>{while(1){let pc=stp();if(pc==bp)return;if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return}}};
   if(deb.checked==false){let lpc;while(1){let pc=cpu(stp());if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
@@ -58,8 +58,8 @@ let stackinit=(d,a)=>{let J=new BigUint64Array(d[0].buffer,0,32),b=new Uint8Arra
  showstack=shstk(new BigUint64Array(d[0].buffer,d[3]));showstack(0,rsp);}
 let rdxinit=(d,rdx)=>{let J=new BigUint64Array(d[0].buffer,0,32);J[3]=rdx}
 
-//virtual addr :                                                  xxxxxxxxxxxxxxxxxxxxxxxx       xxxx  brk0.......brk  .....(stacktop)
-//memory layout: 0..256 registers (0:eflags) 256(rip)  argstrings entrypoint..program code (eop) data (eod) heap (brk) stack
+//virtual addr :                                                  xxxxxxxxxxxxxxxxxxxxxxxx (eop) xxxx (brk.........stacktop) | br0.............brk
+//memory layout: 0..256 registers (0:eflags) 256(rip)  argstrings entrypoint..program code (eop) data (eod) stack (eod+stsz)  (eod+stsz) heap.....
 
 let err=s=>{throw new Error(s)}
 let execute=(elf,D)=>{ //brk S R B( lo= flag
@@ -69,8 +69,8 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
   let ibuf=new Uint8Array(D.memory.buffer,bp,16),sz,adrmode,B=x=>BigInt(x);
   let V=new DataView(M.buffer),H=new Uint16Array(M.buffer,0,M.buffer.byteLength>>1),U=new Uint32Array(M.buffer,0,M.buffer.byteLength>>2),J=new BigUint64Array(M.buffer,0,M.buffer.byteLength>>3) /*,I=new Int32Array(M.buffer,0,69)*/;U[64]=rip;   // [156 regs][4 imm]
   let Rat=(x, s)=>(s=regsiz[x],x=regmap[x],B(8==s?M[x]:16==s?H[x>>1]:32==s?U[x>>2]:J[x>>3])),simm=(i,l,h, a)=>(a=66+2*i,U[a]=l,U[1+a]=h,a<<2)
-  let push=(x, i)=>(J[5]-=8n, i=(brk+Number(stacktop-J[5]))>>2, U[i]=U[x>>2],U[1+i]=U[1+(x>>2)] )
-  let popl=x=>((r=U[(brk+Number(stacktop-J[5]))>>2]),(J[5]+=8n),r)
+  let push=(x, i)=>(J[5]-=8n, i=(eod+Number(stacktop-J[5]))>>2,U[i]=U[x>>2],U[1+i]=U[1+(x>>2)])
+  let popl=x=>((r=U[(eod+Number(stacktop-J[5]))>>2]),(J[5]+=8n),r)
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,40,0,0,0)
   let prot=x=>{if(x>=rip&&x<=eop)throw new Error("write protection");return x}
@@ -85,7 +85,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,U[64]+(8==s?i8(l):16==s?i16(l):i32(l)))}
    let disp=(o,b,i,l,h)=>(8==o?0xff:16==o?0xffff:0xffffffff)&l
    let indx=(i,s)=>Rat(i)*B(s?s:1);
-   let st=x=>lea?x:x<eod?Number(x):(x>=brk0&&x<brk)?eop+Number(brk0-x):x<stacktop?brk+Number(x-stacktop):(O(`\nillegal addr: ${x.toString(16)}\n`),exit(1)); //x>0xffffffffn?brk+Number(stacktop-x):x
+   let st=x=>lea?x:x<eod?Number(x):(x>=br0&&x<brk)?eod+stsz+Number(br0-x):x<stacktop?eod+Number(x-stacktop):(O(`\nillegal addr: ${x.toString(16)}\n`),exit(1)); //x>0xffffffffn?brk+Number(stacktop-x):x
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; /*console.log("opmem b",b,s,regmap[b],regmap[b]>>2,Rat(b),"i",i);*/ return(b?Rat(b)+(i?indx(i,sc):0n):0n)+B(o?disp(o,b,i,u[x+6],u[x+7]):0n)}
    let oper=i=>{let x=1+12*i,t=u[x]; return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
    
@@ -179,6 +179,7 @@ let decode=(rip,b,u)=>{ //sizeofud(576) inp_buf(+4) inp_ctr(+20 length) mnemonic
  return h4(rip-b[20])+" "+rep+(mne[u[0]]).padEnd(4," ")+" "+operands()}
 
 let mark=(U,rip,x,y,z,zz)=>{let pc=h4(rip),rsp=BigInt(U[10])|(BigInt(U[11])<<32n); //S R flg
+console.log("mark",x,y,z,zz);
  let a=af(disa.childNodes);a.forEach(unbold)
  let i=a.findIndex(x=>x.textContent.startsWith(pc));if(i<0){i=asm.findIndex(x=>x.startsWith(pc));if(i>=0){disa.dataset.i=i-1;disa.move(1);bold(disa.firstChild)}}else bold(a[i]);
  a=af(regs.children);a.forEach(unbold);flags.textContent=af("OSZAPC").map((s,i)=>(1&(U[0]>>(5-i)))?s:".").join("");
@@ -186,8 +187,7 @@ let mark=(U,rip,x,y,z,zz)=>{let pc=h4(rip),rsp=BigInt(U[10])|(BigInt(U[11])<<32n
  let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")
  tc(h(256),reg32) //rip
  const stkx=[stk0,stk1,stk2,stk3,stk4,stk5,stk6,stk7,stk8,stk9,stk10,stk11,stk12,stk13,stk14,stk15]
- let st=x=>{let s=H8(x),i=stkx.findIndex(y=>s==y.textContent.substring(1,17)),u=brk+Number(stacktop-rsp)>>2;
-  if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}
- }
- let mk=x=>{if(x.constructor==BigInt){if(x>BigInt(brk))return st(x);x=lo(x)}; (!x)?0:x<=256?(bold(tc(h(x),ge("reg"+((x>>>3)-1)))),(40==x?markrsp(rsp):0)):0};mk(x);mk(y);mk(z);mk(zz)}
-
+ let st=x=>{let s=H8(x),i=stkx.findIndex(y=>s==y.textContent.substring(1,17)),u=eod+Number(stacktop-x)>>2;
+  if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}}
+ let mk=x=>(!x)?0:x<=256?(bold(tc(h(x),ge("reg"+((x>>>3)-1)))),(40==x?markrsp(rsp):0)):(x>=br0&&x<brk)?console.log("heap",x.toString(16)):x<stacktop?st(x):0;
+ mk(x);mk(y);mk(z);mk(zz);}
