@@ -1,6 +1,9 @@
+//e2 3 4 5 6 7 8 9 0 1
+// f a s m 0 x . a s 0
+// d d d d d d d e e e
+// 8 9 a b c d e 0 1 2
 
-
-let rip,eop,eod,brk,br0=Infinity;const stacktop=0x7faee69ffed8n,stsz=8192,arg1=0x7faee69fffddn
+let rip,eop,eod,brk,br0=0x11fbe7000000n;const rs0=0x7faee69ffec0n,stacktop=0x7faee69fffe8n /*0x7faee69ffed8n*/,stsz=8192,arge=0x7faee69fffe2n
 let loadelf=u=>{let U=new Uint32Array(u.buffer,0,u.buffer.byteLength>>>2),H=new Uint16Array(u.buffer,0,u.buffer.byteLength>>>1),n=H[28],p=U[8]>>>2,i,s=[],m=0,M,R,rip=U[6],eop,eod=0
  eop=U[p+4]+U[p+8];for(i=0;i<n;i++){s.push({o:U[p+2],va:U[p+4],fs:U[p+8]});eod=Math.max(eod,U[p+4]+U[p+10]);p+=14};eod=(15+eod)>>4<<4;M=new Uint8Array(eod+1024);s.forEach(x=>M.set(u.subarray(x.o,x.o+x.fs),x.va));return[M,rip,eop,eod]}
 
@@ -39,23 +42,25 @@ let execv=a=>{ kdbut.hidden=false;kdb(1);
  catch(e){out.textContent+="elf: "+e.message+"\n";progexit();return}
  WebAssembly.instantiateStreaming(fetch("ud/dis.wasm")).then(r=>{let d=r.instance.exports
   disasm(elf,d);stackinit(elf,a);rdxinit(elf,0x7faee69ffff9n);eop=BigInt(elf[2]);eod=elf[3];
-  showheap=shhep(elf[0]);showheap((elf[2]+15)>>4<<4);br.textContent=h8(0,br0);
+  showheap=shhep(elf[0]);showheap(BigInt((elf[2]+15)>>4<<4));br.textContent=H8(br0);
   let stp=execute(elf,d),cpu=cpulog(fsget("x.cpulog"),elf);cpu();traceinto=stp;stepover=stp;
-  runto=bp=>{while(1){let pc=stp();if(pc==bp)return;if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return}}};
+  runto=bp=>{let lpc;while(1){let pc=stp();if(pc==bp)return;if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}};
   if(deb.checked==false){let lpc;while(1){let pc=cpu(stp());if("string"==typeof pc){if(""==pc)return;O("\n"+h4(lpc)+": "+pc+"\n");return};lpc=pc;}}})
 }
 let exit=x=>{if(x)O("exit "+x+"\n");progexit();kdb(0);return""}
 
 let showstack,showheap
-let xxD=(b,t)=>{let h=(i,o)=>h2(b[o+i*16])+h2(b[1+o+i*16])+" "+h2(b[2+o+i*16])+h2(b[3+o+i*16]),s=o=>Array(16).fill("-").map((x,i)=>(x=b[o+i],x>31&&x<127?String.fromCharCode(x):".")).join("")
- return Array(16).fill(0).map((_,i)=>h4(t+i*16)+" "+h(i,0)+" "+h(i,4)+" "+h(i,8)+" "+h(i,12)+" "+s(i*16)).join("\n")}
-let shhep=M=>t=>heap.textContent=(t=min(t,M.length-16*32),xxD(new Uint8Array(M.buffer,t,16*32),t))
-let shstk=S=>(h,rsp)=>{for(let i=0;i<16;i++){let j=stacktop-BigInt(8*(i+h)); ge("stk"+i).textContent=(rsp>j?"│":rsp==j?"└":" ")+H8(j)+" "+H8(S[(i+h)])}  }
+let xxD=(b,t)=>{let st=x=>x<eod?Number(x):(x>=br0&&x<brk)?eod+stsz+Number(br0-x):x<stacktop?eod+Number(stacktop-x):-1
+ let B=x=>((x=st(x),x<0||x>b.length?0:b[x])).toString(16).padStart(2,"0"),s=x=>(x=st(x),x=(x>0?b[x]:x),x>31&&x<127?String.fromCharCode(x):"."),S=x=>Array(16).fill(x).map((x,i)=>s(x+BigInt(i))).join(""),h2=x=>B(x)+B(++x),h4=x=>h2(x)+" "+h2(2n+x),h8=x=>h4(x)+" "+h4(4n+x)
+ let q=t-16n;return Array(16).fill(0).map((_,i)=>(q+=16n,H8(q)+" "+h8(q)+" "+h8(q+8n)+" "+S(q))).join("\n");}
+let shhep=M=>t=>heap.textContent=xxD(M,t)
+let shstk=S=>(h,rsp)=>{for(let i=0;i<16;i++){let j=stacktop-BigInt(8*(i+h)); ge("stk"+i).textContent=(rsp<j?"│":rsp==j?"└":" ")+H8(j)+" "+H8(S[(i+h)])}  }
 let showcal=c=>{c.slice(c.length-16,c.length).forEach((x,i)=>tc(h4(x[0])+": "+h4(x[1]),ge("cal"+i)))}
 let markrsp=rsp=>{for(let i=0;i<16;i++){let e=ge("stk"+i),s=e.textContent,a=BigInt("0x"+s.slice(1,17));s=(a>rsp?"│":a<rsp?" ":"└")+s.slice(1);e.textContent=s}}
-let stackinit=(d,a)=>{let J=new BigUint64Array(d[0].buffer,0,32),b=new Uint8Array(d[0].buffer),U=new Uint32Array(d[0].buffer,d[3]),p=d[1]-16;
- a=a.toReversed();a.forEach((x,i)=>{x=us(x);let k=(7+1+x.length)>>3<<3;p-=k;b.set(x,p);b[p+x.length]=0;U[2+2*i]=p;U[3+2*i]=0});U[2+2*a.length]=a.length;U[3+2*a.length]=0;rsp=stacktop-BigInt(8*(1+a.length));J[5]=rsp; 
- showstack=shstk(new BigUint64Array(d[0].buffer,d[3]));showstack(0,rsp);}
+let stackinit=(d,a)=>{let J=new BigUint64Array(d[0].buffer),b=new Uint8Array(d[0].buffer,d[3]);
+ let p=Number(stacktop-arge+1n),c=[];a.toReversed().forEach((x,i)=>{b[p++]=0;b.set(us(x).toReversed(),p);p+=x.length;c.push(stacktop-BigInt(p-1))})
+ p=(Number(stacktop-rs0)+d[3])>>3;J[p]=BigInt(c.length);c.toReversed().forEach(x=>J[--p]=x);
+ rsp=rs0;J[5]=rsp;showstack=shstk(new BigUint64Array(d[0].buffer,d[3]));showstack(0,rsp)}
 let rdxinit=(d,rdx)=>{let J=new BigUint64Array(d[0].buffer,0,32);J[3]=rdx}
 
 //virtual addr :                                                  xxxxxxxxxxxxxxxxxxxxxxxx (eop) xxxx (brk.........stacktop) | br0.............brk
@@ -74,8 +79,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
   let pucal=(x,y)=>{cal.push([x,y]),cal.length<16?tc(h4(x)+": "+h4(y),ge("cal"+(cal.length-1))):showcal(cal)},pocal=_=>{cal.pop();cal.length<15?tc("",ge("cal"+cal.length)):showcal(cal)}
   let lpc=rip;mark(U,rip,40,0,0,0)
   let prot=x=>{if(x>=rip&&x<=eop)throw new Error("write protection");return x}
-  let iasm=asm.map(x=>xs(x.slice(0,8)));
-  return _=>{ if(!iasm.includes(U[64])){O(`\nillegal rip: ${h4(U[64])}\n`);return exit(1);}
+  return _=>{
    for(let j=0;j<16;j++)ibuf[j]=M[j+U[64]];let n=D.dis();if(!n)return 0;rip+=n;U[64]=rip;let lea=u[0]==269;
    sz=b[538+9];adrmode=b[538+10],rep=b[544]?"rep":b[545]?"repe":b[546]?"repne":"" ;
    if(u[1]==156&&u[3]<5)sz=8; //fix mov al,byte .. sz=32
@@ -85,7 +89,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,U[64]+(8==s?i8(l):16==s?i16(l):i32(l)))}
    let disp=(o,b,i,l,h)=>(8==o?0xff:16==o?0xffff:0xffffffff)&l
    let indx=(i,s)=>Rat(i)*B(s?s:1);
-   let st=x=>lea?x:x<eod?Number(x):(x>=br0&&x<brk)?eod+stsz+Number(br0-x):x<stacktop?eod+Number(x-stacktop):(O(`\nillegal addr: ${x.toString(16)}\n`),exit(1)); //x>0xffffffffn?brk+Number(stacktop-x):x
+   let st=x=>lea?x:x<eod?Number(x):(x>=br0&&x<brk)?eod+stsz+Number(br0-x):x<stacktop?eod+Number(stacktop-x):(O(`\nillegal addr: ${x.toString(16)}\n`),exit(1)); //x>0xffffffffn?brk+Number(stacktop-x):x
    let opmem=x=>{let s=u[1+x],b=u[2+x],i=u[3+x],sc=u[4+x]&0xff,o=(u[4+x]>>>8)&0xff; /*console.log("opmem b",b,s,regmap[b],regmap[b]>>2,Rat(b),"i",i);*/ return(b?Rat(b)+(i?indx(i,sc):0n):0n)+B(o?disp(o,b,i,u[x+6],u[x+7]):0n)}
    let oper=i=>{let x=1+12*i,t=u[x]; return(t==0)?0:t==156?regmap[u[2+x]]:t==157?opmem(x):t==159?imm(i,x):t==160?jmm(i,x):(err("operand type:"+t),0)}
    
@@ -100,7 +104,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
                                   :16==sz?(V.setUint16   (x,   r=u16(f(xx=V.getUint16(   x,1),yy=V.getUint16(   y,1))),1),fl(xx,yy,r))
                                   :32==sz?(V.setUint32   (x,   r=u32(f(xx=V.getUint32(   x,1),yy=V.getUint32(   y,1))),1),fl(xx,yy,r),clu(x))
                                   :       (V.setBigUint64(x,   r=u64(f(xx=V.getBigUint64(x,1),yy=V.getBigUint64(y,1))),1),fl(xx,yy,r)));
-   console.log("X",X,x,"Y",Y,y);
+   //console.log("X",X,x,"Y",Y,y);
    switch(u[0]){
    case   5/*add */: F2((x,y)=>x+y,fla);                                                       break;
    case  18/*and */: F2((x,y)=>x&y,fl0);                                                       break;
@@ -124,11 +128,11 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
               if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64;           break; //todo flag: OF, SF, ZF, AF, PF, and CF flags are set according to the temporary result of the comparison.
    case 583/*stc */: flag.C=1;                                                                 break;
    case 593/*sub */: F2((x,y)=>x-y,fls);                                                       break;
-   case 599/*sysc*/: if(60==U[2])return exit(U[16]);U[2]=syscall(M,U[2],U[16],U[14],U[6]); X=8;Y=64;Z=56;zz=24;fsz(8);break;
+   case 599/*sysc*/: if(60==U[2])return exit(U[16]);J[1]=syscall(M,J[1],J[8],J[7],J[3]); X=8;Y=64;Z=56;zz=24;break;
    case 603/*test*/: F2((x,y)=>x,(x,y,r)=>fsz(uint(x&y)));aco(0,0,0);                          break;
    case 894/*xor */: F2((x,y)=>x^y,fl0);                                                       break;  
-   case 280/*lodsb*/:X=8n;x=8;Y=Rat(32==sz?43:59);y=lo(Y);Z=56n;F2((x,y)=>0xff&y,(a,b,r)=>r);J[7]+=(flag.D?-1n:1n); if(rep!=""){O("todo lodsb rep");return exit(1)}; break
-   case 588/*stosb*/:X=Rat(32==sz?44:60);x=lo(X);Y=8n;y=8;F2((x,y)=>0xff&y,(a,b,r)=>r);J[8]+=(flag.D?-1n:1n); break;
+   case 280/*lodsb*/:X=8;x=8;Y=Rat(59);y=st(Y);Z=56;F2((x,y)=>0xff&y,(a,b,r)=>r);J[7]+=(flag.D?-1n:1n); if(rep!=""){O("todo lodsb rep");return exit(1)}; break
+   case 588/*stosb*/:X=Rat(60);x=st(X);Y=8;y=8;F2((x,y)=>0xff&y,(a,b,r)=>r);J[8]+=(flag.D?-1n:1n); break;
    default: O(`\n${h4(lpc)}:unknown instr ${u[0]}: ${mne[u[0]]}\n`); return exit(1);
    }
    U[0]=(+!!flag.C)|((+!!flag.P)<<1)|((+!!flag.A)<<2)|((+!!flag.Z)<<3)|((+!!flag.S)<<4)|((+!!flag.O)<<5)   
@@ -150,7 +154,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
 0x60  96  gettimeofday
 0xc9 201  time
 */
-let syscall=(M,rax,rdi,rsi,rdx)=>1==rax?(O(M.subarray(rsi,rsi+rdx)),rdx):12==rax&&rdi==0?brk:(O("unknown syscall: "+rax+" "+rdi+"\n"),exit(1))
+let syscall=(M,rax,rdi,rsi,rdx)=>1==rax?(O(M.subarray(Number(rsi),Number(rsi+rdx))),rdx):12==rax&&rdi==0?(brk=br0):(O("unknown syscall: "+rax+" "+rdi+"\n"),exit(1))
 
 let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
   let ud=D.dis_init(rip)
@@ -179,15 +183,16 @@ let decode=(rip,b,u)=>{ //sizeofud(576) inp_buf(+4) inp_ctr(+20 length) mnemonic
  return h4(rip-b[20])+" "+rep+(mne[u[0]]).padEnd(4," ")+" "+operands()}
 
 let mark=(U,rip,x,y,z,zz)=>{let pc=h4(rip),rsp=BigInt(U[10])|(BigInt(U[11])<<32n); //S R flg
-console.log("mark",x,y,z,zz);
- let a=af(disa.childNodes);a.forEach(unbold)
+ let a=af(disa.childNodes);a.forEach(unbold);af(stac.querySelectorAll("span")).forEach(unbold);
  let i=a.findIndex(x=>x.textContent.startsWith(pc));if(i<0){i=asm.findIndex(x=>x.startsWith(pc));if(i>=0){disa.dataset.i=i-1;disa.move(1);bold(disa.firstChild)}}else bold(a[i]);
  a=af(regs.children);a.forEach(unbold);flags.textContent=af("OSZAPC").map((s,i)=>(1&(U[0]>>(5-i)))?s:".").join("");
  let h=x=>U[1+(x>>2)].toString(16).padStart(8,"0")+U[x>>2].toString(16).padStart(8,"0");
  let H=(i,x)=>"ffffffff"+x.toString(16).padStart(8,"0")+" "+S[i].toString(16).padStart(8,"0")+S[1+i].toString(16).padStart(8,"0")
  tc(h(256),reg32) //rip
+ let si=Number((stacktop-rsp)>>3n);if(16<si-+stac.dataset.i){stac.dataset.i=si-8;showstack(si-8,rsp)}
  const stkx=[stk0,stk1,stk2,stk3,stk4,stk5,stk6,stk7,stk8,stk9,stk10,stk11,stk12,stk13,stk14,stk15]
  let st=x=>{let s=H8(x),i=stkx.findIndex(y=>s==y.textContent.substring(1,17)),u=eod+Number(stacktop-x)>>2;
   if(i>=0){bold(stkx[i]);stkx[i].textContent=stkx[i].textContent.substring(0,18)+h4(U[1+u])+h4(U[u])}}
- let mk=x=>(!x)?0:x<=256?(bold(tc(h(x),ge("reg"+((x>>>3)-1)))),(40==x?markrsp(rsp):0)):(x>=br0&&x<brk)?console.log("heap",x.toString(16)):x<stacktop?st(x):0;
+ let mk=x=>(!x)?0:x<=256?(bold(tc(h(x),ge("reg"+((x>>>3)-1)))),(40==x?markrsp(rsp):0)):x<eod?0:(x>=br0&&x<brk)?console.log("heap",x.toString(16)):x<stacktop?st(x):0;
  mk(x);mk(y);mk(z);mk(zz);}
+
