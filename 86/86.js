@@ -85,7 +85,7 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
    if(u[1]==156&&u[3]<5)sz=8; //fix mov al,byte .. sz=32
    let bs=x=>sz==64?BigInt(x):x
    
-   let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l)}
+   let imm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7],sn=46==u[x+10];return simm(i,l=sn?(8==s?l<<24>>24:l<<0>>0):(8==s?0xff:16==s?0xffff:0xffffffff)&l,64==sz?(8==s?l<<24>>31:l<<0>>31):0)}
    let jmm=(i,x)=>{let s=u[1+x],l=u[x+6],h=u[x+7];return simm(i,U[64]+(8==s?i8(l):16==s?i16(l):i32(l)))}
    let disp=(o,b,i,l,h)=>(8==o?0xff:16==o?0xffff:0xffffffff)&l
    let indx=(i,s)=>Rat(i)*B(s?s:1);
@@ -126,6 +126,10 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
 	      let a=M[8],b=M[U[64>>2]];
               U[64>>2]++; if(rep=="")break;let c=--U[16>>2]; //todo: dirflag cld/std
               if((!c)||(rep=="repe"&&a!=b)||(rep=="repne"&&a==b))break}; x=16; y=64;           break; //todo flag: OF, SF, ZF, AF, PF, and CF flags are set according to the temporary result of the comparison.
+   
+   
+   
+   case 569/*shl */: let m=64==sz?63:31; F2((x,y)=>(console.log("shl m",x,y),x<<(y&m)), (x,y,r, c)=>(c=(x>>(sz-(y&m)))&1,aco(0,c,(r>>(sz-1))^c),fsz(r),r)); break;
    case 583/*stc */: flag.C=1;                                                                 break;
    case 593/*sub */: F2((x,y)=>x-y,fls);                                                       break;
    case 599/*sysc*/: if(60==U[2])return exit(U[16]);J[1]=syscall(M,J[1],J[8],J[7],J[3]); X=8;Y=64;Z=56;zz=24;break;
