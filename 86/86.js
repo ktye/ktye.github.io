@@ -151,14 +151,15 @@ let execute=(elf,D)=>{ //brk S R B( lo= flag
 0x2    2  open
 0x3    3  close
 0x8    8  lseek
-0x9    9  mmap         only for large alloc
-0xb   11  munmap       .. 
+0x9    9  mmap
+0xb   11  munmap
 0xc   12  brk
 0x3c  60  exit
 0x60  96  gettimeofday
 0xc9 201  time
 */
-let syscall=(M,rax,rdi,rsi,rdx)=>1==rax?(O(M.subarray(Number(rsi),Number(rsi+rdx))),rdx):12==rax&&rdi==0?(brk=br0):(O("unknown syscall: "+rax+" "+rdi+"\n"),exit(1))
+let mmap=(addr,len,prot,fl)=>(console.log("mmap",addr,len,prot,fl),0x7faee5200000n)
+let syscall=(M,rax,rdi,rsi,rdx)=>9==rax?mmap(rdi,rsi,rdx):1==rax?(O(M.subarray(Number(rsi),Number(rsi+rdx))),rdx):12==rax&&rdi==0?(brk=br0):(O("unknown syscall: "+rax+" "+rdi+"\n"),exit(1))
 
 let disasm=(elf,D)=>{let[M,rip,eop]=elf;asm=[];disa.innerHTML=""
   let ud=D.dis_init(rip)
