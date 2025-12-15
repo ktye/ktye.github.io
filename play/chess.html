@@ -3,6 +3,7 @@ body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:c
 svg{width:min(100vw,100vh);height:min(100vw,100vh);}
 .t{transform:translate(0,-20px)}
 .p{filter:saturate(3)}
+.b{fill:#333}
 </style></head><body><svg id="board" viewBox="0 0 800 800"></svg><script>
 
 
@@ -22,34 +23,22 @@ const defs=`<defs>
 
 let M=(b,s,d)=>(b=b.slice(),b[d]=b[s],b[s]='-',Q(b,d))
 let Q=(b,d)=>((b[d]=b[d].toUpperCase()=="P"&&(7==d>>>3||0==d>>>3)?(b[d]=="p"?"q":"Q"):b[d]),b)
-let P=(B,i)=>{let r=[],m=i=>r.push(i),s=B[i],x=i&7,y=i>>3,p,C=s.toUpperCase(),W=C==s,ad=W?-8:8,my=c=>((c==c.toUpperCase)==W),f=i=>"-"==B[i],b=(i,q)=>((!f(i))&&!my(B[i]));
+let P=(B,i)=>{let r=[],m=i=>r.push(i),s=B[i],x=i&7,y=i>>3,p,C=s.toUpperCase(),W=C==s,ad=W?-8:8,my=c=>((c==c.toUpperCase())==W),f=i=>"-"==B[i],b=(i,q)=>((!f(i))&&!my(B[i]));
  let bf=p=>{if(f(p)||!my(B[p]))m(p);return!f(p)},h=(x,y)=>x>=0&&x<8&&y>=0&&y<8?bf(x+8*y):0,
      mv=_=>{for(let i=1;x+i<8;i++){p=8*y+x+i;  if(bf(p))break};for(let i=-1;x+i>=0;i--){p=8*y+x+i;  if(bf(p))break}},
      mh=_=>{for(let i=1;y+i<8;i++){p=8*(y+i)+x;if(bf(p))break};for(let i=-1;y+i>=0;i--){p=8*(y+i)+x;if(bf(p))break}},ml=()=>(mv(),mh()),
      md=_=>{for(let i=1;x+i<8&&y+i<8;i++){ p=8*(y+i)+x+i;if(bf(p))break};for(let i=1;x+i<8&&y-i>=0;i++){ p=8*(y-i)+x+i;if(bf(p))break}
     	    for(let i=1;x-i>=0&&y+i<8;i++){p=8*(y+i)+x-i;if(bf(p))break};for(let i=1;x-i>=0&&y-i>=0;i++){p=8*(y-i)+x-i;if(bf(p))break}}
- "P"==C?(p=x+8*y+ad,x&&b(p-1)?m(p-1):0,7-x&&b(p+1)?m(p+1):0,f(p)?(m(p),(W?6:1)==y&&f(m(p+ad))?m(p+ad):0):0)
+ "P"==C?(p=x+8*y+ad,x&&b(p-1)?m(p-1):0,7-x&&b(p+1)?m(p+1):0,f(p)?(m(p),(W?6:1)==y&&f(p+ad)?m(p+ad):0):0)
 :"T"==C?ml():"B"==C?md():"Q"==C?(ml(),md())
 :"H"==C?(h(x-2,y-1),h(x-2,y+1),h(x+2,y-1),h(x+2,y+1),h(x-1,y-2),h(x-1,y+2),h(x+1,y-2),h(x+1,y+2))
 :"K"==C?(h(x-1,y-1),h(x-1,y),h(x-1,y+1),h(x,y-1),h(x,y),h(x,y+1),h(x+1,y-1),h(x+1,y),h(x+1,y+1)):0;return r}
 let A=(B,w)=>{const xx=w?"THBQKP":"thbqkp";let r=[];B.forEach((c,i)=>xx.includes(c)?r.push(i):0);return r}
-let CK=(B,w)=>{const k=B.indexOf(w?"K":"k"),a=A(B,w);for(let i=0;i<a.length;i++)if(P(B,a[i]).includes(k))return true;return false}
-let PN=(B,w)=>{let s=0,V=c=>c=="p"?1:c=="t"?5:c=="h"?3:c=="b"?3:c=="q"?9:c=="k"?1000:0;B.forEach(c=>s+=c==c.toLowerCase()?V(c):-V(c.toLowerCase()));return d*(s+0.1*(Math.random()-0.5))}
-let AM=(B,w)=>{let r=[];A(B,w).forEach(s=>P(B,s).forEach(b=>CK(b,w)?0:r.push(b)));return r}
+let CK=(B,w)=>{const k=B.indexOf(w?"K":"k"),a=A(B,!w);for(let x of a)if(P(B,x).includes(k))return true;return false}
+let PN=(B,w)=>{let s=0,V=c=>c=="p"?1:c=="t"?5:c=="h"?3:c=="b"?3:c=="q"?9:c=="k"?1000:0;B.forEach(c=>s+=c==c.toLowerCase()?V(c):-V(c.toLowerCase()));return s+0.1*(Math.random()-0.5)}
+let AM=(B,w)=>{let r=[];A(B,w).forEach(s=>P(B,s).forEach(d=>{let b=M(B,s,d);if(!CK(b,w))r.push(b)}));return r}
 
-/*
- let b1=AM(B,0)
- let b2=[];b1.forEach(x=>AM(x,1).forEach(x=>b2.push(x)))
- let b3=[];b2.forEach(x=>AM(x,0).forEach(x=>b3.push(x)))
- let s=-1000;PN(b3[0],0);b3.forEach(b=>{let x=PN(b,0);x>s?(s=x,B=b):0});return B
-*/
-
-let ktye=(x,d)=>{
- let S=X=>{let s=0,V=c=>c=="p"?1:c=="t"?5:c=="h"?3:c=="b"?3:c=="q"?9:c=="k"?1000:0;X.forEach(c=>s+=c==c.toLowerCase()?V(c):-V(c));return d*(s+0.1*Math.random())}
- let X=x.slice(),SX=S(X)
- let s=[];x.forEach((c,i)=>((d>0?"thbqkp":"THBQKP").includes(c))?s.push(i):0);
- s.forEach(s=>P(x,s).forEach(d=>{let x1=M(x,d),s1=S(x1);if(s1>SX){SX=s1;X=x1}}))
- return X}
+let ktye=(B,w,l)=>{let a=AM(B,w),S=-10000;a.forEach(b=>{let r=l?ktye(b,!w,l-1):b,s=PN(r,w);if(s>S){S=s;B=b.slice()}});return B}
 
 let af=x=>Array.from(x),qa=x=>document.querySelectorAll(x),ge=x=>document.getElementById(x)
 let bord="thbqkbhtpppppppp--------------------------------PPPPPPPPTHBQKBHT".split(""),turn=1
@@ -58,29 +47,14 @@ let ungrab=_=>[af(qa(".t")),af(qa(".p"))].flat().forEach(x=>x.classList.remove("
 let idxy=(x,y)=>ge(x+""+y),idi=i=>idxy(i&7,i>>>3)
 let pick=x=>X(x=qa(".t")[0])+8*Y(x)
 let wait=x=>x
-
-/*
-let mark=(x,y)=>{let p,i=x+8*y,c=bord[i],a=Array(64).fill(0),m=x=>a[x]=1,
- f=p=>bord[p]=='-',b=p=>"thbqkp".includes(bord[p]),bf=p=>{if(b(p)||f(p))m(p);return!f(p)}
- mv=_=>{for(i=1;x+i<8;i++){p=8*y+x+i;if(bf(p))break};for(i=-1;x+i>=0;i--){p=8*y+x+i;if(bf(p))break}},
- mh=_=>{for(i=1;y+i<8;i++){p=8*(y+i)+x;if(bf(p))break};for(i=-1;y+i>=0;i--){p=8*(y+i)+x;if(bf(p))break}},
- md=_=>{for(i=1;x+i<8&&y+i<8;i++){p=8*(y+i)+x+i;if(bf(p))break};for(i=1;x+i<8&&y-i>=0;i++){p=8*(y-i)+x+i;if(bf(p))break}
-	for(i=1;x-i>=0&&y+i<8;i++){p=8*(y+i)+x-i;if(bf(p))break};for(i=1;x-i>=0&&y-i>=0;i++){p=8*(y-i)+x-i;if(bf(p))break}},
- ml=()=>(mv(),mh()),h=(x,y)=>x>=0&&x<8&&y>=0&&y<8?bf(x+8*y):0
- "P"==c?(p=x+8*y-8,x&&b(p-1)?m(p-1):0,7-x&&b(p+1)?m(p+1):0,f(p)?(m(p),6==y&&f(m(p-8))?m(p-8):0):0)
-:"T"==c?ml():"B"==c?md():"Q"==c?(ml(),md())
-:"H"==c?(h(x-2,y-1),h(x-2,y+1),h(x+2,y-1),h(x+2,y+1),h(x-1,y-2),h(x-1,y+2),h(x+1,y-2),h(x+1,y+2))
-:"K"==c?(h(x-1,y-1),h(x-1,y),h(x-1,y+1),h(x,y-1),h(x,y),h(x,y+1),h(x+1,y-1),h(x+1,y),h(x+1,y+1)):0
- a.forEach((c,i)=>c?idi(i).classList.add("p"):0)}
-*/
-let mark=(x,y)=>{P(bord,x+8*y).forEach(i=>idi(i).classList.add("p"))}
- 
-let move=(p,q)=>p.classList.contains("p")?(bord[p=X(p)+8*Y(p)]=bord[q=pick()],p<8&&"P"==bord[p]?bord[p]="Q":0,bord[q]='-',draw(1),bord=ktye(bord),draw(0)):0
+let show=(a,b)=>{let i=a.findIndex((x,i)=>x!='-'&&b[i]=='-');bord=b;console.log("i",i,i&7,i>>>3);if(i<0)console.log("todo game over");idi(i).classList.add("b");setTimeout(draw,500)}
+let mark=(x,y)=>{P(bord,x+8*y).forEach(i=>{if(!CK(M(bord,x+8*y,i),1))idi(i).classList.add("p")})}
+let move=(p,q)=>p.classList.contains("p")?(bord[p=X(p)+8*Y(p)]=bord[q=pick()],p<8&&"P"==bord[p]?bord[p]="Q":0,bord[q]='-',draw(1),show(bord,ktye(bord,0,2))):0
 let beat=x=>move(idxy(X(x),Y(x)))
 let grab=x=>(ungrab(),mark(X(x),Y(x)),"w"==x.href.baseVal[1]?x.classList.add("t"):0)
 let draw=r=>{let t=defs,x=0,y=0,i=0,c;turn=r;document.title=r?"black":"white";console.log(bord.join(""))
  for(;i<64;i++){t+=`<rect id=${x+''+y} x="${100*x}" y="${100*y}" onclick="move(this)" width="100" height="100" fill="${1&(x^y)?'#4B3621dd':'#FAD6A5dd'}"/>`;if(8==++x){x=0;y++}}
  t+=bord.map((C,i)=>'-'==C?"":(c=C.toLowerCase(),`<use href="${(C==c?'#b':'#w')+c}" onclick="${turn?'wait':C==c?'beat':'grab'}(this)" x="${100*(i&7)}" y="${100*(i>>>3)}"/>`))
  board.innerHTML=t
-};//draw(0);
+};draw(0);
 </script></body></html>
