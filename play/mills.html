@@ -4,26 +4,62 @@ svg{width:min(100vw,100vh);height:min(100vw,100vh);background:#ffffcc}
 .t{transform:translate(0,-20px)}
 .p{filter:saturate(3)}
 .b{fill:#333}
+.x{stroke:red;stroke-width:0.02}
 </style></head><body><svg id="board" viewBox="0 0 800 800"></svg><script>
 
 //24 points, 32 edges
 let P="-3 -3;0 -3;3 -3;-2 -2;0 -2;2 -2;-1 -1;0 -1;1 -1;-3 0;-2 0;-1 0;1 0;2 0;3 0;-3 3;-1 1;0 1;1 1;-2 2;0 2;2 2;0 3;3 3".split(";").map(x=>x.split(" ").map(Number));
 let E="0 1;1 2;3 4;4 5;1 4;4 7;6 7;7 8;6 11;8 12;9 10;10 11;12 13;13 14;0 9;3 10;5 13;2 14;11 16;12 18;16 17;17 18;9 15;10 19;17 20;20 22;13 21;14 23;19 20;20 21;15 22;22 23".split(";").map(x=>x.split(" ").map(Number))
-let M="0 1 2;3 4 5;6 7 8;9 10 11;12 13 13;16 17 18;19 20 21;15 22 23;0 9 15;3 10 19;6 11 16;1 4 7;17 20 22;8 12 18;5 13 21;2 14 23".split(";").map(x=>x.split(" ").map(Number))
-let B="-".repeat(24).split("")
-let R=0
+let M="0 1 2;3 4 5;6 7 8;9 10 11;12 13 14;16 17 18;19 20 21;15 22 23;0 9 15;3 10 19;6 11 16;1 4 7;17 20 22;8 12 18;5 13 21;2 14 23".split(";").map(x=>x.split(" ").map(Number))
+let M_={};for(let i=0;i<24;i++){M_[i]=[];M.forEach(m=>{if(m.includes(i))M_[i].push(m.filter(x=>x!=i))})}
+let B="-".repeat(24).split("");
+let S=-1,R=0
 
-let mi=(b,w,i)=>M.filter(m=>m.includes(i)).some(x=>b[x[0]]==w&&b[x[1]]==w&&b[x[2]]==w)
 let fr=(b,i)=>b[i]=="-"
-let A=(b,w,r)=>(r<18?a1:b.filter(x=>x==w).length>3?a2:a3)(b,w) //all moves [s,d,t] source dest take
-let a1=(b,w)=>{for(let i=0;i<24;i++)if(fr(b,i)){b[i]=w;
-  if(mi(b,w,i))for(let j=0;j<24;j++)if(!mi(b,!w,j))r.push([-1,i,j])
-  else r.push([-1,i,-1]);b[i]="-";return r}}
+let mi=(b,i)=>{
+	let x=b[i],m0=M_[i][0],m1=M_[i][1];return((b[m0[0]]==x&&b[m0[1]]==x)||(b[m1[0]]==x&&b[m1[1]]==x))}
+let where=(b,x)=>{let r=[];for(let i=0;i<24;i++)if(b[i]==x)r.push(i);return r}
+let A=(b,w)=>{ //all possible moves for board b and player w: [[s,d,t],..] source,destination,take
+ let r=[],F=where(b,!w).filter(i=>mi(b,i));
+ let takes=(s,d)=>{b[d]=w;if(mi(b,d)){F.length?F.forEach(t=>r.push([s,d,t])):r.push([s,d,-1])}else{r.push([s,d,-1])};b[d]="-"}
+ if(R<9){let s=-1,d;
+  where(b,"-").forEach(d=>{b[d]=w; takes(-1,d)})
+ }else{
+  let bw=where(b,w);
+  if(bw.length>3){
+   bw.forEach(s=>{E.filter(e=>e[0]==s&&fr([e[1]])).forEach(e=>takes(s,e[1]));
+                  E.filter(e=>e[1]==s&&fr([e[0]])).forEach(e=>takes(s,e[0]))})
+  }else if(bw.length==3){
+   let D=where(b,"-");
+   bw.forEach(s=>{D.forEach(d=>F.forEach(t=>r.push([s,d,t])))})
+  } //else: <2 lost
+ }
+ if(w==1)console.log(">",r)
+ return r
+}
 
-let clic=t=>{let p=Number(t.id.slice(1));console.log(p,t)}
+let PN=(b,w)=>{let p=0;
+ b.forEach(x=>p+=x=="-"?0:x==w?1:-1);
+ M.forEach(m=>p+=0.5*m.every(x=>x==w));
+ M.forEach(m=>p-=0.5*m.every(x=>x==!w));return p}
+
+let id=t=>Number(t.id.slice(1))
+let put=t=>{if(S>-1)B[S]="-";B[id(t)]=1;if(R<9)R++;draw(1);}
+let mv=(b,m,w)=>{let s=m[0],d=m[1],t=m[2];b=b.slice();b[d]=w;if(s>=0)b[s]="-";if(t>=0)b[t]="-";return b}
+let turn=_=>{let bb=B.slice(),P=-Infinity;
+	A(B,0).forEach(m=>{
+		let b=mv(B,m),p=PN(b,0);
+		if(p>P){P=p;bb=b}
+	})
+	if(bb.every((x,i)=>B[i]==x))console.log("game over")
+	B=bb
+	draw()
+}
+
+//let ktye=(B,w,l)=>{let a=AM(B,w),S=-10000;a.forEach(b=>{let r=l?ktye(b,!w,l-1):b,s=PN(r,w);if(s>S){S=s;B=b.slice()}});return B}
 
 const defs=`<defs>
-<g id="bk" transform="scale(2.2)" style="fill:none; fill-opacity:1; fill-rule:evenodd; stroke:#000000; stroke-width:1.5; stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4; stroke-dasharray:none; stroke-opacity:1;"> <path d="M 22.5,11.63 L 22.5,6" style="fill:none; stroke:#000000; stroke-linejoin:miter;" id="path6570"/> <path d="M 22.5,25 C 22.5,25 27,17.5 25.5,14.5 C 25.5,14.5 24.5,12 22.5,12 C 20.5,12 19.5,14.5 19.5,14.5 C 18,17.5 22.5,25 22.5,25" style="fill:#000000;fill-opacity:1; stroke-linecap:butt; stroke-linejoin:miter;"/> <path d="M 12.5,37 C 18,40.5 27,40.5 32.5,37 L 32.5,30 C 32.5,30 41.5,25.5 38.5,19.5 C 34.5,13 25,16 22.5,23.5 L 22.5,27 L 22.5,23.5 C 20,16 10.5,13 6.5,19.5 C 3.5,25.5 12.5,30 12.5,30 L 12.5,37" style="fill:#000000; stroke:#000000;"/> <path d="M 20,8 L 25,8" style="fill:none; stroke:#000000; stroke-linejoin:miter;"/> <path d="M 32,29.5 C 32,29.5 40.5,25.5 38.03,19.85 C 34.15,14 25,18 22.5,24.5 L 22.5,26.6 L 22.5,24.5 C 20,18 10.85,14 6.97,19.85 C 4.5,25.5 13,29.5 13,29.5" style="fill:none; stroke:#ffffff;"/> <path d="M 12.5,30 C 18,27 27,27 32.5,30 M 12.5,33.5 C 18,30.5 27,30.5 32.5,33.5 M 12.5,37 C 18,34 27,34 32.5,37" style="fill:none; stroke:#ffffff;"/> </g>
+<filter id="s"><feDropShadow dx="0.02" dy="0.02" stdDeviation="0.02"/></filter>
 </defs>`
 const styl=`<style>
 rect{vector-effect:non-scaling-stroke;stroke-width:6;stroke:black;fill:none}
@@ -31,14 +67,26 @@ line{vector-effect:non-scaling-stroke;stroke-width:6;stroke:black;fill:none}
 text{fill:white;font-size:0.15px;font-family:monospace};
 </style>`
 
-let draw=r=>{let t=defs+styl,x=0,y=0,i=0,c;turn=r;document.title=r?"black":"white";
+let draw=Y=>{let t=defs+styl,x=0,y=0,i=0,c;document.title=Y?"black":"white";
  t+=`<g transform="translate(400.5 400.5) scale(120 120)">`
+ let d=[],q=[],s=[];
+ if(!Y){let a=A(B,1);
+ d=a.map(x=>x[1]);s=a.filter(x=>x[0]>=0).map(x=>x[0]);q=a.filter(x=>x[2]>=0).map(x=>x[2])}
+ /*
+ let d=Y?[]:R<18?B.map((_,i)=>B[i]=="-"?i:-1).filter(x=>x>=0):[];
+ let q=Y?[]:[0]
+ let s=Y?[]:[1]
+ */
  E.forEach(e=>t+=`<line x1="${P[e[0]][0]}" x2="${P[e[1]][0]}" y1="${P[e[0]][1]}" y2="${P[e[1]][1]}"/>`)
- P.forEach((p,i)=>t+=`<circle id="p${i}" cx="${p[0]}" cy="${p[1]}" r="0.12" fill="black" onclick="clic(this)" />`)
- P.forEach((p,i)=>t+=`<text x="${p[0]-0.05}" y="${p[1]+0.08}">${i}</text>`)
+ P.forEach((p,i)=>t+=`<circle id="p${i}" cx="${p[0]}" cy="${p[1]}" r="0.12" fill="black" ${d.includes(i)?"onclick='put(this)'":''} class="${d.includes(i)?'x':''}" />`)
+ B.forEach((x,i)=>t+=(x=="-")?"":`<circle id="s${i}" cx="${P[i][0]}" cy="${P[i][1]}" r="0.25" fill=${x?"#ffe2b6":"#171310"} filter="url(#s)" ${s.includes(i)?"onclick='pick(this)'":''} ${q.includes(i)?"onclick='beat(this)'":''} class="${s.includes(i)||q.includes(i)?'x':''}" />`)
+// P.forEach((p,i)=>t+=`<text x="${p[0]-0.05}" y="${p[1]+0.08}">${i}</text>`)
 
- //for(;i<64;i++){t+=`<rect id=${x+''+y} x="${100*x}" y="${100*y}" onclick="move(this)" width="100" height="100" fill="${1&(x^y)?'#4B3621dd':'#FAD6A5dd'}"/>`;if(8==++x){x=0;y++}}
- //t+=bord.map((C,i)=>'-'==C?"":(c=C.toLowerCase(),`<use href="${(C==c?'#b':'#w')+c}" onclick="${turn?'wait':C==c?'beat':'grab'}(this)" x="${100*(i&7)}" y="${100*(i>>>3)}" style="filter:drop-shadow(3px 3px 3px rgba(0,0,0,0.8))"/>`))
  board.innerHTML=t+"</g>"
+ if(Y)setTimeout(turn,500)
 };draw(0);
 </script></body></html>
+
+
+
+

@@ -2,8 +2,9 @@
 body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
 svg{width:min(100vw,100vh);height:min(100vw,100vh);}
 .t{transform:translate(0,-20px)}
-.p{filter:saturate(3)}
 .b{fill:#333}
+.a{fill:#4B3621dd}.a.p{fill:#864912}
+.b{fill:#FAD6A5dd}.b.p{fill:#f3c211}
 </style></head><body><svg id="board" viewBox="0 0 800 800"></svg><script>
 
 
@@ -53,7 +54,7 @@ let move=(p,q)=>p.classList.contains("p")?(bord[p=X(p)+8*Y(p)]=bord[q=pick()],p<
 let beat=x=>move(idxy(X(x),Y(x)))
 let grab=x=>(ungrab(),mark(X(x),Y(x)),"w"==x.href.baseVal[1]?x.classList.add("t"):0)
 let draw=r=>{let t=defs,x=0,y=0,i=0,c;turn=r;document.title=r?"black":"white";console.log(bord.join(""))
- for(;i<64;i++){t+=`<rect id=${x+''+y} x="${100*x}" y="${100*y}" onclick="move(this)" width="100" height="100" fill="${1&(x^y)?'#4B3621dd':'#FAD6A5dd'}"/>`;if(8==++x){x=0;y++}}
+ for(;i<64;i++){t+=`<rect id=${x+''+y} x="${100*x}" y="${100*y}" onclick="move(this)" width="100" height="100" class="${1&(x^y)?'a':'b'}"/>`;if(8==++x){x=0;y++}}
  t+=bord.map((C,i)=>'-'==C?"":(c=C.toLowerCase(),`<use href="${(C==c?'#b':'#w')+c}" onclick="${turn?'wait':C==c?'beat':'grab'}(this)" x="${100*(i&7)}" y="${100*(i>>>3)}" style="filter:drop-shadow(3px 3px 3px rgba(0,0,0,0.8))"/>`))
  board.innerHTML=t
 };draw(0);
