@@ -1,0 +1,14 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png"><title>mandel</title><style>
+body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:#ffffcc}
+</style></head><body><canvas id="cnv"></canvas><script>
+
+let w,X=-0.5,Y=0,W=4;
+let mandel=(x,y)=>{let re=0,im=0;for(let i=0;i<32;i++){[re,im]=[re*re-im*im-x,2*re*im-y];if(re*re+im*im>2)return i};return 255}
+let click=e=>{let b=cnv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;console.log("x/y",x,y,mandel(X+x/w,Y+y/w))}
+let draw=_=>{w=cnv.clientWidth;cnv.width=w;cnv.height=w;let c=cnv.getContext("2d"),m=c.getImageData(0,0,w,w),d=m.data;
+ let k=-1,dx=W/w,y=Y+W/2-dx;for(let i=0;i<w;i++){y+=dx;x=X-W/2-dx;for(let j=0;j<w;j++){x+=dx;v=mandel(x,y);d[++k]=v;d[++k]=v;d[++k]=v;d[++k]=255}}
+ c.putImageData(m,0,0);
+};
+draw(0);cnv.onclick=click;
+</script></body></html>
