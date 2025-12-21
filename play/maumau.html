@@ -1,0 +1,21 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png"><title>chess</title><style>
+body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+svg{width:min(100vw,100vh);height:min(100vw,100vh);background:#white}
+.t{transform:translate(0,-20px)}
+.p{filter:saturate(3)}
+.b{fill:#333}
+.x{stroke:red;stroke-width:0.02}
+</style></head><body><svg id="board" viewBox="0 0 800 800"></svg><script>
+
+
+const c_="🃑 🃒 🃓 🃔 🃕 🃖 🃗 🃘 🃙 🃚 🃛 🃝 🃞 🂡 🂢 🂣 🂤 🂥 🂦 🂧 🂨 🂩 🂪 🂫 🂭 🂮 🂱 🂲 🂳 🂴 🂵 🂶 🂷 🂸 🂹 🂺 🂻 🂽 🂾 🃁 🃂 🃃 🃄 🃅 🃆 🃇 🃈 🃉 🃊 🃋 🃍 🃎 🂠".split(" ")
+let card=(c,n,x,y,s)=>`<text x="${x}" y="${y}" font-size="${s}" fill="${c>1?'#ff5555':'black'}">${c_[c<0?52:n+13*c]}</text>`
+
+let rnd=m=>0|(m*Math.random())
+let draw=(Y,m)=>{ board.innerHTML=`${card(-1,-1,10,100,100)} ${card(rnd(4),rnd(13),400,400,100)}` };draw();
+board.onclick=_=>draw();
+</script></body></html>
+
+
+
+

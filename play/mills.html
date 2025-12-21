@@ -20,7 +20,7 @@ let mi=(b,i)=>{
 	let x=b[i],m0=M_[i][0],m1=M_[i][1];return((b[m0[0]]==x&&b[m0[1]]==x)||(b[m1[0]]==x&&b[m1[1]]==x))}
 let where=(b,x)=>{let r=[];for(let i=0;i<24;i++)if(b[i]==x)r.push(i);return r}
 let A=(b,w)=>{ //all possible moves for board b and player w: [[s,d,t],..] source,destination,take
- let r=[],F=where(b,!w).filter(i=>mi(b,i));
+ let r=[],F=where(b,!w).filter(i=>!mi(b,i));
  let takes=(s,d)=>{b[d]=w;if(mi(b,d)){F.length?F.forEach(t=>r.push([s,d,t])):r.push([s,d,-1])}else{r.push([s,d,-1])};b[d]="-"}
  if(R<9){let s=-1,d;
   where(b,"-").forEach(d=>{b[d]=w; takes(-1,d)})
@@ -44,16 +44,17 @@ let PN=(b,w)=>{let p=0;
  M.forEach(m=>p-=0.5*m.every(x=>x==!w));return p}
 
 let id=t=>Number(t.id.slice(1))
-let put=t=>{if(S>-1)B[S]="-";B[id(t)]=1;if(R<9)R++;draw(1);}
+let put=t=>{if(S>-1)B[S]="-";B[id(t)]=1;if(R<9)R++;let m=mi(B,id(t));draw(!m,m)}
+let beat=t=>(B[id(t)]="-",draw(1))
 let mv=(b,m,w)=>{let s=m[0],d=m[1],t=m[2];b=b.slice();b[d]=w;if(s>=0)b[s]="-";if(t>=0)b[t]="-";return b}
 let turn=_=>{let bb=B.slice(),P=-Infinity;
 	A(B,0).forEach(m=>{
-		let b=mv(B,m),p=PN(b,0);
+		let b=mv(B,m,0),p=PN(b,0);
 		if(p>P){P=p;bb=b}
 	})
 	if(bb.every((x,i)=>B[i]==x))console.log("game over")
 	B=bb
-	draw()
+	draw(0)
 }
 
 //let ktye=(B,w,l)=>{let a=AM(B,w),S=-10000;a.forEach(b=>{let r=l?ktye(b,!w,l-1):b,s=PN(r,w);if(s>S){S=s;B=b.slice()}});return B}
@@ -67,11 +68,12 @@ line{vector-effect:non-scaling-stroke;stroke-width:6;stroke:black;fill:none}
 text{fill:white;font-size:0.15px;font-family:monospace};
 </style>`
 
-let draw=Y=>{let t=defs+styl,x=0,y=0,i=0,c;document.title=Y?"black":"white";
+let draw=(Y,m)=>{let t=defs+styl,x=0,y=0,i=0,c;document.title=Y?"black":"white";
  t+=`<g transform="translate(400.5 400.5) scale(120 120)">`
  let d=[],q=[],s=[];
- if(!Y){let a=A(B,1);
- d=a.map(x=>x[1]);s=a.filter(x=>x[0]>=0).map(x=>x[0]);q=a.filter(x=>x[2]>=0).map(x=>x[2])}
+ if(!Y){let a=A(B,1);d=a.map(x=>x[1]);s=a.filter(x=>x[0]>=0).map(x=>x[0]);
+  if(m){q=where(B,0).filter(x=>!mi(B,x));s=[];d=[]}}
+ console.log("q",q);
  /*
  let d=Y?[]:R<18?B.map((_,i)=>B[i]=="-"?i:-1).filter(x=>x>=0):[];
  let q=Y?[]:[0]
