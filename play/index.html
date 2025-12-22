@@ -1,26 +1,39 @@
 <!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png"><title>play</title><style>
-body{margin:0;min-height:100vh;overflow:hidden;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
-img{aspect-ratio:16 / 9;width:auto;height:100vh}
+body{margin:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:space-around}
+img{width:min(100vw,16 / 9 * 100vh)}
 *{font-family:monospace;font-size:24px}
 </style></head><body>
 
-<img id="img" width="800" height="450" usemap="#map">
+<img id="img" usemap="#map">
 <map id="map" name="map"></map>
 
 <script>
-fetch("story").then(r=>r.text()).then(r=>{
- let ch=document.location.hash.slice(1);ch=ch?ch:"xx";
- document.title=ch;
- img.src="m/"+ch+".webp";
- console.log("ch",ch)
- let p=""
- r.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|")).forEach(x=>{
-	 console.log(x[1],x[2])
-  p+=`<area shape="rect" coords="${x[1]}" href="${x[2]}" />`
- })
- map.innerHTML=p
- console.log(l)
-})
 
+let ch
+let showpage=_=>{
+ fetch("story").then(r=>r.text()).then(r=>{
+  ch=document.location.hash.slice(1);ch=ch?ch.split(":")[0]:"xx";
+  console.log("showpage",ch)
+  document.title=ch;
+  img.src="m/"+ch+".webp";
+  img.href="#"+ch;
+  let p=""
+  img.onload=_=>{let sc=x=>(console.log(x,x*img.with/800),Math.floor(x*img.width/800))
+   r.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|")).forEach(x=>{
+    p+=`<area shape="rect" coords="${x[1].split(",").map(x=>sc(+x))}" href="#${ch+':'+encodeURIComponent(x[2])}" />`
+   })
+   p+=`<area shape="default" href="#${ch}">`
+   map.innerHTML=p}})}
+
+let showtext=t=>{console.log("showtext",t)}
+
+window.onhashchange=e=>{
+ let x=decodeURIComponent(new URL(e.newURL).hash).slice(1);
+ let c=x.split(":")[0]
+ console.log("c",c,"c!=ch",c!=ch)
+ ch!=c?(ch=c,showpage()):showtext(x.slice(1+c.length))
+}
+
+showpage()
 
 </script></body></html>

@@ -15,20 +15,28 @@ textarea{width:100%}
 <script>
 let ctx=cnv.getContext("2d");
 let ch=document.location.hash.slice(1)
-if(ch!=""){im="m/"+ch+".webp";let img=new Image();img.onload=_=>ctx.drawImage(img,0,0);img.src=im;document.title=ch;h1.textContent=ch
+let im
+if(ch!=""){im="m/"+ch+".webp";let img=new Image();img.onload=_=>{im=img;draw()};img.src=im;document.title=ch;h1.textContent=ch
 }else alert("missing hash");
 
-fetch("story").then(r=>r.text()).then(r=>out.value=r.split("\n").filter(x=>x.startsWith(ch+"|")).join("\n")+"\n")
 
 
 let X=0,Y=0;
 cnv.onmousedown=e=>{X=e.offsetX;Y=e.offsetY;}
-cnv.onmouseup=e=>{let x=e.offsetX;y=e.offsetY;console.log("up",X,Y); if(x-X>10&&y-Y>10)rect(X,Y,x-X,y-Y); }
-let rect=(x,y,w,h)=>{ctx.strokeStyle="red";ctx.strokeRect(x,y,w,h);re.value=[x,y,w,h].join(" ")};
+cnv.onmouseup=e=>{let x=e.offsetX;y=e.offsetY;console.log("up",X,Y); if(x-X>10&&y-Y>10)rect(X,Y,x,y); }
+let rect=(x,y,xx,yy)=>{ctx.strokeStyle="red";ctx.strokeRect(x,y,xx-x,yy-y);re.value=[x,y,xx,yy].join(" ")};
 
-let add=_=>{
- let r=re.value.split(" ")
- out.value+=ch+"|"+r+"|\n"
-}
+let add=_=>{ let r=re.value.split(" "); out.value+=ch+"|"+r+"|\n"; draw() }
+
+fetch("story").then(r=>r.text()).then(r=>out.value=r)
+let draw=_=>{ let a=out.value.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|"))
+ ctx.drawImage(im,0,0);
+ a.forEach((r,i)=>{
+	 let[x,y,xx,yy]=r[1].split(",").map(Number);
+	 ctx.strokeStyle="green";ctx.strokeRect(x,y,xx-x,yy-y)
+ 	 ctx.font="20px monospace";ctx.fillText(i,x+5,y+25)
+	 })
+ console.log(a)}
+
 
 </script></body></html>
