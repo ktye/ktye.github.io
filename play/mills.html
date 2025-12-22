@@ -13,7 +13,8 @@ let E="0 1;1 2;3 4;4 5;1 4;4 7;6 7;7 8;6 11;8 12;9 10;10 11;12 13;13 14;0 9;3 10
 let M="0 1 2;3 4 5;6 7 8;9 10 11;12 13 14;16 17 18;19 20 21;15 22 23;0 9 15;3 10 19;6 11 16;1 4 7;17 20 22;8 12 18;5 13 21;2 14 23".split(";").map(x=>x.split(" ").map(Number))
 let M_={};for(let i=0;i<24;i++){M_[i]=[];M.forEach(m=>{if(m.includes(i))M_[i].push(m.filter(x=>x!=i))})}
 let B="-".repeat(24).split("");
-let S=-1,R=0
+let S=-1,R=0;
+const nine=4
 
 let fr=(b,i)=>b[i]=="-"
 let mi=(b,i)=>{
@@ -22,7 +23,8 @@ let where=(b,x)=>{let r=[];for(let i=0;i<24;i++)if(b[i]==x)r.push(i);return r}
 let A=(b,w)=>{ //all possible moves for board b and player w: [[s,d,t],..] source,destination,take
  let r=[],F=where(b,!w).filter(i=>!mi(b,i));
  let takes=(s,d)=>{b[d]=w;if(mi(b,d)){F.length?F.forEach(t=>r.push([s,d,t])):r.push([s,d,-1])}else{r.push([s,d,-1])};b[d]="-"}
- if(R<9){let s=-1,d;
+ if(R<nine){let s=-1,d;
+  console.log("R<nine");
   where(b,"-").forEach(d=>{b[d]=w; takes(-1,d)})
  }else{
   let bw=where(b,w);
@@ -34,26 +36,27 @@ let A=(b,w)=>{ //all possible moves for board b and player w: [[s,d,t],..] sourc
    bw.forEach(s=>{D.forEach(d=>F.forEach(t=>r.push([s,d,t])))})
   } //else: <2 lost
  }
- if(w==1)console.log(">",r)
  return r
 }
 
 let PN=(b,w)=>{let p=0;
  b.forEach(x=>p+=x=="-"?0:x==w?1:-1);
  M.forEach(m=>p+=0.5*m.every(x=>x==w));
- M.forEach(m=>p-=0.5*m.every(x=>x==!w));return p}
+ M.forEach(m=>p-=0.5*m.every(x=>x==!w));return p+Math.random()}
 
 let id=t=>Number(t.id.slice(1))
-let put=t=>{if(S>-1)B[S]="-";B[id(t)]=1;if(R<9)R++;let m=mi(B,id(t));draw(!m,m)}
+let put=t=>{if(S>-1)B[S]="-";B[id(t)]=1;let m=mi(B,id(t));draw(!m,m)}
 let beat=t=>(B[id(t)]="-",draw(1))
+let pick=t=>(S=id(t),draw(0),S=-1)
 let mv=(b,m,w)=>{let s=m[0],d=m[1],t=m[2];b=b.slice();b[d]=w;if(s>=0)b[s]="-";if(t>=0)b[t]="-";return b}
 let turn=_=>{let bb=B.slice(),P=-Infinity;
 	A(B,0).forEach(m=>{
 		let b=mv(B,m,0),p=PN(b,0);
 		if(p>P){P=p;bb=b}
 	})
-	if(bb.every((x,i)=>B[i]==x))console.log("game over")
+	if(bb.every((x,i)=>B[i]==x))gameover("black")
 	B=bb
+	if(R<nine)R++;
 	draw(0)
 }
 
@@ -71,9 +74,10 @@ text{fill:white;font-size:0.15px;font-family:monospace};
 let draw=(Y,m)=>{let t=defs+styl,x=0,y=0,i=0,c;document.title=Y?"black":"white";
  t+=`<g transform="translate(400.5 400.5) scale(120 120)">`
  let d=[],q=[],s=[];
- if(!Y){let a=A(B,1);d=a.map(x=>x[1]);s=a.filter(x=>x[0]>=0).map(x=>x[0]);
+ if(!Y){let a=A(B,1);if(!a.length)gameover("white");d=a.map(x=>x[1]);s=a.filter(x=>x[0]>=0).map(x=>x[0]);
+  if(S>=0){console.log("S",S);a=a.filter(x=>x[0]==S);s=[];d=a.map(x=>x[1]); console.log("d",d);}
+  else if(s.length)d=[];
   if(m){q=where(B,0).filter(x=>!mi(B,x));s=[];d=[]}}
- console.log("q",q);
  /*
  let d=Y?[]:R<18?B.map((_,i)=>B[i]=="-"?i:-1).filter(x=>x>=0):[];
  let q=Y?[]:[0]
@@ -87,8 +91,7 @@ let draw=(Y,m)=>{let t=defs+styl,x=0,y=0,i=0,c;document.title=Y?"black":"white";
  board.innerHTML=t+"</g>"
  if(Y)setTimeout(turn,500)
 };draw(0);
+
+let gameover=w=>(GO=`game over ${w} lost`,draw);
 </script></body></html>
-
-
-
 
