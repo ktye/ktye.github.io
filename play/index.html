@@ -2,34 +2,56 @@
 body{margin:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:space-around}
 img{width:min(100vw,16 / 9 * 100vh)}
 *{font-family:monospace;font-size:24px}
-#txt{background:#ffffff;padding:20px;font-size:30px;position:absolute;display:none;flex-flow:column;font-weight:bold;border:2px solid yellow}
+#txt{background:#ffffff;padding:20px;font-size:30px;position:absolute;display:none;font-weight:bold;border:2px solid yellow}
 </style></head><body>
 
 <img id="img" usemap="#map">
 <map id="map" name="map"></map>
-<div id="txt"></div>
+<pre id="txt"></pre>
 
 <script>
 
 let ch
+let back="#linatina"
 let showpage=_=>{ // >(img) *(audio) @(full-link) else(text) 
  fetch("story").then(r=>r.text()).then(r=>{
   ch=document.location.hash.slice(1);ch=ch?ch.split(":")[0]:"linatina";
-  console.log("showpage",ch)
   document.title=ch;
+  txt.style.display="none"
   img.src="m/"+ch+".webp";
   img.href="#"+ch;
   let p=""
-  img.onload=_=>{let sc=x=>(console.log(x,x*img.with/800),Math.floor(x*img.width/800))
+  img.onload=_=>{let sc=x=>(Math.floor(x*img.width/800))
    r.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|")).forEach(x=>{let a=x[2];
     
-    let h=a.startsWith("@")?a.slice(1):a.startsWith(">")?"#"+a.slice(1):"#"+ch+(a?":"+encodeURIComponent(a):"")
+    let h=a.startsWith("@")?a.slice(1):a.startsWith(">")?"#"+a.slice(1):a.startsWith("<")?back:"#"+ch+(a?":"+encodeURIComponent(a):"")
     p+=`<area shape="rect" coords="${x[1].split(",").map(x=>sc(+x))}" href="${h}" />`
    })
    p+=`<area shape="default" href="#${ch}">`
-   map.innerHTML=p}})}
+   map.innerHTML=p;
+//   document.body.requestFullscreen()
+   }})}
 
-let showtext=t=>{if(!t)return txt.onclick();txt.style.display="flex";txt.innerHTML="";t=t.split("/").forEach(t=>{let s=document.createElement("span");s.textContent=t;txt.appendChild(s)})}
+let showtext=t=>{if(!t)return txt.onclick();txt.style.display="block"; 
+ txt.textContent=t.replaceAll("/","\n");console.log("txthtml",txt.innerHTML)
+ let h=txt.innerHTML,i=0,r="";
+ while(i=h.indexOf("("),i>=0){
+	 r+=h.slice(0,i)
+	 h=h.slice(1+i)
+	 i=h.indexOf("&gt;")
+	 let a=h.slice(0,i)
+	 h=h.slice(4+i)
+	 i=h.indexOf(")")
+	 let href="#"+h.slice(0,i)
+	 console.log("a",a,"href",href)
+	 r+=`<a href="${href}">${a}</a>`
+	 h=h.slice(1+i)
+ }
+ r+=h
+ txt.innerHTML=r
+
+ //txt.innerHTML="";t=t.split("/").forEach(t=>{let s=document.createElement("span");s.textContent=t;txt.appendChild(s)})
+}
 txt.onclick=()=> txt.style.display="none"
 
 let au;var snd=[]
@@ -40,8 +62,7 @@ let play=x=>{if(typeof au=='undefined')au=new AudioContext();
 window.onhashchange=e=>{
  let x=decodeURIComponent(new URL(e.newURL).hash).slice(1);
  let c=x.split(":")[0],s=x.slice(1+c.length)
- console.log("c",c,"c!=ch",c!=ch)
- ch!=c?(ch=c,showpage()):s.startsWith("*")?play(s.slice(1)):showtext(s)
+ ch!=c?(back="#"+ch,ch=c,showpage()):s.startsWith("*")?play(s.slice(1)):showtext(s)
 }
 
 showpage()

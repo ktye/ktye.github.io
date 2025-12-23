@@ -1,20 +1,30 @@
 linatina|0,0,800,450|>bus
-bus|676,146,782,252|schreit:Nur vorne einsteigen/Türen freimachen/nächste Haltestelle Freiheitsplatz
+bus|676,146,782,252|Nur vorne einsteigen/Türen freimachen//nächste Haltestelle (Freiheitsplatz>freiheit)
 bus|490,154,560,250|>harald
 bus|193,164,303,258|>linatina
 bus|372,167,496,253|*hallokai
 bus|108,190,186,261|>cola
-cola|0,0,800,450|*wasser
+dogs|4,1,151,175|<
 dogs|157,13,405,267|*wau1
 dogs|411,72,578,323|*wau2
 dogs|566,31,781,368|*wau3
 dogs|1,186,209,442|@chess.html
 dogs|555,370,769,440|>schneemann
 dogs|210,276,443,441|>vogel
-schneemann|55,0,451,408|ich friere./Mir ist kalt.
+schneemann|39,0,163,157|<
 schneemann|452,272,626,416|Hier ist es heiss.
+schneemann|169,6,448,402|ich friere./Mir ist kalt.
+vogel|8,0,265,241|<
 vogel|285,76,523,397|>schneemann
-cola|674,357,790,440|
-harald|36,27,312,325|@chess.html
-harald|325,12,486,182|Hallo, mein Name ist Töpfer./Harald Töpfer um genau zu sein./Ich kann zaubern.
+vogel|540,17,794,412|*uhr
+cola|7,2,263,202|<
+cola|270,2,550,414|*water
+harald|36,27,312,325|<
+harald|325,12,486,182|Hallo, mein Name ist Töpfer./Harald Töpfer um genau zu sein./Ich kann zaubern./Ich spiele gerne (Schach>xx).
 harald|491,183,794,434|>dogs
+xx|0,0,273,254|<
+xx|288,157,528,320|Wenn du Schach spielen willst,/schaue im Wasser.
+xx|8,277,281,389|@chess.html
+xx|290,322,535,384|@chess.html
+xx|290,322,535,384|@chess.html
+xx|529,272,797,411|@chess.html

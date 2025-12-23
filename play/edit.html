@@ -5,7 +5,7 @@ canvas{background:grey}
 textarea{width:100%}
 </style></head><body>
 
-<h1 id="h1"></h1>
+<select id="chs" onchange="(ch=this.value,draw())"></select><br/>
 <canvas id="cnv" width="800" height="450"></canvas><br/>
 <input type="text" id="re"></input>
 <button onclick="add()">add</button>
@@ -14,9 +14,10 @@ textarea{width:100%}
 
 <script>
 let ctx=cnv.getContext("2d");
-let ch=document.location.hash.slice(1)
+let ch="linatina"
 let im
-if(ch!=""){im="m/"+ch+".webp";let img=new Image();img.onload=_=>{im=img;draw()};img.src=im;document.title=ch;h1.textContent=ch
+
+if(ch!=""){im="m/"+ch+".webp";let img=new Image();img.onload=_=>{im=img;draw()};img.src=im;document.title=ch;
 }else alert("missing hash");
 
 
@@ -26,17 +27,30 @@ cnv.onmousedown=e=>{X=e.offsetX;Y=e.offsetY;}
 cnv.onmouseup=e=>{let x=e.offsetX;y=e.offsetY;console.log("up",X,Y); if(x-X>10&&y-Y>10)rect(X,Y,x,y); }
 let rect=(x,y,xx,yy)=>{ctx.strokeStyle="red";ctx.strokeRect(x,y,xx-x,yy-y);re.value=[x,y,xx,yy].join(" ")};
 
-let add=_=>{ let r=re.value.split(" "); out.value+=ch+"|"+r+"|\n"; draw() }
+let add=_=>{ let r=re.value.split(" "); clip(ch+"|"+r.join(",")+"|"); out.value+=ch+"|"+r+"|\n"; drawrect(r,out.value.split("\n").length-1) }
 
-fetch("story").then(r=>r.text()).then(r=>out.value=r)
-let draw=_=>{ let a=out.value.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|"))
- ctx.drawImage(im,0,0);
- a.forEach((r,i)=>{
-	 let[x,y,xx,yy]=r[1].split(",").map(Number);
-	 ctx.strokeStyle="green";ctx.strokeRect(x,y,xx-x,yy-y)
- 	 ctx.font="20px monospace";ctx.fillText(i,x+5,y+25)
-	 })
- console.log(a)}
+let uniq=x=>x.filter((x,i,a)=>a.indexOf(x)==i)
+let draw=_=>{
+ fetch("story").then(r=>r.text()).then(r=>{
+	chs.innerHTML=uniq(r.split("\n").map(x=>x.split("|")[0])).map(x=>`<option>${x}</option>`).join("")
+ 	im=new Image();im.onload=_=>{
+		ctx.drawImage(im,0,0); 
+		let a=r.split("\n").filter(x=>x.startsWith(ch+"|"))
+		out.textContent=a.join("\n")+"\n"
+		a.forEach((v,i)=>{
+			let r=v.split("|");
+			drawrect(r[1].split(","),i)
+		})
+	}
+	im.src="m/"+ch+".webp"
+ })
+}
+let drawrect=(r,i)=>{
+	let[x,y,xx,yy]=r.map(Number);
+	ctx.strokeStyle="green";ctx.strokeRect(x,y,xx-x,yy-y)
+	ctx.font="20px monospace";ctx.fillText(i,x+5,y+25)
+}
 
+let clip=t=>navigator.clipboard.writeText(t);
 
 </script></body></html>
