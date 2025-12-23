@@ -4,6 +4,8 @@ bus|490,154,560,250|>harald
 bus|193,164,303,258|>linatina
 bus|372,167,496,253|*hallokai
 bus|108,190,186,261|>cola
+bus|42,33,723,124|Geh zur 53 und suche den Schatz/solange du kannst.
+bus|737,67,782,108|@mandel.html
 dogs|4,1,151,175|<
 dogs|157,13,405,267|*wau1
 dogs|411,72,578,323|*wau2
@@ -14,6 +16,7 @@ dogs|210,276,443,441|>vogel
 schneemann|39,0,163,157|<
 schneemann|452,272,626,416|Hier ist es heiss.
 schneemann|169,6,448,402|ich friere./Mir ist kalt.
+schneemann|504,7,750,250|>schreibmaschine
 vogel|8,0,265,241|<
 vogel|285,76,523,397|>schneemann
 vogel|540,17,794,412|*uhr
@@ -28,3 +31,9 @@ xx|8,277,281,389|@chess.html
 xx|290,322,535,384|@chess.html
 xx|290,322,535,384|@chess.html
 xx|529,272,797,411|@chess.html
+schreibmaschine|5,4,362,230|<
+schreibmaschine|538,329,579,372|*../../ret
+schreibmaschine|209,301,536,397|*../../key
+schreibmaschine|276,403,515,431|*../../spc
+freiheit|4,3,320,138|<
+freiheit|53,143,728,431|Lina und Tina haben keine Lust auf Schule//Was machen sie?
