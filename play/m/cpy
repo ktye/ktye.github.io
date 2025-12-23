@@ -1,7 +1,7 @@
 # sh cpy abc
 set -e 
 set -x
-if [ -z "$1" -a ! -f ~/down/{$1}.jpeg ]; then
+if [ -z "$1" -a ! -f ~/down/{$1}.jpg ]; then
 	exit 1
 fi
-magick ~/down/${1}.jpeg -resize 800x450 ${1}.webp
+magick ~/down/${1}.jpg -resize 800x450 ${1}.webp

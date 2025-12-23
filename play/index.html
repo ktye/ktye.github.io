@@ -10,9 +10,9 @@ img{width:min(100vw,16 / 9 * 100vh)}
 <script>
 
 let ch
-let showpage=_=>{
+let showpage=_=>{ // >(img) *(audio) @(full-link) else(text) 
  fetch("story").then(r=>r.text()).then(r=>{
-  ch=document.location.hash.slice(1);ch=ch?ch.split(":")[0]:"xx";
+  ch=document.location.hash.slice(1);ch=ch?ch.split(":")[0]:"dogs";
   console.log("showpage",ch)
   document.title=ch;
   img.src="m/"+ch+".webp";
@@ -20,18 +20,24 @@ let showpage=_=>{
   let p=""
   img.onload=_=>{let sc=x=>(console.log(x,x*img.with/800),Math.floor(x*img.width/800))
    r.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|")).forEach(x=>{
-    p+=`<area shape="rect" coords="${x[1].split(",").map(x=>sc(+x))}" href="#${ch+':'+encodeURIComponent(x[2])}" />`
+    let h=x[2].startsWith("@")?x[2].slice(1):"#"+ch+":"+encodeURIComponent(x[2]);
+    p+=`<area shape="rect" coords="${x[1].split(",").map(x=>sc(+x))}" href="${h}" />`
    })
    p+=`<area shape="default" href="#${ch}">`
    map.innerHTML=p}})}
 
 let showtext=t=>{console.log("showtext",t)}
 
+let au;var snd=[]
+let play=x=>{if(typeof au=='undefined')au=new AudioContext();
+ let p=b=>{let s=au.createBufferSource();s.buffer=b;s.connect(au.destination);s.start()}
+ fetch("a/"+x+".m4a").then(r=>r.arrayBuffer()).then(a=>au.decodeAudioData(a)).then(b=>p(b))}
+
 window.onhashchange=e=>{
  let x=decodeURIComponent(new URL(e.newURL).hash).slice(1);
- let c=x.split(":")[0]
+ let c=x.split(":")[0],s=x.slice(1+c.length)
  console.log("c",c,"c!=ch",c!=ch)
- ch!=c?(ch=c,showpage()):showtext(x.slice(1+c.length))
+ ch!=c?(ch=c,showpage()):s.startsWith("*")?play(s.slice(1)):showtext(s)
 }
 
 showpage()
