@@ -1,9 +1,20 @@
+linatina|0,0,800,450|>bus
+bus|676,146,782,252|schreit:Nur vorne einsteigen/Türen freimachen/nächste Haltestelle Freiheitsplatz
+bus|490,154,560,250|>harald
+bus|193,164,303,258|>linatina
+bus|372,167,496,253|*hallokai
+bus|108,190,186,261|>cola
+cola|0,0,800,450|*wasser
 dogs|157,13,405,267|*wau1
 dogs|411,72,578,323|*wau2
 dogs|566,31,781,368|*wau3
 dogs|1,186,209,442|@chess.html
 dogs|555,370,769,440|>schneemann
-schneemann||
-xx|352,194,454,278|hallo bibi, wo ist tina?
-xx|674,357,790,440|nicht hier
-
+dogs|210,276,443,441|>vogel
+schneemann|55,0,451,408|ich friere./Mir ist kalt.
+schneemann|452,272,626,416|Hier ist es heiss.
+vogel|285,76,523,397|>schneemann
+cola|674,357,790,440|
+harald|36,27,312,325|@chess.html
+harald|325,12,486,182|Hallo, mein Name ist Töpfer./Harald Töpfer um genau zu sein./Ich kann zaubern.
+harald|491,183,794,434|>dogs
