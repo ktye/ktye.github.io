@@ -5,7 +5,8 @@ canvas{background:grey}
 textarea{width:100%}
 </style></head><body>
 
-<select id="chs" onchange="(ch=this.value,draw())"></select><br/>
+<select id="chs" onchange="(ch=this.value,draw())"></select>
+<select id="unr" onchange="(ch=this.value,draw())"></select><br/>
 <canvas id="cnv" width="800" height="450"></canvas><br/>
 <input type="text" id="re"></input>
 <button onclick="add()">add</button>
@@ -32,7 +33,10 @@ let add=_=>{ let r=re.value.split(" "); clip(ch+"|"+r.join(",")+"|"); out.value+
 let uniq=x=>x.filter((x,i,a)=>a.indexOf(x)==i)
 let draw=_=>{
  fetch("story").then(r=>r.text()).then(r=>{
-	chs.innerHTML=uniq(r.split("\n").map(x=>x.split("|")[0])).map(x=>`<option>${x}</option>`).join("")
+	let all=uniq(r.split("\n").map(x=>x.split("|")[0]))
+	chs.innerHTML=all.map(x=>`<option>${x}</option>`).join("")
+	let u=all.filter(x=>r.indexOf(">"+x)<0)
+	unr.innerHTML=u.map(x=>`<option>${x}</option>`).join("")
  	im=new Image();im.onload=_=>{
 		ctx.drawImage(im,0,0); 
 		let a=r.split("\n").filter(x=>x.startsWith(ch+"|"))

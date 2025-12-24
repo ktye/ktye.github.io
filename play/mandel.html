@@ -24,12 +24,14 @@ const C=[[0,0,3],[0,0,4],[0,0,6],[1,0,7],[1,1,9],[1,1,11],[2,1,14],[2,2,16],[3,2
 [244,219,75],[244,220,79],[243,222,82],[243,224,86],[243,226,89],[242,228,93],[242,230,96],[241,232,100],[241,233,104],[241,235,108],[241,237,112],[241,238,116],
 [241,240,121],[241,242,125],[242,243,129],[242,244,133],[243,246,137],[244,247,141],[245,248,145],[246,250,149],[247,251,153],[249,252,157],[250,253,160],[252,254,164]];
 
+let count=0
 let w,X=-0.5,Y=0,W=4;
 let mandel=(x,y)=>{let x2=0,u=0,v=0,y2=0,w=0;for(let i=0;i<255;i++){
  x2=u*u;y2=v*v;v=2*u*v+y;u=x2-y2+x;if(x2+y2>4)return i;
 };return 255}
 let click=e=>{let b=cnv.getBoundingClientRect(),x=e.clientX-b.left,y=e.clientY-b.top;X+=(W/w)*(x-w/2);Y+=(W/w)*(y-w/2);W*=0.5;draw()} //;console.log("x/y",x,y,mandel(X+x/w,Y+y/w))}
 let draw=_=>{w=cnv.clientWidth;cnv.width=w;cnv.height=w;let c=cnv.getContext("2d"),m=c.getImageData(0,0,w,w),d=m.data;
+ if(++count==20)history.back()
  let k=-1,dx=W/w,y=Y-W/2-dx;for(let i=0;i<w;i++){y+=dx;x=X-W/2-dx;for(let j=0;j<w;j++){x+=dx;v=mandel(x,y);
   d[++k]=C[v][0];d[++k]=C[v][1];d[++k]=C[v][2];d[++k]=255}}
  c.putImageData(m,0,0);

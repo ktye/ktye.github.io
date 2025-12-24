@@ -1,0 +1,87 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png"><title>calc</title><style>
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;justify-content:space-around;align-items:center;background:#f0f0f0;font-size:60px}
+input{font-size:60px;width:200px}
+button{font-size:60px;}
+#b{display:none}
+</style></head><body>
+<span id="q"></span>
+<input type="number" onchange="check(+this.value)" />
+<span id="r"></span>
+<div id="b">
+ <button onclick="neu()">nochmal</button>
+ <button onclick="history.back()">fertig</button>
+</div>
+<script>
+
+
+let a=`
+x+y+z
+x+y-z
+x+(y*z)
+z+(y/x)
+
+x-y+z
+x-y-z
+x-(y*z)
+z-(y/x)
+
+(x*y)+z
+(x*y)-z
+
+(y/x)+z
+(y/x)-z
+(y/x)*z
+`.split("\n").filter(x=>x.length)
+
+let R=x=>Math.floor(x*Math.random())
+let X  =_=>   R(10) 
+let X1 =_=>1+(R( 9))
+let anyof=a=>a[R(a.length)]
+
+let right=`
+👌
+👍
+🙌
+das war ja auch kiki leicht
+kann ja jeder
+war ja auch klar.
+was auch sonst.
+und warum hat's so lange gedauert?
+tolle Antwort!
+weiss ja auch jeder Erstklässler
+1 mit Sternchen.
+1a richtig. Wie in der ersten Klasse.
+`.split("\n").filter(x=>x.length)
+
+let wrong=`
+🤦
+🤮
+oh je.
+was soll nur aus dir werden..
+ich sag jetzt mal nix dazu.
+probier lieber nochmal.
+das kannst du besser.
+das habe ich überhört.
+falsch
+voll falsch
+neinneinneinneinnein
+ich glaub mein Pferd pfeift.
+`.split("\n").filter(x=>x.length)
+
+let A
+let check=a=>{r.textContent=(A==a)?(b.style.display="block",anyof(right)):anyof(wrong)}
+
+let neu=_=>{
+	b.style.display="none"
+	r.textContent=""
+	let s=anyof(a),x=X(),y=X(),z=X();
+	if(s.includes("/")){x=X1();y=x*X1()}
+	s=s.split("").join(" ").replace("x",x).replace("y",y).replace("z",z)
+
+	q.textContent=s
+	A=eval(s)
+};
+neu()
+
+
+</script></body></html>

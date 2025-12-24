@@ -2,10 +2,57 @@ linatina|0,0,800,450|>bus
 bus|676,146,782,252|Nur vorne einsteigen/Türen freimachen//nächste Haltestelle (Freiheitsplatz>freiheit)
 bus|490,154,560,250|>harald
 bus|193,164,303,258|>linatina
-bus|372,167,496,253|*hallokai
 bus|108,190,186,261|>cola
+bus|2,179,108,354|>busparkplatz
 bus|42,33,723,124|Geh zur 53 und suche den Schatz/solange du kannst.
 bus|737,67,782,108|@mandel.html
+bus|134,273,619,431|>kaichen
+kaichen|0,0,200,200|<
+kaichen|541,72,750,253|*hallokai
+kaichen|242,121,536,364|Die Busfahrt ist langweilig.//Wann kommt er endlich an...
+kaichen|5,237,235,435|>freiheit
+busparkplatz|0,0,200,200|<
+busparkplatz|275,62,635,361|Endstation. Alle aussteigen./Hanau (Freiheitsplatz>freiheit)
+busparkplatz|2,209,267,409|Komm wir gehen (hier>auto) lang und suchen uns ein Auto.
+auto|0,0,200,200|<
+auto|204,157,652,424|Meinst du das fährt noch?//Komm wir klettern am rechten Spiegel hoch//und schauen mal.
+auto|654,12,788,218|>autodach
+autodach|226,9,681,264|>Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
+flugzeug|0,0,200,200|<
+flugzeug|207,33,370,160|Keine (Hunde>dogs) an bord erlaubt.
+flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?
+oslo|0,0,200,200|<
+oslo|20,333,222,446|>tunnel
+oslo|231,237,475,341|>tuer
+oslo|366,105,569,251|>adlerturm
+oslo|607,3,790,445|Wollen wir mit der (Eisenbahn>eisenbahn) fahren?
+eisenbahn|0,0,200,200|<
+eisenbahn|11,282,340,396|Wie weit ist es noch nach (Berlin>berlin500)?
+eisenbahn|205,3,713,257|Iiiih.//Hier stinkt's./Zum Glück kann man das nicht durchs Internet riechen.
+eisenbahn|364,260,780,424|*uhr
+berlin500|0,0,200,200|<
+berlin500|451,6,695,424|500 km ist ganz schön weit weg.//Als wir endlich da sind, ist es (dunkel>stuttgartnacht).
+stuttgartnacht|0,0,200,200|<
+stuttgartnacht|280,144,776,434|Komm (hier lang>schatten)
+schatten|0,0,200,200|<
+schatten|205,110,449,434|Wollen wir auf die (Mauer>gruselfriedhof) klettern?
+gruselfriedhof|0,0,200,200|<
+gruselfriedhof|660,10,798,247|Oh das Gruselhaus. Da übernachten wir, und dann schauen wir/ob's was zu (essen>hanswurst) gibt?
+hanswurst|0,0,200,200|<
+hanswurst|314,130,543,418|Lecker.//Oder willst du was (einkaufen>gemuese)?
+adlerturm|0,0,200,200|<
+adlerturm|234,145,675,396|Kann man hier hochklettern?//Versuche es mal am rechten Pfosten.
+adlerturm|672,3,790,304|Hier geht's nach (oben>adler)
+adler|0,0,200,200|<
+adler|124,226,291,430|Der guckt aber streng.
+adler|209,4,475,219|Vorsicht.//Nicht runterfallen!
+adler|588,81,749,444|Ich geh lieber wieder (runter>nebelberge).
+adler|500,1,586,83|>vogel
+nebelberge|0,0,200,200|<
+nebelberge|214,126,688,423|Es wird kälter.//Schnell weiter bevor/es dunkel wird//Da ganz hinten muss es weitergehen.
+nebelberge|213,5,755,108|>gipfelkreuz
+gipfelkreuz|0,0,200,200|<
+gipfelkreuz|211,2,538,409|Meinst du hier ist ein Schatz versteckt?
 dogs|4,1,151,175|<
 dogs|157,13,405,267|*wau1
 dogs|411,72,578,323|*wau2
@@ -18,8 +65,9 @@ schneemann|452,272,626,416|Hier ist es heiss.
 schneemann|169,6,448,402|ich friere./Mir ist kalt.
 schneemann|504,7,750,250|>schreibmaschine
 vogel|8,0,265,241|<
-vogel|285,76,523,397|>schneemann
+vogel|285,76,523,397|>buntervogel
 vogel|540,17,794,412|*uhr
+buntervogel|0,0,200,200|<
 cola|7,2,263,202|<
 cola|270,2,550,414|*water
 harald|36,27,312,325|<
@@ -36,4 +84,53 @@ schreibmaschine|538,329,579,372|*../../ret
 schreibmaschine|209,301,536,397|*../../key
 schreibmaschine|276,403,515,431|*../../spc
 freiheit|4,3,320,138|<
-freiheit|53,143,728,431|Lina und Tina haben keine Lust auf Schule//Was machen sie?
+freiheit|51,141,570,363|Lina und Tina haben keine Lust auf Schule//Was machen sie?
+freiheit|592,236,791,326|Erstmal was (essen>gemuese)
+freiheit|596,335,679,405|Wollen wir mit dem (Fahrrad>fahrrad) wegfahren?
+fahrrad|0,0,200,200|<
+fahrrad|269,71,624,406|Das Fahrrad ist gut verschlossen.//Wie kommt man da ran?
+fahrrad|557,3,749,67|Hier ist der (Schlüssel>schluessel)
+gemuese|0,0,200,200|<
+gemuese|58,273,369,402|Lecker Orange!
+gemuese|522,194,791,305|vielleicht gibt's auch was zu (trinken>bier)
+gemuese|488,312,708,444|Hier gibt's auch was auch (China>ringfleisch).
+ringfleisch|0,0,200,200|<
+ringfleisch|201,85,600,245|Was soll denn das sein?
+ringfleisch|74,256,793,433|Lina schmeckt es nicht.//Viel zu scharf.
+bier|0,0,200,200|<
+bier|249,5,400,336|*wasser
+accordeon|0,0,200,200|<
+accordeon|16,204,228,400|*acc2
+accordeon|234,201,471,410|*acc1
+accordeon|474,198,739,438|*acc4
+accordeon|230,5,690,187|*acc3
+biberbaum|0,0,200,200|<
+biblis|0,0,200,200|<
+birkenhainer|0,0,200,200|<
+breuberg|0,0,200,200|<
+burg|0,0,200,200|<
+echterspfahl|0,0,200,200|<
+entenrutsche|0,0,200,200|<
+enten|0,0,200,200|<
+faltergrab|0,0,200,200|<
+fliegenpilz|0,0,200,200|<
+funkturm|0,0,200,200|<
+ganstogo|0,0,200,200|<
+geschenkverpackt|0,0,200,200|<
+inselflug|0,0,200,200|<
+kabelsalat|0,0,200,200|<
+kugelversteck|0,0,200,200|<
+kuh|0,0,200,200|<
+messuhr|0,0,200,200|<
+moorhuhn|0,0,200,200|<
+pizzamat|0,0,200,200|<
+ronald|0,0,200,200|<
+segelboote|0,0,200,200|<
+spinnennetz|0,0,200,200|<
+tuerglocke|0,0,200,200|<
+tuer|0,0,200,200|<
+tunnel|0,0,200,200|<
+turm|0,0,200,200|<
+weinberg|0,0,200,200|<
+wolfsgebiet|0,0,200,200|<
+wuppertal|0,0,200,200|<

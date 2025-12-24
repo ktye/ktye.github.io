@@ -29,11 +29,11 @@ let showpage=_=>{ // >(img) *(audio) @(full-link) else(text)
    })
    p+=`<area shape="default" href="#${ch}">`
    map.innerHTML=p;
-//   document.body.requestFullscreen()
+   document.body.requestFullscreen()
    }})}
 
 let showtext=t=>{if(!t)return txt.onclick();txt.style.display="block"; 
- txt.textContent=t.replaceAll("/","\n");console.log("txthtml",txt.innerHTML)
+ txt.textContent=t.replaceAll("/","\n");
  let h=txt.innerHTML,i=0,r="";
  while(i=h.indexOf("("),i>=0){
 	 r+=h.slice(0,i)
@@ -43,13 +43,12 @@ let showtext=t=>{if(!t)return txt.onclick();txt.style.display="block";
 	 h=h.slice(4+i)
 	 i=h.indexOf(")")
 	 let href="#"+h.slice(0,i)
-	 console.log("a",a,"href",href)
 	 r+=`<a href="${href}">${a}</a>`
 	 h=h.slice(1+i)
  }
  r+=h
  txt.innerHTML=r
-
+ if(Math.random()>0.97)window.location.href="calc.html"
  //txt.innerHTML="";t=t.split("/").forEach(t=>{let s=document.createElement("span");s.textContent=t;txt.appendChild(s)})
 }
 txt.onclick=()=> txt.style.display="none"
