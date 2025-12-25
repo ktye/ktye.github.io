@@ -28,10 +28,10 @@ let showpage=_=>{ // >(img) *(audio) @(full-link) else(text)
    })
    p+=`<area shape="default" href="#${ch}">`
    map.innerHTML=p;
-   document.body.requestFullscreen()
    }})}
 
-let showtext=t=>{if(!t)return txt.onclick();txt.style.display="block"; 
+let showtext=t=>{if(t=="fullscreen"){t="";document.body.requestFullscreen()}
+	if(!t)return txt.onclick();txt.style.display="block"; 
  txt.textContent=t.replaceAll("/","\n");
  let h=txt.innerHTML,i=0,r="";
  while(i=h.indexOf("("),i>=0){
