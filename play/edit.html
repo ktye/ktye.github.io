@@ -5,8 +5,7 @@ canvas{background:grey}
 textarea{width:100%}
 </style></head><body>
 
-<select id="chs" onchange="(ch=this.value,draw())"></select>
-<select id="unr" onchange="(ch=this.value,draw())"></select><br/>
+<select id="chs" onchange="(ch=this.value,draw(0))"></select><br/>
 <canvas id="cnv" width="800" height="450"></canvas><br/>
 <input type="text" id="re"></input>
 <button onclick="add()">add</button>
@@ -15,28 +14,29 @@ textarea{width:100%}
 
 <script>
 let ctx=cnv.getContext("2d");
-let ch="linatina"
+let ch=location.hash.slice(1)?location.hash.slice(1):"linatina"
 let im
 
-if(ch!=""){im="m/"+ch+".webp";let img=new Image();img.onload=_=>{im=img;draw()};img.src=im;document.title=ch;
+if(ch!=""){im="m/"+ch+".webp";let img=new Image();img.onload=_=>{im=img;draw(0)};img.src=im;document.title=ch;
 }else alert("missing hash");
 
 
 
 let X=0,Y=0;
 cnv.onmousedown=e=>{X=e.offsetX;Y=e.offsetY;}
-cnv.onmouseup=e=>{let x=e.offsetX;y=e.offsetY;console.log("up",X,Y); if(x-X>10&&y-Y>10)rect(X,Y,x,y); }
-let rect=(x,y,xx,yy)=>{ctx.strokeStyle="red";ctx.strokeRect(x,y,xx-x,yy-y);re.value=[x,y,xx,yy].join(" ")};
+cnv.onmouseup=e=>{let x=e.offsetX;y=e.offsetY;console.log("up",X,Y); if(x-X>10&&y-Y>10){addrect(X,Y,x,y);add()} }
+let addrect=(x,y,xx,yy)=>{let w=xx-x,h=yy-y;re.value=[x,y,xx,yy].join(" "); };
 
 let add=_=>{ let r=re.value.split(" "); clip(ch+"|"+r.join(",")+"|"); out.value+=ch+"|"+r+"|\n"; drawrect(r,out.value.split("\n").length-1) }
 
 let uniq=x=>x.filter((x,i,a)=>a.indexOf(x)==i)
-let draw=_=>{
- fetch("story").then(r=>r.text()).then(r=>{
+let draw=q=>{
+ fetch("story").then(r=>r.text()).then(r=>{ 
 	let all=uniq(r.split("\n").map(x=>x.split("|")[0]))
-	chs.innerHTML=all.map(x=>`<option>${x}</option>`).join("")
-	let u=all.filter(x=>r.indexOf(">"+x)<0)
-	unr.innerHTML=u.map(x=>`<option>${x}</option>`).join("")
+	if(chs.innerHTML=="")chs.innerHTML=all.map(x=>`<option>${x}</option>`).join("");
+	chs.value=ch;
+	let u=all.filter(x=>r.indexOf(">"+x)<0);
+	console.log("unreach:",u.join(" "));
  	im=new Image();im.onload=_=>{
 		ctx.drawImage(im,0,0); 
 		let a=r.split("\n").filter(x=>x.startsWith(ch+"|"))
@@ -51,7 +51,12 @@ let draw=_=>{
 }
 let drawrect=(r,i)=>{
 	let[x,y,xx,yy]=r.map(Number);
-	ctx.strokeStyle="green";ctx.strokeRect(x,y,xx-x,yy-y)
+	ctx.strokeWidth=2;
+	ctx.strokeStyle="green";ctx.strokeRect(x-0.5,y-0.5,xx-x,yy-y)
+	ctx.strokeStyle="white";ctx.strokeRect(x-4.5,y-4.5,8+xx-x,8+yy-y)
+	ctx.fillStyle="white"
+	ctx.fillRect(x,y,40,30)
+	ctx.fillStyle="black"
 	ctx.font="20px monospace";ctx.fillText(i,x+5,y+25)
 }
 

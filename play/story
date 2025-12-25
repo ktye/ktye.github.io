@@ -4,133 +4,198 @@ bus|490,154,560,250|>harald
 bus|193,164,303,258|>linatina
 bus|108,190,186,261|>cola
 bus|2,179,108,354|>busparkplatz
-bus|42,33,723,124|Geh zur 53 und suche den Schatz/solange du kannst.
-bus|737,67,782,108|@mandel.html
-bus|134,273,619,431|>kaichen
-kaichen|0,0,200,200|<
+bus|42,33,623,124|Geh zur 53 und suche den Schatz/solange du kannst.
+bus|673,35,796,130|@mandel.html
+kaichen|0,0,200,200|>fahrrad
 kaichen|541,72,750,253|*hallokai
-kaichen|242,121,536,364|Die Busfahrt ist langweilig.//Wann kommt er endlich an...
-kaichen|5,237,235,435|>freiheit
-busparkplatz|0,0,200,200|<
+kaichen|242,121,536,364|weiter geht's
+kaichen|5,237,235,435|>birkenhainer
+busparkplatz|0,0,200,200|>bus
 busparkplatz|275,62,635,361|Endstation. Alle aussteigen./Hanau (Freiheitsplatz>freiheit)
 busparkplatz|2,209,267,409|Komm wir gehen (hier>auto) lang und suchen uns ein Auto.
-auto|0,0,200,200|<
+auto|0,0,200,200|>busparkplatz
 auto|204,157,652,424|Meinst du das fährt noch?//Komm wir klettern am rechten Spiegel hoch//und schauen mal.
 auto|654,12,788,218|>autodach
 autodach|226,9,681,264|>Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
-flugzeug|0,0,200,200|<
+flugzeug|0,0,200,200|>autodach
 flugzeug|207,33,370,160|Keine (Hunde>dogs) an bord erlaubt.
 flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?
-oslo|0,0,200,200|<
+flugzeug|8,210,372,431|Komm wir (fliegen>inselflug) auf eine Insel.
+oslo|0,0,200,200|>flugzeug
 oslo|20,333,222,446|>tunnel
 oslo|231,237,475,341|>tuer
 oslo|366,105,569,251|>adlerturm
 oslo|607,3,790,445|Wollen wir mit der (Eisenbahn>eisenbahn) fahren?
-eisenbahn|0,0,200,200|<
+eisenbahn|0,0,200,200|>oslo
 eisenbahn|11,282,340,396|Wie weit ist es noch nach (Berlin>berlin500)?
 eisenbahn|205,3,713,257|Iiiih.//Hier stinkt's./Zum Glück kann man das nicht durchs Internet riechen.
-eisenbahn|364,260,780,424|*uhr
-berlin500|0,0,200,200|<
+eisenbahn|364,260,780,424|Komm wir fahren nach (Wuppertal>wuppertal).
+berlin500|0,0,200,200|>eisenbahn
 berlin500|451,6,695,424|500 km ist ganz schön weit weg.//Als wir endlich da sind, ist es (dunkel>stuttgartnacht).
-stuttgartnacht|0,0,200,200|<
+berlin500|215,5,446,167|>biblis
+stuttgartnacht|0,0,200,200|>berlin500
 stuttgartnacht|280,144,776,434|Komm (hier lang>schatten)
-schatten|0,0,200,200|<
+schatten|0,0,200,200|>stuttgartnacht
 schatten|205,110,449,434|Wollen wir auf die (Mauer>gruselfriedhof) klettern?
-gruselfriedhof|0,0,200,200|<
-gruselfriedhof|660,10,798,247|Oh das Gruselhaus. Da übernachten wir, und dann schauen wir/ob's was zu (essen>hanswurst) gibt?
-hanswurst|0,0,200,200|<
+gruselfriedhof|0,0,200,200|>schatten
+gruselfriedhof|660,10,798,247|Oh das Gruselhaus. Da übernachten wir,/und dann schauen wir/ob's was zu (essen>hanswurst) gibt?
+hanswurst|0,0,200,200|>gruselfriedhof
 hanswurst|314,130,543,418|Lecker.//Oder willst du was (einkaufen>gemuese)?
-adlerturm|0,0,200,200|<
+hanswurst|369,4,672,139|(Gruselhaus>geschenkverpackt).
+hanswurst|676,32,791,386|>ringfleisch
+adlerturm|0,0,200,200|>oslo
 adlerturm|234,145,675,396|Kann man hier hochklettern?//Versuche es mal am rechten Pfosten.
 adlerturm|672,3,790,304|Hier geht's nach (oben>adler)
-adler|0,0,200,200|<
+adler|0,0,200,200|>adlerturm
 adler|124,226,291,430|Der guckt aber streng.
 adler|209,4,475,219|Vorsicht.//Nicht runterfallen!
 adler|588,81,749,444|Ich geh lieber wieder (runter>nebelberge).
 adler|500,1,586,83|>vogel
-nebelberge|0,0,200,200|<
+nebelberge|0,0,200,200|>adler
 nebelberge|214,126,688,423|Es wird kälter.//Schnell weiter bevor/es dunkel wird//Da ganz hinten muss es weitergehen.
 nebelberge|213,5,755,108|>gipfelkreuz
-gipfelkreuz|0,0,200,200|<
+gipfelkreuz|0,0,200,200|>nebelberge
 gipfelkreuz|211,2,538,409|Meinst du hier ist ein Schatz versteckt?
-dogs|4,1,151,175|<
+gipfelkreuz|554,141,793,282|Ich hab hier eine (Schreibmaschine>schreibmaschine) gefunden.
+dogs|4,1,151,175|>harald
 dogs|157,13,405,267|*wau1
 dogs|411,72,578,323|*wau2
 dogs|566,31,781,368|*wau3
 dogs|1,186,209,442|@chess.html
 dogs|555,370,769,440|>schneemann
 dogs|210,276,443,441|>vogel
-schneemann|39,0,163,157|<
+schneemann|39,0,163,157|>dogs
 schneemann|452,272,626,416|Hier ist es heiss.
 schneemann|169,6,448,402|ich friere./Mir ist kalt.
 schneemann|504,7,750,250|>schreibmaschine
-vogel|8,0,265,241|<
-vogel|285,76,523,397|>buntervogel
-vogel|540,17,794,412|*uhr
-buntervogel|0,0,200,200|<
-cola|7,2,263,202|<
-cola|270,2,550,414|*water
-harald|36,27,312,325|<
+vogel|8,0,265,241|>dogs
+vogel|285,76,523,397|*amsel
+vogel|260,295,547,437|>buntervogel
+vogel|540,17,794,412|>moorhuhn
+buntervogel|0,0,200,200|>vogel
+buntervogel|245,18,648,228|*vogel3
+buntervogel|657,11,789,407|*vogel4
+cola|7,2,263,202|>bus
+cola|270,2,550,414|*wasser
+harald|36,27,312,325|>bus
 harald|325,12,486,182|Hallo, mein Name ist Töpfer./Harald Töpfer um genau zu sein./Ich kann zaubern./Ich spiele gerne (Schach>xx).
-harald|491,183,794,434|>dogs
-xx|0,0,273,254|<
+harald|491,183,794,434|Lina und Tina beachten mit gar nicht.
+harald|293,334,487,438|Wo ist eigentlich/Franz Lunseberg?/Der ist so gut in Mathe.
+harald|499,4,790,166|@mandel.html
+harald|33,331,271,425|Wollen wir Karten spielen?/🃑 🃙 🃚 🃛 🃝 🂡 🂢 🂪
+xx|0,0,273,254|>harald
 xx|288,157,528,320|Wenn du Schach spielen willst,/schaue im Wasser.
 xx|8,277,281,389|@chess.html
 xx|290,322,535,384|@chess.html
 xx|290,322,535,384|@chess.html
 xx|529,272,797,411|@chess.html
-schreibmaschine|5,4,362,230|<
+schreibmaschine|5,4,362,230|>schneemann
 schreibmaschine|538,329,579,372|*../../ret
 schreibmaschine|209,301,536,397|*../../key
 schreibmaschine|276,403,515,431|*../../spc
-freiheit|4,3,320,138|<
-freiheit|51,141,570,363|Lina und Tina haben keine Lust auf Schule//Was machen sie?
+schreibmaschine|372,5,758,236|>accordeon
+freiheit|4,3,320,138|>bus
+freiheit|52,137,574,302|Lina und Tina haben keine Lust auf Schule//Was machen sie?//Vielleicht wollen sie mit dem Fahrrad weg.
 freiheit|592,236,791,326|Erstmal was (essen>gemuese)
 freiheit|596,335,679,405|Wollen wir mit dem (Fahrrad>fahrrad) wegfahren?
-fahrrad|0,0,200,200|<
+freiheit|453,305,554,414|Was macht der Mann da?/Wo geht er hin?
+fahrrad|0,0,200,200|>freiheit
 fahrrad|269,71,624,406|Das Fahrrad ist gut verschlossen.//Wie kommt man da ran?
-fahrrad|557,3,749,67|Hier ist der (Schlüssel>schluessel)
-gemuese|0,0,200,200|<
+fahrrad|557,3,749,67|Ok hier ist der Schluessel, los geht die (Tour>kaichen).
+gemuese|0,0,200,200|>freiheit
 gemuese|58,273,369,402|Lecker Orange!
 gemuese|522,194,791,305|vielleicht gibt's auch was zu (trinken>bier)
 gemuese|488,312,708,444|Hier gibt's auch was auch (China>ringfleisch).
-ringfleisch|0,0,200,200|<
+ringfleisch|0,0,200,200|>gemuese
 ringfleisch|201,85,600,245|Was soll denn das sein?
 ringfleisch|74,256,793,433|Lina schmeckt es nicht.//Viel zu scharf.
-bier|0,0,200,200|<
+bier|0,0,200,200|>gemuese
 bier|249,5,400,336|*wasser
-accordeon|0,0,200,200|<
+bier|408,5,550,384|*plopp
+bier|560,6,783,445|*plopp2
+accordeon|0,0,200,200|>schreibmaschine
 accordeon|16,204,228,400|*acc2
 accordeon|234,201,471,410|*acc1
 accordeon|474,198,739,438|*acc4
 accordeon|230,5,690,187|*acc3
-biberbaum|0,0,200,200|<
-biblis|0,0,200,200|<
-birkenhainer|0,0,200,200|<
-breuberg|0,0,200,200|<
-burg|0,0,200,200|<
-echterspfahl|0,0,200,200|<
-entenrutsche|0,0,200,200|<
-enten|0,0,200,200|<
-faltergrab|0,0,200,200|<
-fliegenpilz|0,0,200,200|<
-funkturm|0,0,200,200|<
-ganstogo|0,0,200,200|<
-geschenkverpackt|0,0,200,200|<
-inselflug|0,0,200,200|<
-kabelsalat|0,0,200,200|<
+birkenhainer|0,0,200,200|>kaichen
+birkenhainer|526,5,761,405|>biberbaum
+biberbaum|9,207,290,421|>birkenhainer
+biberbaum|0,0,200,200|>berlin500
+biberbaum|289,106,657,370|Angebiebert!
+biblis|0,0,200,200|>berlin500
+biblis|266,130,662,301|Schau mal das schöne Atomkraftwerk./Das schauen wir uns näher an!
+biblis|558,306,793,440|>breuberg
+breuberg|0,0,200,200|>biblis
+breuberg|219,106,675,401|Komm wir klettern auf den Turm.
+breuberg|374,4,626,99|>ronald
+breuberg|682,11,796,278|>burg
+burg|0,0,200,200|>breuberg
+burg|222,28,672,430|*plopp
+ronald|0,0,200,200|>breuberg
+ronald|249,59,632,339|Hilfe, was ist das?//Der macht nix./Der ist doch nur aus Holz!
+ronald|651,115,782,438|>echterspfahl
+ronald|9,210,246,430|Komm wir gehen lieber (weiter>entenrusche).Weg von der Burg.
+echterspfahl|0,0,200,200|>ronald
+echterspfahl|27,219,549,439|Ich hab durst./Wollen wir was (trinken>bier)?
+echterspfahl|206,1,448,216|Hier steht die Saage vom Echterspfahl./Und den 3 Ringen.
+echterspfahl|550,178,791,408|Hier waren die Pferde angebunden/von den Räuberbrüdern.
+echterspfahl|550,0,774,165|Das ist jetzt das Wappen von Aschaffenburg./3 Ringe.
+entenrutsche|0,0,200,200|>ronald
+entenrutsche|463,146,741,312|>enten
+entenrutsche|207,49,427,395|Ich hab Hunger.//Ich hab eine (gefangen>ganstogo)/Lecker.//Oder lieber eine (Pizza>pizzamat)?
+enten|0,0,200,200|>entenrutsche
+enten|44,204,222,313|*eule
+enten|264,169,496,313|*vogel
+enten|507,132,673,292|*vogel2
+enten|676,19,795,172|>moorhuhn
+ganstogo|0,0,200,200|>entenrutsche
+ganstogo|215,219,660,447|Gans-Togo?/Was soll das denn sein.//Aber es gibt was zu (trinken>bier)/Oder (Wein>weinberg)
+ganstogo|2,208,204,439|Hier können wir das (Fahrrad>fahrrad) abschliessen.
+ganstogo|253,3,686,215|Wollen wir eine leckere Pilzsuppe essen?//Komm wir suchen uns (welche>fliegenpilz)
+ganstogo|669,226,791,444|Gibt's auf der Karte keine (Kuh>kuh)?
+fliegenpilz|0,0,200,200|>ganstogo
+fliegenpilz|303,2,616,172|Hier im Wald ist es (gruselig>faltergrab)
+faltergrab|0,0,200,200|>fliegenpilz
+faltergrab|212,69,689,409|Der Mann war sehr fleissig./Aber es hat ihm nichts genützt//Schnell raus aus dem Wald/Hier ist ein (Turm>funkturm).
+funkturm|0,0,200,200|>turm
+funkturm|22,223,257,418|Eine Menge (Kabel>kabelsalat)
+funkturm|600,160,776,377|Wieviel (Uhr>messuhr) ist es?
+funkturm|267,125,489,436|Schnell wieder (runter>turm)
+turm|0,0,200,200|>funkturm
+turm|311,255,463,431|Komm wir klettern (hoch>funkturm)
+turm|293,12,480,248|Hier ist eine schöne (Aussicht>nebelberge).
+messuhr|0,0,200,200|>funkturm
+messuhr|223,23,697,420|*uhr
+kabelsalat|0,0,200,200|>funkturm
+kuh|0,0,200,200|>ganstogo
+kuh|212,7,759,391|*muh
+moorhuhn|0,0,200,200|>enten
+moorhuhn|309,7,558,364|>buntervogel
+moorhuhn|568,20,780,335|*amsel
+inselflug|0,0,200,200|>flugzeug
+inselflug|313,3,786,233|Schau mal hier (runter>segelboote).
 kugelversteck|0,0,200,200|<
-kuh|0,0,200,200|<
-messuhr|0,0,200,200|<
-moorhuhn|0,0,200,200|<
-pizzamat|0,0,200,200|<
-ronald|0,0,200,200|<
-segelboote|0,0,200,200|<
+geschenkverpackt|0,0,200,200|>hanswurst
+geschenkverpackt|238,9,502,433|Wer hat hier Geburtstag?//(Klingel>tuerglocke) mal.
+segelboote|0,0,200,200|>inselflug
+segelboote|228,9,460,311|Hier gibt's viele Segelboote.
+pizzamat|0,0,200,200|>entenrutsche
+pizzamat|219,65,543,430|Schau mal, hier gibt's Pizza/direkt aus dem Automaten./In nur 3 Minuten fertig!
+pizzamat|557,156,737,438|Was ist das für eine dunkle (Gestalt>schatten)?
+wuppertal|0,0,200,200|>eisenbahn
+wuppertal|572,40,788,285|>hanswurst
+wuppertal|237,290,662,431|Schnell über die (Wupper>entenrutsche).
 spinnennetz|0,0,200,200|<
-tuerglocke|0,0,200,200|<
-tuer|0,0,200,200|<
+tuerglocke|0,0,200,200|>geschenkverpackt
+tuerglocke|335,179,492,400|*klingel
+tuerglocke|313,4,490,168|>tuer
+tuer|0,0,200,200|<tuerglocke
+tuer|285,12,589,365|>turm
 tunnel|0,0,200,200|<
-turm|0,0,200,200|<
-weinberg|0,0,200,200|<
-wolfsgebiet|0,0,200,200|<
-wuppertal|0,0,200,200|<
+weinberg|143,65,506,398|Hier geht's (lang>wolfsgebiet).
+weinberg|224,128,448,373|
+wolfsgebiet|0,0,200,200|>weinberg
+wolfsgebiet|199,53,364,310|Hilfe!!
+wolfsgebiet|9,316,493,434|Hilfe, dahinten kommt ein (Wolfsrudel>dogs)
+wolfsgebiet|511,98,785,371|>adlerturm

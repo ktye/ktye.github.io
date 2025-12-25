@@ -12,7 +12,6 @@ img{width:min(100vw,16 / 9 * 100vh)}
 <script>
 
 let ch
-let back="#linatina"
 let showpage=_=>{ // >(img) *(audio) @(full-link) else(text) 
  fetch("story").then(r=>r.text()).then(r=>{
   ch=document.location.hash.slice(1);ch=ch?ch.split(":")[0]:"linatina";
@@ -24,7 +23,7 @@ let showpage=_=>{ // >(img) *(audio) @(full-link) else(text)
   img.onload=_=>{let sc=x=>(Math.floor(x*img.width/800))
    r.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|")).forEach(x=>{let a=x[2];
     
-    let h=a.startsWith("@")?a.slice(1):a.startsWith(">")?"#"+a.slice(1):a.startsWith("<")?back:"#"+ch+(a?":"+encodeURIComponent(a):"")
+    let h=a.startsWith("@")?a.slice(1):a.startsWith(">")?"#"+a.slice(1):"#"+ch+(a?":"+encodeURIComponent(a):"")
     p+=`<area shape="rect" coords="${x[1].split(",").map(x=>sc(+x))}" href="${h}" />`
    })
    p+=`<area shape="default" href="#${ch}">`
@@ -61,9 +60,21 @@ let play=x=>{if(typeof au=='undefined')au=new AudioContext();
 window.onhashchange=e=>{
  let x=decodeURIComponent(new URL(e.newURL).hash).slice(1);
  let c=x.split(":")[0],s=x.slice(1+c.length)
- ch!=c?(back="#"+ch,ch=c,showpage()):s.startsWith("*")?play(s.slice(1)):showtext(s)
+ ch!=c?(ch=c,showpage()):s.startsWith("*")?play(s.slice(1)):showtext(s)
 }
-
 showpage()
 
+/*
+let xt=0,yt=0
+let xytouch=(e, r)=>(r=img.getBoundingClientRect(),[e.touches[0].clientX-window.pageXOffset-r.left,e.touches[0].clientY-window.pageYOffset-r.top]);
+img.ontouchstart=e=>{xt=0,yt=0;if(1==e.touches.length){[xt,yt]=xytouch(e)}}
+img.ontouchend=e=>{if(1==e.touches.length){
+		let[x,y]=xytouch(e);x-=xt;y-=yt;
+		if((Math.abs(xt-x)<20)&&Math.abs(yt-x)<20){
+			//?
+		}
+	}
+	xt=0;yt=0
+}
+*/
 </script></body></html>
