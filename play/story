@@ -19,7 +19,7 @@ auto|204,157,652,424|Meinst du das fährt noch?//Komm wir klettern am rechten Sp
 auto|654,12,788,218|>autodach
 auto|5,261,195,423|*jaund
 autodach|226,9,681,264|Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
-flugzeug|0,0,200,200|>autodach
+flugzeug|0,0,200,200|Komm wir fliegen nach (Korea>korea1)
 flugzeug|207,33,370,160|Keine (Hunde>dogs) an bord erlaubt.
 flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?
 flugzeug|8,210,372,431|Komm wir (fliegen>inselflug) auf eine Insel.
@@ -49,6 +49,7 @@ hanswurst|676,32,791,386|>ringfleisch
 adlerturm|0,0,200,200|>oslo
 adlerturm|234,145,675,396|Kann man hier hochklettern?//Versuche es mal am rechten Pfosten.
 adlerturm|672,3,790,304|Hier geht's nach (oben>adler)
+adlerturm|234,3,644,130|Wollen wir zum (Flughafen>flugzeug)?//Oder suchen wir da unten einen (Bahnhof>eisenbahn)?
 adler|0,0,200,200|>adlerturm
 adler|124,226,291,430|Der guckt aber streng.
 adler|209,4,475,219|Vorsicht.//Nicht runterfallen!
@@ -83,7 +84,7 @@ cola|7,2,263,202|>bus
 cola|270,2,550,414|*wasser
 harald|36,27,312,325|>bus
 harald|325,12,486,182|Hallo, mein Name ist Töpfer./Harald Töpfer um genau zu sein./Ich kann zaubern./Ich spiele gerne (Schach>xx).
-harald|491,183,794,434|Lina und Tina beachten mit gar nicht.
+harald|491,183,794,434|Lina und Tina beachten mich gar nicht.
 harald|293,334,487,438|Wo ist eigentlich/Franz Lunseberg?/Der ist so gut in Mathe.
 harald|499,4,790,166|@mandel.html
 harald|33,331,271,425|Wollen wir Karten spielen?/🃑 🃙 🃚 🃛 🃝 🂡 🂢 🂪
@@ -102,7 +103,7 @@ freiheit|4,3,320,138|>bus
 freiheit|52,137,574,302|Lina und Tina haben keine Lust auf Schule//Was machen sie?//Vielleicht wollen sie mit dem Fahrrad weg.
 freiheit|592,236,791,326|Erstmal was (essen>gemuese)
 freiheit|596,335,679,405|Wollen wir mit dem (Fahrrad>fahrrad) wegfahren?
-freiheit|453,305,554,414|Was macht der Mann da?/Wo geht er hin?
+freiheit|453,305,554,414|Was macht der Mann da?/Wo geht er hin/Wollen wir mit ihm auf eine (Wanderung>wanderer)?
 fahrrad|0,0,200,200|>freiheit
 fahrrad|269,71,624,406|Das Fahrrad ist gut verschlossen.//Wie kommt man da ran?
 fahrrad|557,3,749,67|Ok hier ist der Schluessel, los geht die (Tour>kaichen).
@@ -110,6 +111,7 @@ gemuese|0,0,200,200|>freiheit
 gemuese|58,273,369,402|Lecker Orange!
 gemuese|522,194,791,305|vielleicht gibt's auch was zu (trinken>bier)
 gemuese|488,312,708,444|Hier gibt's auch was auch (China>ringfleisch).
+gemuese|209,26,507,269|Hast du Geld dabei?/Wie sollen wir bezahlen?//Ja (klar>scheine).
 ringfleisch|0,0,200,200|>gemuese
 ringfleisch|201,85,600,245|Was soll denn das sein?
 ringfleisch|74,256,793,433|Lina schmeckt es nicht.//Viel zu scharf.
@@ -184,6 +186,7 @@ geschenkverpackt|238,9,502,433|Wer hat hier Geburtstag?//(Klingel>tuerglocke) ma
 segelboote|0,0,200,200|>inselflug
 segelboote|228,9,460,311|Hier gibt's viele Segelboote.
 segelboote|501,199,795,432|Hier suchen wir uns ein (Kanu>kanu)
+segelboote|469,6,786,182|Hier ist eine (Schildkröte>schildkroete)
 pizzamat|0,0,200,200|>entenrutsche
 pizzamat|219,65,543,430|Schau mal, hier gibt's Pizza/direkt aus dem Automaten./In nur 3 Minuten fertig!
 pizzamat|557,156,737,438|Was ist das für eine dunkle (Gestalt>schatten)?
@@ -195,28 +198,46 @@ tuerglocke|0,0,200,200|>geschenkverpackt
 tuerglocke|335,179,492,400|*klingel
 tuerglocke|313,4,490,168|>tuer
 tuer|0,0,200,200|>tuerglocke
-tuer|285,12,589,365|>turm
-weinberg|143,65,506,398|Hier geht's (lang>wolfsgebiet).
-weinberg|224,128,448,373|
+tuer|278,5,535,278|Hier ist ein (Schloss>schloss) dran.//Ich krieg die Tür nicht auf.
+tuer|257,281,577,437|*klingel
+schloss|16,142,390,429|Ach der Schlüssel steckt./Dann ist es kein Problem.
+schloss|394,3,685,319|Was ist hinter der Tür (versteckt>schmuck)?
+weinberg|428,117,777,408|Lecker (Weintrauben>weintrauben)/(Trinke>bier) etwas oder geh den Weg entlang.
+weinberg|227,124,381,275|>wolfsgebiet
+weinberg|6,51,207,386|>schmetterling2
+schmetterling2|0,0,180,180|>weinberg
+schmetterling2|201,7,446,178|*amsel
+schmetterling2|82,210,594,426|Was ist das für eine Blüte?
+schmetterling2|611,239,794,444|>blumen
+blumen|7,4,328,110|>weinberg
+blumen|462,85,793,365|Schöne Blumen!
+blumen|3,123,387,356|>blumen2
+blumen2|0,0,200,200|>weinberg
+blumen2|265,146,597,423|*tama1
+blumen2|3,225,251,425|*amsel
+blumen2|623,134,791,405|*vogel2
 wolfsgebiet|0,0,200,200|>weinberg
 wolfsgebiet|199,53,364,310|Hilfe!!
 wolfsgebiet|9,316,493,434|Hilfe, dahinten kommt ein (Wolfsrudel>dogs)
 wolfsgebiet|511,98,785,371|>adlerturm
+wolfsgebiet|370,45,495,302|>adlerturm
 gold|0,0,200,200|>gipfelkreuz
 kugelversteck|0,0,200,200|<
 tunnel|0,0,200,200|<
 tunnel|209,1,584,162|*wau1
 tunnel|601,3,795,303|*vogel
 tunnel|219,170,558,425|Komm wir gehen durch den (Tunnel>kanu)/da wartet bestimmt ein Abenteuer.
-kanu|67,74,657,390|Wir nehmen das Boot und/paddeln den Fluss entlang.
-kanu|658,9,793,414|>kanus
+kanu|67,74,557,390|Wir nehmen das Boot und/paddeln den Fluss entlang.
+kanu|565,9,793,414|>kanus
 kanus|206,112,621,411|lass uns hier anlegen
 kanus|626,7,797,420|Hier quakt ein (Frosch>frosch)
+kanus|8,6,200,403|Hier quakt auch ein (Frosch>frosch)
 frosch|130,84,556,393|Der quakt ja gar nicht mehr!
 frosch|563,20,790,413|>peruaner
 peruaner|0,0,200,200|>frosch
 peruaner|390,1,635,183|>papagei
 peruaner|172,164,459,409|Die Frau hat einen Goldschatz umhängen./Hoffentlich finden wir auch noch einen./Das gehört sich so,/für ein vernünftiges Abenteuer.
+peruaner|465,190,794,439|>schmetterling2
 papagei|246,10,576,330|>herzvogel
 herzvogel|0,0,200,200|>papagei
 herzvogel|170,261,334,444|Hier hängt schon mal ein Schatz./Der ist uns aber nicht gross genug.
@@ -228,3 +249,43 @@ meise|398,143,692,255|Morgen müssen wir wieder in die (Schule>bus)
 meise|512,268,791,444|Ich hab einen (Diamant>diamant) gefunden!
 diamant|0,0,200,200|>meise
 diamant|218,176,661,424|Oh wie schön der leuchtet//Den nehmen wir mit.
+wanderer|0,0,200,200|>freiheit
+wanderer|226,215,585,433|Wir stürzen uns in ein Wanderabenteuer./Wir gehen den Weg entlang.
+wanderer|211,3,585,197|>weinberg
+korea1|7,34,308,405|*wind
+korea1|545,26,790,419|*wind
+korea1|318,8,533,420|Toll ist es hier in Korea.//Wir rennen die (Strasse>korea2) entlang.
+korea2||
+korea2|15,44,395,348|Ich glaub hier gibt's Vampire.//Jetzt bräuchte ich mein Vampier-Detektor Bausatz.
+korea2|408,249,592,433|Schaum mal das alte (Auto>auto).
+korea2|400,3,791,235|Ich hab Karten für ein tolles (Konzert>konzert).
+konzert||Ach ist doch nicht toll, findet Lina.//Zu laut./Und ich hab keinen Light-stick dabei.
+konzert|7,5,243,322|Nach dem Konzert geht's wieder in die (Stadt>korea4).
+korea4||
+korea4|9,206,306,409|Ich hab Hunger, lass uns in ein (Restaurant>ringfleisch) gehen.
+korea4|5,1,309,194|vogel3
+korea4|320,6,712,429|Hier steht, es geht zum (Raketenflugplatz>raketenstart)
+raketenstart|151,237,648,435|Toll sieht die Erde aus von hier oben./Ganz klein.
+raketenstart|38,12,750,233|Wir fliegen in die (Sterne>rakete).
+rakete|309,10,552,443|Alle Anschnallen es geht mit Höchstgeschwindigkeit nach oben.
+rakete|562,34,793,426|Hilfe wir stürzen ab./Jetzt geht's ins (Höllenfeuer>hoellenfeuer)/so heiss ist mir.
+hoellenfeuer|62,96,534,421|>ufo
+ufo|213,36,563,431|Die Rakete hat sich wieder gefangen und wir sind abgekühlt.//Aber hier gibt es Ufos./Schau auf die (Uhr>uhr2)
+ufo|578,56,797,432|Wir landen wieder in (Korea>korea3) auf einem Berg.
+ufo|3,23,211,431|Wir landen in (Oslo>oslo).
+korea3|342,5,548,322|Wollen wir auf den (Turm>turm) klettern?
+korea3|559,226,788,445|Gehne wir ins (Konzert>konzert)?
+korea3|6,159,333,420|Komm wir fliegen nach (Peru>kanu).
+schildkroete|4,0,313,259|>segelboote
+schildkroete|374,5,773,245|Komm Schildi komm,/wackel mit dem Kopf!
+schmuck||Wir haben einen Goldschatz gefunden.//Morgen müssen wir wieder in die (Schule>bus).
+scheine|98,130,371,349|Das sollte reichen.
+scheine|388,159,653,384|Meinst du wir kriegen was zurück?
+scheine|318,5,661,127|Ich kaufe mir ein (Zugticket>eisenbahn)
+scheine|93,365,353,442|Hiervon kaufe ich mir etwas zu (trinken>bier)
+milch||
+uhr2||
+vase||
+teppichvogel||
+lunsenberg||
+abgucker||
