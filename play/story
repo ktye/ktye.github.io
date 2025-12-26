@@ -17,7 +17,8 @@ busparkplatz|2,209,267,409|Komm wir gehen (hier>auto) lang und suchen uns ein Au
 auto|0,0,200,200|>busparkplatz
 auto|204,157,652,424|Meinst du das fährt noch?//Komm wir klettern am rechten Spiegel hoch//und schauen mal.
 auto|654,12,788,218|>autodach
-autodach|226,9,681,264|>Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
+auto|5,261,195,423|*jaund
+autodach|226,9,681,264|Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
 flugzeug|0,0,200,200|>autodach
 flugzeug|207,33,370,160|Keine (Hunde>dogs) an bord erlaubt.
 flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?
@@ -28,12 +29,13 @@ oslo|231,237,475,341|>tuer
 oslo|366,105,569,251|>adlerturm
 oslo|607,3,790,445|Wollen wir mit der (Eisenbahn>eisenbahn) fahren?
 eisenbahn|0,0,200,200|>oslo
-eisenbahn|11,282,340,396|Wie weit ist es noch nach (Berlin>berlin500)?
+eisenbahn|11,282,340,396|Sollen wir auf den (Plan>oslo) schauen,/oder nach (Berlin>berlin500)/oder nach (Wuppertal>wuppertal) fahren?
 eisenbahn|205,3,713,257|Iiiih.//Hier stinkt's./Zum Glück kann man das nicht durchs Internet riechen.
-eisenbahn|364,260,780,424|Komm wir fahren nach (Wuppertal>wuppertal).
+eisenbahn|364,260,780,424|*kaffeemaschine
 berlin500|0,0,200,200|>eisenbahn
 berlin500|451,6,695,424|500 km ist ganz schön weit weg.//Als wir endlich da sind, ist es (dunkel>stuttgartnacht).
 berlin500|215,5,446,167|>biblis
+berlin500|702,5,795,424|Hier geht's in einen (Tunnel>tunnel)
 stuttgartnacht|0,0,200,200|>berlin500
 stuttgartnacht|280,144,776,434|Komm (hier lang>schatten)
 schatten|0,0,200,200|>stuttgartnacht
@@ -58,6 +60,7 @@ nebelberge|213,5,755,108|>gipfelkreuz
 gipfelkreuz|0,0,200,200|>nebelberge
 gipfelkreuz|211,2,538,409|Meinst du hier ist ein Schatz versteckt?
 gipfelkreuz|554,141,793,282|Ich hab hier eine (Schreibmaschine>schreibmaschine) gefunden.
+gipfelkreuz|555,293,793,441|Ich glaub ich hab einen (Goldschatz>gold) gefunden.
 dogs|4,1,151,175|>harald
 dogs|157,13,405,267|*wau1
 dogs|411,72,578,323|*wau2
@@ -176,11 +179,11 @@ moorhuhn|309,7,558,364|>buntervogel
 moorhuhn|568,20,780,335|*amsel
 inselflug|0,0,200,200|>flugzeug
 inselflug|313,3,786,233|Schau mal hier (runter>segelboote).
-kugelversteck|0,0,200,200|<
 geschenkverpackt|0,0,200,200|>hanswurst
 geschenkverpackt|238,9,502,433|Wer hat hier Geburtstag?//(Klingel>tuerglocke) mal.
 segelboote|0,0,200,200|>inselflug
 segelboote|228,9,460,311|Hier gibt's viele Segelboote.
+segelboote|501,199,795,432|Hier suchen wir uns ein (Kanu>kanu)
 pizzamat|0,0,200,200|>entenrutsche
 pizzamat|219,65,543,430|Schau mal, hier gibt's Pizza/direkt aus dem Automaten./In nur 3 Minuten fertig!
 pizzamat|557,156,737,438|Was ist das für eine dunkle (Gestalt>schatten)?
@@ -191,12 +194,37 @@ spinnennetz|0,0,200,200|<
 tuerglocke|0,0,200,200|>geschenkverpackt
 tuerglocke|335,179,492,400|*klingel
 tuerglocke|313,4,490,168|>tuer
-tuer|0,0,200,200|<tuerglocke
+tuer|0,0,200,200|>tuerglocke
 tuer|285,12,589,365|>turm
-tunnel|0,0,200,200|<
 weinberg|143,65,506,398|Hier geht's (lang>wolfsgebiet).
 weinberg|224,128,448,373|
 wolfsgebiet|0,0,200,200|>weinberg
 wolfsgebiet|199,53,364,310|Hilfe!!
 wolfsgebiet|9,316,493,434|Hilfe, dahinten kommt ein (Wolfsrudel>dogs)
 wolfsgebiet|511,98,785,371|>adlerturm
+gold|0,0,200,200|>gipfelkreuz
+kugelversteck|0,0,200,200|<
+tunnel|0,0,200,200|<
+tunnel|209,1,584,162|*wau1
+tunnel|601,3,795,303|*vogel
+tunnel|219,170,558,425|Komm wir gehen durch den (Tunnel>kanu)/da wartet bestimmt ein Abenteuer.
+kanu|67,74,657,390|Wir nehmen das Boot und/paddeln den Fluss entlang.
+kanu|658,9,793,414|>kanus
+kanus|206,112,621,411|lass uns hier anlegen
+kanus|626,7,797,420|Hier quakt ein (Frosch>frosch)
+frosch|130,84,556,393|Der quakt ja gar nicht mehr!
+frosch|563,20,790,413|>peruaner
+peruaner|0,0,200,200|>frosch
+peruaner|390,1,635,183|>papagei
+peruaner|172,164,459,409|Die Frau hat einen Goldschatz umhängen./Hoffentlich finden wir auch noch einen./Das gehört sich so,/für ein vernünftiges Abenteuer.
+papagei|246,10,576,330|>herzvogel
+herzvogel|0,0,200,200|>papagei
+herzvogel|170,261,334,444|Hier hängt schon mal ein Schatz./Der ist uns aber nicht gross genug.
+herzvogel|178,8,502,253|*amsel
+herzvogel|511,8,793,287|>meise
+meise|105,5,318,187|*tama1
+meise|103,194,379,367|*vogel3
+meise|398,143,692,255|Morgen müssen wir wieder in die (Schule>bus)
+meise|512,268,791,444|Ich hab einen (Diamant>diamant) gefunden!
+diamant|0,0,200,200|>meise
+diamant|218,176,661,424|Oh wie schön der leuchtet//Den nehmen wir mit.
