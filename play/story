@@ -7,6 +7,7 @@ bus|108,190,186,261|>cola
 bus|2,179,108,354|>busparkplatz
 bus|42,33,623,124|Geh zur 53 und suche den Schatz/solange du kannst.
 bus|673,35,796,130|@mandel.html
+bus|420,146,476,241|Mein Name ist Franz (Lunsenberg>lunsenberg).
 kaichen|0,0,200,200|>fahrrad
 kaichen|541,72,750,253|*hallokai
 kaichen|242,121,536,364|weiter geht's
@@ -202,9 +203,10 @@ tuer|278,5,535,278|Hier ist ein (Schloss>schloss) dran.//Ich krieg die Tür nich
 tuer|257,281,577,437|*klingel
 schloss|16,142,390,429|Ach der Schlüssel steckt./Dann ist es kein Problem.
 schloss|394,3,685,319|Was ist hinter der Tür (versteckt>schmuck)?
-weinberg|428,117,777,408|Lecker (Weintrauben>weintrauben)/(Trinke>bier) etwas oder geh den Weg entlang.
+weinberg|428,117,777,408|Lecker (Weintrauben>weintraube)/(Trinke>bier) etwas oder geh den Weg entlang.
 weinberg|227,124,381,275|>wolfsgebiet
 weinberg|6,51,207,386|>schmetterling2
+weintraube|0,0,400,400|>weinberg
 schmetterling2|0,0,180,180|>weinberg
 schmetterling2|201,7,446,178|*amsel
 schmetterling2|82,210,594,426|Was ist das für eine Blüte?
@@ -283,9 +285,22 @@ scheine|98,130,371,349|Das sollte reichen.
 scheine|388,159,653,384|Meinst du wir kriegen was zurück?
 scheine|318,5,661,127|Ich kaufe mir ein (Zugticket>eisenbahn)
 scheine|93,365,353,442|Hiervon kaufe ich mir etwas zu (trinken>bier)
+lunsenberg|9,1,297,88|>bus
+lunsenberg|17,100,750,415|Ich hab heute verschlafen.//Morgen schreiben wir englisch./Ich hab nix gelernt./Da muss ich von Lina (abschreiben>abgucker).
+abgucker|347,72,665,370|Oh. Lina kann ja alles./Zumindest mehr als ich.
+abgucker|53,10,332,324|>linatina
 milch||
 uhr2||
 vase||
 teppichvogel||
-lunsenberg||
-abgucker||
+feuerauge||
+adler2||
+uhr3||
+bahn1||
+bahn2||
+bahn3||
+bahn4||
+druck||
+lokomotive||
+jazz||
+exoplanet||
