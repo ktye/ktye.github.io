@@ -1,9 +1,10 @@
-linatina|75,13,353,241|fullscreen
-linatina|467,9,712,401|Und ich bin Lina//Wollen wir mit dem (Bus>bus)/losfahren?.
+linatina|71,10,395,437|fullscreenHallo/Ich bin Tina.
+linatina|467,9,712,401|fullscreenUnd ich bin Lina//Wollen wir mit dem (Bus>bus)/losfahren?.//Oder (Schlagzeug>schlagzeug) spielen?
 bus|676,146,782,252|Nur vorne einsteigen/Türen freimachen//nächste Haltestelle (Freiheitsplatz>freiheit)
 bus|490,154,560,250|>harald
 bus|193,164,303,258|>linatina
-bus|108,190,186,261|>cola
+bus|108,190,186,261|Wir trinken (Cola>cola).//Zuhause dürfen wir das nicht.
+bus|308,143,398,248|Hallo Ich bin Ayumi
 bus|2,179,108,354|>busparkplatz
 bus|42,33,623,124|Geh zur 53 und suche den Schatz/solange du kannst.
 bus|673,35,796,130|@mandel.html
@@ -31,8 +32,34 @@ oslo|366,105,569,251|>adlerturm
 oslo|607,3,790,445|Wollen wir mit der (Eisenbahn>eisenbahn) fahren?
 eisenbahn|0,0,200,200|>oslo
 eisenbahn|11,282,340,396|Sollen wir auf den (Plan>oslo) schauen,/oder nach (Berlin>berlin500)/oder nach (Wuppertal>wuppertal) fahren?
-eisenbahn|205,3,713,257|Iiiih.//Hier stinkt's./Zum Glück kann man das nicht durchs Internet riechen.
+eisenbahn|205,3,713,257|Iiiih.//Hier stinkt's./Zum Glück kann man das nicht durchs Internet riechen.//Los geht's auf die (Reise>bahn2).
 eisenbahn|364,260,780,424|*kaffeemaschine
+bahn2|34,148,337,370|Es rumpelt ziemlich.
+bahn2|341,10,613,222|*wind
+bahn2|390,238,633,433|Lina, wollen wir uns die (Lok>lokomotive) angschauen?
+lokomotive||
+lokomotive|7,131,304,425|*bumbum
+lokomotive|315,304,641,445|*kaffeemaschine
+lokomotive|332,7,618,234|>druck
+lokomotive|627,25,789,373|>bahn1
+druck|0,0,200,200|>lokomotive
+druck|281,12,689,428|*uhr
+bahn1|4,0,331,240|Weiter geht's auf grosse Fahrt.//Folge den Schienen.
+bahn1|356,118,623,298|*spuelmaschine
+bahn1|5,259,361,421|*zollstock
+bahn1|627,90,798,282|*bumbum
+bahn1|508,302,798,438|>bahn3
+bahn3|0,0,166,242|>bahn1
+bahn3|178,4,454,247|*bumbum
+bahn3|463,4,794,274|*kaffeemaschine
+bahn3|3,265,401,429|*zollstock
+bahn3|416,281,792,438|>bahn4
+bahn4|596,2,798,159|*tama1
+bahn4|6,203,253,443|*kreisel
+bahn4|319,14,615,400|Komm wir klettern hier (raus>bienen)/und springen ab.
+bienen|21,2,385,311|Hilfe hier gibt's Bienen.//Und ich bin allergisch!
+bienen|22,320,403,435|Ahh. Sie hat mich gestochen.
+bienen|416,29,785,400|Schnell (wegrennen>kuh).//Weg von hier.
 berlin500|0,0,200,200|>eisenbahn
 berlin500|451,6,695,424|500 km ist ganz schön weit weg.//Als wir endlich da sind, ist es (dunkel>stuttgartnacht).
 berlin500|215,5,446,167|>biblis
@@ -55,7 +82,11 @@ adler|0,0,200,200|>adlerturm
 adler|124,226,291,430|Der guckt aber streng.
 adler|209,4,475,219|Vorsicht.//Nicht runterfallen!
 adler|588,81,749,444|Ich geh lieber wieder (runter>nebelberge).
-adler|500,1,586,83|>vogel
+adler|500,1,586,83|>adler2
+adler2|0,0,200,200|>ader
+adler2|603,240,791,427|>vogel
+adler2|6,272,273,415|>vogel
+adler2|276,10,588,254|*eule
 nebelberge|0,0,200,200|>adler
 nebelberge|214,126,688,423|Es wird kälter.//Schnell weiter bevor/es dunkel wird//Da ganz hinten muss es weitergehen.
 nebelberge|213,5,755,108|>gipfelkreuz
@@ -100,11 +131,14 @@ schreibmaschine|538,329,579,372|*../../ret
 schreibmaschine|209,301,536,397|*../../key
 schreibmaschine|276,403,515,431|*../../spc
 schreibmaschine|372,5,758,236|>accordeon
-freiheit|4,3,320,138|>bus
+freiheit|4,3,250,138|>bus
+freiheit|258,1,571,124|Am liebsten würden sie mit dem Flugzeug auf reise gehen.//Aber wo geht's zum Flughafen?
 freiheit|52,137,574,302|Lina und Tina haben keine Lust auf Schule//Was machen sie?//Vielleicht wollen sie mit dem Fahrrad weg.
 freiheit|592,236,791,326|Erstmal was (essen>gemuese)
 freiheit|596,335,679,405|Wollen wir mit dem (Fahrrad>fahrrad) wegfahren?
 freiheit|453,305,554,414|Was macht der Mann da?/Wo geht er hin/Wollen wir mit ihm auf eine (Wanderung>wanderer)?
+freiheit|580,2,791,216|Lina und Tina gehen rüber in die Schule.//Heute schreiben sie eine (Englischarbeit>abgucker).
+freiheit|2,312,292,434|Komm wir fahren mit dem Bus zum (Bahnhof>eisenbahn).
 fahrrad|0,0,200,200|>freiheit
 fahrrad|269,71,624,406|Das Fahrrad ist gut verschlossen.//Wie kommt man da ran?
 fahrrad|557,3,749,67|Ok hier ist der Schluessel, los geht die (Tour>kaichen).
@@ -113,9 +147,12 @@ gemuese|58,273,369,402|Lecker Orange!
 gemuese|522,194,791,305|vielleicht gibt's auch was zu (trinken>bier)
 gemuese|488,312,708,444|Hier gibt's auch was auch (China>ringfleisch).
 gemuese|209,26,507,269|Hast du Geld dabei?/Wie sollen wir bezahlen?//Ja (klar>scheine).
+gemuese|514,3,785,179|Lina kauf sich einen (Obstsalat>salat)
+salat|11,4,319,224|>gemuese
+salat|487,219,785,433|Lecker Orange!
 ringfleisch|0,0,200,200|>gemuese
 ringfleisch|201,85,600,245|Was soll denn das sein?
-ringfleisch|74,256,793,433|Lina schmeckt es nicht.//Viel zu scharf.
+ringfleisch|74,256,793,433|Lina schmeckt es nicht.//Viel zu (scharf>hoellenfeuer).
 bier|0,0,200,200|>gemuese
 bier|249,5,400,336|*wasser
 bier|408,5,550,384|*plopp
@@ -163,6 +200,7 @@ ganstogo|253,3,686,215|Wollen wir eine leckere Pilzsuppe essen?//Komm wir suchen
 ganstogo|669,226,791,444|Gibt's auf der Karte keine (Kuh>kuh)?
 fliegenpilz|0,0,200,200|>ganstogo
 fliegenpilz|303,2,616,172|Hier im Wald ist es (gruselig>faltergrab)
+fliegenpilz|53,206,780,422|Lieber nicht essen./Die Pilze sehen gifit aus.//Ich hab hunter auf Pilzsuppe.
 faltergrab|0,0,200,200|>fliegenpilz
 faltergrab|212,69,689,409|Der Mann war sehr fleissig./Aber es hat ihm nichts genützt//Schnell raus aus dem Wald/Hier ist ein (Turm>funkturm).
 funkturm|0,0,200,200|>turm
@@ -175,8 +213,12 @@ turm|293,12,480,248|Hier ist eine schöne (Aussicht>nebelberge).
 messuhr|0,0,200,200|>funkturm
 messuhr|223,23,697,420|*uhr
 kabelsalat|0,0,200,200|>funkturm
-kuh|0,0,200,200|>ganstogo
-kuh|212,7,759,391|*muh
+kuh|0,0,200,200|*muh
+kuh|212,7,759,391|Hier steht eine Kuh.//Schnell Milch trinken./Misst, sie ist (runtergefallen>milch).
+milch|244,15,760,398|Oh nein./So tollpatschig.//Schnell (weg>kuh2),/soll ein anderer aufwischen.
+kuh2|302,269,584,446|*muh
+kuh2|592,192,790,438|Achtung dahinten ist eine (Schlange>schlange)
+kuh2|220,1,580,252|Ich hab (Hunger>ganstogo).
 moorhuhn|0,0,200,200|>enten
 moorhuhn|309,7,558,364|>buntervogel
 moorhuhn|568,20,780,335|*amsel
@@ -229,9 +271,13 @@ tunnel|0,0,200,200|<
 tunnel|209,1,584,162|*wau1
 tunnel|601,3,795,303|*vogel
 tunnel|219,170,558,425|Komm wir gehen durch den (Tunnel>kanu)/da wartet bestimmt ein Abenteuer.
-kanu|67,74,557,390|Wir nehmen das Boot und/paddeln den Fluss entlang.
-kanu|565,9,793,414|>kanus
-kanus|206,112,621,411|lass uns hier anlegen
+kanu|67,19,549,333|Wir nehmen das Boot und/paddeln den Fluss entlang.
+kanu|9,333,536,439|>kanus
+kanu|561,1,792,268|>kanus
+kanu|562,274,791,442|Im Wasser ist ein (Flussdelfin>delfin).
+delfin|8,6,344,165|>kanu
+delfin|362,47,773,405|*wasser
+kanus|206,112,621,411|lass uns hier anlegen/und ins (Haus>holzhaus) gehen.
 kanus|626,7,797,420|Hier quakt ein (Frosch>frosch)
 kanus|8,6,200,403|Hier quakt auch ein (Frosch>frosch)
 frosch|130,84,556,393|Der quakt ja gar nicht mehr!
@@ -287,20 +333,48 @@ scheine|318,5,661,127|Ich kaufe mir ein (Zugticket>eisenbahn)
 scheine|93,365,353,442|Hiervon kaufe ich mir etwas zu (trinken>bier)
 lunsenberg|9,1,297,88|>bus
 lunsenberg|17,100,750,415|Ich hab heute verschlafen.//Morgen schreiben wir englisch./Ich hab nix gelernt./Da muss ich von Lina (abschreiben>abgucker).
-abgucker|347,72,665,370|Oh. Lina kann ja alles./Zumindest mehr als ich.
-abgucker|53,10,332,324|>linatina
-milch||
+abgucker|53,10,332,324|Lina hat nichts gelernt./Meistens war sie gar nicht da,/sondern auf Abenteuer.//Ich will lieber zum (Freiheitsplatz>freiheit).
+abgucker|343,62,659,293|Oh. Lina kann ja alles./Zumindest mehr als ich.
+abgucker|343,300,766,435|Eine Woche später gibt's die Arbeiten zurück.//(Linas>englisch2) war nicht so gut./(Tinas>englisch) genau so schlecht.
+englisch|0,0,200,200|>abgucker
+englisch|626,350,757,444|Oh je. Was wird meine Mutter sagen.//Die Lehrerin ist echt fies.
+englisch2|0,0,200,200|>abgucker
+englisch2|471,258,752,435|Die Lehrerin wollte mehr sehen./Es war ihr zu wenig.
+englisch2|105,201,365,433|Lauter Flecken.
+schlagzeug|143,260,357,448|*drum1
+schlagzeug|2,112,216,248|*drum2
+schlagzeug|46,1,295,98|*drum3
+schlagzeug|302,82,424,203|*drum4
+schlagzeug|433,98,571,224|*drum5
+schlagzeug|579,3,792,163|*drum6
+schlagzeug|502,310,699,447|*drum7
+schlagzeug|359,226,491,440|*drum8
+schlagzeug|303,0,528,66|Hier geht's (raus>linatina)
+schlagzeug|4,255,132,438|Oben an der T
+schlange|451,1,790,443|Hilfe eine Schlange.//Sie zischt.//Wo kommt die denn her?
+schlange|10,4,443,337|>exoplanet
+exoplanet|6,154,193,412|Das Männchen kackt.
+exoplanet|387,331,642,441|Ist das ein (Hund>hund2)?
+exoplanet|594,6,790,146|*vogel2
+exoplanet|587,156,788,315|*vogel4
+exoplanet|650,321,793,438|*vogel3
+exoplanet|11,2,574,145|>teppichvogel
+teppichvogel|540,6,786,164|*vogel
+teppichvogel|480,174,787,310|*vogel3
+teppichvogel|381,313,788,435|*vogel4
+teppichvogel|6,0,462,296|Hier ist dichter Wald.//Da vorne ist ein (Holzhaus>holzhaus).
+holzhaus|144,38,657,372|Erstmal ausruhen, dann fahren wir mit dem (Kanu>kanu) weiter.
 uhr2||
 vase||
-teppichvogel||
-feuerauge||
-adler2||
 uhr3||
-bahn1||
-bahn2||
-bahn3||
-bahn4||
-druck||
-lokomotive||
 jazz||
-exoplanet||
+robbe||
+reiten||
+kamele||
+kaefig||
+dogs2||
+gang||
+storchennest||
+pferde||
+bienen||
+indianer||

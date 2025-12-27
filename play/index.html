@@ -30,7 +30,7 @@ let showpage=_=>{ // >(img) *(audio) @(full-link) else(text)
    map.innerHTML=p;
    }})}
 
-let showtext=t=>{if(t=="fullscreen"){t="";document.body.requestFullscreen()}
+let showtext=t=>{if(t.startsWith("fullscreen")){t=t.slice(10);document.body.requestFullscreen()}
 	if(!t)return txt.onclick();txt.style.display="block"; 
  txt.textContent=t.replaceAll("/","\n");
  let h=txt.innerHTML,i=0,r="";
