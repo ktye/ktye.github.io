@@ -1,16 +1,48 @@
-<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png"><title>maumau</title><style>
-body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
-svg{width:min(100vw,100vh);height:min(100vw,100vh);background:#white}
-.t{transform:translate(0,-20px)}
-.p{filter:saturate(3)}
-.b{fill:#333}
-.x{stroke:red;stroke-width:0.02}
-</style></head><body><svg id="table" viewBox="0 0 800 800"></svg>
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>maumau</title><style>
+body{margin:0;width:100vw;height:100vh}
+</style></head><body>
 <script src="cards.js"></script>
 <script>
 
-let t={Lina:[17,29],Tina:[12,31],"Franz Luseberg":[],me:[3,8,14,25],table:[28,15,-1]}
-drawTable(t)
+let af=Array.from
+let deck=shuffle(thirtytwo())
+let players="Lina,Tina,Franz Lunsenberg,me".split(",")
+let t={};
+([...players,"table"]).forEach(p=>{t[p]=deck.slice(0,3);deck=deck.slice(3)})
+t.turn="Tina"
+let closing=""
+
+let nextplayer=i=>t.turn=players[(1+players.indexOf(t.turn))%players.length]
+
+let myturn=t=>{let my=[0,0,0],ta=t.table.map(x=>0);
+ let count=a=>a[0]+a[1]+a[2];
+ let next=_=>(nextplayer(),play())
+ let swap=_=>([t.me,t.table]=[t.table,t.me],next())
+ let exch=(i,j)=>(i=my.indexOf(1),j=ta.indexOf(1),[t.me[i],t.table[j]]=[t.table[j],t.me[i]],next())
+ let toggle=(x,a,i)=>{a[i]=1-a[i];x.style.verticalAlign=a[i]?"super":"";x.style.borderBottom=a[i]?"4px solid":""}
+ let ck=_=>(1==count(my)&&1==count(ta)?exch():3==count(my)||3==count(ta)?swap():0)
+ let ix=x=>t.me.indexOf(c_.indexOf(x.textContent))
+ let jx=x=>t.table.indexOf(c_.indexOf(x.textContent));
+ let f=x=>(toggle(x,my,ix(x)),ck());
+ let g=x=>(toggle(x,ta,jx(x)),ck());
+ console.log("myturn",af(south.children));
+ af(south.children).forEach(x=>x.onclick=_=>f(x))
+ af(stock.children).forEach(x=>x.onclick=_=>g(x))
+ let bt=(t,f, b)=>(b=document.createElement("span"),b.style.fontSize="xxx-large",b.textContent=t,b.onclick=f,b)
+ south.appendChild(bt("🤛",_=>(closing="me",next())))
+ south.insertBefore(bt("🫷",next),south.firstChild)
+}
+let play=_=>{
+ show(t);
+ if(closing==t.turn){t.turn="";return show(t,1)};
+ if(t.turn=="me")return myturn(t)
+ nextplayer();
+ setTimeout(play,1000)
+}
+setTimeout(play,1000)
+
+
 </script></body></html>
 
 

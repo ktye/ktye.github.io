@@ -325,7 +325,7 @@ korea3|559,226,788,445|Gehne wir ins (Konzert>konzert)?
 korea3|6,159,333,420|Komm wir fliegen nach (Peru>kanu).
 schildkroete|4,0,313,259|>segelboote
 schildkroete|374,5,773,245|Komm Schildi komm,/wackel mit dem Kopf!
-schmuck||Wir haben einen Goldschatz gefunden.//Morgen müssen wir wieder in die (Schule>bus).
+schmuck|0,0,400,400|Wir haben einen Goldschatz gefunden.//Morgen müssen wir wieder in die (Schule>bus).
 scheine|98,130,371,349|Das sollte reichen.
 scheine|388,159,653,384|Meinst du wir kriegen was zurück?
 scheine|318,5,661,127|Ich kaufe mir ein (Zugticket>eisenbahn)
@@ -349,7 +349,7 @@ schlagzeug|579,3,792,163|*drum6
 schlagzeug|502,310,699,447|*drum7
 schlagzeug|359,226,491,440|*drum8
 schlagzeug|303,0,528,66|Hier geht's (raus>linatina)
-schlagzeug|4,255,132,438|Oben an der T
+schlagzeug|4,255,132,438|Oben an der Tür geht's raus.
 schlange|451,1,790,443|Hilfe eine Schlange.//Sie zischt.//Wo kommt die denn her?
 schlange|10,4,443,337|>exoplanet
 exoplanet|6,154,193,412|Das Männchen kackt.
