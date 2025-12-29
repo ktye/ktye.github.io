@@ -21,6 +21,7 @@ let yourturn=(d,t)=>{ d.style.border=t?"2px solid blue":""; d.style.borderRadius
 let fiftytwo=_=>Array(52).fill(0).map((_,i)=>i)
 let thirtytwo=_=>fiftytwo().filter(x=>(x=x%13,(!x)||x>5))
 let shuffle=a=>a.toSorted(_=>Math.random()-0.5)
+let chair=(t,name, P,n,i)=>(P=Object.keys(t),n=P.length-2,i=P.indexOf(name),n==2?[north,south][i]:n==3?[west,east,south][i]:[west,north,east,south][i])
 
 //let drawDeck=(x,y,c)=>
 let show=(t,open)=>{
