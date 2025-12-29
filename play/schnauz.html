@@ -1,6 +1,6 @@
 <!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
 <title>schnauz</title><style>
-body{margin:0;width:100vw;height:100vh}
+body{margin:0;width:100vw;height:100vh;font-size:18vh}
 </style></head><body>
 <script src="cards.js"></script>
 <script>
@@ -27,7 +27,7 @@ let whowins=t=>{show(t,1);
  let s=1==w.length&&w[0]=="me"?"Ich hab gewonnen":1==w.length?w[0]+" hat gewonnen":(w.join(" und ")+" gewinnen").replace("me ","ich ");
  stock.innerHTML+=s
 }
-let span=(t, sp)=>(sp=document.createElement("span"),sp.style.fontSize="xxx-large",sp.textContent=t,sp)
+let span=(t, sp)=>(sp=document.createElement("span"),sp.textContent=t,sp)
 let thirtyone=t=>Object.values(t).slice(0,-2).map(count).some(x=>x>30.5)
 let myturn=t=>{let my=[0,0,0],ta=t.table.map(x=>0);
  let count=a=>a[0]+a[1]+a[2];

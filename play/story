@@ -4,11 +4,18 @@ bus|676,146,782,252|Nur vorne einsteigen/Türen freimachen//nächste Haltestelle
 bus|490,154,560,250|>harald
 bus|193,164,303,258|>linatina
 bus|108,190,186,261|Wir trinken (Cola>cola).//Zuhause dürfen wir das nicht.
-bus|308,143,398,248|Hallo Ich bin Ayumi
+bus|308,143,398,248|Hallo Ich bin (Ayumi>ayumi)
 bus|2,179,108,354|>busparkplatz
 bus|42,33,623,124|Geh zur 53 und suche den Schatz/solange du kannst.
 bus|673,35,796,130|@mandel.html
 bus|420,146,476,241|Mein Name ist Franz (Lunsenberg>lunsenberg).
+ayumi|0,0,200,85|>bus
+ayumi|355,115,529,407|Harald Töpfer ruft Ayumi.//Aber sie hört ihn nicht.
+ayumi|208,19,351,128|Niemand hört ihn./Gemeint ist Harald Töpfer.
+ayumi|88,91,172,409|Bitte./Danke Frau Meier./Sie ist die Lehrerin.
+ayumi|230,187,351,272|Harald Töpfer ist 30m weit weg./Deshalb kann man ihn nicht hören.
+ayumi|473,5,641,126|Warum sind da so viele Herzen?//Ist Harald töpfer etwa in Ayumi verliebt?
+ayumi|532,153,731,413|Hier steht nichts. Rein garnichts.
 kaichen|0,0,200,200|>fahrrad
 kaichen|541,72,750,253|*hallokai
 kaichen|242,121,536,364|weiter geht's
@@ -184,7 +191,7 @@ ronald|9,210,246,430|Komm wir gehen lieber (weiter>entenrusche).Weg von der Burg
 echterspfahl|0,0,200,200|>ronald
 echterspfahl|27,219,549,439|Ich hab durst./Wollen wir was (trinken>bier)?
 echterspfahl|206,1,448,216|Hier steht die Saage vom Echterspfahl./Und den 3 Ringen.
-echterspfahl|550,178,791,408|Hier waren die Pferde angebunden/von den Räuberbrüdern.
+echterspfahl|550,178,791,408|Hier waren die (Pferde>pferde) angebunden/von den Räuberbrüdern.
 echterspfahl|550,0,774,165|Das ist jetzt das Wappen von Aschaffenburg./3 Ringe.
 entenrutsche|0,0,200,200|>ronald
 entenrutsche|463,146,741,312|>enten
@@ -225,8 +232,10 @@ moorhuhn|309,7,558,364|>buntervogel
 moorhuhn|568,20,780,335|*amsel
 inselflug|0,0,200,200|>flugzeug
 inselflug|313,3,786,233|Schau mal hier (runter>segelboote).
-geschenkverpackt|0,0,200,200|>hanswurst
+geschenkverpackt|0,0,150,200|>hanswurst
 geschenkverpackt|238,9,502,433|Wer hat hier Geburtstag?//(Klingel>tuerglocke) mal.
+geschenkverpackt|160,116,233,187|*klingel2
+geschenkverpackt|520,100,587,176|*klingel
 segelboote|0,0,200,200|>inselflug
 segelboote|228,9,460,311|Hier gibt's viele Segelboote.
 segelboote|501,199,795,432|Hier suchen wir uns ein (Kanu>kanu)
@@ -245,7 +254,8 @@ tuer|0,0,200,200|>tuerglocke
 tuer|278,5,535,278|Hier ist ein (Schloss>schloss) dran.//Ich krieg die Tür nicht auf.
 tuer|257,281,577,437|*klingel
 schloss|16,142,390,429|Ach der Schlüssel steckt./Dann ist es kein Problem.
-schloss|394,3,685,319|Was ist hinter der Tür (versteckt>schmuck)?
+schloss|394,3,685,319|Was ist hinter der Tür (versteckt>kaefig)?
+kaefig|259,1,638,436|Ein böses Monster bewacht einen (Schatz>schmuck).
 weinberg|428,117,777,408|Lecker (Weintrauben>weintraube)/(Trinke>bier) etwas oder geh den Weg entlang.
 weinberg|227,124,381,275|>wolfsgebiet
 weinberg|6,51,207,386|>schmetterling2
@@ -310,10 +320,17 @@ korea2|408,249,592,433|Schaum mal das alte (Auto>auto).
 korea2|400,3,791,235|Ich hab Karten für ein tolles (Konzert>konzert).
 konzert||Ach ist doch nicht toll, findet Lina.//Zu laut./Und ich hab keinen Light-stick dabei.
 konzert|7,5,243,322|Nach dem Konzert geht's wieder in die (Stadt>korea4).
-korea4||
-korea4|9,206,306,409|Ich hab Hunger, lass uns in ein (Restaurant>ringfleisch) gehen.
+korea4|9,206,306,409|Eine (Streetgang>gang) versperrt Lina und Tina den Weg.//Sie sehen sehr (böse>gang) aus.
 korea4|5,1,309,194|vogel3
 korea4|320,6,712,429|Hier steht, es geht zum (Raketenflugplatz>raketenstart)
+gang|2,1,795,117|>korea4
+gang|3,107,100,352|Chu
+gang|104,92,252,351|Hui
+gang|259,98,416,357|Pfui
+gang|422,98,550,358|Juijui
+gang|555,133,675,370|Toki
+gang|682,144,792,392|Guji
+gang|5,360,791,443|Regal. Egal.
 raketenstart|151,237,648,435|Toll sieht die Erde aus von hier oben./Ganz klein.
 raketenstart|38,12,750,233|Wir fliegen in die (Sterne>rakete).
 rakete|309,10,552,443|Alle Anschnallen es geht mit Höchstgeschwindigkeit nach oben.
@@ -365,17 +382,35 @@ teppichvogel|480,174,787,310|*vogel3
 teppichvogel|381,313,788,435|*vogel4
 teppichvogel|6,0,462,296|Hier ist dichter Wald.//Da vorne ist ein (Holzhaus>holzhaus).
 holzhaus|144,38,657,372|Erstmal ausruhen, dann fahren wir mit dem (Kanu>kanu) weiter.
-uhr2||
+wappen|405,4,509,163|(Adler>ader)
+wappen|513,0,604,230|Ritter Rübenzahl
+wappen|336,171,466,314|Die (Burg>breuberg)
+wappen|226,279,383,431|Ein (Kamel>kamele)
+wappen|472,280,598,431|Sabrina
+wappen|206,11,324,227|Der goldene (Schlüssel>schloss).//Hier geht's wohl weiter.
+uhr2|0,0,200,200|>rakete
+pferde|60,133,354,417|Hier ist Tinas Pferd./Es heisst Amadeus.
+pferde|489,250,776,439|Das ist Linas Pferd./Es heisst Sabrina./Findest du auch Tinas Pferd?//(Huiiihhuhu>pferdestall)
+pferde|360,14,777,231|Hier ist Tinas Pferd nicht.
+pferdestall|524,112,717,257|*wiehern
+pferdestall|238,108,417,249|Wollen wir (losreiten>kamale)?
+pferdestall|209,321,270,399|Die Tür ist (abgeschlossen>schloss)
+pferdestall|147,0,480,81|Hier ist der Pferdestall von Lina und Tina.
+pferdestall|291,257,727,442|Lina und Tina haben heute Lust/auf ein Reitabenteuer./Sie satteln ihre Pferde und (reiten>reiten) davon.
+pferdestall|41,99,218,265|Lina würde am liebsten nach (Amerika>indianer) reiten.
+indianer|3,0,116,333|>Pferdestall
+indianer|703,53,795,280|Vorsicht. Hier ist ein Indianer versteckt.//Er hat bereits auf Lina gezielt.
+indianer|344,292,539,442|Das ist der Schatten von Lina/auf dem Pferd.
+indianer|126,3,682,276|Lina wird von einem Indianerpfeil getroffen.
+reiten|387,6,536,132|Hughiii. Huiuiui.//Tina hat eine Fliege verschluckt./Aber sie müssen weiter./Haben keine Zeit anzuhalten.
+reiten|39,196,342,388|Sie reiten immer weiter bis sie nach Afrika kommen.//Dort müssen sie (umsteigen>kamele).
+kamele|32,5,453,302|Wir sind schon weit geritten.//Mitten in der Wüste./Wir mussten auf Kamele umsteigen.//Ich wünschte wir hätten was zu (trinken>bier).
 vase||
 uhr3||
 jazz||
 robbe||
-reiten||
-kamele||
-kaefig||
 dogs2||
-gang||
 storchennest||
-pferde||
-bienen||
-indianer||
+pfau1||
+pfau2||
+pelikan||
