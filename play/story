@@ -352,6 +352,7 @@ raketenstart|151,237,648,435|Toll sieht die Erde aus von hier oben./Ganz klein.
 raketenstart|38,12,750,233|Wir fliegen in die (Sterne>rakete).
 rakete|309,10,552,443|Alle Anschnallen es geht mit Höchstgeschwindigkeit nach oben.
 rakete|562,34,793,426|Hilfe wir stürzen ab./Jetzt geht's ins (Höllenfeuer>hoellenfeuer)/so heiss ist mir.
+rakete|10,78,300,420|Wir fliegen an der (Venus>venus) vorbei.
 hoellenfeuer|62,96,534,421|>ufo
 ufo|213,36,563,431|Die Rakete hat sich wieder gefangen und wir sind abgekühlt.//Aber hier gibt es Ufos./Schau auf die (Uhr>uhr2)
 ufo|578,56,797,432|Wir landen wieder in (Korea>korea3) auf einem Berg.
@@ -422,6 +423,11 @@ indianer|126,3,682,276|Lina wird von einem Indianerpfeil getroffen.
 reiten|387,6,536,132|Hughiii. Huiuiui.//Tina hat eine Fliege verschluckt./Aber sie müssen weiter./Haben keine Zeit anzuhalten.
 reiten|39,196,342,388|Sie reiten immer weiter bis sie nach Afrika kommen.//Dort müssen sie (umsteigen>kamele).
 reiten|12,7,353,179|Sie müssen vorsichtig sein./Vor ihnen taucht ein ein/gefährlicher (Vogel>pfau1) auf.
+reiten|376,153,743,437|Wir steigen um, auf ein (Lama>lama)
+lama|155,195,529,430|Das Lama hat eine bunte Decke/wie die (Kamele>kamele),/die wir schon gesehen haben.
+lama|170,3,437,147|*wasser
+lama|631,2,788,181|Hier ist ein Regenbogen.//Dort gibt es eine Schatz./Den müssen wir finden.
+lama|541,273,787,433|Hier ist eine große (Wiese>nebelberge)./Dort ist eine Kuh versteckt.
 pfau1|332,27,675,429|Plötzlich richtet er seine (Flügel>pfau2) auf!
 pfau2|332,27,675,429|Sie bekommen es mit der Angst zu tun/und reiten schnell (weiter>reiten).
 kamele|32,5,453,302|Wir sind schon weit geritten.//Mitten in der (Wüste>vase)./Wir mussten auf Kamele umsteigen.//Ich wünschte wir hätten was zu (trinken>bier).
@@ -432,3 +438,13 @@ dogs2|321,312,708,441|>reiten
 dogs2|12,3,334,114|>flugzeug
 spinnennetz|367,251,485,356|Hier sitzt die Spinne am liebsten.
 spinnennetz|206,3,730,253|Es ist kalt.//Sie gehen schnell (weiter>nebelberge).
+spinnennetz|7,259,354,434|Hier gibt es (Pilze>riesenpilz).
+riesenpilz|191,21,663,325|Oha. Das ist ja ein riesiger Pilz.//Der schmeckt bestimmt gut.//Vielleicht steht er auf der (Karte>china).
+riesenpilz|188,328,717,443|Der Pilz spiegelt sich im (Wasser>kanu).
+venus|555,57,750,287|Auf der Sonnenseite ist alles ganz heiss.
+venus|310,14,553,289|Auf der Schattenseite ist es so kalt,/daß alles gefrohren ist.
+venus|6,292,439,436|Die Venus wirft einen riesigen Schatten/ins Weltall.//Wir fliegen weiter Richtung (Erde>falke).
+falke|332,81,671,316|Auf einmal taucht ein Falke mit Sonnenbrille auf./Er ist im Sturzflug./Wir müssen ausweichen.
+falke|188,166,328,319|Die Erde ist wieder zu sehen.//Alles bereit zur (Landung>indianer).
+falke|192,331,326,396|Zum Glück steht an der Erde ein Schild.//Deshalb wissen wir,/dass es nicht die Venus ist.
+falke|0,2,177,355|Hier ist nichts./Nur Weltall.
