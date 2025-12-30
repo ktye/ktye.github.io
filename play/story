@@ -30,7 +30,7 @@ auto|5,261,195,423|*jaund
 autodach|226,9,681,264|Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
 flugzeug|0,0,200,200|Komm wir fliegen nach (Korea>korea1)
 flugzeug|207,33,370,160|Keine (Hunde>dogs2) an bord erlaubt.
-flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?
+flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?//Oder nach (Frankfurt>roemer)?
 flugzeug|8,210,372,431|Komm wir (fliegen>inselflug) auf eine Insel.
 oslo|0,0,200,200|>flugzeug
 oslo|20,333,222,446|>tunnel
@@ -44,6 +44,7 @@ eisenbahn|364,260,780,424|*kaffeemaschine
 bahn2|34,148,337,370|Es rumpelt ziemlich.
 bahn2|341,10,613,222|*wind
 bahn2|390,238,633,433|Lina, wollen wir uns die (Lok>lokomotive) angschauen?
+bahn2|619,14,794,443|*tama3
 lokomotive|9,225,311,439|*bumbum
 lokomotive|5,50,301,213|>uhr3
 lokomotive|315,304,641,445|*kaffeemaschine
@@ -58,6 +59,7 @@ bahn1|356,118,623,298|*spuelmaschine
 bahn1|5,259,361,421|*zollstock
 bahn1|627,90,798,282|*bumbum
 bahn1|508,302,798,438|>bahn3
+bahn1|340,5,610,103|*tama2
 bahn3|0,0,166,242|>bahn1
 bahn3|178,4,454,247|*bumbum
 bahn3|463,4,794,274|*kaffeemaschine
@@ -113,7 +115,7 @@ dogs|555,370,769,440|>schneemann
 dogs|210,276,443,441|>vogel
 schneemann|39,0,163,157|>dogs
 schneemann|452,272,626,416|Hier ist es heiss.
-schneemann|169,6,448,402|ich friere./Mir ist kalt.
+schneemann|169,6,448,402|ich friere./Mir ist (kalt>pinguine).
 schneemann|504,7,750,250|>schreibmaschine
 vogel|8,0,265,241|>dogs
 vogel|285,76,523,397|*amsel
@@ -168,6 +170,7 @@ bier|0,0,200,200|>gemuese
 bier|249,5,400,336|*wasser
 bier|408,5,550,384|*plopp
 bier|560,6,783,445|*plopp2
+bier|5,213,261,430|*flasche
 accordeon|0,0,200,200|>schreibmaschine
 accordeon|16,204,228,400|*acc2
 accordeon|234,201,471,410|*acc1
@@ -208,7 +211,7 @@ ganstogo|0,0,200,200|>entenrutsche
 ganstogo|215,219,660,447|Gans-Togo?/Was soll das denn sein.//Aber es gibt was zu (trinken>bier)/Oder (Wein>weinberg)
 ganstogo|2,208,204,439|Hier können wir das (Fahrrad>fahrrad) abschliessen.
 ganstogo|253,3,686,215|Wollen wir eine leckere Pilzsuppe essen?//Komm wir suchen uns (welche>fliegenpilz)
-ganstogo|669,226,791,444|Gibt's auf der Karte keine (Kuh>kuh)?
+ganstogo|669,226,791,444|Gibt's auf der Karte keine (Kuh>kuh)?//Oder einen (Schweinebraten>wutz)?
 fliegenpilz|0,0,200,200|>ganstogo
 fliegenpilz|303,2,616,172|Hier im Wald ist es (gruselig>faltergrab)
 fliegenpilz|53,206,780,422|Lieber nicht essen./Die Pilze sehen gifit aus.//Ich hab hunter auf Pilzsuppe.
@@ -282,6 +285,9 @@ wolfsgebiet|370,45,495,302|>adlerturm
 kugelversteck|43,25,390,351|Lina und Tina verstecken sich in der Kugel.//Sie hoffen, dass sie hier in Sicherheit sind.//Doch dann kommt ein (Wolfsrudel>dogs2).
 kugelversteck|414,131,788,333|Ob es im Wasser (Delphine>delfin) gibt?
 gold|0,0,200,200|>gipfelkreuz
+gold|211,1,531,257|Welch ein Schatz, wie wertvoll.//Ich höre schon das Geld kimpern.
+gold|15,251,291,431|*klimpern
+gold|303,265,782,438|*geld
 tunnel|0,0,200,200|<
 tunnel|209,1,584,162|*wau1
 tunnel|601,3,795,303|*vogel
@@ -297,8 +303,11 @@ robbe|103,207,735,438|Das ist die Robbenmama.//Sie beschützt ihre Kinder.
 robbe|167,7,607,186|Das sind die Kinder.//Bald sind sie genau so groß wie ihre Mutter.//Mindestens.
 robbe|613,5,788,197|Durch die Schublade geht's zurück ins (Kanu>kanu)
 robbe|6,1,158,183|>pelikan
-pelikan|55,20,768,434|Wo kommt denn der her?//Ist es aus seinem (Nest>storchennest) entflogen?
-storchennest|0,0,800,400|Weiter geht's mit dem (Kanu>kanu)
+pelikan|102,18,459,189|Wo kommt denn der her?//Ist es aus seinem (Nest>storchennest) entflogen?
+pelikan|467,75,676,342|*tama2
+pelikan|188,197,468,431|*tama3
+storchennest|277,1,789,443|Weiter geht's mit dem (Kanu>kanu)
+storchennest|7,36,267,389|Achtung, es kommt ein Raubvogel/im (Sturzflug>falke).//Alle in Sicherheit.
 kanus|206,112,621,411|lass uns hier anlegen/und ins (Haus>holzhaus) gehen.
 kanus|626,7,797,420|Hier quakt ein (Frosch>frosch)
 kanus|8,6,200,403|Hier quakt auch ein (Frosch>frosch)
@@ -437,14 +446,28 @@ dogs2|447,15,745,310|Wauwau.//Lina hat Angst.//Hoffentlich beisst er nicht.
 dogs2|321,312,708,441|>reiten
 dogs2|12,3,334,114|>flugzeug
 spinnennetz|367,251,485,356|Hier sitzt die Spinne am liebsten.
-spinnennetz|206,3,730,253|Es ist kalt.//Sie gehen schnell (weiter>nebelberge).
+spinnennetz|206,3,730,253|Es ist kalt, wie am (Südpol>pinguine).//Sie gehen schnell (weiter>nebelberge).
 spinnennetz|7,259,354,434|Hier gibt es (Pilze>riesenpilz).
 riesenpilz|191,21,663,325|Oha. Das ist ja ein riesiger Pilz.//Der schmeckt bestimmt gut.//Vielleicht steht er auf der (Karte>china).
 riesenpilz|188,328,717,443|Der Pilz spiegelt sich im (Wasser>kanu).
-venus|555,57,750,287|Auf der Sonnenseite ist alles ganz heiss.
-venus|310,14,553,289|Auf der Schattenseite ist es so kalt,/daß alles gefrohren ist.
+venus|555,57,750,287|Auf der Sonnenseite ist alles ganz heiss.//Wenn man unter der Venus hört,/hört man ein Summen./Das muss von einem Summstein kommen.
+venus|310,14,553,289|Auf der Schattenseite ist es so (kalt>pinguine),/daß alles gefrohren ist.
 venus|6,292,439,436|Die Venus wirft einen riesigen Schatten/ins Weltall.//Wir fliegen weiter Richtung (Erde>falke).
+venus|447,292,786,437|*summstein
 falke|332,81,671,316|Auf einmal taucht ein Falke mit Sonnenbrille auf./Er ist im Sturzflug./Wir müssen ausweichen.
 falke|188,166,328,319|Die Erde ist wieder zu sehen.//Alles bereit zur (Landung>indianer).
 falke|192,331,326,396|Zum Glück steht an der Erde ein Schild.//Deshalb wissen wir,/dass es nicht die Venus ist.
 falke|0,2,177,355|Hier ist nichts./Nur Weltall.
+falke|337,323,513,442|Die Mäuse rennen schnell weg.
+roemer|609,68,795,443|Kann man hier (rein>tuer)?
+roemer|66,43,237,421|Ist das Justizia?//Die mit der Waage in der Hand?
+roemer|343,166,601,363|Hier ist der Balkon vom Römer./Römer heisst das Haus.//Auf dem Balkon lassen wir uns feiern,/wenn wir den Schatz gefunden haben.
+roemer|250,6,581,146|Wollen wir zum (Flughafen>flugzeug)//oder zum (Bahnhof>eisenbahn)?//In Frankfurt gibt es zum Glück beides.
+wutz|53,245,547,417|Ich kann Gitarre spielen.//Wenn ich noch einen (Schlagzeuger>schlagzeug) finde,/kann ich eine (Band>gang) aufmachen.
+wutz|140,4,555,232|Mein Name ist Pfeffer!//Pfeffer Schwein.
+pinguine|16,163,166,373|Oink.
+pinguine|167,118,265,366|Schnatter.
+pinguine|277,166,382,379|Hmpf
+pinguine|390,218,517,392|klapp klapp.
+pinguine|515,152,615,387|üü, ü, üüü.
+pinguine|605,7,784,367|Tap Tapp.//Kommt alle mit//Ihr müsst in die Pinguin (Schule>bus) Nummer 53.

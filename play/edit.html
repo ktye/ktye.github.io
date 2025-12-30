@@ -28,8 +28,10 @@ let uniq=x=>x.filter((x,i,a)=>a.indexOf(x)==i)
 let draw=q=>{
  fetch("story").then(r=>r.text()).then(r=>{ 
 	let all=uniq(r.split("\n").map(x=>x.split("|")[0]))
+	let snd=uniq(r.split("\n").map(x=>x.split("|")[2]).filter(x=>x&&x.startsWith("*")))
 	let u=all.filter(x=>r.indexOf(">"+x)<0);
 	console.log("unreach:",u.join(" "));
+	fetch("a/sounds").then(r=>r.text()).then(r=>{r=r.split("\n").filter(x=>x.length);console.log("sounds:", r.filter(x=>!snd.includes("*"+x)))})
  	im=new Image();im.onload=_=>{
 		ctx.drawImage(im,0,0); 
 		let a=r.split("\n").filter(x=>x.startsWith(ch+"|"))
@@ -56,5 +58,6 @@ let drawrect=(r,s)=>{
 let clip=t=>navigator.clipboard.writeText(t);
 window.onhashchange=_=>{ch=location.hash.slice(1);draw(0)}
 draw(0)
+
 
 </script></body></html>

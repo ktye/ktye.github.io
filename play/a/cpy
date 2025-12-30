@@ -1,1 +1,2 @@
 cp ~/down/*.m4a .
+ls *.m4a|sed 's/....$//' > sounds
