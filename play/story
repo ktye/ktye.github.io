@@ -29,7 +29,7 @@ auto|654,12,788,218|>autodach
 auto|5,261,195,423|*jaund
 autodach|226,9,681,264|Ja sieht noch gut aus.//Lass uns losfahren//ab zum (Flughafen>flugzeug).
 flugzeug|0,0,200,200|Komm wir fliegen nach (Korea>korea1)
-flugzeug|207,33,370,160|Keine (Hunde>dogs) an bord erlaubt.
+flugzeug|207,33,370,160|Keine (Hunde>dogs2) an bord erlaubt.
 flugzeug|373,105,738,426|Wollen wir nach (Oslo>oslo) fliegen?
 flugzeug|8,210,372,431|Komm wir (fliegen>inselflug) auf eine Insel.
 oslo|0,0,200,200|>flugzeug
@@ -44,11 +44,13 @@ eisenbahn|364,260,780,424|*kaffeemaschine
 bahn2|34,148,337,370|Es rumpelt ziemlich.
 bahn2|341,10,613,222|*wind
 bahn2|390,238,633,433|Lina, wollen wir uns die (Lok>lokomotive) angschauen?
-lokomotive||
-lokomotive|7,131,304,425|*bumbum
+lokomotive|9,225,311,439|*bumbum
+lokomotive|5,50,301,213|>uhr3
 lokomotive|315,304,641,445|*kaffeemaschine
 lokomotive|332,7,618,234|>druck
 lokomotive|627,25,789,373|>bahn1
+uhr3|0,0,200,200|>lokomotive
+uhr3|207,8,632,431|*uhr
 druck|0,0,200,200|>lokomotive
 druck|281,12,689,428|*uhr
 bahn1|4,0,331,240|Weiter geht's auf grosse Fahrt.//Folge den Schienen.
@@ -97,6 +99,7 @@ adler2|276,10,588,254|*eule
 nebelberge|0,0,200,200|>adler
 nebelberge|214,126,688,423|Es wird kälter.//Schnell weiter bevor/es dunkel wird//Da ganz hinten muss es weitergehen.
 nebelberge|213,5,755,108|>gipfelkreuz
+nebelberge|5,206,200,420|Hinter dem Hügel steht eine (Kuh>kuh2).
 gipfelkreuz|0,0,200,200|>nebelberge
 gipfelkreuz|211,2,538,409|Meinst du hier ist ein Schatz versteckt?
 gipfelkreuz|554,141,793,282|Ich hab hier eine (Schreibmaschine>schreibmaschine) gefunden.
@@ -192,7 +195,7 @@ echterspfahl|0,0,200,200|>ronald
 echterspfahl|27,219,549,439|Ich hab durst./Wollen wir was (trinken>bier)?
 echterspfahl|206,1,448,216|Hier steht die Saage vom Echterspfahl./Und den 3 Ringen.
 echterspfahl|550,178,791,408|Hier waren die (Pferde>pferde) angebunden/von den Räuberbrüdern.
-echterspfahl|550,0,774,165|Das ist jetzt das Wappen von Aschaffenburg./3 Ringe.
+echterspfahl|550,0,774,165|Das ist jetzt das (Wappen>wappen) von Aschaffenburg./3 Ringe.
 entenrutsche|0,0,200,200|>ronald
 entenrutsche|463,146,741,312|>enten
 entenrutsche|207,49,427,395|Ich hab Hunger.//Ich hab eine (gefangen>ganstogo)/Lecker.//Oder lieber eine (Pizza>pizzamat)?
@@ -246,13 +249,13 @@ pizzamat|557,156,737,438|Was ist das für eine dunkle (Gestalt>schatten)?
 wuppertal|0,0,200,200|>eisenbahn
 wuppertal|572,40,788,285|>hanswurst
 wuppertal|237,290,662,431|Schnell über die (Wupper>entenrutsche).
-spinnennetz|0,0,200,200|<
 tuerglocke|0,0,200,200|>geschenkverpackt
 tuerglocke|335,179,492,400|*klingel
 tuerglocke|313,4,490,168|>tuer
 tuer|0,0,200,200|>tuerglocke
 tuer|278,5,535,278|Hier ist ein (Schloss>schloss) dran.//Ich krieg die Tür nicht auf.
 tuer|257,281,577,437|*klingel
+tuer|549,2,789,290|Hier ist ein (Spinnennetz>spinnennetz).//Tina hat Angst.
 schloss|16,142,390,429|Ach der Schlüssel steckt./Dann ist es kein Problem.
 schloss|394,3,685,319|Was ist hinter der Tür (versteckt>kaefig)?
 kaefig|259,1,638,436|Ein böses Monster bewacht einen (Schatz>schmuck).
@@ -272,22 +275,30 @@ blumen2|265,146,597,423|*tama1
 blumen2|3,225,251,425|*amsel
 blumen2|623,134,791,405|*vogel2
 wolfsgebiet|0,0,200,200|>weinberg
-wolfsgebiet|199,53,364,310|Hilfe!!
-wolfsgebiet|9,316,493,434|Hilfe, dahinten kommt ein (Wolfsrudel>dogs)
+wolfsgebiet|199,53,364,310|Hilfe!!//Schnell (verstecken>kugelversteck).
+wolfsgebiet|9,316,493,434|Hilfe, dahinten kommt ein (Wolfsrudel>dogs2)
 wolfsgebiet|511,98,785,371|>adlerturm
 wolfsgebiet|370,45,495,302|>adlerturm
+kugelversteck|43,25,390,351|Lina und Tina verstecken sich in der Kugel.//Sie hoffen, dass sie hier in Sicherheit sind.//Doch dann kommt ein (Wolfsrudel>dogs2).
+kugelversteck|414,131,788,333|Ob es im Wasser (Delphine>delfin) gibt?
 gold|0,0,200,200|>gipfelkreuz
-kugelversteck|0,0,200,200|<
 tunnel|0,0,200,200|<
 tunnel|209,1,584,162|*wau1
 tunnel|601,3,795,303|*vogel
 tunnel|219,170,558,425|Komm wir gehen durch den (Tunnel>kanu)/da wartet bestimmt ein Abenteuer.
-kanu|67,19,549,333|Wir nehmen das Boot und/paddeln den Fluss entlang.
-kanu|9,333,536,439|>kanus
-kanu|561,1,792,268|>kanus
-kanu|562,274,791,442|Im Wasser ist ein (Flussdelfin>delfin).
-delfin|8,6,344,165|>kanu
-delfin|362,47,773,405|*wasser
+kanu|62,14,508,249|Wir nehmen das Boot und/paddeln den Fluss entlang.
+kanu|515,1,789,229|>kanus
+kanu|7,262,218,438|>kanus
+kanu|227,260,493,443|*wasser
+kanu|513,232,795,442|Im Wasser ist ein (Flussdelfin>delfin).
+delfin|344,12,781,424|Plötzlich taucht noch ein (Pelikan>pelikan) auf.
+delfin|8,150,337,430|Es kommt noch eine (Robbe>robbe) hinzu
+robbe|103,207,735,438|Das ist die Robbenmama.//Sie beschützt ihre Kinder.
+robbe|167,7,607,186|Das sind die Kinder.//Bald sind sie genau so groß wie ihre Mutter.//Mindestens.
+robbe|613,5,788,197|Durch die Schublade geht's zurück ins (Kanu>kanu)
+robbe|6,1,158,183|>pelikan
+pelikan|55,20,768,434|Wo kommt denn der her?//Ist es aus seinem (Nest>storchennest) entflogen?
+storchennest|0,0,800,400|Weiter geht's mit dem (Kanu>kanu)
 kanus|206,112,621,411|lass uns hier anlegen/und ins (Haus>holzhaus) gehen.
 kanus|626,7,797,420|Hier quakt ein (Frosch>frosch)
 kanus|8,6,200,403|Hier quakt auch ein (Frosch>frosch)
@@ -320,6 +331,12 @@ korea2|408,249,592,433|Schaum mal das alte (Auto>auto).
 korea2|400,3,791,235|Ich hab Karten für ein tolles (Konzert>konzert).
 konzert||Ach ist doch nicht toll, findet Lina.//Zu laut./Und ich hab keinen Light-stick dabei.
 konzert|7,5,243,322|Nach dem Konzert geht's wieder in die (Stadt>korea4).
+konzert|344,3,793,305|Auf der Bühne geht es voll zur (Sache>jazz).
+jazz|0,0,113,209|>konzert
+jazz|365,271,633,433|*drum5
+jazz|3,237,168,362|*drum4
+jazz|175,302,351,439|*drum8
+jazz|124,85,527,259|*drum3
 korea4|9,206,306,409|Eine (Streetgang>gang) versperrt Lina und Tina den Weg.//Sie sehen sehr (böse>gang) aus.
 korea4|5,1,309,194|vogel3
 korea4|320,6,712,429|Hier steht, es geht zum (Raketenflugplatz>raketenstart)
@@ -395,7 +412,7 @@ pferde|360,14,777,231|Hier ist Tinas Pferd nicht.
 pferdestall|524,112,717,257|*wiehern
 pferdestall|238,108,417,249|Wollen wir (losreiten>kamale)?
 pferdestall|209,321,270,399|Die Tür ist (abgeschlossen>schloss)
-pferdestall|147,0,480,81|Hier ist der Pferdestall von Lina und Tina.
+pferdestall|147,0,480,81|Hier ist der Pferdestall von Lina und Tina.//Über der Tür ist ein (Wappen>wappen) angebracht.
 pferdestall|291,257,727,442|Lina und Tina haben heute Lust/auf ein Reitabenteuer./Sie satteln ihre Pferde und (reiten>reiten) davon.
 pferdestall|41,99,218,265|Lina würde am liebsten nach (Amerika>indianer) reiten.
 indianer|3,0,116,333|>Pferdestall
@@ -404,13 +421,14 @@ indianer|344,292,539,442|Das ist der Schatten von Lina/auf dem Pferd.
 indianer|126,3,682,276|Lina wird von einem Indianerpfeil getroffen.
 reiten|387,6,536,132|Hughiii. Huiuiui.//Tina hat eine Fliege verschluckt./Aber sie müssen weiter./Haben keine Zeit anzuhalten.
 reiten|39,196,342,388|Sie reiten immer weiter bis sie nach Afrika kommen.//Dort müssen sie (umsteigen>kamele).
-kamele|32,5,453,302|Wir sind schon weit geritten.//Mitten in der Wüste./Wir mussten auf Kamele umsteigen.//Ich wünschte wir hätten was zu (trinken>bier).
-vase||
-uhr3||
-jazz||
-robbe||
-dogs2||
-storchennest||
-pfau1||
-pfau2||
-pelikan||
+reiten|12,7,353,179|Sie müssen vorsichtig sein./Vor ihnen taucht ein ein/gefährlicher (Vogel>pfau1) auf.
+pfau1|332,27,675,429|Plötzlich richtet er seine (Flügel>pfau2) auf!
+pfau2|332,27,675,429|Sie bekommen es mit der Angst zu tun/und reiten schnell (weiter>reiten).
+kamele|32,5,453,302|Wir sind schon weit geritten.//Mitten in der (Wüste>vase)./Wir mussten auf Kamele umsteigen.//Ich wünschte wir hätten was zu (trinken>bier).
+vase|62,26,519,359|Am Wegesrand steht eine Vase.//Hoffentlich gibt's bald was zu (trinken>bier).
+dogs2|32,124,307,345|Wau.//Er jagt Tina einen Riesenschreck ein./Denn sie hat ihn erst nicht gesehen.
+dogs2|447,15,745,310|Wauwau.//Lina hat Angst.//Hoffentlich beisst er nicht.
+dogs2|321,312,708,441|>reiten
+dogs2|12,3,334,114|>flugzeug
+spinnennetz|367,251,485,356|Hier sitzt die Spinne am liebsten.
+spinnennetz|206,3,730,253|Es ist kalt.//Sie gehen schnell (weiter>nebelberge).

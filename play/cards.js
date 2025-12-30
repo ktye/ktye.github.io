@@ -1,6 +1,6 @@
 
 const c_="🃑 🃒 🃓 🃔 🃕 🃖 🃗 🃘 🃙 🃚 🃛 🃝 🃞 🂡 🂢 🂣 🂤 🂥 🂦 🂧 🂨 🂩 🂪 🂫 🂭 🂮 🂱 🂲 🂳 🂴 🂵 🂶 🂷 🂸 🂹 🂺 🂻 🂽 🂾 🃁 🃂 🃃 🃄 🃅 🃆 🃇 🃈 🃉 🃊 🃋 🃍 🃎 🂠".split(" ")
-let card=i=>`<span color:${i>25&&i<52?'#ff5555':'black'}">${c_[i<0?52:i]}</span>`
+let card=i=>`<span style="color:${i>25&&i<52?'#ff5555':'black'}">${c_[i<0?52:i]}</span>`
 let cards=a=>a.map(card).join("")
 
 //table: {a:[1,3],b:[4,5],c:[7],me:[32,33],table:[12,13,15];turn:"me"}
@@ -20,7 +20,7 @@ document.body.innerHTML=`
 let yourturn=(d,t)=>{ d.style.border=t?"2px solid blue":""; d.style.borderRadius="1em"; d.style.border=t?"2px solid blue":""; d.style.paddingLeft=t?"0.1em":""; d.style.paddingRight=t?"0.1em":""; }
 let fiftytwo=_=>Array(52).fill(0).map((_,i)=>i)
 let thirtytwo=_=>fiftytwo().filter(x=>(x=x%13,(!x)||x>5))
-let shuffle=a=>a.toSorted(_=>Math.random()-0.5)
+let shuffle=a=>(a.slice(),a.sort(_=>Math.random()-0.5),a)
 let chair=(t,name, P,n,i)=>(P=Object.keys(t),n=P.length-2,i=P.indexOf(name),n==2?[north,south][i]:n==3?[west,east,south][i]:[west,north,east,south][i])
 
 //let drawDeck=(x,y,c)=>
@@ -28,7 +28,8 @@ let show=(t,open)=>{
  let player=Object.keys(t).filter(x=>x!="table"&&x!="turn");
  let others=player.filter(x=>x!="me"),no=others.length
  let divs=1==no?[north]:2==no?[west,east]:[west,north,east];
- let backside=`<span>${c_[52]}</span>`
+ let backside=`<span>${c_[52]}</span>`;
+ ([west,north,east,south,stock]).forEach(x=>x.innerHTML="");
  others.forEach((x,i)=>{divs[i].innerHTML=`<span style="font-size:large">${x}</span>${open?cards(t[x]):backside}`;yourturn(divs[i],t.turn==x)})
  south.innerHTML=cards(t.me)
  yourturn(south,t.turn=="me")

@@ -6,12 +6,19 @@ body{margin:0;width:100vw;height:100vh;font-size:18vh}
 <script>
 
 let af=Array.from
-let deck=shuffle(thirtytwo())
-let players="Lina,Tina,Franz Lunsenberg,me".split(",")
-let t={};
-([...players,"table"]).forEach(p=>{t[p]=deck.slice(0,3);deck=deck.slice(3)})
-t.turn="Tina"
-let closing=""
+let deck,players,t,closing;
+let newgame=n=>{
+ deck=shuffle(thirtytwo())
+ players="Lina,Tina,Franz Lunsenberg".split(",").slice(0,n);players.push("me")
+ t={};
+ ([...players,"table"]).forEach(p=>{t[p]=deck.slice(0,3);deck=deck.slice(3)})
+ t.turn="Lina"
+ closing=""
+ setTimeout(play,1000)
+ let sp=(t,r,f)=>{let s=document.createElement("span");s.textContent=t;s.onclick=f;s.style.position="absolute";s.style.top=0;if(r)s.style.right=0;return s};
+ let s1=sp("1",0,_=>newgame(1)),s2=sp("2",1,_=>newgame(2));
+ [s1,s2].forEach(x=>document.body.appendChild(x));
+}
 
 let nextplayer=i=>t.turn=players[(1+players.indexOf(t.turn))%players.length]
 
@@ -72,7 +79,8 @@ let play=_=>{
  nextplayer();
  setTimeout(play,1000)
 }
-setTimeout(play,1000)
+
+newgame()
 
 
 </script></body></html>
