@@ -77,6 +77,7 @@ berlin500|215,5,446,167|>biblis
 berlin500|702,5,795,424|Hier geht's in einen (Tunnel>tunnel)
 stuttgartnacht|0,0,200,200|>berlin500
 stuttgartnacht|280,144,776,434|Komm (hier lang>schatten)
+stuttgartnacht|206,0,792,116|Man sieht keine (Sterne>stern) am Himmel.
 schatten|0,0,200,200|>stuttgartnacht
 schatten|205,110,449,434|Wollen wir auf die (Mauer>gruselfriedhof) klettern?
 gruselfriedhof|0,0,200,200|>schatten
@@ -284,6 +285,7 @@ wolfsgebiet|511,98,785,371|>adlerturm
 wolfsgebiet|370,45,495,302|>adlerturm
 kugelversteck|43,25,390,351|Lina und Tina verstecken sich in der Kugel.//Sie hoffen, dass sie hier in Sicherheit sind.//Doch dann kommt ein (Wolfsrudel>dogs2).
 kugelversteck|414,131,788,333|Ob es im Wasser (Delphine>delfin) gibt?
+kugelversteck|8,353,485,444|Glaubst du, dass hier schon mal ein Pfau/vorbei gelaufen ist?//Doch siehe (hier>pfau3).
 gold|0,0,200,200|>gipfelkreuz
 gold|211,1,531,257|Welch ein Schatz, wie wertvoll.//Ich höre schon das Geld kimpern.
 gold|15,251,291,431|*klimpern
@@ -430,9 +432,23 @@ indianer|703,53,795,280|Vorsicht. Hier ist ein Indianer versteckt.//Er hat berei
 indianer|344,292,539,442|Das ist der Schatten von Lina/auf dem Pferd.
 indianer|126,3,682,276|Lina wird von einem Indianerpfeil getroffen.
 reiten|387,6,536,132|Hughiii. Huiuiui.//Tina hat eine Fliege verschluckt./Aber sie müssen weiter./Haben keine Zeit anzuhalten.
-reiten|39,196,342,388|Sie reiten immer weiter bis sie nach Afrika kommen.//Dort müssen sie (umsteigen>kamele).
+reiten|11,183,368,432|Auf einmal kommt ihnen ein (goldener>goldenerreiter) Reiter entgegen.
 reiten|12,7,353,179|Sie müssen vorsichtig sein./Vor ihnen taucht ein ein/gefährlicher (Vogel>pfau1) auf.
-reiten|376,153,743,437|Wir steigen um, auf ein (Lama>lama)
+reiten|376,153,743,437|Wir reiten weiter, da kommt ein (Bär>pony)/und nimmt uns das Pferd weg.
+pony|68,47,296,254|*wiehern
+pony|5,260,228,428|Ein (Papagei>papagei) fliegt vorne weg/und zeigt dem Bär,/wo es lang geht.
+pony|319,3,617,281|Der Bär hat einen Sack/mit Räubersachen drin.
+pony|621,165,784,371|Achtung, das Pferd hebt gleich den Schwanz.
+pony|618,375,792,443|Hier ist sogar noch ein Fuchs versteckt.
+pony|623,2,793,152|Wenn man hunger hat,/kann man sich einfach einen Apfel pflücken.//Oder in den (Supermarkt>gemuese) gehen.
+pony|236,288,607,434|Da wir kein Pferd mehr haben,/müssen wir mit einem (Lama>lama) weiter.
+goldenerreiter|491,33,743,414|*wiehern
+goldenerreiter|277,5,484,410|Ich bin Roland./Was wollt ihr hier?//Macht das ihr nach hause kommt.
+goldenerreiter|5,3,269,407|Wir reiten weiter bis nach (Dresden>dresden)
+dresden|16,248,700,433|Ein langer Schlitten.//Mittlerweise liegt viel Schnee./Man könnte einen (Schneemann>schneemann) bauen.//Es ist so kalt, da wünscht man sich einen Ritt/durch die (Wüste>kamele).
+dresden|361,105,792,251|Hier ist ein Gasthaus./Dort gibt es bestimmt leckeren (Gänsebraten>ganstogo).
+dresden|6,25,124,242|Hinter dieser (Tür>tuer) ist bestimmt ein Schatz versteckt.
+dresden|160,9,355,235|*flasche
 lama|155,195,529,430|Das Lama hat eine bunte Decke/wie die (Kamele>kamele),/die wir schon gesehen haben.
 lama|170,3,437,147|*wasser
 lama|631,2,788,181|Hier ist ein Regenbogen.//Dort gibt es eine Schatz./Den müssen wir finden.
@@ -440,6 +456,7 @@ lama|541,273,787,433|Hier ist eine große (Wiese>nebelberge)./Dort ist eine Kuh 
 pfau1|332,27,675,429|Plötzlich richtet er seine (Flügel>pfau2) auf!
 pfau2|332,27,675,429|Sie bekommen es mit der Angst zu tun/und reiten schnell (weiter>reiten).
 kamele|32,5,453,302|Wir sind schon weit geritten.//Mitten in der (Wüste>vase)./Wir mussten auf Kamele umsteigen.//Ich wünschte wir hätten was zu (trinken>bier).
+kamele|464,82,644,417|*wiehern
 vase|62,26,519,359|Am Wegesrand steht eine Vase.//Hoffentlich gibt's bald was zu (trinken>bier).
 dogs2|32,124,307,345|Wau.//Er jagt Tina einen Riesenschreck ein./Denn sie hat ihn erst nicht gesehen.
 dogs2|447,15,745,310|Wauwau.//Lina hat Angst.//Hoffentlich beisst er nicht.
@@ -463,11 +480,42 @@ roemer|609,68,795,443|Kann man hier (rein>tuer)?
 roemer|66,43,237,421|Ist das Justizia?//Die mit der Waage in der Hand?
 roemer|343,166,601,363|Hier ist der Balkon vom Römer./Römer heisst das Haus.//Auf dem Balkon lassen wir uns feiern,/wenn wir den Schatz gefunden haben.
 roemer|250,6,581,146|Wollen wir zum (Flughafen>flugzeug)//oder zum (Bahnhof>eisenbahn)?//In Frankfurt gibt es zum Glück beides.
-wutz|53,245,547,417|Ich kann Gitarre spielen.//Wenn ich noch einen (Schlagzeuger>schlagzeug) finde,/kann ich eine (Band>gang) aufmachen.
-wutz|140,4,555,232|Mein Name ist Pfeffer!//Pfeffer Schwein.
+wutz|53,245,547,417|Ich kann Gitarre spielen.//Wenn ich noch einen (Schlagzeuger>schlagzeug) finde,/kann ich eine (Band>gang) aufmachen.//Unser Lieblingslied ist:/Morgen ist (Silvester>silvester).
+wutz|140,4,555,232|Mein Name ist Pfeffer!//Pfeffer Schwein//Ich esse gerne (Kartoffen>raabruke).
 pinguine|16,163,166,373|Oink.
 pinguine|167,118,265,366|Schnatter.
 pinguine|277,166,382,379|Hmpf
 pinguine|390,218,517,392|klapp klapp.
 pinguine|515,152,615,387|üü, ü, üüü.
 pinguine|605,7,784,367|Tap Tapp.//Kommt alle mit//Ihr müsst in die Pinguin (Schule>bus) Nummer 53.
+raabruke|71,2,406,430|Ich in Raabruke./Ein Frosch.//Ich komme aus dem (Spreewald>spreewald).
+raabruke|412,2,754,435|Und ich bin ein Krummbär./Eine Kartoffel.//Eine krumme Beere.
+spreewald|321,84,671,443|Hier im Spreewald fahren alle Leute mit dem Boot.//Und (trinken meistens>bier).
+spreewald|60,4,797,76|Achtung, wenn wir nicht aufpassen/(krachen>busparkplatz) wir in die Brücke.
+spreewald|2,244,311,439|Hier gibt es (Fische>delfin).
+spreewald|5,80,304,236|An Land kamm man sich (verstecken>kugelversteck).
+silvester|32,148,785,419|Es war 2026.//Bald schon längst wieder (vorbei>uhr3).
+silvester|348,0,612,133|>rot
+rot|4,121,51,406|gelber
+rot|53,109,109,421|gelb
+rot|117,141,172,425|fast gelb
+rot|171,118,238,435|orange gelb
+rot|239,81,293,428|009 orange
+rot|296,88,360,435|rosarot
+rot|364,88,427,431|orange
+rot|431,72,489,433|zehn brau gelb//völlig unsortiert
+rot|493,107,544,437|wassergelb
+rot|547,120,611,431|kackbraun
+rot|614,104,671,446|Schmincke aus youtube.
+rot|673,90,727,438|ganz normales orange.
+rot|732,127,793,431|rot.//oben ist schwarz. wie die nacht.
+rot|5,3,228,105|schwarz wie die (Nacht>stuttgartnacht)
+rot|234,1,794,72|(dunkelschwarz>stuttgartnacht)
+raben|32,18,200,201|Ich hab den Mond gefangen.
+raben|303,40,490,213|Ich esse den Mond gleich auf.
+raben|151,240,365,420|Ich kann den Mond nicht runterschlucken./Er ist zu schwer.
+raben|560,31,799,440|Hier ist alles (rot>rot)./Sogar der Himmel.//Man sieht nicht mal einen (Stern>stern).
+pfau3|103,118,331,360|*vogel2
+pfau3|352,8,799,303|Ist das der Wald?//Nein das sind meine Federn.
+pfau3|338,311,597,443|Ist das Salat?//Nein das sind auch meine Federn.//Ich bin nicht der einzige (Pfau>pfau1).
+stern|302,14,672,430|Sonne mond und (Erde>falke).//Alle meine (Sterne>venus).

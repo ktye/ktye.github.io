@@ -20,9 +20,9 @@ let showpage=_=>{ // >(img) *(audio) @(full-link) else(text)
   img.src="m/"+ch+".webp";
   img.href="#"+ch;
   let p=""
-  img.onload=_=>{let sc=x=>(Math.floor(x*img.width/800))
+  img.onload=_=>{let sc=x=>(Math.floor(x*img.width/800));
    r.split("\n").filter(x=>x.startsWith(ch+"|")).map(x=>x.split("|")).forEach(x=>{let a=x[2];
-    
+    console.log("x/a",x,a); 
     let h=a.startsWith("@")?a.slice(1):a.startsWith(">")?"#"+a.slice(1):"#"+ch+(a?":"+encodeURIComponent(a):"")
     p+=`<area shape="rect" coords="${x[1].split(",").map(x=>sc(+x))}" href="${h}" />`
    })
