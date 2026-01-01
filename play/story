@@ -179,6 +179,7 @@ accordeon|474,198,739,438|*acc4
 accordeon|230,5,690,187|*acc3
 birkenhainer|0,0,200,200|>kaichen
 birkenhainer|526,5,761,405|>biberbaum
+birkenhainer|213,90,493,403|@pong.html
 biberbaum|9,207,290,421|>birkenhainer
 biberbaum|0,0,200,200|>berlin500
 biberbaum|289,106,657,370|Angebiebert!
@@ -227,7 +228,9 @@ turm|311,255,463,431|Komm wir klettern (hoch>funkturm)
 turm|293,12,480,248|Hier ist eine schöne (Aussicht>nebelberge).
 messuhr|0,0,200,200|>funkturm
 messuhr|223,23,697,420|*uhr
+messuhr|3,213,209,426|@pong.html
 kabelsalat|0,0,200,200|>funkturm
+kabelsalat|607,43,796,301|@pong.html
 kuh|0,0,200,200|*muh
 kuh|212,7,759,391|Hier steht eine Kuh.//Schnell Milch trinken./Misst, sie ist (runtergefallen>milch).
 milch|244,15,760,398|Oh nein./So tollpatschig.//Schnell (weg>kuh2),/soll ein anderer aufwischen.
@@ -267,6 +270,7 @@ weinberg|428,117,777,408|Lecker (Weintrauben>weintraube)/(Trinke>bier) etwas ode
 weinberg|227,124,381,275|>wolfsgebiet
 weinberg|6,51,207,386|>schmetterling2
 weintraube|0,0,400,400|>weinberg
+weintraube|425,36,781,425|@pong.html
 schmetterling2|0,0,180,180|>weinberg
 schmetterling2|201,7,446,178|*amsel
 schmetterling2|82,210,594,426|Was ist das für eine Blüte?

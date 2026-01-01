@@ -1,8 +1,66 @@
-<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png"><title>chess</title><style>
-body{margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>pong</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
 canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:black}
-</style></head><body><canvas id="cnv" ></canvas>
+</style></head><body><canvas id="cnv"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random()
 
-<script>
+const L=0.06,R=0.02,eps=0.001
+let A=0,B=0,X=0.5,Y=0.5,U=-1,V=rand(),P=0.5,Q=0.5,vel=0.5
+let t0,w,h;
+let dir=0;
+let goal=_=>{X=0.5;Y=0.5;V=rand()}
+let rotate=(phi,c,s)=>(c=cos(phi),s=sin(phi),[c*U-s*V,s*U+c*V])
+let reflect=P=>{
+ let phi=asin((abs(P-Y)-L)/R);
+ let s=sign(P-Y)*sign(U);
+ [U,V]=rotate(-s*phi);U=-U;[U,V]=rotate(s*phi);
+ if(X>1-2*R)X=1-2*R-eps;
+ if(X<  2*R)X=2*R+eps;
+}
+let frame=t=>{vel=min(2,vel*1.001)
+ if(t0===undefined)t0=t;let dt=t-t0
+ dt*=0.0005
+ 
+ cnv.width=w=cnv.getBoundingClientRect().width;
+ cnv.height=h=cnv.getBoundingClientRect().height;
+ const padlen=h/20
+
+ P=max(L,min(1-L,P-0.007*dir));
+ Q=max(L,min(1-L,Q+0.007*sign(Y-Q)));
+
+ let uv=vel/hypot(U,V);U*=uv;V*=uv;X+=dt*U;Y+=dt*V
+ if(Y>1-2*R||Y<0)V=-V
+ if(X>1-2*R)((abs(P-Y)>L+R)?goal(++A):(abs(P-Y)>L)?reflect(P):(U=-U))
+ if(X<  2*R)((abs(Q-Y)>L+R)?goal(++B):(abs(Q-Y)>L)?reflect(Q):(U=-U))
+
+ let p=P*h,q=Q*h,l=L*h,r=R*h,x=X*h,y=Y*h
+
+ let ctx=cnv.getContext("2d");
+ ctx.lineWidth=1;
+ ctx.strokeStyle="white"
+ ctx.fillStyle="white"
+ ctx.setLineDash([10,10]);ln(ctx,w/2,0,w/2,h);ctx.setLineDash([])
+ ctx.textAlign="center"
+ ctx.font="40px monospace"
+ ctx.fillText(A,w/4,50)
+ ctx.fillText(B,3*w/4,50)
+
+ ctx.lineWidth=4; //paddles
+ ln(ctx,  r,q-l,  r,q+l)
+ ln(ctx,w-r,p-l,w-r,p+l)
+
+ ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill()
+
+ t0=t;if(A<10&&B<10)requestAnimationFrame(frame);else history.back()
+}
+let ln=(c,x0,y0,x1,y1)=>{c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
+
+window.onkeydown=e=>dir=e.key=="ArrowUp"?1:e.key=="ArrowDown"?-1:0
+window.onkeyup=_=>dir=0;
+requestAnimationFrame(frame);
+
 
 </script></body></html>
