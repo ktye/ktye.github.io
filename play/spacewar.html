@@ -1,0 +1,84 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>spacewar</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#333;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:#333}
+</style></head><body><canvas id="cnv"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random()
+const pi=Math.PI,pi2=2*pi
+
+//NextVelocity = ThisVelocity + ThisAcceleration * dt ;
+//NextPosition = ThisPosition + NextVelocity * dt ;
+
+const Sun=0.02,Ship=0.08,G=0.05
+let bc=(x,y,r,p)=>(r=hypot(x,y),r>1?((p=atan2(y,x)),r-=2,[r*cos(p),r*sin(p)]):[x,y])
+let Ax=0.5,Ay=0.3,Ap=0.1,Ua=0.05,Va=0,Bx=-0.5,By=-0.3,Bp=-0.1-pi,Ub=-0.05,Vb=0,acc=0,bcc=0
+let Afire=0;Bfire=0;
+let ammo=[]
+let stars=Array(100).fill(0).map(x=>2*rand()-1);for(let i=0;i<stars.length;i+=2)[stars[i],stars[1+i]]=bc(stars[i],stars[1+i])
+let t0
+let frame=t=>{
+ if(t0===undefined)t0=t;let dt=t-t0
+ dt*=0.0005
+ 
+ cnv.width=w=cnv.getBoundingClientRect().width;
+ cnv.height=h=cnv.getBoundingClientRect().height;
+ const padlen=h/20,r=h/2-2
+
+ let Fx,Fy;
+ [Fx,Fy]=gr(Ax,Ay);Fx+=cos(Ap)*acc;Fy+=sin(Ap)*acc;acc=0;Ua+=Fx*dt;Va+=Fy*dt;
+ [Fx,Fy]=gr(Bx,By);Fx+=cos(Bp)*bcc;Fy+=sin(Bp)*acc;acc=0;Ub+=Fx*dt;Vb+=Fy*dt;
+ Ax+=Ua*dt;Ay+=Va*dt;[Ax,Ay]=bc(Ax,Ay)
+ Bx+=Ub*dt;By+=Vb*dt;[Bx,By]=bc(Bx,By)
+
+ let sun=r*Sun,ship=r*Ship,ax=r*Ax,ay=r*Ay,bx=r*Bx,by=r*By
+
+// P=max(L,min(1-L,P-0.007*dir));
+// Q=max(L,min(1-L,Q+0.007*sign(Y-Q)));
+
+ let ctx=cnv.getContext("2d");ctx.translate(h/2,h/2);
+ ctx.fillStyle="black"
+ ctx.beginPath();ctx.arc(0,0,r,0,pi2);ctx.fill()
+ ctx.fillStyle="white";ctx.strokeStyle="white"
+
+ ctx.beginPath();ctx.arc(0,0,sun,0,pi2);ctx.fill();
+ console.log("stars",stars,"r",r);
+ for(let i=0;i<stars.length;i+=2)ctx.fillRect(r*stars[i],r*stars[1+i],2,2);
+
+ drawship(ctx,ax,ay,Ap,ship);ctx.stroke()
+ drawship(ctx,bx,by,Bp,ship);ctx.fill()
+
+/*
+ ctx.lineWidth=1;
+ ctx.strokeStyle="white"
+ ctx.fillStyle="white"
+ ctx.setLineDash([10,10]);ln(ctx,w/2,0,w/2,h);ctx.setLineDash([])
+ ctx.textAlign="center"
+ ctx.font="40px monospace"
+ ctx.fillText(A,w/4,50)
+ ctx.fillText(B,3*w/4,50)
+
+ ctx.lineWidth=4; //paddles
+ ln(ctx,  r,q-l,  r,q+l)
+ ln(ctx,w-r,p-l,w-r,p+l)
+
+ ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill()
+ */
+
+// t0=t;requestAnimationFrame(frame)
+}
+let ln=(c,x0,y0,x1,y1)=>{c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
+let drawship=(c,x,y,p,l)=>{let x1=x-l*cos(p-pi/12),y1=y-l*sin(p-pi/12),x2=x-l*cos(p+pi/12),y2=y-l*sin(p+pi/12);c.beginPath();c.moveTo(x,y);c.lineTo(x1,y1);c.lineTo(x2,y2);c.closePath()}
+let gr=(x,y,r,p,r2)=>(r=hypot(x,y),r2=r*r,p=atan2(y,x),[-r2*G*cos(p),-r2*G*sin(p)])
+
+window.onkeydown=e=>{
+	acc+=e.key=="ArrowUp"?1.0:e.key=="ArrowDown"?-1.0:0;
+	Ap+=e.key=="ArrowLeft"?0.1:e.key=="ArrowRight"?-0.1:0;
+	console.log(e.key==" ");
+	e.key==" "?Afire=1:0}
+//window.onkeyup=_=>dir=0;
+requestAnimationFrame(frame);
+
+
+</script></body></html>
