@@ -20,6 +20,8 @@ kaichen|0,0,200,200|>fahrrad
 kaichen|541,72,750,253|*hallokai
 kaichen|242,121,536,364|weiter geht's
 kaichen|5,237,235,435|>birkenhainer
+kaichen|543,256,783,436|@spaceinvaders.html
+kaichen|206,0,533,105|@spacewar.html
 busparkplatz|0,0,200,200|>bus
 busparkplatz|275,62,635,361|Endstation. Alle aussteigen./Hanau (Freiheitsplatz>freiheit)
 busparkplatz|2,209,267,409|Komm wir gehen (hier>auto) lang und suchen uns ein Auto.
@@ -365,9 +367,11 @@ gang|682,144,792,392|Guji
 gang|5,360,791,443|Regal. Egal.
 raketenstart|151,237,648,435|Toll sieht die Erde aus von hier oben./Ganz klein.
 raketenstart|38,12,750,233|Wir fliegen in die (Sterne>rakete).
-rakete|309,10,552,443|Alle Anschnallen es geht mit Höchstgeschwindigkeit nach oben.
-rakete|562,34,793,426|Hilfe wir stürzen ab./Jetzt geht's ins (Höllenfeuer>hoellenfeuer)/so heiss ist mir.
+rakete|306,2,552,189|Alle Anschnallen es geht mit Höchstgeschwindigkeit nach oben.
+rakete|560,6,793,260|Hilfe wir stürzen ab./Jetzt geht's ins (Höllenfeuer>hoellenfeuer)/so heiss ist mir.
 rakete|10,78,300,420|Wir fliegen an der (Venus>venus) vorbei.
+rakete|307,194,550,445|@spacewar.html
+rakete|559,267,794,441|@spaceinvaders.html
 hoellenfeuer|62,96,534,421|>ufo
 ufo|213,36,563,431|Die Rakete hat sich wieder gefangen und wir sind abgekühlt.//Aber hier gibt es Ufos./Schau auf die (Uhr>uhr2)
 ufo|578,56,797,432|Wir landen wieder in (Korea>korea3) auf einem Berg.
@@ -422,6 +426,8 @@ wappen|226,279,383,431|Ein (Kamel>kamele)
 wappen|472,280,598,431|Sabrina
 wappen|206,11,324,227|Der goldene (Schlüssel>schloss).//Hier geht's wohl weiter.
 uhr2|0,0,200,200|>rakete
+uhr2|245,15,467,292|@spacewar.html
+uhr2|473,41,749,392|@spaceinvaders.html
 pferde|60,133,354,417|Hier ist Tinas Pferd./Es heisst Amadeus.
 pferde|489,250,776,439|Das ist Linas Pferd./Es heisst Sabrina./Findest du auch Tinas Pferd?//(Huiiihhuhu>pferdestall)
 pferde|360,14,777,231|Hier ist Tinas Pferd nicht.

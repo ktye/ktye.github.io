@@ -1,0 +1,123 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>spaceinvaders</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:black;image-rendering:pixelated;}
+</style></head><body><canvas id="cnv" width="280" height="280"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,floor=Math.floor
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random()
+
+const W=280,W2=floor(W/2)
+let B=0;
+let shoot=-4*W,dir=0,S=[]
+let M=[[1,1,1,1,1,1,1,1,1,1,1],
+       [3,3,3,3,3,3,3,3,3,3,3],
+       [3,3,3,3,3,3,3,3,3,3,3],
+       [5,5,5,5,5,5,5,5,5,5,5],
+       [5,5,5,5,5,5,5,5,5,5,5]]
+
+const ctx=cnv.getContext("2d");ctx.imageSmoothingEnabled=false;
+const im=ctx.getImageData(0,0,cnv.width,cnv.height)
+const da=new Uint32Array(im.data.buffer);
+const white=0xffffffff
+let X=0,Y=W*30,D=1;L1=0,L2=W-18*11,Z=W*W-W*13-W2,Z1=Z-W2,Z2=Z+W2-15,C=-4*W
+let blit=(I,o)=>I.forEach(x=>da[x+o]=white)
+let shot=(i,j,x,y,u,v)=>{x=shoot%W;y=floor(shoot/W);u=1+X+18*j,v=floor(Y/W)+14*i
+ if(x>u&&x<u+14&&v>y&&v-16<y){M[i][j]=0;shoot=-1;
+ let x1=10,x2=0,s=0;M.forEach(r=>r.forEach((x,i)=>{if(x){s++,x1=min(x1,i),x2=max(x2,i)}}))
+ if(!s)history.back();L1=-x1*18;L2=W-18*(1+x2)
+ return 0};return 1}
+let draw=_=>{B=1-B;
+ da.forEach((_,i)=>da[i]=0);
+ X+=D;if(X>L2){Y+=W+W;D=-1;}if(X<L1){Y+=W+W;D=1}
+
+ shoot-=8*W;
+ M.forEach((x,i)=>x.forEach((y,j)=>y?(shot(i,j)?blit(S[y-B],X+Y+14*W*i+18*j):0):0))
+ blit(ammo,shoot);
+
+ Z=max(Z1,min(Z2,Z+dir));dir=0;blit(ship,Z);
+
+ ctx.putImageData(im,0,0)
+ setTimeout(draw,20);
+}
+setTimeout(draw,200)
+
+window.onkeydown=e=>{dir+=e.key=="ArrowLeft"?-4:e.key=="ArrowRight"?4:0;if(e.key==" "&&shoot<0)shoot=7+Z;}
+//window.onkeyup=e=>dir=(e.key=="ArrowLeft"||e.key=="ArrowRight")?0:dir
+//requestAnimationFrame(frame);
+
+
+let sprite=(n,x,r)=>(r=[],x.split("\n").filter(x=>x.length).map(x=>x+" ".repeat(n-x.length)).join("").split("").forEach((x,j)=>{if(x=="x")r.push(j%n+W*floor(j/n))}),r)
+const ammo=[0,W,W+W,W+W+W]
+const ship=sprite(15,`
+       x
+      xxx
+     xxxxx
+     xxxxx
+ xxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxx
+`)
+S[0]=sprite(16,`
+       xx
+      xxxx
+     xxxxxx
+    xx xx xx 
+    xxxxxxxx
+     x xx x
+    x      x
+     x    x
+`);S[1]=sprite(16,`
+       xx
+      xxxx
+     xxxxxx
+    xx xx xx 
+    xxxxxxxx
+      x  x
+     x xx x
+    x x  x x
+`);S[2]=sprite(16,`
+    x      x
+     x    x
+    xxxxxxxx
+   xx xxxx xx
+  xxxxxxxxxxxx
+  x xxxxxxxx x
+  x x      x x
+     xx  xx
+`);S[3]=sprite(16,`
+    x      x
+  x  x    x  x
+  x xxxxxxx  x
+  xxx xxxx xxx
+  xxxxxxxxxxxx
+    xxxxxxxx  
+    x      x  
+   x        x
+`);S[4]=sprite(16,`
+     xxxxxx
+  xxxxxxxxxxxx
+ xxxxxxxxxxxxxx
+ xxx  xxxx  xxx
+ xxxxxxxxxxxxxx
+   xxx    xxx
+  xx  xxxx  xx
+   xx      xx
+`);S[5]=sprite(16,`
+     xxxxxx
+  xxxxxxxxxxxx
+ xxxxxxxxxxxxxx
+ xxx  xxxx  xxx
+ xxxxxxxxxxxxxx
+   xxx    xxx
+  xx  xxxx  xx
+ xx          xx
+`)
+//.split("\n").filter(x=>x.length).map(x=>x+" ".repeat(16-x.length))
+//for(let i=0;i<6;i++){S[i]=[];
+//sprites.slice(8*i,8+8*i).
+//join("").split("").forEach((x,j)=>{if(x=="x")S[i].push(j%16+W*floor(j/16))})}
+
+
+</script></body></html>
