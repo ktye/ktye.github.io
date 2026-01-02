@@ -26,7 +26,7 @@ let frame=t=>{vel=min(2,vel*1.001)
  
  cnv.width=w=cnv.getBoundingClientRect().width;
  cnv.height=h=cnv.getBoundingClientRect().height;
- const padlen=h/20
+ const padlen=h/20;
 
  P=max(L,min(1-L,P-0.007*dir));
  Q=max(L,min(1-L,Q+0.007*sign(Y-Q)));
@@ -58,6 +58,8 @@ let frame=t=>{vel=min(2,vel*1.001)
 }
 let ln=(c,x0,y0,x1,y1)=>{c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
 
+cnv.onpointerdown=e=>dir=e.clientY-e.target.getBoundingClientRect().top>h/2?-1:1
+cnv.onpointerup=_=>dir=0
 window.onkeydown=e=>dir=e.key=="ArrowUp"?1:e.key=="ArrowDown"?-1:0
 window.onkeyup=_=>dir=0;
 requestAnimationFrame(frame);
