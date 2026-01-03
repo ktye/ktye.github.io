@@ -54,7 +54,7 @@ lokomotive|332,7,618,234|>druck
 lokomotive|627,25,789,373|>bahn1
 uhr3|0,0,200,200|>lokomotive
 uhr3|207,8,632,431|*uhr
-uhr3|640,3,795,441|@breakout.html
+uhr3|640,3,795,441|>vorhang
 druck|0,0,200,200|>lokomotive
 druck|281,12,689,428|*uhr
 bahn1|4,0,331,240|Weiter geht's auf grosse Fahrt.//Folge den Schienen.
@@ -182,7 +182,7 @@ accordeon|474,198,739,438|*acc4
 accordeon|230,5,690,187|*acc3
 birkenhainer|0,0,200,200|>kaichen
 birkenhainer|526,5,761,405|>biberbaum
-birkenhainer|213,90,493,403|@pong.html
+birkenhainer|213,90,493,403|>vorhang
 biberbaum|9,207,290,421|>birkenhainer
 biberbaum|0,0,200,200|>berlin500
 biberbaum|289,106,657,370|Angebiebert!
@@ -233,7 +233,7 @@ messuhr|0,0,200,200|>funkturm
 messuhr|223,23,697,420|*uhr
 messuhr|3,213,209,426|@pong.html
 kabelsalat|0,0,200,200|>funkturm
-kabelsalat|607,43,796,301|@pong.html
+kabelsalat|607,43,796,301|>vorhang
 kuh|0,0,200,200|*muh
 kuh|212,7,759,391|Hier steht eine Kuh.//Schnell Milch trinken./Misst, sie ist (runtergefallen>milch).
 milch|244,15,760,398|Oh nein./So tollpatschig.//Schnell (weg>kuh2),/soll ein anderer aufwischen.
@@ -314,7 +314,22 @@ robbe|613,5,788,197|Durch die Schublade geht's zurück ins (Kanu>kanu)
 robbe|6,1,158,183|>pelikan
 pelikan|102,18,459,189|Wo kommt denn der her?//Ist es aus seinem (Nest>storchennest) entflogen?
 pelikan|467,75,676,342|*tama2
-pelikan|188,197,468,431|*tama3
+pelikan|23,196,466,437|>urwald
+urwald|463,5,560,85|Hier (fliegt>vogel2) ein (Vogel>vogel).
+urwald|470,111,784,386|Dichter (Wald>spreewald).
+urwald|175,161,448,363|Der Bär ist faul/liegt nur rum/und frisst Bananen.
+urwald|5,336,197,446|Hier liegen Schätze rum.
+urwald|5,4,445,150|>iquitos
+urwald|204,368,795,443|>iquitos
+iquitos|2,6,313,294|>papagei
+iquitos|6,302,251,446|>holzhaus
+iquitos|272,303,548,441|>kanu
+iquitos|321,5,779,301|>iquitos2
+iquitos2|9,5,415,216|>papagei
+iquitos2|493,390,704,447|>delfin
+iquitos2|589,37,796,248|>holzhaus
+iquitos2|9,225,296,443|>vogel2
+iquitos2|306,223,567,306|>kanu
 storchennest|277,1,789,443|Weiter geht's mit dem (Kanu>kanu)
 storchennest|7,36,267,389|Achtung, es kommt ein Raubvogel/im (Sturzflug>falke).//Alle in Sicherheit.
 kanus|206,112,621,411|lass uns hier anlegen/und ins (Haus>holzhaus) gehen.
@@ -322,6 +337,14 @@ kanus|626,7,797,420|Hier quakt ein (Frosch>frosch)
 kanus|8,6,200,403|Hier quakt auch ein (Frosch>frosch)
 frosch|130,84,556,393|Der quakt ja gar nicht mehr!
 frosch|563,20,790,413|>peruaner
+frosch|2,4,121,232|Hier ist ein (Vogel>vogel2) versteckt.
+frosch|128,2,551,73|>vogel2
+vogel2|90,5,433,199|*amsel
+vogel2|53,196,275,387|>blumen2
+vogel2|444,1,793,444|Da hinten kommt ein (Delfin>delfin2).
+delfin2|25,172,400,371|*tama1
+delfin2|407,285,789,443|>delfin
+delfin2|12,10,793,178|Hier hüpft ein (Kanguru>kanguru).
 peruaner|0,0,200,200|>frosch
 peruaner|390,1,635,183|>papagei
 peruaner|172,164,459,409|Die Frau hat einen Goldschatz umhängen./Hoffentlich finden wir auch noch einen./Das gehört sich so,/für ein vernünftiges Abenteuer.
@@ -340,6 +363,11 @@ diamant|218,176,661,424|Oh wie schön der leuchtet//Den nehmen wir mit.
 wanderer|0,0,200,200|>freiheit
 wanderer|226,215,585,433|Wir stürzen uns in ein Wanderabenteuer./Wir gehen den Weg entlang.
 wanderer|211,3,585,197|>weinberg
+wanderer|593,4,797,443|Die Wanderung geht langsam.//Da ist ja eine (Schnecke>schnecke) schneller.
+wanderer|4,207,219,435|>schnecke
+schnecke|122,2,399,264|Ich bin Igitta die Schnecke./Ich bin sehr schnell./3 Zentimeter pro Stunde.
+schnecke|402,47,710,403|Wirf Geld ein, das macht dich/nicht reich,/aber bringt Glück.//(Für mich).
+schnecke|4,269,395,437|Am liebsten Esse ich (Weintrauben>weinberg).//Lecker.
 korea1|7,34,308,405|*wind
 korea1|545,26,790,419|*wind
 korea1|318,8,533,420|Toll ist es hier in Korea.//Wir rennen die (Strasse>korea2) entlang.
@@ -371,7 +399,7 @@ raketenstart|38,12,750,233|Wir fliegen in die (Sterne>rakete).
 rakete|306,2,552,189|Alle Anschnallen es geht mit Höchstgeschwindigkeit nach oben.
 rakete|560,6,793,260|Hilfe wir stürzen ab./Jetzt geht's ins (Höllenfeuer>hoellenfeuer)/so heiss ist mir.
 rakete|10,78,300,420|Wir fliegen an der (Venus>venus) vorbei.
-rakete|307,194,550,445|@spacewar.html
+rakete|307,194,550,445|>vorhang
 rakete|559,267,794,441|@spaceinvaders.html
 hoellenfeuer|62,96,534,421|>ufo
 ufo|213,36,563,431|Die Rakete hat sich wieder gefangen und wir sind abgekühlt.//Aber hier gibt es Ufos./Schau auf die (Uhr>uhr2)
@@ -428,8 +456,8 @@ wappen|472,280,598,431|Sabrina
 wappen|206,11,324,227|Der goldene (Schlüssel>schloss).//Hier geht's wohl weiter.
 uhr2|0,0,200,200|>rakete
 uhr2|245,15,467,292|@spacewar.html
-uhr2|473,41,749,392|@spaceinvaders.html
-uhr2|7,210,243,427|@breakout.html
+uhr2|473,41,749,392|>vorhang
+uhr2|7,210,243,427|>vorhang
 pferde|60,133,354,417|Hier ist Tinas Pferd./Es heisst Amadeus.
 pferde|489,250,776,439|Das ist Linas Pferd./Es heisst Sabrina./Findest du auch Tinas Pferd?//(Huiiihhuhu>pferdestall)
 pferde|360,14,777,231|Hier ist Tinas Pferd nicht.
@@ -514,14 +542,14 @@ rot|53,109,109,421|gelb
 rot|117,141,172,425|fast gelb
 rot|171,118,238,435|orange gelb
 rot|239,81,293,428|009 orange
-rot|296,88,360,435|rosarot
+rot|296,88,360,435|(rosarot>feuerstein)
 rot|364,88,427,431|orange
 rot|431,72,489,433|zehn brau gelb//völlig unsortiert
 rot|493,107,544,437|wassergelb
 rot|547,120,611,431|kackbraun
 rot|614,104,671,446|Schmincke aus youtube.
-rot|673,90,727,438|ganz normales orange.
-rot|732,127,793,431|rot.//oben ist schwarz. wie die nacht.
+rot|673,90,727,438|ganz normales (orange>feuerstein).
+rot|732,127,793,431|(rot>feuerstein).//oben ist schwarz. wie die nacht.
 rot|5,3,228,105|schwarz wie die (Nacht>stuttgartnacht)
 rot|234,1,794,72|(dunkelschwarz>stuttgartnacht)
 raben|32,18,200,201|Ich hab den Mond gefangen.
@@ -532,3 +560,21 @@ pfau3|103,118,331,360|*vogel2
 pfau3|352,8,799,303|Ist das der Wald?//Nein das sind meine Federn.
 pfau3|338,311,597,443|Ist das Salat?//Nein das sind auch meine Federn.//Ich bin nicht der einzige (Pfau>pfau1).
 stern|302,14,672,430|Sonne mond und (Erde>falke).//Alle meine (Sterne>venus).
+kanguru|264,74,508,425|*tama2
+kanguru|513,80,696,267|@breakout.html
+kanguru|5,12,257,407|Morgen hab ich (Geburtstag>quince)!
+quince|16,18,262,318|@spaceinvaders.html
+quince|271,16,742,397|Das Kanguru wird (5>luftballons)!
+luftballons|45,23,424,388|*plopp3
+luftballons|437,3,750,183|*plopp2
+luftballons|434,186,786,443|Morgen müssen wir wieder in die (Schule>bus).
+feuerstein|17,7,329,336|>hoellenfeuer
+feuerstein|334,6,637,446|>diamant
+feuerstein|645,3,797,434|Das Feuer brennt schön (rot>rot).
+vorhang|242,60,611,365|Vorhang auf!//Hier sind Spiele versteckt.
+vorhang|239,370,611,444|>bus
+vorhang|1,0,233,193|@schach.html
+vorhang|6,201,229,434|@spacewar.html
+vorhang|616,3,797,236|@spaceinvaders.html
+vorhang|613,241,797,444|@pong.html
+vorhang|237,1,612,51|@breakout.html
