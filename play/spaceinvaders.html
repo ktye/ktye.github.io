@@ -42,9 +42,12 @@ let draw=_=>{B=1-B;
 }
 setTimeout(draw,200)
 
+
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerdown=e=>{pd(e);
+ let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;
+ x<0.3?(dir-=4):x<0.7?(shoot<0?shoot=7+Z:0):(dir+=4)}
 window.onkeydown=e=>{dir+=e.key=="ArrowLeft"?-4:e.key=="ArrowRight"?4:0;if(e.key==" "&&shoot<0)shoot=7+Z;}
-//window.onkeyup=e=>dir=(e.key=="ArrowLeft"||e.key=="ArrowRight")?0:dir
-//requestAnimationFrame(frame);
 
 
 let sprite=(n,x,r)=>(r=[],x.split("\n").filter(x=>x.length).map(x=>x+" ".repeat(n-x.length)).join("").split("").forEach((x,j)=>{if(x=="x")r.push(j%n+W*floor(j/n))}),r)
@@ -114,10 +117,4 @@ S[0]=sprite(16,`
   xx  xxxx  xx
  xx          xx
 `)
-//.split("\n").filter(x=>x.length).map(x=>x+" ".repeat(16-x.length))
-//for(let i=0;i<6;i++){S[i]=[];
-//sprites.slice(8*i,8+8*i).
-//join("").split("").forEach((x,j)=>{if(x=="x")S[i].push(j%16+W*floor(j/16))})}
-
-
 </script></body></html>

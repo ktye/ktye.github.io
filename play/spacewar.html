@@ -65,6 +65,7 @@ let frame=t=>{
  ctx.font="30px monospace"
  ctx.fillText(A,0.85*r,-0.85*r)
  ctx.fillText(B,-0.85*r,-0.85*r)
+ if(A==10||B==10)history.back()
  t0=t;requestAnimationFrame(frame)
 }
 let ln=(c,x0,y0,x1,y1)=>{c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}

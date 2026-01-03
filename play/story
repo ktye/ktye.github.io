@@ -54,6 +54,7 @@ lokomotive|332,7,618,234|>druck
 lokomotive|627,25,789,373|>bahn1
 uhr3|0,0,200,200|>lokomotive
 uhr3|207,8,632,431|*uhr
+uhr3|640,3,795,441|@breakout.html
 druck|0,0,200,200|>lokomotive
 druck|281,12,689,428|*uhr
 bahn1|4,0,331,240|Weiter geht's auf grosse Fahrt.//Folge den Schienen.
@@ -428,6 +429,7 @@ wappen|206,11,324,227|Der goldene (Schlüssel>schloss).//Hier geht's wohl weiter
 uhr2|0,0,200,200|>rakete
 uhr2|245,15,467,292|@spacewar.html
 uhr2|473,41,749,392|@spaceinvaders.html
+uhr2|7,210,243,427|@breakout.html
 pferde|60,133,354,417|Hier ist Tinas Pferd./Es heisst Amadeus.
 pferde|489,250,776,439|Das ist Linas Pferd./Es heisst Sabrina./Findest du auch Tinas Pferd?//(Huiiihhuhu>pferdestall)
 pferde|360,14,777,231|Hier ist Tinas Pferd nicht.
@@ -464,6 +466,7 @@ lama|170,3,437,147|*wasser
 lama|631,2,788,181|Hier ist ein Regenbogen.//Dort gibt es eine Schatz./Den müssen wir finden.
 lama|541,273,787,433|Hier ist eine große (Wiese>nebelberge)./Dort ist eine Kuh versteckt.
 pfau1|332,27,675,429|Plötzlich richtet er seine (Flügel>pfau2) auf!
+pfau1|9,8,324,434|@breakout.html
 pfau2|332,27,675,429|Sie bekommen es mit der Angst zu tun/und reiten schnell (weiter>reiten).
 kamele|32,5,453,302|Wir sind schon weit geritten.//Mitten in der (Wüste>vase)./Wir mussten auf Kamele umsteigen.//Ich wünschte wir hätten was zu (trinken>bier).
 kamele|464,82,644,417|*wiehern

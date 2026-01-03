@@ -1,0 +1,94 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>breakout</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:black}
+</style></head><body><canvas id="cnv"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random()
+
+const L=0.06,B=0.04,R=0.02,eps=0.001
+let A=0,X=0.5,Y=0.5,V=1,U=rand(),P=0.5,vel=0.5
+let t0,w,h;
+let dir=0;
+let goal=_=>{X=0.5;Y=0.5;V=rand()}
+let rotate=(phi,c,s)=>(c=cos(phi),s=sin(phi),[c*U-s*V,s*U+c*V])
+let reflect=P=>{
+ let phi=asin((abs(P-X)-L)/R);
+ let s=sign(X-P);
+ [U,V]=rotate(-s*phi);V=-V;[U,V]=rotate(s*phi);
+ if(Y>1-2*R)Y=1-2*R-eps;
+}
+const left =[[0,0,1],[0.31,0,0.1],[0.70,0,0.1]]
+const right=[[1,0,1],[0.3,0,0.1],[0.71,0,0.1]]
+const upper=[[0,0,1],[0.1,0.3,0.31],[0.1,0.7,0.71]]
+let bricks=[Array(10).fill(0).map((x,i)=>[0.05+0.1*i,0.2])]
+for(let i=5;i>=0;i--)for(let j=0;j<10;j++)bricks.push([0.05+0.1*j,0.15+0.04*i])
+let frame=t=>{vel=min(2,vel*1.001)
+ if(t0===undefined)t0=t;let dt=t-t0
+ dt*=0.0005
+
+ cnv.width=w=cnv.getBoundingClientRect().width;
+ cnv.height=h=cnv.getBoundingClientRect().height;
+ const padlen=h/20;
+
+ P=max(L,min(1-L,P-0.007*dir));
+
+ let XX=X;YY=Y
+ let uv=vel/hypot(U,V);U*=uv;V*=uv;X+=dt*U;Y+=dt*V
+ if(Y>1-2*R)((abs(P-X)>L+R)?(++A,Y=0.4,U=rand()):(abs(P-X)>L)?reflect(P):(V=-V))
+
+ left.forEach( l=>{let x=R+l[0],y1=l[1],y2=l[2];if(X<x&&Y>y1&&Y<y2)U=-U})
+ right.forEach(l=>{let x=l[0]-R,y1=l[1],y2=l[2];if(X>x&&Y>y1&&Y<y2)U=-U})
+ upper.forEach(l=>{let y=R+l[0],x1=l[1],x2=l[2];if(Y<y&&X>x1&&X<x2)V=-V})
+
+ for(let i=0;i<bricks.length;i++){
+	 let b=bricks[i],x=b[0],y=b[1],t=10/h;
+	 if(X+R>x-B&&X-R<x+B&&Y+R>y-t&&Y-R<y+t){
+		if(XX+R<x-B||XX-R>x+B)U=-U
+		else V=-V
+		X=XX;Y=YY;
+	 	bricks.splice(i,1);
+		break;
+	 }
+ }
+ let p=P*h,l=L*h,r=R*h,x=X*h,y=Y*h
+
+ let ctx=cnv.getContext("2d");
+ ctx.lineWidth=1;
+ ctx.strokeStyle="white"
+ ctx.fillStyle="white"
+ ctx.textAlign="center"
+ ctx.font="40px monospace"
+ ctx.fillText(A,w/2,50)
+
+ ctx.lineWidth=4; //paddle
+ ln(ctx,p-l,w-r,p+l,w-r)
+
+ left.forEach(l=>{let x=h*l[0],y1=h*l[1],y2=h*l[2];ln(ctx,x,y1,x,y2)})
+ right.forEach(l=>{let x=h*l[0],y1=h*l[1],y2=h*l[2];ln(ctx,x,y1,x,y2)})
+ upper.forEach(l=>{let y=h*l[0],x1=h*l[1],x2=h*l[2];ln(ctx,x1,y,x2,y)})
+
+ ctx.lineWidth=20;
+ ctx.strokeStyle="red"
+ bricks.forEach(b=>{let x=h*b[0],y=h*b[1];ln(ctx,x-h*B,y,x+h*B,y)})
+
+ ctx.beginPath();ctx.arc(x,y,r,0,2*Math.PI);ctx.fill()
+
+ t0=t;if(A<10&&bricks.length)requestAnimationFrame(frame);else history.back()
+}
+let ln=(c,x0,y0,x1,y1)=>{c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
+
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerdown=e=>{pd(e);
+ let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;
+ dir=x<0.5?1.5*vel:-1.5*vel}
+cnv.onpointerup=e=>{pd(e),dir=0}
+
+window.onkeydown=e=>dir=e.key=="ArrowLeft"?1.5*vel:e.key=="ArrowRight"?-1.5*vel:0
+window.onkeyup=_=>dir=0;
+requestAnimationFrame(frame);
+
+
+
+</script></body></html>

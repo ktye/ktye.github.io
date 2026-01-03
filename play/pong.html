@@ -58,8 +58,9 @@ let frame=t=>{vel=min(2,vel*1.001)
 }
 let ln=(c,x0,y0,x1,y1)=>{c.beginPath();c.moveTo(x0,y0);c.lineTo(x1,y1);c.stroke()}
 
-cnv.onpointerdown=e=>dir=e.clientY-e.target.getBoundingClientRect().top>h/2?-1:1
-cnv.onpointerup=_=>dir=0
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerdown=e=>(pd(e),dir=e.clientY-e.target.getBoundingClientRect().top>h/2?-1:1)
+cnv.onpointerup=e=>(pd(e),dir=0)
 window.onkeydown=e=>dir=e.key=="ArrowUp"?1:e.key=="ArrowDown"?-1:0
 window.onkeyup=_=>dir=0;
 requestAnimationFrame(frame);
