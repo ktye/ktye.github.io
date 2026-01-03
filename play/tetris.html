@@ -1,0 +1,49 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>tetris</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:black;image-rendering:pixelated;}
+</style></head><body><canvas id="cnv" width="20" height="20"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,floor=Math.floor
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random()
+
+const W=20
+let tetro=[],X=5,Y=0,R=0
+
+const ctx=cnv.getContext("2d");ctx.imageSmoothingEnabled=false;
+const im=ctx.getImageData(0,0,cnv.width,cnv.height)
+const da=new Uint32Array(im.data.buffer);
+const white=0xffffffff,grey=0xfff0f0f0,black1=0xff000000,black2=0xff111111
+let blit=(I,o,c)=>I.forEach(x=>da[x+o]=c)
+let rotate=_=>R=++R%4
+let draw=_=>{
+ da.forEach((_,i)=>da[i]=0);
+
+ for(let i=0;i<20;i++)for(let j=0;j<20;j++)da[W*i+j]=(j<5||j>15)?grey:1&(i^j)?black1:black2;
+ blit(tetro[6][R],X+W*Y,white);
+
+ ctx.putImageData(im,0,0)
+ setTimeout(draw,20);
+}
+setTimeout(draw,200)
+
+
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerdown=e=>{pd(e);
+ let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;
+ x<0.3?(dir-=4):x<0.7?(shoot<0?shoot=7+Z:0):(dir+=4)}
+
+window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?--X:k=="ArrowRight"?++X:k=="ArrowUp"?rotate():k=="ArrowDown"?++Y:k==" "?fall():0}
+
+//https://tetris.wiki/Super_Rotation_System
+
+let sprite=(n,x,o,r)=>(r=[],o=o?o:0,x.split("\n").filter(x=>x.length).map(x=>x+" ".repeat(n-x.length)).join("").split("").forEach((x,j)=>{if(x=="x")r.push(j%n+o+W*floor(j/n))}),r)
+tetro[0]=[sprite(4,`xxxx`),sprite(1,"x\nx\nx\nx",-18),sprite(4,`xxxx`,20),sprite(1,"x\nx\nx\nx",-19)]
+tetro[1]=[sprite(3,"x\nxxx"),sprite(2,"xx\nx\nx",1),sprite(3,"xxx\n  x",20),sprite(3," x\n x\nxx")]
+tetro[2]=[sprite(3,"  x\nxxx"),sprite(2,"x\nx\nxx",1),sprite(3,"xxx\nx",20),sprite(2,"xx\n x\n x")]
+tetro[3]=[sprite(2,"xx\nxx"),sprite(2,"xx\nxx"),sprite(2,"xx\nxx"),sprite(2,"xx\nxx")]
+tetro[4]=[sprite(3," xx\nxx"),sprite(2,"x \nxx\n x",1),sprite(3," xx\nxx",20),sprite(2,"x\nxx\n x")]
+tetro[5]=[sprite(3," x\nxxx"),sprite(2,"x\nxx\nx",1),sprite(3,"xxx\n x",20),sprite(2," x\nxx\n x")]
+tetro[6]=[sprite(3,"xx\n xx"),sprite(2," x\nxx\nx",1),sprite(3,"xx\n xx",20),sprite(2," x\nxx\nx")]
+
+</script></body></html>
