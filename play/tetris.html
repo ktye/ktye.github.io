@@ -8,32 +8,47 @@ let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
 let rand=_=>Math.random()
 
 const W=20
-let tetro=[],X=5,Y=0,R=0
+let B=new Uint8Array(20*22).map((_,i)=>8*(i%20<5||i%20>14));
+let tetro=[],bag=[],X=10,Y=5,T=0,R=0
+
+for(let i=0;i<10;i++)B[20*20+5+i]=1
 
 const ctx=cnv.getContext("2d");ctx.imageSmoothingEnabled=false;
 const im=ctx.getImageData(0,0,cnv.width,cnv.height)
 const da=new Uint32Array(im.data.buffer);
 const white=0xffffffff,grey=0xfff0f0f0,black1=0xff000000,black2=0xff111111
-let blit=(I,o,c)=>I.forEach(x=>da[x+o]=c)
-let rotate=_=>R=++R%4
-let draw=_=>{
- da.forEach((_,i)=>da[i]=0);
-
- for(let i=0;i<20;i++)for(let j=0;j<20;j++)da[W*i+j]=(j<5||j>15)?grey:1&(i^j)?black1:black2;
- blit(tetro[6][R],X+W*Y,white);
-
+const colors=[0xffffff00,0xffff0000,0xff00a5ff,0xff00ffff,0xff00ff00,0xff800080,0xff0000ff,grey]
+const BB=r=>{r="";for(let i=0;i<22;i++){for(let j=0;j<20;j++)r+=B[20*i+j];r+="\n"};console.log(r)}
+let next=_=>{row();if(!bag.length){bag=[0,1,2,3,4,5,6];bag.sort(_=>rand()-0.5)}
+ T=bag.pop();X=8+(3==T);Y=0;R=0}
+let free=(x,y,r,t)=>(console.log("free",x,y,r),t=tetro[T][r%4],x+=20*y,t.every(i=>(0==B[i+x])))
+let clear=o=>{o=X+20*Y;tetro[T][R].forEach(i=>B[i+o]=0)}
+let blit=(o,c)=>{console.log("blit",T,R,X,Y);o=X+20*Y;tetro[T][R].forEach(i=>B[i+o]=1+T)}
+let left =_=>{clear();X-=free(X-1,Y,R);blit()}
+let right=_=>{clear();X+=free(X+1,Y,R);blit()}
+let down =n=>{clear();Y+=free(X,1+Y,R);n=!free(X,1+Y,R);blit();if(n)next()}
+let fall =_=>{clear();while(free(X,++Y,R));--Y;blit();next()}
+let rotate=_=>{clear();if(free(X,Y,1+R))R=(1+R)%4;blit()}
+let delrow=(n,i)=>{while(n>40){i=n%20;if(i>4&&i<15)B[n]=B[n-20];n--}}
+let isrow=i=>{i*=20;r=0;for(j=5;j<15;j++)if(!(B[i+j]))return 0;return 1}
+let row=(i,j)=>{for(i=21;i>=0;i--)while(isrow(i))delrow(20*i+21)}
+let draw=_=>{let k=0,i,j,c;
+ for(i=0;i<20;i++)for(j=0;j<20;j++){c=B[40+k];da[k++]=c?colors[c-1]:1&(i^j)?black1:black2}
  ctx.putImageData(im,0,0)
- setTimeout(draw,20);
+ //setTimeout(draw,20);
 }
-setTimeout(draw,200)
+let tick=_=>(down(),draw())
+//setInterval(tick,1000)
 
 
+/*
 let pd=e=>(e.preventDefault(),e.stopPropagation())
 cnv.onpointerdown=e=>{pd(e);
  let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width;
  x<0.3?(dir-=4):x<0.7?(shoot<0?shoot=7+Z:0):(dir+=4)}
+*/
 
-window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?--X:k=="ArrowRight"?++X:k=="ArrowUp"?rotate():k=="ArrowDown"?++Y:k==" "?fall():0}
+window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="ArrowUp"?rotate():k=="ArrowDown"?down():k==" "?fall():0;draw()}
 
 //https://tetris.wiki/Super_Rotation_System
 
@@ -45,5 +60,6 @@ tetro[3]=[sprite(2,"xx\nxx"),sprite(2,"xx\nxx"),sprite(2,"xx\nxx"),sprite(2,"xx\
 tetro[4]=[sprite(3," xx\nxx"),sprite(2,"x \nxx\n x",1),sprite(3," xx\nxx",20),sprite(2,"x\nxx\n x")]
 tetro[5]=[sprite(3," x\nxxx"),sprite(2,"x\nxx\nx",1),sprite(3,"xxx\n x",20),sprite(2," x\nxx\n x")]
 tetro[6]=[sprite(3,"xx\n xx"),sprite(2," x\nxx\nx",1),sprite(3,"xx\n xx",20),sprite(2," x\nxx\nx")]
+next();
 
 </script></body></html>
