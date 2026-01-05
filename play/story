@@ -209,9 +209,12 @@ entenrutsche|463,146,741,312|>enten
 entenrutsche|207,49,427,395|Ich hab Hunger.//Ich hab eine (gefangen>ganstogo)/Lecker.//Oder lieber eine (Pizza>pizzamat)?
 enten|0,0,200,200|>entenrutsche
 enten|44,204,222,313|*eule
-enten|264,169,496,313|*vogel
+enten|264,169,496,313|>ente
 enten|507,132,673,292|*vogel2
 enten|676,19,795,172|>moorhuhn
+ente|0,0,200,200|>entenrutsche
+ente|402,3,762,235|@tetris.html
+ente|4,208,411,430|*vogel1
 ganstogo|0,0,200,200|>entenrutsche
 ganstogo|215,219,660,447|Gans-Togo?/Was soll das denn sein.//Aber es gibt was zu (trinken>bier)/Oder (Wein>weinberg)
 ganstogo|2,208,204,439|Hier können wir das (Fahrrad>fahrrad) abschliessen.
@@ -574,7 +577,8 @@ feuerstein|645,3,797,434|Das Feuer brennt schön (rot>rot).
 vorhang|242,60,611,365|Vorhang auf!//Hier sind Spiele versteckt.
 vorhang|239,370,611,444|>bus
 vorhang|1,0,233,193|@schach.html
-vorhang|6,201,229,434|@spacewar.html
+vorhang|4,208,232,327|@spacewar.html
+vorhang|2,332,232,444|@tetris.html
 vorhang|616,3,797,236|@spaceinvaders.html
 vorhang|613,241,797,444|@pong.html
 vorhang|237,1,612,51|@breakout.html

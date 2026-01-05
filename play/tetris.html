@@ -18,7 +18,7 @@ const white=0xffffffff,grey=0xfff0f0f0,black1=0xff000000,black2=0xff111111
 const colors=[0xffffff00,0xffff0000,0xff00a5ff,0xff00ffff,0xff00ff00,0xff800080,0xff0000ff,grey]
 let next=_=>(clearInterval(req),setTimeout(lock,300))
 let lock=_=>{row();if(!bag.length){bag=[0,1,2,3,4,5,6];bag.sort(_=>rand()-0.5)}
- T=bag.pop();X=8+(3==T);Y=+!T;R=0;if(!free(X,Y,R))gameover();req=setInterval(tick,300)}
+ T=bag.pop();X=8+(3==T);Y=+!T;R=0;if(!free(X,Y,R))gameover();req=setInterval(tick,500)}
 let free=(x,y,r,t)=>(t=tetro[T][r%4],x+=20*y,t.every(i=>(0==B[i+x])))
 let clear=o=>{o=X+20*Y;tetro[T][R].forEach(i=>B[i+o]=0)}
 let blit=(o,c)=>(o=X+20*Y,tetro[T][R].forEach(i=>B[i+o]=1+T))
@@ -26,19 +26,18 @@ let left =_=>{clear();X-=free(X-1,Y,R);blit()}
 let right=_=>{clear();X+=free(X+1,Y,R);blit()}
 let down =n=>{clear();Y+=free(X,1+Y,R);n=!free(X,1+Y,R);blit();if(n)next()}
 let fall =_=>{clear();while(free(X,++Y,R));--Y;blit();next()}
-//https://tetris.wiki/Super_Rotation_System
-let kik=[[0,-1,-21,40,39],[0,1,21,-40,-39],[0,1,-19,40,41],[0,-1,19,-40,-41]]
-let kic=[[0,-2,1,18,-39],[0,-1,2,-41,22],[0,2,-1,-18,39],[0,1,-2,41,-22]]
-let rotate=k=>{k=T?kik:kic;clear();if(free(X,Y,1+R))R=(1+R)%4;blit()}
+let kik=[[0,0,-1,0,-1,1,0,-2,-1,-2],[0,0,1,0,1,-1,0,2,1,2],[0,0,1,0,1,1,0,-2,1,-2],[0,0,-1,0,-1,-1,0,2,-1,2]]
+let kic=[[0,0,-2,0,1,0,-2,-1,1,2],[0,0,-1,0,2,0,-1,2,2,-1],[0,0,2,0,-1,0,2,1,-1,-2],[0,0,1,0,-2,0,1,-2,-2,1]]
+let rotate=k=>{k=T?kik[R]:kic[R];clear();for(let i=0;i<10;i+=2)if(free(X+k[i],Y-k[1+i],1+R)){X+=k[i];Y-k[1+i];R=(1+R)%4;break};blit()}
 let delrow=(n,i)=>{while(n>40){i=n%20;if(i>4&&i<15)B[n]=B[n-20];n--}}
 let isrow=i=>{i*=20;r=0;for(j=5;j<15;j++)if(!(B[i+j]))return 0;return 1}
 let row=(i,j)=>{for(i=21;i>=0;i--)while(isrow(i))delrow(20*i+21)}
+let gameover=_=>history.back()
 let draw=_=>{let k=0,i,j,c;
  for(i=0;i<20;i++)for(j=0;j<20;j++){c=B[40+k];da[k++]=c?colors[c-1]:1&(i^j)?black1:black2}
  ctx.putImageData(im,0,0)}
 let tick=_=>(down(),draw())
 req=setInterval(tick,500)
-
 
 let pd=e=>(e.preventDefault(),e.stopPropagation())
 cnv.onpointerup=e=>pd(e)

@@ -1,0 +1,13 @@
+
+cat << EOF > games.html
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>games</title>
+</head><body><ul>
+EOF
+
+ls *.html | grep -v edit | grep -v index | grep -v games | while read g;do
+	f=`echo $g|sed 's/.html//'`
+	echo "<li><a href=\"$g\">$f</g></li>" >> games.html
+done
+
+echo "</ul></body></html>" >> games.html
