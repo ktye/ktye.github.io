@@ -1,0 +1,131 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>frogger</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:black;image-rendering:pixelated;}
+</style></head><body><canvas id="cnv" width="480" height="480"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,floor=Math.floor
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random()
+
+let X=222,Y=12,T=0,A=5,F=0,req
+const W=480,G=48,B=180,P=36
+
+const ctx=cnv.getContext("2d");ctx.imageSmoothingEnabled=false;
+const im=ctx.getImageData(0,0,cnv.width,cnv.height)
+const da=new Uint32Array(im.data.buffer);
+const white=0xffffffff,black=0xff000000,red=0xff0000ff,blue=0xff490016,green=0xff17f200,purple=0xffdf00aa
+let gameover=_=>{clearInterval(req);history.back()}
+let dead=()=>{console.log("dead",A);Y=12;X=222;if(!--A)gameover()}
+let blit=(r,o,s,w,i)=>(w=s.w,i=0,s.c.forEach(x=>{r[o+i]=x;if(++i==w){o+=W;i=0}}))
+let rect=(x,y,w,h,c)=>{let o=x+W*y,i,j;for(j=o;j<o+W*h;j+=W)for(i=0;i<w;i++)da[i+j]=c}
+let alive=_=>{for(let i=0;i<12;i++)if(da[X+10+W*(20+36*Y+i)]!=black)return dead();X+=16;
+              for(let i=0;i<12;i++)if(da[X+10+W*(20+36*Y+i)]!=black)return dead();X-=16;}
+let dry  =_=>{for(let i=0;i<12;i++)if(da[X+10+W*(20+36*Y+i)]==blue)return dead();X+=16;
+              for(let i=0;i<12;i++)if(da[X+10+W*(20+36*Y+i)]==blue)return dead();X-=16;}
+let frg=(i,o)=>{i=0;o=X+W*(10+36*Y);frog.c.forEach(x=>(x==black?0:da[i+o]=x,++i==36?(i=0,o+=W):0))}
+rect(0,0,W,G,green);
+for(let i=0;i<5;i++)rect(24+i*96,10,48,36,black);
+rect(0,G,W,B-G,blue);
+rect(0,B,W,P-G-B,purple);
+
+
+let car1,car2,car3,car4,frog,truck,trunk1,trunk2,trunk3
+let pa,sprite=(w,h,c)=>{c=rld(c).split("");let r=new Uint32Array(w*h);for(let i=0;i<c.length;i++)r[i]=0xff000000|pa["abcdefghijklmnopqrstuvxwyzABCDEFGHIJKLMNOPQRSTUVXWYZ".indexOf(c[i])];return{w:w,h:h,c:r}}
+let rld=s=>{let r="";for(let i=0;i<s.length;i++){if("0123456789".includes(s[i])){let n=parseInt(s.slice(i));r+=r[r.length-1].repeat(n);i+=(""+n).length-1}else{r+=s[i]}};return r}
+pa=[0,204,255,69,137,2687153,6815962,7340117,14614698,3604524,17726,65529,1820903,3423849,6912980,10813631,10944639,50943,1342703,917749,31231,52154,6815961,7143575,2917544,35197,]
+car1=sprite(46,36,"a29bc11da31bc11da10eb11da6bc11da10bc11ea6bc11da10bc11ea6bc11da10bc11ea6bc11da10bc11ea6bc11da10e4fg1fe3da6e4fg1e4a16hi1ja16hi1a21hi1ja16hi1a15kl31ka10kl33ka8kl10m5l6m11nja5kl10oi5pl4oi13qa3kl10oi6pl2rlpi13ha2kl11i5oml2rc1lmst1sm1t1fj3a2kl11oi5pml2uc1rlrc1ul1c1ba5kl11oi8pl1uc1rlrc1ul1c1ba6vl10mi8ol1uc1rlrc1ul1c1ba7vl10pi5oml2uc1rlrc1ul1c1ba8vl10i5pol2rc1lmwg1wo1g1xh3a5vl9mi6pl4oi13qa5vl9oi5ol4oi13ha6vl9m5l7m9yj1a8vl31va12zv3m2v17m2v2a18hi1ja16hi1a21hi1ja16hi1a16de3fg1e4da6de3fg1e4da10bc11ea6bc11da10bc11ea6bc11da10bc11ea6bc11da10bc11ea6bc11da10e12da6bc11da31bc11da31bc11da1")
+pa=[0,3618615,3288702,137,7303023,69,10921638,6577659,255,10658030,14606046,81152,424448,7039159,204,4308,7056311,2429891,2452679,10938530,1569280,964096,7384937,7401049,3781632,3993856,29842,3388029,]
+car2=sprite(46,36,"a96bcd1ce1d1ce1d2e1cfa9e7a8ghi1jkji1hk1i2k1ida9k7a8ghi1jkji1hk1i2k1ida9k7a8ghi1jkji1hk1i2k1ida9k1ji1fa10ghi1jkji1hk1i2k1ida1lm6k1ji1fa10enopqgno1rg1opstgrda1mu6k1ji1cb1a11u1ma6vu1a4vu6k7a11u1ma6vu1a4vuva4k7a10et2g6t2g4t1wa4k1ji1cb1a9ek20ga4k1ji1fa10ek21ga4k1ji1fa10gk11xu3tkxu1ya4k7a8gk11tu3xku2ya4k7a8gk3tx6tx1u1xkx2wa4k2h1ne1a8gk3xu6tk1u1xk3ga4k1ji1fa10gk3xu6tk1u1xk3ga4k1ji1fa10gk3xu6tk1u1xk3ga4k1ji1fa10gk3xu6tk1u1xk3ga4k1ji1fa10gk3tz6t2u1xk1t1ga4k1ji1cb1a8gk11xu3xku2va4k7a8gk11tu3xkzu1ya4k7a8ek12t3k2t1ga4k1ji1cb1a9ek20ga4k1ji1fa12ek19ga4k1ji1fa13u1ma6vu1a4vuva4k7a11u1ma6vu1a4vu1v4k7a8bcdABwed1ce1dA1xecfa1vu6k2h1ne1a8ghi1jkji1hk1i2k1ida1lu6k1ji1fa10ghi1jkji1hk1i2k1ida9k1ji1fa10ghi1jkji1hk1i2k1ida9k2j1g2a8ghi1jkji1hk1i2k1ida9k7a8eno1ngno1rg1o1rg1rda9g7a95")
+pa=[0,53071,65385,35636,3539014,6923983,3072164,3316358,7209099,17948,3684608,10748110,14352639,11119360,14869760,14857984,14713732,7435008,14563533,11203584,10640371,3931904,7601920,7329398,7356994,3429223,]
+car3=sprite(46,36,"a147bc3da11dc6da18bc3da11dc6da17efg3hia10jg6da15klm8ia7elm7ia13nopm9ia5im10ia11no1qm10l5m12ea9ro1pm8sqm19sr2a5rot1um6so3sm17o3na4ovc2fm4qo4m18o3ra3koc4m4o4qm10qp3sm2k2a4rowxf1um3qo4m11po3qm2a7nopm7qo3qm11po3qm2a7o1qm7po3qm11po3qm2a7o1qm7o4sm11po3qm2a6ko1qm7o4sm11po3qm2a7o1pm7o4sm11po3qm2a7o1pm7po3qm11po3qm2a7no1m7po3pm11po3qm2a7yotg1f1m3so4m11po3qm2a7koc4m4po3qm10q4sm1sr2a5nwc2fm4so4sm17o3na4ko2sm6sqo2qm17o3ra5ro2sm8sm19lk2a7ro1pm10li4m12ea11roqm9ea5em10ea13eim7lea8im6la18hg3zea10dg6ja18bc3da11dc6da18db3da11jb6da192")
+pa=[0,255,69,30788,111664,964096,1569280,3618615,3781632,3993856,14606046,7303023,7401049,10938530,424448,81152,10658030,6577659,137,10921638,7384937,]
+car4=sprite(46,36,"a2b12a32b12a32b12a6cb12a11b12a6cb12a11b12a6cb12a11b12a6cb12a11b12a6cb12a11c4dedc4a7c4e1dc4a16fgfa17g1fa18h2ijih17j1ih4a12hk31la10hk33la7f1j10m1k4nj4m1k9la5og14k4mg6nk9la4pg13mqrk2ng6jk10la8sb1qkqb1rk1b2k3ng5mk10la7sb1qkqb1rk1b2k1nj1g6nk10la6sb1qkqb1rk1b2k1mg8mk11ha5sb1qkqb1rk1b2k1ng8mk10ta6sb1qkqb1rk1b1rk3ng5mk10ta2pf4e1j2e2jmrbqk1nj1g5k10ta3og14k4mg6mk9ta4pofj11mk4nj5mk9ta8lk33ta10lk31ta12l2um1l17m2l4a16fgfa17g1fa21fgfa17g1fa16b12a6cb12a11b12a6cb12a11b12a6cb12a11b12a6cb12a11b12a6cb12a11b12a7c12a11b12a32b12a29")
+pa=[0,81152,424448,1569280,3539014,964096,10748111,14352639,10748119,7209099,3715890,65461,65529,65384,7171221,6451967,10486015,7147666,3552842,1112576,]
+frog=sprite(36,36,"a220bca7b1c2ba7b1a9d1ba2e1cd7ce1a2cdfa8bd1ca1gh1id7ih1ja1fd1a6cd3cajh3kl1m1lnoh3eafd3ba3fd3cajh3pm5qh3jafd3ca4cfd1caeh3pm5ph3a1fd1f1a6bd1ca1ri1pm7phisa1fd1a8bd1ca1fdtm9d1fa1fd1a8bd2f1d1tm9d2f1d2a8bd6tm9d7a9cf3d1tm9d2f3ca14d1tm9d1fa19d1tm9d1fa14bc3d1tm9d1fc3a10d6tm9d6fa8bd7m8ld7a8bd1ca1cd1nm7nd1ba1fd1a8bd1ca1bd2nm5nd1ca2fd1a7bcd1ca2cd2tn1lt1d2ba2fd1b1a4cd3ca3cd9ba3fd3ba3fd3ca4c1d4f1ba4fd3ca4bcd1ca8b2a7fd1b1a6bd1ca19fd1a9cfa20bdca220")
+pa=[0,81152,1569280,424448,964096,69,10921638,10938530,3700526,7303023,3618615,204,6577659,14606046,137,255,7039159,10658030,3288702,3993856,3781632,]
+truck=sprite(78,32,"a166b6a5b6a31b7a16bc6da3bc6da30c6ea16bc6da3bc6da30c6ea13fg2h6ia1jg1h7g30h7g1ka8flmn9ja1gn50ja8opn10ja1gn50ja8omn10ja1gn50ja8jn11ja1gn50ja8jn11qo1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8jn11mp1rn50ja8sn11ja1gn50ja8orn10ja1gn50ja8opn10ja1gn50ja8oprn9ja1gn50ja9opn9ja1gn50ja11k1it6ia1k1it6ik30t6uk2a13bc6da3bc6da30c6ea16be6da3be6da30e6da240")
+pa=[4718604,4653372,4466806,4146095,3431658,6586344,9347301,14606046,11976674,3694806,4286620,4476021,4720171,4664911,3538951,3420750,4128777,2359299,2949125,]
+trunk1=sprite(36,36,"a116bc25a6bde26a5ce28a5e29a4ce29a3ce5f1g1e20a3ce5h3ie19a3e6ih2ie19a2ce7f2e20a2ce31a2de28f2a2de27h3a2e27fh3a2e4fg3e18g2fa2e4gh3fe21a2de3fh2ie22a2de31a2ce31a2bj31a3k31a3lk30a3mk30a4lk29a5lk28a5mk28a7nk26a5o3p25a5qr28a6or27a8os25a107")
+pa=[4718604,4466806,3431658,6586344,9347301,14606046,11976674,3694806,6717908,9413329,12042445,4286620,3420750,2359299,2949125,]
+trunk2=sprite(36,36,"a107b35c168de2c30ef3ec29df3ec31d2c78ec34gc34dc133ef5ec27gf6ch26ijk4ihl251m35n71o35a107")
+pa=[4718604,4466806,7162228,9660529,7219260,3431658,6586344,11976674,14606046,9347301,12166055,9071217,3538951,3694806,9413329,12042445,6717908,4286620,8481904,6981037,2359299,4128777,9479357,11511207,5452089,3420750,2949125,]
+trunk3=sprite(36,36,"a107b18cd2ea11f16ghi5da9f15ji8da8f14ji2hgf1ji2da7f14i2gf4gi2ea6f13ji1jfghgf2gi1ka6f12ji1jf1ihgf3hi1ea5f12ji1f1jhf5gi1ka5f12i1hf1ijf6hi1a5f11gi1jfjif7gi1ea4f11ji1gfhjf7gi1da4f11ji1gfhjf8i1da4f11ji1f1ijf8i1ka4f11ji1f1igf4gif1i1ka4f11ji1f8gif1i1ka4f11ji1f8jifgi1la4f1ji2jf4gi1gf7jhfji1la4f1i4f4gi1hf7ijfji1ma4n1o1p1qn5i1hf6jif1i2ma4r12pi1gf5hjfji1sma4r12ti1hf3ghif1ji1uva4r13pi1jf2ihgfji1sua5r14i2jf4ji2uma5r14ti2j1fghi2sua6r15wi8suma6r17wi4xyu1ma6z19s1y1u2ma7u25ma8u24va9A22va119")
+pa=[4718604,2521344,1569280,3553536,1750272,3407942,204,1376393,29842,255,12176,2177098,4308,5842047,7219260,12166055,9660529,6059057,10658030,14606046,7401049,6577659,3993856,4128777,10938530,137,3538951,2949125,1507397,2359299,1784832,111664,292932,1407488,1357312,1931520,2963968,]
+turtle=sprite(46,36,"a195bcda17bcda21c1ea17c1ba19dbc1eb1a13dbc1eb1a16bc6da11bc6da15dc6da11bc5ea21dc1df1g6h1abc1a26dcigj11kica26lmj15iha24hj19ha22gj21na16opqrkj22sfa3dba7det2sj23tga2bc1da5dc1ut1vj22vtjfabc2a6bc4mj22t1jic3da6ec4mj21vt1jic2da7dc1wu1mj20vt1vjkb1da9bct2sj19st2j1xa13byt1ujvj15vt3vjzAa15o1BCjtv1j10s1t3vj1DAa17BDzjvt2s1v1s2t5sj1gD1xa17xD1Cjvst12vj1gD1Aa19AD1Eij1v1st3s2j2mFD2a21ADEc1kzj8g1Gc1D1xa19db1HIc1ED2C1zC2D2Hc1HJb2a16bc6ED11Hc6da15dc5eAD10BKc5ea19c1ea4A6xa4c1ba21ecba17ecba21dba18bda148")
+
+let cp=(o,r)=>{r.forEach((x,i)=>da[o+i]=x)}
+let row=c=>new Uint32Array(38*W).fill(c)
+let R1=((r,o)=>(r=row(blue),o=0,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk3),o+=108,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk2),o+=36, blit(r,o,trunk3),o+=36,r))()
+
+let R2=((r,o)=>(r=row(blue),o=0,
+ blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=86,blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=86,
+ blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=86,blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=76,
+ r))()
+
+let R3=((r,o)=>(r=row(blue),o=0,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk3),o+=108,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk3),o+=72,
+ r))()
+
+let R4=((r,o)=>(r=row(blue),o=0,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36,blit(r,o,trunk3),o+=108,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36, blit(r,o,trunk3),o+=108,
+ blit(r,o,trunk1),o+=36,blit(r,o,trunk2),o+=36, blit(r,o,trunk3),o+=108,
+ r))()
+
+let R5=((r,o)=>(r=row(blue),o=0,
+ blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=108,
+ blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=36,blit(r,o,turtle),o+=76,
+ r))()
+
+let R6=row(purple)
+
+let R7=((r,o)=>(r=row(black),o=0,blit(r,o,truck),o+=208,blit(r,o,truck),r))()
+let R8=((r,o)=>(r=row(black),o=0,blit(r,o,car4),o+=72,blit(r,o,car4),o+=72,blit(r,o,car4),o+=72,r))()
+let R9=((r,o)=>(r=row(black),o=0,blit(r,o,car3),o+=148,blit(r,o,car3),o+=148,blit(r,o,car3),r))()
+let Ra=((r,o)=>(r=row(black),o=0,blit(r,o,car2),o+=100,blit(r,o,car2),r))()
+let Rb=((r,o)=>(r=row(black),o=0,blit(r,o,car1),o+=96,blit(r,o,car1),o+=108,blit(r,o,car1),r))()
+let Rc=row(purple)
+
+let left=_=>(X-=36,draw())
+let right=_=>(X+=36,draw())
+let up=_=>(--Y,draw())
+let down=_=>(++Y,draw())
+
+let draw=_=>{let h,d,r=36*W,o=r+10*W;if(++T==W)T=0;
+ cp(o+T,R1);o+=r
+ cp(o-2*T,R2);o+=r
+ cp(o+T,R3);o+=r
+ cp(o+3*T,R4);o+=r
+ cp(o-T,R5);o+=r
+ cp(o,R6);o+=r
+ cp(o-T,R7);o+=r
+ cp(o+2*T,R8);o+=r
+ cp(o-T,R9);o+=r
+ cp(o+2*T,Ra);o+=r
+ cp(o-3*T,Rb);o+=r
+ cp(o,Rc);
+
+ X+=Y==1?1:Y==2?-2:Y==3?1:Y==4?3:Y==5?-1:0
+
+ if(X<18||X>462)dead();
+ if(Y&&Y<6)dry();
+ if(Y==0||(Y>6&&Y<12))alive();
+ frg()
+ if(!Y){X=222;Y=12;if(5==++F)gameover()}
+ ctx.putImageData(im,0,0)}
+
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerup=e=>pd(e);cnv.onpointerdown=e=>{pd(e);
+ let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height
+ x<0.3?left():x>0.7?right():y<0.3?up():y>0.7?down():0}
+
+window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="ArrowUp"?up():k=="ArrowDown"?down():0}
+
+draw()
+req=setInterval(draw,30)
+
+</script></body></html>
+
