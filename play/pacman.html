@@ -1,0 +1,141 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>pacman</title><style>
+body{font-family:monospace;font-size:xxx-large;margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;background:#f0f0f0;}
+canvas{width:min(100vw,100vh);height:min(100vw,100vh);background:black;image-rendering:pixelated;}
+</style></head><body><canvas id="cnv" width="341" height="341"></canvas><script>
+let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,floor=Math.floor
+let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
+let rand=_=>Math.random(),pi=Math.PI
+
+let X=0,Y=0,T=0,A=5,F=0,req
+const W=341
+
+const ctx=cnv.getContext("2d");ctx.imageSmoothingEnabled=false;
+const im=ctx.getImageData(0,0,cnv.width,cnv.height)
+const da=new Uint32Array(im.data.buffer);
+const white=0xffffffff,black=0xff000000,yellow=0xff00fff9,red=0xff0000ff,blue=0xffff004c,green=0xff17f200,purple=0xffdf00aa
+let gameover=_=>{clearInterval(req);history.back()}
+let dead=()=>{console.log("dead",A);Y=12;X=222;if(!--A)gameover()}
+
+let circ=(d,w,x,y,r,c)=>{
+ let j=0,k=0;for(let i=0;i<d.length;i++){
+  if((k-x)*(k-x)+(j-y)*(j-y)<r*r)d[i]=c;
+  if(++k==w){j++;k=0};}}
+let cake=(d,w,x,y,r,o)=>{o*=pi/180
+ let j=0,k=0;for(let i=0;i<d.length;i++){
+  if(abs(atan2(j-y,k-x))<o)d[i]=black
+  if(++k==w){j++;k=0};}}
+let flip=(d,w)=>{w=d.w
+ let o=new Uint32Array(d.length);o.w=w;
+ for(let i=0;i<w;i++)for(let j=0;j<w;j++)o[i+w*j]=d[j+w*i];
+ return o}
+let flop=(d,w)=>{w=d.w
+ let o=new Uint32Array(d.length);o.w=w;
+ for(let i=0;i<w;i++)for(let j=0;j<w;j++)o[i+w*j]=d[w*j+w-i-1];
+ return o}
+let rect=(i,j,c,o)=>{o=i*11+W*11*(j-1);for(j=0;j<11;j++)for(i=0;i<11;i++){if(!i)o+=W;da[o+i]=c}}
+
+let coin=(i,j,c,b)=>{j=i*11+W*11*j;b=[37,38,39,47,48,49,50,51,58,59,60,61,62,69,70,71,72,73,81,82,83]
+ for(i=0;i<11*11;i++)da[j+(i%11)+W*floor(i/11)]=b.includes(i)?yellow:black}
+/*
+let coin=`
++++++++++++
++++++++++++
++++++++++++
+++++---++++
++++-----+++
++++-----+++
++++-----+++
+++++---++++
++++++++++++
++++++++++++
++++++++++++`.replaceAll("\n","").split("")
+*/
+
+let bg=`
++++++++++++++++++++++++++++++
++oooooooooooo+++oooooooooooo+
++o++++o+++++o+++o+++++o++++o+
++o++++o+++++o+++o+++++o++++o+
++o++++o+++++o+++o+++++o++++o+
++ooooooooooooooooooooooooooo+
++o++++o++o+++++++++o++o++++o+
++o++++o++o+++++++++o++o++++o+
++oooooo++oooo+++oooo++o++++o+
+++++++o+++++ +++ +++++o++++++
+     +o+++++ +++ +++++o+     
+     +o++           ++o+     
+     +o++ ++++ ++++ ++o+     
+++++++o++ +       + ++o++++++
+      o   +       +   o      
+++++++o++ +       + ++o++++++
+     +o++ +++++++++ ++o+     
+     +o++           ++o+     
+     +o++ +++++++++ ++o+     
+++++++o++ +++++++++ ++o++++++
++oooooooooooo+++oooooooooooo+
++o++++o+++++o+++o+++++o++++o+
++o++++o+++++o+++o+++++o++++o+
++ooo++ooooooooooooooooo++ooo+
++++o++o++o+++++++++o++o++o+++
++++o++o++o+++++++++o++o++o+++
++oooooo++oooo+++oooo++oooooo+
++o++++++++++o+++o++++++++++o+
++o++++++++++o+++o++++++++++o+
++ooooooooooooooooooooooooooo+
++++++++++++++++++++++++++++++
+`.split("\n").filter(x=>x.length).forEach((r,j)=>{
+ r.split("").forEach((c,i)=>c=="+"?rect(i,j,blue):c=="o"?coin(i,j):0)
+})
+
+
+let pacm=o=>{const w=11;
+ let d=new Uint32Array(w*w).fill(black)
+ circ(d,w,5,5,5,yellow);
+ cake(d,w,5,5,5,o)
+ d.w=w;return d}
+
+let pac=[
+ [10,20,30,50].map((o,i)=>pacm(o)),
+ [10,20,30,50].map((o,i)=>flip(pacm(o))),
+ [10,20,30,50].map((o,i)=>flop(pacm(o))),
+ [10,20,30,50].map((o,i)=>flip(flop(pacm(o))))]
+
+let ghostm=c=>{const w=11;let d=new Uint32Array(w*w).fill(black);d.w=w;
+ circ(d,w,5,5,5,c);circ(d,w,2,9,2,c);circ(d,w,8,9,2,c);
+ circ(d,w,3,5,2,white);circ(d,w,7,5,2,white);
+ return d;}
+let ghost=ghostm(red)
+let ghosteye=(p,d,o)=>{o=[4+5*W,3+6*W,2+5*W,3+4*W][d];da[p+o]=black;da[p+o+4]=black;}
+
+let blit=(p,s,w,i)=>{w=s.w;i=0;s.forEach(c=>{da[p+i]=c; if(++i==w){i=0;p+=W}})}
+
+let left=_=>(X-=36,draw())
+let right=_=>(X+=36,draw())
+let up=_=>(--Y,draw())
+let down=_=>(++Y,draw())
+
+let I=0
+let draw=_=>{let h,d,r=36*W,o=r+10*W;if(++T==W)T=0;
+ //blit(10*W+10,pac1)
+ //blit(10+10*W,pac[0][++I%4])
+ //blit(10+10*W,ghost);ghosteye(10+10*W,0)
+ //blit(30+10*W,ghost);ghosteye(30+10*W,1)
+ //blit(50+10*W,ghost);ghosteye(50+10*W,2)
+ //blit(70+10*W,ghost);ghosteye(70+10*W,3)
+ ctx.putImageData(im,0,0)}
+
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerup=e=>pd(e);cnv.onpointerdown=e=>{pd(e);
+ let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height
+ x<0.3?left():x>0.7?right():y<0.3?up():y>0.7?down():0}
+
+window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="ArrowUp"?up():k=="ArrowDown"?down():0}
+
+draw()
+//req=setInterval(draw,100)
+
+
+</script></body></html>
+
+
