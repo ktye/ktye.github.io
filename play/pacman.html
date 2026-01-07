@@ -7,15 +7,20 @@ let min=Math.min,max=Math.max,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,floor
 let cos=Math.cos,sin=Math.sin,sign=Math.sign,asin=Math.asin,atan2=Math.atan2
 let rand=_=>Math.random(),pi=Math.PI
 
-let X=11*15,Y=11*23,T=0,A=5,D=2,DR=-1,req
-const W=341
+let X=11*15,Y=11*23,T=0,A=6,D=2,DR=-1,req
+const W=341,W10=10*W,W11=11*W
 
 const ctx=cnv.getContext("2d");ctx.imageSmoothingEnabled=false;
 const im=ctx.getImageData(0,0,cnv.width,cnv.height)
 const da=new Uint32Array(im.data.buffer);
-const white=0xffffffff,black=0xff000000,yellow=0xff00fff9,gold=0xff00d7ff,red=0xff0000ff,blue=0xffff004c,green=0xff17f200,purple=0xffdf00aa
+const white=0xffffffff,black=0xff000000,yellow=0xff00fff9,orange=0xff19c1ff,gold=0xff00d7ff,red=0xff0000ff,cyan=0xffffff00,blue=0xffff004c,green=0xff17f200,purple=0xffdf81ff
 let gameover=_=>{clearInterval(req);history.back()}
-let dead=()=>{console.log("dead",A);Y=12;X=222;if(!--A)gameover()}
+let dead=()=>{X=11*15,Y=11*23,DR=0,D=0;
+ ghosts[0].x=12*11;ghosts[0].y=13*11;ghosts[1].x=14*11;ghosts[1].y=13*11;
+ ghosts[2].x=15*11;ghosts[2].y=14*11;ghosts[3].x=14*11;ghosts[3].y=14*11;
+ if(!--A)gameover()}
+let rnd4=_=>floor(4*rand())
+let grade4=x=>[0,1,2,3].sort((a,b)=>(a=x[a])<(b=x[b])?-1:a>b?1:0)
 
 let circ=(d,w,x,y,r,c)=>{
  let j=0,k=0;for(let i=0;i<d.length;i++){
@@ -33,10 +38,10 @@ let flop=(d,w)=>{w=d.w
  let o=new Uint32Array(d.length);o.w=w;
  for(let i=0;i<w;i++)for(let j=0;j<w;j++)o[i+w*j]=d[w*j+w-i-1];
  return o}
-let rect=(i,j,c,o)=>{o=i*11+W*11*j-W;for(j=0;j<11;j++)for(i=0;i<11;i++){if(!i)o+=W;da[o+i]=c}}
+let rect=(i,j,c,o)=>{o=i*11+W11*j-W;for(j=0;j<11;j++)for(i=0;i<11;i++){if(!i)o+=W;da[o+i]=c}}
 
-let coin=(i,j,c,b)=>{j=i*11+W*11*j;b=[37,38,39,47,48,49,50,51,58,59,60,61,62,69,70,71,72,73,81,82,83]
- for(i=0;i<11*11;i++)if(b.includes(i))da[j+(i%11)+W*floor(i/11)]=gold}
+let coin=(i,j,c,b)=>{j=i*11+W11*j;b=[37,38,39,47,48,49,50,51,58,59,60,61,62,69,70,71,72,73,81,82,83]
+ for(i=0;i<11*11;i++)da[j+(i%11)+W*floor(i/11)]=b.includes(i)?gold:black}
 
 let bg=`
 +++++++++++++++++++++++++++++++
@@ -54,7 +59,7 @@ let bg=`
      +o++ ++++   ++++ ++o+     
 ++++++o++ +         + ++o++++++
  ooooooooo+         +ooooooooo 
-++++++o++o+         +o++o++++++
+++++++o++o+    +    +o++o++++++
      +o++o+++++++++++o++o+     
      +o++ooooooooooooo++o+     
      +o++o+++++++++++o++o+     
@@ -71,14 +76,32 @@ let bg=`
 +ooooooooooooooooooooooooooooo+
 +++++++++++++++++++++++++++++++
 `.split("\n").filter(x=>x.length).forEach((r,j)=>{
- r.split("").forEach((c,i)=>c=="+"?rect(i,j,blue):c=="o"?coin(i,j):0)
+ r.split("").forEach((c,i)=>c=="+"?rect(i,j,blue):c=="o"?coin(i,j):rect(i,j,black))
 })
 
+/*
+let nodes=`
+ 1-1 6-1 12-1 18-1 24-1 29-1
+ 1-5 6-5 9-5 12-5 18-5 21-5 24-5 29-5
+ 1-8 6-8 9-8 12-8 18-8 21-8 24-8 29-8
+ 9-11 12-11 15-11 18-11 21-11
+ 11-13 14-13 15-13 16-13 19-13
+ 6-14 9-14 21-14 24-14
+ 11-15 14-15 16-15 19-15
+ 9-17 21-17
+ 1-20 6-20 9-20 12-20 18-20 21-20 24-20 29-20
+ 1-23 3-23 6-23 9-23 12-23 18-23 21-23 24-23 27-23 29-23
+ 1-26 3-26 6-26 9-26 12-26 18-26 21-26 24-26 27-26 29-26
+ 1-29 12-29 18-29 29-29
+ `.trim().replaceAll("\n","").split(" ").map(x=>x.split("-")).map(x=>[x[0]*11,x[1]*11])
+
+nodes.forEach(x=>{let p=5+5*W+x[0]+W*x[1];da[p]=red;da[1+p]=red;da[W+p]=red;da[W+p+1]=red})
+*/
 
 
 let pacm=o=>{const w=11;
  let d=new Uint32Array(w*w).fill(black)
- circ(d,w,5,5,5,yellow);
+ circ(d,w,5,5,6,yellow);
  cake(d,w,5,5,5,o)
  d.w=w;return d}
 
@@ -88,12 +111,12 @@ let pac=[
  [10,20,30,50].map((o,i)=>flop(pacm(o))),
  [10,20,30,50].map((o,i)=>flip(pacm(o)))]
 
-let ghostm=c=>{const w=11;let d=new Uint32Array(w*w).fill(black);d.w=w;
+let ghostm=(c,D)=>{const w=11;let d=new Uint32Array(w*w).fill(black);d.w=w;
  circ(d,w,5,5,5,c);circ(d,w,2,9,2,c);circ(d,w,8,9,2,c);
  circ(d,w,3,5,2,white);circ(d,w,7,5,2,white);
- return d;}
-let ghost=ghostm(red)
+ return{d:d,D:D,x:0,y:0}}
 let ghosteye=(p,d,o)=>{o=[4+5*W,3+6*W,2+5*W,3+4*W][d];da[p+o]=black;da[p+o+4]=black;}
+let ghosts=[ghostm(red,0),ghostm(orange,1),ghostm(cyan,2),ghostm(purple,3)]
 
 let blit=(p,s,w,i)=>{w=s.w;i=0;s.forEach(c=>{da[p+i]=c; if(++i==w){i=0;p+=W}})}
 
@@ -106,16 +129,50 @@ let bb=da.slice()
 let cpy=n=>{n=da.length;for(let i=0;i<n;i++)da[i]=bb[i]}
 let blk=p=>{for(let j=0;j<11;j++)for(i=0;i<11;i++){bb[p++]=black;if(10==i)p+=W-11}}
 let O=0;
+let sens=(p,d)=>0==d?[p+11,p+11+W10]:1==d?[p-W,p-W+10]:2==d?[p-1,p+W10-1]:3==d?[p+W11,p+W11+10]:[0,0]
+let free=(p,d,a,b)=>([a,b]=sens(p,d),da[a]==black&&da[b]==black)
+let move=(x,y,d)=>(0==d?x++:1==d?y--:2==d?x--:3==d?y++:0,[x==0?330:x==330?0:x,y])
+let home=(x,y)=>(x>10*11&&x<20*11&&y>12*11&&y<16*11)
+let target=(x,y,X,Y,d)=>{ let dx=X-x,dy=Y-y;return abs(dx)>abs(dy)?(dx>0?0:2):dy>0?3:1 }
+let follow=(x,y)=>target(x,y,X,Y)
+let direct=(x,y,p)=>(p=x*W+y,
+  y==Y&&X>x&&free(p,0)?0
+ :y==Y&&X<x&&free(p,2)?2
+ :x==X&&Y>y&&free(p,3)?3
+ :x==X&&Y<y&&free(p,1)?1:-1)
+
+let walk=(p,d,d1,d2)=>(d1=(d+(rand()>0.5?1:3))%4,d2=(d1+2)%4,
+ free(p,d)?d:free(p,d1)?d1:free(p,d2)?d2:(d+2)%4)
+
+dead();
 let draw=_=>{if(++O==4){O=0;if(++T==4)T=0}
  let p=X+W*Y;blk(p);cpy();
  blit(X+W*Y,pac[D][T])
- 0==D?X++:1==D?Y--:2==D?X--:3==D?Y++:0
- if(DR>-1){D=DR;DR=-1}
- //blit(10+10*W,pac[0][++I%4])
- //blit(10+10*W,ghost);ghosteye(10+10*W,0)
- //blit(30+10*W,ghost);ghosteye(30+10*W,1)
- //blit(50+10*W,ghost);ghosteye(50+10*W,2)
- //blit(70+10*W,ghost);ghosteye(70+10*W,3)
+ let[s1,s2]=sens(p);
+
+ ghosts.forEach(g=>{
+	 let x=g.x,y=g.y,d=g.D,di,dd=rnd4(),p=x+W*y
+	 //if(home(x,y)&&free(p,1))d=1;
+	 //if(home(x,y)){d=x<166?0:x>180?2:1; console.log("targ",d)}
+	 //else d=follow(x,y);
+	 //if(d==3&&x>=14*11&&x<17*11)d=1
+	 //if(free(p,dd))if(rand()>0.95)d=dd;
+	 //for(let i=0;i<4;i++)if(!free(p,d))d=rnd4()
+	 if(-1<(di=direct(x,y)))d=di
+	 else d=walk(p,d)
+	 if(free(p,d))[x,y]=move(x,y,d);
+	 //let d=rnd4();[x,y]=free(p,d=rnd4())?move(x,y,d):[x,y]
+	 [g.x,g.y,g.D]=[x,y,d];
+	 p=x+W*y;
+	 blit(p,g.d);ghosteye(p,g.D)
+	 if(abs(x-X)<11&&abs(y-Y)<11)dead();
+	 })
+
+ if(DR<0)DR=D;
+ if(free(p,DR)){D=DR;[X,Y]=move(X,Y,D)}
+ else if(free(p,D))[X,Y]=move(X,Y,D)
+
+  let g=0;for(let i=0;i<W*W;i++)if(da[i]==gold)g++;if(!g)gameover();
  ctx.putImageData(im,0,0)}
 
 let pd=e=>(e.preventDefault(),e.stopPropagation())
@@ -123,10 +180,10 @@ cnv.onpointerup=e=>pd(e);cnv.onpointerdown=e=>{pd(e);
  let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height
  x<0.3?left():x>0.7?right():y<0.3?up():y>0.7?down():0}
 
-window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="ArrowUp"?up():k=="ArrowDown"?down():0}
+window.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="ArrowUp"?up():k=="ArrowDown"?down():k==" "?draw():0}
 
 draw()
-//req=setInterval(draw,30)
+req=setInterval(draw,30)
 
 
 </script></body></html>
