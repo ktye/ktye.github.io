@@ -43,60 +43,66 @@ let rect=(i,j,c,o)=>{o=i*11+W11*j-W;for(j=0;j<11;j++)for(i=0;i<11;i++){if(!i)o+=
 let coin=(i,j,c,b)=>{j=i*11+W11*j;b=[37,38,39,47,48,49,50,51,58,59,60,61,62,69,70,71,72,73,81,82,83]
  for(i=0;i<11*11;i++)da[j+(i%11)+W*floor(i/11)]=b.includes(i)?gold:black}
 
+let mirror=x=>[...x,...x.toReversed().slice(1)]
+let xmirror=x=>[...x,...x.toReversed().slice(x[x.length-1]==W/2?1:0).map(x=>([W-11-x[0],x[1]]))]
+let pairs=x=>Array(x.length/2).fill([]).map((x,i)=>[x[2*i],x[2*i+1]])
 let bg=`
-+++++++++++++++++++++++++++++++
-+oooooooooooo+++++oooooooooooo+
-+o++++o+++++o+++++o+++++o++++o+
-+o++++o+++++o+++++o+++++o++++o+
-+o++++o+++++o+++++o+++++o++++o+
-+ooooooooooooooooooooooooooooo+
-+o++++o++o+++++++++++o++o++++o+
-+o++++o++o+++++++++++o++o++++o+
-+oooooo++oooo+++++oooo++o++++o+
-++++++o+++++ +++++ +++++o++++++
-     +o+++++ +++++ +++++o+     
-     +o++             ++o+     
-     +o++ ++++   ++++ ++o+     
-++++++o++ +         + ++o++++++
- ooooooooo+         +ooooooooo 
-++++++o++o+    +    +o++o++++++
-     +o++o+++++++++++o++o+     
-     +o++ooooooooooooo++o+     
-     +o++o+++++++++++o++o+     
-++++++o++o+++++++++++o++o++++++
-+oooooooooooo+++++oooooooooooo+
-+o++++o+++++o+++++o+++++o++++o+
-+o++++o+++++o+++++o+++++o++++o+
-+ooo++ooooooooo ooooooooo++ooo+
-+++o++o++o+++++++++++o++o++o+++
-+++o++o++o+++++++++++o++o++o+++
-+oooooo++oooo+++++oooo++oooooo+
-+o++++++++++o+++++o++++++++++o+
-+o++++++++++o+++++o++++++++++o+
-+ooooooooooooooooooooooooooooo+
-+++++++++++++++++++++++++++++++
+++++++++++++++++
++oooooooooooo+++
++o++++o+++++o+++
++o++++o+++++o+++
++o++++o+++++o+++
++ooooooooooooooo
++o++++o++o++++++
++o++++o++o++++++
++oooooo++oooo+++
+++++++o+++++ +++
+     +o+++++ +++
+     +o++       
+     +o++ ++++  
+++++++o++ +     
+ ooooooooo+     
+++++++o++o+    +
+     +o++o++++++
+     +o++ooooooo
+     +o++o++++++
+++++++o++o++++++
++oooooooooooo+++
++o++++o+++++o+++
++o++++o+++++o+++
++ooo++ooooooooo 
++++o++o++o++++++
++++o++o++o++++++
++oooooo++oooo+++
++o++++++++++o+++
++o++++++++++o+++
++ooooooooooooooo
+++++++++++++++++
 `.split("\n").filter(x=>x.length).forEach((r,j)=>{
- r.split("").forEach((c,i)=>c=="+"?rect(i,j,blue):c=="o"?coin(i,j):rect(i,j,black))
+ mirror(r.split("")).forEach((c,i)=>c=="+"?rect(i,j,blue):c=="o"?coin(i,j):rect(i,j,black))
 })
 
-/*
 let nodes=`
- 1-1 6-1 12-1 18-1 24-1 29-1
- 1-5 6-5 9-5 12-5 18-5 21-5 24-5 29-5
- 1-8 6-8 9-8 12-8 18-8 21-8 24-8 29-8
- 9-11 12-11 15-11 18-11 21-11
- 11-13 14-13 15-13 16-13 19-13
- 6-14 9-14 21-14 24-14
- 11-15 14-15 16-15 19-15
- 9-17 21-17
- 1-20 6-20 9-20 12-20 18-20 21-20 24-20 29-20
- 1-23 3-23 6-23 9-23 12-23 18-23 21-23 24-23 27-23 29-23
- 1-26 3-26 6-26 9-26 12-26 18-26 21-26 24-26 27-26 29-26
- 1-29 12-29 18-29 29-29
- `.trim().replaceAll("\n","").split(" ").map(x=>x.split("-")).map(x=>[x[0]*11,x[1]*11])
+ 1-1 6-1 12-1
+ 1-5 6-5 9-5 12-5
+ 1-8 6-8 9-8 12-8
+ 9-11 12-11 15-11
+ 11-13 14-13 15-13
+ 6-14 9-14
+ 11-15 14-15
+ 9-17
+ 1-20 6-20 9-20 12-20
+ 1-23 3-23 6-23 9-23 12-23
+ 1-26 3-26 6-26 9-26 12-26
+ 1-29 12-29
+ `.trim().split("\n").map(x=>x.trim().split(" ").map(x=>x.split("-")).map(x=>[x[0]*11,x[1]*11])).map(xmirror).flat()
 
 nodes.forEach(x=>{let p=5+5*W+x[0]+W*x[1];da[p]=red;da[1+p]=red;da[W+p]=red;da[W+p+1]=red})
-*/
+
+//let edges=[]
+//for(let i=0;i<nodes.length;i++)
+// nodes.map((x,j)=>x[1]==nodes[i][1]&&x[0]>nodes[i][0]?j:-1).filter(x=>x>0)
+
 
 
 let pacm=o=>{const w=11;
@@ -115,7 +121,7 @@ let ghostm=(c,D)=>{const w=11;let d=new Uint32Array(w*w).fill(black);d.w=w;
  circ(d,w,5,5,5,c);circ(d,w,2,9,2,c);circ(d,w,8,9,2,c);
  circ(d,w,3,5,2,white);circ(d,w,7,5,2,white);
  return{d:d,D:D,x:0,y:0}}
-let ghosteye=(p,d,o)=>{o=[4+5*W,3+6*W,2+5*W,3+4*W][d];da[p+o]=black;da[p+o+4]=black;}
+let ghosteye=(p,d,o)=>{o=[4+5*W,3+4*W,2+5*W,3+6*W][d];da[p+o]=black;da[p+o+4]=black;}
 let ghosts=[ghostm(red,0),ghostm(orange,1),ghostm(cyan,2),ghostm(purple,3)]
 
 let blit=(p,s,w,i)=>{w=s.w;i=0;s.forEach(c=>{da[p+i]=c; if(++i==w){i=0;p+=W}})}
