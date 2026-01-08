@@ -1,0 +1,96 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="../kelas16.png">
+<title>play k</title><style>
+*{font-family:monospace;font-size:x-large;}
+body{display:flex;flex-direction:column;
+align-items:center;
+background:#aaa;
+}
+canvas{width:50%;max-height:100%;aspect-ratio:1 / 1;background:black;image-rendering:pixelated;}
+textarea{width:100%;resize:none;}
+#head{height:2em}
+#main{display:flex;width:100%;max-height:calc(100vh - 3em)}
+
+#edit{height:80%}
+#kons{height:20%}
+
+</style></head>
+<body>
+<div id="head">
+<select id="sel" onchange="load(this.value)">
+ <option>snake</option>
+</select>
+<button title="run fullscreen" onclick="fullscreen()">fullscreen</button>
+<button onclick="pause()">pause</button>
+<button onclick="resume()">resume</button>
+<button onclick="kinit()">start</button>
+</div>
+<div id="main">
+ <canvas id="cnv" width="341" height="341" tabindex="1"></canvas>
+ <div style="display:flex;flex-direction:column;width:50%">
+  <textarea id="edit" wrap="off" spellcheck="false">+/!100</textarea>
+  <textarea id="kons" wrap="off" spellcheck="false"></textarea>
+ </div>
+</div>
+<script>
+let req,delay,left,right,up,down
+let pause=_=>clearInterval(req)
+let resume=_=>(pause(),console.log("delay",delay),delay?req=setInterval(draw,delay):0,cnv.focus())
+let fullscreen=_=>cnv.requestFullscreen()
+let ctx,im,da
+
+
+//req=setInterval(draw,30)
+
+let K,lo=x=>Number(BigInt.asUintN(32,x)),su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let C=()=>new Int8Array(K.memory.buffer),I=()=>new Uint32Array(K.memory.buffer)
+let KC=x=>{x=("string"===typeof x)?us(x):x;let r=K.mk(18,x.length);C().set(x,lo(r));return r}
+let CK=x=>(K.dx(x),su(new Uint8Array(K.memory.buffer,lo(x),K.nn(x))))
+let env={env:{Exit:x=>0,Args:_=>0,Arg:x=>x,Read:x=>x,ReadIn:x=>x,Native:x=>x,
+ Write:(a,b,c,d)=>{console.log("a",a);a=(new Uint8Array(K.memory.buffer,c,d));kons.value+=su(a);kons.scrollTop=kons.scrollHeight;return 0}}}
+let kframe
+let kinit=_=>WebAssembly.instantiateStreaming(fetch("../k.wasm"),env).then(r=>{pause();K=r.instance.exports;K.kinit();
+ let[a,b]=edit.value.split("/frame\n");
+ if(b===undefined){kons.value="/frame missing";return}
+ kons.value="";K.dx(K.Val(KC(a)))
+ let w=K.Val(K.sc(KC("W")));W=lo(w);if(3!=K.tp(w)||W<10||W>4000){kons.value="W is unset";return}
+ cnv.width=W;cnv.height=W;ctx=cnv.getContext("2d");im=ctx.getImageData(0,0,W,W);da=new Uint32Array(im.data.buffer);
+ let d=K.Val(K.sc(KC("delay")));delay=lo(d);if(3!=K.tp(d)||delay<10||delay>10000){kons.value="delay is unset";return}
+ let fn=(x,f)=>{f=K.Val(K.sc(KC(x)));if(K.tp(f)!=13||K.nn(f)!=0){kons.value=x+" must be a niladic lambda";return 0};return _=>K.dx(K.Cal(K.rx(f),K.mk(23,0)))}
+ if(!(left=fn("left")))return;if(!(right=fn("right")))return;if(!(up=fn("up")))return;if(!(down=fn("down")))return;if(!(space=fn("space")))return
+ kframe=K.Atx(K.sc(KC("p")),KC(b));kons.value+="ktye/k\n ";resume()})
+
+kons.onkeydown=e=>{
+ if("Enter"==e.key){pd(e);
+  let v=kons.value,p=kons.selectionEnd
+  let n=v.slice(p).indexOf("\n")
+  if(n>=0)v=v.slice(0,p+n)
+  kons.value=v
+  let i=v.lastIndexOf("\n"),s=(i<0?v:v.slice(1+i))
+  s=s.length>1&&s[0]==" "?s.slice(1):s;if(!s.length)return
+  kons.value+="\n";K.repl(KC(s));kons.value+=" ";
+  kons.scrollTop=kons.scrollHeight;
+}}
+
+
+let draw=_=>{ console.log("draw");
+ let I=K.Val(K.rx(kframe))
+ da.set(new Uint32Array(K.memory.buffer,lo(I),K.nn(I)))
+ K.dx(I)
+ ctx.putImageData(im,0,0) }
+
+let pd=e=>(e.preventDefault(),e.stopPropagation())
+cnv.onpointerup=e=>pd(e);cnv.onpointerdown=e=>{pd(e);cnv.focus();
+ let r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height
+ x<0.3?left():x>0.7?right():y<0.3?up():y>0.7?down():0}
+
+cnv.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="ArrowUp"?up():k=="ArrowDown"?down():k==" "?space():0}
+
+
+//K.repl(KC(s))
+
+let load=x=>fetch((x+=".k")).then(r=>r.text()).then(r=>(edit.value=r,edit.title=x,kinit(r[0],r[1])))
+load(sel.value)
+
+</script></body></html>
+
+
