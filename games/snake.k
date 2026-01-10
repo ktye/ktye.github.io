@@ -6,10 +6,10 @@ white:rgb 255 255 255
 black:rgb 0 0 0
 red:rgb 255 0 0
 
+B:black+&N
 P:(W%2)+W*W%2;D:1;DR:!0
 Q:(q:{*b(-n)?n:#b:&B=black})[]
 S:P-2 1 0
-B:black+&N
 G:-1
 XY:!W,W;
 @[`B;&(W-1)=|/XY;white]

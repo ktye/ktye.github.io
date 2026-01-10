@@ -18,6 +18,7 @@ textarea{width:100%;resize:none;}
 <div id="head">
 <select id="sel" onchange="load(this.value)">
  <option>snake</option>
+ <option>gorillas</option>
 </select>
 <button title="run fullscreen" onclick="fullscreen()">fullscreen</button>
 <button onclick="pause()">pause</button>
@@ -94,7 +95,7 @@ cnv.onkeydown=(e,k)=>{k=e.key;k=="ArrowLeft"?left():k=="ArrowRight"?right():k=="
 //K.repl(KC(s))
 
 let load=x=>fetch((x+=".k")).then(r=>r.text()).then(r=>(edit.value=r,edit.title=x,kinit(r[0],r[1])))
-load(sel.value)
+sel.value=window.location.hash.slice(1)||"snake";load(sel.value)
 
 </script></body></html>
 
