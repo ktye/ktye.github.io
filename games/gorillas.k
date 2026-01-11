@@ -4,6 +4,7 @@ blu:-5636096
 ora:-11162881
 yel:-11141121
 gre:-5592406
+odo:{(,/x#'!x;(x*x)#!x)}
 
 abc:"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 rld:{ ,/{(*x),(`i$x 1)#*|*x}'   -2^((&~='x?\"0123456789")^x),,"0" } /run length decode
@@ -21,10 +22,10 @@ b3:&abc?rld"a15b1a7b2a6b2a7b2a7b2a7b2a7b2a8b2a8b1a14"
 b4:&abc?rld"a35b4a4b6a2b8a1b1a4b1a44"
 
 /skyline
-X:(600>)#0,+\10*4+15?4
+X:(W>)#0,+\10*4+15?4
 Y:(#X)#10*40+15?15
 Z:Y@X'!W
-XY:!W,W
+XY:odo W
 
 x:X@i:^-2?#X; Ax:  5+*x;Bx:  5+x 1
 y:Y@i;        Ay:-30+*y;By:-30+y 1
