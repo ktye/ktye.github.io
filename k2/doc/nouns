@@ -1,0 +1,23 @@
+Math:   _log _exp _abs _sqr _sqrt _floor _dot _mul _inv
+        _sin _cos _tan _asin _acos _atan _sinh _cosh _tanh
+        y _lsq A is least squares x for y~+/A*x (i.e. Ax=y)
+ 
+Rand:   x _draw y (from !y); x _draw -y (deal from !y); x _draw 0 (from (0,1))
+ 
+Time:   _t is gmt seconds. _lt is local from gmt, e.g. _gtime _lt _t
+        _jd yyyymmdd (and _dj) for to and from julian day number (0 is monday)
+ 
+List:   x _in y is 1 if x is an item of y; 0 otherwise (list: _lin)
+        x _bin y is binary search for y in ascending x (list: _binl)
+        x _dv y and x _di y to delete by value and index (list: _dvl)
+        x _sv v (scalar from vector) and x _vs s (vector from scalar)
+        _ci i (character from integer) and _ic c (integer from character)
+        x _sm y is string match. y can have *?[^-], e.g. files _sm "*.[kK]"
+        x _ss y is string/symbol search for start indices. y can have ?[^-].
+        _ssr[x;y;z] is string/symbol search and replace. z can be a function.
+        _bd d (bytes from data) and _db b (data from bytes). linear form.
+        _getenv v (v _setenv s) gets(sets) environment variable v.
+        _host addr; _host name; _size file; _exit code.
+ 
+Vars:   _d(dir) _v(var) _i(index) _t(second) _f(function) _n(null) _s(space)
+        _h(host) _p(port) _w(who) _u(user) _a(address) _k(version) _T(time)

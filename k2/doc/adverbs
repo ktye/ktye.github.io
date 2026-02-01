@@ -1,0 +1,23 @@
+f'      EACH
+d\:     EACHLEFT
+d/:     EACHRIGHT
+d':     EACHPRIOR
+d/      OVER    f/[init;...]    RECUR
+d\      SCAN    f\[init;...]    TRACE
+m/ CONVERGE     n m/ DO         b m/ WHILE
+m\ CONVERGE     n m\ DO         b m\ WHILE
+f(function) d(dyadic) m(monadic) b(boolean)
+scatter selection       matrix'
+transitive closure      vector/ vector\
+state transition        matrix/ matrix\ matrix':
+ 
+compose         2+  8$  ~=  ~<  ~>  *|:(first reverse)
+project         pv:{[c;t;d]+/c*d^t}  pv[c:.1 .1 1.1;t:1 2 3]d:%1.1
+invert          pv[c;t]?.97  pv[c;;d]?.98  pv[;t;d]?.99
+modify          @[0 0 0;1 1 0 2 2 0 1 2;+;!8]
+iterate         9{+':0,x,0}\1  9(|+\)\1 1.0
+converge        (1+%:)\1.0  {x\'!#x}parent:0 0 1 1 0
+integrate       +\2 3 4  *\2 3 4
+differentiate   -':0 2 5 9  %':1 2 6 24
+ 
+verbs default to dyad. use(:) for monad, e.g. (<;<:)

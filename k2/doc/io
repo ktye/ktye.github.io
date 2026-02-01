@@ -1,0 +1,10 @@
+ 0:f    f 0:x   read/write text(` for console)
+ 1:f    f 1:x   read/write data(default .l)
+ 6:f    f 6:x   read/write bytes
+        f 5:x   append data, e.g. `log 5:,transaction
+ 
+ (type;[,]delim)0:f     [names+]delimited text( IFCSDTZ)
+ (type;width)0:f        fixedwidth text( IFCSDTZ)
+ (type;width)1:f        fixedwidth data(cbsijfd IFCSDZMm)
+ Blank skips. S strips. f can be (f;index;length).
+ 

@@ -1,0 +1,18 @@
+Attributes              Type
+ 
+ h      help            string
+ t      trigger         expression
+ d      dependency      expression
+ c      class(display)  symbol
+         `data(default) atom, list, dict, list of lists, dict of lists
+         `chart          as above where atom is list of y values
+         `plot           as above where atom is matrix of (x;y) values
+         `check         0 or 1
+         `radio         symbol (one of ..o; see below)
+         `button        expression or dictionary of expressions
+         `form          dictionary of entries of any class(incl. `form)
+ 
+Triggers neither self-invalidate nor refire.
+Dependencies should have no side-effects and cannot loop.
+Triggers, dependencies and attributes can access _d _v and _i.
+Screen data updates can happen incrementally, i.e. change attrs first.

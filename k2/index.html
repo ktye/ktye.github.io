@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset=utf-8><title>k2</title>
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<style>
+*{box-sizing:border-box;/*overflow:clip;*/font-family:monospace}
+html{height:100vh}
+body{}
+#tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;display:inline-block}
+#tty:focus-within{color:white}
+#rdl{color:white;outline:none}
+#edt{min-width:78ch;min-height:22rem;padding:0;border:none;background:#ececec;outline:none;field-sizing:content;white-space:pre;}
+</style></head><body>
+
+<pre id="tty"><span id="out" tabindex="-1">$k</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
+
+<p><select onchange="fe(this.value)">
+ <option value="">empty</option>
+ <optgroup label="ref">
+  <option value="doc/verbs">+ verbs</option>
+  <option value="doc/adverbs">' adverbs</option>
+  <option value="doc/nouns">_ system verbs and nouns</option>
+  <option value="doc/assign">. assign, define, control and debug</option>
+  <option value="doc/io">: io</option>
+  <option value="doc/attrib">a attributes</option>
+ </optgroup>
+ <optgroup label="examples/nsl">
+  <option value="nsl/k.k">parser</option></select>
+ </optgroup>
+<button onclick="kinit(edt.value)">run</button>
+<p><textarea id="edt" spellcheck="false">
+</textarea>
+
+<script>
+
+//tty
+let pd=e=>(e.preventDefault(),e.stopPropagation()) 
+let shpr="$",rlbuf=[],rlpos=0
+let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}
+let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
+let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
+let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
+let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
+tty.onclick=_=>rdl.focus()
+rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),progexit()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
+let kp=_=>{let v=out.textContent.split("\n"),p="  ";
+ v=(19<v.length?v.slice(v.length-19):v).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n")
+ v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
+ rdl.textContent="";prmt(1);}
+let exec=x=>(O(x+"\n"),k(x),kp())
+
+
+//ce cadeau, c'est cadeux
+let O=x=>out.textContent+=x
+let K,M,C,U,I
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let cs=(r,s)=>(C.set(us(s),r),C[r+s.length]=0,s.length)
+let m=_=>(C=new Uint8Array(K.memory.buffer),I=new Int32Array(K.memory.buffer),U=new Uint32Array(K.memory.buffer))
+let S=x=>su(C.slice(x,C.indexOf(0,x)))
+let e={env:{
+ malloc:x=>{let r=M,t=K.memory.buffer.byteLength,a=t-r;
+  console.log("malloc",x,a,x<a?"ok":"grow "+((x-a+65536)>>>16));
+  if(x>a){K.memory.grow((x-a+65536)>>>16);m()};M+=x;return r},
+ write:x=>O(S(x)),
+ writn:x=>O(S(x)+"\n"),
+ writi:x=>O(+x),
+ spg:(r,p,f,s,t)=>(s=f.toPrecision(p),t=f.toString(),cs(r,s.length<t.length?s:t)),
+ spf:(r,d,f)=>cs(r,f.toFixed(d)),
+ spe:(r,d,f)=>cs(r,(f<0?"":" ")+f.toExponential(d)),
+ spne:(r,n,d,f)=>cs(r,(f<0?"":" ")+f.toExponential(d).padEnd(n," ")),
+ spnf:(r,n,d,f)=>cs(r,f.toFixed(d).padStart(n," ")),
+ strtod:(x,p,s,n,r)=>(s=S(x),n=s.length,r=Number(s),U[p>>2]=x+n-isNaN(r),r),
+}}
+"log exp sqrt floor sin cos tan asin acos atan sinh cosh tanh".split(" ").forEach(x=>e.env[x]=Math[x])
+let k=(s,r)=>(s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
+let kinit=s=>fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,e)).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?k(s):out.textContent="k2";kp()});
+kinit();
+
+//edt
+let fe=x=>{console.log(x);if(x==""){edt.value="";return kinit()};fetch(x).then(r=>r.text()).then(r=>(edt.value=r,x.endsWith(".k")?kinit(r):0))}
+
+</script></body></html>

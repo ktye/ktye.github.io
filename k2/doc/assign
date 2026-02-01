@@ -1,0 +1,23 @@
+Dyad            D-Amend         Monad           M-amend
+v::y (or v:y)   .[`v;();:;y]
+v+:y            .[`v;();+;y]    v-:             .[`v;();-:]
+v[i]+:y         .[`v;,i;+;y]    v[i]-:          .[`v;,i;-:]
+v[i;j]+:y       .[`v;(i;j);+;y] v[i;j]-:        .[`v;(i;j);-:]
+ 
+@[v;i;d;y] is .[v;,i;d;y]       @[v;i;m] is .[v;,i;m]
+ 
+{[a;b;c] ...}   function definition
+ x y z          default parameters
+ d:...          local variable
+ 
+control(debug: ctrl-c stop)
+ :[c;t;f]       conditional
+ if[c; ... ]
+ do[n; ... ]
+ while[c; ...]
+ / ...          comment
+ \ ...          trace(escape)
+ : ...          return(resume)
+ ' ...          signal
+ 
+trap signals with .[f;(x;y;z);:] and @[f;x;:]

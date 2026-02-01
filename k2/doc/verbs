@@ -1,0 +1,23 @@
+        Dyad            Monad
++       plus            flip
+-       minus           negate
+*       times           first
+%       divide          reciprocal
+&       min/and         where
+|       max/or          reverse
+<       less            upgrade
+>       more            downgrade
+=       equal           group
+^       power           shape
+!       mod/rotate      enumerate
+~       match           not
+,       join            enlist
+#       take/reshape    count
+_       drop/cut        floor
+$       form/format     format
+?       find/invert     unique  invert-guess
+@       at              atom    m-amend d-amend
+.       dot             value   m-amend d-amend
+ 
+f[x]    is f .,x        is f@x  is f x
+f[x;y]  is f .(x;y)
