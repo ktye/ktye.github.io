@@ -23,9 +23,13 @@ body{}
   <option value="doc/io">: io</option>
   <option value="doc/attrib">a attributes</option>
  </optgroup>
- <optgroup label="examples/nsl">
-  <option value="nsl/k.k">parser</option></select>
+ <optgroup label="examples(nsl.com)">
+  <option value="nsl/k.k">parser</option>
+  <option value="nsl/parse.k">k6 parser</option>
+  <option value="nsl/kzoo.k">k zoo</option>
+  <option value="nsl/knapsack.k">knapsack</option>
  </optgroup>
+ </select>
 <button onclick="kinit(edt.value)">run</button>
 <p><textarea id="edt" spellcheck="false">
 </textarea>
@@ -71,11 +75,16 @@ let e={env:{
  strtod:(x,p,s,n,r)=>(s=S(x),n=s.length,r=Number(s),U[p>>2]=x+n-isNaN(r),r),
 }}
 "log exp sqrt floor sin cos tan asin acos atan sinh cosh tanh".split(" ").forEach(x=>e.env[x]=Math[x])
+let ex={}
+let kw
 let k=(s,r)=>(s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
-let kinit=s=>fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(r,e)).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?k(s):out.textContent="k2";kp()});
+let cut=(x,i)=>(i=x.indexOf("\n\\\n"),i>0?x.slice(0,i):x)
+let wa=(r,s)=>WebAssembly.instantiate(r,e).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?k(cut(s)):out.textContent="k2";kp()});
+let kinit=s=>kw?wa(kw,s):fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>wa(r,s))
 kinit();
 
 //edt
-let fe=x=>{console.log(x);if(x==""){edt.value="";return kinit()};fetch(x).then(r=>r.text()).then(r=>(edt.value=r,x.endsWith(".k")?kinit(r):0))}
+let show=(x,r)=>(r=r.replaceAll("\r",""),edt.value=r,x.endsWith(".k")?kinit(r):0)
+let fe=x=>{if(x==""){edt.value="";return kinit()};ex?show(x,ex[x]):fetch(x).then(r=>r.text()).then(r=>show(x,r))}
 
 </script></body></html>

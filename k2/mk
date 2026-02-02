@@ -1,0 +1,16 @@
+sed '/^let kw/q'    index.html
+echo 'let ub=x=>(x=atob(x),new Uint8Array(x.length).map((_,i,u)=>u[i]=x.charCodeAt(i)))'
+echo 'kw=ub(`'
+base64 -w 120 k.wasm
+echo '`.replaceAll("\n",""))'
+
+grep 'option value' index.html | sed 's/.*value=.//' | sed 's/".*//' | while read file; do
+ if [ -f "$file" ]; then
+  echo 'ex["'${file}'"]=atob(`'
+  base64 -w 120 $file
+  echo '`)'
+ fi
+done
+
+sed '1,/^let kw/ d' index.html
+
