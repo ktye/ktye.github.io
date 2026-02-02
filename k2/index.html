@@ -24,7 +24,7 @@ body{}
   <option value="doc/attrib">a attributes</option>
  </optgroup>
  <optgroup label="examples(nsl.com)">
-  <option value="nsl/k.k">parser</option>
+  <option value="nsl/k.k">2x2 parser</option>
   <option value="nsl/parse.k">k6 parser</option>
   <option value="nsl/kzoo.k">k zoo</option>
   <option value="nsl/knapsack.k">knapsack</option>
@@ -62,7 +62,7 @@ let m=_=>(C=new Uint8Array(K.memory.buffer),I=new Int32Array(K.memory.buffer),U=
 let S=x=>su(C.slice(x,C.indexOf(0,x)))
 let e={env:{
  malloc:x=>{let r=M,t=K.memory.buffer.byteLength,a=t-r;
-  console.log("malloc",x,a,x<a?"ok":"grow "+((x-a+65536)>>>16));
+  //console.log("malloc",x,a,x<a?"ok":"grow "+((x-a+65536)>>>16));
   if(x>a){K.memory.grow((x-a+65536)>>>16);m()};M+=x;return r},
  write:x=>O(S(x)),
  writn:x=>O(S(x)+"\n"),
@@ -75,7 +75,7 @@ let e={env:{
  strtod:(x,p,s,n,r)=>(s=S(x),n=s.length,r=Number(s),U[p>>2]=x+n-isNaN(r),r),
 }}
 "log exp sqrt floor sin cos tan asin acos atan sinh cosh tanh".split(" ").forEach(x=>e.env[x]=Math[x])
-let ex={}
+let ex
 let kw
 let k=(s,r)=>(s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
 let cut=(x,i)=>(i=x.indexOf("\n\\\n"),i>0?x.slice(0,i):x)
