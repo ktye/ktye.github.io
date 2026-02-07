@@ -2,40 +2,52 @@
 <html><head><meta charset=utf-8><title>k2</title>
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
 <style>
-*{box-sizing:border-box;/*overflow:clip;*/font-family:monospace}
+*{/*box-sizing:border-box;overflow:clip;*/font-family:monospace}
 html{height:100vh}
-body{}
-#tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;display:inline-block}
+body{display:flex;margin:0}
+#lef{display:flex;flex-direction:column;height:100vh}
+#dex{border:5px solid white;height:calc(100vh - 10px);width:100%;background-image:repeating-conic-gradient(#aaaaaa 0% 25%,#cccccc 0% 50%);background-position:0 0,5px 5px;background-size:10px 10px;background-color:#cccccc}
+#tty{border:5px solid white;width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;display:inline-block}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
-#edt{min-width:78ch;min-height:22rem;padding:0;border:none;background:#ececec;outline:none;field-sizing:content;white-space:pre;}
+#edt{width:78ch;/*min-height:22rem;*/height:100%;padding:0;border:5px solid white;background:#ececec;outline:none;field-sizing:content;white-space:pre;}
+.win{position:absolute;border:2px solid black;background:white}
+.hdr{text-align:center;font-weight:bold;border-bottom:2px solid black;padding:5px;background:#eee}
+.hdr:hover{cursor:pointer}
+.cxx{padding-left:10px}
+.cxx:hover{cursor:""}
 </style></head><body>
+<div id="lef">
+ <pre id="tty"><span id="out" tabindex="-1">$k</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
+ 
+ <div style="padding:5px">
+  <select id="sel" onchange="fe(this.value)"> 
+   <option value="">empty</option>
+   <optgroup label="ref">
+    <option value="doc/verbs">+ verbs</option>
+    <option value="doc/adverbs">' adverbs</option>
+    <option value="doc/slash">\ commands</option>
+    <option value="doc/nouns">_ system verbs and nouns</option>
+    <option value="doc/assign">. assign, define, control and debug</option>
+    <option value="doc/io">: io</option>
+    <option value="doc/attrib">a attributes</option>
+   </optgroup>
+   <optgroup label="examples(nsl.com)">
+    <option value="nsl/k.k">2x2 parser</option>
+    <option value="nsl/parse.k">k6 parser</option>
+    <option value="nsl/kzoo.k">k zoo</option>
+    <option value="nsl/knapsack.k">knapsack</option>
+   </optgroup>
+   <option value="gui.k">no gui for old men</option>
+   </select>
+  <button onclick="kinit(edt.value)" style="float:right">run</button>
+ </div>
+ <textarea id="edt" spellcheck="false">
+ </textarea>
+</div>
+<div id="dex"></div>
 
-<pre id="tty"><span id="out" tabindex="-1">$k</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
-
-<p><select onchange="fe(this.value)">
- <option value="">empty</option>
- <optgroup label="ref">
-  <option value="doc/verbs">+ verbs</option>
-  <option value="doc/adverbs">' adverbs</option>
-  <option value="doc/slash">\ commands</option>
-  <option value="doc/nouns">_ system verbs and nouns</option>
-  <option value="doc/assign">. assign, define, control and debug</option>
-  <option value="doc/io">: io</option>
-  <option value="doc/attrib">a attributes</option>
- </optgroup>
- <optgroup label="examples(nsl.com)">
-  <option value="nsl/k.k">2x2 parser</option>
-  <option value="nsl/parse.k">k6 parser</option>
-  <option value="nsl/kzoo.k">k zoo</option>
-  <option value="nsl/knapsack.k">knapsack</option>
- </optgroup>
- </select>
-<button onclick="kinit(edt.value)">run</button>
-<p><textarea id="edt" spellcheck="false">
-</textarea>
-
-<script src="u.js"></script>
+<script src="gui.js"></script>
 <script>
 
 //tty
@@ -82,7 +94,7 @@ let sk=s=>{let o=O,r="";O=x=>r+=x;k(s);O=o;return r}
 let k=(s,r)=>(console.log("k",s.trim()),s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
 let cut=x=>{let i=x.indexOf("\n\\\n"),r=[],v=(i>0?x.slice(0,i):x).split("\n"),s="",px=x=>(p(),s=x,p()),p=_=>s?(r.push(s.trim()),s=""):0;
  v.forEach(x=>x.startsWith("\\")?px(x):s+="\n"+x);p();return r}
-let wa=(r,s)=>WebAssembly.instantiate(r,e).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?cut(s).map(k):out.textContent="k2";kp()});
+let wa=(r,s)=>WebAssembly.instantiate(r,e).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?cut(s).map(k):out.textContent="k2";kp();ui()});
 let kinit=s=>fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>wa(r,s))
 kinit();
 
@@ -90,4 +102,5 @@ kinit();
 let ed=(x,r)=>(r=r.replaceAll("\r",""),edt.value=r,x.endsWith(".k")?kinit(r):0)
 let fe=x=>{if(x==""){edt.value="";return kinit()};fetch(x).then(r=>r.text()).then(r=>ed(x,r))}
 
+sel.value="gui.k";fe(sel.value)
 </script></body></html>
