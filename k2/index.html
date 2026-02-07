@@ -18,6 +18,7 @@ body{}
  <optgroup label="ref">
   <option value="doc/verbs">+ verbs</option>
   <option value="doc/adverbs">' adverbs</option>
+  <option value="doc/slash">\ commands</option>
   <option value="doc/nouns">_ system verbs and nouns</option>
   <option value="doc/assign">. assign, define, control and debug</option>
   <option value="doc/io">: io</option>
@@ -34,6 +35,7 @@ body{}
 <p><textarea id="edt" spellcheck="false">
 </textarea>
 
+<script src="u.js"></script>
 <script>
 
 //tty
@@ -50,7 +52,7 @@ let kp=_=>{let v=out.textContent.split("\n"),p="  ";
  v=(19<v.length?v.slice(v.length-19):v).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n")
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
  rdl.textContent="";prmt(1);}
-let exec=x=>(O(x+"\n"),k(x),kp())
+let exec=x=>(O(x+"\n"),k(x),kp(),ui())
 
 
 //ce cadeau, c'est cadeux
@@ -73,18 +75,19 @@ let e={env:{
  spne:(r,n,d,f)=>cs(r,(f<0?"":" ")+f.toExponential(d).padEnd(n," ")),
  spnf:(r,n,d,f)=>cs(r,f.toFixed(d).padStart(n," ")),
  strtod:(x,p,s,n,r)=>(s=S(x),n=s.length,r=Number(s),U[p>>2]=x+n-isNaN(r),r),
+ gui:(x,y)=>gui(x,S(y)),
 }}
 "log exp sqrt floor sin cos tan asin acos atan sinh cosh tanh".split(" ").forEach(x=>e.env[x]=Math[x])
-let ex
-let kw
-let k=(s,r)=>(s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
-let cut=(x,i)=>(i=x.indexOf("\n\\\n"),i>0?x.slice(0,i):x)
-let wa=(r,s)=>WebAssembly.instantiate(r,e).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?k(cut(s)):out.textContent="k2";kp()});
-let kinit=s=>kw?wa(kw,s):fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>wa(r,s))
+let sk=s=>{let o=O,r="";O=x=>r+=x;k(s);O=o;return r}
+let k=(s,r)=>(console.log("k",s.trim()),s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
+let cut=x=>{let i=x.indexOf("\n\\\n"),r=[],v=(i>0?x.slice(0,i):x).split("\n"),s="",px=x=>(p(),s=x,p()),p=_=>s?(r.push(s.trim()),s=""):0;
+ v.forEach(x=>x.startsWith("\\")?px(x):s+="\n"+x);p();return r}
+let wa=(r,s)=>WebAssembly.instantiate(r,e).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?cut(s).map(k):out.textContent="k2";kp()});
+let kinit=s=>fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>wa(r,s))
 kinit();
 
 //edt
-let show=(x,r)=>(r=r.replaceAll("\r",""),edt.value=r,x.endsWith(".k")?kinit(r):0)
-let fe=x=>{if(x==""){edt.value="";return kinit()};ex?show(x,ex[x]):fetch(x).then(r=>r.text()).then(r=>show(x,r))}
+let ed=(x,r)=>(r=r.replaceAll("\r",""),edt.value=r,x.endsWith(".k")?kinit(r):0)
+let fe=x=>{if(x==""){edt.value="";return kinit()};fetch(x).then(r=>r.text()).then(r=>ed(x,r))}
 
 </script></body></html>

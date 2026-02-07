@@ -1,0 +1,4 @@
+\d [d|^] k directory [go to]
+\v [d|^] variables [directory]
+\i [v]   invalid [antecedents/dependents]
+\p [n]   print precision [digits]
