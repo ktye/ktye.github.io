@@ -1,5 +1,5 @@
 <!doctype html>
-<html><head><meta charset=utf-8><title>k2</title>
+<html><head><meta charset=utf-8><title>2</title>
 <link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
 <style>
 *{/*box-sizing:border-box;overflow:clip;*/font-family:monospace}
@@ -47,6 +47,7 @@ body{display:flex;margin:0}
 </div>
 <div id="dex"></div>
 
+<script src="j.s"></script>
 <script src="gui.js"></script>
 <script>
 
@@ -65,7 +66,6 @@ let kp=_=>{let v=out.textContent.split("\n"),p="  ";
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
  rdl.textContent="";prmt(1);}
 let exec=x=>(O(x+"\n"),k(x),kp(),ui())
-
 
 //ce cadeau, c'est cadeux
 let O=x=>out.textContent+=x
@@ -91,7 +91,7 @@ let e={env:{
 }}
 "log exp sqrt floor sin cos tan asin acos atan sinh cosh tanh".split(" ").forEach(x=>e.env[x]=Math[x])
 let sk=s=>{let o=O,r="";O=x=>r+=x;k(s);O=o;return r}
-let k=(s,r)=>(console.log("k",s.trim()),s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
+let k=(s,r)=>(s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
 let cut=x=>{let i=x.indexOf("\n\\\n"),r=[],v=(i>0?x.slice(0,i):x).split("\n"),s="",px=x=>(p(),s=x,p()),p=_=>s?(r.push(s.trim()),s=""):0;
  v.forEach(x=>x.startsWith("\\")?px(x):s+="\n"+x);p();return r}
 let wa=(r,s)=>WebAssembly.instantiate(r,e).then(r=>{out.textContent="";K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();s?cut(s).map(k):out.textContent="k2";kp();ui()});
