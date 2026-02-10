@@ -9,21 +9,37 @@ let ct=(t,x)=>(x.textContent=t,x)
 let cl=(c,x)=>(x.classList.add(c),x)
 let qs=(x,y)=>x.querySelector(y)
 let bb=x=>x.getBoundingClientRect()
+let attr=(x,l,a)=>l.includes(a)?J(`${x}..${a}`):0
 let win=x=>{let i=dex.childElementCount
- let v=J(x),a=J(x+".");k(`${x}..t:"\`show$\`${x}"`)
- console.log("v",v,"a",a);
- let l=0,w=fwin(x)||(l=1,cl("win",ce("w")));w.dataset.k=x
+ let v=J(x),A=J(`!${x}.`);k(`${x}..t:"\`show$\`${x}"`)
+ console.log("v",v,"A",A);
+ let l=0,w=fwin(x)||(l=1,cl("win",ce("w")));w.dataset.k=x;
+ let c=attr(x,A,"c")||atn(["data"],4,1);console.log("c",c);c=c.t==4?c[0]:"data";if(5==v.t&&c!="data")c="form";
+ let f={data:data/*,char:char,plot:plot,check:check,radio:radio,button:button,form:form*/}[c]||(x=>`class ${c}?`);
  w.innerHTML=`<div class="hdr">
   <img src="../kelas32.png" width="16" style="float:left;position:relative;left:-5px">
   <span>${x}</span>
   <span style="float:right" style="padding-left:5px" class="cxx" data-k="${x}">&#x2717;</span>
- </div>
- <table><tr><td>${x}</td><td>
- </td></tr></table>`
-
+ </div>`+f(x,v,A);
  ac(w,dex);if(l)lay(w,i);drag(w);return w}
 
-let atr=(a,x,i)=>6==a._?null:(i=a[0].indexOf(x),i<0?null:a[1][i])
+let data=(x,v,a)=>{
+ let t=v.t<0 //|| dict of vectors
+ let[K,V]=v.t==5?v:[[last(x.split("."))],[v]]
+ let A=v.t==5?K.map(k=>`!${x}.k.`):[a]
+ if(t)return "table..";
+ let r="";for(let i=0;i<K.length;i++){ let k=K[i],vi=V[i],xi=v.t==5?`${x}.${k}`:x,s=v[0]
+  let l=attr(x,A[i],"l");l=l?l[0]:last(k.split("."))
+  let e=attr(x,A[i],"e");console.log("e!",e);e=e?e[0]:1; console.log("e?",e);
+  let f=attr(x,A[i],"f");if(f)s=J(f[0]+xi)[0]
+  let h=attr(x,A[i],"h");h=h?h[0]:""
+  console.log("s?",JSON.stringify(s));
+  r+=`<tr title="${h}"><th>${l}</th><td>${input(s,e,h)}</td></tr>`
+ }
+ return"<table>"+r+"</table>"}
+
+let input=(x,e,h)=>(console.log("input value",x),`<input value="${x}" ${e?"":"readonly"}>`)
+let last=x=>x[x.length-1]
 let inp=(x,v,a,t)=>{
  let g=atr(a,"g")||(t==-3?" ":["0","0.0",`" "`,"`"][t])+"$";g=`(${g})${x}`
  //let u=atr(a,"u')||":";u=`${x}:
@@ -43,5 +59,6 @@ let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
  c=e.clientX;d=e.clientY;document.onmouseup=cd;document.onmousemove=mm}
  h.onmousedown=md
 }
+
 
 
