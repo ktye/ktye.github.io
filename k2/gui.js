@@ -32,6 +32,7 @@ let data=(x,v,a)=>{
   let l=attr(x,A[i],"l");l=l?l[0]:last(k.split("."))
   let e=attr(x,A[i],"e");console.log("e!",e);e=e?e[0]:1; console.log("e?",e);
   let f=attr(x,A[i],"f");if(f)s=J(f[0]+xi)[0]
+//  let g=attr(x,A[i],"g");g=g?g=f[0]+xi:
   let h=attr(x,A[i],"h");h=h?h[0]:""
   console.log("s?",JSON.stringify(s));
   r+=`<tr title="${h}"><th>${l}</th><td>${input(s,e,h)}</td></tr>`

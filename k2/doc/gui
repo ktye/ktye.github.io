@@ -1,0 +1,23 @@
+`show$`v        show variable v
+`hide$`v        hide variable v
+ 
+ Display attributes (for variables that have class).
+  x     width           integer(KFONT width)
+  y     height          integer(KFONT height)
+  a     arrangement     nest of symbols(class `form)
+  o     options         list of symbols(class `radio)
+  l     label           string
+  kl    click label     string (also klr)
+ 
+  Data-display attributes (for variables that have class `data).
+  functions (monadic, constant or array)        default
+   e    editable        0 or 1                   1
+   f    format          string from data         11$(11.2$)
+   g    getdata         data from string         0$ etc.
+   u    update          update[old;new]          :
+   fg   foreground      integer(rrggbb)          0
+   bg   background      integer(rrggbb)         -1(808080)
+ 
+  expressions/events (strings)
+   ins, del, f1 ... f12, ctrl_a ... ctrl_z
+   k, kr, kk    click, click right, double click(precludes e)
