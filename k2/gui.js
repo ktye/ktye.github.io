@@ -32,21 +32,17 @@ let data=(x,v,a)=>{
   let l=attr(x,A[i],"l");l=l?l[0]:last(k.split("."))
   let e=attr(x,A[i],"e");console.log("e!",e);e=e?e[0]:1; console.log("e?",e);
   let f=attr(x,A[i],"f");if(f)s=J(f[0]+xi)[0]
-//  let g=attr(x,A[i],"g");g=g?g=f[0]+xi:
+  let g=attr(x,A[i],"g");g=g?g[0]:1==v.t?"0$":2==v.t?"0.0$":4==v.t?"`$":"$:"
+  let u=attr(x,A[i],"u");u=u?u[0]:":"
   let h=attr(x,A[i],"h");h=h?h[0]:""
-  console.log("s?",JSON.stringify(s));
-  r+=`<tr title="${h}"><th>${l}</th><td>${input(s,e,h)}</td></tr>`
+  r+=`<tr title="${h}"><th>${l}</th><td>${input(s,xi,"!0",e,g,u,h)}</td></tr>`
  }
  return"<table>"+r+"</table>"}
 
-let input=(x,e,h)=>(console.log("input value",x),`<input value="${x}" ${e?"":"readonly"}>`)
+let input=(s,x,i,e,g,u,h)=>(console.log("input value",s),`<input value="${s}" ${e?"":"readonly"} data-x="${x}" data-i="${i}" data-g="${g}" data-u="${u}" onchange=datachange(this) onfocus="this.old=this.value;">`)
 let last=x=>x[x.length-1]
-let inp=(x,v,a,t)=>{
- let g=atr(a,"g")||(t==-3?" ":["0","0.0",`" "`,"`"][t])+"$";g=`(${g})${x}`
- //let u=atr(a,"u')||":";u=`${x}:
- `<input value="${v[0]}" data-k=${k} data-g="${g}" onchange="valid(this)">`
-}
-let valid=x=>sk(x.dataset.g)
+
+let datachange=x=>sk(`.[${x.dataset.g};"${x.value}";:]`)[1]=="1"?(x.value=x.old):sk(`.[\`${x.dataset.x};${x.dataset.i};${x.dataset.u};${x.dataset.g}"${x.value}"]`) //if .[g;y;:] reset else .[`x;i;u;g s]
 
 let lay=(w,i)=>{let r=bb(dex);w.style.left=(5+r.left+20*i)+"px";w.style.top=(5+r.top+30*i)+"px"}
 let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
