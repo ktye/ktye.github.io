@@ -1,0 +1,64 @@
+<!doctype html>
+<html><head><meta charset=utf-8><title>2</title>
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<style>
+*{/*box-sizing:border-box;overflow:clip;*/font-family:monospace}
+html{height:100vh}
+body{display:flex;margin:0}
+input{field-sizing:content}
+input:read-only{border:none;outline:none}
+#lef{display:flex;flex-direction:column;height:100vh}
+#dex{border:5px solid white;height:calc(100vh - 10px);width:100%;background-image:repeating-conic-gradient(#aaaaaa 0% 25%,#cccccc 0% 50%);background-position:0 0,5px 5px;background-size:10px 10px;background-color:#cccccc}
+#tty{border:5px solid white;width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;display:inline-block}
+#tty:focus-within{color:white}
+#rdl{color:white;outline:none}
+#edt{width:78ch;/*min-height:22rem;*/height:100%;padding:0;border:5px solid white;background:#ececec;outline:none;field-sizing:content;white-space:pre;}
+.win{position:absolute;border:2px solid black;background:white}
+.hdr{text-align:center;font-weight:bold;border-bottom:2px solid black;padding:5px;background:#eee}
+.hdr:hover{cursor:pointer}
+.cxx{padding-left:10px}
+.cxx:hover{cursor:""}
+</style></head><body>
+<div id="lef">
+ <pre id="tty"><span id="out" tabindex="-1">$k</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
+ 
+ <div style="padding:5px">
+  <select id="sel" onchange="fe(this.value)"> 
+   <option value="">empty</option>
+   <option value="gui.j">gui.j</option>
+  </select>
+  <button onclick="jinit(edt.value)" style="float:right">run</button>
+ </div>
+ <textarea id="edt" spellcheck="false">
+ </textarea>
+</div>
+<div id="dex"></div>
+
+<script src="gui.js"></script>
+<script>
+
+//tty
+let pd=e=>(e.preventDefault(),e.stopPropagation()) 
+let shpr="$",rlbuf=[],rlpos=0
+let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}
+let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
+let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
+let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
+let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
+tty.onclick=_=>rdl.focus()
+rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),progexit()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
+let kp=_=>{let v=out.textContent.split("\n"),p="  ";
+ v=(19<v.length?v.slice(v.length-19):v).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n")
+ v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
+ rdl.textContent="";prmt(1);}
+let exec=x=>(O(x+"\n"),O(eval?.('('+x+')')),kp())
+let O=x=>(out.textContent+=("string"==typeof x)?x:JSON.stringify(x))
+
+let jinit=s=>{out.textContent="";eval(s);out.textContent="j2";kp()}
+
+//edt
+let ed=(x,r)=>(r=r.replaceAll("\r",""),edt.value=r,x.endsWith(".j")?jinit(r):0)
+let fe=x=>{if(x==""){edt.value="";return jinit()};fetch(x).then(r=>r.text()).then(r=>ed(x,r))}
+
+sel.value="";fe(sel.value)
+</script></body></html>

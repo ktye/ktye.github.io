@@ -26,15 +26,19 @@ let win=x=>{let i=dex.childElementCount
 let data=(x,v,a)=>{
  let t=v.t<0 //|| dict of vectors
  let[K,V]=v.t==5?v:[[last(x.split("."))],[v]]
- let A=v.t==5?K.map(k=>`!${x}.k.`):[a]
+ let A=v.t==5?K.map(k=>J(`!${x}.${k}.`)):[a]
  if(t)return "table..";
- let r="";for(let i=0;i<K.length;i++){ let k=K[i],vi=V[i],xi=v.t==5?`${x}.${k}`:x,s=v[0]
-  let l=attr(x,A[i],"l");l=l?l[0]:last(k.split("."))
-  let e=attr(x,A[i],"e");console.log("e!",e);e=e?e[0]:1; console.log("e?",e);
-  let f=attr(x,A[i],"f");if(f)s=J(f[0]+xi)[0]
-  let g=attr(x,A[i],"g");g=g?g[0]:1==v.t?"0$":2==v.t?"0.0$":4==v.t?"`$":"$:"
-  let u=attr(x,A[i],"u");u=u?u[0]:":"
-  let h=attr(x,A[i],"h");h=h?h[0]:""
+ let r="";for(let i=0;i<K.length;i++){ let k=K[i],vi=V[i],xi=v.t==5?`${x}.${k}`:x
+ console.log("Ai",A[i])
+  let l=attr(xi,A[i],"l");l=l?l[0]:last(k.split("."))
+  let e=attr(xi,A[i],"e");console.log("e!",e);e=e?e[0]:1; console.log("e?",e);
+  let f=attr(xi,A[i],"f");console.log("f?",f);f=f?f[0]:"$"
+  let g=attr(xi,A[i],"g");g=g?g[0]:1==v.t?"0$":2==v.t?"0.0$":4==v.t?"`$":"$:"
+  let u=attr(xi,A[i],"u");u=u?u[0]:":"
+  let h=attr(xi,A[i],"h");h=h?h[0]:""
+  console.log("lefguh",l,e,f,g,u,h);
+  let s=J(`${f}${xi}`)[0];
+  console.log("s",s);
   r+=`<tr title="${h}"><th>${l}</th><td>${input(s,xi,"!0",e,g,u,h)}</td></tr>`
  }
  return"<table>"+r+"</table>"}
