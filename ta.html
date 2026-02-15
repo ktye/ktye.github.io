@@ -1,0 +1,124 @@
+<!DOCTYPE html><head><meta charset="utf-8"><link rel=icon href="kelas16.png"><title>ta</title><style>
+
+*{font-family:monospace}
+body{height:100vh;width:100vw;border:none;margin:0;overflow:hidden}
+table,tr{border:none}
+th{line-height:1em;border-top:1px solid #ccc;border-left:1px solid #ccc;border-right:1px solid transparent;border-bottom:1px solid transparent;background:#ddd}
+td{line-height:1em;border-top:1px solid #ccc;border-left:1px solid #ccc;border-right:1px solid transparent;border-bottom:1px solid transparent;white-space:nowrap;overflow:hidden}
+/*table{border-collapse:collapse}*/
+td{min-width:6ch;text-align:right}
+.tb{background:#aaa}
+.bt{border-top:1px solid red;border-top-width:1px}
+.bb{border-bottom:1px solid red;border-bottom-width:1px}
+.bl{border-left:1px solid red;border-left-width:1px}
+.br{border-right:1px solid red;border-right-width:1px}
+.dt{border-top:1px solid green;border-top-width:1px}
+.db{border-bottom:1px solid green;border-bottom-width:1px}
+.dl{border-left:1px solid green;border-left-width:1px}
+.dr{border-right:1px solid green;border-right-width:1px}
+.top{position:sticky;top:0}
+.lef{position:sticky;left:0}
+input{/*width:fit-content*/width:5ch;outline:none;border:none;background:#ffe;padding:0;line-height:1em}
+#T{table-layout:fixed;outline:none}
+.dot{position:absolute;background:black;padding:1px;width:1px;height:1px;cursor:crosshair;z-index:1}
+
+</style></head><body>
+
+<div style="height:calc(100% - 2em);width:100%;overflow:auto">
+ <table id="T" cellspacing="0" rowspacing="0" tabindex="0"></table>
+</div>
+<div id="B" style="position:fixed;left:0;bottom:0;width:100%;height:2em;display:flex">
+</div>
+
+
+<script>
+
+let t={_ignore:3};"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(x=>t[x]=Array(100).fill(0).map(x=>(10*Math.random()).toFixed(3)));
+
+// editable table, copy-paste, drop corner, ..
+
+
+let ta=(t,T)=>{
+ let af=Array.from,qa=(x,y)=>x.querySelectorAll(y),ce=x=>document.createElement(x),tc=(t,x)=>(x.textContent=t,x),cl=(c,x)=>(x.classList.add(c),x),tn=t=>document.createTextNode(t),ac=(c,x)=>(x.appendChild(c),x)
+ let oc=(f,x)=>(x.onclick=f,x),pd=e=>e.preventDefault(),bbox=x=>x.getBoundingClientRect()
+ let tr=(a, r)=>(r=ce("tr"),a.map(x=>ac(x,r)),r),tt=t=>tc(t,cl("top",ce("th"))),tl=i=>tc(i,cl("lef",ce("th"))),td=t=>tc(t,ce("td"))
+ let dot=cl("dot",ce("div"));T.after(dot);let rowb,colb
+
+ let addrow=_=>{let i=T.rows.length,nc=T.rows[0].children.length;ac(tr([tl(i),...Array(nc-1).fill(0).map(c=>td(""))]),T)}
+ let newnam=_=>{let a=af(T.rows[0].children).map(x=>x.textContent),s,i=a.length;while(++i){s="col"+i;if(!a.includes(s))return s}}
+ let rowlab=_=>{let n=T.rows.length;for(let i=1;i<n;i++)tc(i-1,T.rows[i].firstChild)}
+ let addcol=_=>{let n=T.rows.length,nc=T.rows[0].children.length;for(let i=0;i<n;i++)ac(ce(i?"td":"th"),T.rows[i]);tc(newnam(),T.rows[0].children[nc])}
+ let insrow=b=>{let s=mm0(S);addrow();let r=T.children;T.insertBefore(r[r.length-1],r[b?s[0]:1+s[1]]);rowlab();if(b){S[0]++;S[1]++;mark()};}
+ let movrow=u=>{let r=T.children,n=r.length,s=mm0(S),a=s[0],b=s[1],d=u?-1:1;if(u&&1==a)return;if(b==n-1&&!u)return;S[0]+=d;S[1]+=d;T.insertBefore(u?r[a-1]:r[1+b],u?r[1+b]:r[a]);mark();rowlab()}
+ let inscol=b=>{let s=mm0(S),i,r=T.rows,n=r.length,m=r[0].children.length;addcol();for(i=0;i<n;i++){c=r[i].children;r[i].insertBefore(c[m],b?c[s[2]]:c[1+s[3]])};if(b){S[2]++;S[3]++;mark()}}
+ let movcol=l=>{let s=mm0(S),i,c,r=T.rows,n=r.length,m=r[0].children.length,d=l?-1:1;if(d&&s[2]<2)return;if(s[3]==m-1&&!l)return;for(i=0;i<n;i++){c=r[i].children;r[i].insertBefore(l?c[s[2]-1]:c[s[3]+1],l?c[s[3]+1]:c[s[2]-1])};S[2]+=d;S[3]+=d;mark()}
+
+ let scroll=(i,j,le,ri,up,dn)=>{i=Math.max(i,1),j=Math.max(j,1),n=T.rows.length,m=T.rows[0].children.length;i=Math.min(i,n-1);j=Math.min(j,m-1);
+  let c=T.rows[i].children,e=bbox(c[j]),d=T.parentElement,p=bbox(d),w0=bbox(c[0]).right,h0=bbox(T.rows[0].firstChild).bottom,
+  sw=p.width-d.clientWidth,sh=p.height-d.clientHeight;
+  le&&e.left<w0?d.scrollBy(e.left-w0,0):ri&&e.right>p.right-sw?d.scrollBy(e.right-p.right+sw+2,0)
+  :up&&e.top<h0?d.scrollBy(0,e.top-h0):dn&&e.bottom>p.bottom-sh?d.scrollBy(0,e.bottom-p.bottom+sh):0}
+
+ let at=(i,j)=>T.rows[i].children[j]
+ let _S=[1,1,1,1],S=[1,1,1,1],_D=[],D=[]
+ let mm0=x=>{let m=(x,y)=>x>y?[y,x]:[x,y];return[...m(x[0],x[1]),...m(x[2],x[3])]}
+ let mm1=x=>mm0(x.map(x=>Math.max(1,x)))
+ let mm2=x=>{let r=T.rows,n=r.length-1,m=r[0].children.length-1;return x.length?[...[x[0],x[1]].map(x=>Math.min(n,x)),...[x[2],x[3]].map(x=>Math.min(m,x))]:[]}
+ let ext=s=>{s=s.slice();if(0==s[0]+s[1]){s[0]=1;s[1]=T.rows.length-1};if(0==s[2]+s[3]){s[2]=1;s[3]=T.rows[0].children.length-1};return s}
+ let mark=d=>{let bt="bt",bb="bb",bl="bl",br="br";if(d){[bt,bb,bl,br]="dt db dl dr".split(" ");D=mm2(D);_D=mm2(_D)}else{S=mm2(S);_S=mm2(_S);}
+  if(rowb){colb.style.display=S[0]+S[1]==0?"":"none";rowb.style.display=S[2]+S[3]==0?"":"none"}
+  let m=(s,rm)=>{if(!s.length)return;let[a,b,c,d]=mm1(s)
+   r=T.rows[a].children;for(let j=c;j<=d;j++){r[j].classList[rm](bt);T.rows[0].children[j].classList[rm]("tb")}
+   r=T.rows[b].children;for(let j=c;j<=d;j++){r[j].classList[rm](bb)}
+   for(let i=a;i<=b;i++){T.rows[i].children[c].classList[rm](bl);T.rows[i].children[0].classList[rm]("tb");}
+   for(let i=a;i<=b;i++){T.rows[i].children[d].classList[rm](br);}
+   if(rm=="add"){let bd=T.rows[b].children[d],q=bbox(bd);dot.style.left=(q.left+q.width-2)+"px";dot.style.top=(q.top+q.height-2)+"px";}
+  };m(ext(d?_D:_S),"remove");m(ext(d?D:S),"add");d?(_D=D.slice()):(_S=S.slice());  }
+ let c=Object.keys(t).filter(x=>x[0]!="_"),nc=c.length,nr=t[c[0]].length;
+ ac(tr([tt(""),...c.map(tt)]),T)
+ for(let i=0;i<nr;i++)ac(tr([tl(i),...c.map(c=>td(t[c][i]))]),T)
+
+ let delr=(a,b)=>{[a,b]=a>b?[b,a]:[a,b];for(let i=b;i>=a;i--)T.rows[i].remove();for(let i=a;i<T.rows.length;i++)T.rows[i].firstChild.textContent=i-1;mark()}
+ let delc=(a,b)=>{[a,b]=a>b?[b,a]:[a,b];for(let i=0;i<T.rows.length;i++){let r=T.rows[i];for(let j=b;j>=a;j--)r.children[j].remove()};mark()}
+ let del=s=>{let[a,b,c,d]=mm1(s),i,j,r;for(i=a;i<=b;i++){r=T.rows[i];for(j=c;j<=d;j++)r.children[j].textContent=""}}
+ let clr=_=>(0==S[0]+S[1]?delc(S[2],S[3]):0==S[2]+S[3]?delr(S[0],S[1]):del(S))
+ let dotto=_=>{if(!D.length)return;let i,j,k,r,rk,s=mm2(S),d=mm2(D);D=[];
+  if(s[0]==d[0])for(i=s[0];i<=s[1];i++){r=T.rows[i].children,k=s[2];for(j=d[2];j<=d[3];j++){r[j].textContent=r[k].textContent;if(++k==1+s[3])k=s[2]}}
+  else{k=s[0];for(i=d[0];i<=d[1];i++){rk=T.rows[k].children;r=T.rows[i].children;for(j=d[2];j<=d[3];j++)r[j].textContent=rk[j].textContent;if(++k==1+s[1])k=s[0];}}}
+ let ji=(x, r)=>[af((r=x.parentElement).children).indexOf(x),af(T.children).indexOf(r)]
+ let kk=t=>{n=t.nodeName,s=t.textContent,q=ce("input"),[j,i]=ji(t),right=t.nextElementSibling,next=T.children[1+i];if(next)next=next.children[j];
+  if(t.classList.contains("lef"))return;q.value=s;t.replaceChildren(q)
+  let f=(I,J)=>{t.textContent=q.value;let r=T.rows;if(I<0||J<0)return;I==T.rows.length?addrow():J==T.rows[0].childElementCount?addcol():0;kk(at(I,J))}
+  q.onkeydown=e=>"Escape"==e.key?(pd(e),(t.textContent=s)) :"Tab"==e.key?(pd(e),f(i,j+1-2*e.shiftKey)) :"Enter"==e.key?(pd(e),f(i+1-2*e.shiftKey,j)) :0
+  q.onblur=e=>t.replaceChildren(tn(e.target.value))
+  q.focus();q.select()}
+ T.ondblclick=e=>kk(e.target)
+ T.onkeydown=e=>{if(e.target!=T)return;let I,J,n=T.rows.length,m=T.rows[0].children.length,k=e.key,c=e.ctrlKey,s=e.shiftKey,t="Tab"==k,r="Enter"==k,le="ArrowLeft"==k,ri="ArrowRight"==k,up="ArrowUp"==k,dn="ArrowDown"==k;
+  if("Delete"==k)return pd(e),clr()
+  if(s&&c&&le+ri+up+dn){pd(e);S=mm0(S);I=1;J=1;up?(I=S[0]=1):dn?(I=S[1]=n-1):le?(J=S[2]=1):(J=S[3]=m-1);scroll(I,J,le,ri,up,dn);return mark()}
+  if(c&&le+ri+up+dn){pd(e);I=up?1:dn?n-1:S[0];J=le?1:ri?m-1:S[2];S=[I,I,J,J];scroll(I,J,le,ri,up,dn);return mark()}
+  if(c&&"a"==k){pd(e);S=[1,n-1,1,m-1];return mark()}
+  if(c)return
+  if(le+ri+up+dn){pd(e);[I,J]=le?[0,-1]:ri?[0,1]:up?[-1,0]:[1,0];if(s){S[1]+=I;S[3]+=J}else{S[1]=S[0]+=I;S[3]=S[2]+=J};scroll(S[0+s],S[2+s],le,ri,up,dn);return mark()}
+  if(t+r){pd(e);I=S[0]+r-2*r*s;J=S[2]+t-2*t*s;S=[I,I,J,J];scroll(I,J,t&&s,t&&!s,r&&s,r&&!s);return mark()}
+ }
+ T.onmousedown=e=>{let t=e.target,[j,i]=ji(t);pd(e);e.stopPropagation();T.focus();S=e.shiftKey?[S[0],i,S[2],j]:[i,i,j,j];mark()}
+ let dt=0,di,dj,_;dot.onmousedown=e=>{dt=1,_;[di,_,dj]=mm1(S);pd(e);}
+ T.onmousemove=e=>{if(dt){pd(e);let[j,i]=ji(e.target),s=mm1(S);
+   D=i<s[0]||i>s[1]|j<s[2]||j>s[3]?(i>=s[0]&&i<=s[1]?[s[0],s[1],...j>s[3]?[1+s[3],j]:[j,s[2]-1]]:j>=s[2]&&j<=s[3]?[...i>s[1]?[1+s[1],i]:[i,s[0]-1],s[2],s[3]]:[]):[];mark(1);
+  }else if(e.buttons){let[j,i]=ji(e.target);S[1]=i;S[3]=j;mark()}}
+ T.onmouseup=e=>{let t=e.target,[j,i]=ji(t);if(dt){pd(e);dt=0;dotto();mark(1)}else{S[1]=i;S[3]=j;mark()}}
+ T.oncopy=e=>{let s=mm1(S),i,j,a,r,q=[];for(i=s[0];i<=s[1];i++){r=T.rows[i].children;a=[];for(j=s[2];j<=s[3];j++)a.push(r[j].textContent);q.push(a.join("\t"))}
+  e.clipboardData.setData("text/plain",q.join("\r\n"));pd(e)}
+ T.oncut=e=>(T.oncopy(e),clr())
+ T.onpaste=e=>{pd(e);let[a,_a,b,_b]=mm1(S),n,m,it,jt,i,j,v,r,t=(e.clipboardData||window.clipboardData).getData("text");t=t.split(/\r*\n/);n=t.length;
+  if(1==n&&0>t[0].indexOf("\t")){t=t[0];[a,_a,b,_b]=ext(mm0(S));for(i=a;i<=_a;i++){r=T.rows[i].children;for(j=b;j<=_b;j++)r[j].textContent=t};return}
+  for(i=a;i<a+t.length;i++){if(i==T.rows.length)addrow();r=T.rows[i].children;v=t[i-a].split("\t");m=v.length;
+   for(j=b;j<b+v.length;j++){if(j==r.length){addcol();r=T.rows[i].children};r[j].textContent=v[j-b];}};S=[a,a+n-1,b,b+m-1];mark()}
+ if(B){let b=(t,f)=>tc(t,oc(f,ce("button"))),l=t=>tc(t,ce("span")),dv=x=>{let d=ce("div");x.forEach(x=>ac(x,d));d.style.display="none";return d};
+  rowb=dv([l("row: insert"),b("before",x=>insrow(1)),b("after",x=>insrow(0)),l("move"),b("up",  x=>movrow(1)),b("down", x=>movrow(0))]);
+  colb=dv([l("col: insert"),b("left",  x=>inscol(1)),b("right",x=>inscol(0)),l("move"),b("left",x=>movcol(1)),b("right",x=>movcol(0))]);ac(rowb,B);ac(colb,B)}
+}
+
+ta(t,T,B)
+</script></body></html>
