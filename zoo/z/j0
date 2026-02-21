@@ -1,0 +1,19 @@
+(async O=>{
+
+let su=u=>(u.length)?new TextDecoder("utf-8").decode(u):""
+let us=s=>new TextEncoder("utf-8").encode(s)
+
+let J,M
+let m=x=>{ M+=x;return M-x;                       }
+let u=_=>{ return new Uint8Array(J.memory.buffer) }
+let n=x=>{ return u().slice(x).indexOf(0)         }
+let p=x=>{ O(su(u().slice(x,x+n(x))));return 0    }
+let d=x=>{ O(String(u()[x])+"")                  }
+let A=s=>{ let x=us(s);let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;return r}
+let env={env:{printf:(x,y)=>y?d(y):p(x),malloc:m,strlen:n}}
+ 
+let r=await WebAssembly.instantiate(await(await fetch('../../j/j00/j.wasm')).arrayBuffer(),env)
+J=r.instance.exports;M=J.__heap_base.value
+
+let j=s=>J.j(A(s))
+return[" ",j]})

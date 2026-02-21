@@ -1,0 +1,23 @@
+(async O=>{
+
+let K,B,lo=x=>Number(BigInt.asUintN(32,x)),
+C=()=>new Int8Array(K.memory.buffer),U=x=>new Uint32Array(K.memory.buffer,x,1)[0],
+su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
+KC=x=>{x=us(x);let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=s=>K.sc(KC(s))
+
+let z=_=>0,kenv={env:{Exit:z,Args:z,Arg:z,Read:_=>-1,ReadIn:z,Native:z,
+ Write:(a,b,c,d)=>(O(su(new Uint8Array(K.memory.buffer,c,d))),0)}}
+
+let n,nk=x=>{n=x.byteLength;return x}
+let r=await WebAssembly.instantiate(nk(await(await(await fetch("../../k.wasm")).arrayBuffer())),kenv);
+K=r.instance.exports;K.kinit();
+K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC("80 16")))))
+
+let save=_=>B=C().slice(0,1<<U(32))
+let rest=_=>C().set(B)
+
+K.dx(K.Val(KC(await (await fetch("../../apl.k")).text())))
+let A=K.Atx(20n,KC("APL"))
+let a=x=>{try{K.dx(K.Atx(K.rx(A),KC(x)));save()}catch(e){rest()}} 
+O("\n")
+return["      ",a]})

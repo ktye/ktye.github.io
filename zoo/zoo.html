@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<head><meta charset="utf-8"><title>j0</title>
+<link rel="icon" type="image/png" sizes="16x16" href="../kelas16.png">
+<style>
+ html{font-family:monospace}
+ body{margin:0;padding:0;overflow:hidden}
+ optgroup{font-style:normal;white-space:pre}
+ option{font-family:monospace;white-space:pre}
+ #sel{position:absolute;left:0px;top:0px;z-index:10;background:white;border:1px solid;font-family:monospace;white-space:pre}
+ button:active{transform:translateY(1px);}
+ #src{position:absolute;top:0px;right:calc(50vw + 1em);z-index:10;}
+ #edt{position:absolute;top:0px;right:calc(50vw + 5em);z-index:20;}
+ .hidden{display:none}
+ .left{position:absolute;left:0px;width:50vw;height:calc(100vh - 20px);top:20px;overflow:auto}
+ .right{position:absolute;left:50vw;width:50vw;height:100vh}
+ textarea{overflow:hidden;margin:0px;padding:0px;resize:none;outline:0px;border:none;border-left:1px solid;font-family:monospace}
+</style>
+</head>
+
+<body>
+  <select id="sel" autocomplete="off">
+   <optgroup label="APL">
+    <option value="apl360">APL\360     (1966) 60k</option>
+    <option value="ngnapl">ngn/apl     (2018) 50k</option>
+    <option value="iv"    >APL\iv      (2020) 6M</option>
+    <option value="kap"   >KAP         (2022) 800k</option>
+   </optgroup>
+   <optgroup label="j">
+    <option value="j0"    >Incunabulum (1989)   6k</option>
+    <option value="j90"   >APL\?       (1990)     </option>
+    <option value="j42"   >j42         (1992) 108k</option>
+   </optgroup>
+   <optgroup label="k">
+    <option value="ok"    >oK           (2021)  40k</option>
+    <option value="ktye2" >ktye/k2      (2020) 800k</option>
+    <option value="kw"    >ktye/k.w     (2020)  20k</option>
+    <option value="ngn"   >ngn/k        (2022) 160k</option>
+    <!--option value="k4"    >k4           (2024) 800k</option-->
+    <option value="k2"    >k2           (1998)  96k</option>
+    <option value="k7"    >k7           (2019)   1M</option>
+    <option value="k9"    >k9           (2021) 170k</option>
+    <option value="k" selected="selected">ktye/k       (2023)  34k</option>
+    <option value="1k"    >1k           (2023)   4k</option>
+   </optgroup>
+   <optgroup label="others">
+    <option value="klong" >klong        (2020) 160k</option>
+    <option value="jstack">jstack      (2021)   2k</option>
+    <option value="bqn"   >BQN         (2022) 150k</option>
+    <option value="lil"   >lil         (2022) 120k</option>
+   </optgroup>
+    <option value="files" >files</option>
+  </select>
+  <a id="src"  href="browse.html#k.json" target="_blank">src </a>
+  <a id="edt"  href="#"                                 >edit</a>
+  <div id="main">
+   <div      class="left"         id="dec" ></div>
+   <textarea class="left hidden"  id="editor" autocomplete="off" spellcheck="false" autocorrect="off" title="shift-enter to exec"></textarea>
+   <textarea class="right"        id="tty"    autocomplete="off" spellcheck="false" autocorrect="off"></textarea>
+  </div>
+ </div>
+</div>
+
+<script type="module">
+
+import { apl360 } from './apl360.js'
+import { iv     } from './iv.js'
+import { kap    } from './kap.js'
+import { ngnapl } from './ngnapl.js'
+import { j0     } from './j0.js'
+import { j90    } from './j90.js'
+import { j42    } from './j42.js'
+import { ok     } from './ok.js'
+import { ktye2  } from './ktye2.js'
+import { kw     } from './kw.js'
+import { ngn    } from './ngn.js'
+import { k2     } from './k2.js'
+import { k4     } from './k4.js'
+import { k7     } from './k7.js'
+import { k9     } from './k9.js'
+import { k      } from './k.js'
+import { lk     } from './1k.js'
+import { klong  } from './klong.js'
+import { jstack } from './jstack.js'
+import { bqn    } from './bqn.js'
+import { lil    } from './lil.js'
+import { fs     } from './fs.js' 
+import { files  } from './files.js'
+
+window.onerror=function(m,s,l,c,e){tty.value+=s+m+"\n"}
+
+function pd(e){if(e){e.preventDefault();e.stopPropagation()}};
+function ge(x){return document.getElementById(x)}
+
+var sel=ge("sel")
+var dec=ge("dec")
+var tty=ge("tty")
+var src=ge("src")
+var editor=ge("editor")
+
+sel.onchange=function(e){swtch(e.target.value)}
+
+function toggled(){editor.classList.toggle("hidden");return false}; ge("edt").onclick=toggled
+editor.value = "/pressing enter sends marked text to the interpreter"
+editor.onkeydown=function(e){
+ if("Enter"==e.key){let a=editor.selectionStart,b=editor.selectionEnd,s,i
+  if(e.shiftKey){pd(e);s=editor.value.slice(0,b),i=s.lastIndexOf("\n");tty.recv((i>0)?s.slice(1+i):s)}
+  if(a>b)b=[a,a=b][0]
+  if(b-a){ tty.recv(editor.value.slice(a,b));return false
+}}}
+
+
+tty.value = ""
+let keydown=function(e){
+ if("Enter"==e.key){pd(e);
+  let v=tty.value
+  let p=tty.selectionEnd
+  let n=v.slice(p).indexOf("\n")
+  if(n>=0)v=v.slice(0,p+n)
+  tty.value=v
+  let i=v.lastIndexOf("\n")
+  let s=((i<0)?v:v.slice(i)).trim()
+  if(!s.length)return
+  ha(s)
+  evl(s); tty.scrollTop=tty.scrollHeight;
+}}
+tty.onkeydown=keydown
+tty.recv=function(s){s=s.trim();tty.value+=s;evl(s);tty.scrollTop=tty.scrollHeight;}
+tty.focus()
+
+function out(s){tty.value+=s;tty.scrollTop=tty.scrollHeight;}
+
+
+// drop file in console (store in fs)
+window.ondragover=function(e){pd(e)}
+window.ondrop=function(e){pd(e);console.log("drop!");if(e.dataTransfer.items){for(let i=0;i<e.dataTransfer.items.length;i++){if(e.dataTransfer.items[i].kind=='file'){let file=e.dataTransfer.items[i].getAsFile();addfile(file)}}}else for(let i=0;i<e.dataTransfer.files.length;i++)addfile(e.dataTransfer.files[i])}
+function addfile(x){
+ let r=new FileReader()
+ r.onload=function(){
+  let u=new Uint8Array(r.result)
+  fs.writefile(x.name,u)
+  if(tty.drop)tty.drop(x.name,u)
+ }
+ r.readAsArrayBuffer(x)
+}
+
+
+var evl
+
+function swtch(s){
+ window.location.hash="#"+s
+ let rmc=function(p){if(p)while(p.firstChild)p.removeChild(p.lastChild)}
+ let rm=function(p){if(p){rmc(p);p.parentElement.removeChild(p)}}
+ document.title=s; sel.value=s
+ dec.style.overflow="auto" //j90 hides it
+ rmc(dec)
+ rm(tty.nextElementSibling)//j90 adds elements
+ tty.value=""
+ tty.onchange=undefined    //files overwrites it
+ tty.onkeydown=keydown     //
+ tty.drop=undefined        //auto-exec
+
+ let sys
+ switch(s){
+ case "apl360": sys=apl360 ;break
+ case "ngnapl": sys=ngnapl ;break
+ case "iv":     sys=iv     ;break
+ case "kap":    sys=kap    ;break
+ case "j0":     sys=j0     ;break
+ case "j90":    sys=j90    ;break
+ case "j42":    sys=j42    ;break
+ case "ok":     sys=ok     ;break
+ case "ktye2":  sys=ktye2  ;break
+ case "kw":     sys=kw     ;break
+ case "ngn":    sys=ngn    ;break
+ case "k2":     sys=k2     ;break
+ case "k4":     sys=k4     ;break
+ case "k7":     sys=k7     ;break
+ case "k9":     sys=k9     ;break
+ case "k":      sys=k      ;break
+ case "1k":     sys=lk     ;break
+ case "klong":  sys=klong  ;break
+ case "jstack": sys=jstack ;break
+ case "bqn":    sys=bqn    ;break
+ case "lil":    sys=lil    ;break
+ case "files":  sys=files  ;break
+ default:console.log("unknown system", s); sys=k
+ }
+ sys.ini(dec,out);evl=sys.evl
+ src.href="browse.html#"+s+":"+sys.src
+}
+
+function ha(s){
+ window.location.hash=window.location.hash.split(":")[0]+":"+encodeURIComponent(s)
+}
+
+let h=(window.location.hash.length>0)?window.location.hash.slice(1):"k"
+h=h.split(":")
+if(h.length>1){editor.value=decodeURIComponent(h.slice(1).join(":"));toggled()}
+swtch(h[0])
+
+
+</script></body></html>
