@@ -1,0 +1,18 @@
+(async O=>{
+
+let oK
+let r=await(await fetch("./ok/oK.js")).text()
+oK=new Function(r+"\nreturn{run:run,parse:parse,format:format,baseEnv:baseEnv}")()
+
+O("Welcome to oK v0.1\n")
+let  env   = oK.baseEnv()
+let run=oK.run
+let parse=oK.parse
+let format=oK.format
+let k=x=>{
+ try{     x=format(run(parse(x),env));x=x.length?x+"\n":x}
+ catch(e){x=e.message+"\n"}
+ O(x)}
+
+return[" ",k]})
+

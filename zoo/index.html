@@ -13,35 +13,31 @@ body{display:flex;justify-content:center;align-items:center;background:#dec}
 <pre id="tty"><span id="out" tabindex="-1">$</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>
 
 <script>
-
-//tty
-let pd=e=>(e.preventDefault(),e.stopPropagation()) 
+let pd=e=>(e.preventDefault(),e.stopPropagation()),sw=(s,x)=>x.startsWith(s)
 let shpr="$",rlbuf=[],rlpos=0
 let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}
 let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
-let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
+let pr=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 tty.onclick=_=>rdl.focus()
-rdl.onkeydown=(e,k,c)=>(k=e.key,c=e.ctrlKey,"Enter"==k?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==k?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==k?(pd(e),rlnext(rdl.textContent)):("c"==k&&c)?(pd(e),O("\n"),$="$",_=sh,term()):"Escape"==k?(pd(e),rdl.textContent=""):"Tab"==k?pd(e):0)
+rdl.onkeydown=(e,k,c)=>(k=e.key,c=e.ctrlKey,"Enter"==k?(pd(e),exe(rladd(rdl.textContent))):"ArrowUp"==k?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==k?(pd(e),rlnext(rdl.textContent)):("c"==k&&c)?(pd(e),O("\n"),$="$",_=sh,tm()):"Escape"==k?(pd(e),rdl.textContent=""):"Tab"==k?pd(e):0)
 
-let sh=async x=>{x=x.trim(),"pwd"==x?On("/"):"cd"==x?0:"ls"==x?On(ls()):"clear"==x?out.textContent="":x.startsWith("he")||la.map(x=>x+" ").some(y=>y==x.slice(0,y.length))?await help(x):la.includes(x)?await run(x):O(x+": command not found\n")}
+let sh=async x=>(x=x.trim(),"pwd"==x?On("/"):sw("cd",x)?0:"ls"==x?On(a.join(" ")):"clear"==x?out.textContent="":sw("he",x)||sw("ma",x)||a.map(x=>x+" ").some(y=>y==x.slice(0,y.length))?await help(x):a.includes(x)?await run(x):O(x.split(" ")[0]+": command not found\n"))
+let tm=v=>{v=out.textContent.split("\n"),v=(20<v.length?v.slice(v.length-20):v).map(x=>x.slice(0,80)).join("\n");
+ out.textContent=v+=$;rdl.textContent="";pr(1)}
 let $="$",_=sh,O=x=>out.textContent+=x,On=x=>O(x+"\n")
-let term=v=>{v=out.textContent.split("\n"),v=(20<v.length?v.slice(v.length-20):v).map(x=>x.slice(0,80)).join("\n");
- v+=$/*v.endsWith("\n")?$:$+"\n"*/;out.textContent=v;rdl.textContent="";prmt(1)}
 
-let exec=async x=>{rdl.textContent="";On(x);await _(x);term()}
+let exe=async x=>{rdl.textContent="";On(x);await _(x);tm()}
 let run=async x=>{x=await(await fetch("z/"+x)).text();[$,_]=await eval?.(x)(O);}
 
-let la="apl j j0 k k2".split(" ")
-let ls=_=>la.map((x,i,a)=>"\n "[+(i&&x[0]==a[i-1][0])]+x).join("").trim()+"\nhelp apl.."
-
-let he={apl:"../apl.k",j:"../../j/j42/ref.txt",j0:"../../j/j00/j.c",k:"../../klib/ref",k2:"../../k2/doc/verbs"}
-let hel=async x=>O((await(await fetch(x)).text()).split("\n").slice(0,19).join("\n")+"\n")
-let help=async x=>(x=x.split(" "),he[x[0]]?hel(he[x[0]]):he[x[1]]?hel(he[x[1]]):O("no "+x.join(" ")+"\n"))
+let a="apl j j0 k k2 k4 k9 ok".split(" ")
+let b={apl:"../apl.k",j:"../../j/j42/ref.txt",j0:"../../j/j00/j.c",k:"../../klib/ref",k2:"../../k2/doc/verbs",k9:"./k9/ref.txt",ok:"./ok/ref"}
+let h=async x=>O((await(await fetch(x)).text()).split("\n").slice(0,19).join("\n")+"\n")
+let help=async x=>(x=x.split(" "),b[x[0]]?h(b[x[0]]):b[x[1]]?h(b[x[1]]):O("no "+x.join(" ")+"\n"))
 
 window.onerror=e=>On;window.onunhandledrejection=e=>On(e.reason)
-prmt(1)
+pr(1)
 </script></body></html>
 
 

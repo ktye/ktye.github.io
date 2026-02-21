@@ -1,0 +1,41 @@
+(async $=>{
+
+let E=null,F={'a':{'b':{'foo':[1,2,3]}},'bar.k':(new TextEncoder).encode("0N!2+2;")},D={3:F},O={},S=null,U=null,V=()=>new DataView(E.memory.buffer),
+GG=p=>V().getUint8(p,1),GU=p=>V().getUint32(p,1),GL=p=>V().getBigUint64(p,1),GA=(p,n)=>new Uint8Array(E.memory.buffer,p,n),GS=(p,n)=>(new TextDecoder).decode(GA(p,n)),
+SG=(p,x)=>V().setUint8(p,x,1),SH=(p,x)=>V().setUint16(p,x,1),SU=(p,x)=>V().setUint32(p,x,1),SL=(p,x)=>V().setBigUint64(p,BigInt(x),1),SS=(p,s)=>(new TextEncoder).encodeInto(s,new Uint8Array(E.memory.buffer,p)).written
+let isA=x=>x&&[Array,Uint8Array].includes(x.constructor);let aD=x=>{let i=4;for(;D.hasOwnProperty(i);i++);return D[i]=x,O[i]=0,i;}
+let walk=(d,s,o,x)=>{let r=(p,d)=>{let f=p[0]=='.'?d:d[p[0]];if(p.length<2){if(!f&&o)f=d[p[0]]=o;if(f){if(x)delete d[p[0]];return f}return undefined}
+ if(f)return r(p.slice(1),f);return undefined};return r(s.replace(/\/\+/g,"/").replace(/\/$/,"").split('/'),D[d])},
+fstat=(w,r)=>{if(!w)return 8;SL(r,0);SL(r+8,0);SG(r+16,3+isA(w));SL(r+24,0);SL(r+32,isA(w)?w.length:0);SL(r+40,0);SL(r+48,0);SL(r+56,0);return 0},
+read=(d,p,n,o,r)=>{let m=GU(p+4),k,f=o>-1;o=!d?0:f?o:O[d];if(!d)return 44;else{k=D[d].length-o}if(m>k)m=k;(new Uint8Array(E.memory.buffer)).set(D[d].slice(o,m+o),GU(p));if(!f)O[d]+=m;SU(r,m);return 0},
+ I={args_get(p,v){SS(v,'q');SG(v+1,0);SU(p,v);return 0},
+ args_sizes_get(c,n){let f=!!S.length;SU(c,1+2*f);SU(n,2+7*f);return 0},
+ environ_get(){return 52},environ_sizes_get(c,n){SU(c,0);SU(n,0);return 0},
+ clock_time_get(c,p,r){SL(r,1e6*(/*performance.timeOrigin*/1735041600000+performance.now()));return 0},
+ fd_fdstat_get(d,p){SG(p,!d?2:isA(D[d])?4:3);SH(p+2,0);SL(p+8,0);SL(p+16,0);return 0},
+ fd_filestat_get(d,r){return fstat(D[d],r)},fd_filestat_set_size(){return 52},fd_fdstat_set_flags(){return 52},
+ fd_close(d){delete D[d];delete O[d];return 0},
+ fd_read(d,p,n,r){return read(d,p,n,-1,r)},fd_pread(d,p,n,o,r){return read(d,p,n,Number(o),r)},
+ fd_prestat_get(d,p){if(d>3)return 8;SG(p,0);SU(p+4,1);return 0},fd_prestat_dir_name(d,s,n){SG(s,'/');return 0},
+ fd_readdir(d,p,n,o,r){let i=Number(o),s=p,k=Object.keys(D[d]);for(;s<p+n&&i<k.length;){let m=SS(s+24,k[i]);SL(s,++i);SL(s+8,0);SU(s+16,m);SG(s+20,3+isA(D[d]));s+=24+m}return SL(r,s-p),0},
+ fd_seek(d,o,w,r){SL(r,O[d]=Number(o)+(!w?0:w==1?O[d]:D[d].length));return 0},fd_sync(){return 52},
+ fd_write(d,p,n,r){let s=0,k,t;for(let i=0;i<n;i++){t=(d>2?GA:GS)(GU(p+8*i),k=GU(p+8*i+4));s+=k;if(d<3)$(t);else{D[d].splice(O[d],1/0,...t);O[d]+=k}}SU(r,s);return 0},
+ path_create_directory(d,b,n){walk(d,GS(b,n),{});return 0},
+ path_filestat_get(d,f,p,n,r){return fstat(walk(d,GS(p,n)),r);},
+ path_open(d,l,p,n,o,b,i,f,r){let w=walk(d,GS(p,n),(o&1)&&[]);if(w){if((o&2)&&isA(w))return 54;SU(r,aD(w));return 0;}return 44},
+ path_remove_directory(){return 52},
+ path_unlink_file(d,p,n){let s=GS(p,n),w=walk(d,s);return !w?44:!isA(w)?31:(walk(d,s,0,1),0);},
+ path_rename(d,p,n,f,q,m){walk(d,GS(q,m),walk(d,GS(p,n),0,1));return 0},
+ poll_oneoff(s,e,n,r){return 52},
+ proc_exit(e){throw e},sock_recv(){return 52},sock_send(){return 52},sock_accept(){return 52}}
+Object.keys(I).forEach((k,i)=>I[k]=((n,f)=>function(){let r=f.apply(this,arguments);return r})(k,I[k]))
+
+let P=null,K=null;
+ws=s=>((new TextEncoder).encodeInto(s+'\0',GA(S,1<<16)),S);kp=s=>E.kp(ws(s));k=e=>E.k(0,ws(e),0)
+
+let x=await WebAssembly.instantiate(await(await fetch("./qlib.wasm")).arrayBuffer(),{wasi_snapshot_preview1:I})
+E=x.instance.exports;S=E.memory.grow(1)<<16;
+E.qinit(0,0,0,0,0);K=k('k){.Q.trp[1 .Q.s@.:;x;{2("\'",x,"\n"),/.Q.pl\'-2_.[y;(::;3);-2+]}];}');
+let q=s=>{let x=E.ktn(0,1n);SU(x+16,kp("k)"+s));E.r0(E.dot(K,x));E.r0(x)}
+return["k)",q]})
+

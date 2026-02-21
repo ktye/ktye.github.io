@@ -1,0 +1,49 @@
+(async O=>{
+
+let M,K,ss,oe,sa,t0
+let U=_=>new Uint8Array(M),I=_=>new Uint32Array(M),F=_=>new Float64Array(M)
+
+let us=s=>new TextEncoder("utf-8").encode(s)
+let su=u=>u.length?new TextDecoder("utf-8").decode(u):""
+let s0=x=>x=(new Uint8Array(M,x),su(x.slice(0,x.indexOf(0))))
+let lh=(x,y)=>(new Float64Array((new Uint32Array([x, y])).buffer))[0]
+let hl=(x,y)=>lh(y,x)
+let lo=x=>(new Uint32Array((new Float64Array([x])).buffer))[0]
+let hi=x=>(new Uint32Array((new Float64Array([x])).buffer))[1]
+
+let cn=(s,b)=>{let a=[];let c;b>>=2;let u=U();let i=I();let f=F();
+ while(c=u[s++]){let d=c<105;if(d&&(b&1))b++;a.push(d?f[b++>>1]:i[b]);++b};return a}
+
+let ftoa=(x,y,z)=>{if(x!=1158)console.log("ftoa?", x)
+ let a=cn(y,z),u=us(a[0].toPrecision(7)),to=a[1]
+ let d=U();if(to){d.set(u,to);d[to+u.length]=0}
+ return u.length}
+
+let atof=(x,y,z)=>{if(x!=1181) console.log("atof?",x)
+ let a=cn(y,z),u=U().slice(a[0]),n=u.indexOf(0)
+ return Number.parseFloat(su(u.slice(0,n)))}
+
+let fd_write=(f,iov,nio,nr)=>{if(nio!=1)console.log("nio!=1")
+ let i=I(),ptr=i[iov>>2],len=i[1+(iov>>2)];
+ O(su(U().slice(ptr,ptr+len)));i[nr>>2]=len;return 0}
+
+let z=_=>0,z1=_=>-1
+let env={a:{p:z,w:z,o:z,s:z,m:z1,n:z,f:z1,v:z,k:z,e:z1,q:z,d:z,j:z,
+ b:atof,c:ftoa,g:z,l:(d,s,n)=>U().copyWithin(d,s,s+n),
+ h:z,x:z,r:z,t:z,u:fd_write,i:z,a:x=>(t0=x) }}  
+
+let r=await WebAssembly.instantiate(await(await fetch('./k9/k.wasm')).arrayBuffer(),env)
+K=r.instance.exports;M=K.y.buffer
+
+//emscripten seems to split a 64bit return value into a 32bit return value and calls a function before with the other (setTempRet0).
+ss=x=>(x=K.G(x),hl(t0,x))
+oe=x=>(x=K.A(lo(x),hi(x)),hl(t0,x))
+sa=K.P //stack allocate
+
+K.F(0,0) //main
+O("w2021.03.27 1gb firefox (c)shakti 2.0\n")
+
+let k=s=>{let u=us(s),x=sa(1+u.length),m=U();
+ m.set(u,x);m[x+u.length]=0;oe(ss(x))}
+
+return[" ",k]})
