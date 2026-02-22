@@ -32,7 +32,7 @@ let env={a:{p:z,w:z,o:z,s:z,m:z1,n:z,f:z1,v:z,k:z,e:z1,q:z,d:z,j:z,
  b:atof,c:ftoa,g:z,l:(d,s,n)=>U().copyWithin(d,s,s+n),
  h:z,x:z,r:z,t:z,u:fd_write,i:z,a:x=>(t0=x) }}  
 
-let r=await WebAssembly.instantiate(await(await fetch('./k9/k.wasm')).arrayBuffer(),env)
+let r=await wa('./k9/k.wasm',env)
 K=r.instance.exports;M=K.y.buffer
 
 //emscripten seems to split a 64bit return value into a 32bit return value and calls a function before with the other (setTempRet0).

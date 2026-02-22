@@ -12,7 +12,7 @@ let d=x=>{ O(String(u()[x])+"")                  }
 let A=s=>{ let x=us(s);let r=m(1+x.length);let d=u();d.set(x,r);d[r+x.length]=0;return r}
 let env={env:{printf:(x,y)=>y?d(y):p(x),malloc:m,strlen:n}}
  
-let r=await WebAssembly.instantiate(await(await fetch('../../j/j00/j.wasm')).arrayBuffer(),env)
+let r=await wa('../../j/j00/j.wasm',env)
 J=r.instance.exports;M=J.__heap_base.value
 
 let j=s=>J.j(A(s))

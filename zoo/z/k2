@@ -22,7 +22,7 @@ let e={env:{
 "log exp sqrt floor sin cos tan asin acos atan sinh cosh tanh".split(" ").forEach(x=>e.env[x]=Math[x])
 let k=(s,r,n)=>(s=us(s.trim()),n=s.length,r=e.env.malloc(((3+n)>>2)<<2),C.set(s,r),C[r+n]=0,K.keval(r))
 
-let r=await WebAssembly.instantiate(await(await fetch("../../k2/k.wasm")).arrayBuffer(),e);
+let r=await wa("../../k2/k.wasm",e);
 K=r.instance.exports;M=K.__heap_base.value;m();K.kinit();O("k2\n");
 
 return["  ",k]})

@@ -44,7 +44,7 @@ let env={env:{
 }}
 
 
-let r=await WebAssembly.instantiate(await(await fetch('../../j/j42/j42.wasm')).arrayBuffer(),env)
+let r=await wa('../../j/j42/j42.wasm',env)
 J=r.instance.exports
 M=J.__heap_base.value //ma=new allocator(M,J.memory)
 J.jinit()

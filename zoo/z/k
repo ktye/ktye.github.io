@@ -8,11 +8,10 @@ KC=x=>{x=us(x);let r=K.mk(18,x.length);C().set(x,lo(r));return r},Ks=s=>K.sc(KC(
 let z=_=>0,kenv={env:{Exit:z,Args:z,Arg:z,Read:_=>-1,ReadIn:z,Native:z,
  Write:(a,b,c,d)=>(O(su(new Uint8Array(K.memory.buffer,c,d))),0)}}
 
-let n,nk=x=>{n=x.byteLength;return x}
-let r=await WebAssembly.instantiate(nk(await(await(await fetch("../../k.wasm")).arrayBuffer())),kenv);
+let r=await wa("../../k.wasm",kenv);
 K=r.instance.exports;K.kinit();
 K.dx(K.Asn(Ks("l."),K.Atx(Ks("lxy"),K.Val(KC("80 16")))))
-O("ktye/k "+n+"\n")
+O("ktye/k\n")
 let k=x=>{try{K.repl(KC(x));save()}catch(e){rest()}}
 
 let save=_=>B=C().slice(0,1<<U(32))

@@ -36,6 +36,7 @@ let b={apl:"../apl.k",j:"../../j/j42/ref.txt",j0:"../../j/j00/j.c",k:"../../klib
 let h=async x=>O((await(await fetch(x)).text()).split("\n").slice(0,19).join("\n")+"\n")
 let help=async x=>(x=x.split(" "),b[x[0]]?h(b[x[0]]):b[x[1]]?h(b[x[1]]):O("no "+x.join(" ")+"\n"))
 
+let wa=async(w,e)=>await WebAssembly.instantiate(await(await fetch(w)).arrayBuffer(),e);
 window.onerror=e=>On;window.onunhandledrejection=e=>On(e.reason)
 pr(1)
 </script></body></html>

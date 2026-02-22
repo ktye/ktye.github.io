@@ -33,7 +33,7 @@ Object.keys(I).forEach((k,i)=>I[k]=((n,f)=>function(){let r=f.apply(this,argumen
 let P=null,K=null;
 ws=s=>((new TextEncoder).encodeInto(s+'\0',GA(S,1<<16)),S);kp=s=>E.kp(ws(s));k=e=>E.k(0,ws(e),0)
 
-let x=await WebAssembly.instantiate(await(await fetch("./qlib.wasm")).arrayBuffer(),{wasi_snapshot_preview1:I})
+let x=await wa("./qlib.wasm",{wasi_snapshot_preview1:I})
 E=x.instance.exports;S=E.memory.grow(1)<<16;
 E.qinit(0,0,0,0,0);K=k('k){.Q.trp[1 .Q.s@.:;x;{2("\'",x,"\n"),/.Q.pl\'-2_.[y;(::;3);-2+]}];}');
 let q=s=>{let x=E.ktn(0,1n);SU(x+16,kp("k)"+s));E.r0(E.dot(K,x));E.r0(x)}
