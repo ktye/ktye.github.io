@@ -1,0 +1,784 @@
+(async O=>{
+
+
+// lil: Learning in Layers
+
+let allocs=0,calldepth=0,do_panic=0
+NIL  =                   {t:'nil'},                       linil=x=>x&&x.t=='nil'
+lmn  =x      =>(allocs++,{t:'num',v:isFinite(x)?+x:0}),   lin  =x=>x&&x.t=='num'
+lms  =x      =>(allocs++,{t:'str',v:''+x }),              lis  =x=>x&&x.t=='str'
+lml  =x      =>(allocs++,{t:'lst',v:x    }),              lil  =x=>x&&x.t=='lst'
+lmd  =(k,v)  =>(allocs++,{t:'dic',k:k||[],v:v||[]}),      lid  =x=>x&&x.t=='dic'
+lmt  =_      =>(allocs++,{t:'tab',v:new Map()}),          lit  =x=>x&&x.t=='tab'
+lmi  =(f,n,x)=>(allocs++,{t:'int',f,n}),                  lii  =x=>x&&x.t=='int'
+lmon =(n,a,b)=>(allocs++,{t:'on' ,n:n,a:a,b:b,c:null}),   lion =x=>x&&x.t=='on'
+lmnat=f      =>(allocs++,{t:'nat',f:f}),                  linat=x=>x&&x.t=='nat'
+lmblk=_      =>(allocs++,{t:'blk',b:[],locals:[]}),       liblk=x=>x&&x.t=='blk'
+lmbool=x     =>          x?ONE:ZERO
+lmenv=p      =>{allocs++;const r={t:'env',v:new Map(),p:p};r.local=(n,x)=>env_local(r,lms(n),x);return r}
+
+ZERO=lmn(0), ONE=lmn(1), seed=0x12345, max=Math.max, min=Math.min, abs=Math.abs
+ISODATE=lms('%04i-%02i-%02iT%02i:%02i:%02iZ%n%m'), PARTS=['year','month','day','hour','minute','second'].map(lms)
+drom_toupper=x=>x.replace(/([ßẞ])|([^ßẞ])/g,(_,s,e)=>s?'ẞ': e.toUpperCase())
+drom_tolower=x=>x.replace(/([ßẞ])|([^ßẞ])/g,(_,s,e)=>s?'ß': e.toLowerCase())
+clchars=x=>x.normalize("NFC").replace(
+	/(\r)|(\t)|([‘’])|([“”])|([^\x20-\x7E\n…ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿĀāĂăĄąĆćĒēĘęĪīıŁłŃńŌōŐőŒœŚśŠšŪūŰűŸŹźŻżŽžȘșȚțẞ¡¿«»€°]$)/gm,
+	(_,r,t,sq,dq)=>r?'': t?' ': sq?`'`: dq?`"`: '�'
+)
+drom_chars=`…ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿĀāĂăĄąĆćĒēĘęĪīıŁłŃńŌōŐőŒœŚśŠšŪūŰűŸŹźŻżŽžȘșȚțẞ¡¿«»€°`.split('')
+drom_idx=new Map();drom_chars.forEach((c,i)=>drom_idx.set(c.charCodeAt(0),127+i))
+drom_to_ord=x=>{const i=x.charCodeAt(0);return i==10||(i>=32&&i<=126)?i: drom_idx.get(i)||255}
+drom_from_ord=x=>x==9?' ': x==10?'\n': x==13?'': (x>=32&&x<=126)?String.fromCharCode(x): (x>=127&&x<=240)?drom_chars[x-127]: '�'
+wnum=y=>{
+	let w='',d='',s=y<0?(y=-y,'-'):'',i=Math.floor(y);y=Math.round((y-Math.floor(y))*1000000);if(y>=1000000)i++
+	while(i>0){w=(0|i%10)+w,i=i/10}for(let z=0;z<6;z++){d=(0|y%10)+d,y=y/10}
+	return s+('0'+w).replace(/^(0+)(?=[^0])/,'')+('.'+d).replace(/(\.?0+)$/,'')
+}
+mod=(x,y)=>x-y*Math.floor(x/y)
+range=x=>Array.from(Array(0|x)).map((_,i)=>i)
+tab_get=(t,c)=>t.v.get(c)
+tab_has=(t,c)=>t.v.get(c)!=undefined
+tab_cell=(t,c,i)=>(t.v.get(c)||[])[i]
+tab_set=(t,c,v)=>t.v.set(c,v)
+tab_cols=t        =>{const r=[]   ;for(let k of t.v.keys())r.push(k);return r}
+tab_row=(t,i)     =>{const r=lmd();for(let k of t.v.keys())dset(r,lms(k),tab_cell(t,k,i));return r}
+tab_splice=(f,x,t)=>{const r=lmt();for(let k of t.v.keys())tab_set(r,k,f(x,tab_get(t,k)));return r}
+tab_clone=t       =>{const r=lmt();for(let k of t.v.keys())tab_set(r,k,tab_get(t,k).slice(0));return r}
+tab_rowcount=t=>!t.v.size?0: t.v.values().next().value.length
+torect=t=>{
+	let n=0;for(let x of t.v.values())n=max(n,lil(x)?count(x):1);
+	for(let k of t.v.keys()){const v=tab_get(t,k);tab_set(t,k,take(n,lil(v)?v.v:[v]))}
+}
+count=x=>lin(x)?1: lis(x)||lil(x)||lid(x)?x.v.length: lit(x)?tab_rowcount(x): 0
+rows=x=>{const t=lt(x);return lml(range(tab_rowcount(t)).map(i=>tab_row(t,i)))}
+coltab=x=>{
+	const n=lmn(x.v.reduce((x,y)=>max(x,lil(y)?count(y):1),0)),r=lmt()
+	x.k.map((k,i)=>tab_set(r,ls(k),dyad.take(n,dyad.take(n,lil(x.v[i])?x.v[i]:lml([x.v[i]]))).v));return r
+}
+rowtab=x=>{
+	const ok=[],t=lmt(),v=x.v.map(ld)
+	v.map(r=>r.k.map(k=>{if(!tab_has(t,ls(k)))ok.push(k);tab_set(t,ls(k),[])}))
+	v.map(x=>ok.map(k=>tab_get(t,ls(k)).push(dget(x,k)||NIL)));return t
+}
+listab=x=>{
+	const v=x.v.map(ll), m=v.reduce((r,x)=>max(r,x.length),0);const t=lmt();for(let z=0;z<m;z++)tab_set(t,'c'+z,[])
+	v.map(row=>{for(let z=0;z<m;z++)tab_get(t,'c'+z).push(z>=row.length?NIL:row[z])});return t
+}
+tflip=x=>{
+	const c=tab_cols(x),kk=c.indexOf('key')>-1?'key':c[0],k=(tab_get(x,kk)||[]).map(ls),cc=c.filter(k=>k!=kk),r=lmt()
+	tab_set(r,'key',cc.map(lms));k.map((k,i)=>tab_set(r,k,cc.map(c=>tab_cell(x,c,i))));return r
+}
+tcat=(x,y)=>{
+	const r=lmt()
+	tab_cols(x).map(k=>tab_set(r,k,tab_get(x,k).concat(tab_has(y,k)?[]:range(count(y)).map(x=>NIL))))
+	tab_cols(y).map(k=>tab_set(r,k,(tab_has(x,k)?tab_get(x,k):range(count(x)).map(x=>NIL)).concat(tab_get(y,k))));return r
+}
+zip=(x,y,f)=>{const n=count(x),o=count(y)<n?take(n,y.v):y.v;return x.v.map((x,i)=>f(x,o[i%n]))}
+dzip=(x,y,f)=>{
+	const r=lmd(x.k.slice(0),x.v.map((z,i)=>f(z,dget(y,x.k[i])||NIL)))
+	y.k.filter(k=>!dget(x,k)).map(k=>dset(r,k,f(NIL,dget(y,k))));return r
+}
+match=(x,y)=>x==y?1: (x.t!=y.t)||(count(x)!=count(y))?0: (lin(x)||lis(y))?x.v==y.v:
+	         lil(x)?x.v.every((z,i)=>dyad['~'](z,y.v[i]).v): lit(x)?dyad['~'](rows(x),rows(y)).v:
+	         lid(x)?x.v.every((z,i)=>dyad['~'](z,y.v[i]).v&&dyad['~'](x.k[i],y.k[i]).v):0
+splice=(f,x,y)=>lis(y)?lms(f(x,ll(y)).map(ls).join('')): lid(y)?lmd(f(x,y.k),f(x,y.v)): lit(y)?tab_splice(f,x,y): lml(f(x,ll(y)))
+ina=(x,y)=>lmn(lis(y)?y.v.indexOf(ls(x))>=0: lil(y)?y.v.some(y=>match(x,y)): lid(y)?dget(y,x)!=undefined: lit(y)?tab_has(y,ls(x)): x==y)
+filter=(i,x,y)=>{
+	x=(lis(x)||linil(x))?monad.list(x):lml(ll(x))
+	if(lid(y)){const r=lmd();y.k.forEach((k,v)=>i==lb(ina(k,x))&&dset(r,k,y.v[v]));return r}
+	if(!lit(y))return lml(ll(y).filter(z=>i==lb(ina(z,x))))
+	const n=x.v.every(lin),nx=x.v.map(ln),ix=range(tab_rowcount(y))
+	if(n&& i){const r=dyad.take(ZERO,y);nx.forEach(i=>{for(c of y.v.keys()){const v=tab_cell(y,c,i);if(v)tab_get(r,c).push(v)}});return r}
+	if(n&&!i){const r=dyad.take(ZERO,y);ix.forEach(i=>{if(nx.indexOf(i)<0){for(let c of y.v.keys())tab_get(r,c).push(tab_cell(y,c,i))}});return r}
+	const r=lmt();for(let k of y.v.keys())if(i==lb(ina(lms(k),x)))tab_set(r,k,tab_get(y,k));return r
+}
+take=(x,y)=>{const n=y.length, s=x<0?mod(x,n):0; return range(abs(x)).map(z=>y[mod(z+s,n)]||NIL)}
+dkix=(dict,key)=>dict.k.findIndex(x=>match(key,x)), dget=(dict,key)=>dict.v[dkix(dict,key)]
+dvix=(dict,val)=>dict.v.findIndex(x=>match(val,x)), dkey=(dict,val)=>dict.k[dvix(dict,val)]
+dset=(d,k,v)=>{const i=d.k.findIndex(x=>match(x,k));if(i<0){d.k.push(k),d.v.push(v)}else{d.v[i]=v};return d}
+union=(x,y)=>{const r=lmd(x.k.slice(0),x.v.slice(0));y.k.forEach(k=>dset(r,k,dget(y,k)));return r}
+amend=(x,i,y)=>{
+	if(lii(x))return x.f(x,i,y)
+	if(lit(x)&&lin(i)){
+		const r=tab_clone(x), rn=count(x), cols=ll(monad.keys(x)), ri=0|ln(i); y=lid(y)?y: lmd(cols, new Array(cols.length).fill(y))
+		if(ri>=0&&ri<rn)y.k.map((k,i)=>{k=ls(k);if(tab_has(r,k))tab_get(r,k)[ri]=y.v[i]});return r
+	}
+	if(lit(x)&&lis(i)){
+		const r=tab_clone(x), rn=count(x), c=lil(y)?ll(y).slice(0,rn): new Array(rn).fill(y)
+		while(c.length<rn)c.push(NIL);tab_set(r,ls(i),c);return r
+	}
+	if(!lis(x)&&!lil(x)&&!lid(x))return amend(lml([]),i,y)
+	if((lil(x)||lis(x))&&(!lin(i)||(ln(i)<0||ln(i)>count(x))))return amend(ld(x),i,y)
+	if(lil(x)){const r=lml(x.v.slice(0));r.v[ln(i)|0]=y;return r}
+	return lid(x)?dset(lmd(x.k.slice(0),x.v.slice(0)),i,y): lis(x)?lms(ls(x).slice(0,ln(i))+ls(y)+ls(x).slice(1+ln(i))): lml([])
+}
+l_at=(x,y)=>{
+	if(linil(x))return NIL; if(lii(x))return lis(y)&&y.v=='type'?lms(x.n): x.f(x,y)
+	if(lit(x)&&lin(y))x=monad.rows(x); if((lis(x)||lil(x))&&linil(y))y=ZERO; if((lis(x)||lil(x))&&!lin(y))x=ld(x)
+	if(lit(x)&&lis(y)){const r=tab_get(x,ls(y));return r?lml(r):NIL}
+	return lis(x)?lms(x.v[ln(y)|0]||''): lil(x)?x.v[ln(y)|0]||NIL: lid(x)?dget(x,y)||NIL: NIL
+}
+amendv=(x,i,y,n,tla)=>{
+	if(lii(x))tla.v=0;const f=monad.first(i[n]||NIL)
+	return (!tla.v&&n+1 <i.length)?amendv(l_at(x,f),i,y,n+1,tla):
+	       (n+1<i.length)?amend(x,f,amendv(l_at(x,f),i,y,n+1,tla)): (n+1==i.length)?amend(x,f,y): y
+}
+lb=x=>linil(x)?0: lin(x)?x.v!=0: lis(x)?x.v!='': lil(x)||lid(x)?x.v.length: 1
+ln=x=>linil(x)?0: lin(x)?x.v: lis(x)?(isFinite(x.v)?+x.v:0): lil(x)||lid(x)?ln(x.v[0]): 0
+ls=x=>lin(x)?wnum(x.v): lis(x)?x.v: lil(x)?x.v.map(ls).join(''): ''
+ll=x=>linil(x)?[]: lis(x)?x.v.split('').map(lms): lil(x)||lid(x)?x.v: lit(x)?rows(x).v: [x]
+ld=x=>lid(x)?x:lit(x)?monad.cols(x):lil(x)||lis(x)?lmd(range(count(x)).map(lmn),lis(x)?ll(x):x.v):lmd()
+lt=x=>{if(lit(x))return x;const r=lmt();if(linil(x))return r;if(lid(x)){tab_set(r,'key',x.k.slice(0))};tab_set(r,'value',ll(x));return r}
+vm=f=>{const r=x=>lid(x)?lmd(x.k,x.v.map(r)):lil(x)?lml(x.v.map(r)):f(x);return r}
+vd=f=>{const r=(x,y)=>
+	 lid(x)&lid(y)?dzip(x,y,r)    :lid(x)&!lid(y)?lmd(x.k.slice(0),x.v.map(x=>r(x,y))):!lid(x)&lid(y)?lmd(y.k.slice(0),y.v.map(y=>r(x,y))):
+	 lil(x)&lil(y)?lml(zip(x,y,r)):lil(x)&!lil(y)?lml(x.v.map(x=>r(x,y)))             :!lil(x)&lil(y)?lml(y.v.map(y=>r(x,y))): f(x,y);return r}
+vmnl=f=>{const r=x=>lil(x)?(ll(x).some(x=>!lin(x))?lml(x.v.map(r)):f(x)):f(x);return r}
+fstr=x=>{
+	let ct=0;return x.split('').map(x=>{
+		let e=0;if(x=='<'){ct=1}else if(x=='/'&&ct){e=1}else if(x!=' '&&x!='\n'){ct=0}
+		return e?'\\/':({'\n':'\\n','\\':'\\\\','"':'\\"'})[x]||x
+	}).join('')
+}
+fjson=x=>lin(x)?wnum(x.v): lit(x)?fjson(rows(x)): lil(x)?`[${x.v.map(fjson).join(',')}]`:
+         lis(x)?`"${fstr(x.v)}"`:lid(x)?`{${x.k.map((k,i)=>`${fjson(lms(ls(k)))}:${fjson(x.v[i])}`).join(',')}}`:'null'
+fii  =x=>{const e=ifield(x,'encoded');return linil(e)?'null':ls(e)}
+flove=x=>lin(x)||lis(x)?fjson(x): lil(x)?`[${x.v.map(flove).join(',')}]`:
+         lid(x)?`{${x.k.map((k,i)=>`${flove(k)}:${flove(x.v[i])}`).join(',')}}`:
+         lit(x)?`<${tab_cols(x).map(k=>`${flove(lms(k))}:${flove(lml(tab_get(x,k)))}`).join(',')}>`:
+         lii(x)?fii(x): 'null'
+pjson=(y,h,n)=>{
+	const si=h, hn=_=>m&&y[h]&&(n?h-si<n:1), hnn=x=>m&&h+x<=y.length&&(n?h+x-si<n:1)
+	const jd=_=>{while(hn()&&/[0-9]/.test(y[h]))h++}, jm=x=>hn()&&y[h]==x?(h++,1):0, iw=_=>/[ \n]/.test(y[h]), ws=_=>{while(hn()&&iw())h++}
+	const esc=e=>e=='n'?'\n': /[\\/"']/.test(e)?e: e=='u'&&hnn(4)?String.fromCharCode(parseInt(y.slice(h,h+=4),16)):' '
+	let f=1, m=1, rec=_=>{
+		const t={null:NIL,false:ZERO,true:ONE};for(let k in t)if(hnn(k.length)&&y.slice(h,h+k.length)==k)return h+=k.length,t[k]
+		if(jm('[')){const r=lml([]);while(f&&hn()){ws();if(jm(']'))break;r.v.push(rec()),ws(),jm(',')}return r}
+		if(jm('{')){const r=lmd();while(f&&hn()){ws();if(jm('}'))break;const k=rec();ws(),jm(':'),ws();if(f)dset(r,k,rec());ws(),jm(',')}return r}
+		if(jm('"')){let r='';while(f&&hn()&&!jm('"'))r+=hnn(2)&&jm('\\')?esc(y[h++]):y[h++];return lms(clchars(r))}
+		if(jm("'")){let r='';while(f&&hn()&&!jm("'"))r+=hnn(2)&&jm('\\')?esc(y[h++]):y[h++];return lms(clchars(r))}
+		const ns=h;jm('-'),jd(),jm('.'),jd();if(jm('e')||jm('E')){jm('-')||jm('+');jd();}return h<=ns?(f=0,NIL): lmn(+y.slice(ns,h))
+	}, r=rec();return {value:r,index:h}
+}
+idecode=x=>{
+	const p=x.slice(0,5).toLowerCase()
+	return p=='%%img'?image_read(x): p=='%%snd'?sound_read(x): p=='%%dat'?array_read(x): NIL
+}
+plove=(y,h,n)=>{
+	const si=h, hn=_=>m&&y[h]&&(n?h-si<n:1), hnn=x=>m&&h+x<=y.length&&(n?h+x-si<n:1)
+	const jd=_=>{while(hn()&&/[0-9]/.test(y[h]))h++}, jm=x=>hn()&&y[h]==x?(h++,1):0, iw=_=>/[ \n]/.test(y[h]), ws=_=>{while(hn()&&iw())h++}
+	const esc=e=>e=='n'?'\n': /[\\/"']/.test(e)?e: e=='u'&&hnn(4)?String.fromCharCode(parseInt(y.slice(h,h+=4),16)):' '
+	let f=1, m=1, rec=_=>{
+		const t={null:NIL,false:ZERO,true:ONE};for(let k in t)if(hnn(k.length)&&y.slice(h,h+k.length)==k)return h+=k.length,t[k]
+		if(jm('[')){const r=lml([]);while(f&&hn()){ws();if(jm(']'))break;r.v.push(rec()),ws(),jm(',')}return r}
+		if(jm('{')){const r=lmd();while(f&&hn()){ws();if(jm('}'))break;const k=rec();ws(),jm(':'),ws();if(f)dset(r,       k,         rec()  );ws(),jm(',')}return r}
+		if(jm('<')){const r=lmd();while(f&&hn()){ws();if(jm('>'))break;const k=rec();ws(),jm(':'),ws();if(f)dset(r,lms(ls(k)),lml(ll(rec())));ws(),jm(',')}return monad.table(r)}
+		if(jm('%')){jm('%');let r='%%';while(f&&hn()&&/[a-zA-Z0-9+/=]/.test(y[h]))r+=y[h++];return idecode(r)}
+		if(jm('"')){let r='';while(f&&hn()&&!jm('"'))r+=hnn(2)&&jm('\\')?esc(y[h++]):y[h++];return lms(r)}
+		if(jm("'")){let r='';while(f&&hn()&&!jm("'"))r+=hnn(2)&&jm('\\')?esc(y[h++]):y[h++];return lms(r)}
+		const ns=h;jm('-'),jd(),jm('.'),jd();if(jm('e')||jm('E')){jm('-')||jm('+');jd();}return h<=ns?(f=0,NIL): lmn(+y.slice(ns,h))
+	}, r=rec();return {value:r,index:h}
+}
+format_has_names=x=>{
+	let f=0;while(x[f]){
+		if(x[f]!='%'){f++;continue;}f++;if(x[f]=='[')return 1
+		if(x[f]=='*')f++;if(x[f]=='-')f++;if(x[f]=='0')f++;while(/[0-9]/.test(x[f]))f++;if(x[f]=='.')f++
+		let d=0;while(/[0-9]/.test(x[f]))d=d*10+(+x[f++]);if(!x[f])break;const t=x[f++];if(t=='r'||t=='o')while(d&&x[f])d--,f++
+	}return 0
+}
+razetab=x=>{const k=tab_cols(x);return dyad.dict(lml(tab_get(x,k[0])||[]),lml(tab_get(x,k[1])||[]))}
+monad={
+	'-':    vm(x=>lmn(-ln(x))),
+	'!':    vm(x=>lmbool(!lb(x))),
+	floor:  vm(x=>lmn(Math.floor(ln(x)))),
+	ceil:   vm(x=>lmn(Math.ceil(ln(x)))),
+	cos:    vm(x=>lmn(Math.cos(ln(x)))),
+	sin:    vm(x=>lmn(Math.sin(ln(x)))),
+	tan:    vm(x=>lmn(Math.tan(ln(x)))),
+	exp:    vm(x=>lmn(Math.exp(ln(x)))),
+	ln:     vm(x=>lmn(Math.log(ln(x)))),
+	sqrt:   vm(x=>lmn(Math.sqrt(ln(x)))),
+	trim:   vm(x=>lms(ls(x).trim())),
+	unit:   vm(x=>{const n=ln(x);return lml([lmn(Math.cos(n)),lmn(Math.sin(n))])}),
+	mag:    vmnl(x=>lmn(Math.sqrt(ll(x).reduce((x,y)=>x+Math.pow(ln(y),2),0)))),
+	heading:vmnl(x=>{const a=getpair(x);return lmn(Math.atan2(a.y,a.x))}),
+	sum:    x=>ll(x).reduce(dyad['+'],ZERO),
+	prod:   x=>ll(x).reduce(dyad['*'],ONE),
+	raze:   x=>lit(x)?razetab(x) :ll(x).slice(1).reduce(dyad[','],monad.first(x)),
+	max:    x=>ll(x).slice(1).reduce(dyad['|'],monad.first(x)),
+	min:    x=>ll(x).slice(1).reduce(dyad['&'],monad.first(x)),
+	count:  x=>lmn(count(x)),
+	first:  x=>linil(x)?NIL: lis(x)?(x.v.length?lms(x.v[0           ]):NIL): lit(x)?monad.first(rows(x)): lion(x)?lms(x.n): linat(x)?lms('native'): count(x)?ll(x)[0]: NIL,
+	last:   x=>linil(x)?NIL: lis(x)?(x.v.length?lms(x.v[x.v.length-1]):NIL): lit(x)?monad.last (rows(x)): count(x)?ll(x)[count(x)-1]: NIL,
+	keys:   x=>lml(lii(x)?[]: lion(x)?x.a.map(lms): ld(x).k),
+	range:  x=>lml(lin(x)?range(max(0,0|ln(x))).map(lmn): ld(x).v),
+	list:   x=>lml([x]),
+	typeof: x=>lms(({num:"number",str:"string",lst:"list",dic:"dict",tab:"table",on:"function",nat:"function",nil:"nil"})[x.t]||x.n||"interface"),
+	flip:   x=>lit(x)?tflip(x):lml(range(ll(x).reduce((w,z)=>max(w,lil(z)?count(z):1),0)).map(i=>lml(ll(x).map(c=> !lil(c)?c: i<count(c)?c.v[i]: NIL)))),
+	rows:   x=>rows(x),
+	cols:   x=>{const t=lt(x),k=tab_cols(t);return lmd(k.map(lms),k.map(x=>lml(tab_get(t,x))))},
+	table:  x=>lid(x)?coltab(x): lil(x)&&x.v.every(x=>lid(x)||linil(x))?rowtab(x): lil(x)&&x.v.every(x=>lil(x)||linil(x))?listab(x): lt(x),
+	rev:    x=>{
+		if(lis(x)&&count(x)>1)return lms(ls(x).split('').reverse().join(''))
+		if(lil(x)&&count(x)>1)return lml(ll(x).slice(0).reverse())
+		if(lit(x)&&count(x)>1){const r=lmt();for(let k of x.v.keys())tab_set(r,k,tab_get(x,k).slice(0).reverse());return r}
+		if(lid(x)){const r=lmd();x.v.map((v,i)=>dset(r,v,x.k[i]));return r;}
+		return x
+	},
+	distinct: x=>{
+		if(lis(x)&&count(x)>1){const d=new Map();return lms(ls(x).split('').filter(x=>d.get(x)?0: (d.set(x,1),1)).join(''))}
+		if(lil(x)&&count(x)>1){const d=lmd();return lml(ll(x).filter(x=>dget(d,x)?0: (dset(d,x,1),1)))}
+		if(lit(x)&&count(x)>1)return monad.table(monad.distinct(monad.rows(x)))
+		return x
+	},
+	'@tab': t=>{
+		t=lt(t);const r=tab_clone(t)
+		tab_set(r,'index' ,range(count(r)).map(lmn))
+		tab_set(r,'gindex',range(count(r)).map(lmn))
+		tab_set(r,'group' ,range(count(r)).map(x=>ZERO))
+		return r
+	},
+}
+dyad={
+	'+':  vd((x,y)=>lmn(ln(x)+ln(y))),
+	'-':  vd((x,y)=>lmn(ln(x)-ln(y))),
+	'*':  vd((x,y)=>lmn(ln(x)*ln(y))),
+	'/':  vd((x,y)=>lmn(ln(x)/ln(y))),
+	'%':  vd((x,y)=>lmn(mod(ln(y),ln(x)))),
+	'^':  vd((x,y)=>lmn(Math.pow(ln(x),ln(y)))),
+	'<':  vd((x,y)=>lmn(lin(x)||lin(y)?ln(x)< ln(y): ls(x)< ls(y))),
+	'>':  vd((x,y)=>lmn(lin(x)||lin(y)?ln(x)> ln(y): ls(x)> ls(y))),
+	'=':  vd((x,y)=>lmn(lii(x)||lii(y)?x==y: linil(x)||linil(y)?x==y: lin(x)&&lin(y)?ln(x)==ln(y): ls(x)==ls(y))),
+	'&':  vd((x,y)=>lin(x)||lin(y)?lmn(min(ln(x),ln(y))): lms(ls(x)<ls(y)?ls(x):ls(y))),
+	'|':  vd((x,y)=>lin(x)||lin(y)?lmn(max(ln(x),ln(y))): lms(ls(x)>ls(y)?ls(x):ls(y))),
+	split:(x,y)=>lml(ls(y).split(ls(x)).map(lms)),
+	fuse: (x,y)=>lms(ll(y).map(ls).join(ls(x))),
+	dict: (x,y)=>(y=ll(y),ll(x).reduce((d,x,i)=>dset(d,x,y[i]||NIL),lmd())),
+	take: (x,y)=>lis(y)&&lin(x)&&ln(x)<0&&abs(ln(x))<=count(y)?lms(y.v.slice(count(y)+ln(x))):
+                 lis(y)&&lin(x)&&ln(x)>=0&&ln(x)<=count(y)?lms(y.v.slice(0,ln(x))):
+	             lin(x)?splice(take,ln(x),y):filter(1,x,y),
+	drop: (x,y)=>lis(y)&&lin(x)&&ln(x)>=0?lms(y.v.slice(ln(x))):
+                 lis(y)&&lin(x)&&ln(x)<0 ?lms(y.v.slice(0,max(0,count(y)+ln(x)))):
+	             lin(x)?splice((x,y)=>x<0?y.slice(0,x):y.slice(x),ln(x),y):filter(0,x,y),
+	limit:(x,y)=>count(y)>ln(x)?dyad.take(lmn(ln(x)),y):y,
+	in:   (x,y)=>lil(x)?lml(x.v.map(x=>ina(x,y))):ina(x,y),
+	',':  (x,y)=>lit(x)&&lit(y)?tcat(x,y): lid(x)?union(x,ld(y)):
+                 (lis(x)||linil(x))?dyad[','](lml([x]),y): (lis(y)||linil(y))?dyad[','](x,lml([y])): lml(ll(x).concat(ll(y))),
+	'~':  (x,y)=>lmbool(match(x,y)),
+	unless:(x,y)=>linil(y)?x:y,
+	join: (x,y)=>{ // natural join on tables.
+		const f=x=>lin(x)?monad.range(x):lml(ll(x));if(!lit(x)||!lit(y))return lml(zip(f(x),f(y),dyad[',']))
+		const a=x,b=y,ak=tab_cols(a),bk=tab_cols(b), ik=bk.filter(x=>ak.indexOf(x)>=0),dk=bk.filter(x=>ak.indexOf(x)<0)
+		const r=lmt(); ak.forEach(k=>tab_set(r,k,[])), dk.forEach(k=>tab_set(r,k,[]))
+		for(let ai=0;ai<count(a);ai++)for(let bi=0;bi<count(b);bi++)if(ik.every(k=>match(tab_cell(a,k,ai),tab_cell(b,k,bi))))
+			ak.forEach(k=>tab_get(r,k).push(tab_cell(a,k,ai))),dk.forEach(k=>tab_get(r,k).push(tab_cell(b,k,bi)))
+		return r
+	},
+	cross: (x,y)=>{ // cartesian join; force columns to be unique:
+		const f=x=>lt(lin(x)?monad.range(x):lml(ll(x)));if(!lit(x)||!lit(y))return lml(rows(dyad.cross(f(x),f(y))).v.map(x=>lml(x.v)))
+		const a=lt(x),b=lt(y), ak=tab_cols(a),bk=tab_cols(b),uk=[]
+		const r=lmt(); ak.forEach(k=>tab_set(r,k,[])), bk.forEach(k=>{
+			while(tab_has(r,k))k=k+'_';tab_set(r,k,[]),uk.push(k)
+		})
+		for(let bi=0;bi<count(b);bi++)for(let ai=0;ai<count(a);ai++){
+			ak.forEach(k=>tab_get(r,k).push(tab_cell(a,k,ai)))
+			bk.forEach((k,i)=>tab_get(r,uk[i]).push(tab_cell(b,k,bi)))
+		}return r
+	},
+	parse: (x,y)=>{
+		if(lil(y))return lml(y.v.map(y=>dyad.parse(x,y)))
+		x=ls(x),y=ls(y);let f=0,h=0,m=1,pi=0,named=format_has_names(x),r=named?lmd():lml([]);while(x[f]){
+			if(x[f]!='%'){if(m&&x[f]==y[h]){h++}else{m=0}f++;continue}f++
+			let nk=null;if(x[f]=='['){f++;nk='';while(x[f]&&x[f]!=']')nk+=x[f++];if(x[f]==']')f++}
+			let im=m,n=0,d=0,v=null,si=h,sk=x[f]=='*'&&(f++,1),lf=x[f]=='-'&&(f++,1);if(x[f]=='0')f++
+			const hn=_=>m&&y[h]&&(n?h-si<n:1), id=x=>/[0-9]/.test(x), ix=_=>/[0-9a-fA-F]/.test(y[h]), iw=_=>/[ \n]/.test(y[h])
+			while(id(x[f]))n=n*10+(+x[f++]);x[f]=='.'&&f++
+			while(id(x[f]))d=d*10+(+x[f++]);if(!x[f])break;const t=x[f++]
+			if('%mnzsluqarojJ'.indexOf(t)<0)while(hn()&&iw())h++
+			if(t=='%'){if(m&&t==y[h]){h++}else{m=0}}
+			else if(t=='m'){v=lmbool(m)}
+			else if(t=='n'){v=lmn(h)}
+			else if(t=='z'){v=lmbool(m&&h==y.length)}
+			else if(t=='s'||t=='l'||t=='u'){v=lms('');while(hn()&&(n?1:y[h]!=x[f]))v.v+=y[h++];if(t=='l')v.v=drom_tolower(v.v);if(t=='u')v.v=drom_toupper(v.v)}
+			else if(t=='a'){v=lml([]);while(hn()&&(n?1:y[h]!=x[f]))v.v.push(lmn(drom_to_ord(y[h++])))}
+			else if(t=='b'){v=lmbool(/[tTyYx1]/.test(y[h]));while(hn()&&(n?1:y[h]!=x[f]))h++}
+			else if(t=='i'){v=lmn(0);const s=(y[h]=='-')?(h++,-1):1;m&=id(y[h]);while(hn()&&id(y[h]))v.v=v.v*10+(+y[h++]);v.v*=s}
+			else if(t=='h'||t=='H'){v=lmn(0),                       m&=ix();    while(hn()&&ix())v.v=v.v*16+parseInt(y[h++],16)}
+			else if(t=='j'){if(m){const j=pjson(y,h,n);h=j.index,v=j.value}else{v=NIL}}
+			else if(t=='J'){if(m){const j=plove(y,h,n);h=j.index,v=j.value}else{v=NIL}}
+			else if(t=='v'){v=lms(''),m&=!id(y[h]);while(hn()&&/[0-9a-zA-Z_?]/.test(y[h]))v.v+=y[h++];m&=count(v)>0}
+			else if(t=='q'){
+				v=lms(''),m&=y[h]=='"';if(m)h++;while(hn()&&y[h]!='"'){
+					if(y[h]=='\\'){h++;if(/[n\\"]/.test(y[h])){v.v+=y[h]=='n'?'\n':y[h]}else{m=0}}else{v.v+=y[h]}h++
+				}if(m&=y[h]=='"')h++;if(!m)v=NIL
+			}
+			else if(t=='f'||t=='c'||t=='C'){
+				v=lmn(0);let p=10,s=(y[h]=='-')?(h++,-1):1; if(t=='c'&&m&&y[h]=='$')h++
+				m&=id(y[h])||y[h]=='.';  while(hn()&&id(y[h]))v.v=v.v*10+(+y[h++])
+				m&&hn()&&y[h]=='.'&&h++; while(hn()&&id(y[h]))v.v+=(+y[h++])/p,p*=10;v.v*=s
+			}
+			else if(t=='r'||t=='o'){
+				let cc=x.slice(f,f+(d||1));v=lms(''),f+=(d||1);
+				while(hn()){if(cc.indexOf(y[h])>=0==lf?1:0){if(n)m=0;break}v.v+=y[h++];if(t=='o')break;}if(!m)v.v='';
+			}
+			else if(t=='e'||t=='p'){
+				const [dy,dm,dd,dh,dmi,ds,dl,dma]=ll(dyad.parse(ISODATE,lms(y.slice(h)))), l=ln(dl), d=new Date(y.slice(h,h+l))
+				if(l&&ln(dma)){h+=l}else{m=0}; v=t=='e'?lmn(m?0|(d.getTime()/1000):0):lmd(PARTS,[dy,dm,dd,dh,dmi,ds].map(x=>lmn(ln(x))))
+			}else{m=0}while(n&&y[h]&&h-si<n)h++,m=0;
+			if(!sk&&v){
+				if     (!im&&'%mnz'.indexOf(t)==-1)v=NIL              // some previous pattern failed
+				else if((h-si)==0&&'fcCihHv'.indexOf(t)>=0)v=NIL,m=0  // no characters consumed
+				named?dset(r,nk!=null?lms(nk):lmn(pi),v):r.v.push(v);pi++
+			}
+		}return named?r: r.v.length==1?r.v[0]:r
+	},
+	format: (x,y)=>{
+		const frec=(i,x,y)=>{
+			if(i>=count(x))return y
+			const fuse=(count(x)-i)%2?0:1,named=format_has_names(ls(x.v[i+fuse]))
+			const r=lml(ll(lit(y)?rows(y):y).map(z=>dyad.format(x.v[i+fuse],frec(i+fuse+1,x,lit(y)&&!named?lml(ll(z)):z))))
+			return fuse?dyad.fuse(x.v[i],r):r
+		};if(lil(x))return frec(0,x,y)
+		x=ls(x);let r='',f=0,h=0,named=format_has_names(x);y=named?ld(y):lil(y)?y:monad.list(y);while(x[f]){
+			if(x[f]!='%'){r+=x[f++];continue}f++
+			let nk=null;if(x[f]=='['){f++;nk='';while(x[f]&&x[f]!=']')nk+=x[f++];if(x[f]==']')f++}
+			let o='',n=0,d=0,sk=x[f]=='*'&&(f++,1),lf=x[f]=='-'&&(f++,1),pz=x[f]=='0'&&(f++,1)
+			const hn=_=>m&&y[h]&&(n?h-si<n:1), id=x=>/[0-9]/.test(x)
+			while(id(x[f]))n=n*10+(+x[f++]);x[f]=='.'&&f++
+			while(id(x[f]))d=d*10+(+x[f++]);if(!x[f])break;const t=x[f++]
+			const an=named?dget(y,nk!=null?lms(nk):lmn(h)): null
+			const a=t=='%'?NIL: named?(an?an:NIL): (!sk&&h<count(y))?y.v[h]: NIL; if(t!='%'&&!sk)h++
+			if     (t=='%'){o='%'}
+			else if(t=='s'||t=='v'){o=ls(a)}
+			else if(t=='l'){o=drom_tolower(ls(a))}
+			else if(t=='u'){o=drom_toupper(ls(a))}
+			else if(t=='r'||t=='o'){o=ls(a),lf=1;d=max(1,d);while(d&&x[f])d--,f++;d=n;}
+			else if(t=='a'){o=ll(a).map(x=>drom_from_ord(ln(x))).join('')}
+			else if(t=='b'){o=lb(a)?'true':'false'}
+			else if(t=='f'){o=d?ln(a).toFixed(min(100,d)):wnum(ln(a))}
+			else if(t=='c'){const v=ln(a);o=(v<0?'-':'')+'$'+abs(v).toFixed(min(100,d)||2)}
+			else if(t=='C'){const v=ln(a);o=(v<0?'-':'')    +abs(v).toFixed(min(100,d)||2)}
+			else if(t=='i'){o=''+Math.trunc(ln(a))}
+			else if(t=='h'||t=='H'){o=ln(a).toString(16);if(t=='H')o=o.toUpperCase()}
+			else if(t=='e'){o=new Date(ln(a)*1000).toISOString().split('.')[0]+'Z'}
+			else if(t=='p'){const d=ld(a);o=dyad.format(ISODATE,lml(PARTS.map(x=>dget(d,x)))).v}
+			else if(t=='j'){o=fjson(a)}
+			else if(t=='J'){o=flove(a)}
+			else if(t=='q'){o=fjson(lms(ls(a)))}
+			let vn=o.length; if(d&&(t=='f'||t=='c'||t=='C'))d=0;if(d&&lf)vn=min(d,vn)
+			if(n&&!lf)for(let z=0;z<n-vn;z++)r+=pz?'0':' '
+			for(let z=d&&!lf?max(0,vn-d):0;z<vn;z++)r+=o[z]
+			if(n&&lf)for(let z=0;z<n-vn;z++)r+=pz?'0':' '
+		}return lms(r)
+	},
+	like: (x,y)=>{
+		if(!lil(y))y=monad.list(y);const pats=y.v.map(pat=>{
+			const r={m:'',l:'',a:[]},ch=ls(pat).split('');for(let i=0;i<ch.length;i++){
+				r.m+=ch[i]=='`'&&i<ch.length-1?(r.l+=ch[++i],'a'): ch[i]in{'.':1,'*':1,'#':1}?(r.l+='!',ch[i]): (r.l+=ch[i],'a')
+				while(ch[i]=='*'&&ch[i+1]=='*')i++
+			}return r
+		})
+		const test=str=>{
+			for(let pi=0;pi<pats.length;pi++){
+				const m=pats[pi].m, l=pats[pi].l, sc=m.length, a=new Uint8Array(sc);a[0]=m[0]=='*'
+				if(!sc&&!str.length){return ONE}else if(!sc)continue;for(let ci=0;ci<str.length;ci++){
+					const c=str[ci];for(let si=sc-1;si>=0;si--){
+						const prev=(si>0&&a[si-1])||(si==0&&ci==0)||(si>1&&m[si-1]=='*'&&a[si-2])
+						a[si]=m[si]=='*'?a[si]||prev: m[si]=='.'?prev: m[si]=='#'?/[0-9]/.test(c)&&prev: c==l[si]&&prev
+					}
+				}if(a[sc-1]||(sc>1&&m[sc-1]=='*'&&a[sc-2]))return ONE
+			}return ZERO
+		};return lil(x)?lml(x.v.map(x=>test(ls(x)))): test(ls(x))
+	},
+	window: (x,y)=>{
+		let n=ln(x), r=[], con;if(lis(y)){y=ls(y),con=lms}else{y=ll(y),con=lml}
+		if(n>0){     for(let z=0;z    <y.length;z+=n)r.push(con(y.slice(z,z+n)))}
+		if(n<0){n=-n;for(let z=0;z+n-1<y.length;z++ )r.push(con(y.slice(z,z+n)))}
+		return lml(r)
+	},
+	fill: (x,y)=>{
+		if(lit(y)){const r=lmt();for(let k of y.v.keys())tab_set(r,k,ll(dyad.fill(x,lml(tab_get(y,k)))));return r}
+		return lil(y)?lml(ll(y).map(z=>dyad.fill(x,z))): lid(y)?lmd(y.k.slice(0),y.v.map(z=>dyad.fill(x,z))): linil(y)?x: y
+	},
+	'@where': (col,tab)=>{
+		const w=dyad.take(lmn(count(tab)),lml(ll(col)))
+		const p=lml(range(count(tab)).filter(i=>lb(w.v[i])).map(lmn))
+		const r=dyad.take(p,tab);tab_set(r,'gindex',range(count(r)).map(lmn));return r
+	},
+	'@by': (col,tab)=>{
+		const b=dyad.take(lmn(count(tab)),lml(ll(col))), r=monad.rows(tab), u=b.v.reduce((x,y)=>{dset(x,y,y);return x},lmd([],[]))
+		const rows=u.v.map((v,group)=>{
+			const p=lml(range(count(tab)).filter(x=>match(v,b.v[x])).map(lmn))
+			const s=dyad.take(p,tab);tab_set(s,'gindex',range(count(s)).map(lmn)),tab_set(s,'group',range(count(s)).map(_=>lmn(group)));return s
+		});return lml(rows)
+	},
+}
+merge=(vals,keys,widen)=>{
+	const i=lms('@index');let ix=null
+	if(!widen){ix=lml([]);vals.v.map((val,z)=>{dget(val,i).v.map(x=>ix.v.push(x))})}
+	if(widen)vals.v=vals.v.filter(x=>count(dget(x,i)))
+	if(count(vals)==0)vals.v.push(keys.v.reduce((x,y)=>dset(x,y,lml([])),lmd()))
+	let r=monad.raze(lml(vals.v.map(x=>monad.table(widen?x:dyad.drop(i,x)))))
+	if(widen){ix=lml(tab_get(r,'@index')),r=dyad.drop(i,r)}
+	return {r,ix}
+}
+n_uplevel=([a])=>{let i=2, e=getev(), r=null, name=ls(a); while(e&&i){r=e.v.get(name);if(r)i--;e=e.p};return r||NIL}
+n_eval=([x,y,extend])=>{
+	y=y?ld(y):lmd();const yy=lmd(y.k.slice(0),y.v.slice(0)), r=lmd(['value','vars'].map(lms),[NIL,yy])
+	const feval=([r,x])=>{
+		dset(r,lms('value'),x);const b=dget(r,lms('vars')), v=getev().v;
+		for(let k of v.keys()){dset(b,lms(k),v.get(k))};return r
+	}
+	try{
+		const prog=parse(x?ls(x):'')
+		blk_opa(prog,op.BUND,2),blk_lit(prog,lmnat(feval)),blk_op(prog,op.SWAP),blk_op(prog,op.CALL)
+		issue(env_bind(extend&&lb(extend)?getev():null,yy.k.map(ls),lml(yy.v)),prog)
+	}catch(e){dset(r,lms('error'),lms(e.x)),dset(r,lms('errorpos'),lml([lmn(e.r),lmn(e.c)]))};return r
+}
+triad={
+	'@orderby': (col,tab,order_dir)=>{
+		const lex_list=(x,y,a,ix)=>{
+			if(x.length<ix&&y.length<ix)return 0;const xv=x[ix]||NIL,yv=y[ix]||NIL
+			return lex_less(xv,yv)?a: lex_more(xv,yv)?!a: lex_list(x,y,a,ix+1)
+		}
+		const lex_less=(a,b)=>lil(a)&&lil(b)? lex_list(a.v,b.v,1,0): lb(dyad['<'](a,b))
+		const lex_more=(a,b)=>lil(a)&&lil(b)? lex_list(a.v,b.v,0,0): lb(dyad['>'](a,b))
+		const o=dyad.take(lmn(count(tab)),lml(ll(col)));order_dir=ln(order_dir)
+		const pv=range(count(tab)).sort((a,b)=>{
+			if(lex_less(o.v[a],o.v[b]))return  order_dir
+			if(lex_more(o.v[a],o.v[b]))return -order_dir
+			return a-b // produce a stable sort
+		})
+		const rt=dyad.take(lml(pv.map(lmn)),tab)
+		tab_set(rt,'gindex',range(count(tab)).map(lmn));return rt
+	},
+	'@sel': (orig,vals,keys)=>{
+		const mv=merge(vals,keys,0);return count(keys)>1?mv.r: dyad.take(mv.ix,dyad.drop(lml(['index','gindex','group'].map(lms)),orig))
+	},
+	'@ext': (orig,vals,keys)=>{
+		const r=monad.cols(triad['@sel'](orig,vals,keys))
+		return count(keys)==1?(count(r)?monad.first(r):lml([])): count(r)!=1||count(r.k[0])?r: monad.first(r)
+	},
+	'@upd': (orig,vals,keys)=>{
+		orig=dyad.drop(lml(['index','gindex','group'].map(lms)),orig);const mv=merge(vals,keys,1),r=mv.r,ix=mv.ix
+		tab_cols(r).map(c=>{
+			if(tab_get(r,c)==ix)return;const ci=tab_has(orig,c),col=range(count(orig)).map(z=>ci?tab_cell(orig,c,z):NIL)
+			tab_set(orig,c,col),ix.v.map((x,row)=>col[0|ln(x)]=tab_cell(r,c,row))
+		});return orig
+	},
+	'@ins': (v,n,x)=>{
+		const nc=count(n), rc=Math.ceil(count(v)/nc), r=monad.table(lmd(n.v,n.v.map((_,z)=>lml(range(rc).map(r=>v.v[nc*r+z]||NIL)))))
+		return lin(x)?r:dyad[','](lt(x),r)
+	},
+}
+
+findop=(n,prims)=>Object.keys(prims).indexOf(n), as_enum=x=>x.split(',').reduce((x,y,i)=>{x[y]=i;return x},{})
+let tnames=0;tempname=_=>lms(`@t${tnames++}`)
+op=as_enum('JUMP,JUMPF,JUMPT,LIT,DUP,DROP,SWAP,OVER,BUND,OP1,OP2,OP3,GET,SET,LOC,AMEND,TAIL,CALL,BIND,ITER,EACH,NEXT,COL,IPRE,IPOST,FIDX,FMAP')
+oplens=   [ 3   ,3    ,3    ,3  ,1  ,1   ,1   ,1   ,3   ,3  ,3  ,3  ,3  ,3  ,3  ,3    ,1   ,1   ,1   ,1   ,3   ,3   ,1  ,3   ,3    ,3   ,3    ]
+blk_addb=(x,n  )=>x.b.push(0xFF&n)
+blk_here=(x    )=>x.b.length
+blk_setb=(x,i,n)=>x.b[i]=0xFF&n
+blk_getb=(x,i  )=>0xFF&x.b[i]
+blk_adds=(x,n  )=>{blk_addb(x,n>>8),blk_addb(x,n)}
+blk_sets=(x,i,n)=>{blk_setb(x,i,n>>8),blk_setb(x,i+1,n)}
+blk_gets=(x,i  )=>0xFFFF&(blk_getb(x,i)<<8|blk_getb(x,i+1))
+blk_op  =(x,o  )=>{blk_addb(x,o);if(o==op.COL)blk_addb(x,op.SWAP)}
+blk_opa =(x,o,i)=>{blk_addb(x,o),blk_adds(x,i);return blk_here(x)-2}
+blk_imm =(x,o,k)=>{let i=x.locals.findIndex(x=>match(x,k));if(i==-1)i=x.locals.length,x.locals.push(k);blk_opa(x,o,i)}
+blk_op1 =(x,n)=>blk_opa(x,op.OP1,findop(n,monad))
+blk_op2 =(x,n)=>blk_opa(x,op.OP2,findop(n,dyad ))
+blk_op3 =(x,n)=>blk_opa(x,op.OP3,findop(n,triad))
+blk_lit =(x,v)=>blk_imm(x,op.LIT,v)
+blk_set =(x,n)=>blk_imm(x,op.SET,n)
+blk_loc =(x,n)=>blk_imm(x,op.LOC,n)
+blk_get =(x,n)=>blk_imm(x,op.GET,n)
+blk_getimm=(x,i)=>x.locals[i]
+blk_cat=(x,y)=>{
+	let z=0,base=blk_here(x);while(z<blk_here(y)){
+		const b=blk_getb(y,z);if(b==op.LIT||b==op.GET||b==op.SET||b==op.LOC||b==op.AMEND){blk_imm(x,b,blk_getimm(y,blk_gets(y,z+1)))}
+		else if(b==op.JUMP||b==op.JUMPF||b==op.JUMPT||b==op.EACH||b==op.NEXT||b==op.FIDX){blk_opa(x,b,blk_gets(y,z+1)+base)}
+		else{for(let i=0;i<oplens[b];i++)blk_addb(x,blk_getb(y,z+i))}z+=oplens[b]
+	}
+}
+blk_loop=(b,names,f)=>{
+	blk_op(b,op.ITER);const head=blk_here(b);blk_lit(b,names);const each=blk_opa(b,op.EACH,0)
+	f(),blk_opa(b,op.NEXT,head),blk_sets(b,each,blk_here(b))
+}
+blk_end=x=>{
+	let z=0;while(z<blk_here(x)){
+		let b=blk_getb(x,z);z+=oplens[b];if(b!=op.CALL)continue
+		let t=1,i=z;while(i<blk_here(x)){if(blk_getb(x,i)!=op.JUMP){t=0;break}const a=blk_gets(x,i+1);if(a<=i){t=0;break}i=a}if(t)blk_setb(x,z-1,op.TAIL)
+	}return x
+}
+
+parse=text=>{
+	let i=0,r=0,c=0, tq=null // text index, row, column, token queued
+	const er=x=>{throw {x,r,c,i,stack:new Error().stack}}
+	const nc=_=>{const x=text[i++];x=='\n'?(r++,c=0):(c++);return x}
+	const iw=_=>text[i]in{' ':1,'\t':1,'\n':1,'#':1}
+	const sw=_=>{while(iw())if(text[i]=='#')while(i<text.length&&text[i]!='\n')nc();else nc()}
+	const id=_=>0<='0123456789'.indexOf(text[i])
+	//          !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+	const tcc=' s" sss ()ssssdsdddddddddd: sssn@nnnnnnnnnnnnnnnnnnnnnnnnnn[ ]sn nnnnnnnnnnnnnnnnnnnnnnnnnn s s'
+	const ncc='                nnnnnnnnnn     n nnnnnnnnnnnnnnnnnnnnnnnnnn    n nnnnnnnnnnnnnnnnnnnnnnnnnn    '
+	const mcc='     xx x xxxx x          x xxx x                          x  x                             x x'
+	const esc={'\\':'\\','"':'"','n':'\n'}
+	const ne=_=>{const e=nc();return esc[e]?esc[e]: er(`Invalid escape character '\\${e}' in string.`)}
+	const nw=x=>{let v=+x;    while(id())v=(v*10)+(+nc());  return v} 
+	const nf=_=>{let v=0,p=10;while(id())v+=(+nc())/p,p*=10;return v}
+	const nn=(x,tr,tc,v,sign)=>{
+		if(x=='.'&&!id())return{t:'.',r:tr,c:tc}
+		if(x=='.')v=nf();else v=nw(x),v+=(text[i]=='.')?(nc(),nf()):0
+		return {t:'number',v:sign*v,r:tr,c:tc}
+	}
+	const tok=_=>{
+		const w=iw()||i==0||(mcc[text[i-1].charCodeAt(0)-32]=='x');sw();if(i>=text.length)return{t:'the end of the script'}
+		const tr=r,tc=c, x=nc(), cc=tcc[x.charCodeAt(0)-32]; let v=0
+		if(cc==' '||cc==undefined)er(`Invalid character '${x}'.`)
+		if(x=='-'&&w&&tcc[(text[i]||'').charCodeAt(0)-32]=='d')return nn(nc(),r,c,v,-1)
+		if(cc=='n'){let v=x; while(ncc[(text[i]||' ').charCodeAt(0)-32]=='n')v+=nc();return {t:'name',v,r:tr,c:tc}}
+		if(cc=='"'){let v='',c;while(i<text.length&&(c=nc())!='"')v+=(c=='\\'?ne():clchars(c));return{t:'string',v,r:tr,c:tc}}
+		return cc=='s'?{t:'symbol',v:x,r:tr,c:tc}: cc=='d'?nn(x,tr,tc,v,1):{t:x,r:tr,c:tc}
+	}
+	const peek=_=>{if(!tq)tq=tok();return tq}
+	const hasnext=_=>peek().t!='the end of the script'
+	const peek2=_=>{const pi=i,pr=r,pc=c,pq=tq;next();const v=peek();i=pi,r=pr,c=pc,tq=pq;return v}
+	const next=_=>{if(tq){const r=tq;tq=null;return r};return tok()}
+	const matchp=k=>peek().t=='name'&&peek().v==k
+	const match=k=>matchp(k)?(next(),1):0
+	const matchsp=k=>peek().t==k?(next(),1):0
+	const expect=t=>peek().t==t?next().v:er(`Expected ${t}, but found ${peek().t}.`)
+	const ident=n=>{
+		const kw={while:1,each:1,send:1,on:1,if:1,elseif:1,else:1,end:1,do:1,with:1,local:1,select:1,extract:1,update:1,insert:1,
+			into:1,from:1,where:1,by:1,orderby:1,asc:1,desc:1};return !(kw.hasOwnProperty(n)||monad.hasOwnProperty(n)||dyad.hasOwnProperty(n))
+	}
+	const name=n=>{const r=expect('name');if(!ident(r)&&n!='member')er(`'${r}' is a keyword, and cannot be used for a ${n} name.`);return r}
+	const names=(x,n)=>{const r=[];while(!match(x))r.push(name(n));return r}
+	const quote=_=>{const r=lmblk();expr(r);blk_end(r);return r}
+	const block=_=>{const r=lmblk();iblock(r);return r}
+	const quotesub=_=>{let c=0,r=lmblk();while(hasnext()&&!matchsp(']'))expr(r),c++;blk_opa(r,op.BUND,c);return r}
+	const quotedot=_=>{const r=lmblk();blk_lit(r,lml([lms(name('member'))]));return r}
+	const iblock=r=>{let c=0;while(hasnext()){if(match('end')){if(!c)blk_lit(r,NIL);return}if(c)blk_op(r,op.DROP);expr(r),c++};er(`Expected 'end' for block.`)}
+	const parseclause=(b,func)=>{
+		const iter_group=(g,f)=>{if(g){const n=tempname();blk_loop(b,[ls(n)],_=>{blk_get(b,n),f()})}else{f()}}
+		if(match('where')){
+			const ex=quote(),grouped=parseclause(b,func)
+			iter_group(grouped,_=>{blk_lit(b,ex),blk_op(b,op.COL),blk_op2(b,'@where')});return grouped
+		}
+		if(match('orderby')){
+			const ex=quote(),dir=match('asc')?-1: match('desc')?1: er(`Expected 'asc' or 'desc'.`), grouped=parseclause(b,func)
+			iter_group(grouped,_=>{blk_lit(b,ex),blk_op(b,op.COL),blk_lit(b,lmn(dir)),blk_op3(b,'@orderby')});return grouped
+		}
+		if(match('by')){
+			const ex=quote(),grouped=parseclause(b,func);if(grouped)blk_op1(b,'raze')
+			blk_lit(b,ex),blk_op(b,op.COL),blk_op2(b,'@by');return 1
+		}
+		if(!match('from'))er(`Expected 'from'.`);expr(b),blk_op1(b,'@tab'),blk_op(b,op.DUP);return 0
+	}
+	const parsequery=(b,func,dcol)=>{
+		const cols=lmd([],[]);while(!matchp('from')&&!matchp('where')&&!matchp('by')&&!matchp('orderby')){
+			let set=peek2().t==':', lit=peek().t=='string', name=lms(lit?(set?peek().v:''):peek().t=='name'?peek().v:'')
+			let get=ident(ls(name)), unique=ls(name).length&&dkix(cols,name)==-1; if(set&&lit&&!unique)next(),next()
+			const x=set&&unique?(next(),next(),name): get&&unique&&dcol?name: lms(dcol?`c${cols.k.length}`: '')
+			cols.k.push(x),cols.v.push(quote())
+		}
+		const grouped=parseclause(b,func), index=lmblk();blk_get(index,lms('index'))
+		const keys=lml(cols.k.concat([lms('@index')])),n=tempname();if(!grouped)blk_op1(b,'list')
+		blk_loop(b,[ls(n)],_=>{
+			blk_lit(b,keys),blk_get(b,n),cols.v.map(x=>(blk_lit(b,x),blk_op(b,op.COL)))
+			blk_lit(b,index),blk_op(b,op.COL),blk_op(b,op.DROP),blk_opa(b,op.BUND,count(keys)),blk_op2(b,'dict')
+		}),blk_lit(b,keys),blk_op3(b,func)
+	}
+	const parseindex=(b,name)=>{
+		const i=[];while(({'[':1,'.':1})[peek().t]){
+			if(matchsp('['))i.push(quotesub())
+			if(matchsp('.')){
+				if(({'[':1,'.':1})[peek().t]){
+					const vn=tempname()
+					i.map(v=>(blk_cat(b,v),blk_op(b,op.CALL))),blk_loop(b,[vn.v],_=>{blk_get(b,vn),parseindex(b)});return
+				}else{i.push(quotedot())}
+			}
+		}
+		if(matchsp(':')){
+			i.map(v=>blk_cat(b,v)),blk_opa(b,op.BUND,i.length),blk_op(b,op.OVER)
+			for(let z=0;z<i.length-1;z++)blk_opa(b,op.IPRE,z),blk_opa(b,op.IPOST,z);expr(b),blk_imm(b,op.AMEND,name||ZERO)
+		}else{i.map(v=>(blk_cat(b,v),blk_op(b,op.CALL)))}
+	}
+	const term=b=>{
+		if(peek().t=='number'){blk_lit(b,lmn(next().v));return}
+		if(peek().t=='string'){blk_lit(b,lms(next().v));return}
+		if(match('if')){
+			const fin=[];let c=0,e=0,next=-1;expr(b);next=blk_opa(b,op.JUMPF,0);while(hasnext()){
+				if(match('elseif')){
+					if(e)er(`Expected 'end'.`)
+					if(!c)blk_lit(b,NIL);c=0;fin.push(blk_opa(b,op.JUMP,0)),blk_sets(b,next,blk_here(b)),expr(b),next=blk_opa(b,op.JUMPF,0);continue
+				}
+				if(match('else')){
+					if(e)er(`Expected 'end'.`)
+					if(!c)blk_lit(b,NIL);c=0,e=1;fin.push(blk_opa(b,op.JUMP,0)),blk_sets(b,next,blk_here(b)),next=-1;continue
+				}
+				if(match('end')){
+					if(!c)blk_lit(b,NIL);c=0;if(!e)fin.push(blk_opa(b,op.JUMP,0));if(next!=-1)blk_sets(b,next,blk_here(b));if(!e)blk_lit(b,NIL)
+					fin.map(x=>blk_sets(b,x,blk_here(b)));return
+				}
+				if(c)blk_op(b,op.DROP);expr(b),c++
+			}
+		}
+		if(match('while')){
+			blk_lit(b,NIL);const cond=blk_opa(b,op.JUMP,0);const e=lmblk();expr(e);const head=blk_here(b)
+			if(!match('end')){blk_op(b,op.DROP),iblock(b)}
+			blk_sets(b,cond,blk_here(b)),blk_cat(b,e),blk_opa(b,op.JUMPT,head);return
+		}
+		if(match('each')){const n=names('in','variable');expr(b),blk_loop(b,n,_=>iblock(b));return}
+		if(match('on')){
+			const n=name('function'),v=matchsp('.')&&matchsp('.')&&matchsp('.');let a=names('do','argument')
+			if(v&&a.length!=1)return er(`Variadic functions must take exactly one named argument.`);if(v)a=['...'+a[0]]
+			blk_lit(b,lmon(n,a,blk_end(block()))),blk_op(b,op.BIND);return
+		}
+		if(match('send')){
+			blk_lit(b,lmnat(n_uplevel)),blk_lit(b,lml([lms(name('function'))])),blk_op(b,op.CALL)
+			expect('['),blk_cat(b,quotesub()),blk_op(b,op.CALL);return
+		}
+		if(match('local')){const n=lms(name('variable'));expect(':'),expr(b),blk_loc(b,n);return}
+		if(match('select' )){parsequery(b,'@sel',1);return}
+		if(match('extract')){parsequery(b,'@ext',0);return}
+		if(match('update' )){parsequery(b,'@upd',1);return}
+		if(match('insert')){
+			const n=lml([]);while(!match('with')){n.v.push(lms(peek().t=='string'?next().v:name('column')))}
+			let v=0,i=0;while(1){if(match('into')){i=1;break}if(match('end')){i=0;break}expr(b),v++}
+			if(n.v.length==0&&v==0&&i==0){blk_lit(b,lmt());return}
+			if(n.v.length<1)n.v.push(lms('value'));blk_opa(b,op.BUND,v),blk_lit(b,n);if(i){expr(b)}else{blk_lit(b,ZERO)}
+			blk_op3(b,'@ins');return
+		}
+		if(matchsp('(')){if(matchsp(')')){blk_lit(b,lml([]));return}expr(b),expect(')');return}
+		const s=peek().v;if(findop(s,monad)>=0&&({'symbol':1,'name':1})[peek().t]){
+			next();if(matchsp('@')){
+				let depth=0,l=lmblk();while(matchsp('@'))depth++
+				expr(b),blk_opa(l,op.FMAP,findop(s,monad))
+				while(depth-->0){const t=tempname(),m=lmblk();blk_loop(m,[ls(t)],_=>{blk_get(m,t),blk_cat(m,l)}),l=m}
+				blk_cat(b,l)
+			}else{expr(b),blk_op1(b,s)};return
+		}const n=lms(name('variable'));if(matchsp(':')){expr(b),blk_set(b,n);return}blk_get(b,n),parseindex(b,n)
+	}
+	const expr=b=>{
+		term(b);if(({'[':1,'.':1})[peek().t]){parseindex(b)}
+		if(matchsp('@')){
+			let depth=0;while(matchsp('@'))depth++
+			const func=tempname();blk_set(b,func),blk_op(b,op.DROP),expr(b)
+			let l=lmblk();blk_get(l,func),blk_op(l,op.SWAP);const fidx=blk_opa(l,op.FIDX,0)
+			blk_loop(l,['v'],_=>{blk_get(l,func),blk_get(l,lms('v')),blk_opa(l,op.BUND,1),blk_op(l,op.CALL)})
+			blk_sets(l,fidx,blk_here(l))
+			while(depth-->0){const t=tempname(),m=lmblk();blk_loop(m,[ls(t)],_=>{blk_get(m,t),blk_cat(m,l)}),l=m}
+			blk_cat(b,l);return
+		}const s=peek().v;if(findop(s,dyad)>=0&&({'symbol':1,'name':1})[peek().t]){next(),expr(b),blk_op2(b,s)}
+	}
+	const b=lmblk();if(hasnext())expr(b);while(hasnext())blk_op(b,op.DROP),expr(b)
+	if(blk_here(b)==0)blk_lit(b,NIL);return b
+}
+
+env_local=(e,n,x)=>{e.v.set(ls(n),x)}
+env_getr =(e,n  )=>{const k=ls(n);r=e.v.get(k);return r?r: e.p?env_getr(e.p,n): null}
+env_setr =(e,n,x)=>{const k=ls(n);r=e.v.get(k);return r?e.v.set(k,x): e.p?env_setr(e.p,n,x): null}
+env_get  =(e,n  )=>env_getr(e,n)||NIL
+env_set  =(e,n,x)=>{const r=env_getr(e,n);r?env_setr(e,n,x):env_local(e,n,x)}
+env_bind =(e,k,v)=>{const r=lmenv(e); k.map((a,i)=>env_local(r,lms(a),v.v[i]||NIL));return r}
+const monadi=Object.values(monad), dyadi=Object.values(dyad), triadi=Object.values(triad), states=[]; let state=null, op_count=0
+pushstate=env=>{if(state){states.push(state)};state={e:[env],p:[],t:[],pcs:[]}}
+popstate =_=>{state=states.pop()}
+halt     =_=>{state.p=[],state.t=[],state.e=[state.e[0]]}
+running  =_=>state.t.length>0
+getev    =_=>state.e  [state.e  .length-1]
+getblock =_=>state.t  [state.t  .length-1]
+getpc    =_=>state.pcs[state.pcs.length-1]
+setpc    =x=>state.pcs[state.pcs.length-1]=x
+issue    =(env,blk)=>(state.e.push(env),state.t.push(blk),state.pcs.push(0))
+descope  =_=>(state.e.pop(),state.t.pop(),state.pcs.pop())
+ret      =x=>state.p.push(x)
+arg      =_=>state.p.pop()
+docall=(f,a,tail)=>{
+	if(linat(f)){ret(f.f(ll(a)));return}
+	if(!lion(f)){ret(l_at(f,monad.first(a)));return}
+	if(tail){descope()}
+	issue(f.a.length==1&&f.a[0][0]=='.'?env_bind(f.c,[f.a[0].slice(3)],monad.list(a)): env_bind(f.c,f.a,a),f.b)
+	calldepth=max(calldepth,state.e.length)
+}
+runop=_=>{
+	op_count+=1
+	const b=getblock();if(!liblk(b))ret(state.t.pop())
+	const pc=getpc(),o=blk_getb(b,pc),imm=(oplens[o]==3?blk_gets(b,1+pc):0); setpc(pc+oplens[o])
+	switch(o){
+		case op.DROP :arg();break
+		case op.DUP  :{const a=arg();ret(a),ret(a);break}
+		case op.SWAP :{const a=arg(),b=arg();ret(a),ret(b);break}
+		case op.OVER :{const a=arg(),b=arg();ret(b),ret(a),ret(b);break}
+		case op.JUMP :setpc(imm);break
+		case op.JUMPF:if(!lb(arg()))setpc(imm);break
+		case op.JUMPT:if( lb(arg()))setpc(imm);break
+		case op.LIT  :ret(blk_getimm(b,imm));break
+		case op.GET  :{ret(env_get(getev(),blk_getimm(b,imm)));break}
+		case op.SET  :{const v=arg();env_set(getev(),blk_getimm(b,imm),v),ret(v);break}
+		case op.LOC  :{const v=arg();env_local(getev(),blk_getimm(b,imm),v),ret(v);break}
+		case op.BUND :{const r=[];for(let z=0;z<imm;z++)r.push(arg());r.reverse(),ret(lml(r));break}
+		case op.OP1  :{                      ret(monadi[imm](arg()    ));break}
+		case op.OP2  :{const         y=arg();ret(dyadi [imm](arg(),y  ));break}
+		case op.OP3  :{const z=arg(),y=arg();ret(triadi[imm](arg(),y,z));break}
+		case op.IPRE :{const s=arg(),i=arg();ret(i),docall(s,i.v[imm]);if(lion(s)||lii(s)||linat(s)){for(let z=0;z<=imm;z++)i.v[z]=null}break}
+		case op.IPOST:{const s=arg(),i=arg(),r=arg();ret(i.v[imm]?r:s),ret(i),ret(s);break}
+		case op.AMEND:{
+			let v=arg(),r=arg(),i=ll(arg()),ro=arg(),n=blk_getimm(b,imm),t={v:1}
+			if(i.length&&!i[0]){i=i.filter(x=>x),t.v=0}r=amendv(ro,i,v,0,t);if(t.v&&!lin(n))env_set(getev(),n,r);ret(r);break
+		}
+		case op.CALL : // fall through:
+		case op.TAIL :{const a=arg(),f=arg();docall(f,a,o==op.TAIL);break}
+		case op.BIND :{const f=arg(),r=lmon(f.n,f.a,f.b);r.c=getev(),env_local(getev(),lms(f.n),r),ret(r);break}
+		case op.ITER :{const x=arg();ret(lil(x)?x:ld(x));ret(lid(x)?lmd():lml([]));break}
+		case op.FIDX :{const x=arg(),f=arg();if((lid(f)||lil(f)||lis(f))&&lil(x)){ret(lml(x.v.map(x=>l_at(f,x))));setpc(imm)}else{ret(x)};break}
+		case op.FMAP :{const x=arg(),f=monadi[imm];ret(lid(x)?lmd(x.k,x.v.map(f)):lml(ll(x).map(f)));break}
+		case op.EACH :{
+			const n=arg(),r=arg(),s=arg();if(count(r)==count(s)){setpc(imm),ret(r);break}
+			const z=count(r), v=lml([s.v[z],lid(s)?s.k[z]:lmn(z),lmn(z)]);
+			state.e.push(env_bind(getev(),n,v)),ret(s),ret(r);break
+		}
+		case op.NEXT :{const v=arg(),r=arg(),s=arg();state.e.pop();if(lid(r))r.k.push(s.k[r.v.length]);r.v.push(v),ret(s),ret(r),setpc(imm);break}
+		case op.COL  :{
+			const ex=arg(),t=arg(),n=tab_cols(t),v=ll(monad.cols(t));ret(t)
+			n.push('column'),v.push(t),issue(env_bind(getev(),n,lml(v)),ex);break
+		}
+	}while(running()&&getpc()>=blk_here(getblock()))descope()
+}
+
+/* fchar=x...   the rest of lil.js from here on except show() */
+
+showt=(x,toplevel)=>{
+	if(!toplevel){
+		const d=monad.rows(x).v.map(r=>r.v.map(v=>show(v)).join(' ')).join(' ')
+		return `insert ${tab_cols(x).map(x=>x+' ').join('')}with ${d?d+' ':''}end`
+	}
+	try{
+	const w=tab_cols(x).map(k=>tab_get(x,k).reduce((x,y)=>max(x,min(40,show(y).length)+2),k.length+2))
+	const s='+'+tab_cols(x).map((x,i)=>"-".repeat(w[i])).join('+')+'+'
+	const v=range(tab_rowcount(x)).map(r=>tab_cols(x).map(k=>' '+show(tab_cell(x,k,r))).map((f,i)=>f.slice(0,41)+(' '.repeat(max(0,w[i]-min(41,f.length))))))
+	         .map(x=>`|${x.join('|')}|`).join('\n')
+	return `${s}\n|${tab_cols(x).map((x,i)=>` ${x+(' '.repeat(w[i]-x.length-2))} `).join('|')}|\n${s}${v.length?'\n'+v+'\n'+s:''}`
+	}catch(err){console.log('cannot serialize',x);throw err}
+}
+show=(x,toplevel)=>linat(x)?'on native x do ... end': linil(x)?(toplevel?'':'nil'):
+		lil(x)?`(${x.v.map(x=>show(x)).join(',')})`: lit(x)?showt(x,toplevel): lion(x)?`on ${x.n}${x.a.map(x=>' '+x).join('')} do ... end`:
+		lis(x)?`"${x.v.split('').map(x=>({'\n':'\\n','\\':'\\\\','"':'\\"'})[x]||x).join('')}"`:
+		lin(x)?fjson(x):lid(x)?`{${x.k.map((k,i)=>`${show(k)}:${show(x.v[i])}`).join(',')}}`:
+		lii(x)?`<${x.n}>`:`<INVALID ${x}>`
+
+
+const env=lmenv()
+let printtext=O
+let run=prog=>{pushstate(env),issue(env,prog);while(running())runop();const r=arg();return popstate(),r}
+let L=x=>{
+ try{if(x.trim()!=0){x=run(parse(x.trim()));
+  env.local('_',x);O(show(x,true)+"\n")}}
+ catch(e){O('x' in e?`${' '.repeat(e.c+1)}^\n${e.x}\n`:e)}
+}
+
+return["  ",L]})
+
+
