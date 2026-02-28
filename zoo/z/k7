@@ -1,0 +1,77 @@
+(async O=>{
+
+
+let su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+let M=new WebAssembly.Memory({initial:4096,maximum:4096});
+let I=new Int32Array(M.buffer),U=new Uint8Array(M.buffer);
+
+let h0=1;
+let u; //upper32 see b()
+
+let kenv={env:{
+a:_=>(console.log("a"),performance.now()),
+b:x=>(u=x,console.log("b",x),0), //b is called from wasm with upper32 half before another call returns(lower32)
+c:x=>(console.log("c",x),5287184),
+d:_=>(console.log("d"),0),
+e:_=>(console.log("e"),new Date().getTime()),
+f:_=>(console.log("f"),0),
+g:_=>(console.log("g"),0),
+h:(x,y,z)=>(console.log("h",x,y,z),h0?(h0=0,4)/*ncpu*/:20/*cache?*/),
+i:_=>(console.log("i"),0),
+j:_=>(console.log("j"),0),
+k:_=>(console.log("k"),0),
+l:_=>(console.log("l"),0),
+m:_=>(console.log("m"),0),
+n:_=>(console.log("n"),0),
+o:_=>(console.log("o"),0),
+p:_=>(console.log("p"),0),
+q:_=>(console.log("q"),0),
+r:_=>(console.log("r"),0),
+s:_=>(console.log("s"),0),
+t:(x,y)=>(console.log("t",x,y,I[y>>2],I[1+(y>>2)],I[2+(y>>2)]),0),
+u:_=>(console.log("u"),0),
+v:_=>(console.log("v"),0),
+w:_=>(console.log("w"),0),
+x:_=>(console.log("x"),0),
+y:_=>(console.log("y"),0),
+z:_=>(console.log("z"),0),
+A:_=>(console.log("A"),0),
+B:_=>(console.log("B"),0),
+C:_=>(console.log("C"),0),
+D:_=>(console.log("D"),0),
+E:_=>(console.log("E"),0),
+F:_=>(console.log("F"),0),
+G:_=>(console.log("G"),0),
+H:(x,y)=>(console.log("H",x,y),K.pa(16384,134217728),5292032), //mmap
+I:(x,y)=>{console.log("I",x,y);let r=I[y>>2],w=(s,o)=>(U.set(Array.from(us(s)),r+o),U[r+o+s.length]=0);
+ w("Emscripten",0);w("emscripten",65);w("1.0",130);w("#1",195);w("x86-JS",260);w("",325);
+ return 0}, //uname
+J:_=>(console.log("J"),0),
+K:_=>(console.log("K"),0),
+L:_=>(console.log("L"),0),
+memory:M,
+table:new WebAssembly.Table({initial:285,maximum:285,element:"anyfunc"}),
+}}
+
+let r=await wa("./k7/k.wasm",kenv);
+K=r.instance.exports
+K.M();K.ga();O("2019-09-25 10:44:44 α 8core 512mb wsm32 (c) shakti\n")
+
+let k=s=>{
+ let a=K.ta();//stack save
+ let n=s.length;
+ let t=K.ua(1+4*n);//stack alloc
+ U.set(us(s),t);U[t+n]=0;
+ let q=K.Q(t);
+ K.va(a); //stack restore
+ let r=K.X(q,0),ru=u; //ex
+ let b=K.ba(r,ru),bu=u; //vx
+
+ //todo check type for err
+ let nb=I[(b>>2)-1]
+ if(nb)O(su(U.subarray(b,b+nb))+"\n")
+
+ K.R(b,bu); //r0
+}
+
+return[" ",k]})
