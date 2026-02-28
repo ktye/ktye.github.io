@@ -21,7 +21,8 @@ let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let pr=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
-tty.onclick=_=>rdl.focus()
+tty.onpaste=e=>(pd(e),rdl.textContent=(e.clipboardData||window.clipboardData).getData("text").split("\n")[0],rdl.focus(),rlend())
+tty.onclick=e=>(console.log(e),rdl.focus())
 rdl.onkeydown=(e,k,c)=>(k=e.key,c=e.ctrlKey,"Enter"==k?(pd(e),exe(rladd(rdl.textContent))):"ArrowUp"==k?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==k?(pd(e),rlnext(rdl.textContent)):("c"==k&&c)?(pd(e),O("\n"),$="$",_=sh,tm()):"Escape"==k?(pd(e),rdl.textContent=""):"Tab"==k?pd(e):0)
 
 let sh=async x=>(x=x.trim(),"pwd"==x?On("/"):sw("cd",x)?0:"ls"==x?On(a.join(" ")):"clear"==x?out.textContent="":sw("he",x)||sw("ma",x)||a.map(x=>x+" ").some(y=>y==x.slice(0,y.length))?await help(x):a.includes(x)?await run(x):O(x.split(" ")[0]+": command not found\n"))
