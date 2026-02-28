@@ -1,0 +1,24 @@
+(async O=>{
+
+let K,heap,inp
+let T1=new TextEncoder,t1=x=>T1.encode(x),T0=new TextDecoder,t0=x=>T0.decode(x)
+let U8=x=>new Uint8Array(x),M=(p,n)=>U8(K.memory.buffer).subarray(p,p+n)
+let ma=n=>{heap+=n;let m=K.memory,l=m.buffer.byteLength;heap>l&&m.grow((heap-l-1>>>16)+1);return heap-n}
+
+let env={env:{sin:Math.sin,cos:Math.cos,log:Math.log,exp:Math.exp,
+ js_in:(a,n)=>{const s=inp;inp="";let w=T1.encodeInto(s,M(a,n)).written;return w},
+ js_out:(a,n)=>{O(t0(M(a,n)))},
+ js_log:a=>console.log(t0(gb(a))),
+ js_time:(a,b)=>{ return 0 },
+ js_exit:x=>{ console.log("exit",x); },
+ js_alloc:n=>{ const p=4096,r=heap%p;r&&ma(p-r);return ma(n) },
+ js_eval:(a,m,r,n)=>{ console.log("jseval",a,m,r,n);}}}
+
+K=(await wa("./ngn/k.wasm",env)).instance.exports
+heap=K.__heap_base
+K.kinit()
+O("ngn/k, (c) 2019-2022 ngn, GNU AGPLv3.\n")
+
+let k=s=>{inp=s+"\n";K.rep();}
+
+return[" ",k]})

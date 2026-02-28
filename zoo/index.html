@@ -32,8 +32,8 @@ let $="$",_=sh,O=x=>out.textContent+=x,On=x=>O(x+"\n")
 let exe=async x=>{rdl.textContent="";On(x);await _(x);tm()}
 let run=async x=>{x=await(await fetch("z/"+x)).text();[$,_]=await eval?.(x)(O);}
 
-let a="apl j j0 k k2 k4 k9 lil ok".split(" ")
-let b={apl:"../apl.k",j:"../../j/j42/ref.txt",j0:"../../j/j00/j.c",k:"../../klib/ref",k2:"../../k2/doc/verbs",k9:"./k9/ref.txt",lil:"./z/lil.ref",ok:"./ok/ref"}
+let a="apl j j0 k k2 k4 k9 lil nk ok".split(" ")
+let b={apl:"../apl.k",j:"../../j/j42/ref.txt",j0:"../../j/j00/j.c",k:"../../klib/ref",k2:"../../k2/doc/verbs",k9:"./k9/ref.txt",lil:"./z/lil.ref",nk:"./ngn/ref.txt",ok:"./ok/ref"}
 let h=async x=>O((await(await fetch(x)).text()).split("\n").slice(0,19).join("\n")+"\n")
 let help=async x=>(x=x.split(" "),b[x[0]]?h(b[x[0]]):b[x[1]]?h(b[x[1]]):O("no "+x.join(" ")+"\n"))
 
