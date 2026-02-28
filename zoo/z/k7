@@ -65,7 +65,7 @@ let k=s=>{
  let q=K.Q(t);
  K.va(a); //stack restore
  let r=K.X(q,0),ru=u; //ex
- if(ru<0)return O(" class length type domain value parse stack nyi".split(" ")[r]+" error\n")
+ if(r&&ru<0)return O(" class length type domain value parse stack nyi".split(" ")[r]+" error\n")
  let b=K.ba(r,ru),bu=u; //vx
  let nb=I[(b>>2)-1]
  if(nb)O(su(U.subarray(b,b+nb))+"\n")
