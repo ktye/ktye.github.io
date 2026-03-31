@@ -1,0 +1,11 @@
+<html>
+<body>
+<textarea id="i" onchange="run()" style="field-sizing:content">//a program
+function alpha(x,y){return x+y}</textarea><hr>
+<pre      id="o">//parser output</pre>
+<script src="parser.js"></script>
+<script>
+let run=_=>o.textContent=JSON.stringify(parse(i.value))
+run();
+</script>
+</body></html>
