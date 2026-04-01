@@ -5,7 +5,11 @@ function alpha(x,y){return x+y}</textarea><hr>
 <pre      id="o">//parser output</pre>
 <script src="parser.js"></script>
 <script>
-let run=_=>o.textContent=JSON.stringify(parse(i.value))
+let run=_=>{let a=parse(i.value);
+ o.textContent=JSON.stringify(a)+"\n\n"
+ a=ty(a)
+ o.textContent=JSON.stringify(a)+"\n\n"
+ o.textContent+=wa(a)}
 run();
 </script>
 </body></html>
