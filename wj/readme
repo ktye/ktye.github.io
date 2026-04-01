@@ -1,0 +1,45 @@
+
+runtime:
+
+   M=new Uint8Array(64*1024)
+   V=new DataView(M.buffer)
+   C=x=>V.getInt8(x,1)
+   I=x=>V.getInt32(x,1)
+   J=(x,y)=>V.getBigInt64(x,1)
+   F=x=>V.getFloat64(x,1)
+   CC=(x,y)=>V.setInt8(x,y,1)
+   II=(x,y)=>V.setInt32(x,y,1)
+   JJ=(x,y)=>V.setBigInt64(x,y,1)
+   FF=(x,y)=>V.setFloat64(x,y,1)
+
+   grow=n=>{let m=new Uint8Array(M.length+(n<<16));m.set(M);M=m;V=new DataView(M.buffer)}
+
+   Fn[x]=.. //function table
+   k$(Fn[i])(3,4n)  //signature from args and return-conv
+
+   i$=x=>0|x
+   i_=x=>0|Number(x)
+   u$=x=>x>>>0
+   j$=x=>BigInt(x)
+   k$=x=>BigInt.asUintN(64,x)
+   f$=x=>0.0+x
+   lo=x=>Number(BigInt.asUintN(32,x))
+
+function shuffle(r,m){k$(r);
+ let i,j,rp=i_(r),n=nn(r);m=mini(n-1,m);
+ while(i<m){j=rp+4*randi(n-i);t=I(rp);II(rp,I(j));II(j,t);rp+=4;i++}
+ return r}
+
+function randi(n){i$(n);f$(x)
+ let v=u$(rnd())
+ let p=BigInt(v)*BigInt(n)
+ let l=Number(BigInt.asUintN(32,p))
+ if(l<n>>>0){
+  let t=u$(-n)%u$(n)
+  while(l<t){
+   v=u$(rnd())
+   p=BigInt(v)*BigInt(n)
+   l=lo(p)
+  }
+ }
+}

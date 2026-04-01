@@ -1,33 +1,49 @@
-let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error(s)},nx=()=>{i++;c=p[i]||''}              //js parser
- let syma=c=>/[A-Za-z_$]/.test(c),symb=c=>/[A-Za-z0-9_$]/.test(c)
- let sw=x=>x===p.slice(i,i+x.length),skip=s=>{i+=s.length;c=p[i]||'';ws()}
- let ws=_=>{while(1){while(/\s/.test(c))nx();if(c==='/'&&p[i+1]==='/'){nx();nx();while(c&&c!=='\n')nx();continue;}break;}}
- let qs=s=>{if(!sw(s))err('@'+i+':qsed '+s);skip(s)};
- let prog=_=>{let b=[];while(i<p.length){ws();if(!c)break;b.push(stmt())};return{t:'prog',body:b}}
- let stmt=_=>{ws();let t=(s,n)=>sw(s)&&/\W/.test(p[i+s.length]);
-  if(t('let'     ))return decl();if(t('const'   ))return decl();if(t('function'))return func();
-  if(t('return'  ))return retn();if(t('if'      ))return ifff();if(t('while'   ))return whil();
-  if(c==='{')return block();//}
-  /*??*/let e=expr();ws();if(c===';')nx();return{t:'exst',expression:e};}
- let block=_=>{qs('{');let b=[];while(c&&c!=='}'){b.push(stmt());ws()};/*{*/qs('}');return{t:'bloc',b}}
- let decl=_=>{let r=[],kind=sw('const')?'const':'let';skip(kind);
-  do{let id=iden(),init=0;ws();if(c==='='){nx();ws();init=expr();ws()};r.push({t:'VariableDeclarator',id, init});if(c===','){nx();ws();}else break}while(1);
-  if(c===';')nx();return{t:'VariableDeclaration',decls:r,kind}}
- let func=_=>{qs('function');ws();let params=[],id=syma(c)?iden():null;ws();qs('(');ws();
-  while(c!==')'&&c){params.push(iden());ws();if(c===','){nx();ws()}else break}
-  qs(')');ws();return{t:'func',id,params,body:block()};}
- let retn=_=>{qs('return');ws();let arg=(c===';'||c==='}')?null:expr();if(c===';')nx();return {t:'retn', argument:arg};}
- let ifff=_=>{qs('if');ws();qs('(');let cond=expr(),then,els=0;qs(')');ws();then=stmt();ws();if(sw('else')){qs('else');ws();els=stmt()};return{t:'ifff',cond,then,els}}
- let whil=_=>{qs('while');ws();qs('(');let test=expr();qs(')');ws();const body=stmt();return{t:'while',test,body}}
- let expr=_=>{let left=cond(),right;ws();if(c==='='){nx();ws();right=expr();return{t:'asin',operator:'=',left,right}};return left}
- let cond=_=>{let test=bina(0),then,els;ws();if(c==='?'){nx();ws();then=expr();ws();if(c!==':')err('tern : missing);nx();ws();els=expr();return{t:'cond',test,then,els}};return test}
- let PREC={'||':1,'&&':2,'==':3,'!=':3,'<':4,'>':4,'+':5,'-':5,'*':6,'/':6};
- let bina=mi=>{let pc,r,l=mona();ws();while(1){let op=0,oo=p.slice(i,i+2);if(['==','!=','||','&&'].includes(two))op=oo;else if(PREC[c])op=c;else break;
-   pc=PREC[op]||0;if(pc<mi)break;skip(op);r=bina(pc+1);l={t:'bina',op,l,r};ws();}return l}
- let mona=_=>{ws();if(c==='!'||c==='-'||c==='+'){let op=c;nx();ws();return{t:'mona',operator:op,prefix:true,argument:mona()};};return prima()}
- let prima=_=>{ws();if(c==='('){nx();ws();let e=expr();qs(')');return e;};return(c==='"'||c==="'")?strn():/[0-9]/.test(c)?numb():syma(c)?idcl():err('token unexpected "'+c+'")}
- let strn=_=>{let q=c,s='';nx();while(c&&c!==q){if(c==='\\'){nx();s+=p[i]||'';nx()}else{s+=c;nx()}}qs(q);return{t:'string',value:s,raw:q+s+q}}
- let numb=_=>{let s='';while(/[0-9.]/.test(c)){s+=c;nx()}return{t:'number',value:Number(s),raw:s}}
- let iden=_=>{let s='';if(!syma(c))err("expected identifier");while(symb(c)){s+=c;nx()};return{t:'iden',name:s}}
- let idcl=_=>{let f=iden(),a=[];ws();if(c==='('){nx();ws();while(c!==')'&&c){a.push(expr());ws();if(c===','){nx();ws()}else break};qs(')');return{t:'call',f,a}};return id;}
- return prog()}
+let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>c=p[++i]||'';             //js parser
+ let _=$=>{while(1){while(/\s/.test(c))n();if(c=='/'&&p[i+1]=='/'){n();n();while(c&&c!='\n')n();continue}break}}
+ let sy=c=>/[A-Za-z_$]/.test(c),sY=c=>/[A-Za-z0-9_$]/.test(c)
+ let sw=x=>x==p.substr(i,x.length),__=s=>{i+=s.length;c=p[i]||'';_()}
+ let qs=s=>{if(!sw(s))err('expected '+s);__(s)};
+ let st=$=>{_();let r,e,t=(s,n)=>sw(s)&&/\W/.test(p[i+s.length]);if(r=t('let')?dec():t('function')?fun():t('return')?ret():t('if')?iff():t('while')?whl():0)return r;
+  if(c=='{')return blk();e=ex();_();if(c==';')n();return{t:'est',e}}
+ let ex=$=>{let s=cnd(),e;_();if(c=='='){n();_();e=ex();return{t:'asn',s,e}};return s}
+ let prg=$=>{let b=[];while(i<p.length){_();if(!c)break;b.push(st())};return{t:'prg',b}}
+ let blk=$=>{qs('{');let b=[];while(c&&c!='}'){b.push(st());_()};qs('}');return{t:'blk',b}}
+ let dec=$=>{let r=[],s,e;__('let');do{s=sym(),e=0;_();if(c=='='){n();_();e=ex();_()};r.push({t:'asn',s,e});if(c==','){n();_()}else break}while(1)
+  if(c==';')n();return{t:'var',l:r}}
+ let fun=$=>{qs('function');_();let a=[],s=sy(c)?sym():null;_();qs('(');_();while(c!=')'&&c){a.push(sym());_();if(c==','){n();_()}else break};
+  qs(')');_();return{t:'fun',s,a,b:blk()}}
+ let ret=$=>{qs('return');_();let e=(c==';'||c=='}')?0:ex();if(c==';')n();return {t:'ret',e}}
+ let iff=$=>{qs('if');_();qs('(');let c=ex(),t,e=0;qs(')');_();t=st();_();if(sw('else')){qs('else');_();e=st()};return{t:'iff',c,t,e}}
+ let whl=$=>{qs('while');_();qs('(');let b,t=ex();qs(')');_();b=st();return{t:'whl',t,b}}
+ let cnd=$=>{let test=dya(0),then,els;_();if(c=='?'){n();_();then=ex();_();if(c!=':')err('tern : missing');n();_();els=ex();return{t:'cnd',test,then,els}};return test}
+ let P={'||':1,'&&':2,'==':3,'!=':3,'<':4,'>':4,'+':5,'-':5,'*':6,'/':6};
+ let dya=m=>{let q,o,oo,r,l=mon();_();while(1){oo=p.substr(i,2);o=P[oo]?oo:P[o]?o:0;if(!o)break;q=P[o]||0;if(q<m)break;__(o);r=dya(q+1);l={t:'dya',o,l,r};_()}return l}
+ let mon=$=>{_();if("+-!~".includes(c)){let o=c;n();_();return{t:'mon',o,r:mon()}};return sta()}
+ let sta=$=>{_();if(c=='('){n();_();let e=ex();qs(')');return e};return(c=='"'||c=="'")?str():/[0-9]/.test(c)?num():sy(c)?scl():err('token unexpected '+c)}
+ let str=$=>{let q=c,s='';n();while(c&&c!=q){if(c=='\\'){n();s+=p[i]||'';n()}else{s+=c;n()}}qs(q);return{t:'str',s}}
+ let num=$=>{let s='';while("0123456789xn.".includes(c)){s+=c;n()}return{t:'num',s}}
+ let sym=$=>{let s='';if(!sy(c))err("expected identifier");while(sY(c)){s+=c;n()};return{t:'sym',s}}
+ let scl=$=>{let f=sym(),a=[];_();if(c=='('){n();_();while(c!=')'&&c){a.push(ex());_();if(c==','){n();_()}else break};qs(')');return{t:'cal',f,a}};return f}
+ return prg()}
+
+/*ast nodes: nested objects
+prg b            program body[statements]
+blk b            block
+est e            expression statement
+var l            variable declaration list l:[asn+]
+asn s e          assignment
+fun s a b        function name(sym) args[sym] body(blk)
+cal f a          call function [arguments]
+sym s            symbol/identifier s(string)
+ret e|0          return expression
+iff c t e|0      if condition then else (statement)
+cnd c t e        if condition then else (ternary expression)
+whl c b          while condition body
+dya o l r        dyadic operator left right
+mon o r          monadic operator
+str s            string literal
+num s            numeric literal
+
+todo [] x++ ++x << >> x+=y
+negative literals
+*/
