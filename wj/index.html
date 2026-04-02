@@ -5,11 +5,17 @@ function alpha(x,y){return x+y}</textarea><hr>
 <pre      id="o">//parser output</pre>
 <script src="parser.js"></script>
 <script>
-let run=_=>{let a=parse(i.value);
- o.textContent=JSON.stringify(a)+"\n\n"
- a=ty(a)
- o.textContent=JSON.stringify(a)+"\n\n"
- o.textContent+=wa(a)}
+let run=_=>{let s,a,E=x=>(o.textContent+=x+"\n",console.log(x))
+ try{  a=parse(i.value); }catch(e){E(e)}
+ o.textContent=pr(a,"","")
+ /*
+ //o.textContent=JSON.stringify(a)+"\n\n"
+ try{  a=ty(a)           }catch(e){E(e)}
+ o.textContent+=JSON.stringify(a)+"\n\n"
+ try{  s=wa(a)           }catch(e){E(e)}
+ o.textContent+=wa(a)
+ */
+ }
 run();
 </script>
 </body></html>
