@@ -28,12 +28,12 @@ let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>c=p[++i
 
 /*ast nodes: nested arrays. all nodes have also .i(src offset)
 prg b..          program body[statements]
-blk b            block
+blk b..          block
 est e            expression statement
 var l            variable declaration list l:[asn+]
 asn s e          assignment
 fun s a b        function name(sym) args[sym] body(blk|statement)
-cal f a          call function [arguments]
+cal f a..        call function [arguments]
 sym s            symbol/identifier s(string)
 ret e|0          return expression
 iff c t e|0      if condition then else (statement)
@@ -48,29 +48,31 @@ num s            numeric literal
 // loc: uppercase:i64 endwith"f":"f64" otherwise:i32    fun(return value) fname:startswith_(void)/upper/endswithf/otherwise
 
 let pr=(a,sp)=>{if(!Array.isArray(a))return sp+"("+typeof a+")"+String(a)+"\n";if(!a.length)return sp+"()\n"
- let s=sp+a[0]+"\n";for(let i=1;i<a.length;i++)s+=pr(a[i],sp+" ");return s}
+ let s=sp+a[0]+"."+(a.T||'')+"\n";for(let i=1;i<a.length;i++)s+=pr(a[i],sp+" ");return s}
 
-let ty=a=>{  //typify ast(inplace) (add .T to each node with value "ijf" or !x.T
- let Q=(x,y,i)=>{if(x.T!=y.T)err("@"+i+": type mismatch")},err=s=>{throw new Error(s)}
- let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
- let f=x=>(
-  ({fun:x=>x.T=t(x.s.s),
-    blk:x=>x.map(x=>x.map(f)),
-    est:x=>x.T=f(x.e),
-    var:x=>x.l.forEach(f),
-    asn:x=>(x.s.T=t(x.s.s),f(x.e)),
-    cal:x=>(x.T=t(x.f.s),a.forEach(f)),
-    sym:x=>x.T=t(x.s),
-    ret:x=>x.T=x.e?f(x.e):"",
-    iff:x=>(f(x.c),f(x.t),x.e?f(x.e):0),
-    cnd:x=>(f(x.c),f(x.t),x.T=x.e),
-    whl:x=>(f(x.c),b.forEach(f)),
-    dya:x=>(f(x.l),f(x.l),f(x.r),Q(x.l,x.r,x.i),x.T=x.l.T),
-    mon:x=>(x.T=f(x.r)),
+let ty=a=>{  //typify ast(inplace) adds .T to each node with value "vijf" (void i32 i64 f64)
+ let Q=(p,x,y)=>{if(x.T!=y.T)err(`@${p.i}: type mismatch: ${x.T}~${y.T}`);return x.T},err=s=>{throw new Error(s)}
+ let l=x=>x[x.length-1],v=""
+ let t=s=>s[0]=="_"?"v":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
+ let c=x=>x.slice(1).map(f)                  //typify children
+ let f=x=>( console.log("f",x[0]),
+  ({fun:x=>x.T=(c(x),x[0].T),
+    blk:x=>x.T=l(c(x)),
+    est:x=>x.T=f(x[1]),
+    var:x=>x.T=(c(x),v),
+    asn:x=>x.T=(c(x),Q(x,x[1],x[2])),        //we check(may throw) on asn, cnd and dya, we could also uptype
+    cal:x=>x.T=(c(x),t(x[1])),
+    sym:x=>x.T=t(x[1]),
+    ret:x=>x.T=x.length>1?f(x[1]):v,
+    iff:x=>x.T=(c(x),v),
+    cnd:x=>x.T=(c(x),Q(x[2],x[3])),
+    whl:x=>x.T=(c(x),v),
+    dya:x=>x.T=(f(x[2]),f(x[3]),Q(x,x[2],x[3])),
+    mon:x=>x.T=f(x[2]),
     str:x=>err("unexpected node str"),
-    num:x=>x.T=x.s.endsWith("n")?"j":x.s.includes(".")?"f":"i",
-  })[x.t](x),x.T)
- a.b.filter(x=>x.t=="fun").forEach(f);return a}
+    num:x=>x.T=x[1].endsWith("n")?"j":x[1].includes(".")?"f":"i",
+  })[x[0]](x),x.T)
+ c(a);return a}
  
 
 let wa=a=>{let $=[],O=s=>$.push(s),err=(x,s)=>{throw new Error("@"+i+" "+s)}

@@ -1,21 +1,15 @@
-<html>
-<body>
+<html><head><title>wj compiler</title></head>
+<body style="font-family:monospace">
 <textarea id="i" onchange="run()" style="field-sizing:content">//a program
 function alpha(x,y){return x+y}</textarea><hr>
-<pre      id="o">//parser output</pre>
+<details open><summary>parse tree</summary><pre id="pt"></pre></details><hr>
+<details open><summary>typed ast </summary><pre id="ta"></pre></details><hr>
 <script src="parser.js"></script>
 <script>
-let run=_=>{let s,a,E=x=>(o.textContent+=x+"\n",console.log(x))
- try{  a=parse(i.value); }catch(e){E(e)}
- o.textContent=pr(a,"","")
- /*
- //o.textContent=JSON.stringify(a)+"\n\n"
- try{  a=ty(a)           }catch(e){E(e)}
- o.textContent+=JSON.stringify(a)+"\n\n"
- try{  s=wa(a)           }catch(e){E(e)}
- o.textContent+=wa(a)
- */
- }
-run();
+let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",console.log(s))
+ let o=(e,a)=>e.textContent=pr(a,"","")
+ try{o(pt,a=parse(i.value))}catch(s){E(s,pt)}
+ try{o(ta,a=ty(a))         }catch(s){E(s,ta)}
+};run()
 </script>
 </body></html>
