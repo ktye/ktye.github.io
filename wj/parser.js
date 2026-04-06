@@ -1,5 +1,11 @@
+let example=_=>`memory(1)
+function a(x){return b(1,x)}
+function b(x,y){return -x+y}
+//runtime
+"ignore from here on.."`
+
 let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++i],_()),N=(p,...x)=>(x,x.i=p,x)      //js parser
- let _=$=>{while(1){while(/\s/.test(p[i]))i++;if(c=='/'&&p[i+1]=='/'){i+=2;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
+ let _=$=>{while(1){while(/\s/.test(p[i]))i++;if(c=='/'&&p[i+1]=='/'){i+=2;if(sw("runtim"))i=p.length;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
  let sy=c=>/[A-Za-z_$]/.test(c),sY=c=>/[A-Za-z0-9_$]/.test(c)
  let sw=x=>x==p.substr(i,x.length),__=s=>{i+=s.length;c=p[i]||'';_()}
  let qs=s=>{if(!sw(s))err('expected '+s);__(s)};
@@ -22,7 +28,7 @@ let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++
  let str=$=>{let j=i,q=c,s='';n();while(c&&c!=q){if(c=='\\'){n();s+=p[i]||'';n()}else{s+=c;n()}}qs(q);return N(j,'str',s)}
  let num=$=>{let j=i,s='';while("0123456789xn.".includes(c))s+=c,c=p[++i];return N(j,'num',s)}
  let sym=$=>{let j=i,s='';if(!sy(c))err("expected identifier");while(sY(c))s+=c,c=p[++i];return N(j,'sym',s)}
- let scl=$=>{let j,f=sym(),a=[];_();if(c=='('){j=i;n();while(c!=')'&&c){a.push(ex());_();if(c!=",")break;n()};qs(')');return N(j,'cal',f,a)};return f}
+ let scl=$=>{let j,f=sym(),a=[];_();if(c=='('){j=i;n();while(c!=')'&&c){a.push(ex());_();if(c!=",")break;n()};qs(')');return N(j,'cal',f,...a)};return f}
  return prg()}
 
 /*ast nodes: nested arrays. all nodes have also .i(src offset)
@@ -46,7 +52,7 @@ num s            numeric literal
 
 // loc: uppercase:i64 endwith"f":"f64" otherwise:i32    fun(return value) fname:startswith_(void)/upper/endswithf/otherwise
 
-let pr=(a,sp)=>{if(!Array.isArray(a))return sp+String(a)+"\n";if(!a.length)return sp+"()\n"
+let pr=(a,sp)=>{if(!Array.isArray(a)){return sp+String(a)+"\n"};if(!a.length)return sp+"()\n"
  let s=sp+a[0]+"."+(a.T||'')+" @"+a.i+"\n";for(let i=1;i<a.length;i++)s+=pr(a[i],sp+" ");return s}
 
 let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i32 i64 f64)
@@ -66,31 +72,21 @@ let wa=a=>{  //wasm text format
  let p=x=>x.slice(1).map(x=>`(param $${x[1][0]} ${T(x)})`).join("")
  let A={},R={},V=[],D="add sub mul".split(" ")
  let L=x=>(x=V,V=[],x.map(x=>`(local $${x[1]} ${T(x)})`).join(""))
+ let t=(T,...x)=>(x.T=T,x)
+ //let m=a=>{let b=a,r="";do{r+="."+b[0];b=b[1]}while("string"!=typeof b[1]);console.log("M",r);return a}
+ let m=x=>{let f=(r,x)=>"string"==typeof x?r+"."+x:f(r+"."+x[0],x[1]);if(".est.cal.sym.memory"==f("",x[1])){O(`(memory (export "memory") ${x[1][1][2][1]})`);x.splice(1,1)};return x}
  let f=x=>((({
   prg:c, blk:c,
   var:x=>x.slice(1).map(x=>(x=x[0]=="asn"?(f(x),x[1]):x,V.push(x))),
   asn:x=>(f(x[2]),O(`local.tee $${x[1][1]}`)),
   sym:x=>O(`local.get $${x[1]}`),
+  mon:x=>x.T=="f"?(f(x[2]),O("f64.neg")):(O(T(x)+".const 0"),f(x[2]),O(T(x)+".sub")),
   dya:x=>(x.slice(2).map(f),O(T(x)+"."+D["+-*".indexOf(x[1])])),
   ret:x=>(c(x),O("return")),
   num:x=>O(`${T(x)}.const ${x[1]}`),
+  cal:x=>(x.slice(2).map(f),O(`call ${x[0][1]}`)),
   fun:x=>(O("^"),f(x[3]),O(")"),o=o.replace("^",`(func $${x[1][1]} ${p(x[2])} ${T(x)?"(result "+T(x)+")":""} ${L()}`)),
- })[x[0]]||e(x))(x));f(a);return o+")\n"}
-
-/*
-let wa=a=>{let $=[],O=s=>$.push(s),err=(x,s)=>{throw new Error("@"+i+" "+s)}
- let _=s=>s[0]=="_"?s.slice(1):s
- let t=x=>["","i32","i64","f64"]["ijf".indexOf(x.T||"?")]
- let fun=x=>{let s=x.s.s,r=t(x);if(r)r=`(result ${r})`
-  let a=x=>`(param $${x.s} ${t(x)})`
-  O(`(fun $${_(s)} ${x.a.map(a).join("")} ${r}`);blk(x.b) ;O(")")}
- let blk=x=>x.b.forEach(x=>out(x))
- let sym=x=>O(`local.get $${x.s}`)
- let out=x=>x.t=="ret"?(out(x.e),O("return")):x.t=="sym"?sym(x):x.t=="dya"?dya(x):(console.log(x),err(x,x.t))
- let dya=x=>(out(x.l),out(x.r),O(x.o))
- O("(module");a.b.forEach(x=>x.t=="fun"?fun(x):err(x,"type: fun expected"))
- return $.join("\n")+")\n"}
-*/
+ })[x[0]]||e(x))(x));f(m(a));return o+")\n"}
 
 /*
 todo [] x++ ++x << >> x+=y

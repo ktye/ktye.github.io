@@ -4,13 +4,12 @@ body{font-family:monospace}
 .l{color:#0000fa}
 .l:hover{cursor:pointer}
 </style></head><body>
-<textarea id="i" onchange="run()" style="field-sizing:content">//a program
-function alpha(x,y){let a=1+2,bf;return x+y}</textarea><hr>
-<details    open ><summary>parse tree</summary><pre id="pt"></pre></details><hr>
+<textarea id="i" onchange="run()" style="field-sizing:content"></textarea><hr>
+<details     ><summary>parse tree</summary><pre id="pt"></pre></details><hr>
 <details     ><summary>typed ast </summary><pre id="ta"></pre></details><hr>
 <details open><summary>wasm text </summary><pre id="wt"></pre></details><hr>
 <script src="parser.js"></script>
-<script>
+<script>i.textContent=example()
 let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
  let r=e=>e.innerHTML=e.innerHTML.replaceAll(/@[0-9]+/g,"<span class='l' onclick='hi(this)'>$&</span>")
  let o=(e,a)=>{e.textContent="string"==typeof a?a:pr(a,"","");r(e)}
