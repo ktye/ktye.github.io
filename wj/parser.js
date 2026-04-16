@@ -1,6 +1,7 @@
 let example=_=>`memory(1) //initial memory 64k
-let g,G,gf=1.2; //globals
-let sinf=Math.sin,cosf=Math.cos; //imports
+let g,gf=1.2;                      //globals(mutable)
+const G=3n;                        //const
+const sinf=Math.sin,cosf=Math.cos; //imports
 function a(x){return b(1,x)}
 function b(x,y){return -x+y}
 function sf(xf){return sinf(xf)}
@@ -12,12 +13,12 @@ let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++
  let sy=c=>/[A-Za-z_$]/.test(c),sY=c=>/[A-Za-z0-9_$.]/.test(c)
  let sw=x=>x==p.substr(i,x.length),__=s=>{i+=s.length;c=p[i]||'';_()}
  let qs=s=>{if(!sw(s))err('expected '+s);__(s)};
- let st=$=>{_();let r,e,t=(s,n)=>sw(s)&&/\W/.test(p[i+s.length]);if(r=t('let')?dec():t('function')?fun():t('return')?ret():t('if')?iff():t('while')?whl():0)return r;
+ let st=$=>{_();let r,e,t=(s,n)=>sw(s)&&/\W/.test(p[i+s.length]);if(r=t('let')?dec(0):t('const')?(i+=2,dec(1)):t('function')?fun():t('return')?ret():t('if')?iff():t('while')?whl():0)return r;
   if(c=='{')return blk();e=ex();_();if(c==';')n();return N(e.i,'est',e)}
  let ex=$=>{let j=i,s=cnd(),e;_();if(c=='='){n();e=ex();return N(j,'asn',s,e)};return s}
  let prg=$=>{let b=[];while(i<p.length){_();if(!c)break;b.push(st())};return N(0,'prg',...b)}
  let blk=$=>{qs('{');let j=i,b=[];while(c&&c!='}'){b.push(st());_()};qs('}');return N(j,'blk',...b)}
- let dec=$=>{let r=[],s,e,k,j=i;__('let');do{s=sym(),e=0;_();r.push(c=="="?(k=i,n(),N(k,'asn',s,ex())):s);_();if(c!=',')break;n()}while(1);_();if(c==';')n();return N(j,'var',...r)}
+ let dec=$=>{let r=[],s,e,k,j=i;__('let');do{s=sym(),e=0;_();r.push(c=="="?(k=i,n(),N(k,'asn',s,ex())):s);_();if(c!=',')break;n()}while(1);_();if(c==';')n();return N(j,$?'con':'var',...r)}
  let fun=$=>{let j=i,k,a=[],b,s;qs('function');_();s=sy(c)?sym():err("anonymous");_();k=i;qs('(');_();while(c!=')'&&c){a.push(sym());_();if(c!=",")break;n()}
   qs(')');_();return N(j,'fun',s,N(k,'var',...a),(b=blk(),2==b.length?b[1]:b))}
  let ret=$=>{let j=i,e;qs('return');_();e=(c==';'||c=='}')?0:ex();if(c==';')n();return N(j,'ret',e)}
@@ -39,6 +40,7 @@ prg b..          program body[statements]
 blk b..          block
 est e            expression statement
 var l            variable declaration list l:[asn+]
+con l            constants or imports
 asn s e          assignment
 fun s a b        function name(sym) args[sym] body(blk|statement)
 cal f a..        call function [arguments]
@@ -62,16 +64,16 @@ let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i
  let e=x=>{console.log(x);throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
  let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
  let c=x=>x.slice(1).map(f),c1=x=>x.T=(c(x),x[1].T),cl=x=>x.T=(c(x),x.length>1?x[x.length-1].T:""),cv=x=>x.T=(c(x),"")
- let f=x=>((({fun:c1, blk:cl, est:cl, var:cv, asn:c1, cal:c1, ret:cl, iff:cv, cnd:cl, whl:cv,    //a poor man's switch
-              sym:x=>x.T=t(x[1]),     dya:x=>x.T=(f(x[2]),f(x[3])),   mon:x=>x.T=f(x[2]),        //with default
+ let f=x=>((({fun:c1, blk:cl, est:cl, var:cv, con:cv, asn:c1, cal:c1, ret:cl, iff:cv, cnd:cl, whl:cv,    //a poor man's switch
+              sym:x=>x.T=t(x[1]),     dya:x=>x.T=(f(x[2]),f(x[3])),   mon:x=>x.T=f(x[2]),                //with default
 	      imp:x=>x.T=t(x[1]),
               num:x=>x.T=x[1].endsWith("n")?"j":x[1].includes(".")?"f":"i"})[x[0]]||e(x))(x),x.T);c(a);return a}
 
-let im=a=>{  //replace imports, e.g. let atanf=Math.atan2 with ["imp","atanf","Math","atan2",["sym"],["sym"]] (arg types in sym.T from 1st call)
+let im=a=>{  //replace imports, e.g. const atanf=Math.atan2 with ["imp","atanf","Math","atan2",["sym"],["sym"]] (arg types in sym.T from 1st call)
  let N=(t,i,x)=>(x.T=t,x.i=i,x),F=(x,s)=>Array.isArray(x)?x[0]=='cal'&&x[1][1]==s?x:x.reduce((r,x)=>r||F(x,s),0):0; //first call node
  let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
  let v=x=>{let y,s,xi;for(let i=x.length-1;i>0;i--)if("asn"==(xi=x[i])[0]&&"sym"==xi[2][0])(y=F(a,s=xi[1][1]))?x[i]=N(t(s),x.i,["imp",s,xi[2][1],...y.slice(2).map(x=>N(x.T,x.i,["sym"]))]):x.splice(i,1)}
- for(let i=0;i<a.length;i++)if(a[i][0]=="var")v(a[i]);return a}
+ for(let i=0;i<a.length;i++)if(a[i][0]=="con")v(a[i]);return a}
 
 let wa=a=>{  //wasm text format
  let e=x=>{throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
@@ -85,10 +87,12 @@ let wa=a=>{  //wasm text format
  //let m=a=>{let b=a,r="";do{r+="."+b[0];b=b[1]}while("string"!=typeof b[1]);console.log("M",r);return a}
  let m=x=>{let f=(r,x)=>"string"==typeof x?r+"."+x:f(r+"."+x[0],x[1]);if(".est.cal.sym.memory"==f("",x[1])){O(`(memory (export "memory") ${x[1][1][2][1]})`);x.splice(1,1)};return x}
  let res=x=>T(x)?`(result ${T(x)})`:""
- let top=(x,y)=>O("imp"==x[0]?`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`:`(global $${x[1]} (mut ${T(x)})${y?"("+T(y)+".const "+y[1]+")":''})`)
+ let con=(x,y,m)=>O(`(global $${x[1]} ${m?"(mut "+T(x)+")":T(x)} ${y?"("+T(y)+".const "+y[1]+")":''})`)
+ let imp=x=>(console.log("imp",x),O(`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`))
  let f=x=>((({
   prg:c, blk:c,
-  var:x=>x.slice(1).map(x=>(x=x[0]=="asn"&&fn?(f(x),x[1]):x,fn?V.push(x):x[0]=="asn"?top(x[1],x[2]):top(x))),
+  var:x=>x.slice(1).map(x=>(x=x[0]=="asn"&&fn?(f(x),x[1]):x,fn?V.push(x):x[0]=="asn"?con(x[1],x[2],1):con(x,0,1))),
+  con:x=>(console.log("con",x),x.slice(1).map(x=>x[0]=="imp"?imp(x):x[0]=="asn"?con(x[1],x[2],0):con(x,0,0))),
   asn:x=>(f(x[2]),O(`local.tee $${x[1][1]}`)),
   sym:x=>O(`local.get $${x[1]}`),
   mon:x=>x.T=="f"?(f(x[2]),O("f64.neg")):(O(T(x)+".const 0"),f(x[2]),O(T(x)+".sub")),
@@ -97,7 +101,6 @@ let wa=a=>{  //wasm text format
   num:x=>O(`${T(x)}.const ${x[1]}`),
   cal:x=>(x.slice(2).map(f),O(`call ${x[0][1]}`)),
   fun:x=>(fn=1,O("^"),f(x[3]),O(")"),o=o.replace("^",`(func $${x[1][1]} ${p(x[2])} ${res(x)} ${L()}`)),
-  imp:x=>(console.log("import"),O("import")),
  })[x[0]]||e(x))(x));f(m(a));return o+")\n"}
 
 /*
