@@ -2,9 +2,10 @@ let example=_=>`memory(1) //initial memory 64k
 let g,gf=1.2;                      //globals(mutable)
 const G=3n;                        //const
 const sinf=Math.sin,cosf=Math.cos; //imports
-function a(x){return b(1,x)}
+function a(x){x=b(1,x);return -x}
 function b(x,y){return -x+y}
 function sf(xf){return sinf(xf)}
+function _v(x){x}
 //runtime
 "ignore from here on.."`
 
@@ -64,7 +65,7 @@ let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i
  let e=x=>{console.log(x);throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
  let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
  let c=x=>x.slice(1).map(f),c1=x=>x.T=(c(x),x[1].T),cl=x=>x.T=(c(x),x.length>1?x[x.length-1].T:""),cv=x=>x.T=(c(x),"")
- let f=x=>((({fun:c1, blk:cl, est:cl, var:cv, con:cv, asn:c1, cal:c1, ret:cl, iff:cv, cnd:cl, whl:cv,    //a poor man's switch
+ let f=x=>((({fun:c1, blk:cl, est:cv, var:cv, con:cv, asn:c1, cal:c1, ret:cv, iff:cv, cnd:cl, whl:cv,    //a poor man's switch
               sym:x=>x.T=t(x[1]),     dya:x=>x.T=(f(x[2]),f(x[3])),   mon:x=>x.T=f(x[2]),                //with default
 	      imp:x=>x.T=t(x[1]),
               num:x=>x.T=x[1].endsWith("n")?"j":x[1].includes(".")?"f":"i"})[x[0]]||e(x))(x),x.T);c(a);return a}
@@ -79,7 +80,7 @@ let wa=a=>{  //wasm text format
  let e=x=>{throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
  let s,h,fn=0,o="(module\n",O=x=>o+=x+"\n"
  let c=x=>x.slice(1).map(f)
- let T=x=>["","i32","i64","f64"][1+"ijf".indexOf(x.T)]
+ let T=x=>""==x.T?"":["i32","i64","f64"]["ijf".indexOf(x.T)]
  let p=x=>x.slice(1).map(x=>`(param ${x[1]?"$"+x[1][0]+" ":""}${T(x)})`).join("")
  let A={},R={},V=[],D="add sub mul".split(" ")
  let L=x=>(x=V,V=[],x.map(x=>`(local $${x[1]} ${T(x)})`).join(""))
@@ -87,13 +88,15 @@ let wa=a=>{  //wasm text format
  //let m=a=>{let b=a,r="";do{r+="."+b[0];b=b[1]}while("string"!=typeof b[1]);console.log("M",r);return a}
  let m=x=>{let f=(r,x)=>"string"==typeof x?r+"."+x:f(r+"."+x[0],x[1]);if(".est.cal.sym.memory"==f("",x[1])){O(`(memory (export "memory") ${x[1][1][2][1]})`);x.splice(1,1)};return x}
  let res=x=>T(x)?`(result ${T(x)})`:""
+ let set=(x,d)=>(f(x[2]),O(`local.${d?"set":"tee"} $${x[1][1]}`))
  let con=(x,y,m)=>O(`(global $${x[1]} ${m?"(mut "+T(x)+")":T(x)} ${y?"("+T(y)+".const "+y[1]+")":''})`)
- let imp=x=>(console.log("imp",x),O(`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`))
+ let imp=x=>O(`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`)
  let f=x=>((({
   prg:c, blk:c,
+  est:x=>x[1][0]=='asn'?set(x[1],1):(f(x[1]),x[1][0]=='cal'&&x[1].T==""?0:O("drop")),
   var:x=>x.slice(1).map(x=>(x=x[0]=="asn"&&fn?(f(x),x[1]):x,fn?V.push(x):x[0]=="asn"?con(x[1],x[2],1):con(x,0,1))),
-  con:x=>(console.log("con",x),x.slice(1).map(x=>x[0]=="imp"?imp(x):x[0]=="asn"?con(x[1],x[2],0):con(x,0,0))),
-  asn:x=>(f(x[2]),O(`local.tee $${x[1][1]}`)),
+  con:x=>x.slice(1).map(x=>x[0]=="imp"?imp(x):x[0]=="asn"?con(x[1],x[2],0):con(x,0,0)),
+  asn:x=>set(x),
   sym:x=>O(`local.get $${x[1]}`),
   mon:x=>x.T=="f"?(f(x[2]),O("f64.neg")):(O(T(x)+".const 0"),f(x[2]),O(T(x)+".sub")),
   dya:x=>(x.slice(2).map(f),O(T(x)+"."+D["+-*".indexOf(x[1])])),
