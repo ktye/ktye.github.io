@@ -1,16 +1,17 @@
-let example=_=>`memory(1) //initial memory 64k
+let example=_=>`mem(1) //initial memory 64k
 let g,gf=1.2;                      //globals(mutable)
 const G=3n;                        //const
 const sinf=Math.sin,cosf=Math.cos; //imports
 function a(x){x=b(1,x);return -x}
-function b(x,y){return -x+y}
+function B(i,x,y){return 1n+Tab(i,x,y)}
 function sf(xf){return sinf(xf)}
 function _v(x){x}
-//runtime
-"ignore from here on.."`
+tab(10,a,b)
+`
+
 
 let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++i],_()),N=(p,...x)=>(x,x.i=p,x)      //js parser
- let _=$=>{while(1){while(/\s/.test(p[i]))i++;if(c=='/'&&p[i+1]=='/'){i+=2;if(sw("runtim"))i=p.length;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
+ let _=$=>{while(1){while(/\s/.test(p[i]))i++;if(c=='/'&&p[i+1]=='/'){i+=2;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
  let sy=c=>/[A-Za-z_$]/.test(c),sY=c=>/[A-Za-z0-9_$.]/.test(c)
  let sw=x=>x==p.substr(i,x.length),__=s=>{i+=s.length;c=p[i]||'';_()}
  let qs=s=>{if(!sw(s))err('expected '+s);__(s)};
@@ -61,6 +62,7 @@ num s            numeric literal
 let pr=(a,sp)=>{if(!Array.isArray(a)){return sp+String(a)+"\n"};if(!a.length)return sp+"()\n"
  let s=sp+a[0]+"."+(a.T||'')+" @"+a.i+"\n";for(let i=1;i<a.length;i++)s+=pr(a[i],sp+" ");return s}
 
+
 let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i32 i64 f64)
  let e=x=>{console.log(x);throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
  let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
@@ -70,6 +72,9 @@ let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i
 	      imp:x=>x.T=t(x[1]),
               num:x=>x.T=x[1].endsWith("n")?"j":x[1].includes(".")?"f":"i"})[x[0]]||e(x))(x),x.T);c(a);return a}
 
+let bi=a=>{  //builtin function calls at top level   mem(1)  tab(10,a,b,c)   exp(a,b,c)
+ a.forEach(x=>{if(x[0]=="est"){let a=x[1].slice(2);x[0]=x[1][1][1];x.splice(1,1);x.push(...a)}});return a}
+
 let im=a=>{  //replace imports, e.g. const atanf=Math.atan2 with ["imp","atanf","Math","atan2",["sym"],["sym"]] (arg types in sym.T from 1st call)
  let N=(t,i,x)=>(x.T=t,x.i=i,x),F=(x,s)=>Array.isArray(x)?x[0]=='cal'&&x[1][1]==s?x:x.reduce((r,x)=>r||F(x,s),0):0; //first call node
  let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
@@ -78,21 +83,22 @@ let im=a=>{  //replace imports, e.g. const atanf=Math.atan2 with ["imp","atanf",
 
 let wa=a=>{  //wasm text format
  let e=x=>{throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
- let s,h,fn=0,o="(module\n",O=x=>o+=x+"\n"
+ let s,h,fn=0,ta=0,o="(module\n",O=x=>o+=x+"\n"
  let c=x=>x.slice(1).map(f)
  let T=x=>""==x.T?"":["i32","i64","f64"]["ijf".indexOf(x.T)]
  let p=x=>x.slice(1).map(x=>`(param ${x[1]?"$"+x[1][0]+" ":""}${T(x)})`).join("")
  let A={},R={},V=[],D="add sub mul".split(" ")
  let L=x=>(x=V,V=[],x.map(x=>`(local $${x[1]} ${T(x)})`).join(""))
  let t=(T,...x)=>(x.T=T,x)
- //let m=a=>{let b=a,r="";do{r+="."+b[0];b=b[1]}while("string"!=typeof b[1]);console.log("M",r);return a}
- let m=x=>{let f=(r,x)=>"string"==typeof x?r+"."+x:f(r+"."+x[0],x[1]);if(".est.cal.sym.memory"==f("",x[1])){O(`(memory (export "memory") ${x[1][1][2][1]})`);x.splice(1,1)};return x}
  let res=x=>T(x)?`(result ${T(x)})`:""
  let set=(x,d)=>(f(x[2]),O(`local.${d?"set":"tee"} $${x[1][1]}`))
  let con=(x,y,m)=>O(`(global $${x[1]} ${m?"(mut "+T(x)+")":T(x)} ${y?"("+T(y)+".const "+y[1]+")":''})`)
  let imp=x=>O(`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`)
+ let tab=_=>ta?o=o.replace("(elem",`(table ${ta} funcref)\n(elem`):0
  let f=x=>((({
   prg:c, blk:c,
+  mem:x=>O(`(memory (export "memory") ${x[1][1]})`),
+  tab:x=>{ta+=x.length-2+(+x[1][1]);O(`(elem (i32.const ${x[1][1]}) ${x.slice(2).map(x=>"$"+x[1]).join(" ")})`)},
   est:x=>x[1][0]=='asn'?set(x[1],1):(f(x[1]),x[1][0]=='cal'&&x[1].T==""?0:O("drop")),
   var:x=>x.slice(1).map(x=>(x=x[0]=="asn"&&fn?(f(x),x[1]):x,fn?V.push(x):x[0]=="asn"?con(x[1],x[2],1):con(x,0,1))),
   con:x=>x.slice(1).map(x=>x[0]=="imp"?imp(x):x[0]=="asn"?con(x[1],x[2],0):con(x,0,0)),
@@ -102,9 +108,9 @@ let wa=a=>{  //wasm text format
   dya:x=>(x.slice(2).map(f),O(T(x)+"."+D["+-*".indexOf(x[1])])),
   ret:x=>(c(x),O("return")),
   num:x=>O(`${T(x)}.const ${x[1]}`),
-  cal:x=>(x.slice(2).map(f),O(`call ${x[0][1]}`)),
+  cal:x=>(x.slice(2).map(f),O(`call ${x[1][1]}`)),
   fun:x=>(fn=1,O("^"),f(x[3]),O(")"),o=o.replace("^",`(func $${x[1][1]} ${p(x[2])} ${res(x)} ${L()}`)),
- })[x[0]]||e(x))(x));f(m(a));return o+")\n"}
+ })[x[0]]||e(x))(x));f(a);tab();return o+")\n"}
 
 /*
 todo [] x++ ++x << >> x+=y

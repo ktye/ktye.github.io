@@ -8,6 +8,7 @@ body{font-family:monospace}
 <details     ><summary>parse tree</summary><pre id="pt"></pre></details><hr>
 <details     ><summary>typed ast </summary><pre id="ta"></pre></details><hr>
 <details     ><summary>imports</summary><pre id="ti"></pre></details><hr>
+<details     ><summary>builtins</summary><pre id="tj"></pre></details><hr>
 <details open><summary>wasm text </summary><pre id="wt"></pre></details><hr>
 <script src="parser.js"></script>
 <script>i.textContent=example()
@@ -16,7 +17,8 @@ let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
  let o=(e,a)=>{e.textContent="string"==typeof a?a:pr(a,"","");r(e)}
  try{o(pt,a=parse(i.value))}catch(s){E(s,pt)}
  try{o(ta,a=ty(a))         }catch(s){E(s,ta)}
- try{o(ti,a=im(a))         }catch(s){E(s,ta)}
+ try{o(ti,a=im(a))         }catch(s){E(s,ti)}
+ try{o(tj,a=bi(a))         }catch(s){E(s,tj)}
  try{o(wt,a=wa(a))         }catch(s){E(s,wt)}
 };run()
 
