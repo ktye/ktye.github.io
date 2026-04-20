@@ -1,14 +1,23 @@
 let example=_=>`mem(1) //initial memory 64k
-let g,gf=1.2;                      //globals(mutable)
-const G=3n;                        //const
-const sinf=Math.sin,cosf=Math.cos; //imports
-function a(x){x=b(1,x);return -x}
-function B(i,x,y){_b(16,-1);return 1n+Tab(x,y,i)}
-function sf(xf,yp){_f(8,xf);return sinf($f(b_(yp)))}
-function jf(xf){return f$(xf)}
-function _v(x){x}
-function R(X){let p=j$(X)-8;_i(p,i_(p)+1);return X}
-tab(10,a,b)
+//let g,gf=1.2;                      //globals(mutable)
+//const G=3n;                        //const
+//const sinf=Math.sin,cosf=Math.cos; //imports
+//function a(x){x=b(1,x);return -x}
+//function B(i,x,y){_b(16,-1);return 1n+Tab(x,y,i)}
+//function sf(xf,yp){_f(8,xf);return sinf($f(b_(yp)))}
+//function jf(xf){return f$(xf)}
+//function _v(x){x}
+//function R(X){let p=j$(X)-8;_i(p,i_(p)+1);return X}
+//tab(10,a,b)
+function a(x){return x?1+x:-x}
+function b(x){if(x)return 1+x;else return -x}
+`
+
+let runtime=`
+let $M,$V,mem=x=>($V=($M=new Uint8Array(x<<10)).buffer),$=x=>BigInt.asIntN(64,x)
+let b_=x=>$M[x],i_=x=>$V.getInt32(x,1),I_=x=>$V.getBigInt64(x,1),ff=x=>$V.getFloat64(x,1)
+let _b=(x,y)=>$M[x]=y,_i=(x,y)=>$V.setInt32(x,y,1),_I=(x,y)=>$V.setBigInt64(x,y,1),_f=(x,y)=>$V.setFloat64(x,y,1)
+let b$=x=>x<<24>>24,j$=x=>0|x,f$=x=>0|x,U$=x=>BigInt.asUintN(64,BigInt(x)),I$=x=>BigInt(x),$f=x=>x
 `
 
 let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++i],_()),N=(p,...x)=>(x,x.i=p,x)      //js parser
@@ -102,20 +111,20 @@ let wa=a=>{  //wasm text format
  let cnv=(x,i)=>(i=["b$","j$","f$","U$","I$","f$"].indexOf(x[1][1]),i<0)?0:O(T(x)+"."+["extend8_s","wrap_i64","trunc_f64_s","extend_i32_u","extend_i32_s","convert_i32_s"][i])
  let cst=x=>["F$","$$f"].includes(x[1][1])?O(`${T(x)}.reinterpret_${T(x[2])}`):0
  let f=x=>((({
-  prg:c, blk:c,
+  prg:c, blk:c, asn:x=>set(x), ret:x=>(c(x),O("return")),
   mem:x=>O(`(memory (export "memory") ${x[1][1]})`),
   tab:x=>{ta+=x.length-2+(+x[1][1]);O(`(elem (i32.const ${x[1][1]}) ${x.slice(2).map(x=>"$"+x[1]).join(" ")})`)},
   drp:x=>x[1][0]=='asn'?set(x[1],1):(f(x[1]),x[1][0]=='cal'&&x[1].T==""?0:O("drop")),
   var:x=>x.slice(1).map(x=>(x=x[0]=="drp"&&fn?(f(x),x[1][1]):x,fn?V.push(x):x[0]=="asn"?con(x[1],x[2],1):con(x,0,1))),
   con:x=>x.slice(1).map(x=>x[0]=="imp"?imp(x):x[0]=="asn"?con(x[1],x[2],0):con(x,0,0)),
-  asn:x=>set(x),
   sym:x=>(x="$"+x[1],o.endsWith(`local.set ${x}\n`))?(o=o.slice(0,-(11+x.length)),O(`local.tee ${x}`)):O(`local.get ${x}`),
   mon:x=>x.T=="f"?(f(x[2]),O("f64.neg")):(O(T(x)+".const 0"),f(x[2]),O(T(x)+".sub")),
   dya:x=>(x.slice(2).map(f),O(T(x)+"."+D["+-*".indexOf(x[1])])),
-  ret:x=>(c(x),O("return")),
   num:x=>O(`${T(x)}.const ${x.T=="j"?x[1].slice(0,-1):x[1]}`),
+  cnd:x=>(f(x[1]),O(`if${res(x)}`),f(x[2]),O("else"),f(x[3]),O("end")),
+  iff:x=>(f(x[1]),O("if"),f(x[2]),(x.length>2?(O("else"),f(x[3])):0),O("end")),
   cal:x=>(x.slice(2).map(f),icl(x)?0:sto(x)?0:lod(x)?0:cnv(x)?0:O(`call ${x[1][1]}`)),
-  fun:x=>(fn=1,O("^"),f(x[3]),O(")"),o=o.replace("^",`(func $${x[1][1]} ${p(x[2])} ${res(x)} ${L()}`)),
+  fun:x=>(fn=1,O("^"),f(x[3]),(o.endsWith("return\n")?o=o.slice(0,-7):0),O(")"),o=o.replace("^",`(func $${x[1][1]} ${p(x[2])} ${res(x)} ${L()}`)),
  })[x[0]]||e(x))(x));f(a);tab();return o+")\n"}
 /*
 load from memory (byte position x)
@@ -138,12 +147,6 @@ todo [] x++ ++x << >> x+=y
 todo N: set .i but as the start of the node
 negative literals
 let JS=JSON.stringify
-
-
-let $M,$V,mem=x=>($V=($M=new Uint8Array(x<<10)).buffer),$=:
-let b_=x=>$M[x],i_=x=>$V.getInt32(x,1),I_=x=>$V.getBigInt64(x,1),ff=x=>$V.getFloat64(x,1)
-let _b=(x,y)=>$M[x]=y,_i=(x,y)=>$V.setInt32(x,y,1),_I=(x,y)=>$V.setBigInt64(x,y,1),_f=(x,y)=>$V.setFloat64(x,y,1)
-let b$=x=>x<<24>>24,j$=x=>0|x,f$=x=>0|x,U$=x=>BigInt.asUintN(64,BigInt(x)),I$=x=>BigInt(x),$f=x=>x
 
 $&(x+y)
 */
