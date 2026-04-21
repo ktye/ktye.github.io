@@ -9,8 +9,11 @@ let example=_=>`mem(1) //initial memory 64k
 //function _v(x){x}
 //function R(X){let p=j$(X)-8;_i(p,i_(p)+1);return X}
 //tab(10,a,b)
-function a(x){return x?1+x:-x}
-function b(x){if(x)return 1+x;else return -x}
+//function a(x){return x?1+x:-x}
+//function b(x){if(x)return 1+x;else return -x}
+//function alloc(n){let x,t=x=bk(n);return i_(t)?_i(t,i_(x),x):x=alloc(2*x),free(x),x+n}
+function f(x,y){_i(x,y);return 0}
+//                  ^ maybe comma should not be a dyadic operator
 `
 
 let runtime=`
@@ -37,7 +40,7 @@ let parse=p=>{let i=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++
  let iff=$=>{let j=i,t,e=0,c;qs('if');_();qs('(');c=ex();qs(')');_();t=st();_();if(sw('else')){qs('else');_();e=st()};return N(j,'iff',c,t,e)}
  let whl=$=>{let j=i,b,t;qs('while');_();qs('(');t=ex();qs(')');_();b=st();return N(j,'whl',t,b)}
  let cnd=$=>{let j,q=dya(0),t,e;_();if(c=='?'){j=i,n();t=ex();_();if(c!=':')err('tern : missing');n();e=ex();return N(j,'cnd',q,t,e)};return q}
- let P={'||':1,'&&':2,'==':3,'!=':3,'<':4,'>':4,'+':5,'-':5,'*':6,'/':6};
+ let P={',':1,'=':2,'+=':2,'-=':2,'*=':2,'&=':2,'^|':2,'|=':2,/*'||':3,'&&':4,*/'==':5,'!=':5,'<':6,'>':6,'<<':7,'>>':7,'+':8,'-':8,'*':9,'/':9,'%':9};
  let dya=m=>{let q,o,oo,r,j,l=mon();while(1){_();j=i;oo=p.substr(i,2);o=P[oo]?oo:P[c]?c:0;if(!o)break;q=P[o]||0;if(q<m)break;__(o);r=dya(q+1);l=N(j,'dya',o,l,r);_()}return l}
  let mon=$=>{_();if(c=="-"&&/[0-9]/.test(p[1+i])){n();let r=num();r[1]="-"+r[1];return r};if("+-!~".includes(c)){let j=i,o=c;if(c==p[1+i]&&"+-".indexOf(c)>=0){o+=o;i++};n();return N(j,'mon',o,mon())};return sta()}
  let sta=$=>{_();if(c=='('){n();let e=ex();qs(')');return e};return(c=='"'||c=="'")?str():/[0-9]/.test(c)?num():sy(c)?scl():err('token unexpected '+c)}
@@ -91,6 +94,12 @@ let im=a=>{  //replace imports, e.g. const atanf=Math.atan2 with ["imp","atanf",
  let v=x=>{let y,s,xi;for(let i=x.length-1;i>0;i--)if("asn"==(xi=x[i])[0]&&"sym"==xi[2][0])(y=F(a,s=xi[1][1]))?x[i]=N(t(s),x.i,["imp",s,xi[2][1],...y.slice(2).map(x=>N(x.T,x.i,["sym"]))]):x.splice(i,1)}
  for(let i=0;i<a.length;i++)if(a[i][0]=="con")v(a[i]);return a}
 
+let as=a=>{   //replace (modified)assignments, e.g. ['dya', '+=', ['sym','x'] ..] => ['asn', x, ['dya', '+', ['sym', 'x'], ..]]
+ let N=(t,i,x)=>(x.T=t,x.i=i,x),ew=x=>('='==x[x.length-1]);
+ let F=x=>{if(!Array.isArray(x))return;x.forEach(F);
+  if(x[0]=='dya'&&ew(x[1])&&'=='!=x[1]){let s=x[1];x[0]='asn';x[1]=x[2];x[2]=1==s.length?x[3]:N(x.T,x.i,['dya',s.slice(0,-1),x[1],x[3]]);x.splice(3,1)}}
+ return F(a),a}
+
 let wa=a=>{  //wasm text format
  let e=x=>{throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
  let s,h,fn=0,ta=0,o="(module\n",O=x=>o+=x+"\n"
@@ -110,16 +119,17 @@ let wa=a=>{  //wasm text format
  let lod=x=>["b_","i_","I_","ff"].includes(x[1][1])?O(T(x)+".load"+(x[1][1]=="b_"?"8":"")):0
  let cnv=(x,i)=>(i=["b$","j$","f$","U$","I$","f$"].indexOf(x[1][1]),i<0)?0:O(T(x)+"."+["extend8_s","wrap_i64","trunc_f64_s","extend_i32_u","extend_i32_s","convert_i32_s"][i])
  let cst=x=>["F$","$$f"].includes(x[1][1])?O(`${T(x)}.reinterpret_${T(x[2])}`):0
+ let drp=x=>x[0]=='asn'?set(x,1):(f(x),x[0]=='cal'&&x.T==""?0:O("drop"))
  let f=x=>((({
-  prg:c, blk:c, asn:x=>set(x), ret:x=>(c(x),O("return")),
+  prg:c, blk:c, asn:x=>set(x), drp:x=>drp(x[1]), ret:x=>(c(x),O("return")),
   mem:x=>O(`(memory (export "memory") ${x[1][1]})`),
   tab:x=>{ta+=x.length-2+(+x[1][1]);O(`(elem (i32.const ${x[1][1]}) ${x.slice(2).map(x=>"$"+x[1]).join(" ")})`)},
-  drp:x=>x[1][0]=='asn'?set(x[1],1):(f(x[1]),x[1][0]=='cal'&&x[1].T==""?0:O("drop")),
   var:x=>x.slice(1).map(x=>(x=x[0]=="drp"&&fn?(f(x),x[1][1]):x,fn?V.push(x):x[0]=="asn"?con(x[1],x[2],1):con(x,0,1))),
   con:x=>x.slice(1).map(x=>x[0]=="imp"?imp(x):x[0]=="asn"?con(x[1],x[2],0):con(x,0,0)),
   sym:x=>(x="$"+x[1],o.endsWith(`local.set ${x}\n`))?(o=o.slice(0,-(11+x.length)),O(`local.tee ${x}`)):O(`local.get ${x}`),
   mon:x=>x.T=="f"?(f(x[2]),O("f64.neg")):(O(T(x)+".const 0"),f(x[2]),O(T(x)+".sub")),
-  dya:x=>(x.slice(2).map(f),O(T(x)+"."+D["+-*".indexOf(x[1])])),
+  dya:x=>(x[1]==","?(drp(x[2]),f(x[3])):(x.slice(2).map(f),O(T(x)+"."+D["+-*".indexOf(x[1])]))),
+  
   num:x=>O(`${T(x)}.const ${x.T=="j"?x[1].slice(0,-1):x[1]}`),
   cnd:x=>(f(x[1]),O(`if${res(x)}`),f(x[2]),O("else"),f(x[3]),O("end")),
   iff:x=>(f(x[1]),O("if"),f(x[2]),(x.length>2?(O("else"),f(x[3])):0),O("end")),

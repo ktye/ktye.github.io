@@ -9,6 +9,7 @@ body{font-family:monospace}
 <details     ><summary>typed ast </summary><pre id="ta"></pre></details><hr>
 <details     ><summary>imports</summary><pre id="ti"></pre></details><hr>
 <details     ><summary>builtins</summary><pre id="tj"></pre></details><hr>
+<details     ><summary>assigns</summary><pre id="ts"></pre></details><hr>
 <details open><summary>wasm text </summary><pre id="wt"></pre></details><hr>
 <script src="parser.js"></script>
 <script>i.textContent=example()
@@ -19,6 +20,7 @@ let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
  try{o(ta,a=ty(a))         }catch(s){E(s,ta)}
  try{o(ti,a=im(a))         }catch(s){E(s,ti)}
  try{o(tj,a=bi(a))         }catch(s){E(s,tj)}
+ try{o(ts,a=as(a))         }catch(s){E(s,ts)}
  try{o(wt,a=wa(a))         }catch(s){E(s,wt)}
 };run()
 
