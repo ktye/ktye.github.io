@@ -6,7 +6,9 @@ body{font-family:monospace}
 </style></head><body>
 <textarea id="i" onchange="run()" style="field-sizing:content"></textarea><hr>
 <details     ><summary>parse tree</summary><pre id="pt"></pre></details><hr>
+<details     ><summary>operators</summary><pre id="to"></pre></details><hr>
 <details     ><summary>typed ast </summary><pre id="ta"></pre></details><hr>
+<details     ><summary>negate</summary><pre id="tn"></pre></details><hr>
 <details     ><summary>imports</summary><pre id="ti"></pre></details><hr>
 <details     ><summary>builtins</summary><pre id="tj"></pre></details><hr>
 <details     ><summary>assigns</summary><pre id="ts"></pre></details><hr>
@@ -17,7 +19,9 @@ let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
  let r=e=>e.innerHTML=e.innerHTML.replaceAll(/@[0-9]+/g,"<span class='l' onclick='hi(this)'>$&</span>")
  let o=(e,a)=>{e.textContent="string"==typeof a?a:pr(a,"","");r(e)}
  try{o(pt,a=parse(i.value))}catch(s){E(s,pt)}
+ try{o(to,a=op(a))         }catch(s){E(s,to)}
  try{o(ta,a=ty(a))         }catch(s){E(s,ta)}
+ try{o(tn,a=ng(a))         }catch(s){E(s,tn)}
  try{o(ti,a=im(a))         }catch(s){E(s,ti)}
  try{o(tj,a=bi(a))         }catch(s){E(s,tj)}
  try{o(ts,a=as(a))         }catch(s){E(s,ts)}
