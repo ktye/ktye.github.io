@@ -1,4 +1,4 @@
-<html><head><title>wj compiler</title>
+<html><head><title>wj</title>
 <style>
 body{font-family:monospace}
 .l{color:#0000fa}
@@ -25,7 +25,8 @@ let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
  try{o(ti,a=im(a))         }catch(s){E(s,ti)}
  try{o(tj,a=bi(a))         }catch(s){E(s,tj)}
  try{o(ts,a=as(a))         }catch(s){E(s,ts)}
- try{o(wt,a=wa(a))         }catch(s){E(s,wt)}
+ try{o(wt,  wa(a))         }catch(s){E(s,wt)}
+ let u=wb(a);WebAssembly.compile(u).then(r=>console.log(r))
 };run()
 
 let hi=x=>(i.setSelectionRange(x=+x.textContent.slice(1),1+x),i.focus())
