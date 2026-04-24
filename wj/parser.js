@@ -11,7 +11,7 @@ const sinf=Math.sin,cosf=Math.cos; //imports
 //function jf(xf){return f$(xf)}
 //function _v(x){x}
 //function R(X){let p=j$(X)-8;_i(p,i_(p)+1);return X}
-//tab(10,a,b)
+tab(10,h,wf)
 //function a(x){return x?1+x:-x}
 //function b(x){if(x)return 1+x;else return -x}
 //function f(x,y){_i(x,y);return 0}
@@ -172,31 +172,27 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  let ei=(x,b)=>{let r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r}
  let ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y))
  let t=x=>[0,127,126,124][1+"ijf".indexOf(x)]
- let S=[],F={},G={},D=[],nf=0,te=0,mm=0,sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
+ let S=[],F={},G={},C=[],D=[],nf=0,T=[],te=0,mm=0,sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
  let sg=x=>[96,x.length-1,...x.split("").slice(1).map(t),...(x[0]=="_"?[0]:[1,t(x[0])])]
  let cn=t=>[0x41,0x42,0x44]["ijf".indexOf(t)]
  let gl=(x,y)=>G[x[1]]={name:x[1],mut:y,t:x.T,e:x.length>2?x[2][1]:0}
- a.forEach(x=>x[0]=="imp"?x.slice(1).map(x=>F[x[1]]={name:x[1],sig:sig(simp(x)),imp:x[2].split(".").map(us)}):x[0]=="fun"?F[x[1][1]]={name:x[1][1],sig:sig(sfun(x)),imp:""}
-   :x[0]=="tab"?te=Math.max(te,(+x[1][1])+x.length-2):x[0]=="mem"&&x.length==2?mm=+x[1][1]:x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
- ws(1,S.map(sg)) //types
- console.log(F,"te",te,"G",G);
- ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...eu(y[0].length),...y[0],...eu(y[1].length),...y[1],0,...eu(x.sig)]})) //imports
- ws(3,vals(F).filter(x=>!x.imp).map(x=>eu(x.sig))) //func-sigs
- ws(4,[[112,0,...eu(te)]]) //table
- if(mm)ws(5,[[0,mm]]) //memory
- ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),0x0b]]))
- console.log("S",S,"F",F,"te",te,o);   // ws(6,g.map(x=>[ty(x.t),1,...x.c]))
- return new Uint8Array(o);
-}
+ let ns=x=>[...eu(x.length),...us(x)]
+ a.forEach(x=>x[0]=="imp"?x.slice(1).map(x=>F[x[1]]={name:x[1],sig:sig(simp(x)),imp:x[2].split("."),idx:nf++})
+   :x[0]=="fun"?F[x[1][1]]={name:x[1][1],sig:sig(sfun(x)),imp:"",idx:nf++}
+   :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?mm=+x[1][1]:D.push([+x[1][1],x[2]]))
+   :x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
+ ws(1,S.map(sg))                                                                                     //types
+ ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...ns(y[0]),...ns(y[1]),0,...eu(x.sig)]})) //imports
+ ws(3,vals(F).filter(x=>!x.imp).map(x=>eu(x.sig)))                                                   //funcs
+ ws(4,[[112,0,...eu(te)]])                                                                           //table
+ if(mm)ws(5,[[0,mm]])                                                                                //memory
+ ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]))                  //globals
+ ws(7,[[...ns("memory"),2,0]])                                                                       //exports todo funcs
+ T.length?ws(9,T.map(x=>[0,0x41,...eu(x[0]),11,...x[1].map(x=>eu(F[x].idx)).flat()])):0              //elements
+ C.length?ws(10,vals(F).filter(x=>x.code).map(x=>x.code)):0                                          //code
+ D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0                      //data
+ return new Uint8Array(o)}
 
-/*
-sec = NewSection(4)
-		sec.cat1(1)                           // one table
-		sec.cat1(0x70)                        // table type
-		sec.cat1(0)                           // flags
-		sec.cat(leb(int64(segmentsize(tab)))) // size
-		sec.out(o)
-*/
 
 /*
 let o=[],v={},p=(...x)=>o.push(...x),
