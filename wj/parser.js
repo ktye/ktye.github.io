@@ -164,34 +164,43 @@ let wa=a=>{  //wasm text format
   fun:x=>( O(`(func $${x[1][1]} ${p(x[2])} ${res(x)} ${L(x[3].slice(1))}`), f(x[4]),(o.endsWith("return\n")?o=o.slice(0,-7):0),O(")")),
  })[x[0]]||e(x))(x));f(a);tab();return o+")\n"}
 
-let en=(x,b)=>{let r=[];while(1){b=x&127n;x=x>>7n;if((!x)&&!(b&64n)||(x==-1n&&(b&64n))){r.push(Number(b));break};r.push(Number(b|128n))};return r}
 
 let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 3func 4table 5memory 6global 7export [8start] 9element 10code 11data
  let us=x=>new TextEncoder().encode(x),uf=x=>{let b=new ArrayBuffer(8),v=new DataView(b);v.setFloat64(0,Number(x),1);return new Uint8Array(b)},vals=x=>Object.values(x)
  let eu=(x,b,r)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r}
+ let en=(x,b)=>{let r=[];while(1){b=x&127n;x=x>>7n;if((!x)&&!(b&64n)||(x==-1n&&(b&64n))){r.push(Number(b));break};r.push(Number(b|128n))};return r}
  let ei=(x,b)=>{let r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r}
  let ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y))
  let t=x=>[0,127,126,124][1+"ijf".indexOf(x)]
- let S=[],F={},G={},C=[],D=[],nf=0,T=[],te=0,mm=0,sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
+ let S=[],F={},G={},D=[],nf=0,ng=0,T=[],te=0,mm=0,sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
+ let Y="6a7ca06b7da16c7ea26d7fa36f81007183007284007385004853634a55647486007587004651614752624c57654e59664954004b56004d58004f5a00".match(/..?/g).map(x=>parseInt(x,16))
  let sg=x=>[96,x.length-1,...x.split("").slice(1).map(t),...(x[0]=="_"?[0]:[1,t(x[0])])]
  let cn=t=>[0x41,0x42,0x44]["ijf".indexOf(t)]
- let gl=(x,y)=>G[x[1]]={name:x[1],mut:y,t:x.T,e:x.length>2?x[2][1]:0}
+ let gl=(x,y)=>G[x[1]]={name:x[1],mut:y,t:x.T,e:x.length>2?x[2][1]:0,idx:ng++}
  let ns=x=>[...eu(x.length),...us(x)]
+ let lo=x=>{let o=[0],i,T;x[3].slice(1).forEach(x=>{T=t(x.T);o[o.length-1]==T?o[o.length-2]++:o.push(1,T)});o[0]=o.length>>1;return o}
+ let co=(l,L,x)=>{let o=[],O=(...x)=>o.push(x.flat()),f=x=>(({ret:x=>(f(x[1]),O(15)),cal:x=>(x.slice(2).map(f),O(16,F[x[1][1]].idx)),
+  blk:x=>x.slice(1).map(f),
+  drp:x=>(f(x[1]),o[o.length-2]==34?o[o.length-2]--:o[o.length-2]==35?(o.pop(),o.pop()):x[1]=="cal"&&x[1].T==""?0:O(26)),
+  dya:x=>(f(x[2]),f(x[3]),O(Y["+  -  *  /  %  &  |  ^  <  >  << >> == != <= >= lt gt le ge".indexOf(x[1])+"ijf".indexOf(x.T)])),
+  num:x=>O(cn(x.T),x.T=="i"?ei(x[1]):x.T=="j"?en(x[1]):[...uf(x[1])]),
+  asn:x=>(f(x[2]),(x[1][1]in l)?O(34,l[x[1][1]]):O(36,eu(G[x[1][1]]),35,eu(G[x[1][1]]))),
+  sym:x=>(x[1]in l)?(o[o.length-2]==33&&o[o.length-1]==l[x[1]]?o[o.length-2]++:O(32,l[x[1]])):O(35,eu(G[x[1]].idx)),
+  dow:x=>(O(3,64),f(x[1]),f(x[2]),O(13,0,11)),
+  })[x[0]])(x);O(L);f(x);if(o[o.length-1]==15)o.pop();O(11);return o.flat()}
+ let fn=x=>{let l={};[...x[2].slice(1).map(x=>x[1]),...x[3].slice(1).map(x=>x[1])].map((x,i)=>l[x]=i);F[x[1][1]].code=co(l,lo(x),x[4])}
  a.forEach(x=>x[0]=="imp"?x.slice(1).map(x=>F[x[1]]={name:x[1],sig:sig(simp(x)),imp:x[2].split("."),idx:nf++})
    :x[0]=="fun"?F[x[1][1]]={name:x[1][1],sig:sig(sfun(x)),imp:"",idx:nf++}
    :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?mm=+x[1][1]:D.push([+x[1][1],x[2]]))
    :x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
- ws(1,S.map(sg))                                                                                     //types
- ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...ns(y[0]),...ns(y[1]),0,...eu(x.sig)]})) //imports
- ws(3,vals(F).filter(x=>!x.imp).map(x=>eu(x.sig)))                                                   //funcs
- ws(4,[[112,0,...eu(te)]])                                                                           //table
- if(mm)ws(5,[[0,mm]])                                                                                //memory
- ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]))                  //globals
- ws(7,[[...ns("memory"),2,0]])                                                                       //exports todo funcs
- T.length?ws(9,T.map(x=>[0,0x41,...eu(x[0]),11,...x[1].map(x=>eu(F[x].idx)).flat()])):0              //elements
- C.length?ws(10,vals(F).filter(x=>x.code).map(x=>x.code)):0                                          //code
- D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0                      //data
- return new Uint8Array(o)}
+ a.forEach(x=>x[0]=="fun"?fn(x):0);
+ ws(1,S.map(sg));ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...ns(y[0]),...ns(y[1]),0,...eu(x.sig)]}))
+ ws(3,vals(F).filter(x=>!x.imp).map(x=>eu(x.sig)));ws(4,[[112,0,...eu(te)]]);if(mm)ws(5,[[0,mm]])
+ ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]));ws(7,[[...ns("memory"),2,0]])
+ T.length?ws(9,T.map(x=>[0,0x41,...eu(x[0]),11,...x[1].map(x=>eu(F[x].idx)).flat()])):0
+ ws(10,vals(F).filter(x=>x.code).map(x=>[...eu(x.code.length),...x.code]))
+ //console.log(JSON.stringify(o))
+ D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 
 
 /*
