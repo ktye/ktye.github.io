@@ -1,31 +1,35 @@
+/*
 let example=_=>`mem(1) //initial memory 64k
-mem(0,"abc")                       //initial data
-mem(4,1,2n,3)                      //4/8 byte data
-let gf,g=55;                       //globals
-const G=3n;                        //const
+//mem(0,"abc")                       //initial data
+//mem(4,1,2n,3)                      //4/8 byte data
+//let gf,g=55;                       //globals
+//const G=3n;                        //const
 //const c1=1,c2=3;
-const sinf=Math.sin,cosf=Math.cos; //imports
+//const sinf=Math.sin,cosf=Math.cos; //imports
 //function a(x){x=b(1,x);return -x}
 //function B(i,x,y){_b(16,-1);return 1n+Tab(x,y,i)}
 //function sf(xf,yp){_f(8,xf);return sinf($f(b_(yp)))}
 //function jf(xf){return f$(xf)}
 //function _v(x){x}
 //function R(X){let p=j$(X)-8;_i(p,i_(p)+1);return X}
-tab(10,h,wf)
+//tab(0,a)
 //function a(x){return x?1+x:-x}
-//function b(x){if(x)return 1+x;else return -x}
-//function f(x,y){_i(x,y);return 0}
+//function b(x,y){return tab(x,y)}
+//function b(x){if(x)x=1+x;else x=-x;return x;}
+function f(x,y){_i(x,y);return 0.0}
 //function g(x, y){y=0;while(y<x)y+=3;return y}
-function h(x, y){y=0;do{y+=2}while(y<x)return y}
-function wf(X){return sinf(3.14)}
+//function h(x, y){y=0;do{y+=2}while(y<x)return y}
+//function wf(X){return sinf(3.14)}
 //function alloc(n, x,t){t=x=bk(n);return i_(t)?_i(t,i_(x),x):x=alloc(2*x),free(x),x+n}
 `
+*/
 
 let runtime=`
 let $M,$V,mem=x=>($V=($M=new Uint8Array(x<<10)).buffer),$=x=>BigInt.asIntN(64,x)
 let b_=x=>$M[x],i_=x=>$V.getInt32(x,1),I_=x=>$V.getBigInt64(x,1),ff=x=>$V.getFloat64(x,1)
 let _b=(x,y)=>$M[x]=y,_i=(x,y)=>$V.setInt32(x,y,1),_I=(x,y)=>$V.setBigInt64(x,y,1),_f=(x,y)=>$V.setFloat64(x,y,1)
 let b$=x=>x<<24>>24,j$=x=>0|x,f$=x=>0|x,U$=x=>BigInt.asUintN(64,BigInt(x)),I$=x=>BigInt(x),$f=x=>x
+let $T=0,exp=x=>0,test=x=>{++$T;if(!x){throw new Error("test "+$T+" failed")}}
 `
 
 let parse=p=>{let i=0,Q=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++i],_()),N=(p,...x)=>(x,x.i=p,x)      //js parser
@@ -46,7 +50,7 @@ let parse=p=>{let i=0,Q=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=
  let dow=$=>{let j=i,t,b;qs('do');_();b=st();_();qs('while');_();qs('(');t=ex();qs(')');_();return N(j,'dow',b,t)}
  let whl=$=>{let j=i,b,t;qs('while');_();qs('(');t=ex();qs(')');_();b=st();return N(j,'whl',t,b)}
  let cnd=$=>{let j,q=dya(0),t,e;_();if(c=='?'){j=i,n();t=ex();_();if(c!=':')err('tern : missing');n();e=ex();return N(j,'cnd',q,t,e)};return q}
- let P={',':1,'=':2,'+=':2,'-=':2,'*=':2,'&=':2,'^=':2,'|=':2,/*'||':3,'&&':4,*/'==':5,'!=':5,'<':6,'>':6,'<<':7,'>>':7,'+':8,'-':8,'*':9,'/':9,'%':9};
+ let P={',':1,'=':2,'+=':2,'-=':2,'*=':2,'&=':2,'^=':2,'|=':2,'|':3,'^':4,'&':5,'==':6,'!=':6,'<':7,'>':7,'<<':8,'>>':8,'+':9,'-':9,'*':10,'/':10,'%':10};
  let dya=m=>{let q,o,oo,r,j,l=mon();while(1){_();j=i;oo=p.substr(i,2);o=P[oo]?oo:P[c]?c:0;if((!o)||Q&&o==',')break;q=P[o]||0;if(q<m)break;__(o);r=dya(q+1);l=N(j,'dya',o,l,r);_()}return l}
  let mon=$=>{_();if(c=="-"&&/[0-9]/.test(p[1+i])){n();let r=num();r[1]="-"+r[1];return r};if("+-!~".includes(c)){let j=i,o=c;if(c==p[1+i]&&"+-".indexOf(c)>=0){o+=o;i++};n();return N(j,'mon',o,mon())};return sta()}
  let sta=$=>{_();if(c=='('){let q=Q;Q=0;n();let e=ex();qs(')');Q=q;return e};return(c=='"'||c=="'")?str():/[0-9]/.test(c)?num():sy(c)?scl():err('token unexpected '+c)}
@@ -84,13 +88,12 @@ let pr=(a,sp)=>{if(!Array.isArray(a)){return sp+String(a)+"\n"};if(!a.length)ret
 
 let op=a=>{   //replace builtin calls to dyadic/monadic operators ['cal' ['sym', 'shr'] .. ] => ['dya', 'shr', ..]
  const w="clz ctz cnt shr div rem lt gt le ge".split(" ")
- let F=x=>{if(!Array.isArray(x))return x;x.forEach(F);
-  if(x[0]=='cal'&&w.includes(x[1][1])){x[0]=3==x.length?'mon':'dya';x[1]=x[1][1]}}
+ let F=x=>{if(!Array.isArray(x))return x;x.forEach(F);if(x[0]=='cal'&&w.includes(x[1][1])){x[0]=3==x.length?'mon':'dya';x[1]=x[1][1]}}
  return F(a),a}
  
 let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i32 i64 f64)
  let e=x=>{console.log(x);throw new Error(`@${x.i} unexpected node type: ${x[0]}`)}
- let t=s=>s[0]=="_"?"":s[0].toUpperCase()==s[0]?"j":s.endsWith("f")?"f":"i"
+ let t=s=>s[0]=="_"?"":/[A-Z]/.test(s[0])?"j":s.endsWith("f")?"f":"i"
  let C=(t,s)=>"< > == != lt gt le ge !".includes(s)?'i':t
  let c=x=>x.slice(1).map(f),c1=x=>x.T=(c(x),x[1].T),cl=x=>x.T=(c(x),x.length>1?x[x.length-1].T:""),cv=x=>x.T=(c(x),"")
  let f=x=>((({fun:c1, blk:cl, drp:cv, var:cv, loc:cv, con:cv, asn:c1, cal:c1, ret:cv, iff:cv, cnd:cl, whl:cv, dow:cv,   //a poor man's switch
@@ -99,7 +102,7 @@ let ty=a=>{  //typify ast(inplace) adds .T to each node with value "ijf" (void i
               num:x=>x.T=x[1].endsWith("n")?(x[1]=x[1].slice(0,-1),"j"):x[1].includes(".")?"f":"i"})[x[0]]||e(x))(x),x.T);c(a);return a}
 
 let ng=a=>{   //replace -x with 0-x  and  ++/--x with x=1+x   and  ~x with -1^
- T=(t,i,x)=>(x.T=t,x.i=i,x)
+ let T=(t,i,x)=>(x.T=t,x.i=i,x)
  let F=x=>{if(!Array.isArray(x))return x;x.forEach(F);
   if(x[0]=='mon'&&x[1]=='-'&&x.T!='f'){x[0]='dya',x.push(x[2]),x[2]=T(x.T,x.i,['num','0'])}
   if(x[0]=='mon'&&x[1].length==2){x[0]='dya';x[1]=x[0]=="+"?"+=":"-=";x[3]=T(x.T,x.i,['num','1'])}
@@ -107,7 +110,7 @@ let ng=a=>{   //replace -x with 0-x  and  ++/--x with x=1+x   and  ~x with -1^
   }
  return F(a),a}
 
-let bi=a=>{  //builtin function calls at top level   mem(1)  tab(10,a,b,c)   exp(a,b,c)
+let bi=a=>{  //builtin function calls at top level   mem(1)  tab(10,a,b,c)   exp(a,b,c)  test()
  let f=x=>{let u=[],b;x.slice(2).forEach(x=>x[0]=="str"?u.push(...x[1].split("").map(x=>x.charCodeAt(x))):(b=new ArrayBuffer(x.T=='j'?8:4),v=new DataView(b),x.T=='j'?v.setBigInt64(0,BigInt(x[1]),1):v.setInt32(0,+x[1],1),u.push(...new Uint8Array(b))));x[2]=new Uint8Array(u);while(x.length>3)x.pop()}
  a.forEach(x=>{if(x[0]=="drp"){let a=x[1].slice(2);x[0]=x[1][1][1];x.splice(1,1);x.push(...a);if(x[0]=="mem"&&x.length>2)f(x)}});return a}
 
@@ -139,14 +142,16 @@ let wa=a=>{  //wasm text format
  let imp=x=>O(`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`)
  let tab=_=>ta?o=o.replace("(elem",`(table ${ta} funcref)\n(elem`):0
  let icl=x=>["_tab","tab","Tab","tabf"].includes(x[1][1])?O(`call_indirect ${x.slice(2,-1).map(x=>"(param "+T(x)+")").join("")+res(x)}`):0
- let sto=x=>["_b","_i","_I","_I","_f"].includes(x[1][1])?O(T(x[3])+".store"+(x[1][1]=="_b"?"8":"")):0
+ let sto=x=>["_b","_i","_I","_f"].includes(x[1][1])?O(T(x[3])+".store"+(x[1][1]=="_b"?"8":"")):0
  let lod=x=>["b_","i_","I_","ff"].includes(x[1][1])?O(T(x)+".load"+(x[1][1]=="b_"?"8":"")):0
- let cnv=(x,i)=>(i=["b$","j$","f$","U$","I$","f$"].indexOf(x[1][1]),i<0)?0:O(T(x)+"."+["extend8_s","wrap_i64","trunc_f64_s","extend_i32_u","extend_i32_s","convert_i32_s"][i])
+ let cnv=(x,i)=>(i=["s$","i$","f$","U$","I$","$f"].indexOf(x[1][1]),i<0)?0:O(T(x)+"."+["extend8_s","wrap_i64","trunc_f64_s","extend_i32_u","extend_i32_s","convert_i32_s"][i])
  let cst=x=>["F$","$$f"].includes(x[1][1])?O(`${T(x)}.reinterpret_${T(x[2])}`):0
  let drp=x=>x[0]=='asn'?set(x,1):(f(x),x[0]=='cal'&&x.T==""?0:O("drop"))
  let dat=x=>O(`(data (i32.const ${x[1][1]}) "${Array.from(x[2]).map(x=>"\\"+x.toString(16).padStart(2,'0')).join("")}")`)
+ let ex=a.filter(x=>x[0]=="exp").map(x=>x[1][1])
+ console.log("ex",ex);
  let f=x=>((({
-  prg:c, blk:c, asn:x=>set(x), drp:x=>drp(x[1]), ret:x=>(c(x),O("return")),
+  prg:c, blk:c, asn:x=>set(x), drp:x=>drp(x[1]), ret:x=>(c(x),O("return")), exp:x=>0, test:x=>0,
   mem:x=>x.length<3?O(`(memory (export "memory") ${x[1][1]})`):dat(x),
   tab:x=>{ta+=x.length-2+(+x[1][1]);O(`(elem (i32.const ${x[1][1]}) ${x.slice(2).map(x=>"$"+x[1]).join(" ")})`)},
   var:x=>x.slice(1).map(x=>con(x,1)), 
@@ -161,92 +166,55 @@ let wa=a=>{  //wasm text format
   whl:x=>(O("block\nloop"),f(x[1]),O("br_if 1"),f(x[2]),O("br 0\nend\nend")),
   dow:x=>(O("loop"),f(x[1]),f(x[2]),O("br_if 0\nend")),
   cal:x=>(x.slice(2).map(f),icl(x)?0:sto(x)?0:lod(x)?0:cnv(x)?0:O(`call ${x[1][1]}`)),
-  fun:x=>( O(`(func $${x[1][1]} ${p(x[2])} ${res(x)} ${L(x[3].slice(1))}`), f(x[4]),(o.endsWith("return\n")?o=o.slice(0,-7):0),O(")")),
+  fun:x=>(O(`(func $${x[1][1]} ${ex.includes(x[1][1])?'(export "'+x[1][1]+'")':""}${p(x[2])}${res(x)}${L(x[3].slice(1))}`), f(x[4]),(o.endsWith("return\n")?o=o.slice(0,-7):0),O(")")),
  })[x[0]]||e(x))(x));f(a);tab();return o+")\n"}
 
 
 let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 3func 4table 5memory 6global 7export [8start] 9element 10code 11data
+ let e=(x,y)=>{throw new Error(`@${x.i}: ${y}`)}
  let us=x=>new TextEncoder().encode(x),uf=x=>{let b=new ArrayBuffer(8),v=new DataView(b);v.setFloat64(0,Number(x),1);return new Uint8Array(b)},vals=x=>Object.values(x)
  let eu=(x,b,r)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r}
  let en=(x,b)=>{let r=[];while(1){b=x&127n;x=x>>7n;if((!x)&&!(b&64n)||(x==-1n&&(b&64n))){r.push(Number(b));break};r.push(Number(b|128n))};return r}
  let ei=(x,b)=>{let r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r}
  let ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y))
  let t=x=>[0,127,126,124][1+"ijf".indexOf(x)]
- let S=[],F={},G={},D=[],nf=0,ng=0,T=[],te=0,mm=0,sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
+ let S=[],F={},G={},D=[],nf=0,ng=0,T=[],te=0,mm=0,E=[],sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
  let Y="6a7ca06b7da16c7ea26d7fa36f81007183007284007385004853634a55647486007587004651614752624c57654e59664954004b56004d58004f5a00".match(/..?/g).map(x=>parseInt(x,16))
+ let X="00009a004550000067790000687a0000697b0000".match(/..?/g).map(x=>parseInt(x,16))
  let sg=x=>[96,x.length-1,...x.split("").slice(1).map(t),...(x[0]=="_"?[0]:[1,t(x[0])])]
  let cn=t=>[0x41,0x42,0x44]["ijf".indexOf(t)]
  let gl=(x,y)=>G[x[1]]={name:x[1],mut:y,t:x.T,e:x.length>2?x[2][1]:0,idx:ng++}
  let ns=x=>[...eu(x.length),...us(x)]
+ let icl=(x,O,i)=>["_tab","tab","Tab","tabf"].includes(x[1][1])?(i=S.indexOf((x.T?x.T:"_")+x.slice(2,-1).map(x=>x.T)),console.log("i",i,S,(x.T?x.T:"_")+x.slice(2,-1).map(x=>x.T)),i<0?e(x,"unknown function signature"):O(17,0,eu(i))):0
+ let sto=(x,O,i)=>(i=["_b","_i","_I","_f"].indexOf(x[1][1]),i<0?0:O([58,54,55,57][i],i==0?0:i==1?2:3,0))
+ let lod=(x,O,i)=>(i=["b_","i_","I_","ff"].indexOf(x[1][1]),i<0?0:O([45,40,41,43][i],i==0?0:i==1?2:3,0))
+ let cnv=(x,O,i)=>(i=["s$","i$","f$","U$","I$","$f"].indexOf(x[1][1]),i<0)?0:O([192,167,170,173,172,183][i]) //s$(i32.extend8_s) i$(i32.wrap_i64) f$(i32.trunc_f64_s) U$(i64.extend_i32_u) I$(i64.extend_i32_s) $f(f64.convert_i32_s)
  let lo=x=>{let o=[0],i,T;x[3].slice(1).forEach(x=>{T=t(x.T);o[o.length-1]==T?o[o.length-2]++:o.push(1,T)});o[0]=o.length>>1;return o}
- let co=(l,L,x)=>{let o=[],O=(...x)=>o.push(x.flat()),f=x=>(({ret:x=>(f(x[1]),O(15)),cal:x=>(x.slice(2).map(f),O(16,F[x[1][1]].idx)),
-  blk:x=>x.slice(1).map(f),
-  drp:x=>(f(x[1]),o[o.length-2]==34?o[o.length-2]--:o[o.length-2]==35?(o.pop(),o.pop()):x[1]=="cal"&&x[1].T==""?0:O(26)),
+ let co=(l,L,x)=>{let o=[],O=(...x)=>o.push(x.flat()),f=x=>(({ret:x=>(f(x[1]),O(15)),blk:x=>x.slice(1).map(f),
+  drp:x=>(f(x[1]),o[o.length-2]==34?o[o.length-2]--:o[o.length-2]==35?(o.pop(),o.pop()):x[1][0]=="cal"&&x[1].T==""?0:O(26)),
   dya:x=>(f(x[2]),f(x[3]),O(Y["+  -  *  /  %  &  |  ^  <  >  << >> == != <= >= lt gt le ge".indexOf(x[1])+"ijf".indexOf(x.T)])),
-  num:x=>O(cn(x.T),x.T=="i"?ei(x[1]):x.T=="j"?en(x[1]):[...uf(x[1])]),
+  mon:x=>(f(x[2]),O(X["-   !   clz ctz cnt".indexOf(x[1])+"ijf".indexOf(x.T)])),
+  num:x=>O(cn(x.T),x.T=="i"?ei(+x[1]):x.T=="j"?en(+x[1]):[...uf(+x[1])]),
   asn:x=>(f(x[2]),(x[1][1]in l)?O(34,l[x[1][1]]):O(36,eu(G[x[1][1]]),35,eu(G[x[1][1]]))),
-  sym:x=>(x[1]in l)?(o[o.length-2]==33&&o[o.length-1]==l[x[1]]?o[o.length-2]++:O(32,l[x[1]])):O(35,eu(G[x[1]].idx)),
+  sym:x=>(x[1]in l)?(o[o.length-2]==33&&o[o.length-1]==l[x[1]]?o[o.length-2]++:O(32,l[x[1]])):(x[1] in G)?O(35,eu(G[x[1]].idx)):e(x,"unknown symbol"),
+  cnd:x=>(f(x[1]),O(4,t(x.T)),f(x[2]),O(5),f(x[3]),O(11)),
+  iff:x=>(f(x[1]),O(4,64),f(x[2]),(x.length>3?(O(5),f(x[3])):0),O(11)),
+  whl:x=>(O(2,64,3,64),f(x[1]),O(13,1),f(x[2]),O(12,0,11,11)),
   dow:x=>(O(3,64),f(x[1]),f(x[2]),O(13,0,11)),
+  cal:x=>(x.slice(2).map(f),icl(x,O)?0:sto(x,O)?0:lod(x,O)?0:cnv(x,O)?0:O(16,F[x[1][1]]?F[x[1][1]].idx:e(x,"unknown func"))),
   })[x[0]])(x);O(L);f(x);if(o[o.length-1]==15)o.pop();O(11);return o.flat()}
  let fn=x=>{let l={};[...x[2].slice(1).map(x=>x[1]),...x[3].slice(1).map(x=>x[1])].map((x,i)=>l[x]=i);F[x[1][1]].code=co(l,lo(x),x[4])}
  a.forEach(x=>x[0]=="imp"?x.slice(1).map(x=>F[x[1]]={name:x[1],sig:sig(simp(x)),imp:x[2].split("."),idx:nf++})
    :x[0]=="fun"?F[x[1][1]]={name:x[1][1],sig:sig(sfun(x)),imp:"",idx:nf++}
-   :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?mm=+x[1][1]:D.push([+x[1][1],x[2]]))
-   :x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
+   :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?(mm=+x[1][1],E.push([...ns("memory",2,0)])):D.push([+x[1][1],x[2]]))
+   :x[0]=="exp"?x.slice(1).map(x=>E.push([...ns(x[1]),0,...eu(F[x[1]].idx)])):x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
  a.forEach(x=>x[0]=="fun"?fn(x):0);
  ws(1,S.map(sg));ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...ns(y[0]),...ns(y[1]),0,...eu(x.sig)]}))
  ws(3,vals(F).filter(x=>!x.imp).map(x=>eu(x.sig)));ws(4,[[112,0,...eu(te)]]);if(mm)ws(5,[[0,mm]])
- ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]));ws(7,[[...ns("memory"),2,0]])
+ ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]));
+ E.length?ws(7,E):0;
  T.length?ws(9,T.map(x=>[0,0x41,...eu(x[0]),11,...x[1].map(x=>eu(F[x].idx)).flat()])):0
+vals(F).filter(x=>x.code).map(x=>console.log(x.name,x.code));
  ws(10,vals(F).filter(x=>x.code).map(x=>[...eu(x.code.length),...x.code]))
- //console.log(JSON.stringify(o))
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 
-
-/*
-let o=[],v={},p=(...x)=>o.push(...x),
-f=x=>(...y)=>(p(255&x>>8*y[0]),y[0]),
-[ez,    eq,        ne,        lt,        lu,    gt,        gu,    le,        ge,        cz,    ct,    cx,   ]= 
-[0x5045,0x615b5146,0x625c5247,0x635d5348,0x5449,0x645e554a,0x564b,0x655f574c,0x6660594e,0x7a67,0x7968,0x7b69].map(f),
-[ad,        su,        mu,        di,        du,    mo,    rm,    an,    or,    xo,    sl,    sa,    sr,    rl,    rr,    dr,        se,        re        ]=
-[0xa0927c6a,0xa1937d6b,0xa2947e6c,0xa3957f6d,0x806e,0x816f,0x8270,0x8371,0x8472,0x8573,0x8674,0x8775,0x8876,0x8977,0x8a78,0x1a1a1a1a,0x1b1b1b1b,0x0f0f0f0f].map(f),
-[ ab, ng, ce, fl, tr, na, sq, mi, ma, cs]=[0x998b,0x9a8c,0x9b8d,0x9c8e,0x9d8f,0x9e90,0x9f91,0xa496,0xa597,0xa698].map(x=>f(x<<16)),
-io=x=>(p(167),0),fo=x=>(p(183),1),sz=x=>(p(63,0),0),gr=x=>(p(64,0),0),cp=x=>(p(252,10,0,0),-1),fi=x=>(p(252,11,0,0),-1),
-li=x=>(p(40,2,0),0),lf=x=>(p(43,3,0),1),lc=x=>(p(44,1,0),0),lb=x=>(p(45,1,0),0),st=(x,y)=>p(54+3*y,2+y,0),sc=(x,y)=>p(58,0,0)
-eu=(x,b,r)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r},
-ei=(x,b)=>{let r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r},
-ic=x=>(o.push(65),ei(x),0),
-fc=x=>(p(68,[...new Uint8Array(new Uint64Array([x]).buffer)]),1),
-pa=(x,y,l)=>(v[x]={i:eu(Object.keys(v).length),t:tp(y),a:!l},tp(y)),
-as=(x,y)=>(((!(x in v))?pa(x,y,1):0),p(33,...v[x].i),-1),
-va=x=>(p(32,...v[x].i),v[x].t),
-lo=_=>(p(2,3),_=>(p(69,4,64),_=>p(14,0,11,11))),
-cn=_=>(p(4,64),_=>(p(5),_=>p(11))),
-da=(x,y)=>[x,y], //da(offset,"str")
-
-sp=(x,y)=>x.split(y?":":""),
-ns=x=>[...eu(x.length),...sp(x).map(x=>x.charCodeAt(0))],
-ty=x=>[0,127,126,125,124][1+x],
-tp=x=>sp("i:j:e:f",1).indexOf(x),
-fn=(x,...y)=>(x={n:x,s:((y=y[y.length-1])>=0?y:"")+":"+Object.values(v).filter(x=>x.a).map(x=>x.t).join(""),c:o,l:v},o=[],v={},x),
-gl=(x,y)=>(x={n:x,t:y,c:o},o=[],x),
-ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y)), //section
-wx=x=>{},                                            //exports..
-wa=(...x)=>{let r,d=x.filter(x=>x.length),           //data
- f=x.filter(x=>x.s),                                 //funcs
- F=f.filter(x=>x.c),                                 //funcs without imports
- s=f.map(x=>x.s).filter((x,i,a)=>i==a.indexOf(x)),   //signatures
- n=f.map(x=>x.n),                                    //names
- g=x.filter(x=>x.t),                                 //globals
- v=f=>(f=Object.values(f.l).filter(x=>!x.a).map(x=>[1,ty(x.t),...x.i]),[...eu(f.length),...f.flat()])
- o=[0,97,115,109,1,0,0,0]
- ws(1,s.map((x,r,a)=>([r,a]=sp(x,1),[96,a.length,...sp(a).map(x=>ty(Number(x))),r.length,...sp(r).map(x=>ty(Number(x)))])))
- ws(2,f.filter(x=>!x.c).map(x=>[1,97,...ns(x.n),0,...eu(s.indexOf(x.s))]))  //imports
- ws(3,F.map(x=>eu(s.indexOf(x.s)))) //signature index list
- p(5,3,1,0,1)                       //memory 1seg,unshared,1block
- ws(6,g.map(x=>[ty(x.t),1,...x.c]))
- ws(7,[[...ns("memory"),2,0],...F.map((x,i)=>[...ns(x.n),0,...eu(i)])]) //export memory&all functions
- ws(10,F.map((x,y)=>((y=[...v(x),...x.c,11]),[...eu(y.length),...y])))
- ws(11,d.map(x=>[0,65,...eu(x[0]),11,...ns(x[1])]))
- r=new Uint8Array(o);o=[];v={};return r}
-*/

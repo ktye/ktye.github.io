@@ -1,10 +1,11 @@
 <html><head><title>wj</title>
 <style>
-body{font-family:monospace}
+*{font-family:monospace}
 .l{color:#0000fa}
 .l:hover{cursor:pointer}
 </style></head><body>
-<textarea id="i" onchange="run()" style="field-sizing:content"></textarea><hr>
+<select id="sel"><option></option></select><br/>
+<textarea id="i" onchange="run()" style="field-sizing:content"></textarea><br/><span id="te" style="background:orange"></span><hr>
 <details     ><summary>parse tree</summary><pre id="pt"></pre></details><hr>
 <details     ><summary>operators</summary><pre id="to"></pre></details><hr>
 <details     ><summary>typed ast </summary><pre id="ta"></pre></details><hr>
@@ -12,10 +13,14 @@ body{font-family:monospace}
 <details     ><summary>imports</summary><pre id="ti"></pre></details><hr>
 <details     ><summary>builtins</summary><pre id="tj"></pre></details><hr>
 <details     ><summary>assigns</summary><pre id="ts"></pre></details><hr>
-<details open><summary>wasm text </summary><pre id="wt"></pre></details><hr>
+<details open><summary>wasm text</summary><pre id="wt"></pre></details><hr>
+<details     ><summary>wasm binary <a id="dl"></a></summary><pre id="tb"></pre></details><hr>
 <script src="parser.js"></script>
-<script>i.textContent=example()
-let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
+<script>
+
+sel.onchange=e=>(console.log(e.target.value),i.value=example[e.target.value],i.style.width="",i.style.height="",run())
+//i.textContent=example()
+let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s));te.textContent=""
  let r=e=>e.innerHTML=e.innerHTML.replaceAll(/@[0-9]+/g,"<span class='l' onclick='hi(this)'>$&</span>")
  let o=(e,a)=>{e.textContent="string"==typeof a?a:pr(a,"","");r(e)}
  try{o(pt,a=parse(i.value))}catch(s){E(s,pt)}
@@ -26,10 +31,33 @@ let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s))
  try{o(tj,a=bi(a))         }catch(s){E(s,tj)}
  try{o(ts,a=as(a))         }catch(s){E(s,ts)}
  try{o(wt,  wa(a))         }catch(s){E(s,wt)}
- let u=wb(a);WebAssembly.compile(u).then(r=>console.log(r))
-};run()
-
+ try{jtest();              }catch(s){E(s,te)}
+ let u=wb(a);tb.textContent=[...u].map((x,i)=>(i%32?"":"\n"+String(i).padStart(4,'0'))+" "+x.toString(16).padStart(2,'0')).join("");
+ //WebAssembly.compile(u).then(r=>console.log(r))
+ let W=new WebAssembly.Instance(new WebAssembly.Module(u))
+ console.log("W",W);
+ let b=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(b);dl.download=sel.value+".wasm";dl.textContent=sel.value+".wasm";
+};
 let hi=x=>(i.setSelectionRange(x=+x.textContent.slice(1),1+x),i.focus())
 
+let jtest=_=>{console.log("jtest");let f=new Function(runtime+i.value);f()}
+
+const example={
+func:`
+function add(x,y){return x+y}
+function Sub(X,Y){return X-Y}
+function mulf(xf,yf){return xf*yf}
+function _none(x,y){x^y}
+exp(add)
+test(3==add(1,2))
+`,
+globals:`
+const g=55,e=66; //constants
+let q,p=3;       //mutable globals
+`
+}
+
+sel.innerHTML=Object.keys(example).map(x=>`<option>${x}</option>`).join("");
+sel.onchange({target:{value:sel.value}});
 </script>
 </body></html>
