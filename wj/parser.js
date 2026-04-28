@@ -25,11 +25,13 @@ function f(x,y){_i(x,y);return 0.0}
 */
 
 let runtime=`
-let $M,$V,mem=x=>($V=($M=new Uint8Array(x<<10)).buffer),$=x=>BigInt.asIntN(64,x)
+let $M,$V,mem=x=>($V=new DataView(($M=new Uint8Array(x<<10)).buffer)),$=x=>BigInt.asIntN(64,x)
 let b_=x=>$M[x],i_=x=>$V.getInt32(x,1),I_=x=>$V.getBigInt64(x,1),ff=x=>$V.getFloat64(x,1)
 let _b=(x,y)=>$M[x]=y,_i=(x,y)=>$V.setInt32(x,y,1),_I=(x,y)=>$V.setBigInt64(x,y,1),_f=(x,y)=>$V.setFloat64(x,y,1)
-let b$=x=>x<<24>>24,j$=x=>0|x,f$=x=>0|x,U$=x=>BigInt.asUintN(64,BigInt(x)),I$=x=>BigInt(x),$f=x=>x
-let $T=0,exp=x=>0,test=x=>{++$T;if(!x){throw new Error("test "+$T+" failed")}}
+let b$=x=>x<<24>>24,j$=x=>0|x,f$=x=>0|x,U$=x=>BigInt.asUintN(64,BigInt(x)),I$=x=>$(BigInt(x)),$f=x=>x
+let lt=(x,y)=>(x>>>0)<(y>>>0),le=(x,y)=>(x>>>0)<=(y>>>0),gt=(x,y)=>(x>>>0)>(y>>>0),ge=(x,y)=>(x>>>0)>=(y>>>0)
+let shr=(x,y)=>x>>>y,div=x=>(x>>>0)/y,rem=x=>(x>>>0)%y
+let $T=0,exp=x=>0,test=(e,f,...a)=>{let r;++$T;if(e!=(r=f(...a))){throw new Error("test(js) expected "+e+" got "+r)}}
 `
 
 let parse=p=>{let i=0,Q=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++i],_()),N=(p,...x)=>(x,x.i=p,x)      //js parser
@@ -133,11 +135,12 @@ let wa=a=>{  //wasm text format
  let c=x=>x.slice(1).map(f)
  let T=x=>""==x.T?"":["i32","i64","f64"]["ijf".indexOf(x.T)]
  let p=x=>x.slice(1).map(x=>`(param ${x[1]?"$"+x[1]+" ":""}${T(x)})`).join("")
- let A={},R={},D="add sub mul div_s rem_s and or xor lt_s gt_s shl shr_s eq ne le_s ge_s lt_u gt_u le_u gt_u".split(" "),M="neg eqz clz ctz popcount".split(" "),_s=(t,s)=>t=="f"&&s[s.length-2]=='_'?s.slice(0,-2):s
- let L=x=>x.map(x=>`(local $${x[1]} ${T(x)})`).join("") //fn
+ let A={},R={},L,D="add sub mul div_s rem_s and or xor lt_s gt_s shl shr_s eq ne le_s ge_s lt_u gt_u le_u gt_u".split(" "),M="neg clz ctz popcount".split(" "),_s=(t,s)=>t=="f"&&s[s.length-2]=='_'?s.slice(0,-2):s
+ let l=x=>x.map(x=>`(local $${x[1]} ${T(x)})`).join(""),lo=(x,y)=>L=[...x.map(x=>x[1]),...y.map(x=>x[1])]
  let t=(T,...x)=>(x.T=T,x)
  let res=x=>T(x)?`(result ${T(x)})`:""
- let set=(x,d)=>(f(x[2]),O(`local.${d?"set":"tee"} $${x[1][1]}`))
+ let not=(t,i,s)=>{for(i=0;i<N1.length;i++){s=N1[i]+"\n";if(o.endsWith(s)){o=o.slice(0,-s.length)+N2[i]+"\n";return}};O(t+".eqz")},N1="le_s le_u lt_s lt_u eq gt_s gt_u ge_s ge_u ne".split(" "),N2="gt_s gt_u ge_s ge_u ne le_s le_u lt_s lt_u eq".split(" ")
+ let set=(x,d)=>(f(x[2]),L.includes(x[1][1])?O(`local.${d?"set":"tee"} $${x[1][1]}`):(O(`global.set $${x[1][1]}`),d?0:O(`global.get $${x[1][1]}`)))
  let con=(x,m)=>O(`(global $${x[1]} ${m?"(mut "+T(x)+")":T(x)} ${x[2]?"("+T(x)+".const "+x[2][1]+")":''})`)
  let imp=x=>O(`(import ${x[2].split(".").map(x=>'"'+x+'"').join(' ')} (func $${x[1]} ${res(x)}${p(x.slice(2))})`)
  let tab=_=>ta?o=o.replace("(elem",`(table ${ta} funcref)\n(elem`):0
@@ -149,7 +152,6 @@ let wa=a=>{  //wasm text format
  let drp=x=>x[0]=='asn'?set(x,1):(f(x),x[0]=='cal'&&x.T==""?0:O("drop"))
  let dat=x=>O(`(data (i32.const ${x[1][1]}) "${Array.from(x[2]).map(x=>"\\"+x.toString(16).padStart(2,'0')).join("")}")`)
  let ex=a.filter(x=>x[0]=="exp").map(x=>x[1][1])
- console.log("ex",ex);
  let f=x=>((({
   prg:c, blk:c, asn:x=>set(x), drp:x=>drp(x[1]), ret:x=>(c(x),O("return")), exp:x=>0, test:x=>0,
   mem:x=>x.length<3?O(`(memory (export "memory") ${x[1][1]})`):dat(x),
@@ -157,16 +159,16 @@ let wa=a=>{  //wasm text format
   var:x=>x.slice(1).map(x=>con(x,1)), 
   con:x=>x.slice(1).map(x=>con(x,0)),
   imp:x=>x.slice(1).map(imp),
-  sym:x=>(x="$"+x[1],o.endsWith(`local.set ${x}\n`))?(o=o.slice(0,-(11+x.length)),O(`local.tee ${x}`)):O(`local.get ${x}`),
-  mon:x=>(f(x[2]),O(T(x)+"."+M["-   !   clz ctz cnt".indexOf(x[1])/4])),
+  sym:x=>(!L.includes(x[1]))?O(`global get $${x[1]}`):(x="$"+x[1],o.endsWith(`local.set ${x}\n`))?(o=o.slice(0,-(11+x.length)),O(`local.tee ${x}`)):O(`local.get ${x}`),
+  mon:x=>(f(x[2]),x[1]=="!"?not(T(x)):O(T(x)+"."+M["-   clz ctz cnt".indexOf(x[1])/4])),
   dya:x=>(x[1]==","?(drp(x[2]),f(x[3])):(x.slice(2).map(f),O(T(x[2])+"."+D[("+  -  *  /  %  &  |  ^  <  >  << >> == != <= >= lt gt le ge".indexOf(x[1]))/3]))),
   num:x=>O(`${T(x)}.const ${x[1]}`),
   cnd:x=>(f(x[1]),O(`if${res(x)}`),f(x[2]),O("else"),f(x[3]),O("end")),
   iff:x=>(f(x[1]),O("if"),f(x[2]),(x.length>3?(O("else"),f(x[3])):0),O("end")),
-  whl:x=>(O("block\nloop"),f(x[1]),O("br_if 1"),f(x[2]),O("br 0\nend\nend")),
+  whl:x=>(O("block\nloop"),f(x[1]),not("i32"),O("br_if 1"),f(x[2]),O("br 0\nend\nend")),
   dow:x=>(O("loop"),f(x[1]),f(x[2]),O("br_if 0\nend")),
   cal:x=>(x.slice(2).map(f),icl(x)?0:sto(x)?0:lod(x)?0:cnv(x)?0:O(`call ${x[1][1]}`)),
-  fun:x=>(O(`(func $${x[1][1]} ${ex.includes(x[1][1])?'(export "'+x[1][1]+'")':""}${p(x[2])}${res(x)}${L(x[3].slice(1))}`), f(x[4]),(o.endsWith("return\n")?o=o.slice(0,-7):0),O(")")),
+  fun:x=>(O(`(func $${x[1][1]} ${ex.includes(x[1][1])?'(export "'+x[1][1]+'")':""}${p(x[2])}${res(x)}${l(x[3].slice(1))}`),lo(x[2],x[3]),f(x[4]),(o.endsWith("return\n")?o=o.slice(0,-7):0),O(")")),
  })[x[0]]||e(x))(x));f(a);tab();return o+")\n"}
 
 
@@ -179,34 +181,37 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  let ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y))
  let t=x=>[0,127,126,124][1+"ijf".indexOf(x)]
  let S=[],F={},G={},D=[],nf=0,ng=0,T=[],te=0,mm=0,E=[],sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
- let Y="6a7ca06b7da16c7ea26d7fa36f81007183007284007385004853634a55647486007587004651614752624c57654e59664954004b56004d58004f5a00".match(/..?/g).map(x=>parseInt(x,16))
- let X="00009a004550000067790000687a0000697b0000".match(/..?/g).map(x=>parseInt(x,16))
+ let Y="6a7ca06b7da16c7ea26d7fa36f81007183007284007385006e7f004853637082004a55647688007486007587004651614752624c57654e59664954004b56004d58004f5a00".match(/..?/g).map(x=>parseInt(x,16))
+ let X="00009a0067790000687a0000697b0000".match(/..?/g).map(x=>parseInt(x,16))
+ let N1="4648494c4d5153545758474e4f4a4b52595a5556".match(/..?/g).map(x=>parseInt(x,16))
+ let N2="474e4f4a4b52595a55564648494c4d5153545758".match(/..?/g).map(x=>parseInt(x,16))
  let sg=x=>[96,x.length-1,...x.split("").slice(1).map(t),...(x[0]=="_"?[0]:[1,t(x[0])])]
  let cn=t=>[0x41,0x42,0x44]["ijf".indexOf(t)]
  let gl=(x,y)=>G[x[1]]={name:x[1],mut:y,t:x.T,e:x.length>2?x[2][1]:0,idx:ng++}
  let ns=x=>[...eu(x.length),...us(x)]
- let icl=(x,O,i)=>["_tab","tab","Tab","tabf"].includes(x[1][1])?(i=S.indexOf((x.T?x.T:"_")+x.slice(2,-1).map(x=>x.T)),console.log("i",i,S,(x.T?x.T:"_")+x.slice(2,-1).map(x=>x.T)),i<0?e(x,"unknown function signature"):O(17,0,eu(i))):0
+ let not=(t,O)=>{let z=o[o.length-1],i=N1.indexOf(z);i<0?O(t=="i"?69:80):o[o.length-1]=N2[i]}
+ let icl=(x,O,i)=>["_tab","tab","Tab","tabf"].includes(x[1][1])?(i=S.indexOf((x.T?x.T:"_")+x.slice(2,-1).map(x=>x.T)),i<0?e(x,"unknown function signature"):O(17,0,eu(i))):0
  let sto=(x,O,i)=>(i=["_b","_i","_I","_f"].indexOf(x[1][1]),i<0?0:O([58,54,55,57][i],i==0?0:i==1?2:3,0))
  let lod=(x,O,i)=>(i=["b_","i_","I_","ff"].indexOf(x[1][1]),i<0?0:O([45,40,41,43][i],i==0?0:i==1?2:3,0))
  let cnv=(x,O,i)=>(i=["s$","i$","f$","U$","I$","$f"].indexOf(x[1][1]),i<0)?0:O([192,167,170,173,172,183][i]) //s$(i32.extend8_s) i$(i32.wrap_i64) f$(i32.trunc_f64_s) U$(i64.extend_i32_u) I$(i64.extend_i32_s) $f(f64.convert_i32_s)
  let lo=x=>{let o=[0],i,T;x[3].slice(1).forEach(x=>{T=t(x.T);o[o.length-1]==T?o[o.length-2]++:o.push(1,T)});o[0]=o.length>>1;return o}
  let co=(l,L,x)=>{let o=[],O=(...x)=>o.push(x.flat()),f=x=>(({ret:x=>(f(x[1]),O(15)),blk:x=>x.slice(1).map(f),
   drp:x=>(f(x[1]),o[o.length-2]==34?o[o.length-2]--:o[o.length-2]==35?(o.pop(),o.pop()):x[1][0]=="cal"&&x[1].T==""?0:O(26)),
-  dya:x=>(f(x[2]),f(x[3]),O(Y["+  -  *  /  %  &  |  ^  <  >  << >> == != <= >= lt gt le ge".indexOf(x[1])+"ijf".indexOf(x.T)])),
-  mon:x=>(f(x[2]),O(X["-   !   clz ctz cnt".indexOf(x[1])+"ijf".indexOf(x.T)])),
-  num:x=>O(cn(x.T),x.T=="i"?ei(+x[1]):x.T=="j"?en(+x[1]):[...uf(+x[1])]),
-  asn:x=>(f(x[2]),(x[1][1]in l)?O(34,l[x[1][1]]):O(36,eu(G[x[1][1]]),35,eu(G[x[1][1]]))),
+  dya:x=>(f(x[2]),f(x[3]),O(Y["+  -  *  /  %  &  |  ^  div<  rem>  shr<< >> == != <= >= lt gt le ge".indexOf(x[1])+"ijf".indexOf(x.T)])),
+  mon:x=>(f(x[2]),x[1]=="!"?not(x.T,O):O(X["-   clz ctz cnt".indexOf(x[1])+"ijf".indexOf(x.T)])),
+  num:x=>O(cn(x.T),x.T=="i"?ei(+x[1]):x.T=="j"?en(BigInt(x[1])):[...uf(+x[1])]),
+  asn:x=>(f(x[2]),(x[1][1]in l)?O(34,l[x[1][1]]):O(36,eu(G[x[1][1]].idx),35,eu(G[x[1][1]].idx))),
   sym:x=>(x[1]in l)?(o[o.length-2]==33&&o[o.length-1]==l[x[1]]?o[o.length-2]++:O(32,l[x[1]])):(x[1] in G)?O(35,eu(G[x[1]].idx)):e(x,"unknown symbol"),
   cnd:x=>(f(x[1]),O(4,t(x.T)),f(x[2]),O(5),f(x[3]),O(11)),
   iff:x=>(f(x[1]),O(4,64),f(x[2]),(x.length>3?(O(5),f(x[3])):0),O(11)),
-  whl:x=>(O(2,64,3,64),f(x[1]),O(13,1),f(x[2]),O(12,0,11,11)),
+  whl:x=>(O(2,64,3,64),f(x[1]),not("i",O),O(13,1),f(x[2]),O(12,0,11,11)),
   dow:x=>(O(3,64),f(x[1]),f(x[2]),O(13,0,11)),
   cal:x=>(x.slice(2).map(f),icl(x,O)?0:sto(x,O)?0:lod(x,O)?0:cnv(x,O)?0:O(16,F[x[1][1]]?F[x[1][1]].idx:e(x,"unknown func"))),
   })[x[0]])(x);O(L);f(x);if(o[o.length-1]==15)o.pop();O(11);return o.flat()}
  let fn=x=>{let l={};[...x[2].slice(1).map(x=>x[1]),...x[3].slice(1).map(x=>x[1])].map((x,i)=>l[x]=i);F[x[1][1]].code=co(l,lo(x),x[4])}
  a.forEach(x=>x[0]=="imp"?x.slice(1).map(x=>F[x[1]]={name:x[1],sig:sig(simp(x)),imp:x[2].split("."),idx:nf++})
    :x[0]=="fun"?F[x[1][1]]={name:x[1][1],sig:sig(sfun(x)),imp:"",idx:nf++}
-   :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?(mm=+x[1][1],E.push([...ns("memory",2,0)])):D.push([+x[1][1],x[2]]))
+   :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?(mm=+x[1][1],E.push([...ns("memory"),2,0])):D.push([+x[1][1],x[2]]))
    :x[0]=="exp"?x.slice(1).map(x=>E.push([...ns(x[1]),0,...eu(F[x[1]].idx)])):x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
  a.forEach(x=>x[0]=="fun"?fn(x):0);
  ws(1,S.map(sg));ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...ns(y[0]),...ns(y[1]),0,...eu(x.sig)]}))
@@ -214,7 +219,6 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]));
  E.length?ws(7,E):0;
  T.length?ws(9,T.map(x=>[0,0x41,...eu(x[0]),11,...x[1].map(x=>eu(F[x].idx)).flat()])):0
-vals(F).filter(x=>x.code).map(x=>console.log(x.name,x.code));
  ws(10,vals(F).filter(x=>x.code).map(x=>[...eu(x.code.length),...x.code]))
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 

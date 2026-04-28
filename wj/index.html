@@ -3,44 +3,48 @@
 *{font-family:monospace}
 .l{color:#0000fa}
 .l:hover{cursor:pointer}
+details{display:inline-block}
 </style></head><body>
 <select id="sel"><option></option></select><br/>
-<textarea id="i" onchange="run()" style="field-sizing:content"></textarea><br/><span id="te" style="background:orange"></span><hr>
-<details     ><summary>parse tree</summary><pre id="pt"></pre></details><hr>
-<details     ><summary>operators</summary><pre id="to"></pre></details><hr>
-<details     ><summary>typed ast </summary><pre id="ta"></pre></details><hr>
-<details     ><summary>negate</summary><pre id="tn"></pre></details><hr>
-<details     ><summary>imports</summary><pre id="ti"></pre></details><hr>
-<details     ><summary>builtins</summary><pre id="tj"></pre></details><hr>
+<textarea id="i" onchange="run()" style="field-sizing:content"></textarea><br/><span id="te"></span><hr>
+<details     ><summary>parse tree</summary><pre id="pt"></pre></details>
+<details     ><summary>operators</summary><pre id="to"></pre></details>
+<details     ><summary>typed ast </summary><pre id="ta"></pre></details>
+<details     ><summary>negate</summary><pre id="tn"></pre></details>
+<details     ><summary>imports</summary><pre id="ti"></pre></details>
+<details     ><summary>builtins</summary><pre id="tj"></pre></details>
 <details     ><summary>assigns</summary><pre id="ts"></pre></details><hr>
 <details open><summary>wasm text</summary><pre id="wt"></pre></details><hr>
 <details     ><summary>wasm binary <a id="dl"></a></summary><pre id="tb"></pre></details><hr>
 <script src="parser.js"></script>
 <script>
 
-sel.onchange=e=>(console.log(e.target.value),i.value=example[e.target.value],i.style.width="",i.style.height="",run())
+sel.onchange=e=>(i.value=example[e.target.value],i.style.width="",i.style.height="",run())
 //i.textContent=example()
-let run=_=>{let s,a,E=(s,o)=>(o.textContent=s+"\n",r(o),console.log(s));te.textContent=""
+let run=_=>{let s,a,E=(s,o)=>{te.textContent=s+"\n";r(te);throw s};te.textContent="";dl.textContent="";
  let r=e=>e.innerHTML=e.innerHTML.replaceAll(/@[0-9]+/g,"<span class='l' onclick='hi(this)'>$&</span>")
  let o=(e,a)=>{e.textContent="string"==typeof a?a:pr(a,"","");r(e)}
- try{o(pt,a=parse(i.value))}catch(s){E(s,pt)}
- try{o(to,a=op(a))         }catch(s){E(s,to)}
- try{o(ta,a=ty(a))         }catch(s){E(s,ta)}
- try{o(tn,a=ng(a))         }catch(s){E(s,tn)}
- try{o(ti,a=im(a))         }catch(s){E(s,ti)}
- try{o(tj,a=bi(a))         }catch(s){E(s,tj)}
- try{o(ts,a=as(a))         }catch(s){E(s,ts)}
- try{o(wt,  wa(a))         }catch(s){E(s,wt)}
- try{jtest();              }catch(s){E(s,te)}
+ try{o(pt,a=parse(i.value))}catch(s){E(s)}
+ try{o(to,a=op(a))         }catch(s){E(s)}
+ try{o(ta,a=ty(a))         }catch(s){E(s)}
+ try{o(tn,a=ng(a))         }catch(s){E(s)}
+ try{o(ti,a=im(a))         }catch(s){E(s)}
+ try{o(tj,a=bi(a))         }catch(s){E(s)}
+ try{o(ts,a=as(a))         }catch(s){E(s)}
+ try{o(wt,  wa(a))         }catch(s){E(s)}
+ try{jtest();te.textContent="test js:ok"}catch(s){E(s,te)}
  let u=wb(a);tb.textContent=[...u].map((x,i)=>(i%32?"":"\n"+String(i).padStart(4,'0'))+" "+x.toString(16).padStart(2,'0')).join("");
- //WebAssembly.compile(u).then(r=>console.log(r))
- let W=new WebAssembly.Instance(new WebAssembly.Module(u))
- console.log("W",W);
- let b=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(b);dl.download=sel.value+".wasm";dl.textContent=sel.value+".wasm";
+ dn("error.wasm",u);
+ try{let W=new WebAssembly.Instance(new WebAssembly.Module(u));wtest(W,a);te.textContent+=" wa:ok"}catch(s){E(s)}
+ dn(sel.value+".wasm",u)
 };
+let dn=(name,u)=>{let b=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(b);dl.download=name;dl.textContent=name}
 let hi=x=>(i.setSelectionRange(x=+x.textContent.slice(1),1+x),i.focus())
 
-let jtest=_=>{console.log("jtest");let f=new Function(runtime+i.value);f()}
+let jtest=_=>{let f=new Function(runtime+i.value);f()}
+let wtest=(W,a)=>{a.filter(x=>x[0]=="test").forEach((x,i)=>{let X=x=>x.T=="j"?BigInt(x[1]):(+x[1])
+  if(!W.exports[x[2][1]]){throw new Error(`test ${i} ${x[2][1]} is not exported`)}
+  let e=X(x[1]),a=x.slice(3).map(X),f=W.exports[x[2][1]],r=f(...a);if(r!=e){throw new Error(`test(wa) ${i}: expected ${e} got ${r}`)}})}
 
 const example={
 func:`
@@ -48,12 +52,68 @@ function add(x,y){return x+y}
 function Sub(X,Y){return X-Y}
 function mulf(xf,yf){return xf*yf}
 function _none(x,y){x^y}
-exp(add)
-test(3==add(1,2))
+exp(add,Sub)         //exports
+
+test(3,add,1,2)      //test if 3==add(1,2)
+test(2n,Sub,4n,2n)
 `,
 globals:`
 const g=55,e=66; //constants
 let q,p=3;       //mutable globals
+function t(){return g+p}
+function s(x){return p=x}
+exp(s,t)
+
+test(58,t)
+test(2,s,2)
+test(57,t)
+`,
+memory:`
+mem(1)   //1 block
+function s(x,y){_i(x,y);return y}
+function g(x){return i_(x)}
+exp(s,g)
+
+test(5,s,4,5)
+test(5,g,4)
+test(0,g,8)
+`,
+convert:`
+function B(X,Y){return X+Y}
+function A(x){return B(I$(x),3n)}
+exp(A)
+
+test(6n,A,3)
+`,
+unsigned:`//ints are signed, but unsigned operators exist as function calls:
+//shr div rem lt gt le ge
+function u(i){return lt(i,3)} //unsigned x<y
+function s(i,n){return shr(i,n)}
+exp(u,s)
+
+test(1,u,2)
+test(0,u,3)
+test(0,u,-1)
+test(1073741823,s,-4,2)
+`,
+conditionals:`
+function ie(x){if(x)x=2;else x=4;return x}  //if(else) statements
+function te(x){return x<3?-1:-2}            //ternary expression
+exp(ie,te)
+
+test(4,ie,0)
+test(2,ie,3)
+test(-1,te,2)
+test(-2,te,3)
+`,
+loops:`
+function l1(x,y){while(x<y)x*=2;return x}
+function l2(x,y){do{x=x<<2}while(x<10)return x}
+exp(l1,l2)
+test(4,l1,1,3)
+test(32,l2,2,3)
+`,
+alloc:`
 `
 }
 
