@@ -35,14 +35,14 @@ let run=_=>{let s,a,E=(s,o)=>{te.textContent=s+"\n";r(te);throw s};te.textConten
  try{jtest();te.textContent="test js:ok"}catch(s){E(s,te)}
  let u=wb(a);tb.textContent=[...u].map((x,i)=>(i%32?"":"\n"+String(i).padStart(4,'0'))+" "+x.toString(16).padStart(2,'0')).join("");
  dn("error.wasm",u);
- try{let W=new WebAssembly.Instance(new WebAssembly.Module(u));wtest(W,a);te.textContent+=" wa:ok"}catch(s){E(s)}
+ try{let W=new WebAssembly.Instance(new WebAssembly.Module(u),{env:env});wtest(W,a);te.textContent+=" wa:ok"}catch(s){E(s)}
  dn(sel.value+".wasm",u)
 };
 let dn=(name,u)=>{let b=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(b);dl.download=name;dl.textContent=name}
 let hi=x=>(i.setSelectionRange(x=+x.textContent.slice(1),1+x),i.focus())
 
 let jtest=_=>{let f=new Function(runtime+i.value);f()}
-let wtest=(W,a)=>{a.filter(x=>x[0]=="test").forEach((x,i)=>{let X=x=>x.T=="j"?BigInt(x[1]):(+x[1])
+let wtest=(W,a)=>{a.filter(x=>x[0]=="test").forEach((x,i)=>{let X=x=>x.T=="j"?BigInt(x[1]):x[1]=="undefined"?undefined:(+x[1])
   if(!W.exports[x[2][1]]){throw new Error(`test ${i} ${x[2][1]} is not exported`)}
   let e=X(x[1]),a=x.slice(3).map(X),f=W.exports[x[2][1]],r=f(...a);if(r!=e){throw new Error(`test(wa) ${i}: expected ${e} got ${r}`)}})}
 
@@ -72,11 +72,19 @@ memory:`
 mem(1)   //1 block
 function s(x,y){_i(x,y);return y}
 function g(x){return i_(x)}
-exp(s,g)
+function grw(x){return memgrow(x)}
+function _cpy(d,s,n){_memcpy(d,s,n)}
+function _set(d,c,n){_memfill(d,c,n)}
+exp(s,g,grw,_cpy,_set)
 
-test(5,s,4,5)
-test(5,g,4)
-test(0,g,8)
+test(5,s,65532,5)
+test(5,g,65532)
+test(1,grw,1)
+test(2,grw,1)
+test(undefined,_set,0,7,8)
+test(undefined,_cpy,12,0,8)
+test(117901063,g,4) //0x07070707
+test(117901063,g,12)
 `,
 convert:`
 function B(X,Y){return X+Y}
@@ -113,7 +121,23 @@ exp(l1,l2)
 test(4,l1,1,3)
 test(32,l2,2,3)
 `,
+imports:`
+const cosf=env.cos
+const pf=3.141592653589793
+function cf(xf){return 2.0*cosf(xf)}
+exp(cf)
+test(-2,cf,3.141592653589793)
+`,
 alloc:`
+function bk(s, r){return(r=32-clz(7+s),r)<5?5:r}
+function free(x, t){_i(x,i_(t=bk(i_(x-4))));_i(t,x)}
+function alloc(s, p,x){p=bk(s)<<2;x=p>=i_(0)?memgrow(p):i_(p);return x?(_i(p,i_(x)),x):(x=alloc(s<<1),_i(x-4,s),_i(p,x),x+(1<<(p>>2)))}
+
+exp(bk)
+test(5,bk,3)
+test(5,bk,24)
+test(6,bk,32)
+test(6,bk,33)
 `
 }
 
