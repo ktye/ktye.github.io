@@ -13,7 +13,8 @@ details{display:inline-block}
 <details     ><summary>negate</summary><pre id="tn"></pre></details>
 <details     ><summary>imports</summary><pre id="ti"></pre></details>
 <details     ><summary>builtins</summary><pre id="tj"></pre></details>
-<details     ><summary>assigns</summary><pre id="ts"></pre></details><hr>
+<details     ><summary>assigns</summary><pre id="ts"></pre></details>
+<details     ><summary>comma</summary><pre id="tc"></pre></details><hr>
 <details open><summary>wasm text</summary><pre id="wt"></pre></details><hr>
 <details     ><summary>wasm binary <a id="dl"></a></summary><pre id="tb"></pre></details><hr>
 <script src="parser.js"></script>
@@ -31,6 +32,7 @@ let run=_=>{let s,a,E=(s,o)=>{te.textContent=s+"\n";r(te);throw s};te.textConten
  try{o(ti,a=im(a))         }catch(s){E(s)}
  try{o(tj,a=bi(a))         }catch(s){E(s)}
  try{o(ts,a=as(a))         }catch(s){E(s)}
+ try{o(tc,a=dr(a))         }catch(s){E(s)}
  try{o(wt,  wa(a))         }catch(s){E(s)}
  try{jtest();te.textContent="test js:ok"}catch(s){E(s,te)}
  let u=wb(a);tb.textContent=[...u].map((x,i)=>(i%32?"":"\n"+String(i).padStart(4,'0'))+" "+x.toString(16).padStart(2,'0')).join("");
@@ -47,6 +49,14 @@ let wtest=(W,a)=>{a.filter(x=>x[0]=="test").forEach((x,i)=>{let X=x=>x.T=="j"?Bi
   let e=X(x[1]),a=x.slice(3).map(X),f=W.exports[x[2][1]],r=f(...a);if(r!=e){throw new Error(`test(wa) ${i}: expected ${e} got ${r}`)}})}
 
 const example={
+comma:`
+mem(1)
+//function a(x,y){_i(x,y);return x}
+function a(x,y,z){return x,_g(y),z}
+function _g(x){}
+exp(a)
+test(4,a,2,3,4)
+`,
 func:`
 function add(x,y){return x+y}
 function Sub(X,Y){return X-Y}
@@ -129,8 +139,9 @@ exp(cf)
 test(-2,cf,3.141592653589793)
 `,
 alloc:`
+mem(1)
 function bk(s, r){return(r=32-clz(7+s),r)<5?5:r}
-function free(x, t){_i(x,i_(t=bk(i_(x-4))));_i(t,x)}
+function _free(x, t){_i(x,i_(t=bk(i_(x-4))));_i(t,x)}
 function alloc(s, p,x){p=bk(s)<<2;x=p>=i_(0)?memgrow(p):i_(p);return x?(_i(p,i_(x)),x):(x=alloc(s<<1),_i(x-4,s),_i(p,x),x+(1<<(p>>2)))}
 
 exp(bk)
