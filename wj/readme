@@ -43,3 +43,25 @@ function randi(n){i$(n);f$(x)
   }
  }
 }
+
+/0L 1C 2I 3F 4Z 5f  atoms:-1234
+mk(K:ii){r:alloc(y<<x?[3;0;2;3;4]);Ir[-1]:y;jr|x<<32}mk0(K:ii){r:mk(x,y);memset(pr,0,y<<sz(t));r}
+uf(K:K){(!nx)?x!{t:tx0;t<0?i:0;while(ny>+i)if(txi!=t){t:0;break};t?t?[0;nx#cxi;nx#ixi;nx#fxi;nx#zxi]!x;!x}}
+Ki(K:i){jx|-2<<32}Kc(K:i){jx|-1<<32}Kf(K:f){r:mk(1,3);Fr[0]:x;r|-3<<32}Kz(K:ff){r:mk(1,4);Fr[0]:x;Fr[1]:y;r|-4<<32}
+k0(K:i){tx?[Ki(0),Kc(0),Ki(0),Kf(0),Kz(0,0)]}
+Ati(K:Ki){ge(nx,i)?k0(tx)!tx?[+Jx[y];Kc(Cx[y]);Ki(Ix[y]);Kf(Fx[y]);Kz(Fx[y];Fx[1+y])]}
+Fst:{x 0}Lst:{x@-1+#x} /Fst(K:K){tx<0?x!Ati(x,0))}
+Atx(K:KK){x<0?y<0?x!ntake(ny,x)!y<0?ty?[Ecr(Atx,x);ny#Ati(x,Iyi);Q;Q;Cal(x,y)]}
+Til(K:K){t!=2?Q!seq(ix)}seq(K:i){x#i}
+Neg(K:K){x<0?-1-t?[Q;Ki(-ix);Kf(-Fx0);Kz(-Fx0,-Fx1)]!Sub(Ki(0),x)}
+Add(K:KK){t:max(tx,ty);x:up(x,t);y:up(y,t);x<0?y<0?@[Q;Ki(ix+iy);Kf(Fx0+Fy0);Kz(Fx0+Fy0;Fx1+Fy1)]!t?[Ecl(Add,x,y);nx#ix+Iyi;nx#fx+Fyi;(1L<<32)+2nx#fx+Fyi]!y<0?Add(y,x)     !if(nx!=ny)Q;t?[Q;nx#Ixi+Iyi;nx#Fxi+Fyi;nx#Zxi+Zyi]}
+Sub(K:KK){t:max(tx,ty);x:up(x,t);y:up(y,t);x<0?y<0?@[Q;Ki(ix-iy);Kf(Fx0-Fy0);Kz(Fx0-Fy0;Fx1-Fy1)]!t?[Ecl(Sub,x,y);nx#ix-Iyi;nx#fx-Fyi;(1L<<32)+2nx#fx-Fyi]!y<0?Add(Neg(y),x)!if(nx!=ny)Q;t?[Q;nx#Ixi-Iyi;nx#Fxi-Fyi;nx#Zxi-Zyi]}
+up(K:Ki){if(t<y-1)x:up(y,t-1);t<y?t<0?[0;Ki(ix);Kf(f.ix);Kz(Fx0,0)]!t?[0;n#i.Cxi;n#f.Fxi;imag[x;mk0(3,n)]]!x}
+
+Max(K:K)
+
+
+nx#Zxi
+r:mk(4,nx);i:-1;while(nx>+i){ v128.store(pr+i<<4,v128.load(i32(px+i<<4))) }
+
+
