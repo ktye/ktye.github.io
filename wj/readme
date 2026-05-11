@@ -53,20 +53,26 @@ Ati(K:Ki){ge(nx,i)?k0(tx)!tx?[+Jx[y];Kc(Cx[y]);Ki(Ix[y]);Kf(Fx[y]);Kz(Fx[y];Fx[1
 Fst:{x 0}Lst:{x@-1+#x} /Fst(K:K){tx<0?x!Ati(x,0))}
 Atx(K:KK){x<0?y<0?x!ntake(ny,x)!y<0?ty?[Ecr(Atx,x);ny#Ati(x,Iyi);Q;Q;Cal(x,y)]}
 Til(K:K){t!=2?Q!seq(ix)}seq(K:i){x#i}
-Neg(K:K){x<0?-1-t?[Q;Ki(-ix);Kf(-Fx0);Kz(-Fx0,-Fx1)]!Sub(Ki(0),x)}
+Neg(K:K){x<0?(-1-t)?[Q;Ki(-ix);Kf(-Fx0);Kz(-Fx0,-Fx1)]!Sub(Ki(0),x)}
 Add(K:KK){t:max(tx,ty);x:up(x,t);y:up(y,t);x<0?y<0?@[Q;Ki(ix+iy);Kf(Fx0+Fy0);Kz(Fx0+Fy0;Fx1+Fy1)]!t?[Ecl(Add,x,y);nx#ix+Iyi;nx#fx+Fyi;(1L<<32)+2nx#fx+Fyi]!y<0?Add(y,x)     !if(nx!=ny)Q;t?[Q;nx#Ixi+Iyi;nx#Fxi+Fyi;nx#Zxi+Zyi]}
 Sub(K:KK){t:max(tx,ty);x:up(x,t);y:up(y,t);x<0?y<0?@[Q;Ki(ix-iy);Kf(Fx0-Fy0);Kz(Fx0-Fy0;Fx1-Fy1)]!t?[Ecl(Sub,x,y);nx#ix-Iyi;nx#fx-Fyi;(1L<<32)+2nx#fx-Fyi]!y<0?Add(Neg(y),x)!if(nx!=ny)Q;t?[Q;nx#Ixi-Iyi;nx#Fxi-Fyi;nx#Zxi-Zyi]}
 up(K:Ki){if(t<y-1)x:up(y,t-1);t<y?t<0?[0;Ki(ix);Kf(f.ix);Kz(Fx0,0)]!t?[0;n#i.Cxi;n#f.Fxi;imag[x;mk0(3,n)]]!x}
 
-/Rdx(K:KK){y<0?y!tx<3?tx?[Sum(y);Sub(Fst(y),ndrop(1,y));Prd(y);0;Mir(y);Mar(y)],r?r!  !r:Fst(y);N(ny)r:Cal(x,l2(r,xi));r}
-Sum:(K:K){t?[Sum(up(x,2));{s:0;N(nx)s+:Ixi;Ki(s)};{s:0.0;N(nx)s+:Fxi;Kf(s)};{s:0z;N(nx)z+:Zxi;r:Kz(0,0);Zr[0]:s}]}
--/ 1-
-1+/y
-+/[x;y]
-rdx:
+Ech(K:iK){ny#K.x(Ati(y,i))}Both(K:iKK){y<0?z<0?K.x(y,z)!zn#(x)(y,Ati(z,i))!y<0?yn#K.x(Ati(y,i),z)!xn!=yn?Q!xn#K.x(Ati(y,i),Ati(z,i))}
+Ecl(K:iKK){y<0?K.x(y,z)!yn#K.x(Ati(y,i),z)}Ecr(K:iKK){z<0?K.x(y,z)!zn#K.x(y,Ati(z,i))}
 
+/Ovr(K:KK){y<0?y!tx<3?tx?[Sum(y);Sub(Fst(y),ndrop(1,y));Prd(y);0;Mir(y);Mar(y)],r?r!  !r:Fst(y);N(ny)r:Cal(x,l2(r,xi));r}
+Sum:(K:K){t?[Sum(up(x,2));{s:0;N(nx)s+:Ixi;Ki(s)};{s:0.0;N(nx)s+:Fxi;Kf(s)};{s:0z;N(nx)z+:Zxi;r:Kz(0,0);Zr[0]:s}]}
+
+
+/x?y
+Fnd(K:KK){x<0?In[x;y]!xt=-yt?xt?[{N(xn)if(Cx[i]=iy)break;Ki(i)};{N(xn)if(Ixi=iy)break;Ki(i)};{u:Jy0;N(xn)if(Jxi=u)break;Ki(i)};{u:Jy0;v:Jy1;N(xn)if(Jx[2i]=u&Jx[1+2i]=v)break;Ki(i)}]!yt>=0?Ecr(Fnd,x,y)!Q}
+Neq(K:KK){Ki(!match(x,y))}
+match(i:KK){xt!=yt?0!xt<0&yt>0?0!xt<0?(-1-xt)?[ix=iy;ix=iy;Jx0=Jy0;Jx0=Jy0&Jx1=Jy1]!xn!=yn?0!(!Both(Neq,x,y))}
 
 nx#Zxi
 r:mk(4,nx);i:-1;while(nx>+i){ v128.store(pr+i<<4,v128.load(i32(px+i<<4))) }
 
+/   x?y!z x:y x=y
+/or x?y:z x=y x==y
 
