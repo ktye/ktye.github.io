@@ -1,11 +1,11 @@
-Ki(K:i){i|32\2} Kf(K:f){r:Ktn[1;3];Fr0:x;jr|32\-3} Kz(K:z){r:Ktn[1;4];Zr0:x;jr|32\-4}
-Mal(p:i) Mfr(:p) Kfr(:j){t:i.32/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}
-Ktn(K:ii){r:Mal@y\x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;ri|32\x}
-Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]} 
-Exl{r:Ktn[0;xn]tx?[x;xn/Jri:K.Cxi;xn/Jri:K.Ixi;xn/Jri:K.Fxi;xn/Jri:K.Zxi];r}
+Ki(K:i){i|32\2} Kf(K:f){r:Ktn[1;3];Fr0:x;jr|32\-3} Kz(K:z){r:Ktn[1;4];Zr0:x;jr|32\-4}                   /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
+Mal(p:i) Mfr(:p) Kfr(:j){t:i.32/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}           / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
+Ktn(K:ii){r:Mal@y\x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;ri|32\x}                                              / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
+Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]}                    /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
+Exl{r:Ktn[0;xn]tx?[x;xn/Jri:K.Cxi;xn/Jri:K.Ixi;xn/Jri:K.Fxi;xn/Jri:K.Zxi];r}                            / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
-Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}
-Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}
+Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}                     / i/f: <=> ~ ~neq %div i/\shift |&^ _min $max n/ndo  n#vec cast:i. idx: x0 xi
+Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                           / n(length) t(type) r(refcount) p(pointer) s(element-size) 
 Pri{if(jy<0)Q;x[yn#yi;yn#y i-1]} Ovr{s:@x;(ny-1)/s:x[s;y 1+i];s} Scn{s:@x; ny#i? x[s;yi] :s}
 Jon{if(jy<0)Q;r:@y;(ny-1)/{r,:x;r,:y 1+i}; r} Spl{if(!jx<0)Q; if(jy<0)Q; r:(0,!y=x)^y;if(nr)r0:1_r0; r}
 Fix{r:y;while(r~y:f y)r:y; r} Fxs{r:y;s:,r;while(r~f y)r:y;s,:r; r}
@@ -43,27 +43,3 @@ Sub{t:Con[x;y];x:Upt[t;x];y:Upt[t;y];!t? x-'y :t<0? -1-t?[Ki ix-iy;Ki ix-iy;Kf F
 Mul{t:Con[x;y];x:Upt[t;x];y:Upt[t;y];!t? x*'y :t<0? -1-t?[Ki ix*iy;Ki ix*iy;Kf Fx0*Fy0;Kz Fx0*Fy0] :jx<0? t-1?[ny#ix*Cyi;ny#ix*Iyi;ny#Fx0*Fyi;ny#Zx0*Zy0] :jy<0? y*x  :t-1?[ny#i.Cxi*Cyi;ny#Ixi*Iyi;ny#Fxi*Fyi;ny#Zx0*Zx1]}
 Div{t:Con[x;y];x:Upt[t;x];y:Upt[t;y];!t? x%'y :t<0? -1-t?[Ki ix%iy;Ki ix%iy;Kf Fx0%Fy0;Kz Fx0%Fy0] :jx<0? t-1?[ny#ix%Cyi;ny#ix%Iyi;ny#Fx0%Fyi;ny#Zx0%Zy0] :jy<0? (1%y)*x :t-1?[ny#i.Cxi%Cyi;ny#Ixi%Iyi;ny#Fxi%Fyi;ny#Zx0%Zx1]}
 Bin{y} Enc{y} Dec{y} Str{x} Fmt{y} Srt{x}
-
-
-integer ops: < = > ~bitnot ~not %div i\shift/ |or &and ^xor is x_y(min) x#y(max)  n/ loop   n# loop&assign to k vector  others are: udiv [u]mod min max clz  ge gt le lt all unsigned
-int/float: x_y(min) x$y(max)
-
-+ abs add ' ech pri bot bin
-- neg sub ' bot bin
-* sqr mul / ovr fix ecr jon
-% sqt div \ scn fxs ecl spl
-! til mod
-& flp min  $[c;cnd;els] 
-| rev max  ?[i;swc;def]
-< asc les  if(c)e   {block} ?
-> dsc mor  c? x :y     tern
-= grp eql  
-~ not neq  n#t.e    vec of T
-, enl cat  n/ break     loop
-^ srt cut  while()     while
-# cnt tak
-_ flr drp  i. j. K.     cast
-$ str fmt  xi x0       index
-? unq fnd/in Cxi Ixi Fxi Zxi
-@ fst atx  amd    @[x;i;+;y]
-. va? cal  dmd    .[x;i;+;y]
