@@ -1,0 +1,57 @@
+let parse=p=>{let i=-1,c,n=()=>(c=p[++i],_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)}
+ let _=$=>{while(1){while(/\s/.test(p[i]))i++;if(c=='/'&&p[1+i]=='/'){i+=2;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
+ let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yy=c=>"+-*%!&|<>=~,^#_$?@.".includes(c),ya=c=>"/\\'".includes(c)
+ let v=x=>x[0]=='opr'
+ let prg=$=>{let r=[];while(i<p.length)r.push(fun()),c==';'?n():0;return N(0,'prg',...r)}
+ let fun=$=>{let j=i,s=sym();return N(j,'fun',s,sig(),bdy())}
+ let sig=$=>{let j=i,k,r='K:';if(c=='(')while(n(),c!=')');if(i!=j)r=p.slice(1+j,i),n();r=((+r)?"K:"+"K".repeat(+r):r).split(":");if(2!=r.length||r[0].length>1){i=j;Q("signature")};return N(j,'sig',...r)}
+ let sym=$=>{let j=i,s='';if(!sy(c))Q("expected identifier");while(ys(c))s+=c,c=p[++i];_();return N(j,'sym',s)}
+ let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];return N(i,'bdy',r)}
+ let lst=t=>{let j=i,r=[];n();while(c!=t)(r.push(exp(ttt())),c==';'?n():c!=t?Q(`expect ; or ${t} got ${c}`):1);n();return N(i,'lst',...r)}
+ let exp=x=>{let j=i,y,r;if(!x)return 0;y=ttt();if(!y)return x;if(v(y)&&!(v(x))){r=exp(ttt());return dya(y,x,r)};r=exp(y);return !v(x)?jux(x,r):r==y&&v(x)&&v(y)?com(r,x):mon(x,r)}
+ let ttt=$=>{let j=i,l="[({",r=";})]".includes(c)?0:/[0-9]/.test(c)?num():sy(c)?sym():yy(c)?opr():ya(c)?adv():[];return r}
+ let dya=(f,x,y)=>N(f.i,"dya",f,x,y),mon=(f,x)=>N(f.i,"mon",f,x),jux=(x,y)=>dya(N(y.i-1,'opr','@'),x,y),com=(x,y)=>N(x.i,"com",x,y)
+ let opr=$=>{let j=i;r=c;n();return N(j,'opr',r)}
+ let adv=$=>{let j=i;r=c;n();return N(j,'adv',r)}
+ let num=$=>{let j=i,s='';while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
+ return n(),prg()}
+
+const P=`f{1+*2} g{x y;+-x}`
+inp.textContent=P
+
+let O=x=>out.textContent+=x
+let print=a=>{let pr=(a,sp)=>{if(!Array.isArray(a)){return sp+String(a)+"\n"};if(!a.length)return sp+"()\n";let s=sp+a[0]+"."+(a.T||'')+" @"+a.i+"\n";for(let i=1;i<a.length;i++)s+=pr(a[i],sp+" ");return s};O(pr(a,""))}
+let indicate=(i,p)=>{let v=p.split("\n"),n=v.map(x=>x.length),c=i,l=0;for(j=1;j<n.length;j++)if(n[j]>i){c-=n[j-1];l=j;break};O(v[l]+"\n"+" ".repeat(c-1)+"^\n")}
+try{print(parse(P))}catch(e){let s=e.message;console.log(e);if(s[0]=='@')indicate(+s.slice(1,s.indexOf(' ')),P)}
+
+
+/*
+let parse=p=>{let i=0,Q=0,c=p[0],err=s=>{throw new Error("@"+i+" "+s)},n=()=>(c=p[++i],_()),N=(p,...x)=>(x,x.i=p,x)      //js parser
+ let _=$=>{while(1){while(/\s/.test(p[i]))i++;if(c=='/'&&p[i+1]=='/'){i+=2;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
+ let sy=c=>/[A-Za-z_$]/.test(c),sY=c=>/[A-Za-z0-9_$.]/.test(c)
+ let sw=x=>x==p.substr(i,x.length),__=s=>{i+=s.length;c=p[i]||'';_()}
+ let qs=s=>{if(!sw(s))err('expected '+s);__(s)};
+ let st=$=>{_();let r,e,t=(s,n)=>sw(s)&&/\W/.test(p[i+s.length]);if(r=t('let')?dec(0):t('const')?(i+=2,dec(1)):t('function')?fun():t('return')?ret():t('if')?iff():t('do')?dow():t('while')?whl():0)return r;
+  if(c=='{')return blk();e=ex();_();if(c==';')n();return N(e.i,'drp',e)}
+ let ex=$=>{let j=i,s=cnd(),e;_();if(c=='='){n();e=ex();return N(j,'asn',s,e)};return s}
+ let prg=$=>{let b=[];while(i<p.length){_();if(!c)break;b.push(st())};return N(0,'prg',...b)}
+ let blk=$=>{qs('{');let j=i,b=[];while(c&&c!='}'){b.push(st());_()};qs('}');return N(j,'blk',...b)}
+ let dec=$=>{let r=[],s,e,k,j=i,q=Q;Q=1;__('let');do{s=sym(),e=0;_();if(c=='='){k=i,n(),s.push(ex())};r.push(s);_();if(c!=',')break;n()}while(1);Q=q;_();if(c==';')n();return N(j,$?'con':'var',...r)}
+ let fun=$=>{let j=i,k,a=[],l=[],q=a,b,s;qs('function');_();s=sy(c)?sym():err("anonymous");k=i;qs('(');while(c!=')'&&c){if(p[i-1]==' ')q=l;q.push(sym());if(c!=",")break;n()}
+  qs(')');_();return N(j,'fun',s,N(k,'var',...a),N(k,'loc',...l),(b=blk(),2==b.length?b[1]:b))}
+ let ret=$=>{let j=i,e;qs('return');_();e=(c==';'||c=='}')?0:ex();if(c==';')n();return N(j,'ret',e)}
+ let iff=$=>{let j=i,t,e=0,c,r;qs('if');_();qs('(');c=ex();qs(')');_();t=st();_();if(sw('else')){qs('else');_();e=st()};r=N(j,'iff',c,t);if(e)r.push(e);return r}
+ let dow=$=>{let j=i,t,b;qs('do');_();b=st();_();qs('while');_();qs('(');t=ex();qs(')');_();return N(j,'dow',b,t)}
+ let whl=$=>{let j=i,b,t;qs('while');_();qs('(');t=ex();qs(')');_();b=st();return N(j,'whl',t,b)}
+ let cnd=$=>{let j,q=dya(0),t,e;_();if(c=='?'){j=i,n();t=ex();_();if(c!=':')err('tern : missing');n();e=ex();return N(j,'cnd',q,t,e)};return q}
+ let P={',':1,'=':2,'+=':2,'-=':2,'*=':2,'&=':2,'^=':2,'|=':2,'|':3,'^':4,'&':5,'==':6,'!=':6,'<':7,'>':7,'<=':7,'>=':7,'<<':8,'>>':8,'+':9,'-':9,'*':10,'/':10,'%':10};
+ let dya=m=>{let q,o,oo,r,j,l=mon();while(1){_();j=i;oo=p.substr(i,2);o=P[oo]?oo:P[c]?c:0;if((!o)||Q&&o==',')break;q=P[o]||0;if(q<m)break;__(o);r=dya(q+1);l=N(j,'dya',o,l,r);_()}return l}
+ let mon=$=>{_();if(c=="-"&&/[0-9]/.test(p[1+i])){n();let r=num();r[1]="-"+r[1];return r};if("+-!~".includes(c)){let j=i,o=c;if(c==p[1+i]&&"+-".indexOf(c)>=0){o+=o;i++};n();return N(j,'mon',o,mon())};return sta()}
+ let sta=$=>{_();if(c=='('){let q=Q;Q=0;n();let e=ex();qs(')');Q=q;return e};return(c=='"'||c=="'")?str():/[0-9]/.test(c)?num():sy(c)?scl():err('token unexpected '+c)}
+ let str=$=>{let j=i,q=c,s='';n();while(c&&c!=q){if(c=='\\'){n();s+=p[i]||'';n()}else{s+=c;n()}}qs(q);return N(j,'str',s)}
+ let num=$=>{let j=i,s='';while("0123456789xn.".includes(c))s+=c,c=p[++i];return N(j,'num',s)}
+ let sym=$=>{let j=i,s='';if(!sy(c))err("expected identifier");while(sY(c))s+=c,c=p[++i];return N(j,'sym',s)}
+ let scl=$=>{let j,q,f=sym(),a=[];_();if(c=='('){q=Q;Q=1;j=i;n();while(c!=')'&&c){a.push(ex());_();if(c!=",")break;n()};Q=q;qs(')');return N(j,'cal',f,...a)};return f}
+ return prg()}
+*/
+
