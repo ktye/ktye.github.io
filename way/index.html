@@ -10,11 +10,17 @@ li::marker{content: ""}
 .op::marker{content:"+"}
 .ln{color:#0000f0}
 </style>
-<body>
-
-<textarea id="inp" wrap="off" oninput='this.style.height="";this.style.height=this.scrollHeight+"px"' onchange="compile()" autocorrect="off" spellcheck="false"></textarea>
-<pre id="err" style="border-top:1px solid;margin:0"></pre>
-<div id="out"></div>
+<body style="display:flex">
+<div style="flex-grow:1">
+ <textarea id="inp" wrap="off" oninput='this.style.height="";this.style.height=this.scrollHeight+"px"' onchange="compile()" autocorrect="off" spellcheck="false"></textarea>
+ <pre id="err" style="border-top:1px solid;margin:0"></pre>
+</div>
+<div>
+ <input type="radio" name="tview" onclick="compile()" id="ptree" checked="checked"><label for="ptree">parse</label><br>
+ <input type="radio" name="tview" onclick="compile()" id="ptype"                  ><label for="ptype">type</label><br>
+ <input type="radio" name="tview" onclick="compile()" id="plift"                  ><label for="plift">lift</label><br>
+ <div id="out"></div>
+</div>
 <script>
 let hi=x=>(inp.setSelectionRange(x=+x.textContent.slice(1),1+x),inp.focus())
 let showtree=(a,x)=>{out.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
