@@ -1,7 +1,32 @@
 <html>
+<style>
+*{font-family:monospace}
+textarea{width:stretch;resize:none;outline:none;border:none}
+ul{padding-left:0.25em}
+li{cursor:pointer;width:fit-content}
+li::marker{content: ""}
+.no{margin-left:0.25em}
+.no::marker{content:""}
+.op::marker{content:"+"}
+.ln{color:#0000f0}
+</style>
 <body>
-<pre id="inp"></pre>
-<pre id="out" style="border-top:1px solid"></pre>
+
+<textarea id="inp" wrap="off" oninput='this.style.height="";this.style.height=this.scrollHeight+"px"' onchange="compile()" autocorrect="off" spellcheck="false"></textarea>
+<pre id="err" style="border-top:1px solid;margin:0"></pre>
+<div id="out"></div>
+<script>
+let hi=x=>(inp.setSelectionRange(x=+x.textContent.slice(1),1+x),inp.focus())
+let showtree=(a,x)=>{out.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
+ x.forEach(x=>{x.o=1;x.onclick=e=>{let t=e.target;if(t.nodeName=="SPAN")return/*addr*/;t.classList.toggle("op");t.o=!t.o;
+ if("UL"==t.nextElementSibling.nodeName)t.nextElementSibling.style.display=t.o?"":"none"}})}
+let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),tn=(x,t)=>(t=ce("span"),t.textContent=x,t)
+ if(!Array.isArray(a)){let l=ce("li");l.classList.add("no");l.textContent=String(a);return l}
+ let u=ce("ul"),l=ce("li");l.textContent=a[0]+"."+(a.T||"")+" ";l.innerHTML+=`<span class="ln" onclick="hi(this)">+${a.i}</span>`;ac(u,l);let c=ce("ul");u.appendChild(c)
+ for(let i=1;i<a.length;i++)ac(c,tree(a[i]));return u}
+</script>
 <script src="compile"></script>
 </body>
 </html>
+
+
