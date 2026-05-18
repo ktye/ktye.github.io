@@ -1,11 +1,11 @@
-<html>
+<html><head><link rel=icon href="../kelas16.png"><title>k</title></head>
 <style>
 *{font-family:monospace}
 textarea{width:stretch;resize:none;outline:none;border:none}
-ul{padding-left:0.25em}
+ul{padding-left:0.5ch}
 li{cursor:pointer;width:fit-content}
 li::marker{content: ""}
-.no{margin-left:0.25em}
+.no{margin-left:0.5ch}
 .no::marker{content:""}
 .op::marker{content:"+"}
 .ln{color:#0000f0}
@@ -16,6 +16,7 @@ li::marker{content: ""}
  <pre id="err" style="border-top:1px solid;margin:0"></pre>
 </div>
 <div>
+ <input type="text" placeholder="func" size="10" onchange="compile()"     id="pfunc"><br>
  <input type="radio" name="tview" onclick="compile()" id="ptree" checked="checked"><label for="ptree">parse</label><br>
  <input type="radio" name="tview" onclick="compile()" id="ptype"                  ><label for="ptype">type</label><br>
  <input type="radio" name="tview" onclick="compile()" id="plift"                  ><label for="plift">lift</label><br>
@@ -23,7 +24,7 @@ li::marker{content: ""}
 </div>
 <script>
 let hi=x=>(inp.setSelectionRange(x=+x.textContent.slice(1),1+x),inp.focus())
-let showtree=(a,x)=>{out.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
+let showtree=(a,x)=>{if(pfunc.value)a=a.slice(0).filter(x=>x[1][1]==pfunc.value)[0];out.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
  x.forEach(x=>{x.o=1;x.onclick=e=>{let t=e.target;if(t.nodeName=="SPAN")return/*addr*/;t.classList.toggle("op");t.o=!t.o;
  if("UL"==t.nextElementSibling.nodeName)t.nextElementSibling.style.display=t.o?"":"none"}})}
 let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),tn=(x,t)=>(t=ce("span"),t.textContent=x,t)
