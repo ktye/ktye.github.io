@@ -1,11 +1,11 @@
 let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
- let _=$=>{while(1){while(/[ \t]/.test(p[i]))i++;if(c=='/'&&p[i-1]==' '){i+=2;while(p[i]&&p[i]!='\n')i++;continue}break};c=p[i]||''}
- let __=$=>{while(c&&c=='\n')n();},In=(x,y)=>x.includes(y)
- let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yn=c=>In("012345678",c),yy=c=>In("+-*%!&|<>=~,^#_$?@.",c),ya=c=>In("/\\'",c),yx=c=>In("$@.",c),yo=c=>In("({[",c),yc=c=>In("]})",c),ye=c=>In(";\n",c)
+ let _=n=>{while(1){while(In(n?" \t\n":" \t",p[i]))i++;if(p[i]=='/'&&(In(' \n',p[i-1])||!i)){i++;while(p[i]&&p[i]!='\n')i++;i++;continue};break};c=p[i]||''}
+ let In=(x,y)=>x.includes(y)
+ let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yn=c=>In("012345678",c),yy=c=>In("+-*%!&|<>=~,^#_$?@.",c),YY=c=>In("/\\'["),ya=c=>In("/\\'",c),yx=c=>In("$@.",c),yo=c=>In("({[",c),yc=c=>In("]})",c),ye=c=>In(";\n",c)
  let yb=$=>p[i-1]!=' '&&(c==':'||yy(c)&&p[1+i]==':'),yi=$=>p[i-1]=='i'||yn(p[i-1])
  let A="",L=[],AL="xyzabcdefghijklmnopqrstuvw",v=x=>x[0]=='opr'
- let prg=$=>{let r=[];while(i<p.length)r.push(fun()),c==';'?n():0;return N(0,'prg',...r)}
- let fun=$=>{let j=i,m;__();m=sym(),s=sig(),b=bdy(),a=arg(j,s),l=loc(j,a);A="";L=[];__();return N(j,'fun',m,s,a,l,b)}
+ let prg=$=>{let r=[];while(_(1),c)r.push(fun()),c==';'?n():0;return N(0,'prg',...r)}
+ let fun=$=>{let j=i,m,s,b,a,l;m=sym(),s=sig(),b=bdy(),a=arg(j,s),l=loc(j,a);A="";L=[];return N(j,'fun',m,s,a,l,b)}
  let arg=(j,s)=>{let a=s[2].length?s[2].length:In(A,'z')?3:In(A,'y')?2:1; return N(j,'arg',...AL.split("").slice(0,a).map(x=>N(j,'sym',x)))}
  let loc=(j,a)=>{a=","+a.slice(1).map(x=>x[1]+",").join("");return N(j,'loc',...L.filter(x=>!(In(a,`,${x},`))).map(x=>N(j,'sym',x)))}
  let sig=$=>{let j=i,k,r='K:';if(c=='(')while(n(),c!=')');if(i!=j)r=p.slice(1+j,i),n();r=((+r)?"K:"+"K".repeat(+r):r).split(":");if(2!=r.length||r[0].length>1){i=j;Q("signature")};return N(j,'sig',...r)}
@@ -29,15 +29,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
   if(v(y)&&!(v(x))){r=exp(ttt());return dya(y,x,r)};r=exp(y);return !v(x)?jux(x,r):r==y&&v(x)&&v(y)?com(r,x):mon(x,r)}
  let ttt=$=>{let j=i,r;_();r=ye(c)?0:yn(c)?num():sy(c)?sym(1):yy(c)||ya(c)?opr():'('==c?rls('enl',lst(')')):c=='{'?lam():c=='['?blo():0;if(!r)return r;']}';
   if(yb())return yi()?asn(r[2],r[3]):asn(r,0);
-  
-  while(1){j=i;if(!c||p[i-1]==' ')break;
-  if(c=='['&&yx(p[i-1]))return spc(r);if(c=='['&&yy(p[i-1]))Q("primitive bracket call");
-  if(ya(c))r=N(j,'drv',adv(),r);if(c=='[')r=bkt(r);
-  Q('nobreak');
-  };return r}
-  //if(ya(c)){r=N(j,'drv',adv(),r)}else if(c=='['){if(yx(p[i-1])){return spc(r)}else if(c=='['&&!yy(p[i-1])){r=bkt(r)}else break};return r}
- 
- 
+  while(YY(c)&&p[i-1]!=' '){j=i;if(c=='['){if(yx(p[i-1]))return spc(r);r=yy(p[i-1])?Q("primitive bracket call"):bkt(r)}else r=N(j,'drv',adv(),r)};return r}
  let dya=(f,x,y)=>N(f.i,"dya",f,x,y),mon=(f,x)=>N(f.i,"mon",f,x),jux=(x,y)=>dya(N(y.i-1,'opr','@'),x,y),com=(x,y)=>N(x.i,"com",x,y)
  let opr=$=>{let j=i;r=c;n();return N(j,'opr',r)}
  let adv=$=>{let j=i;r=c;n();return N(j,'adv',r)}
@@ -50,21 +42,24 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
  let lam=$=>{'{';let j=i,_a=A,_l=L;A="";L=[];let b=bdy('}'),s=sig(j,'sig','K:'),a=arg(j,s),l=loc(j,a);A=_a;L=_l;return N(j,'lam',a,l,b)}
  return n(),prg()}
 
-let ptye=a=>a[0]='TYP'
-let lift=a=>a[0]='LAM'
+let ptye=a=>a[0]='typ..todo'
+let lift=a=>a[0]='lamda..todo'
 
-let P=`f{$[1;2;3]}`
+let P=`/you can edit the input
+f{x+/a:y}        /dyadic with local a
+g(i:Kii){x;y;z}  /func with signature
+h{1+x? 2*x :3*y} /ternary
+q{if(1<x)x:+1;y*:2; x+y}  /if-body extends to ;(space) without {}
+`
 inp.value=P
 
 //let O=x=>out.textContent+=x
 //let print=a=>{let pr=(a,sp)=>{if(!Array.isArray(a)){return sp+String(a)+"\n"};if(!a.length)return sp+"()\n";let s=sp+a[0]+"."+(a.T||'')+" @"+a.i+"\n";for(let i=1;i<a.length;i++)s+=pr(a[i],sp+" ");return s};return(pr(a,""))}
-let indicate=(s,i,p)=>{let v=p.split("\n"),n=v.map(x=>x.length),c=i,l;for(l=0;l<n.length;l++){if(n[l]>c)break;c-=n[l]};err.textContent=(`k:${1+l}:${1+i} ${s.split(' ')[0]}\n${v[l]}\n${" ".repeat(c)}^${s.replace(/@\d+ /,"")}\n`)}
+let indicate=(s,i,p)=>{let v=p.split("\n"),n=v.map(x=>x.length),c=i,l;for(l=0;l<n.length;l++){if(n[l]>c)break;c-=n[l]};err.textContent=`k:${1+l}:${1+i} ${s.split(' ')[0]}\n${v[l]}\n${" ".repeat(c)}^${s.replace(/@\d+ /,"")}\n`}
 
 let compile=_=>{P=inp.value;
  try{err.textContent="";out.innerHTML="";let a,s=document.querySelector('input[name="tview"]:checked').id;
- console.log(s);
  a=parse(P);if(s=='ptree')showtree(a)
- console.log(a[0])
  ptye(a);   if(s=='ptype')showtree(a)
  lift(a);   if(s=='plift')showtree(a)
  }catch(e){let s=e.message;console.log(e);if(s[0]=='@')indicate(s,+s.slice(1,s.indexOf(' ')),P)}
