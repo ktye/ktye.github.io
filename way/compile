@@ -20,7 +20,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
  let blk=$=>{let j=i,b=lst(' ',0,1);if(p[i-1]==';')c=p[--i];return N(i,'blk',...b.slice(1))}    //auto block       1;2;(space)
  let rls=(t,x)=>{let j=i;return 2==x.length?x[1]:N(x.i,t,...x.slice(1))}
  let bkt=x=>{let j=i,r=lst(']',1);console.log("ij",i,j);if(2==r.length)r=r[1];return(yb())?(x[0]!='sym'?(i=i,Q("asn")):asn(x,r)):jux(x,r)}           // 1-:  => com(opr +, prj(opr :,1))
- let asn=(x,y)=>{console.log("xy",x,y);let j=i,r=c;if(x[0]=='opr')return n(),N(x.i,'com',x,N(j,'opr',':'));             //-:
+ let asn=(x,y)=>{let j=i,r=c;if(x[0]=='opr')return n(),N(x.i,'com',N(j,'opr',':'),x);             //-:
   if(p[1+i]==':')++i,r+=':';
   if(yC(x)&&2==r.length)return n(),N(x.i,'com',N(j,'opr',':'),N(j,'prj',x,N(j,'opr',r[0]))); //1+:
   if(!(x[0]=='sym'||x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'))(i=x.i,Q("assign"));
@@ -48,26 +48,22 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
  let lam=$=>{'{';let j=i,_a=A,_l=L;A="";L=[];let b=bdy('}'),s=sig(j,'sig','K:'),a=arg(j,s),l=loc(j,a);A=_a;L=_l;return N(j,'lam',a,l,b)}
  return n(),prg()}
 
+let comp=a=>{   //convert compositions and unapplied derived verbs to lambdas
+ let N=(x,...y)=>(y,y.i=x,y),F=(x,I,p)=>{if(!Array.isArray(x))return;x.forEach(F);
+ if(x[0]=='com'){let i=x.i,m=x[1][0]=='opr'&&x[1][1]==':',xy=m?["x"]:["x","y"],r=N(x[1].i,'sym','x');x.slice(1).forEach((x,j)=>{r=(j||m)?N(x.i,'mon',x,r):N(i,'dya',x,r,N(i,'sym','y'))});
+  x.splice(1);x[0]='lam';x.push(N(x.i,'arg',...xy.map(x=>N(i,'sym',x))),N(i,'loc'),N(i,'bdy',r))}
+ if(x[0]=="drv"&&p[0]!='mon'&&p[0]!='dya'){let i=x.i,b=N(i,'mon',x,N(i,'sym','x')),r=N(i,'lam',N(i,'arg',N(i,'sym','x')),N(i,'loc'),N(i,'bdy',b));P[I]=r}  // drv -> lam .. mon drv sym x
+ };F(a,0,0)}
+ 
+let lift=a=>{   //lift lambdas.  lam arg loc bdy -> fun sym sig arg loc bdy          maybe check for duplicates (parse tree? input string?)
+ let f=0,N=(x,...y)=>(y,y.i=x,y),F=(x)=>{if(!Array.isArray(x))return;x.forEach(F);
+ if(x[0]=="lam"){let r=N(x.i,'fun',N(x.i,'sym',`_${f}`),N(x.i,'sig','K',''),...x.slice(1));x.splice(2,2);x[0]='sym';x[1]=`_${f++}`;a.push(r)}};F(a)}
+
 let ptye=a=>a[0]='typ..todo'
-let lift=a=>a[0]='lamda..todo'
 
-
-let P=`/f{1-:}
-/h{+/:}
-/g{-:}
-/a{x:1}
-/b{x[1]+:2}
-/c{xi+:1}
-/d{Ix0+:1}
-d{x[1][2]+:3}`
-
+let P=`f{+/}`
 
 /*
-1-
-1-+/
-f{(1-1_+/)x 1}
-*/
-
 P=`/you can edit the input
 f{x+/a:y}        /dyadic with local a
 g(i:Kii){x;y;z}  /func with signature
@@ -75,6 +71,7 @@ h{1+x? 2*x :3*y} /ternary
 q{if(1<x)x:+1;y*:2; x+y}  /if-body extends to ;(space) without {}
 f{{x+y}[1;2]}    /inner lambda needs to be liftet
 `
+*/
 
 inp.value=P
 
@@ -84,9 +81,10 @@ let indicate=(s,i,p)=>{let v=p.split("\n"),n=v.map(x=>1+x.length),c=i,l;for(l=0;
 
 let compile=_=>{P=inp.value;
  try{err.textContent="";out.innerHTML="";let a,s=document.querySelector('input[name="tview"]:checked').id;
- a=parse(P);if(s=='ptree')showtree(a);
- ptye(a);   if(s=='ptype')showtree(a);
- lift(a);   if(s=='plift')showtree(a);
+ a=parse(P);if(s=='ptree')showtree(a)
+ comp(a);   if(s=='pcomp')showtree(a)
+ lift(a);   if(s=='plift')showtree(a)
+ ptye(a);   if(s=='ptype')showtree(a)
  }catch(e){let s=e.message;console.log(e);if(s[0]=='@')indicate(s,+s.slice(1,s.indexOf(' ')),P)}
 }
 compile()
