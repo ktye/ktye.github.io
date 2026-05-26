@@ -15,7 +15,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
   if(1==s.length&&In("x y z",s)&&!In(A,s))A+=s;s=N(j,'sym',s);j+=s.length-1;                    //arity
   s=y?jux(s,'i'==y?((!In(L,y)?L.push(y):0),N(j,'sym',y)):N(j,'num',y)):s;return w?(s.i++,N(k,'cst',w,s)):s}
  let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];if(2==r.length)r=r[1];else r[0]='blk';return N(j,'bdy',r)}
- let lst=(t,z,w)=>{let j=i,e,r=[];w||n();while(c&&c!=t){e=exp(ttt());if(z||e)r.push(e);if(In(":})]",c))break;c==';'||c=='\n'?n(w):c!=t?Q(`expect ; or ${t} got ${c}`):1};if(c==t&&!w)n();return N(j,'lst',...r)}
+ let lst=(t,z,w)=>{let j=i,e,r=[];w||n();while(c&&c!=t){e=exp();if(z||e)r.push(e);if(In(":})]",c))break;c==';'||c=='\n'?n(w):c!=t?Q(`expect ; or ${t} got ${c}`):1};if(c==t&&!w)n();return N(j,'lst',...r)}
  let blo=$=>N(i,'blk',...lst(']').slice(1))                                                     //block expression [1;2;3]
  let blk=$=>{let j=i,b=lst(' ',0,1);if(p[i-1]==';')c=p[--i];return N(i,'blk',...b.slice(1))}    //auto block       1;2;(space)
  let rls=(t,x)=>{let j=i;return 2==x.length?x[1]:N(x.i,t,...x.slice(1))}
@@ -24,17 +24,14 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
   if(p[1+i]==':')++i,r+=':';
   if(yC(x)&&2==r.length)return n(),N(x.i,'com',N(j,'opr',':'),N(j,'prj',x,N(j,'opr',r[0]))); //1+:
   if(!(x[0]=='sym'||x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'))(i=x.i,Q("assign"));
-  if(r==':'&&x[0]=='sym'&&!y&&!In(L,x[1]))L.push(x[1]);n();r=N(j,'asn',r,x,y,exp(ttt()));if(!y)r.splice(3,1);return r}
- let exp=x=>{x=ex(x);console.log(x,c);return x}
+  if(r==':'&&x[0]=='sym'&&!y&&!In(L,x[1]))L.push(x[1]);n();r=N(j,'asn',r,x,y,ex(tt()));if(!y)r.splice(3,1);return r}
+ let exp=x=>{x=ex(tt());return(c=='?'&&p[1+i]==' ')?ter(x):x}
  let ex=x=>{let j=i,y,r;if(!x)return 0;
   if(c==':'&&p[i-1]==' ')return x;
-  //if(c=='?'&&p[i+1]==' ')return ter(x);
   if(c=='?'&&p[i+1]=='[')return jmp(x);
-  y=ttt();
-  console.log("x",x,"y",y,"c",c,p[y.i]);
-  if(!y)return x;
-  if(v(y)&&!(v(x))){r=exp(ttt());if(!r)return prj(y,x);if(v(r))return com(r,prj(x,y));return dya(y,x,r)};r=exp(y);return !v(x)?jux(x,r):(r==y||r[0]=='com')&&v(x)&&v(y)?com(r,x):mon(x,r)}
- let ttt=$=>{let j=i,r;_();r=ye(c)||c=='?'&&p[1+i]==' '||c==':'&&p[i-1]==' '?0:yn(c)?num():sy(c)?sym(1):yy(c)||ya(c)?opr():'('==c?rls('enl',lst(')')):c=='{'?lam():c=='['?blo():0;if(!r)return r;']}';
+  y=tt();if(!y)return x;
+  if(v(y)&&!(v(x))){r=ex(tt());if(!r)return prj(y,x);if(v(r))return com(r,prj(x,y));return dya(y,x,r)};r=ex(y);return !v(x)?jux(x,r):(r==y||r[0]=='com')&&v(x)&&v(y)?com(r,x):mon(x,r)}
+ let tt=$=>{let j=i,r;_();r=ye(c)||c=='?'&&p[1+i]==' '||c==':'&&p[i-1]==' '?0:yn(c)?num():sy(c)?sym(1):yy(c)||ya(c)?opr():'('==c?rls('enl',lst(')')):c=='{'?lam():c=='['?blo():0;if(!r)return r;']}';
   if(yb())return yi(r)?asn(r[2],r[3]):asn(r,0);if(c=='['&&yx(p[i-1]))return spc(r);
   while(YY(c)&&p[i-1]!=' '){j=i;if(c=='['){r=yy(p[i-1])?Q("primitive bracket call"):bkt(r)}else r=N(j,'drv',adv(),r)};return r}
  let dya=(f,x,y)=>N(f.i,"dya",f,x,y),mon=(f,x)=>N(f.i,"mon",f,x),jux=(x,y)=>dya(N(y.i-1,'opr','@'),x,y),com=(x,y)=>x[0]=="com"?(x.push(y),x):N(x.i,"com",x,y)
@@ -45,7 +42,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
  let num=$=>{let j=i,s='';while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
  let ter=x=>{let j=i,t,e;n();t=blk();if(c!=':')Q('tern expect :');n(1);e=blk();_();return N(j,'ter',x,t,e)}
  let jmp=x=>{let j=i++,r=lst('[]'[1]);return N(j,'jmp',...r.slice(1))}
- let ifw=j=>{if(c!='(')Q('(missing');'))';n(1);let e=exp(ttt());n(1); return N(j,p[j]=='i'?'iff':'whl',e,blk())}
+ let ifw=j=>{if(c!='(')Q('(missing');'))';n(1);let e=exp();n(1); return N(j,p[j]=='i'?'iff':'whl',e,blk())}
  let spc=x=>{let j=i-1,r=lst(']');x=x[1];return x=='$'?cnd(r.slice(1),j):(r.length>4||r.length<3)?(i=j,Q('triadic or tetradic')):In("@.",x)?tet(j,x,r):(i=j,Q('unknown special'))}
  let cnd=(x,j)=>{if(x.length<3||!(1&x.length))(i=j,Q("cond-length"));return N(x[0].i,'ter',x[0],x[1],x.length>3?cnd(x.slice(2),j):x[2])}
  let lam=$=>{'{';let j=i,_a=A,_l=L;A="";L=[];let b=bdy('}'),s=sig(j,'sig','K:'),a=arg(j,s),l=loc(j,a);A=_a;L=_l;return N(j,'lam',a,l,b)}
