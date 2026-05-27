@@ -59,16 +59,26 @@ let lift=a=>{   //lift lambdas.  lam arg loc bdy -> fun sym sig arg loc bdy     
  let f=0,N=(x,...y)=>(y,y.i=x,y),F=(x)=>{if(!Array.isArray(x))return;x.forEach(F);
  if(x[0]=="lam"){let r=N(x.i,'fun',N(x.i,'sym',`_${f}`),N(x.i,'sig','K',''),...x.slice(1));x.splice(2,2);x[0]='sym';x[1]=`_${f++}`;a.push(r)}};F(a)}
 
+let maco=a=>{   //type macro nx.. [ntprIJCFZ]
+ let fn=x=>{let i,f,v={},m="ntprIJCFZ",a=x[3].slice(1).map(x=>x[1]),l=x[4].slice(1).map(x=>x[1]),al=[...a,...l],In=(x,y)=>x.includes(y)
+  f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]!="sym"||x[1].length!=2||In(l,x[1]))return;let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return;x.T=In("CIJFZ",p)?p:p=="p"?"p":"i"};f(x[5])}
+ a.filter(x=>x[0]=='fun').forEach(fn)}
+
 let type=a=>{   //type each node
  let X={},fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
  let e=x=>{console.log(x);throw new Error("@"+x.i+" type: "+x)},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1]in X)?X[x[1]]:e(x),nm=(x,s)=>(s=x[x.length-1],"cijf".includes(s)?s:"K");
- let dy=x=>x[2].T==x[3].T?x[2].T:x[2].T=='K'||x[3].T=='K'?e('todo implicit'):e('type'),mn=x=>x[2].T,lt=x=>x[x.length-1].T
+ let dy=x=>x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase(): x[2].T=='K'||x[3].T=='K'?e('todo implicit'):e('type')
+ let mn=x=>x[2].T,lt=x=>x[x.length-1].T
  let as=x=>{let m=+(5==x.length);if((x[2][1] in X)&&!x[2].T)X[x[2][1]]=x[3+m].T;return x[3+m].T},ter=x=>x[1].T!=x[2].T?e(x):x[1].T
  let f=x=>{if(!Array.isArray(x))return;for(let i=1;i<x.length;i++)f(x[i]);
-  let m={sym:lup,num:nm,mon:mn,dya:dy,blk:tl,bdy:t1,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,opr:t0};x.T=(x[0]in m)?m[x[0]](x):e(x);  x.forEach(f)};
+  let m={sym:lup,num:nm,mon:mn,dya:dy,blk:tl,bdy:t1,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);  x.forEach(f)};
  fn.forEach(x=>f(x[5]))}
+ 
+let cc=a=>`#define $(c,t,e) ((c)?(t):(e))`+"\ntodo cc\n"+String(a)
+let wa=a=>"todo wa\n"+String(a)
+let wb=a=>"todo wb\n"+String(a)
 
-let P=`h{1+x? 2*x :3*y}`
+let P=`q{if(1<x)x:+1;y*:2; x+y}`
 
 /*
 P=`/you can edit the input
@@ -91,7 +101,9 @@ let compile=_=>{P=inp.value;
  a=parse(P);if(s=='ptree')showtree(a)
  comp(a);   if(s=='pcomp')showtree(a)
  lift(a);   if(s=='plift')showtree(a)
+ maco(a);   if(s=='pmaco')showtree(a)
  type(a);   if(s=='ptype')showtree(a)
+ pro.textContent=[cc,wa,wb][+ofmt.value](a);
  }catch(e){let s=e.message;console.log(e);if(s[0]=='@')indicate(s,+s.slice(1,s.indexOf(' ')),P)}
 }
 compile()

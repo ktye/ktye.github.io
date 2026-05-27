@@ -14,13 +14,16 @@ li::marker{content: ""}
 <div style="flex-grow:1">
  <textarea id="inp" wrap="off" oninput='this.style.height="";this.style.height=this.scrollHeight+"px"' onchange="compile()" autocorrect="off" spellcheck="false"></textarea>
  <pre id="err" style="border-top:1px solid;margin:0"></pre>
+ <pre id="pro"></pre>
 </div>
 <div>
  <input type="text" placeholder="func" size="10" onchange="compile()"     id="pfunc"><br>
  <input type="radio" name="tview" onclick="compile()" id="ptree"                  ><label for="ptree">parse</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pcomp"                  ><label for="pcomp">comp</label><br>
  <input type="radio" name="tview" onclick="compile()" id="plift"                  ><label for="plift">lift</label><br>
+ <input type="radio" name="tview" onclick="compile()" id="pmaco"                  ><label for="ptype">macro</label><br>
  <input type="radio" name="tview" onclick="compile()" id="ptype" checked="checked"><label for="ptype">type</label><br>
+ <input type="radio" name="tview" onclick="compile()" id="emit"                   ><label for="emit"><select id="ofmt" onchange="compile()"><option value="0">c</option><option value="1">wat</option><option value="2">wasm</option></select></label><br>
  <div id="out"></div>
 </div>
 <script>
