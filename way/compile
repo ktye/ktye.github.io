@@ -1,4 +1,4 @@
-let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
+let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
  let _=n=>{while(1){while(In(n?" \t\n":" \t",p[i]))i++;if(p[i]=='/'&&(In(' \n',p[i-1])||!i)){i++;while(p[i]&&p[i]!='\n')i++;i++;continue};break};c=p[i]||''}
  let In=(x,y)=>x.includes(y)
  let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yn=c=>In("0123456789",c),yy=c=>In(":+-*%!&|<>=~,^#_$?@.",c),YY=c=>In("/\\'[",c),ya=c=>In("/\\'",c),yx=c=>In("$@.",c),yo=c=>In("({[",c),yc=c=>In("]})",c),ye=c=>In(";\n",c)
@@ -14,7 +14,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
   if(q&&s.length>1&&/[cijz]/.test(s[0]))w=s[0],s=s.slice(1);                                    //prefix cijz (cast)  CIJZ (ptrtype)
   if(1==s.length&&In("x y z",s)&&!In(A,s))A+=s;s=N(j,'sym',s);j+=s.length-1;                    //arity
   s=y?jux(s,'i'==y?((!In(L,y)?L.push(y):0),N(j,'sym',y)):N(j,'num',y)):s;return w?(s.i++,N(k,'cst',w,s)):s}
- let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];if(2==r.length)r=r[1];else r[0]='blk';return N(j,'bdy',r)}
+ let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];return N(j,'bdy',...r.slice(1))}
  let lst=(t,z,w)=>{let j=i,e,r=[];w||n();while(c&&c!=t){e=exp();if(z||e)r.push(e);if(In(":})]",c))break;c==';'||c=='\n'?n(w):c!=t?Q(`expect ; or ${t} got ${c}`):1};if(c==t&&!w)n();return N(j,'lst',...r)}
  let blo=$=>N(i,'blk',...lst(']').slice(1)),bk1=x=>x[0]=="blk"&&x.length==2?x[1]:x              //block expression [1;2;3]
  let blk=$=>{let j=i,b=lst(' ',0,1);if(p[i-1]==';')c=p[--i];return N(i,'blk',...b.slice(1))}    //auto block       1;2;(space)
@@ -49,14 +49,14 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y,y.i=x,y),Q=x=>{t
  return n(),prg()}
 
 let comp=a=>{   //convert compositions and unapplied derived verbs to lambdas
- let N=(x,...y)=>(y,y.i=x,y),F=(x,I,p)=>{if(!Array.isArray(x))return;x.forEach(F);
+ let N=(x,...y)=>(y.i=x,y),F=(x,I,p)=>{if(!Array.isArray(x))return;x.forEach(F);
  if(x[0]=='com'){let i=x.i,m=x[1][0]=='opr'&&x[1][1]==':',xy=m?["x"]:["x","y"],r=N(x[1].i,'sym','x');x.slice(1).forEach((x,j)=>{r=(j||m)?N(x.i,'mon',x,r):N(i,'dya',x,r,N(i,'sym','y'))});
   x.splice(1);x[0]='lam';x.push(N(x.i,'arg',...xy.map(x=>N(i,'sym',x))),N(i,'loc'),N(i,'bdy',r))}
  if(x[0]=="drv"&&p[0]!='mon'&&p[0]!='dya'){let i=x.i,b=N(i,'mon',x,N(i,'sym','x')),r=N(i,'lam',N(i,'arg',N(i,'sym','x')),N(i,'loc'),N(i,'bdy',b));P[I]=r}  // drv -> lam .. mon drv sym x
  };F(a,0,0)}
  
 let lift=a=>{   //lift lambdas.  lam arg loc bdy -> fun sym sig arg loc bdy          maybe check for duplicates (parse tree? input string?)
- let f=0,N=(x,...y)=>(y,y.i=x,y),F=(x)=>{if(!Array.isArray(x))return;x.forEach(F);
+ let f=0,N=(x,...y)=>(y.i=x,y),F=(x)=>{if(!Array.isArray(x))return;x.forEach(F);
  if(x[0]=="lam"){let r=N(x.i,'fun',N(x.i,'sym',`_${f}`),N(x.i,'sig','K',''),...x.slice(1));x.splice(2,2);x[0]='sym';x[1]=`_${f++}`;a.push(r)}};F(a)}
 
 let maco=a=>{   //type macro nx.. [ntprIJCFZ]
@@ -71,34 +71,58 @@ let type=a=>{   //type each node
  let mn=x=>x[2].T,lt=x=>x[x.length-1].T
  let as=x=>{let m=+(5==x.length);if((x[2][1] in X)&&!x[2].T)X[x[2][1]]=x[3+m].T;return x[3+m].T},ter=x=>x[1].T!=x[2].T?e(x):x[1].T
  let f=x=>{if(!Array.isArray(x))return;for(let i=1;i<x.length;i++)f(x[i]);
-  let m={sym:lup,num:nm,mon:mn,dya:dy,blk:tl,bdy:t1,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);  x.forEach(f)};
- fn.forEach(x=>f(x[5]))}
+  let m={sym:lup,num:nm,mon:mn,dya:dy,blk:tl,bdy:tl,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);  x.forEach(f)
+  };
+ fn.forEach(x=>{f(x[5]);x[4].forEach(x=>x.T=X[x[1]])})}
 
-let cc=a=>{const H=`#define $(c,t,e) ((c)?(t):(e))
-typedef long K;
+let call=a=>{
+ const op=" +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .".replaceAll(" ","")
+ const o1="Abs Neg Sqr Sqt Til Flp Rev Asc Dsc Grp Not Enl Srt Cnt Flr Str Unq Fst Val".split(" ")
+ const o2="Add Sub Mul Div Mod Min Max Les Mor Eql Neq Cat Cut Tak Drp Fmt Fnd Atx Cal".split(" ")
+ let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
+  if(x[0]=="mon"&&x[1][0]=="opr"&&x.T=="K"){x[0]='cal';x[1]=o1[op.indexOf(x[1][1])]};
+  if(x[0]=="dya"&&x[1][0]=="opr"&&x.T=="K"){x[0]='cal';x[1]=o2[op.indexOf(x[1][1])]};
+ }
+ a.forEach(f)}
+
+let refc=a=>{   //inc refcount on args, dec on exit
+ let N=(x,...y)=>(y.i=x,y.t='K',y),r1=x=>x[0]=="sym"?N(x.i,'cal','R1',x):x
+ let fn=x=>{let a=x[3].slice(1).filter(x=>x.T=="K").map(x=>x[1]),l=x[4].slice(1).filter(x=>x.T=="K").map(x=>x[1]),al=[...a,...l],b=x[5]
+  let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
+   if(x[0]=='cal')for(let i=2;i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}
+  f(b);if(al.length){let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,'asn',':',N(x.i,'sym','_'),x)
+   al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'cal','R0',N(x.i,'sym',s))));b.push(N(x.i,'sym',s))}}
+ a.filter(x=>x[0]=='fun').forEach(fn)}
+
+let cc=a=>{const H=`typedef long K;
+#define $(c,t,e) ((c)?(t):(e))
+#define $2(f,x,y) ({K _y=(y);K _x=(x);f(_x;_y)})
 `
  let e=x=>{console.log(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"long",K:"K",f:"double","z":"double complex","":"void"}[x])
  let f=x=>{if(!Array.isArray(x))return x;let ch=x=>x.slice(1).map(f),x1=x=>x[1],em=x=>x[0]=='sym'||x[0]=='num'?f(x[1]):`(${f(x)})`,
   dr1=(x,y)=>["Ovr","Scn","Ech"]["/\\'".indexOf(x[1][1])]+"("+(x[2][0]=="opr"?op2(x[2]):f(x[2]))+","+y+")",
-  op2=x=>({"+":"Add","-":"Sub"}[x[1]]),
+  op2=x=>o2[op.indexOf(x[1])],
   m={
-   bdy:x=>{if(x[1][0]!="blk")return "{return "+f(x[1])+";}\n";x=x[1].slice(1).map(f);x[x.length-1]="return "+x[x.length-1]+";";return "{"+x.join(";\n")+"}\n"},
+   bdy:x=>x.slice(1).map(f),
    blk:x=>`({${x.slice(1).map(f).join(";")};})`,
-   num:x1,iff:x=>`if(${f(x[1])})${f(x[2])}${x[3]?'else '+f(x[3]):''}`,
+   num:x=>x.T=="K"?((x[1].includes(".")?"Kf":"Ki")+"("+x[1]+")"):x[1],
+   iff:x=>`if(${f(x[1])})${f(x[2])}${x[3]?'else '+f(x[3]):''}`,
    sym:x1,
+   cal:x=>x[1]+"("+x.slice(2).map(f).join(",")+")",
    ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
    asn:x=>`(${f(x[2])}${x[1].replace(':','=')}${f(x[3])})`,
    mon:x=>x[1][0]=='opr'?`(${x[1][1]}em(x[2]))`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
-   dya:x=>x[1][0]=='opr'?`${em(x[2])}${x[1][1]}${em(x[3])}`:e(x),
+   dya:x=>x[1][0]=='opr'?(x.T=="K"?`${op2(x[1])}(${f(x[2])},${f(x[3])})`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
   };return(x[0]in m)?m[x[0]](x):e(x)}
+ let ret=(t,x,n)=>{if(t)x[n=x.length-1]="return "+x[n];return x.join(";")+";"}
  let fn=x=>{let name=x[1][1],res=x[2][1],arg=x[3].slice(1),loc=x[4].slice(1),bdy=x[5];
-  return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")})${f(bdy)}`}
- return H+a.filter(x=>x[0]=='fun').map(fn).join("\n")}
+  return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc.map(x=>t(x.T)+" "+x[1]+"=0;").join("")+"\n"}${ret(res,f(bdy))}}\n`}
+ return H+a.filter(x=>x[0]=='fun').map(fn).join("")}
 
 let wa=a=>"todo wa\n"+String(a)
 let wb=a=>"todo wb\n"+String(a)
 
-let P=`f{y-+/x}`
+let P=`Fst{a:x0;a}`
 
 /*
 P=`/you can edit the input
@@ -123,6 +147,8 @@ let compile=_=>{P=inp.value;
  lift(a);   if(s=='plift')showtree(a)
  maco(a);   if(s=='pmaco')showtree(a)
  type(a);   if(s=='ptype')showtree(a)
+ call(a);   if(s=='pcall')showtree(a)
+ refc(a);   if(s=='prefc')showtree(a)
  pro.textContent=[cc,wa,wb][+ofmt.value](a);
  }catch(e){let s=e.message;console.log(e);if(s[0]=='@')indicate(s,+s.slice(1,s.indexOf(' ')),P)}
 }
