@@ -64,6 +64,10 @@ let maco=a=>{   //type macro nx.. [ntprIJCFZ]
   f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]!="sym"||x[1].length!=2||In(l,x[1]))return;let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return;x.T=In("CIJFZ",p)?p:p=="p"?"p":"i"};f(x[5])}
  a.filter(x=>x[0]=='fun').forEach(fn)}
 
+let asin=a=>{   //lift assignment expressions to pole position in blk or bdy
+ let f=(x,p,L,I)=>{if(!Array.isArray(x))return;let n=x.length,i,r,l=x[0]=='bdy'||x[0]=='blk';for(i=n-1;i>=0;i--)f(x[i],l,l?x:L,l?i:I);if(x[0]=='asn'&&!p){r=x.slice();r.T=x.T;r.i=x.i;x[0]='sym';x[1]=r[2][1];x.splice(2);L.splice(I,0,r);console.log("inline assign",x,"at",I,"into",L)};}
+ f(a,0,[],0)}
+
 let type=a=>{   //type each node
  let X={},fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
  let e=x=>{console.log(x);throw new Error("@"+x.i+" type: "+x)},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1]in X)?X[x[1]]:e(x),nm=(x,s)=>(s=x[x.length-1],"cijf".includes(s)?s:"K");
@@ -86,12 +90,12 @@ let call=a=>{
  a.forEach(f)}
 
 let refc=a=>{   //inc refcount on args, dec on exit
- let N=(x,...y)=>(y.i=x,y.t='K',y),r1=x=>x[0]=="sym"?N(x.i,'cal','R1',x):x
+ let N=(x,t,...y)=>(y.i=x,y.T=t,y),r1=x=>x[0]=="sym"?N(x.i,'K','cal','R1',x):x
  let fn=x=>{let a=x[3].slice(1).filter(x=>x.T=="K").map(x=>x[1]),l=x[4].slice(1).filter(x=>x.T=="K").map(x=>x[1]),al=[...a,...l],b=x[5]
   let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
    if(x[0]=='cal')for(let i=2;i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}
-  f(b);if(al.length){let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,'asn',':',N(x.i,'sym','_'),x)
-   al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'cal','R0',N(x.i,'sym',s))));b.push(N(x.i,'sym',s))}}
+  f(b);if(al.length){let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,x.T,'asn',':',N(x.i,x.T,'sym','_'),x)
+   al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'','cal','R0',N(x.i,'K','sym',s))));b.push(N(x.i,x.T,'sym',s))}}
  a.filter(x=>x[0]=='fun').forEach(fn)}
 
 let cc=a=>{const H=`typedef long K;
@@ -110,7 +114,7 @@ let cc=a=>{const H=`typedef long K;
    sym:x1,
    cal:x=>x[1]+"("+x.slice(2).map(f).join(",")+")",
    ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
-   asn:x=>`(${f(x[2])}${x[1].replace(':','=')}${f(x[3])})`,
+   asn:(x,s)=>(s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${x[1].replace(':','=')}${f(x[3])}`),
    mon:x=>x[1][0]=='opr'?`(${x[1][1]}em(x[2]))`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
    dya:x=>x[1][0]=='opr'?(x.T=="K"?`${op2(x[1])}(${f(x[2])},${f(x[3])})`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
   };return(x[0]in m)?m[x[0]](x):e(x)}
@@ -122,7 +126,7 @@ let cc=a=>{const H=`typedef long K;
 let wa=a=>"todo wa\n"+String(a)
 let wb=a=>"todo wb\n"+String(a)
 
-let P=`Fst{a:x0;a}`
+let P=`f{a:1;a+:b:1+x;a+b}`
 
 /*
 P=`/you can edit the input
@@ -146,6 +150,7 @@ let compile=_=>{P=inp.value;
  comp(a);   if(s=='pcomp')showtree(a)
  lift(a);   if(s=='plift')showtree(a)
  maco(a);   if(s=='pmaco')showtree(a)
+ asin(a);   if(s=='pasin')showtree(a)
  type(a);   if(s=='ptype')showtree(a)
  call(a);   if(s=='pcall')showtree(a)
  refc(a);   if(s=='prefc')showtree(a)
