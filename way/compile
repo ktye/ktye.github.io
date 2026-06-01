@@ -70,20 +70,25 @@ let asin=a=>{   //lift assignment expressions to pole position in blk or bdy
  f(a,0,[],0)}
 
 let btin=a=>{   //builtin calls as operators
- let b='Shl Shr Sha Lt Le Gt Ge'.split(' ')
+ let b='Sh Lt Le Gt Ge'.split(' ')
  let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&b.includes(x[2][1])){x[1][1]=x[2][1];x[2]=x[3][1];x[3]=x[3][2]}};f(a)}
 
 let type=a=>{   //type each node
  let X={},N=(x,...y)=>(y.i=x,y),fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:x[1]=='i'?'i':'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
  let e=x=>{console.log(x);throw new Error("@"+x.i+" type: "+x)},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1]in X)?X[x[1]]:e(x),nm=(x,s)=>(s=x[x.length-1],"cijfz".includes(s)?s:x.includes("a")?"z":x.includes(".")?"f":"i");
- let nu=x=>x[0]=='num'&&x.T=="i",lop=x=>(console.log('lop',x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i'),x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i')
- let dy=x=>lop(x)?x.T='K':x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase():x[1][1]=='@'&&x[3][0]=='lst'?lup(x[2]):nu(x[2])?(x[2].T=x[3].T):nu(x[3])?(x[3].T=x[2].T):x[2].T=='K'||x[3].T=='K'?(console.log(x),e('todo implicit')):(console.log(x),e('type'))
+ let cst=(t,x,r)=>((x[0]=='num'?x.T=t:x[0]=='mon'&&x[2][0]=='num'?(x.T=t,x[2].T=t): (r=x.slice(),(r.i=x.i),(r.T=x.T),x.splice(1),x[0]='cst',x[1]=t,x[2]=r,x.T=t ) ),t)
+ let nu=x=>x[0]=='num'&&x.T=="i",lop=x=>x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i'
+ let dy=x=>lop(x)?x.T='K':x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase():x[1][1]=='@'&&x[3][0]=='lst'?lup(x[2]):nu(x[2])?(x[2].T=x[3].T):nu(x[3])?(x[3].T=x[2].T):x[2].T=='K'||x[3].T=='K'?(console.log(x),e('todo implicit')):x[2].T=='i'?cst(x[3].T,x[2]):x[3].T=='i'?cst(x[2].T,x[3]):(console.log(x),e('type'))
  let mn=x=>x[2].T,lt=x=>x[x.length-1].T
  let as=x=>{let m=+(5==x.length),xx=x[3+m];if((x[2][1]in X)&&!x[2].T)X[x[2][1]]=xx.T;if(xx[0]=='num'&&x[2].T=='K')xx.T='K';return x[3+m].T},ter=x=>(f(x[1]),x[2].T!=x[3].T?e(x):x[2].T)
  let f=x=>{if(!Array.isArray(x))return;for(let i=1;i<x.length;i++)f(x[i]);
-  let m={sym:lup,num:nm,mon:mn,dya:dy,cst:x=>x[1],blk:tl,bdy:tl,lst:t0,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);  x.forEach(f)
-  };
+  let m={sym:lup,num:nm,mon:mn,dya:dy,cst:x=>x[1],blk:tl,bdy:tl,lst:t0,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);x.forEach(f)}
  fn.forEach(x=>{f(x[5]);x[4].forEach(x=>x.T=X[x[1]])})}
+
+let digr=a=>{   //digraphs  <<  >>  <= >= for non-k types
+ let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
+  if(x[0]=='dya'&&x[1][0]=='opr'&&x.T!='K'&&1+'<>'.indexOf(x[1][1])&&x[3][0]=='mon'&&x[3][1][0]=='opr'&&1+'<=>'.indexOf(x[3][1][1])){x[1][1]+=x[3][1][1];x[3]=x[3][2];}}
+ a.forEach(f)}
 
 let kfun=a=>{   //k function objects  f => K2(f)  todo ignore globals   todo track Kn
  let N=(x,...y)=>(y.i=x,y),al,ar={},F=x=>{al=[...x[3].slice(1).map(x=>x[1]),...x[4].slice(1).map(x=>x[1])];f(x[5])}
@@ -125,14 +130,16 @@ let refc=a=>{   //inc refcount on args, dec on exit
  }
  a.filter(x=>x[0]=='fun').forEach(fn)}
 
-let cc=a=>{const H=`typedef long K; //op
+let cc=a=>{const H=`typedef long K;
 #define $(c,t,e) ((c)?(t):(e))
 #define $2(f,x,y) ({K _y=(y);K _x=(x);f(_x;_y)})
 #define P(x) ((void*)(x&0xffffffffffffff))
 #define NI(n,e) ({int _n=(n);K _=Ktn(2,_n);int*_r=(int*)P(x);i=0;while(i<_n){_r[i]=(e);};_r;})
-#define Shl(t,x,y) ((x)<<(y))
-#define Shr(t,x,y) ((x)>>(y))
-#define Sha(t,x,y) ((unsigned t)(x)>>(y))
+#define Lt(t,x,y) ((unsigned t)(x)<(unsigned t)(y))
+#define Le(t,x,y) ((unsigned t)(x)<=(unsigned t)(y))
+#define Gt(t,x,y) ((unsigned t)(x)>(unsigned t)(y))
+#define Ge(t,x,y) ((unsigned t)(x)>=(unsigned t)(y))
+#define Sh(t,x,y) ((unsigned t)(x)>>(y))
 `
  let e=x=>{console.log(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"long",p:"long",K:"K",f:"double","z":"double complex","":"void"}[x])
  let f=x=>{if(!Array.isArray(x))return x;let s,ch=x=>x.slice(1).map(f),x1=x=>x[1],em=x=>x[0]=='sym'||x[0]=='num'?f(x[1]):`(${f(x)})`
@@ -159,7 +166,7 @@ let cc=a=>{const H=`typedef long K; //op
 let wa=a=>"todo wa\n"+String(a)
 let wb=a=>"todo wb\n"+String(a)
 
-let P=`Ktx(K:ip){jy|Shl[jx;56]}`
+let P=`Ktx(K:ip){jy|jx<<56}`
 
 
 /*
@@ -187,6 +194,7 @@ let compile=_=>{P=inp.value;
  //asin(a);   if(s=='pasin')showtree(a)
  btin(a);   if(s=='pbtin')showtree(a)
  type(a);   if(s=='ptype')showtree(a)
+ digr(a);   if(s=='pdigr')showtree(a)
  kfun(a);   if(s=='pkfun')showtree(a)
  call(a);   if(s=='pcall')showtree(a)
  loop(a);   if(s=='ploop')showtree(a)
