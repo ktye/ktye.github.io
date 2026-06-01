@@ -1,6 +1,6 @@
-Ki(K:i){i|32\2} Kf(K:f){r:Ktn[1;3];Fr0:x;jr|32\-3} Kz(K:z){r:Ktn[1;4];Zr0:x;jr|32\-4}                   /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
-Mal(p:i) Mfr(:p) Kfr(:j){t:i.32/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}           / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
-Ktn(K:ii){r:Mal@y\x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;ri|32\x}                                              / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
+Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[1;3];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}            /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
+Mal(p:i) Mfr(:p) Kfr(:j){t:i.56/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}           / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
+Ktx(K:ip){jy|Shl[jx;56]}Ktn(K:ii){r:Mal@y\x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}                    / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
 Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]}                    /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
 Exl{r:Ktn[0;xn]tx?[x;xn/Jri:K.Cxi;xn/Jri:K.Ixi;xn/Jri:K.Fxi;xn/Jri:K.Zxi];r}                            / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
@@ -11,8 +11,8 @@ Jon{if(jy<0)Q;r:@y;(ny-1)/{r,:x;r,:y 1+i}; r} Spl{if(!jx<0)Q; if(jy<0)Q; r:(0,!y
 Fix{r:y;while(r~y:f y)r:y; r} Fxs{r:y;s:,r;while(r~f y)r:y;s,:r; r}
 Sum{jx<0? x :tx?[Ovr[Add;x];xn#Sum Upt[2;x];{s:i.0;nx/s+:Ixi;Ki s};{s:f.0;nx/s+:Fxi;Kf s};{s:z.0;nx/s+:Zxi;Kz s};Q]}
 
-Fst{x0} Enl{Ufy 1#x} Til{tx=2? Wer x :tx~-2? Q :ix#i} Cnt{Ki(jx<0? 1 tx>4? tx-4 :nx)}
-Grp{a:Unq x;l2(a;ta? na#!x=ai :na#!x(~~)\ai)} Rev{jx<0? x: x@nx#nx-i-1}
+Fst{x0} Enl{Ufy 1i#x} Til{tx=2? Wer x :tx~-2? Q :ix#i} Cnt{jx<0? 1 :tx>4? tx-4 :nx}
+Grp{a:Unq x;l2(a;ta? na#!x=ai :na#!x(~~)\ai)} Rev{jx<0? x :x@nx#nx-i-1}
 Drp{if(tx~-2)Q;if(jy<0)Q;ix<0? (Ki max[0;ix+ny])#y :!nx>ix? Ktn[ty;0] :n:ny-ix;y n#ix+i}
 Tak{if(tx~-2)Q;jy<0? y@!x :ix<0? (Ki nx+max[nx;-ix-1])_y :ix>ny? k:i0;y@x#k<x? +k: 0 :y@!x}
 Cut{if(tx=-2){n:ix<0? ny%-ix :ix; x:(Ki ny%n)*!Ki n};if(tx~2)Q;n:nx;x,:K.nx;n#x Kxi+!Ki x[1+i]-xi}
