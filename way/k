@@ -1,6 +1,6 @@
 Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[1;3];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}            /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
-Mal(p:i) Mfr(:p) Kfr(:j){t:i.56/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}           / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
-Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Mal@y\x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}                        / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
+Ma(p:i) Mf(:p) Mc(i:ppi) Kfr(:j){t:i.56/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}   / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
+Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma@y<<x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}                        / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
 Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]}                    /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
 Exl{r:Ktn[0;xn]tx?[x;xn/Jri:K.Cxi;xn/Jri:K.Ixi;xn/Jri:K.Fxi;xn/Jri:K.Zxi];r}                            / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
@@ -18,7 +18,7 @@ Tak{if(tx~-2)Q;jy<0? y@!x :ix<0? (Ki nx+max[nx;-ix-1])_y :ix>ny? k:i0;y@x#k<x? +
 Cut{if(tx=-2){n:ix<0? ny%-ix :ix; x:(Ki ny%n)*!Ki n};if(tx~2)Q;n:nx;x,:K.nx;n#x Kxi+!Ki x[1+i]-xi}
 Wer{if(tx~2)Q;m:s:i0;nx/{s+:xi;m:max[m;Ixi]};r:Ktn[2;s];k:i.-1 m<2? nx/xi? r[+k]:i :nx/{a:Ixi;a/Ir[+k]:i}}
 Unq{jx<0? x: nx<2? x: x:<x;n:i0;(xn-1)/if(xi~xi+1)+n;r:Ktn[tx;n];k:i.-1;(xn-1)/if(xi~xi+1)Ir[+k]:xi;r} /or x@!(nx#i)=x?x 
-Cat{if(jx<0)x:,x;if(jy<0)y:,y;r:Ktn[tx=ty? tx :0;(i.Cnt x)+i.Cnt y];if(!rt){nx/+Kxi;ny/+Kyi};Mcp[pr;px;sx\nx];Mcp[pr+sx\nx;py;sy\nx]}
+Cat{if(jx<0)x:,x;if(jy<0)y:,y;r:Ktn[tx=ty? tx :0;(i.Cnt x)+i.Cnt y];if(!rt){nx/+Kxi;ny/+Kyi};Mc[pr;px;sx\nx];Mc[pr+sx\nx;py;sy\nx]}
 Fnd{jx<0? In[x;y] :tx=-ty? {tx?[xn/if(Cxi=iy)break;xn/if(Ixi=iy)break;xn/if(Fxi=Fx0)break;xn/if(Zxi=Zx0)break;Q];Ki(i)} :yt>-1? Ecr[Fnd;x;y]}
 Ati(K:Ki){tx?[x y;K.Cx y;K.Ix y;K.Fx y;K.Zx y]} Atd{jy<0? x :!ny? Ktn[tx;0] :1=ny? Atx[x;y0] :Dmd[x y0;1_y]}
 Atx{tx>4? x.,y :(!ty)? ny#x yi; ty=-2? Ati[x;iy] :ty~2? Q :tx?[ny#x Iyi;ny#Cx Iyi;ny#Ix Iyi;ny#Fx Iyi;ny#Zx Iyi]}
