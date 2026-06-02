@@ -101,10 +101,10 @@ let call=a=>{    //replace k ops with calls, f@ with call
  const op=" +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .".replaceAll(" ","")
  const o1="Abs Neg Sqr Sqt Til Flp Rev Asc Dsc Grp Not Enl Srt Cnt Flr Str Unq Fst Val".split(" ")
  const o2="Add Sub Mul Div Mod Min Max Les Mor Eql Neq Cat Cut Tak Drp Fmt Fnd Atx Cal".split(" ")
- let fn={},f=x=>{if(!Array.isArray(x))return;x.forEach(f);
+ let fn={},al,f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')al=[...x[3].map(x=>x[1]),...x[4].map(x=>x[1])];x.forEach(f);
   if(x[0]=='mon'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'){             x[0]='cal';x[1]=o1[op.indexOf(x[1][1])]};
   if(x[0]=='dya'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'&&x[3].T=='K'){x[0]='cal';x[1]=o2[op.indexOf(x[1][1])];if(x[1]=='Atx'&&x[3][0]=='num'&&x[3].T=='K'&&(!x[3][1].includes("."))){x[3].T='i';x[1]='Ati'}}
-  else if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&fn[x[2][1]]){x[0]='cal';console.log('cal',x[2][1]);}
+  else if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&fn[x[2][1]]&&!al.includes(x[2][1])){x[0]='cal';x[1]=x[2][1];let l=x[3];x.splice(2);l[0]=='lst'?x.push(...l.slice(1)):x.push(l);}
   };a.filter(x=>x[0]=='fun').forEach(x=>fn[x[1][1]]=1);a.forEach(f)}
 
 let loop=a=>{    // i#(tak)  i/(lop)
@@ -165,7 +165,7 @@ let cc=a=>{const H=`typedef long K;
    ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
    jmp:x=>`$S(${t(x[1].T)},${f(x[1])},${x.slice(1,-1).map(f).map((x,i)=>'$C('+i+','+x+')')},${f(x[x.length-1])})`,
    asn:(x,s)=>(s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${x[1].replace(':','=')}${f(x[3])}`),
-   mon:x=>x[1][0]=='opr'?`(${x[1][1]}em(x[2]))`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
+   mon:x=>x[1][0]=='opr'?`(${x[1][1]}${em(x[2])})`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
    dya:x=>x[1][0]=='opr'?("SGL".includes(x[1][1][0])?`${x[1][1]}(${t(x.T)},${f(x[2])},${f(x[3])})`:x[1][1][0]=='@'?`${em(x[2])}[${f(x[3])}]`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
   };return(x[0]in m)?m[x[0]](x):e(x)}
  let ret=(t,x,n)=>{if(t)x[n=x.length-1]="return "+x[n];return x.join(";")+";"}
@@ -181,7 +181,7 @@ P=`Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[1;3];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr
 Ma(p:i) Mf(:p) 
 Ktn(K:ii){r:Ma@y<<x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}`
 
-P=`Ktx(K:ip){jy|jx<<56}Ki(K:i){Ktx[2;px]}`
+//P=`Ktx(K:ip){jy|jx<<56}Ki(K:i){Ktx[2;px]}`
 
 /*
 P=`/you can edit the input
