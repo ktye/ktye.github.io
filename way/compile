@@ -1,8 +1,8 @@
 let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
  let _=n=>{while(1){while(In(n?" \t\n":" \t",p[i]))i++;if(p[i]=='/'&&(In(' \n',p[i-1])||!i)){i++;while(p[i]&&p[i]!='\n')i++;i++;continue};break};c=p[i]||''}
  let In=(x,y)=>x.includes(y)
- let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yn=c=>In("0123456789",c),yy=c=>In(":+-*%!&|<>=~,^#_$?@.",c),YY=c=>In("/\\'[",c),ya=c=>In("/\\'",c),yx=c=>In("$@.",c),yo=c=>In("({[",c),yc=c=>In("]})",c),ye=c=>In(";\n",c)
- let yb=$=>p[i-1]!=' '&&(c==':'||yy(c)&&p[1+i]==':'),yi=x=>x[0]=='sym'&&(p[i-1]=='i'||yn(p[i-1])),yC=x=>In(['num','vec'],x[0])
+ let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yn=c=>In("0123456789",c),ym=c=>In('abcdefghijklmnopqrstuvxwyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)]}"',c),yy=c=>In(":+-*%!&|<>=~,^#_$?@.",c),YY=c=>In("/\\'[",c)
+ let ya=c=>In("/\\'",c),yx=c=>In("$@.",c),yo=c=>In("({[",c),yc=c=>In("]})",c),ye=c=>In(";\n",c),yb=$=>p[i-1]!=' '&&(c==':'||yy(c)&&p[1+i]==':'),yi=x=>x[0]=='sym'&&(p[i-1]=='i'||yn(p[i-1])),yC=x=>In(['num','vec'],x[0])
  let A="",L=[],AL="xyzabcdefghijklmnopqrstuvw",v=x=>In(['opr','drv','com','prj'],x[0])
  let prg=$=>{let r=[];while(_(1),c)r.push(fun()),c==';'?n():0;return N(0,'prg',...r)}
  let fun=$=>{let j=i,m,s,b,a,l;m=sym();s=sig();b=bdy();a=arg(j,s);l=loc(j,a);A="";L=[];return N(j,'fun',m,s,a,l,b)}
@@ -31,7 +31,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{thr
   if(c=='?'&&p[i+1]=='[')return jmp(x);
   y=tt();if(!y)return x;
   if(v(y)&&!(v(x))){r=ex(tt());if(!r)return prj(y,x);if(v(r))return com(r,prj(x,y));return dya(y,x,r)};r=ex(y);return !v(x)?jux(x,r):(r==y||r[0]=='com')&&v(x)&&v(y)?com(r,x):mon(x,r)}
- let tt=$=>{let j=i,r;_();r=ye(c)||c=='?'&&p[1+i]==' '||c==':'&&p[i-1]==' '?0:yn(c)?num():sy(c)?sym(1):yy(c)||ya(c)?opr():'('==c?rls('enl',lst(')')):c=='{'?lam():c=='['?blo():0;if(!r)return r;']}';
+ let tt=$=>{let j=i,r;_();r=ye(c)||c=='?'&&p[1+i]==' '||c==':'&&p[i-1]==' '?0:yn(c)||c=='-'&&yn(p[1+i])&&!ym(p[i-1])?num():sy(c)?sym(1):yy(c)||ya(c)?opr():'('==c?rls('enl',lst(')')):c=='{'?lam():c=='['?blo():0;if(!r)return r;']}';
   if(yb())return yi(r)?asn(r[2],r[3]):asn(r,0);if(c=='['&&yx(p[i-1]))return spc(r);
   while(YY(c)&&p[i-1]!=' '){j=i;if(c=='['){r=yy(p[i-1])?Q("primitive bracket call"):bkt(r)}else r=N(j,'drv',adv(),r)};return r}
  let dya=(f,x,y)=>N(f.i,"dya",f,x,y),mon=(f,x)=>N(f.i,"mon",f,x),jux=(x,y)=>dya(N(y.i-1,'opr','@'),x,y),com=(x,y)=>x[0]=="com"?(x.push(y),x):N(x.i,"com",x,y)
@@ -39,7 +39,7 @@ let parse=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{thr
  let adv=$=>{let j=i;r=c;n();return N(j,'adv',r)}
  let prj=(x,y)=>{let j=i;return N(j,'prj',x,y)}
  let tet=(j,x,r)=>{if(r.length==3)r.splice(2,0,0);return N(j,'cal',x=='@'?'Amd':'Dmd',N(1+j,'lst',...r))}
- let num=$=>{let j=i,s='';while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
+ let num=$=>{let j=i,s=c=='-'?c:'';if(s)c=p[++i];while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
  let ter=x=>{let j=i,t,e;n();t=blk();if(c!=':')Q('tern expect :');n(1);e=blk();_();return N(j,'ter',x,bk1(t),bk1(e))}
  let jmp=x=>{let j=i++,r=lst('[]'[1]);return N(j,'jmp',...r.slice(1))}
  let ifw=j=>{if(c!='(')Q('(missing');'))';n(1);let e=exp();n(1); return N(j,p[j]=='i'?'iff':'whl',e,blk())}
@@ -62,7 +62,7 @@ let lift=a=>{   //lift lambdas.  lam arg loc bdy -> fun sym sig arg loc bdy     
 let maco=a=>{   //type macro nx.. [ntprIJCFZ]
  let fn=x=>{let i,f,v={},m="ntprIJCFZ",a=x[3].slice(1).map(x=>x[1]),l=x[4].slice(1).map(x=>x[1]),al=[...a,...l],In=(x,y)=>x.includes(y)
   f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]!="sym"||x[1].length!=2||In(l,x[1]))return;
-   let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return;x.T=In("CIJFZ",p)?p:p=="p"?"p":"i";if(In("ntpr",p)){x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i;x[2].T='j'}};f(x[5])}
+   let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return; x.T=In("CIJFZp",p)?p:"i"; x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i;x[2].T='j'};f(x[5])}
  a.filter(x=>x[0]=='fun').forEach(fn)}
 
 let asin=a=>{   //lift assignment expressions to pole position in blk or bdy
@@ -136,6 +136,11 @@ let refc=a=>{   //inc refcount on args, dec on exit
  a.filter(x=>x[0]=='fun').forEach(fn)}
 
 let cc=a=>{const H=`typedef long K;
+#define C(x) ((char*)(x))
+#define I(x) ((int*)(x))
+#define J(x) ((long*)(x))
+#define K(x) ((long*)(x))
+#define Z(x) ((double _Complex*)(x))
 #define $(c,t,e) ((c)?(t):(e))
 #define $2(f,x,y) ({K _y=(y);K _x=(x);f(_x;_y)})
 #define $S(t,c,b,d) ({t _;switch(c){b default:_=(d);};_;})
@@ -149,7 +154,7 @@ let cc=a=>{const H=`typedef long K;
 #define Ge(t,x,y) ((unsigned t)(x)>=(unsigned t)(y))
 #define Sh(t,x,y) ((unsigned t)(x)>>(y))
 `
- let e=x=>{console.log(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"long",p:"long",K:"K",f:"double","z":"double complex","":"void"}[x])
+ let e=x=>{console.log(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"long",p:"long",K:"K",f:"double","z":"double _Complex","":"void"}[x])
  let f=x=>{if(!Array.isArray(x))return x;let s,ch=x=>x.slice(1).map(f),x1=x=>x[1],em=x=>x[0]=='sym'||x[0]=='num'?f(x[1]):`(${f(x)})`
   let m={
    bdy:x=>x.slice(1).map(f),
@@ -164,7 +169,7 @@ let cc=a=>{const H=`typedef long K;
    cal:x=>x[1]+"("+x.slice(2).map(f).join(",")+")",
    ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
    jmp:x=>`$S(${t(x[1].T)},${f(x[1])},${x.slice(1,-1).map(f).map((x,i)=>'$C('+i+','+x+')')},${f(x[x.length-1])})`,
-   asn:(x,s)=>(s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${x[1].replace(':','=')}${f(x[3])}`),
+   asn:(x,s,i)=>(i=5==x.length,s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${i?'['+f(x[3])+']':''}${x[1].replace(':','=')}${f(x[3+i])}`),
    mon:x=>x[1][0]=='opr'?`(${x[1][1]}${em(x[2])})`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
    dya:x=>x[1][0]=='opr'?("SGL".includes(x[1][1][0])?`${x[1][1]}(${t(x.T)},${f(x[2])},${f(x[3])})`:x[1][1][0]=='@'?`${em(x[2])}[${f(x[3])}]`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
   };return(x[0]in m)?m[x[0]](x):e(x)}
@@ -181,7 +186,7 @@ P=`Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[1;3];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr
 Ma(p:i) Mf(:p) 
 Ktn(K:ii){r:Ma@y<<x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}`
 
-//P=`Ktx(K:ip){jy|jx<<56}Ki(K:i){Ktx[2;px]}`
+P=`Kc(K:i){};f{r:x;nx/Jri:Kc Cxi}`
 
 /*
 P=`/you can edit the input
