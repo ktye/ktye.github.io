@@ -1,0 +1,214 @@
+#!/usr/bin/env -S deno run
+let kc=(P,A)=>{ //program(string), ast/asm format:pars,comp,lift,...,c,w
+console.log("P",P,"A",A);
+ let pars=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
+  let _=n=>{while(1){while(In(n?" \t\n":" \t",p[i]))i++;if(p[i]=='/'&&(In(' \n',p[i-1])||!i)){i++;while(p[i]&&p[i]!='\n')i++;i++;continue};break};c=p[i]||''}
+  let In=(x,y)=>x.includes(y)
+  let sy=c=>/[A-Za-z]/.test(c),ys=c=>/[A-Za-z0-9.]/.test(c),yn=c=>In("0123456789",c),ym=c=>In('abcdefghijklmnopqrstuvxwyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)]}"',c),yy=c=>In(":+-*%!&|<>=~,^#_$?@.",c),YY=c=>In("/\\'[",c)
+  let ya=c=>In("/\\'",c),yx=c=>In("$@.",c),yo=c=>In("({[",c),yc=c=>In("]})",c),ye=c=>In(";\n",c),yb=$=>p[i-1]!=' '&&(c==':'||yy(c)&&p[1+i]==':'),yi=x=>x[0]=='sym'&&(p[i-1]=='i'||yn(p[i-1])),yC=x=>In(['num','vec'],x[0])
+  let A="",L=[],AL="xyzabcdefghijklmnopqrstuvw",v=x=>In(['opr','drv','com','prj'],x[0])
+  let prg=$=>{let r=[];while(_(1),c)r.push(fun()),c==';'?n():0;return N(0,'prg',...r)}
+  let fun=$=>{let j=i,m,s,b,a,l;m=sym();s=sig();b=bdy();a=arg(j,s);l=loc(j,a);A="";L=[];return N(j,'fun',m,s,a,l,b)}
+  let arg=(j,s)=>{let a=s[2].length?s[2].length:In(A,'z')?3:In(A,'y')?2:1; return N(j,'arg',...AL.split("").slice(0,a).map(x=>N(j,'sym',x)))}
+  let loc=(j,a)=>{a=","+a.slice(1).map(x=>x[1]+",").join("");return N(j,'loc',...L.filter(x=>!(In(a,`,${x},`))).map(x=>N(j,'sym',x)))}
+  let sig=$=>{let j=i,k,r='K:';if(c=='(')while(n(),c!=')');if(i!=j)r=p.slice(1+j,i),n();r=((+r)?"K:"+"K".repeat(+r):r).split(":");if(2!=r.length||r[0].length>1){i=j;Q("signature")};return N(j,'sig',...r)}
+  let sym=q=>{let j=i,k=i,s='',y=0,w=0;if(!sy(c))Q("expected identifier");while(c&&ys(c))s+=c,c=p[++i];if(q&&s=='if'||s=='while')return ifw(j);_();
+   if(q&&s.length>1&&(l(s)=="i"||yn(l(s))))y=l(s),s=s.slice(0,-1);                               //suffix i09  (index)
+   if(q&&s.length>1&&/[cijz]/.test(s[0]))w=s[0],s=s.slice(1);                                    //prefix cijz (cast)  CIJZ (ptrtype)
+   if(1==s.length&&In("x y z",s)&&!In(A,s))A+=s;if(s=='i'&&!In(L,'i'))L.push('i');s=N(j,'sym',s);j+=s.length-1;  //arity
+   s=y?jux(s,'i'==y?((!In(L,y)?L.push(y):0),N(j,'sym',y)):N(j,'num',y)):s;return w?(s.i++,N(k,'cst',w,s)):s}
+  let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];return N(j,'bdy',...r.slice(1))}
+  let lst=(t,z,w)=>{let j=i,e,r=[];w||n();while(c&&c!=t){e=exp();if(z||e)r.push(e);if(In(":})]",c))break;c==';'||c=='\n'?n(w):c!=t?Q(`expect ; or ${t} got ${c}`):1};if(c==t&&!w)n();return N(j,'lst',...r)}
+  let blo=$=>N(i,'blk',...lst(']').slice(1)),bk1=x=>x[0]=="blk"&&x.length==2?x[1]:x              //block expression [1;2;3]
+  let blk=$=>{let j=i,b=lst(' ',0,1);if(p[i-1]==';')c=p[--i];return N(i,'blk',...b.slice(1))}    //auto block       1;2;(space)
+  let rls=(t,x)=>{let j=i;return 2==x.length?x[1]:N(x.i,t,...x.slice(1))}
+  let bkt=x=>{let j=i,r=lst(']',1);if(2==r.length)r=r[1];return(yb())?(x[0]!='sym'?(i=i,Q("asn")):asn(x,r)):jux(x,r)}           // 1-:  => com(opr +, prj(opr :,1))
+  let asn=(x,y)=>{let j=i,r=c;if(x[0]=='opr')return n(),N(x.i,'com',N(j,'opr',':'),x);             //-:
+   if(p[1+i]==':')++i,r+=':';
+   if(yC(x)&&2==r.length)return n(),N(x.i,'com',N(j,'opr',':'),N(j,'prj',x,N(j,'opr',r[0]))); //1+:
+   if(!(x[0]=='sym'||x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'))(i=x.i,Q("assign"));
+   if(r==':'&&x[0]=='sym'&&!y&&!In(L,x[1]))L.push(x[1]);n();r=N(j,'asn',r,x,y,ex(tt()));if(!y)r.splice(3,1);return r}
+  let exp=x=>{x=ex(tt());return(c=='?'&&p[1+i]==' ')?ter(x):x}
+  let ex=x=>{let j=i,y,r;if(!x)return 0;
+   if(c==':'&&p[i-1]==' ')return x;
+   if(c=='?'&&p[i+1]=='[')return jmp(x);
+   y=tt();if(!y)return x;
+   if(v(y)&&!(v(x))){r=ex(tt());if(!r)return prj(y,x);if(v(r))return com(r,prj(x,y));return dya(y,x,r)};r=ex(y);return !v(x)?jux(x,r):(r==y||r[0]=='com')&&v(x)&&v(y)?com(r,x):mon(x,r)}
+  let tt=$=>{let j=i,r;_();r=ye(c)||c=='?'&&p[1+i]==' '||c==':'&&p[i-1]==' '?0:yn(c)||c=='-'&&yn(p[1+i])&&!ym(p[i-1])?num():sy(c)?sym(1):yy(c)||ya(c)?opr():'('==c?rls('enl',lst(')')):c=='{'?lam():c=='['?blo():0;if(!r)return r;']}';
+   if(yb())return yi(r)?asn(r[2],r[3]):asn(r,0);if(c=='['&&yx(p[i-1]))return spc(r);
+   while(YY(c)&&p[i-1]!=' '){j=i;if(c=='['){r=yy(p[i-1])?Q("primitive bracket call"):bkt(r)}else r=N(j,'drv',adv(),r)};return r}
+  let dya=(f,x,y)=>N(f.i,"dya",f,x,y),mon=(f,x)=>N(f.i,"mon",f,x),jux=(x,y)=>dya(N(y.i-1,'opr','@'),x,y),com=(x,y)=>x[0]=="com"?(x.push(y),x):N(x.i,"com",x,y)
+  let opr=$=>{let j=i;r=c;n();return N(j,'opr',r)}
+  let adv=$=>{let j=i;r=c;n();return N(j,'adv',r)}
+  let prj=(x,y)=>{let j=i;return N(j,'prj',x,y)}
+  let tet=(j,x,r)=>{if(r.length==3)r.splice(2,0,0);return N(j,'cal',x=='@'?'Amd':'Dmd',N(1+j,'lst',...r))}
+  let num=$=>{let j=i,s=c=='-'?c:'';if(s)c=p[++i];while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
+  let ter=x=>{let j=i,t,e;n();t=blk();if(c!=':')Q('tern expect :');n(1);e=blk();_();return N(j,'ter',x,bk1(t),bk1(e))}
+  let jmp=x=>{let j=i++,r=lst('[]'[1]);return N(j,'jmp',...r.slice(1))}
+  let ifw=j=>{if(c!='(')Q('(missing');'))';n(1);let e=exp();n(1); return N(j,p[j]=='i'?'iff':'whl',e,blk())}
+  let spc=x=>{let j=i-1,r=lst(']');x=x[1];return x=='$'?cnd(r.slice(1),j):(r.length>4||r.length<3)?(i=j,Q('triadic or tetradic')):In("@.",x)?tet(j,x,r):(i=j,Q('unknown special'))}
+  let cnd=(x,j)=>{if(x.length<3||!(1&x.length))(i=j,Q("cond-length"));return N(x[0].i,'ter',x[0],x[1],x.length>3?cnd(x.slice(2),j):x[2])}
+  let lam=$=>{'{';let j=i,_a=A,_l=L;A="";L=[];let b=bdy('}'),s=sig(j,'sig','K:'),a=arg(j,s),l=loc(j,a);A=_a;L=_l;return N(j,'lam',a,l,b)}
+  return n(),prg()}
+ 
+ let comp=a=>{   //convert compositions and unapplied derived verbs to lambdas
+  let N=(x,...y)=>(y.i=x,y),F=(x,I,p)=>{if(!Array.isArray(x))return;x.forEach(F);
+  if(x[0]=='com'){let i=x.i,m=x[1][0]=='opr'&&x[1][1]==':',xy=m?["x"]:["x","y"],r=N(x[1].i,'sym','x');x.slice(1).forEach((x,j)=>{r=(j||m)?N(x.i,'mon',x,r):N(i,'dya',x,r,N(i,'sym','y'))});
+   x.splice(1);x[0]='lam';x.push(N(x.i,'arg',...xy.map(x=>N(i,'sym',x))),N(i,'loc'),N(i,'bdy',r))}
+  if(x[0]=="drv"&&p[0]!='mon'&&p[0]!='dya'){let i=x.i,b=N(i,'mon',x,N(i,'sym','x')),r=N(i,'lam',N(i,'arg',N(i,'sym','x')),N(i,'loc'),N(i,'bdy',b));P[I]=r}  // drv -> lam .. mon drv sym x
+  };F(a,0,0)}
+  
+ let lift=a=>{   //lift lambdas.  lam arg loc bdy -> fun sym sig arg loc bdy          maybe check for duplicates (parse tree? input string?)
+  let f=0,N=(x,...y)=>(y.i=x,y),F=(x)=>{if(!Array.isArray(x))return;x.forEach(F);
+  if(x[0]=="lam"){let r=N(x.i,'fun',N(x.i,'sym',`_${f}`),N(x.i,'sig','K',''),...x.slice(1));x.splice(2,2);x[0]='sym';x[1]=`_${f++}`;a.push(r)}};F(a)}
+ 
+ let maco=a=>{   //type macro nx.. [ntprIJCFZ]
+  let fn=x=>{let i,f,v={},m="ntprIJCFZ",a=x[3].slice(1).map(x=>x[1]),l=x[4].slice(1).map(x=>x[1]),al=[...a,...l],In=(x,y)=>x.includes(y)
+   f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]!="sym"||x[1].length!=2||In(l,x[1]))return;
+    let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return; x.T=In("IJFZp",p)?p:"i"; x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i;x[2].T='j'};f(x[5])}
+  a.filter(x=>x[0]=='fun').forEach(fn)}
+ 
+
+ let btin=a=>{   //builtin calls as operators
+  let b='Sh Lt Le Gt Ge'.split(' ')
+  let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&b.includes(x[2][1])){x[1][1]=x[2][1];x[2]=x[3][1];x[3]=x[3][2]}};f(a)}
+ 
+ let type=a=>{   //type each node '#' Tak
+  let X={Ma:'p',Mf:''},N=(x,...y)=>(y.i=x,y),fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:x[1]=='i'?'i':'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
+  let e=x=>{console.log(x);throw new Error("@"+x.i+" type: "+x)},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1]in X)?X[x[1]]:e(x),nm=(x,s)=>(s=x[x.length-1],"cijfz".includes(s)?s:x.includes("a")?"z":x.includes(".")?"f":"i");
+  let cst=(t,x,r)=>((x[0]=='num'?x.T=t:x[0]=='mon'&&x[2][0]=='num'?(x.T=t,x[2].T=t): (r=x.slice(),(r.i=x.i),(r.T=x.T),x.splice(1),x[0]='cst',x[1]=t,x[2]=r,x.T=t ) ),t)
+  let nu=x=>x[0]=='num'&&x.T=="i",lop=x=>x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i'&&x[2][0]!='num'
+  let dy=x=>lop(x)?x.T='K':x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase():x[1][1]=='@'?lup(x[2]):nu(x[2])?(x[2].T=x[3].T):nu(x[3])?(x[3].T=x[2].T):x[2].T=='j'&&x[3].T=='K'?'j':x[2].T=='K'||x[3].T=='K'?(console.log(x),e('todo implicit')):x[2].T=='i'?cst(x[3].T,x[2]):x[3].T=='i'?cst(x[2].T,x[3]):(console.log(x),e('type'))
+  let mn=x=>x[2].T,lt=x=>x[x.length-1].T
+  let jm=x=>(x[1].T=='i'||e(x),x[2].T)
+  let as=x=>{let m=+(5==x.length),xx=x[3+m];if((x[2][1]in X)&&!x[2].T)X[x[2][1]]=xx.T;if(xx[0]=='num'&&x[2].T=='K')xx.T='K';return x[3+m].T},ter=x=>(f(x[1]),x[2].T!=x[3].T?e(x):x[2].T)
+  let f=x=>{if(!Array.isArray(x))return;for(let i=1;i<x.length;i++)f(x[i]);
+   let m={sym:lup,num:nm,mon:mn,dya:dy,cst:x=>x[1],blk:tl,bdy:tl,lst:t0,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,jmp:jm,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);x.forEach(f)}
+  fn.forEach(x=>{f(x[5]);x[4].forEach(x=>x.T=X[x[1]])})}
+ 
+ let digr=a=>{   //digraphs  <<  >>  <= >= for non-k types
+  let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
+   if(x[0]=='dya'&&x[1][0]=='opr'&&x.T!='K'&&1+'<>'.indexOf(x[1][1])&&x[3][0]=='mon'&&x[3][1][0]=='opr'&&1+'<=>'.indexOf(x[3][1][1])){x[1][1]+=x[3][1][1];x[3]=x[3][2];}}
+  a.forEach(f)}
+ 
+ let kfun=a=>{   //k function objects  f => K2(f)  todo ignore globals   todo track Kn
+  let N=(x,...y)=>(y.i=x,y),al,ar={},F=x=>{al=[...x[3].slice(1).map(x=>x[1]),...x[4].slice(1).map(x=>x[1])];f(x[5])}
+  let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='sym'&&x.T=='K'&&ar[x[1]]&&!(al.includes(x[1]))){let s=x[1];x[0]='cal';x[1]='K'+ar[s];x[2]=N(x.i,'sym',s);}}
+  let fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{if(x[2][0]=='K'&&x[2][1].length>1&&x[2][1]=='K'.repeat(x[2][1].length))ar[x[1][1]]=x[3].length-1});fn.forEach(F);
+  }
+ 
+ let call=a=>{    //replace k ops with calls, f@ with call
+  const op=" +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .".replaceAll(" ","")
+  const o1="Abs Neg Sqr Sqt Til Flp Rev Asc Dsc Grp Not Enl Srt Cnt Flr Str Unq Fst Val".split(" ")
+  const o2="Add Sub Mul Div Mod Min Max Les Mor Eql Neq Cat Cut Tak Drp Fmt Fnd Atx Cal".split(" ")
+  let fn={},al,f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')al=[...x[3].map(x=>x[1]),...x[4].map(x=>x[1])];x.forEach(f);
+   if(x[0]=='mon'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'){             x[0]='cal';x[1]=o1[op.indexOf(x[1][1])]};
+   if(x[0]=='dya'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'&&x[3].T=='K'){x[0]='cal';x[1]=o2[op.indexOf(x[1][1])];if(x[1]=='Atx'&&x[3][0]=='num'&&x[3].T=='K'&&(!x[3][1].includes("."))){x[3].T='i';x[1]='Ati'}}
+   else if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&fn[x[2][1]]&&!al.includes(x[2][1])){x[0]='cal';x[1]=x[2][1];let l=x[3];x.splice(2);l[0]=='lst'?x.push(...l.slice(1)):x.push(l);}
+   };a.filter(x=>x[0]=='fun').forEach(x=>fn[x[1][1]]=1);a.forEach(f)}
+ 
+ let loop=a=>{    // i#(tak)  i/(lop)
+  let fn,si=['sym','i'],ii=_=>{if(!(fn[4].slice(1).map(x=>x[1])).includes('i')){si.T='i';si.i=fn.i;fn[4].push(si)}},f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')fn=x;x.forEach(f);
+   if(x[0]=='cal'&&x[1]=='Tak'&&x[2].T=='i'&&x[2][0]!='num'){x[0]='tak';x.T='K';x[1]=x[2];x[2]=x[3];x.slice(3);ii()}
+   if(x[0]=='mon'&&x[1][0]=='drv'&&x[1][1][0]=='adv'&&x[1][1][1]=='/'&&x[1][2].T=='i'&&x[1][2][0]!='num'){x[0]='lop';x[0].T='';x[1]=x[1][2];ii();}
+  }
+  a.forEach(f)}
+ 
+ let cord=a=>{   //evaluate function parameters right-to-left    //todo >2args, count&gen $n(f,x,...)
+  if(A!="c")return
+  let N=(x,...y)=>(y.i=x,y.T='K',y),f=(x,e)=>{if(!Array.isArray(x))return e;
+   x.forEach(x=>e|=f(x,e));
+   if(e&&x.T=='K'&&x[0]=="cal"&&x.length==4){x.splice(1,0,'$2');x[2]=N(x.i,'sym',x[2]);}
+   if(x.T=='K'&&(x[0]=="cal"||x[0]=="asn"))e=1;
+   return e;
+  }
+  a.forEach(x=>f(x,0))}
+ 
+ let refc=a=>{   //inc refcount on args, dec on exit
+  let N=(x,t,...y)=>(y.i=x,y.T=t,y),_x,n,r1=x=>x[0]=="sym"?(++n,_x=N(x.i,'K','cal','R1',x)):x,$n=x=>x.startsWith('$')
+  let fn=x=>{_x=0;n=0;let a=x[3].slice(1).filter(x=>x.T=="K").map(x=>x[1]),l=x[4].slice(1).filter(x=>x.T=="K").map(x=>x[1]),al=[...a,...l],b=x[5]
+   let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
+    if(x[0]=='cal'){for(let i=2+$n(x[1]);i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}}
+   f(b);
+   if(1==n&&1==al.length&&2==b.length){_x[0]='sym';_x[1]=_x[2][1];_x.splice(2)} //revert R1 for single call on x
+   else if(al.length){let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,x.T,'asn',':',N(x.i,x.T,'sym','_'),x)
+    al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'','cal','R0',N(x.i,'K','sym',s))));b.push(N(x.i,x.T,'sym',s))}
+  }
+  a.filter(x=>x[0]=='fun').forEach(fn)}
+ 
+ let cc=a=>{const H=`typedef long K;
+ #define C(x) ((char*)(x))
+ #define I(x) ((int*)(x))
+ #define J(x) ((long*)(x))
+ #define K(x) ((long*)(x))
+ #define Z(x) ((double _Complex*)(x))
+ #define N(x) (I(x)[-1])
+ #define R(x) (I(x)[-2])
+ #define T(x) ((int)(x>>56))
+ #define P(x) ((void*)(x&0xffffffffffffff))
+ #define $(c,t,e) ((c)?(t):(e))
+ #define $2(f,x,y) ({K _y=(y);K _x=(x);f(_x;_y)})
+ #define $S(t,c,b,d) ({t _;switch(c){b default:_=(d);};_;})
+ #define $C(i,x)   case i:_=(x);break;
+ #define W(c,x) {for(i=0;i<(c);i++){x;}}
+ #define NI(n,e) ({int _n=(n);K _=Ktn(2,_n);int*_r=(int*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
+ #define Ma(x) malloc((size_t)(x))
+ #define Mf(x) free(x)
+ #define Mc(d,s,n) memcpy(d,s,(size_t)n)
+ #define Lt(t,x,y) ((unsigned t)(x)<(unsigned t)(y))
+ #define Le(t,x,y) ((unsigned t)(x)<=(unsigned t)(y))
+ #define Gt(t,x,y) ((unsigned t)(x)>(unsigned t)(y))
+ #define Ge(t,x,y) ((unsigned t)(x)>=(unsigned t)(y))
+ #define Sh(t,x,y) ((unsigned t)(x)>>(y))
+ `
+  let e=x=>{console.log(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"long",p:"long",K:"K",f:"double","z":"double _Complex","":"void"}[x])
+  let f=x=>{if(!Array.isArray(x))return x;let s,ch=x=>x.slice(1).map(f),x1=x=>x[1],em=x=>x[0]=='sym'||x[0]=='num'?f(x[1]):`(${f(x)})`
+   let m={
+    bdy:x=>x.slice(1).map(f),
+    blk:x=>`({${x.slice(1).map(f).join(";")};})`,
+    num:x=>x.T=="K"?((x[1].includes(".")?"Kf":"Ki")+"("+x[1]+")"):x[1],
+    iff:x=>`if(${f(x[1])})${f(x[2])}${x[3]?'else '+f(x[3]):''}`,
+    sym:x1,
+    tak:x=>`N${x[2].T.toUpperCase()}(${f(x[1])},${f(x[2])})`,
+    lop:x=>`W(${f(x[1])},${f(x[2])})`,
+    cst:x=>'('+t(x[1])+')'+f(x[2]),
+    lst:x=>x.slice(1).map(f).join(","),
+    cal:x=>x[1]+"("+x.slice(2).map(f).join(",")+")",
+    ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
+    jmp:x=>`$S(${t(x[1].T)},${f(x[1])},${x.slice(1,-1).map(f).map((x,i)=>'$C('+i+','+x+')')},${f(x[x.length-1])})`,
+    asn:(x,s,i)=>(i=5==x.length,s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${i?'['+f(x[3])+']':''}${x[1].replace(':','=')}${f(x[3+i])}`),
+    mon:x=>x[1][0]=='opr'?`(${x[1][1]}${em(x[2])})`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
+    dya:x=>x[1][0]=='opr'?("SGL".includes(x[1][1][0])?`${x[1][1]}(${t(x.T)},${f(x[2])},${f(x[3])})`:x[1][1][0]=='@'?`${em(x[2])}[${f(x[3])}]`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
+   };return(x[0]in m)?m[x[0]](x):e(x)}
+  let ret=(t,x,n)=>{if(t)x[n=x.length-1]="return "+x[n];return x.join(";")+";"}
+  let fn=x=>{let name=x[1][1],res=x[2][1],arg=x[3].slice(1),loc=x[4].slice(1),bdy=x[5];
+   return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc.map(x=>t(x.T)+" "+x[1]+"=0;").join("")}${ret(res,f(bdy))}}\n`}
+  return H+a.filter(x=>x[0]=='fun').map(fn).join("")}
+ 
+ let wa=a=>"todo wa\n"+String(a)
+ let wb=a=>"todo wb\n"+String(a)
+ 
+ if(!P){return`
+
+Ktx(K:ip){jy|jx<<56}
+
+`.trim()
+ }
+ 
+ /*
+ P=`/you can edit the input
+ f{x+/a:y}        /dyadic with local a
+ g(i:Kii){x;y;z}  /func with signature
+ h{1+x? 2*x :3*y} /ternary
+ q{if(1<x)x:+1;y*:2; x+y}  /if-body extends to ;(space) without {}
+ f{{x+y}[1;2]}    /inner lambda needs to be liftet
+ `
+ */
+ 
+ let indicate=(s,i,p)=>{let v=p.split("\n"),n=v.map(x=>1+x.length),c=i,l;for(l=0;l<n.length;l++){if(n[l]>c)break;c-=n[l]};return `k:${1+l}:${1+c} ${s.split(' ')[0]}\n${v[l]}\n${" ".repeat(c)}^${s.replace(/@\d+ /,"")}\n`}
+
+ try{let f,a=pars(P);if(A=="pars")return a
+  for(f of[comp,lift,maco,btin,type,digr,kfun,call,loop,cord,refc]){f(a);if(A==f.name)return a};
+  return A=="c"?cc(a):wa(a)
+ }catch(e){let s=e.message;console.log(e);return s[0]=='@'?indicate(s,+s.slice(1,s.indexOf(' ')),P):s}
+}

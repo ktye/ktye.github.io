@@ -18,11 +18,10 @@ li::marker{content: ""}
 </div>
 <div>
  <input type="text" placeholder="func" size="10" onchange="compile()"     id="pfunc"><br>
- <input type="radio" name="tview" onclick="compile()" id="ptree"                  ><label for="ptree">parse</label><br>
+ <input type="radio" name="tview" onclick="compile()" id="ppars"                  ><label for="ppars">parse</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pcomp"                  ><label for="pcomp">comp</label><br>
  <input type="radio" name="tview" onclick="compile()" id="plift"                  ><label for="plift">lift</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pmaco"                  ><label for="ptype">macro</label><br>
- <!--input type="radio" name="tview" onclick="compile()" id="pasin"                  ><label for="pasin">assign</label><br-->
  <input type="radio" name="tview" onclick="compile()" id="pbtin"                  ><label for="pbtin">builtins</label><br>
  <input type="radio" name="tview" onclick="compile()" id="ptype"                  ><label for="ptype">type</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pdigr"                  ><label for="pdigr">digraphs</label><br>
@@ -31,7 +30,7 @@ li::marker{content: ""}
  <input type="radio" name="tview" onclick="compile()" id="ploop"                  ><label for="ploop">loop</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pcord"                  ><label for="pcord">c arg order</label><br>
  <input type="radio" name="tview" onclick="compile()" id="prefc" checked="checked"><label for="prefc">refcount</label><br>
- <input type="radio" name="tview" onclick="compile()" id="emit"                   ><label for="emit"><select id="ofmt" onchange="compile()"><option value="0">c</option><option value="1">wat</option><option value="2">wasm</option></select></label><br>
+ <input type="radio" name="tview" onclick="compile()" id="emit"                   ><label for="emit"><select id="ofmt" onchange="compile()"><option value="c">c</option><option value="w">wasm</option></select></label><br>
  <div id="out"></div>
 </div>
 <script>
@@ -44,7 +43,12 @@ let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),
  let u=ce("ul"),l=ce("li");l.textContent=a[0]+"."+(a.T||"")+" ";l.innerHTML+=`<span class="ln" onclick="hi(this)">+${a.i}</span>`;ac(u,l);let c=ce("ul");u.appendChild(c)
  for(let i=1;i<a.length;i++)ac(c,tree(a[i]));return u}
 </script>
-<script src="compile"></script>
+<script src="kc.js"></script>
+<script>let a;
+inp.value=kc(0);
+let compile=A=>{A=document.querySelector('input[name="tview"]:checked').id.slice(1);pro.textContent=out.innerHTML='';if(A=="mit")A=ofmt.value;a=kc(inp.value,A);"string"==typeof a?(pro.textContent=a):showtree(a)}
+compile()
+</script>
 </body>
 </html>
 
