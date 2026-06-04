@@ -67,20 +67,19 @@ let kc=(P,A)=>{ //program(string), ast/asm format:pars,comp,lift,...,c,w
     let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return; x.T=In("IJFZp",p)?p.toLowerCase():"i"; x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i;x[2].T='j'};f(x[5])}
   a.filter(x=>x[0]=='fun').forEach(fn)}
  
-
  let btin=a=>{   //builtin calls as operators
   let b='Sh Lt Le Gt Ge'.split(' ')
   let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&b.includes(x[2][1])){x[1][1]=x[2][1];x[2]=x[3][1];x[3]=x[3][2]}};f(a)}
  
- let type=a=>{   //type each node '#' Tak
+ let type=a=>{   //type each node
   let X={Ma:'p',Mf:''},Y={Ma:'i',Mf:'p'},N=(x,...y)=>(y.i=x,y),rt,fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;Y[x[1][1]]=x[2][2]||'K'.repeat(x[3].length-1);x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:x[1]=='i'?'i':'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
   let e=x=>{console.error(x);throw new Error("@"+x.i+" type: "+Li(x))},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1] in X)?X[x[1]]:e(x),nm=(x,s)=>(x=x[1],s=x[x.length-1],x.includes("a")?"z":x.includes(".")?"f":"i");
   let cst=(t,x,r)=>(t==x.T?0:x[0]=='num'&&x.T=='i'?x.T=t:t=='K'?toK(x):x[0]=='mon'&&x[2][0]=='num'?(x.T=t,x[2].T=t):(r=x.slice(),(r.i=x.i),(r.T=x.T),x.splice(1),x[0]='cst',x[1]=t,x[2]=r,x.T=t),t)
   let toK=x=>{let t=x.T,r=x.slice();if(t=='j')return 'K';r.i=x.i;r.T=t;x[0]='cal';x.T='K';x[1]='K'+('ifz'.includes(t)?t:e(x));x.splice(2);x[2]=r;return 'K'}
   let tak=x=>x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i'&&x[2][0]!='num'
   let cal=x=>x[1][1]=='@'&&x[2][0]=='sym'&&(x[2][1]in Y)?(ca(x[2][1],x[3]),x):x
-  let ca=(f,x)=>{let i,a=Y[f],n=a.length,m=x[0]=='lst'?x.length-1:1;if(n!=m)e(x);if(n-1){for(i=0;i<n;i++)cst(a[i],x[1+i])}else cst(a,x);}
-  let dy=x=>tak(x=cal(x))?x.T='K':x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase():x[1][1]=='@'?lup(x[2]):x[2].T=='K'?toK(x[3]):x[3].T=='K'?toK(x[2]):x[2].T=='i'?cst(x[3].T,x[2]):x[3].T=='i'?cst(x[2].T,x[3]):(console.error(x),e('type'))
+  let ca=(f,x)=>{console.log("ca",f);let i,a=Y[f],n=a.length,m=x[0]=='lst'?x.length-1:1;if(n!=m)e(x);if(n-1){for(i=0;i<n;i++)cst(a[i],x[1+i])}else cst(a,x);}
+  let dy=x=>tak(x=cal(x))?x.T='K':x[2].T==x[3].T?x[2].T:x[1][1]=='@'&&x[3].T=='i'?x[2].T:x[1][1]=='@'?lup(x[2]):x[2].T=='K'?toK(x[3]):x[3].T=='K'?toK(x[2]):x[2].T=='i'?cst(x[3].T,x[2]):x[3].T=='i'?cst(x[2].T,x[3]):(console.error(x),e('type'))
   let mn=x=>x[2].T,lt=x=>x[x.length-1].T
   let jm=x=>(x[1].T=='i'||e(x),x[2].T)
   let bd=x=>{if(rt&&rt!=x[x.length-1].T)cst(rt,x[x.length-1]);return rt}
@@ -89,7 +88,7 @@ let kc=(P,A)=>{ //program(string), ast/asm format:pars,comp,lift,...,c,w
    let m={sym:lup,num:nm,mon:mn,dya:dy,cst:x=>x[1],blk:tl,bdy:bd,lst:t0,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,jmp:jm,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x)}
   fn.forEach(x=>{rt=x[2][1];f(x[5]);x[4].forEach(x=>"string"!=typeof x?x.T=X[x[1]]:0)})}
  
- let digr=a=>{   //digraphs  <<  >>  <= >= for non-k types
+ let digr=a=>{   //non-k digraphs  <<  >>  <= >=
   let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
    if(x[0]=='dya'&&x[1][0]=='opr'&&x.T!='K'&&1+'<>'.indexOf(x[1][1])&&x[3][0]=='mon'&&x[3][1][0]=='opr'&&1+'<=>'.indexOf(x[3][1][1])){x[1][1]+=x[3][1][1];x[3]=x[3][2];}}
   a.forEach(f)}
@@ -129,14 +128,15 @@ let kc=(P,A)=>{ //program(string), ast/asm format:pars,comp,lift,...,c,w
  
  let refc=a=>{   //inc refcount on args, dec on exit
   let N=(x,t,...y)=>(y.i=x,y.T=t,y),_x,n,r1=x=>x[0]=="sym"?(++n,_x=N(x.i,'K','cal','R1',x)):x,$n=x=>x.startsWith('$')
-  let fn=x=>{_x=0;n=0;let a=x[3].slice(1).filter(x=>x.T=="K").map(x=>x[1]),l=x[4].slice(1).filter(x=>x.T=="K").map(x=>x[1]),al=[...a,...l],b=x[5]
+  let fn=x=>{_x=0;n=0;let t=x[2][1],a=x[3].slice(1).filter(x=>x.T=="K").map(x=>x[1]),l=x[4].slice(1).filter(x=>x.T=="K").map(x=>x[1]),al=[...a,...l],b=x[5]
    let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
     if(x[0]=='cal'){for(let i=2+$n(x[1]);i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}}
    f(b);
    if(1==n&&1==al.length&&2==b.length){_x[0]='sym';_x[1]=_x[2][1];_x.splice(2)} //revert R1 for single call on x
    else if(al.length){ //let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,x.T,'asn',':',N(x.i,x.T,'sym','_'),x);al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'','cal','R0',N(x.i,'K','sym',s))));b.push(N(x.i,x.T,'sym',s))
-    let r=b[b.length-1];if(r[0]=='sym')al=al.filter(x=>x!=r[1]);b.pop();b.push(N(x.i,r.T,'ret',r,...al))
-  }};a.filter(x=>x[0]=='fun').forEach(fn)}
+    let r=b[b.length-1];if(r[0]=='sym')al=al.filter(x=>x!=r[1]);b.pop();b.push(N(x.i,r.T,'ret',r,...al))}
+   if(t&&b[b.length-1][0]!='ret'){let r=b[b.length-1];b[b.length-1]=N(r.i,t,'ret',r)}
+  };a.filter(x=>x[0]=='fun').forEach(fn)}
  
  let lifmt=s=>{let l=0,i=0,n=[0],m=[0],c,p=0,o="";
   for(i=0;i<s.length;i++,p++){c=s[i];l+=c=='('?1:c==')'?-1:0;f=s.slice(i+1,i+4);if(c=='('&&(p>100||f=="bdy"||f=="fun")){n.push(i-1);m.push(l-2);p=l}}
@@ -207,8 +207,7 @@ typedef long K;
  let wa=a=>"todo wa\n"+String(a)
  let wb=a=>"todo wb\n"+String(a)
  
- if(!P)return `f{Ix[-1]:nx;a:1+x;x}`
- if(!P)return `f{Ix[-1]:nx;x}`
+ if(!P)return `f{if(1)0; x}`
  if(!P)return `K0(:j){t:0;t:x>>56;p:px-8;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/K0 Jxi; Mf px-8; :Ix[-2]:c}`
  if(!P)return `K0(:j){if(!tx)n:Ix[-1];n/K0 Jxi; Mf px-8;}`
  if(!P){return`
