@@ -1,4 +1,4 @@
-<html><head><link rel=icon href="../kelas16.png"><title>k</title></head>
+<html><head><link rel=icon href="../kelas16.png"><title>kc</title></head>
 <style>
 *{font-family:monospace}
 textarea{width:stretch;height:30%;resize:none;outline:none;border:none}
@@ -29,8 +29,8 @@ li::marker{content: ""}
  <input type="radio" name="tview" onclick="compile()" id="pcall"                  ><label for="pcall">call</label><br>
  <input type="radio" name="tview" onclick="compile()" id="ploop"                  ><label for="ploop">loop</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pcord"                  ><label for="pcord">c arg order</label><br>
- <input type="radio" name="tview" onclick="compile()" id="prefc" checked="checked"><label for="prefc">refcount</label><br>
- <input type="radio" name="tview" onclick="compile()" id="emit"                   ><label for="emit"><select id="ofmt" onchange="compile()"><option value="c">c</option><option value="w">wasm</option></select></label><br>
+ <input type="radio" name="tview" onclick="compile()" id="prefc"                  ><label for="prefc">refcount</label><br>
+ <input type="radio" name="tview" onclick="compile()" id="emit"  checked="checked"><label for="emit"><select id="ofmt" onchange="compile()"><option value="c">c</option><option value="w">wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
  <div id="out"></div>
 </div>
 <script>
@@ -51,5 +51,3 @@ compile()
 </script>
 </body>
 </html>
-
-

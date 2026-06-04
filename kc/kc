@@ -1,6 +1,5 @@
 #!/usr/bin/env -S deno run --allow-read
 let kc=(P,A)=>{ //program(string), ast/asm format:pars,comp,lift,...,c,w
-console.log("P",P,"A",A);
  let pars=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
   let _=n=>{while(1){while(In(n?" \t\n":" \t",p[i]))i++;if(p[i]=='/'&&(In(' \n',p[i-1])||!i)){i++;while(p[i]&&p[i]!='\n')i++;i++;continue};break};c=p[i]||''}
   let In=(x,y)=>x.includes(y)
@@ -13,14 +12,14 @@ console.log("P",P,"A",A);
   let loc=(j,a)=>{a=","+a.slice(1).map(x=>x[1]+",").join("");return N(j,'loc',...L.filter(x=>!(In(a,`,${x},`))).map(x=>N(j,'sym',x)))}
   let sig=$=>{let j=i,k,r='K:';if(c=='(')while(n(),c!=')');if(i!=j)r=p.slice(1+j,i),n();r=((+r)?"K:"+"K".repeat(+r):r).split(":");if(2!=r.length||r[0].length>1){i=j;Q("signature")};return N(j,'sig',...r)}
   let sym=q=>{let j=i,k=i,s='',y=0,w=0;if(!sy(c))Q("expected identifier");while(c&&ys(c))s+=c,c=p[++i];if(q&&s=='if'||s=='while')return ifw(j);_();
-   if(q&&s.length>1&&(l(s)=="i"||yn(l(s))))y=l(s),s=s.slice(0,-1);                               //suffix i09  (index)
+   if(q&&s.length>1&&s[0]!='K'&&(l(s)=="i"||yn(l(s))))y=l(s),s=s.slice(0,-1);                    //suffix i09  (index)
    if(q&&s.length>1&&/[cijz]/.test(s[0]))w=s[0],s=s.slice(1);                                    //prefix cijz (cast)  CIJZ (ptrtype)
    if(1==s.length&&In("x y z",s)&&!In(A,s))A+=s;if(s=='i'&&!In(L,'i'))L.push('i');s=N(j,'sym',s);j+=s.length-1;  //arity
    s=y?jux(s,'i'==y?((!In(L,y)?L.push(y):0),N(j,'sym',y)):N(j,'num',y)):s;return w?(s.i++,N(k,'cst',w,s)):s}
   let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];return N(j,'bdy',...r.slice(1))}
   let lst=(t,z,w)=>{let j=i,e,r=[];w||n();while(c&&c!=t){e=exp();if(z||e)r.push(e);if(In(":})]",c))break;c==';'||c=='\n'?n(w):c!=t?Q(`expect ; or ${t} got ${c}`):1};if(c==t&&!w)n();return N(j,'lst',...r)}
   let blo=$=>N(i,'blk',...lst(']').slice(1)),bk1=x=>x[0]=="blk"&&x.length==2?x[1]:x              //block expression [1;2;3]
-  let blk=$=>{let j=i,b=lst(' ',0,1);if(p[i-1]==';')c=p[--i];return N(i,'blk',...b.slice(1))}    //auto block       1;2;(space)
+  let blk=$=>{let j=i,b=lst(' ',0,1);if(p[i-1]==';')c=p[i]=';';return N(i,'blk',...b.slice(1))}  //auto block       1;2;(space)
   let rls=(t,x)=>{let j=i;return 2==x.length?x[1]:N(x.i,t,...x.slice(1))}
   let bkt=x=>{let j=i,r=lst(']',1);if(2==r.length)r=r[1];return(yb())?(x[0]!='sym'?(i=i,Q("asn")):asn(x,r)):jux(x,r)}           // 1-:  => com(opr +, prj(opr :,1))
   let asn=(x,y)=>{let j=i,r=c;if(x[0]=='opr')return n(),N(x.i,'com',N(j,'opr',':'),x);             //-:
@@ -42,8 +41,8 @@ console.log("P",P,"A",A);
   let adv=$=>{let j=i,r=c;n();return N(j,'adv',r)}
   let prj=(x,y)=>{let j=i;return N(j,'prj',x,y)}
   let tet=(j,x,r)=>{if(r.length==3)r.splice(2,0,0);return N(j,'cal',x=='@'?'Amd':'Dmd',N(1+j,'lst',...r))}
-  let num=$=>{let j=i,s=c=='-'?c:'';if(s)c=p[++i];while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
-  let ter=x=>{let j=i,t,e;n();t=blk();if(c!=':')Q('tern expect :');n(1);e=blk();_();return N(j,'ter',x,bk1(t),bk1(e))}
+  let num=$=>{let j=i,s=c=='-'?c:'';if(s)c=p[++i];while(/[0-9.ijfzea]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
+  let ter=x=>{let j=i,t,e;n();t=blk();c=p[++i];console.log("tern",c);if(c!=':')Q('tern expect :');n(1);e=blk();_();return N(j,'ter',x,bk1(t),bk1(e))}
   let jmp=x=>{let j=i++,r=lst('[]'[1]);return N(j,'jmp',...r.slice(1))}
   let ifw=j=>{if(c!='(')Q('(missing');'))';n(1);let e=exp();n(1); return N(j,p[j]=='i'?'iff':'whl',e,blk())}
   let spc=x=>{let j=i-1,r=lst(']');x=x[1];return x=='$'?cnd(r.slice(1),j):(r.length>4||r.length<3)?(i=j,Q('triadic or tetradic')):In("@.",x)?tet(j,x,r):(i=j,Q('unknown special'))}
@@ -65,7 +64,7 @@ console.log("P",P,"A",A);
  let maco=a=>{   //type macro nx.. [ntprIJCFZ]
   let fn=x=>{let i,f,v={},m="ntprIJCFZ",a=x[3].slice(1).map(x=>x[1]),l=x[4].slice(1).map(x=>x[1]),al=[...a,...l],In=(x,y)=>x.includes(y)
    f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]!="sym"||x[1].length!=2||In(l,x[1]))return;
-    let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return; x.T=In("IJFZp",p)?p:"i"; x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i;x[2].T='j'};f(x[5])}
+    let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return; x.T=In("IJFZp",p)?p.toLowerCase():"i"; x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i;x[2].T='j'};f(x[5])}
   a.filter(x=>x[0]=='fun').forEach(fn)}
  
 
@@ -74,17 +73,21 @@ console.log("P",P,"A",A);
   let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&b.includes(x[2][1])){x[1][1]=x[2][1];x[2]=x[3][1];x[3]=x[3][2]}};f(a)}
  
  let type=a=>{   //type each node '#' Tak
-  let X={Ma:'p',Mf:''},N=(x,...y)=>(y.i=x,y),fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:x[1]=='i'?'i':'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
-  let e=x=>{console.log(x);throw new Error("@"+x.i+" type: "+x)},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1]in X)?X[x[1]]:e(x),nm=(x,s)=>(s=x[x.length-1],"cijfz".includes(s)?s:x.includes("a")?"z":x.includes(".")?"f":"i");
-  let cst=(t,x,r)=>((x[0]=='num'?x.T=t:x[0]=='mon'&&x[2][0]=='num'?(x.T=t,x[2].T=t): (r=x.slice(),(r.i=x.i),(r.T=x.T),x.splice(1),x[0]='cst',x[1]=t,x[2]=r,x.T=t ) ),t)
-  let nu=x=>x[0]=='num'&&x.T=="i",lop=x=>x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i'&&x[2][0]!='num'
-  let dy=x=>lop(x)?x.T='K':x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase():x[1][1]=='@'?lup(x[2]):nu(x[2])?(x[2].T=x[3].T):nu(x[3])?(x[3].T=x[2].T):x[2].T=='j'&&x[3].T=='K'?'j':x[2].T=='K'||x[3].T=='K'?(console.log(x),e('todo implicit')):x[2].T=='i'?cst(x[3].T,x[2]):x[3].T=='i'?cst(x[2].T,x[3]):(console.log(x),e('type'))
+  let X={Ma:'p',Mf:''},Y={Ma:'i',Mf:'p'},N=(x,...y)=>(y.i=x,y),rt,fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{x.T=x[2][1];X[x[1][1]]=x.T;Y[x[1][1]]=x[2][2]||'K'.repeat(x[3].length-1);x[2][2]=(!x[2][2])?'K'.repeat(x[3].length-1):x[2][2];x[2][2].split("").forEach((t,i)=>x[3][1+i].T=t);x[3].slice(1).forEach(x=>X[x[1]]=x.T);x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:x[1]=='i'?'i':'')}); //X={'name':'K'} namespace:funcs/arg/loc/glo
+  let e=x=>{console.error(x);throw new Error("@"+x.i+" type: "+Li(x))},t0=x=>'',t1=x=>x[1].T,tl=x=>x[x.length-1].T,lup=x=>(x[1] in X)?X[x[1]]:e(x),nm=(x,s)=>(x=x[1],s=x[x.length-1],x.includes("a")?"z":x.includes(".")?"f":"i");
+  let cst=(t,x,r)=>(t==x.T?0:x[0]=='num'&&x.T=='i'?x.T=t:t=='K'?toK(x):x[0]=='mon'&&x[2][0]=='num'?(x.T=t,x[2].T=t):(r=x.slice(),(r.i=x.i),(r.T=x.T),x.splice(1),x[0]='cst',x[1]=t,x[2]=r,x.T=t),t)
+  let toK=x=>{let t=x.T,r=x.slice();if(t=='j')return 'K';r.i=x.i;r.T=t;x[0]='cal';x.T='K';x[1]='K'+('ifz'.includes(t)?t:e(x));x.splice(2);x[2]=r;return 'K'}
+  let tak=x=>x[1][0]=='opr'&&x[1][1]=='#'&&x[2].T=='i'&&x[2][0]!='num'
+  let cal=x=>x[1][1]=='@'&&x[2][0]=='sym'&&(x[2][1]in Y)?(ca(x[2][1],x[3]),x):x
+  let ca=(f,x)=>{let i,a=Y[f],n=a.length,m=x[0]=='lst'?x.length-1:1;if(n!=m)e(x);if(n-1){for(i=0;i<n;i++)cst(a[i],x[1+i])}else cst(a,x);}
+  let dy=x=>tak(x=cal(x))?x.T='K':x[2].T==x[3].T?x[2].T:"CIJFZ".includes(x[2].T)&&x[1][1]=="@"?x[2].T.toLowerCase():x[1][1]=='@'?lup(x[2]):x[2].T=='K'?toK(x[3]):x[3].T=='K'?toK(x[2]):x[2].T=='i'?cst(x[3].T,x[2]):x[3].T=='i'?cst(x[2].T,x[3]):(console.error(x),e('type'))
   let mn=x=>x[2].T,lt=x=>x[x.length-1].T
   let jm=x=>(x[1].T=='i'||e(x),x[2].T)
-  let as=x=>{let m=+(5==x.length),xx=x[3+m];if((x[2][1]in X)&&!x[2].T)X[x[2][1]]=xx.T;if(xx[0]=='num'&&x[2].T=='K')xx.T='K';return x[3+m].T},ter=x=>(f(x[1]),x[2].T!=x[3].T?e(x):x[2].T)
+  let bd=x=>{if(rt&&rt!=x[x.length-1].T)cst(rt,x[x.length-1]);return rt}
+  let as=x=>{let m=+(5==x.length),xx=x[3+m],s=x[2][0]=='sym'?x[2][1]:'';if(s&&(!m))if(!(s in X))e(x);if(x[1]==':'&&s&&!X[s])X[s]=xx.T;else if(xx.T!=x[2].T)cst(x[2].T,xx);return xx.T},ter=x=>(f(x[1]),x[2].T!=x[3].T?e(x):x[2].T)
   let f=x=>{if(!Array.isArray(x))return;for(let i=1;i<x.length;i++)f(x[i]);
-   let m={sym:lup,num:nm,mon:mn,dya:dy,cst:x=>x[1],blk:tl,bdy:tl,lst:t0,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,jmp:jm,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x);x.forEach(f)}
-  fn.forEach(x=>{f(x[5]);x[4].forEach(x=>x.T=X[x[1]])})}
+   let m={sym:lup,num:nm,mon:mn,dya:dy,cst:x=>x[1],blk:tl,bdy:bd,lst:t0,adv:t0,drv:t0,asn:as,ter:ter,iff:t0,jmp:jm,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x)}
+  fn.forEach(x=>{rt=x[2][1];f(x[5]);x[4].forEach(x=>"string"!=typeof x?x.T=X[x[1]]:0)})}
  
  let digr=a=>{   //digraphs  <<  >>  <= >= for non-k types
   let f=x=>{if(!Array.isArray(x))return;x.forEach(f);
@@ -101,7 +104,7 @@ console.log("P",P,"A",A);
   const op=" +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .".replaceAll(" ","")
   const o1="Abs Neg Sqr Sqt Til Flp Rev Asc Dsc Grp Not Enl Srt Cnt Flr Str Unq Fst Val".split(" ")
   const o2="Add Sub Mul Div Mod Min Max Les Mor Eql Neq Cat Cut Tak Drp Fmt Fnd Atx Cal".split(" ")
-  let fn={},al,f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')al=[...x[3].map(x=>x[1]),...x[4].map(x=>x[1])];x.forEach(f);
+  let fn={Ma:1,Mf:1},al,f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')al=[...x[3].map(x=>x[1]),...x[4].map(x=>x[1])];x.forEach(f);
    if(x[0]=='mon'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'){             x[0]='cal';x[1]=o1[op.indexOf(x[1][1])]};
    if(x[0]=='dya'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'&&x[3].T=='K'){x[0]='cal';x[1]=o2[op.indexOf(x[1][1])];if(x[1]=='Atx'&&x[3][0]=='num'&&x[3].T=='K'&&(!x[3][1].includes("."))){x[3].T='i';x[1]='Ati'}}
    else if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&fn[x[2][1]]&&!al.includes(x[2][1])){x[0]='cal';x[1]=x[2][1];let l=x[3];x.splice(2);l[0]=='lst'?x.push(...l.slice(1)):x.push(l);}
@@ -115,11 +118,11 @@ console.log("P",P,"A",A);
   a.forEach(f)}
  
  let cord=a=>{   //evaluate function parameters right-to-left    //todo >2args, count&gen $n(f,x,...)
-  if(A!="c")return
+  if(A!="c")return;let F="Ki Kf Kz N P R".split(" ");
   let N=(x,...y)=>(y.i=x,y.T='K',y),f=(x,e)=>{if(!Array.isArray(x))return e;
    x.forEach(x=>e|=f(x,e));
    if(e&&x.T=='K'&&x[0]=="cal"&&x.length==4){x.splice(1,0,'$2');x[2]=N(x.i,'sym',x[2]);}
-   if(x.T=='K'&&(x[0]=="cal"||x[0]=="asn"))e=1;
+   if(x.T=='K'&&((x[0]=="cal"&&!F.includes(x[1]))||x[0]=="asn"))e=1;
    return e;
   }
   a.forEach(x=>f(x,0))}
@@ -131,69 +134,93 @@ console.log("P",P,"A",A);
     if(x[0]=='cal'){for(let i=2+$n(x[1]);i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}}
    f(b);
    if(1==n&&1==al.length&&2==b.length){_x[0]='sym';_x[1]=_x[2][1];_x.splice(2)} //revert R1 for single call on x
-   else if(al.length){let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,x.T,'asn',':',N(x.i,x.T,'sym','_'),x)
-    al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'','cal','R0',N(x.i,'K','sym',s))));b.push(N(x.i,x.T,'sym',s))}
-  }
-  a.filter(x=>x[0]=='fun').forEach(fn)}
+   else if(al.length){ //let s='_';x=b[b.length-1];if(x[0]=='sym'){s=x[1];b.pop()}else b[b.length-1]=N(x.i,x.T,'asn',':',N(x.i,x.T,'sym','_'),x);al.filter(x=>x!=s).forEach(s=>b.push(N(x.i,'','cal','R0',N(x.i,'K','sym',s))));b.push(N(x.i,x.T,'sym',s))
+    let r=b[b.length-1];if(r[0]=='sym')al=al.filter(x=>x!=r[1]);b.pop();b.push(N(x.i,r.T,'ret',r,...al))
+  }};a.filter(x=>x[0]=='fun').forEach(fn)}
  
- let cc=a=>{const H=`typedef long K;
- #define C(x) ((char*)(x))
- #define I(x) ((int*)(x))
- #define J(x) ((long*)(x))
- #define K(x) ((long*)(x))
- #define Z(x) ((double _Complex*)(x))
- #define N(x) (I(x)[-1])
- #define R(x) (I(x)[-2])
- #define T(x) ((int)(x>>56))
- #define P(x) ((void*)(x&0xffffffffffffff))
- #define $(c,t,e) ((c)?(t):(e))
- #define $2(f,x,y) ({K _y=(y);K _x=(x);f(_x;_y)})
- #define $S(t,c,b,d) ({t _;switch(c){b default:_=(d);};_;})
- #define $C(i,x)   case i:_=(x);break;
- #define W(c,x) {for(i=0;i<(c);i++){x;}}
- #define NI(n,e) ({int _n=(n);K _=Ktn(2,_n);int*_r=(int*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
- #define Ma(x) malloc((size_t)(x))
- #define Mf(x) free(x)
- #define Mc(d,s,n) memcpy(d,s,(size_t)n)
- #define Lt(t,x,y) ((unsigned t)(x)<(unsigned t)(y))
- #define Le(t,x,y) ((unsigned t)(x)<=(unsigned t)(y))
- #define Gt(t,x,y) ((unsigned t)(x)>(unsigned t)(y))
- #define Ge(t,x,y) ((unsigned t)(x)>=(unsigned t)(y))
- #define Sh(t,x,y) ((unsigned t)(x)>>(y))
- `
-  let e=x=>{console.log(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"long",p:"long",K:"K",f:"double","z":"double _Complex","":"void"}[x])
-  let f=x=>{if(!Array.isArray(x))return x;let s,ch=x=>x.slice(1).map(f),x1=x=>x[1],em=x=>x[0]=='sym'||x[0]=='num'?f(x[1]):`(${f(x)})`
+ let lifmt=s=>{let l=0,i=0,n=[0],m=[0],c,p=0,o="";
+  for(i=0;i<s.length;i++,p++){c=s[i];l+=c=='('?1:c==')'?-1:0;f=s.slice(i+1,i+4);if(c=='('&&(p>100||f=="bdy"||f=="fun")){n.push(i-1);m.push(l-2);p=l}}
+  n.push(s.length);for(i=0;i<n.length-1;i++)o+=" ".repeat(m[i])+s.slice(n[i],n[1+i])+"\n";return o}
+
+ let li=a=>{let f=x=>(!Array.isArray(x))?x:`(${x.map(f).join(" ")})`;return f(a)} //lisp
+ let Li=a=>{let f=x=>(!Array.isArray(x))?x:`(${x.map((e,i)=>(i?'':(x.T||'.'))+f(e)).join(" ")})`;return f(a)} //typed lisp
+ let cc=a=>{const H=`#include<stdint.h>
+#include<stdlib.h>
+typedef long K;
+#define C(x) ((char*)P(x))
+#define I(x) ((int*)P(x))
+#define J(x) ((K*)P(x))
+#define K(x) ((K*)P(x))
+#define F(x) ((double*)P(x))
+#define Z(x) ((double _Complex*)P(x))
+#define N(x) (I(x)[-1])
+#define R(x) (I(x)[-2])
+#define T(x) ((int)(x>>56))
+#define P(x) ((uintptr_t)(0xffffffffffffff&(K)x))
+#define $(c,t,e) ((c)?(t):(e))
+#define $2(f,x,y) ({K _y=(y);K _x=(x);f(_x,_y);})
+#define _1(r,x)           ({K _=(r);R0(x);_;}
+#define _2(r,x,y)         ({K _=(r);R0(x);R0(y);_;}
+#define _3(r,x,y,z)       ({K _=(r);R0(x);R0(y);R0(z);_;}
+#define _4(r,x,y,z,a)     ({K _=(r);R0(x);R0(y);R0(z);R0(a);_;}
+#define _5(r,x,y,z,a,b)   ({K _=(r);R0(x);R0(y);R0(z);R0(a);R0(b);_;}
+#define _6(r,x,y,z,a,b,c) ({K _=(r);R0(x);R0(y);R0(z);R0(a);R0(b);R0(c);_;}
+#define $S(t,c,b,d) ({t _;switch(c){b default:_=(d);};_;})
+#define $C(i,x)   case i:_=(x);break;
+#define W(c,x) {for(i=0;i<(c);i++){x;}}
+#define NI(n,e) ({int _n=(n);K _=Ktn(2,_n);int*_r=(int*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
+#define Ma(x) (uintptr_t)malloc((size_t)(x))
+#define Mf(x) free(x)
+#define Mc(d,s,n) memcpy(d,s,(size_t)n)
+#define Lt(t,x,y) ((unsigned t)(x)<(unsigned t)(y))
+#define Le(t,x,y) ((unsigned t)(x)<=(unsigned t)(y))
+#define Gt(t,x,y) ((unsigned t)(x)>(unsigned t)(y))
+#define Ge(t,x,y) ((unsigned t)(x)>=(unsigned t)(y))
+#define Sh(t,x,y) ((unsigned t)(x)>>(y))
+`
+  let e=x=>{console.error(x);throw new Error("@"+x.i+" cc: "+x)},t=x=>({i:"int",j:"K",p:"K",K:"K",f:"double","z":"double _Complex","":"void"}[x])
+  let res,f=x=>{if(!Array.isArray(x))return x;let s,ch=x=>x.slice(1).map(f),x1=x=>x[1],em=x=>x[0]=='sym'||x[0]=='num'?f(x[1]):`(${f(x)})`
    let m={
-    bdy:x=>x.slice(1).map(f),
-    blk:x=>`({${x.slice(1).map(f).join(";")};})`,
-    num:x=>x.T=="K"?((x[1].includes(".")?"Kf":"Ki")+"("+x[1]+")"):x[1],
+    bdy:x=>x.slice(1).map(f).join(';'),
+    blk:x=>`{${x.slice(1).map(f).join(";")};}`,
+    num:x=>x[1], //todo complex
     iff:x=>`if(${f(x[1])})${f(x[2])}${x[3]?'else '+f(x[3]):''}`,
     sym:x1,
     tak:x=>`N${x[2].T.toUpperCase()}(${f(x[1])},${f(x[2])})`,
     lop:x=>`W(${f(x[1])},${f(x[2])})`,
-    cst:x=>'('+t(x[1])+')'+f(x[2]),
+    cst:x=>'('+t(x[1])+')'+em(x[2]),
     lst:x=>x.slice(1).map(f).join(","),
     cal:x=>x[1]+"("+x.slice(2).map(f).join(",")+")",
     ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
-    jmp:x=>`$S(${t(x[1].T)},${f(x[1])},${x.slice(1,-1).map(f).map((x,i)=>'$C('+i+','+x+')')},${f(x[x.length-1])})`,
+    jmp:x=>`$S(${t(x[1].T)},${f(x[1])},${x.slice(1,-1).map(f).map((x,i)=>'$C('+i+','+x+')').join('')},${f(x[x.length-1])})`,
     asn:(x,s,i)=>(i=5==x.length,s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${i?'['+f(x[3])+']':''}${x[1].replace(':','=')}${f(x[3+i])}`),
     mon:x=>x[1][0]=='opr'?`(${x[1][1]}${em(x[2])})`:x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
     dya:x=>x[1][0]=='opr'?("SGL".includes(x[1][1][0])?`${x[1][1]}(${t(x.T)},${f(x[2])},${f(x[3])})`:x[1][1][0]=='@'?`${em(x[2])}[${f(x[3])}]`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
+    ret:x=>(res?'return ':'')+(x.length==2?f(x[1]):'_'+(x.length-2)+'('+f(x[1])+','+x.slice(2).join(',')+')' ),
    };return(x[0]in m)?m[x[0]](x):e(x)}
   let ret=(t,x,n)=>{if(t)x[n=x.length-1]="return "+x[n];return x.join(";")+";"}
-  let fn=x=>{let name=x[1][1],res=x[2][1],arg=x[3].slice(1),loc=x[4].slice(1),bdy=x[5];
-   return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc.map(x=>t(x.T)+" "+x[1]+"=0;").join("")}${ret(res,f(bdy))}}\n`}
+  let loc=l=>{let r="",i,g={};l.forEach((x,tx)=>(tx=t(x.T),(tx in g)?g[tx].push(x[1]):g[tx]=[x[1]]));for(i in g)r+=i+" "+g[i].map(x=>i!='K'?x:x+'=0').join(",")+";";return r}
+  let fn=x=>{let name=x[1][1],arg=x[3].slice(1),l=x[4].slice(1),bdy=x[5],lt='';res=x[2][1]
+   return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc(l)}${f(bdy)};}\n`}
   return H+a.filter(x=>x[0]=='fun').map(fn).join("")}
  
  let wa=a=>"todo wa\n"+String(a)
  let wb=a=>"todo wb\n"+String(a)
  
+ if(!P)return `f{Ix[-1]:nx;a:1+x;x}`
+ if(!P)return `f{Ix[-1]:nx;x}`
+ if(!P)return `K0(:j){t:0;t:x>>56;p:px-8;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/K0 Jxi; Mf px-8; :Ix[-2]:c}`
+ if(!P)return `K0(:j){if(!tx)n:Ix[-1];n/K0 Jxi; Mf px-8;}`
  if(!P){return`
 
-Ktx(K:ip){jy|jx<<56}
+Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}
+K0(:j){t:i j>>56;p:px-8;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/K0 Jxi; Mf x-8; :Ix[-2]:c}
+Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma 8+y<<x?[3;0;2;3;4];r+:8;Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}
+
 
 `.trim()
  }
+
  
  /*
  P=`/you can edit the input
@@ -209,19 +236,15 @@ Ktx(K:ip){jy|jx<<56}
 
  try{let f,a=pars(P);if(A=="pars")return a
   for(f of[comp,lift,maco,btin,type,digr,kfun,call,loop,cord,refc]){f(a);if(A==f.name)return a};
-  return A=="c"?cc(a):wa(a)
- }catch(e){let s=e.message;console.log(e);return s[0]=='@'?indicate(s,+s.slice(1,s.indexOf(' ')),P):s}
+  return A=="c"?cc(a):A=="w"?wa(a):"l"==A?lifmt(li(a)):lifmt(Li(a))
+ }catch(e){let s=e.message;console.error(e);return s[0]=='@'?indicate(s,+s.slice(1,s.indexOf(' ')),P):s}
 }
 
 if("undefined"!=typeof Deno){
  let P="",A="c",f="out",s,argv=process.argv.slice(2),read=x=>new TextDecoder("utf-8").decode(Deno.readFileSync(x))
  for(s of argv){
-  if(s=="w")A="w";
+  if("c w l t".includes(s))A=s;
   else if(s.endsWith(".k")){f=s.slice(-2);P+=read(s)}
-  else{throw new Error(s)}
- }
- if(!P){throw new Error("no input")}
- f+="."+A
- s=kc(P,A);
- console.log(s);
-}
+  else{throw new Error(s)}}
+ if(!P)P=kc(0);
+ f+="."+A; s=kc(P,A); if(s.startsWith("k:")){console.error(s);Deno.exit(1);} console.log(s);}
