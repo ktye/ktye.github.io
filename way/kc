@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run
+#!/usr/bin/env -S deno run --allow-read
 let kc=(P,A)=>{ //program(string), ast/asm format:pars,comp,lift,...,c,w
 console.log("P",P,"A",A);
  let pars=p=>{let i=-1,c,n=x=>(c=p[++i],x?0:_()),N=(x,...y)=>(y.i=x,y),Q=x=>{throw new Error("@"+i+" "+x)},l=x=>x[x.length-1]
@@ -38,8 +38,8 @@ console.log("P",P,"A",A);
    if(yb())return yi(r)?asn(r[2],r[3]):asn(r,0);if(c=='['&&yx(p[i-1]))return spc(r);
    while(YY(c)&&p[i-1]!=' '){j=i;if(c=='['){r=yy(p[i-1])?Q("primitive bracket call"):bkt(r)}else r=N(j,'drv',adv(),r)};return r}
   let dya=(f,x,y)=>N(f.i,"dya",f,x,y),mon=(f,x)=>N(f.i,"mon",f,x),jux=(x,y)=>dya(N(y.i-1,'opr','@'),x,y),com=(x,y)=>x[0]=="com"?(x.push(y),x):N(x.i,"com",x,y)
-  let opr=$=>{let j=i;r=c;n();return N(j,'opr',r)}
-  let adv=$=>{let j=i;r=c;n();return N(j,'adv',r)}
+  let opr=$=>{let j=i,r=c;n();return N(j,'opr',r)}
+  let adv=$=>{let j=i,r=c;n();return N(j,'adv',r)}
   let prj=(x,y)=>{let j=i;return N(j,'prj',x,y)}
   let tet=(j,x,r)=>{if(r.length==3)r.splice(2,0,0);return N(j,'cal',x=='@'?'Amd':'Dmd',N(1+j,'lst',...r))}
   let num=$=>{let j=i,s=c=='-'?c:'';if(s)c=p[++i];while(/[0-9ijfz]/.test(c))s+=c,c=p[++i];_();return N(j,'num',s)}
@@ -211,4 +211,17 @@ Ktx(K:ip){jy|jx<<56}
   for(f of[comp,lift,maco,btin,type,digr,kfun,call,loop,cord,refc]){f(a);if(A==f.name)return a};
   return A=="c"?cc(a):wa(a)
  }catch(e){let s=e.message;console.log(e);return s[0]=='@'?indicate(s,+s.slice(1,s.indexOf(' ')),P):s}
+}
+
+if("undefined"!=typeof Deno){
+ let P="",A="c",f="out",s,argv=process.argv.slice(2),read=x=>new TextDecoder("utf-8").decode(Deno.readFileSync(x))
+ for(s of argv){
+  if(s=="w")A="w";
+  else if(s.endsWith(".k")){f=s.slice(-2);P+=read(s)}
+  else{throw new Error(s)}
+ }
+ if(!P){throw new Error("no input")}
+ f+="."+A
+ s=kc(P,A);
+ console.log(s);
 }

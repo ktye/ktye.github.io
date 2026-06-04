@@ -43,7 +43,7 @@ let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),
  let u=ce("ul"),l=ce("li");l.textContent=a[0]+"."+(a.T||"")+" ";l.innerHTML+=`<span class="ln" onclick="hi(this)">+${a.i}</span>`;ac(u,l);let c=ce("ul");u.appendChild(c)
  for(let i=1;i<a.length;i++)ac(c,tree(a[i]));return u}
 </script>
-<script src="kc.js"></script>
+<script src="kc"></script>
 <script>let a;
 inp.value=kc(0);
 let compile=A=>{A=document.querySelector('input[name="tview"]:checked').id.slice(1);pro.textContent=out.innerHTML='';if(A=="mit")A=ofmt.value;a=kc(inp.value,A);"string"==typeof a?(pro.textContent=a):showtree(a)}
