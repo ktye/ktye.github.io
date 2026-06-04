@@ -1,11 +1,11 @@
-Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[1;3];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}            /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
-Ma(p:i) Mf(:p) Mc(i:ppi) Kfr(:j){t:i.56/j;p:px;c:Ip[-2]-1;!c? if(!t)Ip[-1]/Kfr Jpi; Mfr x; :Ix[-2]:c}   / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
-Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma@y<<x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}                        / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
-Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]}                    /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
-Exl{r:Ktn[0;nx]tx?[x;nx/Jri:K.Cxi;nx/Jri:K.Ixi;nx/Jri:K.Fxi;nx/Jri:K.Zxi];r}                            / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
+Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[1;3];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}     /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
+Kfr(:j){t:i j>>56;p:px;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/Kfr p Jxi; Mfr x; :Ix[-2]:c}              / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
+Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma@y<<x?[3;0;2;3;4];Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}                 / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
+Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]}             /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
+Exl{r:Ktn[0;nx]tx?[x;nx/Jri:K.Cxi;nx/Jri:K.Ixi;nx/Jri:K.Fxi;nx/Jri:K.Zxi];r}                     / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
-Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}                     / i/f: <=> ~ ~neq %div i/\shift |&^ _min $max n/ndo  n#vec cast:i. idx: x0 xi
-Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                           / n(length) t(type) r(refcount) p(pointer) s(element-size) 
+Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}              / i/f: <=> ~ ~neq %div i/\shift |&^ _min $max n/ndo  n#vec cast:i. idx: x0 xi
+Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                    / n(length) t(type) r(refcount) p(pointer) s(element-size) 
 Pri{if(jy<0)Q;x[yn#yi;yn#y i-1]} Ovr{s:@x;(ny-1)/s:x[s;y 1+i];s} Scn{s:@x; ny#i? x[s;yi] :s}
 Jon{if(jy<0)Q;r:@y;(ny-1)/{r,:x;r,:y 1+i}; r} Spl{if(!jx<0)Q; if(jy<0)Q; r:(0,!y=x)^y;if(nr)r0:1_r0; r}
 Fix{r:y;while(r~y:f y)r:y; r} Fxs{r:y;s:,r;while(r~f y)r:y;s,:r; r}
