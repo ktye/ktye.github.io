@@ -1,7 +1,7 @@
 Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}     /  +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .  
-K0(:j){t:i x>>56;p:px-8;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/K0 Jxi; Mf px-8; :Ix[-2]:c}              / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
-Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma 8+y<<x?[3;0;2;3;4];r+:8;Ir[-2]:1;Ir[-1]:y;Ktx[x;pr]}          / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
-Ufy{(!nx)? x: t:tx0; !t? x: nx/if(t~txi){t:0;break};t?[n#c.xi;n#i.xi;n#f.xi;n#z.xi]}             /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
+K0(:j){t:0;t:x>>56;p:px-8;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/K0 Jxi; Mf px-8; :Ix[-2]:c}            / abs neg sqr sqt til flp rev asc dsc grp not enl srt cnt flr str unq fst val
+Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma 8+y<<x?[3;0;2;3;4];r+:8;Ir[-2]:1;Ir[-1]:y;Ktx[x;r]}           / add sub mul div mod min max les mor eql neq cat cut tak drp fmt fnd atx cal
+Ufy{(!nx? x :t:tx0);!t? x :(n:nx)/if(t~txi)t:0;break; t?[n#Cxi;n#Ixi;n#Fxi;n#Zxi]}               /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
 Exl{r:Ktn[0;nx]tx?[x;nx/Jri:K.Cxi;nx/Jri:K.Ixi;nx/Jri:K.Fxi;nx/Jri:K.Zxi];r}                     / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
 Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}              / i/f: <=> ~ ~neq %div i/\shift |&^ _min $max n/ndo  n#vec cast:i. idx: x0 xi
