@@ -5,4 +5,4 @@ set -x
 #cat m.c >> x.c
 #cc x.c
 
-./kc w x.k | wasm2wat -
+./kc w x.k > x.w && wasm2wat x.w
