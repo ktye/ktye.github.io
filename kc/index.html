@@ -30,7 +30,7 @@ li::marker{content: ""}
  <input type="radio" name="tview" onclick="compile()" id="ploop"                  ><label for="ploop">loop</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pcord"                  ><label for="pcord">c arg order</label><br>
  <input type="radio" name="tview" onclick="compile()" id="prefc"                  ><label for="prefc">refcount</label><br>
- <input type="radio" name="tview" onclick="compile()" id="emit"  checked="checked"><label for="emit"><select id="ofmt" onchange="compile()"><option value="c">c</option><option value="w">wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
+ <input type="radio" name="tview" onclick="compile()" id="emit"  checked="checked"><label for="emit"><select id="ofmt" onchange="compile()"><option value="c">c</option><option value="w" selected>wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
  <div id="out"></div>
 </div>
 <script>
@@ -46,7 +46,10 @@ let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),
 <script src="kc"></script>
 <script>let a;
 inp.value=kc(0);
-let compile=A=>{A=document.querySelector('input[name="tview"]:checked').id.slice(1);pro.textContent=out.innerHTML='';if(A=="mit")A=ofmt.value;a=kc(inp.value,A);"string"==typeof a?(pro.textContent=a):showtree(a)}
+let xxd=(x,t, s,i,o,O)=>(t=t?t:0,i=0,o=x.length+" bytes\n",O=x=>o+=x,s="  ",x.forEach((x,i)=>{
+ if(0==i%16)(O((i?s+"\n":"")+(i+t).toString(16).padStart(8,'0')+":"),s="  ")
+ if(0==i%2)O(" ");O(x.toString(16).padStart(2,'0'));s+=(x>31&&x<127)?String.fromCharCode(x):"."}),(i=x.length%16),O(i?" ".repeat(2.5*(16-x.length%16)):""+s),o)
+let compile=A=>{A=document.querySelector('input[name="tview"]:checked').id.slice(1);pro.textContent=out.innerHTML='';if(A=="mit")A=ofmt.value;a=kc(inp.value,A);if(a.constructor==Uint8Array)a=xxd(a);"string"==typeof a?(pro.textContent=a):showtree(a)}
 compile()
 </script>
 </body>

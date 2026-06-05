@@ -1,0 +1,8 @@
+set -e
+set -x
+
+#./kc > x.c
+#cat m.c >> x.c
+#cc x.c
+
+./kc w x.k | wasm2wat -

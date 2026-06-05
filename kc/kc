@@ -207,12 +207,81 @@ H2=`
    return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc(l)}${f(bdy)};}\n`}
   let r=a.filter(x=>x[0]=='fun').map(fn).join("");return H1+$N()+_N()+H2+r}
  
- let wa=a=>"todo wa\n"+String(a)
- let wb=a=>"todo wb\n"+String(a)
- 
- //if(!P)return `K0(:j){t:0;t:x>>56;p:px-8;c:Ix[-2]-1;!c? if(!t)n:Ix[-1];n/K0 Jxi; Mf px-8; :Ix[-2]:c}`
- //if(!P)return `f(p:i){Ma 8+x}`
- //if(!P)return`Ufy{(!nx? x :t:tx0);!t? x :(n:nx)/if(t~txi)t:0;break; t?[n#Cxi;n#Ixi;n#Fxi;n#Zxi]}`
+ let wa=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x),L,e=x=>{throw new Error("@"+x.i+" wa: "+x)}
+  let t=x=>[0,127,126,124,123,127,126][1+"ijfzpK".indexOf(x)],it=t=>[-1,0,1,2,3,0,1][1+"ijfzpK".indexOf(t)]
+  let eu=(x,b,r)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r}
+  let ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y))
+  let S={},sg=(r,a)=>{let i,s,f=x=>x.replaceAll('K','j').replaceAll('p','i');r=f(r);a=f(a);s=r+':'+a;if(!(s in S))S[s]=[96,a.length,...a.split('').map(t),...(r?[1,t(r)]:[0])];return Object.keys(S).indexOf(s)}
+  let Y="6a7ca06b7da16c7ea26d7fa36f81007183007284007385006e7f004853637082004a55647688007486007587004651614752624c57654e59664954004b56004d58004f5a00".match(/..?/g).map(x=>parseInt(x,16))
+  let o2=(x,t,i)=>{t=it(t);if(t<0||t>2)e(x);i="+  -  *  /  %  &  |  ^  div<  rem>  shr<< >> == != <= >= lt gt le ge".indexOf(x[1]);if(i<0)e(x);return Y[i]}
+  let lo=x=>{let o=[0],i,T;x[4].slice(1).forEach(x=>{T=t(x.T);o[o.length-1]==T?o[o.length-2]++:o.push(1,T)});o[0]=o.length>>1;return o}
+  let co=x=>{let o=[],O=(...x)=>o.push(...x.flat()),fc=x=>x.slice(1).forEach(f),f1=x=>f(x[1]),
+   lu=(x,i)=>(i=L.indexOf(x[1]),i>=0?O(22,i):e(x)),
+   dy=x=>((x[1][0]=='opr'||e(x)),f(x[3]),f(x[2]),O(o2(x[1],x.T))),
+   m={
+   bdy:fc,ret:f1,dya:dy,sym:lu
+   },f=x=>(m[x[0]]||e(x))(x);O(lo(x));f(x[5]);O(11);return o}
+  let fn=a.filter(x=>x[0]=="fun");fn.map(x=>sg(x[2][1],x[2][2]))
+  ws(1,Object.values(S)); //1type 2import 3func 4table 5memory 6global 7export [8start] 9element 10code 11data
+  ws(3,fn.map(x=>eu(sg(x[2][1],x[2][2])))) //;ws(4,[[112,0,...eu(te)]]);if(mm)ws(5,[[0,mm]])
+  ws(10,fn.map((x,r)=>(L=[...x[3].slice(1).map(x=>x[1]),...x[4].slice(1).map(x=>x[1])],  r=co(x),[...eu(r.length),...r])))
+  return new Uint8Array(o)} 
+
+/*
+let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 3func 4table 5memory 6global 7export [8start] 9element 10code 11data
+ let e=(x,y)=>{throw new Error(`@${x.i}: ${y}`)}
+ let us=x=>new TextEncoder().encode(x),uf=x=>{let b=new ArrayBuffer(8),v=new DataView(b);v.setFloat64(0,Number(x),1);return new Uint8Array(b)},vals=x=>Object.values(x)
+ let eu=(x,b,r)=>{r=[];do{b=x&127;r.push((x>>>=7)?b|=128:b)}while(x);return r}
+ let en=(x,b)=>{let r=[];while(1){b=x&127n;x=x>>7n;if((!x)&&!(b&64n)||(x==-1n&&(b&64n))){r.push(Number(b));break};r.push(Number(b|128n))};return r}
+ let ei=(x,b)=>{let r=[];while(1){b=x&127;x>>=7;if(x==0&&!(b&64)||(x==-1&&(b&64))){r.push(b);break};r.push(b|128)};return r}
+ let ws=(x,y)=>(y=[...eu(y.length),...y.flat()],p(x,...eu(y.length),...y))
+ let t=x=>[0,127,126,124][1+"ijf".indexOf(x)]
+ let S=[],F={},G={},D=[],nf=0,ng=0,T=[],te=0,mm=0,E=[],sig=(x,i)=>(i=S.indexOf(x),i<0?S.push(x)-1:i),sfun=(x,s)=>(x.T?x.T:"_")+x[2].slice(1).map(x=>x.T).join(""),simp=x=>(x.T?x.T:"_")+x.slice(2).map(x=>x.T).join("")
+ let Y="6a7ca06b7da16c7ea26d7fa36f81007183007284007385006e7f004853637082004a55647688007486007587004651614752624c57654e59664954004b56004d58004f5a00".match(/..?/g).map(x=>parseInt(x,16))
+ let X="00009a0067790000687a0000697b0000".match(/..?/g).map(x=>parseInt(x,16))
+ let N1="4648494c4d5153545758474e4f4a4b52595a5556".match(/..?/g).map(x=>parseInt(x,16))
+ let N2="474e4f4a4b52595a55564648494c4d5153545758".match(/..?/g).map(x=>parseInt(x,16))
+ let sg=x=>[96,x.length-1,...x.split("").slice(1).map(t),...(x[0]=="_"?[0]:[1,t(x[0])])]
+ let cn=t=>[0x41,0x42,0x44]["ijf".indexOf(t)]
+ let gl=(x,y)=>G[x[1]]={name:x[1],mut:y,t:x.T,e:x.length>2?x[2][1]:0,idx:ng++}
+ let ns=x=>[...eu(x.length),...us(x)]
+ let not=(t,O)=>{let z=o[o.length-1],i=N1.indexOf(z);i<0?O(t=="i"?69:80):o[o.length-1]=N2[i]}
+ let icl=(x,O,i)=>["_tab","tab","Tab","tabf"].includes(x[1][1])?(i=S.indexOf((x.T?x.T:"_")+x.slice(2,-1).map(x=>x.T)),i<0?e(x,"unknown function signature"):O(17,0,eu(i))):0
+ let sto=(x,O,i)=>(i=["_b","_i","_I","_f"].indexOf(x[1][1]),i<0?0:O([58,54,55,57][i],i==0?0:i==1?2:3,0))
+ let lod=(x,O,i)=>(i=["b_","i_","I_","ff"].indexOf(x[1][1]),i<0?0:O([45,40,41,43][i],i==0?0:i==1?2:3,0))
+ let cnv=(x,O,i)=>(i=["s$","i$","f$","U$","I$","$f"].indexOf(x[1][1]),i<0)?0:O([192,167,170,173,172,183][i]) //s$(i32.extend8_s) i$(i32.wrap_i64) f$(i32.trunc_f64_s) U$(i64.extend_i32_u) I$(i64.extend_i32_s) $f(f64.convert_i32_s)
+ let mem=(x,O)=>(x=="memgrow"?O(64,0):x=="_memcpy"?O(252,10,0,0):x=="_memfill"?O(252,11,0):0)
+ let lo=x=>{let o=[0],i,T;x[3].slice(1).forEach(x=>{T=t(x.T);o[o.length-1]==T?o[o.length-2]++:o.push(1,T)});o[0]=o.length>>1;return o}
+ let co=(l,L,x)=>{let o=[],O=(...x)=>o.push(...x.flat()),f=x=>(({ret:x=>(f(x[1]),O(15)),blk:x=>x.slice(1).map(f), drp:x=>(f(x[1]),O(26)),
+  dya:x=>(f(x[2]),f(x[3]),O(Y["+  -  *  /  %  &  |  ^  div<  rem>  shr<< >> == != <= >= lt gt le ge".indexOf(x[1])+"ijf".indexOf(x.T)])),
+  mon:x=>(f(x[2]),x[1]=="!"?not(x.T,O):O(X["-   clz ctz cnt".indexOf(x[1])+"ijf".indexOf(x.T)])),
+  num:x=>O(cn(x.T),x.T=="i"?ei(+x[1]):x.T=="j"?en(BigInt(x[1])):[...uf(+x[1])]),
+  asn:x=>(f(x[2]),(x[1][1]in l)?O(34,l[x[1][1]]):O(36,eu(G[x[1][1]].idx),35,eu(G[x[1][1]].idx))),
+  set:x=>(f(x[2]),(x[1][1]in l)?O(33,l[x[1][1]]):O(36,eu(G[x[1][1]].idx))),
+  sym:x=>(x[1]in l)?(o[o.length-2]==33&&o[o.length-1]==l[x[1]]?o[o.length-2]++:O(32,l[x[1]])):(x[1] in G)?O(35,eu(G[x[1]].idx)):e(x,"unknown symbol"),
+  cnd:x=>(f(x[1]),O(4,t(x.T)),f(x[2]),O(5),f(x[3]),O(11)),
+  iff:x=>(f(x[1]),O(4,64),f(x[2]),(x.length>3?(O(5),f(x[3])):0),O(11)),
+  whl:x=>(O(2,64,3,64),f(x[1]),not("i",O),O(13,1),f(x[2]),O(12,0,11,11)),
+  dow:x=>(O(3,64),f(x[1]),f(x[2]),O(13,0,11)),
+  cal:x=>(x.slice(2).map(f),icl(x,O)?0:sto(x,O)?0:lod(x,O)?0:cnv(x,O)?0:mem(x[1][1],O)?0:O(16,F[x[1][1]]?F[x[1][1]].idx:e(x,"unknown func"))),
+  })[x[0]])(x);O(L);f(x);if(o[o.length-1]==15)o.pop();O(11);return o.flat()}
+ let fn=x=>{let l={};[...x[2].slice(1).map(x=>x[1]),...x[3].slice(1).map(x=>x[1])].map((x,i)=>l[x]=i);F[x[1][1]].code=co(l,lo(x),x[4])}
+ a.forEach(x=>x[0]=="imp"?x.slice(1).map(x=>F[x[1]]={name:x[1],sig:sig(simp(x)),imp:x[2].split("."),idx:nf++})
+   :x[0]=="fun"?F[x[1][1]]={name:x[1][1],sig:sig(sfun(x)),imp:"",idx:nf++}
+   :x[0]=="tab"?(T.push([+x[1][1],x.slice(2).map(x=>x[1])]),te=Math.max(te,(+x[1][1])+x.length-2)):x[0]=="mem"?(x.length==2?(mm=+x[1][1],E.push([...ns("memory"),2,0])):D.push([+x[1][1],x[2]]))
+   :x[0]=="exp"?x.slice(1).map(x=>E.push([...ns(x[1]),0,...eu(F[x[1]].idx)])):x[0]=="var"?x.slice(1).map(x=>gl(x,1)):x[0]=="con"?x.slice(1).map(x=>gl(x,0)):0);
+ a.forEach(x=>x[0]=="fun"?fn(x):0);
+ ws(1,S.map(sg));ws(2,vals(F).filter(x=>x.imp).map(x=>{let y=x.imp;return[...ns(y[0]),...ns(y[1]),0,...eu(x.sig)]}))
+ ws(3,vals(F).filter(x=>!x.imp).map(x=>eu(x.sig)));ws(4,[[112,0,...eu(te)]]);if(mm)ws(5,[[0,mm]])
+ ws(6,vals(G).map(x=>[t(x.t),x.mut,...[cn(x.t),...(x.t=="f"?uf(x.e):ei(x.e)),11]]));
+ E.length?ws(7,E):0;
+ T.length?ws(9,T.map(x=>[0,0x41,...eu(x[0]),11,...x[1].map(x=>eu(F[x].idx)).flat()])):0
+ ws(10,vals(F).filter(x=>x.code).map(x=>[...eu(x.code.length),...x.code]))
+ D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
+*/
+
+
+ if(!P)return`f(i:ii){x+y}`
  if(!P){return`
 
 Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}
@@ -251,4 +320,6 @@ if("undefined"!=typeof Deno){
   else if(s.endsWith(".k")){f=s.slice(-2);P+=read(s)}
   else{throw new Error(s)}}
  if(!P)P=kc(0);
- f+="."+A; s=kc(P,A); if(s.startsWith("k:")){console.error(s);Deno.exit(1);} console.log(s);}
+ f+="."+A; s=kc(P,A); if(s.constructor==Uint8Array){Deno.stdout.write(s);Deno.exit(0)};if(s.startsWith("k:")){console.error(s);Deno.exit(1);} console.log(s);}
+
+
