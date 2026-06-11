@@ -27,7 +27,7 @@ Dmd(4){1=ny? Amd[x;y0;z;a] :u:@x;v:1_x;Amd[x;u;j.0;Dmd[Atx[x;u];y;z;a]]}
 Amd(4){if(jx<0)Q;if((2~ty)&2~-ty)Q;x:Use x;if(Kz)a:z.(x y;a);if((jy<0)&ta~-tx)x:Exl x;jy<0? tx?[Kfr jx iy;Jx[iy]:ja; Cx[iy]:ia; Ix[iy]:ia; Fx[iy]:Fa0; Zx[iy]:Za0]
  :if(Ka<0)a:K.ny#a; if(na~ny)Q; if(tx~ta)x:Exl x;a:Exl a; tx?[ny/Kfr jxi;Jx[i]:Ja yi; ny/Cx[yi]:Ca yi; ny/Ix[yi]:Ia yi; ny/Fx[yi]:Fa yi; ny/Fz[yi]:Za yi]}
 
-Abs{jx<0? -1-tx?[x;Ki(ix|-ix);Kf(+Fx0);Kz(+Zx0);Q] :tx?[nx#Abs xi;x;nx#Ixi|-Ixi;nx#+Fxi;nx#+Zxi]} Sqt{jx<0? -1-tx?[Q;%Kf f.ix;%Fx0;Q] :tx?[nx#Sqt xi;Q;nx#%f.ix;nx#%Fxi;Q]}
+Abs{jx<0? -1-tx?[x;Ki(+ix);Kf(+Fx0);Kz(+Zx0);Q] :tx?[nx#Abs xi;x;nx#+Ixi;nx#+Fxi;nx#+Zxi]} Sqt{jx<0? -1-tx?[Q;%Kf f.ix;Kf %Fx0;Q] :tx?[nx#Sqt xi;Q;nx#%f.ix;nx#%Fxi;Q]}
 Neq{tx~ty? 0 :jx<0? Ki(-1-tx?[ix~iy;ix~iy;Fx0~Fy0;Zx0~Zy0;i0]) :nx~ny? 0 :tx?[nx/if(Cxi~Cyi)break;nx/if(Ixi~Iyi)break;nx/if(Fxi~Fyi)break;nx/if(Zxi~Zyi)break;i:i.-1];Ki(i~nx)} Not{0=x}
 Flp{tx? x :x(m*!#x)+/!m:|/#'x} Neg{0-x} Sqr{x*x} Con(i:KK){jx<0? jy<0? tx&ty :ty$-tx :jy<0? tx$-ty :nx~ny? Q !tx? 0 :!ty? 0 :tx$ty} Imo(i:ii){!y? x :x:y!x;x<0? x+y :x}
 Upt(K:iK){(!t)|(x=ty)|x=-ty? y :y:ty+3?[Kz z.Fy0;Kf f.ix;Ki ix;Q;ny#i.Cxi;ny#f.Ixi;ny#z.Fxi;Q];x~ty? Upt[x;y] :y}
