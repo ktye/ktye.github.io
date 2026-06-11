@@ -24,13 +24,14 @@ let p=[
 ]
 let colors="#003FFF,#03ED3A,#E8000B,#8A2BE2,#FFC400,#00D7FF".split(",")
 let phase=a=>a/180*pi
-let ed=(x,u)=>{console.log("xi",x.dataset.i);let a=prompt('new value',x.textContent);if(a!==null)T[+x.dataset.i][u?"u":"a"]=+a;delete(p[0].Limits);show(T);}
+let ed=(x,u)=>{let a=prompt('new value',x.textContent);if(a!==null)T[+x.dataset.i][u?"u":"a"]=+(a.replaceAll(",","."));delete(p[0].Limits);show(T);}
 let ad=_=>{T.push({pm:"+",u:0,a:0});show(T)}
+let pm=x=>{T[+x.dataset.i]['pm']=T[+x.dataset.i]['pm']=='+'?'-':'+';show(T)}
 let de=x=>{if(T.length>1)T.splice(+x.dataset.i,1);show(T)}
 let show=t=>{p[0].Lines=[];
  let c=[],sum=[0,0]
  let s=`<tr><th>#</th><th>+/-</th></th><th>amount</th><th>angle</th></tr>\n`
- t.forEach((x,i)=>{let sn=x.pm=='+'?1:-1;X=sn*x.u*cos(phase(x.a)),Y=sn*x.u*sin(phase(x.a));c.push(X,Y); p[0].Lines.push({C:[X,Y],Style:{Marker:{Size:8}}}); sum[0]+=X;sum[1]+=Y; s+=`<tr><td style='color:${colors[i%colors.length]}'>${1+i}</td><td>${x.pm}</td><td data-i="${i}" onclick='ed(this,1)'>${x.u}</td><td data-i="${i}" onclick='ed(this,0)'>${x.a}</td><td data-i="${i}" style='color:#c00' onclick='de(this)'>x</td></tr>\n`})
+ t.forEach((x,i)=>{let sn=x.pm=='+'?1:-1;X=sn*x.u*cos(phase(x.a)),Y=sn*x.u*sin(phase(x.a));c.push(X,Y); p[0].Lines.push({C:[X,Y],Style:{Marker:{Size:8}}}); sum[0]+=X;sum[1]+=Y; s+=`<tr><td style='color:${colors[i%colors.length]}'>${1+i}</td><td data-i="${i}" onclick='pm(this)'>${x.pm}</td><td data-i="${i}" onclick='ed(this,1)'>${x.u}</td><td data-i="${i}" onclick='ed(this,0)'>${x.a}</td><td data-i="${i}" style='color:#c00' onclick='de(this)'>x</td></tr>\n`})
  s+=`<tr><td class='b1' style='color:${colors[t.length%colors.length]}'>${1+t.length}</td><td class='b1'>sum</td><td class='b1'>${hypot(sum[0],sum[1]).toFixed(3)}</td><td class='b1'>${((360+Ang(sum)[0])%360).toFixed(1)}</td><th onclick='ad()' style='color:blue'>add</th></tr>\n`
  tab.innerHTML=s
  p[0].Lines.push({C:[sum[0],sum[1]],Style:{Marker:{Size:8}}});
