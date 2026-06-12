@@ -4,9 +4,9 @@ Ktx(K:ip){jy|jx<<56}Ktn(K:ii){r:Ma 8+y<<x?[3;0;2;3;4];r+:8;Ir[-2]:1;Ir[-1]:y;Ktx
 Ufy{(!nx? x :t:tx0);!t? x :(n:nx)/if(t~txi)t:0;break; t?[n#Cxi;n#Ixi;n#Fxi;n#Zxi]}               /  '   '   '   '   /   /   /   /   \   \   \  \     $[c;cnd;else]     if(c)e;
 Exl{r:Ktn[0;nx]tx?[x;nx/Jri:K.Cxi;nx/Jri:K.Ixi;nx/Jri:K.Fxi;nx/Jri:K.Zxi];r}                     / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
-Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}              / i/f: <=> ~ ~neq %div i/\shift |&^ _min $max n/ndo  n#vec cast:i. idx: x0 xi
-Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                    / n(length) t(type) r(refcount) p(pointer) s(element-size) 
-Pri{if(jy<0)Q;x[yn#yi;yn#y i-1]} Ovr{s:@x;(ny-1)/s:x[s;y 1+i];s} Scn{s:@x; ny#i? x[s;yi] :s}
+Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}              / ijfz: <=> ! ~ ~neq << >> Lt Le Gt Ge Sh Dv Mo div |&^ Re Im +abs ~conj @ph
+Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                    / n/ndo  n#vec  idx: x0 xi  heap: Ix0+:y
+Pri{if(jy<0)Q;x[yn#yi;yn#y i-1]} Ovr{s:@x;(ny-1)/s:x[s;y 1+i];s} Scn{s:@x; ny#i? x[s;yi] :s}     / n(length) t(type) r(refcount) p(pointer) s(element-size) 
 Jon{if(jy<0)Q;r:@y;(ny-1)/{r,:x;r,:y 1+i}; r} Spl{if(!jx<0)Q; if(jy<0)Q; r:(0,!y=x)^y;if(nr)r0:1_r0; r}
 Fix{r:y;while(r~y:f y)r:y; r} Fxs{r:y;s:,r;while(r~f y)r:y;s,:r; r}
 Sum{jx<0? x :tx?[Ovr[Add;x];xn#Sum Upt[2;x];{s:i.0;nx/s+:Ixi;Ki s};{s:f.0;nx/s+:Fxi;Kf s};{s:z.0;nx/s+:Zxi;Kz s};Q]}
