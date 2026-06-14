@@ -43,7 +43,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
   let tet=(j,x,r)=>{if(r.length==4){r.splice(3,0,N(j,'num','0'));r[3].T='K'};return N(j,'cal',x=='@'?'Amd':'Dmd',...r.slice(1))}
   let num=$=>{let j=i,s=c=='-'?c:'';if(s)c=p[++i];while(/[0-9.ijfzeap]/.test(c))s+=c,c=p[++i];_();if(l(s)=='p')s=''+(+s.slice(0,-1)*Math.PI);return N(j,'num',s)}
   let ter=x=>{let j=i,t,e;n();t=blk();if(c!=':')c=p[++i];if(c!=':')Q('tern expect :');n(1);e=blk();_();return N(j,'ter',x,bk1(t),bk1(e))}
-  let jmp=x=>{let j=i++,r=lst('[]'[1]);return N(j,'jmp',...r.slice(1))}
+  let jmp=x=>{let j=i++,r=lst('[]'[1]);return N(j,'jmp',x,...r.slice(1))}
   let ifw=j=>{if(c!='(')Q('(missing');'))';n(1);let e=exp();n(1); return N(j,p[j]=='i'?'iff':'whl',e,blk())}
   let spc=x=>{let j=i-1,r=lst(']');x=x[1];return x=='$'?cnd(r.slice(1),j):(r.length>5||r.length<4)?(i=j,Q('triadic or tetradic')):In("@.",x)?tet(j,x,r):(i=j,Q('unknown special'))}
   let cnd=(x,j)=>{if(x.length<3||!(1&x.length))(i=j,Q("cond-length"));return N(x[0].i,'ter',x[0],x[1],x.length>3?cnd(x.slice(2),j):x[2])}
@@ -92,7 +92,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
   let bd=x=>{if(rt&&rt!=x[x.length-1].T)cst(rt,x[x.length-1]);return rt}
   let as=x=>{let m=+(5==x.length),xx=x[3+m],s=x[2][0]=='sym'?x[2][1]:'';if(s&&(!m))if(!(s in X))e(x);if(x[1]==':'&&s&&!X[s])X[s]=xx.T;else if(xx.T!=x[2].T)cst(x[2].T,xx);return xx.T}
   let f=x=>{if(!Array.isArray(x))return; if(x[0]=='blk'||x[0]=='bdy'||x[0]=='ter'||x[0]=='iff'){for(let i=1;i<x.length;i++)f(x[i])}else{for(let i=x.length-1;i>0;i--)f(x[i])}
-   let m={sym:lup,num:nm,mon:mo,dya:dy,cal:mac,cst:x=>x[1],blk:tl,bdy:bd,lst:t0,adv:t0,drv:t0,asn:as,ter:t2,iff:t0,jmp:t2,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x)}
+   let m={sym:lup,num:nm,mon:mo,dya:dy,cal:mac,cst:x=>x[1],blk:tl,bdy:bd,lst:t0,adv:t0,drv:t0,asn:as,ter:t2,iff:t0,jmp:tl,opr:t0};x.T=x.T?x.T:(x[0]in m)?m[x[0]](x):e(x)}
   fn.forEach(x=>{rt=x[2][1];x[3].slice(1).forEach(x=>X[x[1]]=x.T); x[4].slice(1).forEach(x=>X[x[1]]=x.T?x.T:x[1]=='i'?'i':'');f(x[5]);x[4].forEach(x=>"string"!=typeof x?x.T=X[x[1]]:0)})}
  
  let digr=a=>{   //non-k digraphs  <<  >>  <= >=
@@ -174,7 +174,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
     if(x[0]=='cal'&&!R.includes(x[1])){for(let i=2+$n(x[1]);i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}
     if(x[0]=='asn'&&x.length==4&&x[3][0]=='sym'&&x[3].T=='K')x[3]=r1(x[3]);
     if(x[0]=='iff'||x[0]=='ter'){_x={};u={};x.forEach(f)}  //reset inc tracking in branches
-    else if(x[0]=='bdy'||x[0]=='blk')x.forEach(f)
+    else if(x[0]=='bdy'||x[0]=='blk'||x[0]=='jmp')x.forEach(f)
     else if(x[0]=='asn'){let s=x[2][1];for(let i=x.length-1;i>2;i--)f(x[i]);if(s in u)u[s]=0;}
     else for(let i=x.length-1;i>0;i--)f(x[i]);
     if(x[0]=='sym'&&u[x[1]])e(x,'local '+x[1]+' used before assign.')
@@ -261,7 +261,7 @@ H2=`
     lst:x=>x.slice(1).map(f).join(","),
     cal:x=>$n(x[1])+"("+x.slice(2).map(f).join(",")+")",
     ter:x=>`$(${f(x[1])},${f(x[2])},${f(x[3])})`,
-    jmp:x=>`$S(${t(x[1].T)},${f(x[1])},${x.slice(1,-1).map(f).map((x,i)=>'$C('+i+','+x+')').join('')},${f(x[x.length-1])})`,
+    jmp:x=>`$S(${t(x.T)},${f(x[1])},${x.slice(2,-1).map(f).map((x,i)=>'$C('+i+','+x+')').join('')},${f(x[x.length-1])})`,
     asn:(x,s,i)=>(i=5==x.length,s=f(x[2]),`${s=="_"?t(x[2].T)+" _":s}${i?'['+f(x[3])+']':''}${x[1].replace('>','>>').replace('<','<<').replace(':','=')}${f(x[3+i])}`),
     mon:x=>x[1][0]=='opr'?(x[1][1]=='+'?abs(x[2].T,f(x[2])):x[1][1]=='%'?`sqrt(${f(x[2])})`:'Re Im @  ~'.includes(x[1][1])&&x[2].T=='z'?`${['creal','cimag','carg','conj']['ReIm@ ~'.indexOf(x[1][1])/2]}(${f(x[2])})`:`(${x[1][1]}${em(x[2])})`):x[1][0]=='drv'?`${dr1(x[1],f(x[2]))}`:e(x),
     dya:x=>x[1][0]=='opr'?("SGL".includes(x[1][1][0])?`${x[1][1]}(${t(x.T)},${f(x[2])},${f(x[3])})`:x[1][1][0]=='@'?`${em(x[2])}[${f(x[3])}]`:`${em(x[2])}${x[1][1]}${em(x[3])}`):e(x),
@@ -307,8 +307,9 @@ H2=`
    re=x=>{if(x.length>1)x.T?f(x[1]):dr(x[1]);x.slice(2).forEach(s=>f(N(x.i,'cal','R0',N(x.i,'sym',s))))},
    te=x=>{f(x[1]);O(4,t(x.T));f(x[2]);O(5);f(x[3]);O(11)},
    fi=x=>{f(x[1]);O(4,64);f(x[2]);O(11)},
+   jp=x=>{let i,n=x.length-2;O(2,t(x.T));for(i=0;i<n;i++)O(2,64);f(x[1]);O(14,n-1);for(i=0;i<n;i++)O(i);O(11);for(i=0;i<n-1;i++){f(x[2+i]);O(12,n-1-i,11)}f(x[1+n]);O(11)},
    //lod=(x,O,i)=>(i=["b_","i_","I_","ff"].indexOf(x[1][1]),i<0?0:O([45,40,41,43][i],i==0?0:i==1?2:3,0))
-   m={bdy:fd,cod:wa,ret:re,dya:dy,mon:mo,sym:lu,blk:fd,asn:as,num:nm,cst:cs,cal:ca,nop:no,idx:ix,ter:te,iff:fi},f=x=>(m[x[0]]||e(x))(x);O(lo(x));f(x[5]);O(11);return o}
+   m={bdy:fd,cod:wa,ret:re,dya:dy,mon:mo,sym:lu,blk:fd,asn:as,num:nm,cst:cs,cal:ca,nop:no,idx:ix,ter:te,iff:fi,jmp:jp},f=x=>(m[x[0]]||e(x))(x);O(lo(x));f(x[5]);O(11);return o}
   E.push([...ns("memory"),2,0]);
   let im=x=>{let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='cal'&&math.includes(x[1])&&(!M.includes(x[1]))&&!(x[1]in I))I[x[1]]=['f',M2.includes(x[1])?'ff':'f']};x.forEach(f)} //todo other imports?
   let fn=a.filter(x=>x[0]=="fun");im(a);Object.keys(I).forEach(x=>{F.push(x);sg(...I[x])});fn.map(x=>sg(x[2][1],x[2][2]));fn.forEach(x=>F.push(x[1][1]))
@@ -321,8 +322,19 @@ H2=`
   ws(10,fn.map((x,r)=>(L=[...x[3].slice(1).toReversed().map(x=>x[1]),...loc(x[4].slice(1))], r=co(x),[...eu(r.length),...r])))
   return new Uint8Array(o)} 
 
-/* i32.abs:
- 
+/* switch
+ 000019: 02 7f                      | block i32
+ 00001b: 02 40                      |   block
+ 00001d: 02 40                      |     block
+ 00001f: 20 00                      |       local.get 0
+ 000021: 0e 01 00 01                |       br_table 0 1
+ 000025: 0b                         |     end
+ 000026: 41 0a                      |     i32.const 10
+ 000028: 0c 01                      |     br 1
+ 00002a: 0b                         |   end
+ 00002b: 41 0b                      |   i32.const 11
+ 00002d: 0b                         | end
+ 00002e: 0b                         | end
 */
 
 /*
@@ -378,8 +390,7 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 */
  
- if(!P)return`f(f:j){Fx1:3.2}`
- if(!P)return`Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;px]}Ktx(K:ip){jy|jx<<56}
+ if(!P)return`R0(:j){x}Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;pr]}Ktx(K:ip){jy|jx<<56}
 Ktn(K:ii){r:Ma 8+y<<x?[3;0;2;3;4];r+:8;Ir[-2]:1;Ir[-1]:y;Ktx[x;r]}`
  if(!P)return`
 
