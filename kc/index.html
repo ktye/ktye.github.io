@@ -33,7 +33,7 @@ li::marker{content: ""}
  <input type="radio" name="tview" onclick="compile()" id="pindx"                  ><label for="pswap">index</label><br>
  <input type="radio" name="tview" onclick="compile()" id="prefc"                  ><label for="prefc">refcount</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pwrun"                  ><label for="pwrun">wasm runtime</label><br>
- <input type="radio" name="tview" onclick="compile()" id="pemit" checked="checked"><label for="pemit"><select id="ofmt" onchange="compile()"><option value="c" >c</option><option value="w" selected>wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
+ <input type="radio" name="tview" onclick="compile()" id="pemit" checked="checked"><label for="pemit"><select id="ofmt" onchange="compile()"><option value="c" selected>c</option><option value="w" >wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
  <div id="out"></div>
 </div>
 <script>
