@@ -102,22 +102,10 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
  
  let asin=a=>{    //replace modified assign +: for k types and everywhere for wasm, replace k indexed/modified assign with Amd/Dmd, unchain a:b:c=>[b:c;a:b]
   let toK=x=>{let t=x.T,r=x.slice();if(t=='j'||t=='K')return x;r.i=x.i;r.T=t;x[0]='cal';x.T='K';x[1]='K'+('ifz'.includes(t)?t:e(x));x.splice(2);x[2]=r;return x}
-  let e=x=>{console.error(x);throw new Error("@"+x.i+" asin: "+Li(x))},N=(x,t,...y)=>(y.i=x,y.T=t,y)
- // let f=(x,i,a)=>{if(!Array.isArray(x))return x;x.forEach(f);if(x[0]=='asn'&&x.length==4&&x[1]==':')console.log('x3',x[3]);if(x[0]=='asn'&&x.length==4&&x[1]==':'&&x[3][0]=='sym'&&x[3][1]==x[2][1]){console.log("x",x,'x3',x[3]);a[i]=x=x[3];}} //x:x=>x
-  let g=x=>{if(!Array.isArray(x))return;x.forEach(g);
+  let e=x=>{console.error(x);throw new Error("@"+x.i+" asin: "+Li(x))},N=(x,t,...y)=>(y.i=x,y.T=t,y),f=x=>{if(!Array.isArray(x))return;x.forEach(f);
    if(x[0]=='asn'&&x.T=='K'&&x[1]==':'){let s=x[2],i=x.length==5?x[3]:0,r=toK(x[4-!i]);x[3]=i?N(x.i,'K','cal','Amd',s,toK(i),N(x.i,'K','num','0'),r):r;x.splice(4)}
    if(x[0]=='asn'&&x.T=='K'&&x[1]!=':'){let i=x.length==5?x[3]:0,s=x[2],f=N(x.i,'K','opr',x[1][0]),r=x[3+!!i]                                      //modified K  x.length 4|5(indexed)
-    if(x[3][0]=='lst')e(x);x[1]=':';x[3]=i?N(x.i,'K','cal','Amd',s,toK(i),f,toK(r)):N(x.i,'K','dya',toK(f),s,toK(r));x.splice(4)}}
-  let h=x=>{if(!Array.isArray(x))return;x.forEach(h);
-   if(x[0]=='asn'&&x.T=='K'&&x[x.length-1][0]=='asn'){let b=x[x.length-1];x.splice(x.length-1);x.push(b[2]);a[i]=N(x.i,x.T,'blk',b,x);}          //a:b:ex    =>[b:ex;a:b]
-   if(x[0]=='asn'&&x.T=='K'&&x[x.length-1][0]=='blk'){let b=x[x.length-1],c=b[b.length-1];if(c[0]=='asn'){x[x.length-1]=c[2];b.push(x);a[i]=x=b;}}} //a:[..;b:c]=>[..;b:c;a:b]
-  a.forEach(g);/*a.forEach(g);a.forEach(h)*/}
-  
-/*let kfun=a=>{   //k function objects  f => K2(f)  todo ignore globals   todo track Kn
-  let N=(x,...y)=>(y.i=x,y),al,ar={},F=x=>{al=[...x[3].slice(1).map(x=>x[1]),...x[4].slice(1).map(x=>x[1])];f(x[5])}
-  let f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]=='sym'&&x.T=='K'&&ar[x[1]]&&!(al.includes(x[1]))){let s=x[1];x[0]='cal';x[1]='K'+ar[s];x[2]=N(x.i,'sym',s);}}
-  let fn=a.filter(x=>x[0]=='fun');fn.forEach(x=>{if(x[2][0]=='K'&&x[2][1].length>1&&x[2][1]=='K'.repeat(x[2][1].length))ar[x[1][1]]=x[2][1].length});fn.forEach(F);
-  }*/
+    if(x[3][0]=='lst')e(x);x[1]=':';x[3]=i?N(x.i,'K','cal','Amd',s,toK(i),f,toK(r)):N(x.i,'K','dya',toK(f),s,toK(r));x.splice(4)}};a.forEach(f)}
   
  let call=a=>{    //replace k ops with calls, f@ with call,  correct type for P(x)
   const op=" +   -   *   %   !   &   |   <   >   =   ~   ,   ^   #   _   $   =   @   .".replaceAll(" ","")
@@ -173,23 +161,25 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
 
  let refc=a=>{   //inc refcount on args, dec on exit, dex sym on asn, remove asn on return
   let e=(x,y)=>{console.error(x,y);throw new Error("@"+x.i+" "+y+" refc: "+Li(x))},N=(x,t,...y)=>(y.i=x,y.T=t,y),_x={},R=['R0','R1','K1','K2','K3','K4']
-  let r1=x=>x[0]=="sym"?(_x[x[1]]=N(x.i,'K','cal','R1',x)):x,$n=x=>x.startsWith('$'),r0=x=>{x[0]='sym';x[1]=x[2][1];x.splice(2)}
+  let undx=x=>(console.log('undx?',JSON.stringify(x),x[0]=='asn'&&x[3][0]&&x[3][1]=='Dex'),x[0]=='asn'&&x[3][0]=='cal'&&x[3][1]=='Dex'/*&&x[2][1]==x[3][2][1]*/?(console.log('undex',x[2][1]),x):x)
+  let r1=x=>x[0]=="sym"?(_x[x[1]]=N(x.i,'K','cal','R1',x)):undx(x),$n=x=>x.startsWith('$'),r0=x=>{x[0]='sym';x[1]=x[2][1];x.splice(2)}
   let fn=x=>{_x={};let t=x[2][1],a=x[3].slice(1).filter(x=>x.T=="K").map(x=>x[1]),l=x[4].slice(1).filter(x=>x.T=="K").map(x=>x[1]),al=[...a,...l],b=x[5],u={};l.forEach(x=>u[x]=1);
    let f=x=>{if(!Array.isArray(x))return;
     if(x[0]=='cal'&&!R.includes(x[1])){for(let i=2+$n(x[1]);i<x.length;i++)if(x[i].T=="K")x[i]=r1(x[i]);}
-    if(x[0]=='asn'&&x.T=='K'){x[3]=N(x[3].i,'K','cal','Dex',N(x[2].i,'j','sym',x[2][1]),x[3]) }
-    if(x[0]=='asn'&&x.length==4&&x[3][0]=='sym'&&x[3].T=='K')x[3]=r1(x[3]);
+    if(x[0]=='asn'&&x.T=='K'){x[3]=N(x[3].i,'K','cal','Dex',N(x[2].i,'j','sym',x[2][1]),r1(x[3]))}} //<--undex in wrong order
+//    if(x[0]=='asn'&&x.length==4&&x[3][0]=='sym'&&x[3].T=='K')x[3]=r1(x[3]);
     if(x[0]=='iff'||x[0]=='ter'){_x={};u={};x.forEach(f)}  //reset inc tracking in branches
     else if(x[0]=='bdy'||x[0]=='blk'||x[0]=='jmp')x.forEach(f)
     else if(x[0]=='asn'){let s=x[2][1];for(let i=x.length-1;i>2;i--)f(x[i]);if(s in u)u[s]=0;}
     else for(let i=x.length-1;i>0;i--)f(x[i]);
     if(x[0]=='sym'&&x.T=='K'&&u[x[1]])e(x,'local '+x[1]+' used before assign.')
    }
-   f(b);if(al.length){
-    for(let i=al.length-1;i>=0;i--){let s=al[i];console.log("s?",s,s in _x);if(s in _x){r0(_x[s]);al.splice(i,1)}} //revert last call to R1 and don't unref at return
+   f(b);
+   if(al.length){
     let r=b[b.length-1];
-    if(r[0]=='asn'&&r[1]==':'){b[b.length-1]=r[3];r=b[b.length-1]} //remove asn on ret, todo global
-    if(r[0]=='sym'&&al.includes(r[1]))al.splice(al.indexOf(r[1]),1);
+//    if(r[0]=='asn'&&r[1]==':'){b[b.length-1]=r[3];r=b[b.length-1]} //remove asn on ret, todo global
+//    if(r[0]=='sym'&&al.includes(r[1]))al.splice(al.indexOf(r[1]),1);
+//    for(let i=al.length-1;i>=0;i--){let s=al[i];if(s in _x){r0(_x[s]);al.splice(i,1)}} //revert last call to R1 and don't unref at return
    }
    if(b[b.length-1][0]!='ret'){let r=b[b.length-1];if(b.length==1)b.push(r=N(r.i,t,'nop'));b[b.length-1]=N(r.i,t,'ret',r,...al)}
   };a.filter(x=>x[0]=='fun').forEach(fn)}
@@ -277,7 +267,9 @@ H2=`
   let loc=l=>{let r="",i,g={};l.forEach((x,tx)=>(tx=t(x.T),(tx in g)?g[tx].push(x[1]):g[tx]=[x[1]]));for(i in g)r+=i+" "+g[i].map(x=>i!='K'?x:x+'=0').join(",")+";";return r}
   let fn=x=>{let name=x[1][1],arg=x[3].slice(1),l=x[4].slice(1),bdy=x[5],lt='';res=x[2][1]
    return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc(l)}${f(bdy)};}\n`}
-  let r=a.filter(x=>x[0]=='fun').map(fn).join("");return H1+$N()+_N()+H2+r}
+  let r=a.filter(x=>x[0]=='fun').map(fn).join("");
+   //return H1+$N()+_N()+H2+r}
+   return r}
  
  let wa=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x),L,F=[],I={},T=[],E=[],N=(x,...y)=>(y.i=x,y),Kn='K1 K2 K3 K4'.split(' '), e=x=>{console.error(x);throw new Error("@"+x.i+" wa: "+x)} //L=
   let t=x=>[0,127,126,124,123,127,126][1+"ijfzpK".indexOf(x)],it=t=>[-1,0,1,2,3,0,1][1+"ijfzpK".indexOf(t)],M='ceil floor trunc round'.split(' '),M2='atan2 hypot pow'.split(' ')
@@ -396,9 +388,10 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 */
  
+ if(!P)return`f{a:b:c:x;-a}`
+ if(!P)return`f{a:a:b:x;x}`
  if(!P)return`f{b:x;a:b;x}`
  if(!P)return`f{a:b:x;x}`
- if(!P)return`f{a:a:b:x;x}`
  if(!P)return`f{a:x*x;a:y-y;x+y}`
  if(!P)return`f{a:a:a:x}`
  if(!P)return`f{a:b:c:x;1+x}`
