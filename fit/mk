@@ -1,0 +1,1 @@
+cc fit.c && ./a.out f.fit
