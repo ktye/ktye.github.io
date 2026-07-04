@@ -1,0 +1,16 @@
+<html><head><link rel=icon href="../kelas16.png"><title>fit</title></head>
+<style>
+*{font-family:monospace}
+</style>
+<body>
+nothing
+<script src="fit.js"></script>
+<script>
+let f=x=>fetch(x).then(r=>r.arrayBuffer()).then(b=>{parse(b)})
+</script>
+<button onclick="f('f.fit')">f</button>
+<button onclick="f('g.fit')">g</button>
+</body>
+</html>
+
+
