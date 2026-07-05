@@ -27,6 +27,12 @@ cnv.onwheel=e=>zoomat(e.clientX,e.clientY,Math.sign(-e.deltaY))
 let resize=c=>{const vv=window.visualViewport;cnv.width=Math.floor(vv.width);cnv.height=Math.floor(vv.height)}
 let f=x=>fetch("shorts/1783100117.shorts").then(r=>r.arrayBuffer()).then(b=>{u=new Uint32Array(b);world()})
 
+/*
+let gunzip=f=>fetch(f).then(r=>r.arrayBuffer()).then(b=>{
+  let d=new DecompressionStream('gzip'),s=new Blob([b]).stream().pipeThrough(d);
+  return new Uint8Array(new Response(s).arrayBuffer())});
+*/
+
 
 </script>
 </body>
