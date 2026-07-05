@@ -6,7 +6,7 @@ canvas{display:block;width:100vw,height:100dvh}
 <body onload='f()'>
 <canvas id="cnv"></canvas>
 <script>
-let z=6,X=0,Y=0,u;
+let z=6,X=0,Y=0,mx=0,my=0,u;
 let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i;
 console.log("world xyz",X,Y,z);
  for(i=0;i<n;i++){x[i]=(x[i]-X)>>>z;y[i]=(y[i]-Y)>>>z} 
@@ -14,16 +14,20 @@ console.log("world xyz",X,Y,z);
  let c=cnv.getContext('2d'),w=c.width,h=c.height;c.reset();c.fillStyle="#000";
  c.translate(0.5,0.5)
  for(i=0;i<n;i++)c.fillRect(x[i],y[i],1,1)
- c.fillRect(cnv.width/2-10,cnv.height/2-10,20,20)
 }
-  //window.addEventListener('resize', resize, { passive: true });
+let zoomat=(x,y,d)=>{let z1=Math.max(0,z-1);X+=z?x<<z1:0;Y+=z?y<<z1:0;z=z1;world()}
+let pan=(dx,dy)=>{X-=(dx<<z);Y-=(dy<<z);world()}
+
+cnv.ondblclick=_=>{X=0;Y=0;z=6;world()}
+cnv.onmousedown=e=>{mx=e.clientX;my=e.clientY}
+cnv.onmouseup=e=>{let x=e.clientX,y=e.clientY,d=(x,o)=>Math.abs(x-o)>10;if(d(x,mx)&&d(x,my))pan(x-mx,y-my);}
+cnv.onwheel=e=>zoomat(e.clientX,e.clientY,Math.sign(-e.deltaY))
+
+//window.addEventListener('resize',e=>(resize(),world()),{passive:true});
 let resize=c=>{const vv=window.visualViewport;cnv.width=Math.floor(vv.width);cnv.height=Math.floor(vv.height)}
 let f=x=>fetch("shorts/1783100117.shorts").then(r=>r.arrayBuffer()).then(b=>{u=new Uint32Array(b);world()})
 
-//center on click:
-//cnv.onclick=e=>{let dx=e.clientX,dy=e.clientY,w=cnv.width,h=cnv.height;X-=(Math.floor(w/2)-dx)<<z;Y-=(Math.floor(h/2)-dy)<<z; world()}
 
-cnv.onclick=e=>{let dx=e.clientX,dy=e.clientY,z1=Math.max(0,z-1);console.log('z1',z,z1);X+=z?dx<<z1:dx;Y+=z?dy<<z1:dy;z=z1;world()}
 </script>
 </body>
 </html>
