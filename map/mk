@@ -1,0 +1,6 @@
+sed -n '1,/\/\/on/p' world.html
+#cat shorts/*.shorts|xxd -p
+echo 'u=new Uint32Array(Uint8Array.fromBase64(`'
+cat shorts/*.shorts|base64
+echo '`).buffer)'
+sed -n '/\/\/of/,$p' world.html

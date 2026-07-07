@@ -1,38 +1,109 @@
-<html><head><link rel=icon href="../kelas16.png"><title>world</title></head>
+<html><head><link rel=icon href="../elas16.png"><title>a</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+</head>
 <style>
 html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
 canvas{display:block;width:100vw,height:100dvh}
 </style>
-<body onload='f()'>
+<body onload='u?world():f()'>
 <canvas id="cnv"></canvas>
 <script>
-let z=6,X=0,Y=0,mx=0,my=0,u;
+let z=6,X=0,Y=0,mx=0,my=0,gx=NaN,gy=NaN,ci=0,yy=[],tr=[],u;
 let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i;
  for(i=0;i<n;i++){x[i]=(x[i]-X)>>>z;y[i]=(y[i]-Y)>>>z} 
- resize();let c=cnv.getContext('2d');c.reset()
+ resize();let c=cnv.getContext('2d'),txt=(t,x,y)=>{c.fillStyle='white';c.fillRect(x,y,c.measureText(t).width,12);c.fillStyle='black';c.fillText(t,x,y)};c.reset()
  let t0=performance.now()
  let w=cnv.width,h=cnv.height,d=c.createImageData(w,h),U=new Uint32Array(d.data.buffer);
  for(i=0;i<n;i++){let xi=x[i],yi=y[i];if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=0xff000000;}
- c.putImageData(d,0,0)
+ tr.forEach(t=>{n=tr[0].length;for(i=0;i<n;i++){let xi=(tr[0][i]>>>16)-X>>>z,yi=(tr[0][i]&0xffff)-Y>>>z;if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=0xff0000ff;}})
+ c.putImageData(d,0,0);//c.translate(0.5,0.5);
+ if(gx==gx)c.strokeStyle="red";c.beginPath();c.arc((gx-X)>>z,(gy-Y)>>z,10,0,2*Math.PI);c.stroke();
+ if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>{let[x,y]=merc(+q[1],+q[2]);txt(q[0],(x-X)>>z,(y-Y)>>z)})}
 }
 let zoomat=(x,y,d)=>{let z1=z-d;if(z1<0||z1>10)return;if(d>0){X+=x<<z1;Y+=y<<z1}else{X-=x<<z;Y-=y<<z}z=z1;world()} //X+x<<z = X'+x<<z'   X':new offset, z' after scaling.
+let zoom=d=>zoomat(cnv.width>>1,cnv.height>>1,d)
 let pan=(dx,dy)=>{X-=(dx<<z);Y-=(dy<<z);world()}
+let pd=e=>{e.preventDefault();e.stopPropagation()}
 
-cnv.ondblclick=_=>{X=0;Y=0;z=6;world()}
-cnv.onmousedown=e=>{mx=e.clientX;my=e.clientY}
-cnv.onmouseup=e=>{let x=e.clientX,y=e.clientY,a=Math.abs;if(a(x-mx)+a(y-my)>10)pan(x-mx,y-my);}
+cnv.ondblclick=e=>zoomat(e.clientX,e.clientY,1)
+//cnv.onmousedown=e=>{mx=e.clientX;my=e.clientY}
+//cnv.onmouseup=e=>{let x=e.clientX,y=e.clientY,a=Math.abs;if(a(x-mx)+a(y-my)>10)pan(x-mx,y-my);}
 cnv.onwheel=e=>zoomat(e.clientX,e.clientY,Math.sign(-e.deltaY))
 
+let pm={}
+cnv.onpointerdown=e=>{pm[e.pointerId]={x:e.clientX,y:e.clientY}}
+cnv.onpointermove=e=>{let x=e.clientX,y=e.clientY,i=e.pointerId,p=pm[i];if(!p)return;if(p){pan(x-p.x,y-p.y);pm[i]={x:x,y:y}}}
+cnv.onpointercancel=e=>{delete pm[e.pointerId]}
+cnv.onpointerup=e=>{delete pm[e.pointerId]}
 
 window.addEventListener('resize',world,{passive:true});
 let resize=c=>{const vv=window.visualViewport;cnv.width=Math.floor(vv.width);cnv.height=Math.floor(vv.height)}
 
-let f=x=>fetch("shorts/1783100117.shorts").then(r=>r.arrayBuffer()).then(b=>{u=new Uint32Array(b);world()})
 
-//state pts
+let merc=(la,lo)=>[(180+lo)*65535/360,32768*(1-Math.log(Math.tan(la*Math.PI/180)+1/Math.cos(la*Math.PI/180))/Math.PI)];
+let gps=p=>{[gx,gy]=merc(p.coords.latitude,p.coords.longitude);pan((cnv.width>>1)-((gx-X)>>z),(cnv.height>>1)-((gy-Y)>>z));while(z)zoom(1)}
+
+//on
+let sum=x=>{let r=0,n=x.length,i;for(i=0;i<n;i++)r+=x[i];return r}
+let F=x=>{yy=x.map(x=>new Uint32Array(x));u=new Uint32Array(sum(yy.map(x=>x.length)));console.log("x",x);let o=0;yy.forEach(x=>{u.set(x,o);o+=x.length});world()}
+let f=x=>fetchall(Array(2025-2008).fill(0).map((_,i)=>2008+i).map(x=>`shorts/${x}.shorts`),F)
+let fetchall=(l,f)=>{let x=[],F=[];l.forEach(function(u,i){x.push(fetch(u).then(r=>r.arrayBuffer()).then(r=>F[i]=r))});Promise.all(x).then(function(){f(F)})}
+
+let parse=b=>{let i,j,r={time:[],dist:[],lat:[],lon:[],bpm:[],alt:[],lap:[]},v=new DataView(b),p=0,e=s=>{throw new Error(p+':'+s)}
+ let B=_=>v.getUint8(p++),H=_=>(p+=2,v.getUint16(p-2,1)),U=_=>(p+=4,v.getUint32(p-4,1)),I=_=>(p+=4,v.getInt32(p-4,1))
+ let nh=B(),ver=B(),profile=H(),sz=U(),ep=nh+sz,defs=[];U()==1414088238||e(".FIT")
+ let p18=f=>{f.forEach(x=>x.i==2?(r.start=U()):x.i==5?(r.sport=B()):x.i==8?(r.secs=U()/1000):x.i==9?(r.meters=0.1*U()):x.i==26?(r.laps=H()):p+=x.s)}//session
+ let p20=f=>{let s=180/2147483648,la=0,lo=0,di=0,bp=0,al=0;f.forEach(x=>x.i==253?ti=U():x.i==0?la=s*I():x.i==1?lo=s*I():x.i==2?al=H()/5-500:x.i==3?bp=B():x.i==5?di=0.01*U():x.i==78?al=U()/5-500:p+=x.s);
+  r.time.push(ti);r.lat.push(la);r.lon.push(lo);r.dist.push(di);r.bpm.push(bp);r.alt.push(al)}//record
+ p=nh;while(p<ep){let h=B(),lt=h&15;
+  if(h&0x40){B();B();let m=H(),nf=B(),f=[],sf=0;for(i=0;i<nf;i++){let fi={i:B(),s:B()};B();sf+=fi.s;f[i]=fi};f.s=sf;defs[lt]=[m,f]}
+  else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==20?p20(f):p+=f.s}};
+  let n=r.lat.length,t=new Uint32Array(n);j=0;for(i=0;i<n;i++){let[x,y]=merc(r.lat[i],r.lon[i]);t[i]=x<<16|(0xffff&y)};
+  tr.push(Uint32Array.from(new Set(t)))}
+
+
+window.ondragover=e=>pd(e)
+window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{console.log(f.name,parse(u))})}}
+//off
+
+</script>
+
+<div style="position:absolute;top:0;right:0;display:flex;flex-flow:column">
+<button onclick='navigator.geolocation.getCurrentPosition(gps)'>⌖</button><button onclick='zoom(1)'>+</button><button onclick='zoom(-1)'>-</button><button onclick='ci=!ci;world()'>C</button>
+</div>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>const cty=`
+Mz 49.998 8.274
+Fra 50.11 8.683
+Hei 49.41 7.802
+St 48.775 9.178
+Ka 49.013 8.405
+Ba 47.556 7.589
+Zu 47.371 8.542
+Mu 48.137 11.576
+Wi 48.208 16.371
+Ber 52.512 13.412
+Ha 53.548 9.99
+P 48.851 2.349
+Gre 45.19 5.177
+`.split("\n").filter(x=>x.length).map(x=>x.split(" "))
 </script>
 </body>
 </html>

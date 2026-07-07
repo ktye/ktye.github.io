@@ -10,4 +10,4 @@ let parse=b=>{let i,j,r={time:[],dist:[],lat:[],lon:[],bpm:[],alt:[],lap:[]},v=n
   r.time.push(ti);r.lat.push(la);r.lon.push(lo);r.dist.push(di);r.bpm.push(bp);r.alt.push(al)}//record
  p=nh;while(p<ep){let h=B(),lt=h&15;
   if(h&0x40){B();B();let m=H(),nf=B(),f=[],sf=0;for(i=0;i<nf;i++){let fi={i:B(),s:B()};B();sf+=fi.s;f[i]=fi};f.s=sf;defs[lt]=[m,f]}
-  else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==19?p19(f):m==20?p20(f):p+=f.s}}}
+  else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==19?p19(f):m==20?p20(f):p+=f.s}};return r}
