@@ -20,7 +20,7 @@ let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i;
  if(gx==gx)c.strokeStyle="red";c.beginPath();c.arc((gx-X)>>z,(gy-Y)>>z,10,0,2*Math.PI);c.stroke();
  if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>{let[x,y]=merc(+q[1],+q[2]);txt(q[0],(x-X)>>z,(y-Y)>>z)})}
 }
-let zoomat=(x,y,d)=>{let z1=z-d;if(z1<0||z1>10)return;if(d>0){X+=x<<z1;Y+=y<<z1}else{X-=x<<z;Y-=y<<z}z=z1;world()} //X+x<<z = X'+x<<z'   X':new offset, z' after scaling.
+let zoomat=(x,y,d)=>{let z1=z-d;if(z1<0||z1>10)return;if(d>0){X+=x<<z1;Y+=y<<z1}else{X-=x<<z;Y-=y<<z}z=z1;world();cbut.textContent=z} //X+x<<z = X'+x<<z'   X':new offset, z' after scaling.
 let zoom=d=>zoomat(cnv.width>>1,cnv.height>>1,d)
 let pan=(dx,dy)=>{X-=(dx<<z);Y-=(dy<<z);world()}
 let pd=e=>{e.preventDefault();e.stopPropagation()}
@@ -31,10 +31,10 @@ cnv.ondblclick=e=>zoomat(e.clientX,e.clientY,1)
 cnv.onwheel=e=>zoomat(e.clientX,e.clientY,Math.sign(-e.deltaY))
 
 let pm={}
-cnv.onpointerdown=e=>{pm[e.pointerId]={x:e.clientX,y:e.clientY}}
-cnv.onpointermove=e=>{let x=e.clientX,y=e.clientY,i=e.pointerId,p=pm[i];if(!p)return;if(p){pan(x-p.x,y-p.y);pm[i]={x:x,y:y}}}
-cnv.onpointercancel=e=>{delete pm[e.pointerId]}
-cnv.onpointerup=e=>{delete pm[e.pointerId]}
+cnv.onpointerdown=e=>{pd(e);pm[e.pointerId]={x:e.clientX,y:e.clientY}}
+cnv.onpointermove=e=>{pd(e);let x=e.clientX,y=e.clientY,i=e.pointerId,p=pm[i];if(!p)return;if(p){pan(x-p.x,y-p.y);pm[i]={x:x,y:y}}}
+cnv.onpointercancel=e=>{pd(e);delete pm[e.pointerId]}
+cnv.onpointerup=e=>{pd(e);delete pm[e.pointerId]}
 
 window.addEventListener('resize',world,{passive:true});
 let resize=c=>{const vv=window.visualViewport;cnv.width=Math.floor(vv.width);cnv.height=Math.floor(vv.height)}
@@ -69,7 +69,7 @@ window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){l
 </script>
 
 <div style="position:absolute;top:0;right:0;display:flex;flex-flow:column">
-<button onclick='navigator.geolocation.getCurrentPosition(gps)'>⌖</button><button onclick='zoom(1)'>+</button><button onclick='zoom(-1)'>-</button><button onclick='ci=!ci;world()'>C</button>
+<button onclick='navigator.geolocation.getCurrentPosition(gps)'>⌖</button><button onclick='zoom(1)'>+</button><button onclick='zoom(-1)'>-</button><button id='cbut' onclick='ci=!ci;world()'>C</button>
 </div>
 
 
@@ -90,18 +90,22 @@ window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){l
 
 
 <script>const cty=`
-Mz 49.998 8.274
-Fra 50.11 8.683
-Hei 49.41 7.802
-St 48.775 9.178
-Ka 49.013 8.405
-Ba 47.556 7.589
-Zu 47.371 8.542
-Mu 48.137 11.576
+Ber 0 52.512 13.412
+Ha 3 53.548 9.99
+Mz 0 49.998 8.274
+Fra 3 50.11 8.683
+Hei 1 49.41 8.695
+Ma 0 49.488 8.466
+St 2 48.775 9.178
+Ka 2 49.013 8.405
+Sb 3 48.583 7.749
+Ba 3 47.556 7.589
+Zu 3 47.371 8.542
+Mu 3 48.137 11.576
+Mi 45.463 9.187
+Ro 5 41.895 12.483
 Wi 48.208 16.371
-Ber 52.512 13.412
-Ha 53.548 9.99
-P 48.851 2.349
+Pa 5 48.851 2.349
 Gre 45.19 5.177
 `.split("\n").filter(x=>x.length).map(x=>x.split(" "))
 </script>
