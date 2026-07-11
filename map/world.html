@@ -18,7 +18,7 @@ let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i;
  tr.forEach(t=>{n=tr[0].length;for(i=0;i<n;i++){let xi=(tr[0][i]>>>16)-X>>>z,yi=(tr[0][i]&0xffff)-Y>>>z;if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=0xff0000ff;}})
  c.putImageData(d,0,0);//c.translate(0.5,0.5);
  if(gx==gx)c.strokeStyle="red";c.beginPath();c.arc((gx-X)>>z,(gy-Y)>>z,10,0,2*Math.PI);c.stroke();
- if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>{let[x,y]=merc(+q[1],+q[2]);txt(q[0],(x-X)>>z,(y-Y)>>z)})}
+ if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>{let[x,y]=merc(+q[2],+q[3]);if(z<=+q[1])txt(q[0],(x-X)>>z,(y-Y)>>z)})}
 }
 let zoomat=(x,y,d)=>{let z1=z-d;if(z1<0||z1>10)return;if(d>0){X+=x<<z1;Y+=y<<z1}else{X-=x<<z;Y-=y<<z}z=z1;world();cbut.textContent=z} //X+x<<z = X'+x<<z'   X':new offset, z' after scaling.
 let zoom=d=>zoomat(cnv.width>>1,cnv.height>>1,d)
@@ -46,7 +46,7 @@ let gps=p=>{[gx,gy]=merc(p.coords.latitude,p.coords.longitude);pan((cnv.width>>1
 //on
 let sum=x=>{let r=0,n=x.length,i;for(i=0;i<n;i++)r+=x[i];return r}
 let F=x=>{yy=x.map(x=>new Uint32Array(x));u=new Uint32Array(sum(yy.map(x=>x.length)));console.log("x",x);let o=0;yy.forEach(x=>{u.set(x,o);o+=x.length});world()}
-let f=x=>fetchall(Array(2025-2008).fill(0).map((_,i)=>2008+i).map(x=>`shorts/${x}.shorts`),F)
+let f=x=>fetchall(Array(2026-2008).fill(0).map((_,i)=>2008+i).map(x=>`shorts/${x}.shorts`),F)
 let fetchall=(l,f)=>{let x=[],F=[];l.forEach(function(u,i){x.push(fetch(u).then(r=>r.arrayBuffer()).then(r=>F[i]=r))});Promise.all(x).then(function(){f(F)})}
 
 let parse=b=>{let i,j,r={time:[],dist:[],lat:[],lon:[],bpm:[],alt:[],lap:[]},v=new DataView(b),p=0,e=s=>{throw new Error(p+':'+s)}
@@ -90,8 +90,19 @@ window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){l
 
 
 <script>const cty=`
-Ber 0 52.512 13.412
+Ber 8 52.512 13.412
 Ha 3 53.548 9.99
+Br 3 53.075 8.808
+Ko 3 50.937 6.955
+Am 3 52.372 4.9
+Lo 5 51.508 -0.091
+Du 3 53.347 -6.276
+Ed 3 55.952 -3.19
+Ma 5 40.415 -3.691
+Bu 5 44.435 26.104
+Ko 5 55.676 12.590
+St 5 59.324 18.061
+Os 5 59.919 10.767
 Mz 0 49.998 8.274
 Fra 3 50.11 8.683
 Hei 1 49.41 8.695
@@ -102,11 +113,18 @@ Sb 3 48.583 7.749
 Ba 3 47.556 7.589
 Zu 3 47.371 8.542
 Mu 3 48.137 11.576
-Mi 45.463 9.187
+Mi 3 45.463 9.187
 Ro 5 41.895 12.483
-Wi 48.208 16.371
+Wi 3 48.208 16.371
 Pa 5 48.851 2.349
-Gre 45.19 5.177
+Gr 3 45.19 5.177
+Mo 8 55.754 37.62
+Be 8 39.933 116.383
+Ny 8 40.719 -73.995
+La 7 33.998 -118.239
+Rio 8 -22.912 -43.189
+Ca 8 -33.924 18.420
+Sy 8 -33.877 151.214
 `.split("\n").filter(x=>x.length).map(x=>x.split(" "))
 </script>
 </body>
