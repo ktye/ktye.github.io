@@ -14,7 +14,7 @@ let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i,fg=tr.len
  resize();let c=cnv.getContext('2d'),txt=(t,x,y)=>{c.fillStyle='white';c.fillRect(x,y,c.measureText(t).width,12);c.fillStyle='black';c.fillText(t,x,y)};c.reset()
  let w=cnv.width,h=cnv.height,d=c.createImageData(w,h),U=new Uint32Array(d.data.buffer);
  for(i=0;i<n;i++){let xi=x[i],yi=y[i];if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=fg;}
- tr.forEach(t=>{n=t.length;for(i=0;i<n;i++){let xi=(t[i]>>>16)-X>>>z,yi=(t[i]&0xffff)-Y>>>z;if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=0xff0000ff;}})
+ tr.forEach((t,i)=>{fg=[0xff0000ff,0xff00ff00][i&1];n=t.length;for(i=0;i<n;i++){let xi=(t[i]>>>16)-X>>>z,yi=(t[i]&0xffff)-Y>>>z;if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=fg;}})
  c.putImageData(d,0,0);//c.translate(0.5,0.5);
  if(gx==gx)c.strokeStyle="red";c.beginPath();c.arc((gx-X)>>z,(gy-Y)>>z,10,0,2*Math.PI);c.stroke();
  if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>txt(q[0],(q[1]-X)>>z,(q[2]-Y)>>z))}
@@ -39,7 +39,7 @@ let resize=c=>{const vv=window.visualViewport;cnv.width=floor(vv.width);cnv.heig
 
 let merc=(la,lo)=>[(180+lo)*65535/360,32768*(1-Math.log(Math.tan(la*Math.PI/180)+1/Math.cos(la*Math.PI/180))/Math.PI)];
 let gps=p=>{[gx,gy]=merc(p.coords.latitude,p.coords.longitude);pan((cnv.width>>1)-((gx-X)>>z),(cnv.height>>1)-((gy-Y)>>z));while(z)zoom(1)}
-let tours={}
+let tours=[]
 let dominance=_=>{let i,j,n=cti.length,m=[];cti.forEach(c=>{let[x,y]=merc(+c[1],+c[2]),f=c=>100<(abs(c[1]-x)>>z)+(abs(c[2]-y)>>z);if(m.every(f))m.push([c[0],x|0,y|0])});cty=m}
 
 //on
@@ -65,14 +65,14 @@ let timestr=s=>{let h=floor(s/3600),m;s-=h*3600;m=floor(s/60);return`${String(h)
 let rldec=s=>{let c,n,r="",i;for(i=0;i<s.length;i++){c=s[i];n="ABCDEF".indexOf(c);r+=n<0?c:s[i-1].repeat(2+n)};return r}
 let undelta=s=>{let a="ghijklmnopqrstuvxyzGHIJKLMNOPQRSTUVXYZ!#$%^&*()_+",x=0,y=0,n,c,r=[],i,hl=x=>[x>>>16,x&0xffff];
  for(i=0;i<s.length;i++){c=s[i];n=a.indexOf(c);n<0?([x,y]=hl(parseInt(s.substr(i,8),16),i+=7)):(x+=floor(n/7)-3,y+=(n%7)-3);r.push((x<<16)|y)}3;return new Uint32Array(r)}
-let detour=t=>{t=t.split("\n");let f=x=>{x=x.split(" ");return[datestr(+x[0]),floor(0.001*(+x[1])),+x[2],undelta(rldec(x[3]))]},st=t.slice(1).map(f);tours[t[0]]=st}
-let tour=t=>{tr=[];tsum.value="";if(!t)return;t=tours[t];let r="",m=0,s=0;
+let detour=t=>{t=t.split("\n");let f=x=>{x=x.split(" ");return[datestr(+x[0]),floor(0.001*(+x[1])),+x[2],undelta(rldec(x[3]))]},st=t.slice(1).map(f);tours.push([t[0],st])}
+let tour=t=>{tr=[];tsum.value="";if(t<0)return;t=tours[t][1];let r="",m=0,s=0;
  t.forEach((st,i)=>{r+=`${String(1+i).padStart(2,' ')} ${st[0]} ${String(st[1]).padStart(3,' ')}km ${timestr(st[2])}\n`;m+=st[1];s+=st[2]})
  r+=`------------- ${String(m).padStart(3,' ')}km ${timestr(s)}`;tsum.textContent=r;
  tr=t.map(x=>x[3])
  //todo tr=[..]
  world()}
-fetch("tour").then(r=>r.text()).then(r=>{r.trim().split("\n\n").map(detour);tur.innerHTML=["",...Object.keys(tours)].map(x=>`<option>${x}</option>`).join("")})
+fetch("tour").then(r=>r.text()).then(r=>{r.trim().split("\n\n").map(detour);tur.innerHTML=["",...tours].map((x,i)=>`<option value="${i}">${i?x[0]:''}</option>`).join("")})
 
 
 window.ondragover=e=>pd(e)
@@ -80,7 +80,7 @@ window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){l
 //off
 
 </script>
-<div style="position:absolute;top:0;left:0"><select id="tur" onchange='tour(this.value)'></select><pre id='tsum' style='margin-left:5px'></pre></div>
+<div style="position:absolute;top:0;left:0"><select id="tur" onchange='tour(-1+(+this.value))'></select><pre id='tsum' style='margin-left:5px'></pre></div>
 <div style="position:absolute;top:0;right:0;display:flex;flex-flow:column">
 <button onclick='navigator.geolocation.getCurrentPosition(gps)'>⌖</button><button onclick='zoom(1)'>+</button><button onclick='zoom(-1)'>-</button><button id='cbut' onclick='dominance();ci=!ci;world()'>C</button>
 </div>
@@ -92,11 +92,17 @@ Fra 50.11 8.683
 Ham 53.548 9.99
 Bre 53.075 8.808
 Kol 50.937 6.955
+Goe 51.535 9.937
+Ful 50.550 9.688
+Kie 54.323 10.14
+Dre 51.053 13.738
+Lei 51.338 12.369
+Erf 50.974 11.025
 Ams 52.372 4.9
 Lon 51.508 -0.091
 Dub 53.347 -6.276
 Edi 55.952 -3.19
-Man 40.415 -3.691
+Mad 40.415 -3.691
 Bud 44.435 26.104
 Kop 55.676 12.590
 Sto 59.324 18.061
