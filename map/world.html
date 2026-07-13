@@ -63,9 +63,9 @@ let parse=b=>{let i,j,r={time:[],dist:[],lat:[],lon:[],bpm:[],alt:[],lap:[]},v=n
 
 let datestr=t=>{let p2=x=>String(x).padStart(2,"0"),d=new Date(1000*t);return`${d.getFullYear()}.${p2(1+d.getMonth())}.${p2(d.getDate())}`}
 let timestr=s=>{let h=floor(s/3600),m;s-=h*3600;m=floor(s/60);return`${String(h).padStart(2,' ')}h${(m<10?'0':'')+String(m)}`}
-let rldec=s=>{let c,n,r="",i;for(i=0;i<s.length;i++){c=s[i];n="ABCDEF".indexOf(c);r+=n<0?c:s[i-1].repeat(3+n)};return r}
+let rldec=s=>{let c,n,r="",i;for(i=0;i<s.length;i++){c=s[i];n="ABCDEF".indexOf(c);r+=n<0?c:s[i-1].repeat(2+n)};return r}
 let undelta=s=>{let a="ghijklmnopqrstuvxyzGHIJKLMNOPQRSTUVXYZ!#$%^&*()_+",x=0,y=0,n,c,r=[],i,hl=x=>[x>>>16,x&0xffff];
- for(i=0;i<s.length;i++){c=s[i];n=a.indexOf(c);n<0?([x,y]=hl(parseInt(s.substr(i,8),16),i+=7)):(x+=floor(n/7)-3,y+=n%7);r.push((x<<16)|y)};return new Uint32Array(r)}
+ for(i=0;i<s.length;i++){c=s[i];n=a.indexOf(c);n<0?([x,y]=hl(parseInt(s.substr(i,8),16),i+=7)):(x+=floor(n/7)-3,y+=(n%7)-3);r.push((x<<16)|y)}3;return new Uint32Array(r)}
 let detour=t=>{t=t.split("\n");let f=x=>{x=x.split(" ");return[datestr(+x[0]),floor(0.001*(+x[1])),+x[2],undelta(rldec(x[3]))]},st=t.slice(1).map(f);tours[t[0]]=st}
 let tour=t=>{tr=[];tsum.value="";if(!t)return;t=tours[t];let r="",m=0,s=0;
  t.forEach((st,i)=>{r+=`${String(1+i).padStart(2,' ')} ${st[0]} ${String(st[1]).padStart(3,' ')}km ${timestr(st[2])}\n`;m+=st[1];s+=st[2]})
@@ -87,6 +87,7 @@ window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){l
 </div>
 
 <script>
+//iata:https://raw.githubusercontent.com/lxndrblz/Airports/refs/heads/main/airports.csv
 const cty=`
 Ber 8 52.512 13.412
 Ha 3 53.548 9.99
