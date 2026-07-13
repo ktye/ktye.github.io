@@ -8,7 +8,7 @@ canvas{display:block;width:100vw,height:100dvh}
 <body onload='u?world():f()'>
 <canvas id="cnv"></canvas>
 <script>
-let z=6,X=0,Y=0,mx=0,my=0,gx=NaN,gy=NaN,ci=0,yy=[],tr=[],floor=Math.floor,u;
+let z=6,X=0,Y=0,mx=0,my=0,gx=NaN,gy=NaN,ci=0,yy=[],tr=[],cty=[],floor=Math.floor,abs=Math.abs,u;
 let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i,fg=tr.length?0x1f000000:0xff000000;
  for(i=0;i<n;i++){x[i]=(x[i]-X)>>>z;y[i]=(y[i]-Y)>>>z} 
  resize();let c=cnv.getContext('2d'),txt=(t,x,y)=>{c.fillStyle='white';c.fillRect(x,y,c.measureText(t).width,12);c.fillStyle='black';c.fillText(t,x,y)};c.reset()
@@ -17,16 +17,14 @@ let world=_=>{let x=u.map(x=>x>>>16),y=u.map(x=>x&0xffff),n=x.length,i,fg=tr.len
  tr.forEach(t=>{n=t.length;for(i=0;i<n;i++){let xi=(t[i]>>>16)-X>>>z,yi=(t[i]&0xffff)-Y>>>z;if(xi>=0&&xi<w&&yi>=0&&yi<h)U[xi+yi*w]=0xff0000ff;}})
  c.putImageData(d,0,0);//c.translate(0.5,0.5);
  if(gx==gx)c.strokeStyle="red";c.beginPath();c.arc((gx-X)>>z,(gy-Y)>>z,10,0,2*Math.PI);c.stroke();
- if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>{let[x,y]=merc(+q[2],+q[3]);if(z<=+q[1])txt(q[0],(x-X)>>z,(y-Y)>>z)})}
+ if(ci){c.font="12px monospace";c.textBaseline='top';cty.forEach(q=>txt(q[0],(q[1]-X)>>z,(q[2]-Y)>>z))}
 }
-let zoomat=(x,y,d)=>{let z1=z-d;if(z1<0||z1>7)return;if(d>0){X+=x<<z1;Y+=y<<z1}else{X-=x<<z;Y-=y<<z}z=z1;world();cbut.textContent=z} //X+x<<z = X'+x<<z'   X':new offset, z' after scaling.
+let zoomat=(x,y,d)=>{let z1=z-d;if(z1<0||z1>7)return;if(d>0){X+=x<<z1;Y+=y<<z1}else{X-=x<<z;Y-=y<<z}z=z1;dominance();world();cbut.textContent=z} //X+x<<z = X'+x<<z'   X':new offset, z' after scaling.
 let zoom=d=>zoomat(cnv.width>>1,cnv.height>>1,d)
 let pan=(dx,dy)=>{X-=(dx<<z);Y-=(dy<<z);world()}
 let pd=e=>{e.preventDefault();e.stopPropagation()}
 
 cnv.ondblclick=e=>zoomat(e.clientX,e.clientY,1)
-//cnv.onmousedown=e=>{mx=e.clientX;my=e.clientY}
-//cnv.onmouseup=e=>{let x=e.clientX,y=e.clientY,a=Math.abs;if(a(x-mx)+a(y-my)>10)pan(x-mx,y-my);}
 cnv.onwheel=e=>zoomat(e.clientX,e.clientY,Math.sign(-e.deltaY))
 
 let pm={}
@@ -42,6 +40,7 @@ let resize=c=>{const vv=window.visualViewport;cnv.width=floor(vv.width);cnv.heig
 let merc=(la,lo)=>[(180+lo)*65535/360,32768*(1-Math.log(Math.tan(la*Math.PI/180)+1/Math.cos(la*Math.PI/180))/Math.PI)];
 let gps=p=>{[gx,gy]=merc(p.coords.latitude,p.coords.longitude);pan((cnv.width>>1)-((gx-X)>>z),(cnv.height>>1)-((gy-Y)>>z));while(z)zoom(1)}
 let tours={}
+let dominance=_=>{let i,j,n=cti.length,m=[];cti.forEach(c=>{let[x,y]=merc(+c[1],+c[2]),f=c=>100<(abs(c[1]-x)>>z)+(abs(c[2]-y)>>z);if(m.every(f))m.push([c[0],x|0,y|0])});cty=m}
 
 //on
 let sum=x=>{let r=0,n=x.length,i;for(i=0;i<n;i++)r+=x[i];return r}
@@ -83,47 +82,148 @@ window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){l
 </script>
 <div style="position:absolute;top:0;left:0"><select id="tur" onchange='tour(this.value)'></select><pre id='tsum' style='margin-left:5px'></pre></div>
 <div style="position:absolute;top:0;right:0;display:flex;flex-flow:column">
-<button onclick='navigator.geolocation.getCurrentPosition(gps)'>⌖</button><button onclick='zoom(1)'>+</button><button onclick='zoom(-1)'>-</button><button id='cbut' onclick='ci=!ci;world()'>C</button>
+<button onclick='navigator.geolocation.getCurrentPosition(gps)'>⌖</button><button onclick='zoom(1)'>+</button><button onclick='zoom(-1)'>-</button><button id='cbut' onclick='dominance();ci=!ci;world()'>C</button>
 </div>
 
 <script>
-//iata:https://raw.githubusercontent.com/lxndrblz/Airports/refs/heads/main/airports.csv
-const cty=`
-Ber 8 52.512 13.412
-Ha 3 53.548 9.99
-Br 3 53.075 8.808
-Ko 3 50.937 6.955
-Am 3 52.372 4.9
-Lo 5 51.508 -0.091
-Du 3 53.347 -6.276
-Ed 3 55.952 -3.19
-Ma 5 40.415 -3.691
-Bu 5 44.435 26.104
-Ko 5 55.676 12.590
-St 5 59.324 18.061
-Os 5 59.919 10.767
-Mz 0 49.998 8.274
-Fra 3 50.11 8.683
-Hei 1 49.41 8.695
-Ma 0 49.488 8.466
-St 2 48.775 9.178
-Ka 2 49.013 8.405
-Sb 3 48.583 7.749
-Ba 3 47.556 7.589
-Zu 3 47.371 8.542
-Mu 3 48.137 11.576
-Mi 3 45.463 9.187
-Ro 5 41.895 12.483
-Wi 3 48.208 16.371
-Pa 5 48.851 2.349
-Gr 3 45.19 5.177
-Mo 8 55.754 37.62
-Be 8 39.933 116.383
-Ny 8 40.719 -73.995
-La 7 33.998 -118.239
-Rio 8 -22.912 -43.189
-Ca 8 -33.924 18.420
-Sy 8 -33.877 151.214
+let cti=`
+Ber 52.512 13.412
+Fra 50.11 8.683
+Ham 53.548 9.99
+Bre 53.075 8.808
+Kol 50.937 6.955
+Ams 52.372 4.9
+Lon 51.508 -0.091
+Dub 53.347 -6.276
+Edi 55.952 -3.19
+Man 40.415 -3.691
+Bud 44.435 26.104
+Kop 55.676 12.590
+Sto 59.324 18.061
+Osl 59.919 10.767
+Mai 49.998 8.274
+Hei 49.41 8.695
+Man 49.488 8.466
+Stu 48.775 9.178
+Kar 49.013 8.405
+Stb 48.583 7.749
+Bas 47.556 7.589
+Zur 47.371 8.542
+Mun 48.137 11.576
+Mil 45.463 9.187
+Rom 41.895 12.483
+Wie 48.208 16.371
+Par 48.851 2.349
+Gre 45.19 5.177
+Mos 55.754 37.62
+Bei 39.933 116.383
+Nyc 40.719 -73.995
+RIO -22.912 -43.189
+Cap -33.924 18.420
+Syd -33.877 151.214
+HND 35.546 139.781
+DEL 28.555 77.085
+PVG 31.141 121.805
+GRU -23.438 -46.481
+MEX 19.435 -99.073
+CAI 30.114 31.425
+BOM 19.090 72.864
+PEK 40.079 116.594
+DAC 23.842 90.404
+KIX 34.434 135.223
+JFK 40.643 -73.779
+KHI 24.901 67.159
+EZE -34.817 -58.547
+CKG 29.726 106.650
+IST 40.991 28.830
+CCU 22.645 88.439
+MNL 14.512 121.022
+LOS 6.578 3.321
+GIG -22.811 -43.259
+TSN 39.127 117.355
+FIH -4.390 15.447
+CAN 23.393 113.302
+LAX 33.942 -118.421
+SVO 55.976 37.424
+SZX 22.638 113.806
+HND 35.546 139.781
+SIN 1.361 103.990
+HND 35.546 139.781
+MEX 19.435 -99.073
+BOM 19.090 72.864
+KUL 2.745 101.707
+ORD 41.978 -87.909
+BCN 41.297 2.079
+FCO 41.814 12.227
+NRT 35.776 140.393
+SEA 47.448 -122.308
+DFW 32.897 -97.047
+ATL 33.638 -84.429
+DFW 32.897 -97.047
+MUC 48.353 11.790
+MAD 40.495 -3.574
+YYZ 43.682 -79.611
+SYD -33.950 151.182
+MEX 19.435 -99.073
+SCL -33.397 -70.794
+KIX 34.434 135.223
+MAN 53.363 -2.273
+PHX 33.433 -112.009
+IAH 29.984 -95.333
+YVR 49.193 -123.180
+MCO 28.413 -81.309
+MEL -37.667 144.833
+BNE -27.387 153.121
+DME 55.409 37.904
+LED 59.802 30.268
+MXP 45.630 8.724
+VIE 48.105 16.585
+BKK 13.682 100.749
+BOM 19.090 72.864
+GVA 46.238 6.108
+LIM -12.022 -77.111
+CPH 55.609 12.651
+ARN 59.647 17.937
+OSL 60.198 11.100
+HEL 60.321 24.947
+ZRH 47.464 8.553
+BRU 50.901 4.479
+PRG 50.102 14.271
+WAW 52.171 20.973
+ATH 37.937 23.955
+IST 40.991 28.830
+TLV 32.003 34.881
+DOH 25.268 51.558
+AUH 24.432 54.642
+DXB 25.249 55.353
+JED 21.684 39.164
+RUH 24.959 46.703
+BOM 19.090 72.864
+HYD 17.231 78.432
+BLR 13.197 77.708
+MAA 12.993 80.184
+BOM 19.090 72.864
+SGN 10.818 106.658
+PNH 11.547 104.848
+HKG 22.313 113.917
+KIX 34.434 135.223
+NKG 31.732 118.872
+SHA 31.198 121.334
+CSX 28.191 113.220
+XIY 34.439 108.758
+SZX 22.638 113.806
+FUK 33.587 130.447
+CTS 42.787 141.683
+OKA 26.197 127.649
+KOJ 31.803 130.719
+USM 9.549 100.063
+CMB 7.180 79.884
+BWN 4.942 114.929
+KTM 27.694 85.358
+KHI 24.901 67.159
+ISB 33.552 72.826
+LHE 31.519 74.401
+BGW 33.264 44.233
 `.split("\n").filter(x=>x.length).map(x=>x.split(" "))
 </script>
 </body>
