@@ -15,6 +15,7 @@ let mx;
 cnv.onmousedown=e=>(mx=e.clientX);cnv.onmouseup=e=>{mx=0};cnv.onwheel=e=>zoom(e.deltaY<0)
 cnv.onmousemove=e=>{let top=cnv.getBoundingClientRect().top,x=e.clientX,y=e.clientY,a=Math.abs;if(!mx)return pos(x,floor(y-top));if(a(x-mx))pan(x-mx);mx=x}
 
+//parse fit files
 let parse=b=>{let i,j,r={time:[],bpm:[],lap:[]},v=new DataView(b),p=0,e=s=>{throw new Error(p+':'+s)}
  let B=_=>v.getUint8(p++),H=_=>(p+=2,v.getUint16(p-2,1)),U=_=>(p+=4,v.getUint32(p-4,1)),I=_=>(p+=4,v.getInt32(p-4,1))
  let nh=B(),ver=B(),profile=H(),sz=U(),ep=nh+sz,defs=[];U()==1414088238||e(".FIT")
@@ -24,6 +25,11 @@ let parse=b=>{let i,j,r={time:[],bpm:[],lap:[]},v=new DataView(b),p=0,e=s=>{thro
  p=nh;while(p<ep){let h=B(),lt=h&15;
   if(h&0x40){B();B();let m=H(),nf=B(),f=[],sf=0;for(i=0;i<nf;i++){let fi={i:B(),s:B()};B();sf+=fi.s;f[i]=fi};f.s=sf;defs[lt]=[m,f]}
   else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==19?p19(f):m==20?p20(f):p+=f.s}};return r}
+
+//parse embedded strings (kyd/fit/laps.go)
+let un85=s=>{let o=[],i=0,c,b,j,k,L,p,v;while(i<s.length){c=s[i++];if(c=="|"){o.push(0,0,0,0);continue};b=c;for(j=0;j<4&&i<s.length;j++)b+=s[i++];L=b.length;if(L<5)b+="u".repeat(5-L);v=0;for(k=0;k<5;k++){v=v*85+(b.charCodeAt(k)-35)};p=[(v>>>24)&255,(v>>>16)&255,(v>>>8)&255,v&255];for(let m=0;m<(L-1);m++)o.push(p[m])};return new Uint8Array(o)}
+let dec=s=>{let b=un85(s),i=0,n=b.length,v=new DataView(b.buffer),u=_=>b[i++],h=_=>(i+=2,v.getUint16(i-2,1));return[u(),h(),h()]}
+
 
 let p2=x=>String(x).padStart(2,"0")
 let datestr=t=>{let d=new Date(1000*t);return`${d.getFullYear()}.${p2(1+d.getMonth())}.${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`}
