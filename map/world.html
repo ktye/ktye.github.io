@@ -1,4 +1,4 @@
-<html><head><link rel=icon href="../elas16.png"><title>a</title>
+<html><head><link rel=icon href="../kelas16.png"><title>world</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 </head>
 <style>
@@ -72,6 +72,8 @@ let tour=t=>{tr=[];tsum.value="";if(t<0)return;t=tours[t][1];let r="",m=0,s=0;
  tr=t.map(x=>x[3])
  //todo tr=[..]
  world()}
+
+//e.g. kyd -date 2011.04.22-2011.04.30 -tour
 fetch("tour").then(r=>r.text()).then(r=>{r.trim().split("\n\n").map(detour);tur.innerHTML=["",...tours].map((x,i)=>`<option value="${i}">${i?x[0]:''}</option>`).join("")})
 
 

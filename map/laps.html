@@ -4,32 +4,47 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden}
 canvas{display:block;width:100vw,height:500px;cursor:crosshair}
 </style>
 <body>
-<input type="file" accept=".fit" onchange='loadf(this)'>
+<select id="lap" onchange='this.value?run(this.value,laps[this.value]):0'></select> <input type="file" accept=".fit" onchange='loadf(this)'>
 <pre id='hdr'></pre><pre id='cur' style='margin:10 auto;width:fit-content'></pre>
 <canvas id="cnv" style='width:100%;height:300px'></canvas>
 <script>
 let pd=e=>{e.preventDefault();e.stopPropagation()}
 
-let floor=Math.floor
+let floor=Math.floor,round=Math.round,min=Math.min,max=Math.max
 let mx;
 cnv.onmousedown=e=>(mx=e.clientX);cnv.onmouseup=e=>{mx=0};cnv.onwheel=e=>zoom(e.deltaY<0)
 cnv.onmousemove=e=>{let top=cnv.getBoundingClientRect().top,x=e.clientX,y=e.clientY,a=Math.abs;if(!mx)return pos(x,floor(y-top));if(a(x-mx))pan(x-mx);mx=x}
 
-//parse fit files
-let parse=b=>{let i,j,r={time:[],bpm:[],lap:[]},v=new DataView(b),p=0,e=s=>{throw new Error(p+':'+s)}
- let B=_=>v.getUint8(p++),H=_=>(p+=2,v.getUint16(p-2,1)),U=_=>(p+=4,v.getUint32(p-4,1)),I=_=>(p+=4,v.getInt32(p-4,1))
+//parse fit file
+let parse=b=>{let i,j,r={time:[],bpm:[],lap:[]},v=new DataView(b),p=0,d0=631065600,e=s=>{throw new Error(p+':'+s)}
+ let B=_=>v.getUint8(p++),H=_=>(p+=2,v.getUint16(p-2,1)),U=_=>(p+=4,v.getUint32(p-4,1))
  let nh=B(),ver=B(),profile=H(),sz=U(),ep=nh+sz,defs=[];U()==1414088238||e(".FIT")
- let p18=f=>{f.forEach(x=>x.i==2?(r.start=U()):x.i==5?(r.sport=B()):x.i==8?(r.secs=U()/1000):x.i==9?(r.meters=U()/100):x.i==26?(r.laps=H()):p+=x.s)}//session
- let p19=(f,l)=>{l={};f.forEach(x=>x.i==2?l.start=U():x.i==8?l.secs=U()/1000:x.i==9?l.meters=U()/100:p+=x.s);r.lap.push(l)}//lap
- let p20=f=>{let s=180/2147483648,bp=0;f.forEach(x=>x.i==253?ti=U():x.i==3?bp=B():p+=x.s);  r.time.push(ti);r.bpm.push(bp)}//record
+ let p18=f=>{f.forEach(x=>x.i==2?(r.start=d0+U()):x.i==5?(r.sport=B()):x.i==8?(r.secs=U()/1000):x.i==9?(r.meters=U()/100):x.i==26?(r.laps=H()):p+=x.s)}//session
+ let p19=(f,l)=>{l={};f.forEach(x=>x.i==2?l.start=d0+U():x.i==8?l.secs=U()/1000:x.i==9?l.meters=U()/100:p+=x.s);r.lap.push(l)}//lap
+ let p20=f=>{let s=180/2147483648,bp=0;f.forEach(x=>x.i==253?ti=U():x.i==3?bp=B():p+=x.s);  r.time.push(ti+d0);r.bpm.push(bp)}//record
  p=nh;while(p<ep){let h=B(),lt=h&15;
-  if(h&0x40){B();B();let m=H(),nf=B(),f=[],sf=0;for(i=0;i<nf;i++){let fi={i:B(),s:B()};B();sf+=fi.s;f[i]=fi};f.s=sf;defs[lt]=[m,f]}
-  else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==19?p19(f):m==20?p20(f):p+=f.s}};return r}
+  if(h&64){B();B();let m=H(),nf=B(),f=[],sf=0;for(i=0;i<nf;i++){let fi={i:B(),s:B()};B();sf+=fi.s;f[i]=fi};f.s=sf;defs[lt]=[m,f]}
+  else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==19?p19(f):m==20?p20(f):p+=f.s}};console.log(enc(r));return r}
 
-//parse embedded strings (kyd/fit/laps.go)
-let un85=s=>{let o=[],i=0,c,b,j,k,L,p,v;while(i<s.length){c=s[i++];if(c=="|"){o.push(0,0,0,0);continue};b=c;for(j=0;j<4&&i<s.length;j++)b+=s[i++];L=b.length;if(L<5)b+="u".repeat(5-L);v=0;for(k=0;k<5;k++){v=v*85+(b.charCodeAt(k)-35)};p=[(v>>>24)&255,(v>>>16)&255,(v>>>8)&255,v&255];for(let m=0;m<(L-1);m++)o.push(p[m])};return new Uint8Array(o)}
-let dec=s=>{let b=un85(s),i=0,n=b.length,v=new DataView(b.buffer),u=_=>b[i++],h=_=>(i+=2,v.getUint16(i-2,1));return[u(),h(),h()]}
+//encode to string
+let enc=f=>{let i,l=f.lap,n=l.length,b=f.bpm,d,r=[n],h=x=>(x=round(x),r.push(x&255,x>>>8)),t0=f.lap[0].start;l.forEach(l=>{h(l.meters);h(l.secs)});
+ d=repz(delta3(unfill(b)));r.push(d[0]);d=d.slice(1).map(x=>3+x);while(d.length%8)d.push(0);r.push(...pack(d));return`${datestr(t0).slice(0,10).replaceAll(".","")}:"${new Uint8Array(r).toBase64()}"`}
+let unfill=b=>{let y=100;return b.map((x,i)=>(x=x==255?y:x,(y=x),x))}
+let delta3=b=>{let r=[b[0]],i,n=b.length,x=b[0];for(i=1;i<n;i++){r[i]=max(-3,min(3,b[i]-x));x+=r[i]};return r}
+let undel3=r=>{let b=[r[0]],i,n=r.length;for(i=1;i<n;i++)b[i]=b[i-1]+r[i];return b}
+let repz=b=>{let r=[b[0]],i,c=0;for(i=1;i<b.length;i++)r.push(4==(c=(b[i]==0?c+1:0))?(c=0,(r.length-=3),4):b[i]);return r}
+let urez=r=>{let b=[],i;for(i=0;i<r.length;i++)r[i]==4?b.push(0,0,0,0):b.push(r[i]);return b}
+let pack38=(a,b,c,d,e,f,g,h)=>[(a<<5)|(b<<2)|(c>>1),((c&1)<<7)|(d<<4)|(e<<1)|(f>>2),((f&3)<<6)|(g<<3)|h]
+let unpk83=(a,b,c)=>[(a>>5)&7,(a>>2)&7,((a&3)<<1)|((b>>7)&1),(b>>4)&7,(b>>1)&7,((c>>6)&3)|((b&1)<<2),(c>>3)&7,c&7]
+let pack=b=>{let r=[],i;for(i=0;i<b.length;i+=8)r.push(...pack38(...b.slice(i,i+8)));return r}
+let unpk=r=>{let b=[],i;for(i=0;i<r.length;i+=3)b.push(...unpk83(...r.slice(i,i+3)));return b}
+let dec=(s,t0)=>{let b=Uint8Array.fromBase64(s),p=0,u=_=>b[p++],h=_=>(u()|(u()<<8));                     //decode from string
+ let t=t0,lap=[],M=0,S=0,n=u(),i;for(i=0;i<n;i++){let m=h(),s=h();M+=m;S+=s;lap[i]={meters:m,secs:s,start:(t+=s)-s}}
+ let q=[u()];b=b.slice(p);n=b.length;i=0;for(i=0;i<n;i+=3)q.push(...unpk83(b[i],b[1+i],b[2+i]));n=q.length;i=0;
+ b=undel3(urez(q.map((x,i)=>i?x-3:x))).filter((_,i)=>i<=t-t0);t=b.map((_,i)=>i+t0);
+ return({sport:0,start:t0,meters:M,secs:S,lap:lap,bpm:b,time:t})}
 
+let run=(d,s)=>{let x=dec(s,new Date(`${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`)/1000);show(x)}
 
 let p2=x=>String(x).padStart(2,"0")
 let datestr=t=>{let d=new Date(1000*t);return`${d.getFullYear()}.${p2(1+d.getMonth())}.${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`}
@@ -37,7 +52,7 @@ let dur=s=>{let h=floor(s/3600),m;s-=3600*h;m=floor(s/60);s=floor(s-60*m);return
 let pace=(m,s)=>(s=1000*s/m,`${floor(s/60)}:${p2(floor(s-60*floor(s/60)))}/k`)
 
 let F,show=x=>{let fast=0;x.lap.forEach((l,i)=>{l.fast=l.meters/l.secs>x.meters/x.secs;l.stop=i<x.lap.length-1?x.lap[1+i].start:x.start+floor(x.secs);fast+=+l.fast});
- let fs=0,fm=0,h=`${x.sport-1?"B":"R"}  ${datestr(x.start)}  ${dur(x.secs)} ${(x.meters/1000).toFixed(1)}km (${pace(x.meters,x.secs)})\n${String(x.laps).padStart(2,"0")} laps ${fast} fast:\n`;
+ let fs=0,fm=0,h=`${x.sport-1?"B":"R"}  ${datestr(x.start)}  ${dur(x.secs)} ${(x.meters/1000).toFixed(1)}km (${pace(x.meters,x.secs)})\n${String(x.lap.length).padStart(2,"0")} laps ${fast} fast:\n`;
  h+=x.lap.filter(l=>l.fast).map((l,i)=>{fs+=l.secs;fm+=l.meters;return` ${String(1+i).padStart(3," ")}    ${dur(l.secs)}  ${String(floor(l.meters)).padStart(5," ")}m  (${pace(l.meters,l.secs)})`}).join("\n")
  h+=`\n   +    ${dur(fs)}  ${String(floor(fm)).padStart(5," ")}m  (${pace(fm,fs)})`
  hdr.textContent=h;T0=0;SX=0;F=x;draw()}
@@ -62,5 +77,12 @@ let loadf=x=>x.files[0].arrayBuffer().then(b=>show(parse(b)))
 window.ondragover=e=>pd(e)
 window.ondrop=e=>{pd(e);let l=e.dataTransfer.files;for(let i=0;i<l.length;i++){let f=l.item(i);f.arrayBuffer().then(u=>{show(parse(u))})}}
 
+//fetch("fit/i.fit").then(r=>r.arrayBuffer()).then(r=>(parse(r)))
+
+const laps={
+20260703:"CfAiQAvBA9QArQGWACADyABoAZ8AEwUbAcIBsADjBAsBsAZOAlxvBpuSyRuSSSOSty2yTuVmONyWNxtxtyNddtdptNuedtrz//9pJFJtxuJydtxxxuSdydyONptxONxxtrxz/xNptrtxtpT/9udtNx2OOSdJqfppptNNdftuf9zp2z9xptrttNteOeNNtJptNtNLtJz+eTz//9xtpxqJuNddtNxXRxpudyT9txtf9ydLz+dNtONf/tNudr//tftNqdRRJLtJtpztqdr9Ntdr/tqONyNxxxruKRtxpqOSRxtppuNxz/tpruNsBJdtdxyONxpxpJySOSORyONuNuOftptzqdxxtxqeOf+f/////+Kf/txftuONTzuNptptlqJuNNrrptOJtpptqNNJItNpptqLtxpuRtqRxlRskEpNNppz9uNftuduONuSNyRyRxxudtNNyMZtxuT9utyOONNxuOJxufxtxxftuNrrptNptNJtptNNNtL+NtRztzwlKL9tRtxtyNxxtz+eOdtr9NNptRtlJ3NkxFJJNNJNL9ppf/tNpJxtzxz+ftxOedxuNdNtdtfxeNz+duONNzxxynuJxpuOStRxuNuONuNuT+Nftxtpz/9z+dxTudz///9uNufrtdtpuL9uNr9f/9Nz9xdtftdtdtqOJtf9uNswpNrtxxUSJjolSOOSOSONRuNuRueNtfzuJtJKNtdy+SNpNxpptrqLpruJNJpJtdztueNNdtpdxpuOKONxudTuSOR3tuNxyNxzxtrtNtJqNNtNptpNJdtNr/9xtyOSOtuRuRuONz/9RppppptftRqNNtLprttNNJqONdTpNNNJNtJr9ptxpusllNuf+NxftptT05K6xZyRqdtptm9xtxtyOOftruNptptrpzttfttJFNruSRzqQqRNypzuNrz9qdJFprttMJfttNxRtxuOSNxNtWSxuOOTxuNuORtxtztuNxONpxdtr9tdz/tdptrrtNduf9NxeduRtxtpydxtz/tuNuNztNxNrpdpJptJuNxyOySRyXtyL9xxORtqJuJ09OdydpxuReduONudtz9z9uf+JufptxtNsuNz//uNuNRtz+NrptNJtNpptNNJpNJptJpNJNpNpJdNptppLtNpIprttOJNSOTtxtyNxptONdRxtryOSOWOduKONdqtxuKOyWW1ySWRtxuNz/tuNptzz///ufztuftuNfqKf9uf/9ptpptNNppptNJNJNNJJpNFpJpNtNpotNtfpqNMVxuJzqfyLuKNxpuNtdRJIpNWdxRtySSON6SyRxtyStuORtpKOSRuTuNuduNuNuKKdtxz///9tpxrttfxfxtz9xdxtqNdpxdf9rpudqf/9xtpzpxtptz//ptopLtptpptJJNJNpuJppKNNpxNtNptNppxppuSxpuJtxf9tqNrtNdRtdtOVpruNruxuVuMpuONuSyxySNyOSNptxyxz9xpzydudtz///+Kfr/9xRtz/ttNztTtrtz//////9uKf//ttNJpNNNNNpptNtJNNptrpNJtNNdtJtddONdz9tzxT+Nz+dudzuNtT/9tptNpRJptNrpppRpNNNptTpdrtuftRtqLpSKNyONuORtpJeONxryfxtxxeONtdxr//ttNtTtJtpuVtgpKNptwVzyNudrptqdptJKT9xRxtztONrtxuOOeNuNudtrudOLxdpdJtftNNptTtpNxueORgAA=",
+20260710:"C6oUkAZiBPQAIgMrAfgD9QDgAa0A9gPxALYC7gAzBPQAGgjMAgkI5QE9DVMEY24zE07K7nZJJLJJHHI42523O4445G43G5+2nG123JG5FSk3FG4u53E24245HGm0u43O3HG40mv/2S13P03E1201O2mikSmkiiikUCo2m10uo7tZHI5LZI4pXHG5JI5G4vG2m53E3G12013G3P250pGm54025HHJ424o3F1G420k2523K522mv/O41/2m0Um3P22v03G3KY3G3P23P+5HI1O2o2mmnF11G122mVqI0knYe4o25G550246200mkkkkuu3YY5Eu3g53O1/43P523ElGk2k002m1PP25/+523P//3E43HJPE53BI1I420245/5J+m43O5Kk0202122mkl+2414mw002mkmk10W0nO2052u42u21+v23P22p24554v244vHP45123Im3O3HP3HI2421205+mp+2543JI2522v0kl+2525I5G2kmk3Kk1445HHP21/52up/23E2k3HJbO02mUu2pJ2m0202425P2lHFGp2kkkl3G3G4243G2v21E6mmv+2u3Oki0m122m03G43I443JY7LHO2uv+v502pG2lF22m2o3O202om000m0402kjemk053HG3HI45JJI13bLHJG43I442u51O3Um3O20252523HFHP3O5+24m3Go24mv3Op2153G2v1+2123HF/O4202p/2u2ymmk2k0kkem2mmmk0W02020inG0mk1y3Gm1/P0VGv/HG3G415443JGk21HP/JOm3O4443P23T23G2kvPF23GfG421243O3G03G04243OnFG5443HG7bI3K5G53F+24041HO41G3PP23FP//////5+3G1//5+2nGov+m3F/21+2u20000mkmU2m2uk202mmumlGmk2mnP002imm1G12m05123G3G1G45P23Iu02mw9DGmm3G4445HJbJJHI5JI5HHHG5PO3O53G3PP///+u2p5/22u2v//+43P+25/////P40m2kmmkkk0m00mmmk02kk202m2v//421+2m3G000522mm004424200vO523HGv3O21244443I0021+nG02u2o02p21G45HJI5NZHG43G5I43P425/23O3Gm3O3P//P//+21P//3P2p2u2122u1///403O202mkkmmmk2k0momm0m2k1/+k2v21+1G4p+2442042o2m5/E5/P+24m3P/O3G3P20241+u2v//+253HO3O25////P+553Gv+21//+2nE5212m41+25+3P/////+5+25///202120210121//0504v51+1/+243P+uknG2m2m443G3I43F1Ev/241241FVI5G44543HHG43O242503P42553P23G1/25//5/+v/G2v25+5/////5//255/21FP+3P+1F5/////////////////////+2m0002mmk0mum000m112m020112u2p+2m2v02m2u3O2024253P3O202425/3O4pE4m1G02m2m2m0202120522v/+24um3P+3O3P22nP242425242525+1/22m1/3O242413P2vOm2u04120404041G4252p+2m525+021///241//23FFFFFO3P25///+1E203E3F3O3I1G3GnP+25+3O42nP/+21/+u2ou25//2unEkmvPG43GnHO3O40425/21/12p//G1/202uu120v+1P/2m4nE2121/2u12124602mm0km03FOpP25+1+2NHFG0kkymw==",
+20260717:"D/cWiQf4BCwBSgKsACQFLQFWArMAegQsAfYBtgDRBC0BywGyACkFLQHdAbIADwUtAd4BswD6BCwBhggJA2KNSNuRySOONIpPGSW2uJtptNudOSSVeRxOROORxuuRxuNNqeNztNxrptyttNJJqMr9tNyORxyftxfxxRqNxtxztT9txtzxtztuOWORzuSVxeNpJJIpIro39NtNNpz9ppuRtNpuNpxuSNNudJeNRNNtRtxztdtNJJNRxxqNptxyLxztxJtORuONzuNptNtNppIpJNJpqNdueONxzzttNrr/9uJuftptFNNtNptptpptNr9yRtyONyNztuNz+LtNNtTuONxySSSyRx1tduNteNydRNz9tpKMJppptpftpqf/txpz9dxr9NxtptppptpftptNpptf9dtqLtNr9uefztzxrmJtNdptNfz//9NuNuOR1udxuSuStxyNxtr9uLtxtdtNptpptJpNtNNNpdtrtf9uOOONrtNJJNLuONuNtOdNr9rxxyOOSOSNuNztxRxyT+NxuKNtRpqeNyORtxzptNqftyf9udtzxtpuJxtppxqKNzxT/1OSdxxRtWLxtxudtztuNtdtMVlNONsuJspKNxNppNJpJptOeORuSORuNVOWRyOdudtptqNptztNLuNuNxpltJNztuNrlnuNTttNLptptddtz/9txtzttRufxq6Rtz/z/9yf9txtpSytKeNrttNztz9zzzxtz9T//ttNf+f9rqJqJptNdppGRtJJydNRryyftz+NpuptyRxyyNRtxuONuNxxuTptz+fxqef9z/tuftuNf//////tRtwqNz/9pueNr//uOKNNpxtf9uJuJzpxKdudNtdtprpJJJNFNptptNppKNdxdtRtLtNNNrtuNuwhFVJNpxJuNufqNxpedztuNuTttJpudxySOftxySSWVxeNNuNyOeNTtuNuNOdtztxtONNuNxRT/9z/9tz/uf+dtpz/tT//9ztz9tzz9xfr////qdtNJNNptpppNtNpptNptNNRNRNtNpptNdNtNptNtNJpptpqdNdRxtNNpJoduNduKdppJtyfuONuQyXVyOVNNxxySOSyWZyONxtxqT+Juf/txTztxT//ttRNptpuNxfrr9RqNuNuONuKJtztuNxxxRpxRRT9z//tpuKduNr/uNRtdNuNzpuNNtNtJtNNpptNptNMpNpptJpNJNpNrptpNdtpJVppIpJNxzpr//9tJNdr9NpNxNz9xueNuO7aRyRuWRxzuSORxuNxStKRuduRr9xpuKNxRudxuef9z9TtxtT9rtxRNtdOfr//9z/tdpudtzuNuduf//9z9tz9ptNtNNJtpptNNNNptNNdrtteL9tr9uftuL9tNNtOdT/9z//qJtxdtxudtxueNxqNztxtz/zzzudxtxT+dxT//tef/9tdtzqLtf//9tpxf/xtr/9T9T9tONqfrtteNtNxtr9tpJrpprtNdptdptqJptptRpudtddtr/9tqNNJxtdtptNeNtdtpNtJNtNJNLtyNu2txOOxuJRza2yzSeNuNxptztuf/9tptTtNpT/9tf/uLuNpzxRptTztz///9z/tTtrtztrtuddtzz9txTuNf/tdNptNNNptNptNJJtpppNJpptJdptNpNy5ImsNJpftRJKNNppptxtr9xyOSOJtNNOSNPBxtKddxOS2SYySSRyOOKNuSWyOdzuNuKdtxxpztuJtzz9uNtT9ztpxtyNf9txtOftz/pztToxuONptduROJuNpxdtdxfuf/txuL9Nufr/tJNdppJJtppspJtdptplptdptppNtftqdpNOddpeSWWNolyNNL9tz/ttNtNxtpz9yRKNtJJqdJNtdqNr9ftztudxyONuftrtxuKdpdtNpRtJpr//mtNrtzz0ptpptNONuNxxtNqKNrptNr9xuRtyONtNJdpr9xuNxuJpted1ONxztuNf/9xxtOf9xtxRxtdzrtxtdNtNqOL/39xxyRtTudqT9NtNuNpNNNtNpppJKNqNOittdNtfpuNuJJNRtruNNddpNxxyOdxxtyRtxwAA=",
+};lap.innerHTML=["",...Object.keys(laps).toReversed()].map(x=>`<option>${x}</option>`).join("");
 
 </script></body></html>
