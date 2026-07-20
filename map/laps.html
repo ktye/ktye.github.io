@@ -21,7 +21,7 @@ let parse=b=>{let i,j,r={time:[],bpm:[],lap:[]},v=new DataView(b),p=0,d0=6310656
  let nh=B(),ver=B(),profile=H(),sz=U(),ep=nh+sz,defs=[];U()==1414088238||e(".FIT")
  let p18=f=>{f.forEach(x=>x.i==2?(r.start=d0+U()):x.i==5?(r.sport=B()):x.i==8?(r.secs=U()/1000):x.i==9?(r.meters=U()/100):x.i==26?(r.laps=H()):p+=x.s)}//session
  let p19=(f,l)=>{l={};f.forEach(x=>x.i==2?l.start=d0+U():x.i==8?l.secs=U()/1000:x.i==9?l.meters=U()/100:p+=x.s);r.lap.push(l)}//lap
- let p20=f=>{let s=180/2147483648,bp=0;f.forEach(x=>x.i==253?ti=U():x.i==3?bp=B():p+=x.s);  r.time.push(ti+d0);r.bpm.push(bp)}//record
+ let p20=f=>{let s=180/2147483648,ti=0,bp=0;f.forEach(x=>x.i==253?ti=U():x.i==3?bp=B():p+=x.s);  r.time.push(ti+d0);r.bpm.push(bp)}//record
  p=nh;while(p<ep){let h=B(),lt=h&15;
   if(h&64){B();B();let m=H(),nf=B(),f=[],sf=0;for(i=0;i<nf;i++){let fi={i:B(),s:B()};B();sf+=fi.s;f[i]=fi};f.s=sf;defs[lt]=[m,f]}
   else{let d=defs[lt],m=d[0],f=d[1];m==18?p18(f):m==19?p19(f):m==20?p20(f):p+=f.s}};console.log(enc(r));return r}
