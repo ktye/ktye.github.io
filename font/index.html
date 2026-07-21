@@ -1,0 +1,44 @@
+<html><head><title>font</title></head>
+<style>
+*{font-family:monospace}
+input[type=number]{width:10ch}
+#out{border:1px solid red}
+</style>
+<body>
+<img id="fn" onmousemove='mxy(event)' src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAR0AAABjAQMAAACc+0Y9AAAABlBMVEUAAAD///+l2Z/dAAAD6klEQVRIx+2WP05cMRDGkVJQRRzhHSEXiLRljoBEs+QC0PHyl0lHuUfYI1AhqshBKShRighFCDnRFkRCym6EFsOu7cnMeOz18jeKkGjyJHj72B/2+Pv8zfMCyvVp4fYLcSFBFu+6/kM1NOF7xIAOh3FGBILa+PzVb4ZggqfYC3Rz9AjzUDjaXSvQcrRXoSlDH492NwVC3MMuGvpPNGiYraCVnfcK0XQIlyBQyBDdFjaeruy8LdBhxPM00gj2EH2TIJ6uLdMdBqNQGWmo0LrqRIVj93xWUx/xUqAeSfC9qslwTbo6gWwWcy8rbvMNypO9zRZV3DzSLlCDSeoLHKDzjSe5erFTiMHM4DaCg2M8CeRVwDZYdcTh8czgNgBCIMXpz1OGLvGEdZymrUIGv0a7jBDxDHd9Z0Rf9BJkfRNkF7DBmwIFngetA4dtbFSnWAzm6RB45CcKqdg8UobWBOIaXSBoSJApNaEazBL4ZgQkQexc0He9CAzJ6tw1g+vL/Y3iw0eLORscaXWRpB5gkxbZxo4nJ4EFyQa/Y+8sG7wexFJSDeEIwffPIBv8RiFLzkrIBTqkkboZWtnZQPsi2BF/ywZbXGRon6GxQGww2bLsmzLStzJdsOMy3SrwSAWSmlyCzqHadHC1cJdWl6BekmCLaxIJHIoEF8QuZgluN/gxWnS4BxpQgDqTYjD1p6Vk8GJSgkwa0VYHNA5QDV4vBtsCRdqZRptPbodqsELbwYZ5aGXnpUA8HUET/EpvD8OQzZAmeIkcoKVkiKNaQbV3Cg1wO0HDGlpjyGjhgZqw5LmCNMEQu+yljR2FWAKXoWKwvR5OgfbuURy1Kz78LjCpi9CPB8wvjX6dYHrL2AJx2wLuoLaMLwan7jcHyUgzSN93sWHvtnjH/MClCJ6CYL0ZpWafDMayR6YpUhGPSP+uqxOMGk7fFOhwBql3WBJcoP0boP4d06nBGLta+JQKb7EfiT0I3VsTLDGa3GNLKL/ugAYPHXNy1FcGfy+QmXu35GOUGLx5L0Rivude0IizVS+Yg+SQpTE3JeYxjTQFnB2yGKK1G00wx++A9+YY8nQZChU0TSOdl5raGuJwbvNTVRMb7KRwh59xPzaSYFpGXbgaDFf0tHMS6N9ugCrFC3RQM9Wp568M/nAd4tVxE7vxkCUPZwk65s9+DsqnaORWKpCVmtLCLup2iHxco5MMt90TZj2MZStANjiNNIbPfIrmgytOnk3hlKGfJhu8KiONaaRtPjczNPT0Nl+iz2Z+OoF4pDMeidnhDRD12x6fvQLXRNMzlGpig39p4V843yJBUnyYV1cSDCFH847cQZ3ffwjnH3BrdcpfniPsAAAAAElFTkSuQmCC">
+<span id="xy" style='position:fixed'></span>font png:<input type="file" accept="image/png" onchange='loadfont(this);paint()'><canvas id="fnc" style="display:none"></canvas>
+<p>charmap:<textarea id="abc" rows="8" cols="128" onchange="paint()"></textarea>
+<table id="tab"><tr><th colspan="4">font src img</th><th colspan="4">glyph</th></tr>
+       <tr><th>x0</th><th>y0</th><th>dx</th><th>dy</th><th>w</th><th>h</th></tr>
+       <tr><td><input id="X0" type="number" value="54"></td><td><input id="Y0" type="number" value="9"></td><td><input id="DX" type="number" value="14"></td><td><input id="DY" type="number" value="13"></td><td><input id="CW" type="number" value="8"></td><td><input id="CH"type="number" value="14"></td></tr></table>
+<hr>
+<textarea id="txt" onchange="paint()">ABCXYZ0123abcmno!+-./</textarea>
+<p><canvas id="out"></canvas>
+<script>
+abc.value=` !"#$%&'()*+,-./
+0123456789:;<=>?
+@ABCDEFGHIJKLMNO
+PQRSTUVWXYZ[\\]^_
+\`abcdefghijklmno
+pqrstuvwxyz{|}~`
+let loadfont=x=>fn.src=URL.createObjectURL(x.files[0])
+let mxy=e=>xy.textContent=`${e.offsetX} ${e.offsetY}`
+let F
+let paint=_=>{let w,h,i,j,k;fnc.width=w=fn.naturalWidth;fnc.height=h=fn.naturalHeight;let c=fnc.getContext('2d');c.drawImage(fn,0,0);
+ let d=c.getImageData(0,0,w,h).data,px=new Uint32Array(d.buffer).map(x=>x&0x00ffffff?1:0),x0=+X0.value,y0=+Y0.value,dx=+DX.value,dy=+DY.value,cw=+CW.value,ch=+CH.value;
+ let O=Array(127).fill(0),ab=abc.value.split("\n").map(x=>x.split("").map(x=>x.charCodeAt(0)));
+ let I=Array(cw*ch).fill(0);k=0;for(j=0;j<ch;j++)for(i=0;i<cw;i++)I[k++]=j+i*w;
+ ab.forEach((a,i)=>a.forEach((c,j)=>O[c]=x0+j*dx+w*(y0+i*dy)));console.log("O97",O[97]);F=O.map((o,i)=>O[i]=I.map(x=>px[x+o]));
+ 
+ let t=txt.value,l=t.split("\n"),n=l.length,m=Math.max(...l.map(x=>x.length)),W=cw*m,H=ch*n;out.width=W;out.height=H;c=out.getContext('2d');d=c.createImageData(W,H);
+ console.log("WH",W,H);
+ let u=new Uint32Array(d.data.buffer);
+ let draw=(c,i,j)=>{let o=j*cw+W*ch*i,m=F[c.charCodeAt(0)];console.log("cijo",c,c.charCodeAt(0),i,j,o);k=0;for(j=0;j<ch;j++)for(i=0;i<cw;i++)u[o+j+i*W]=m[k++]?0xffffffff:0xff000000}
+ l.forEach((r,i)=>r.split("").forEach((c,j)=>draw(c,i,j)));
+ c.putImageData(d,0,0);
+}
+fn.onload=paint;
+Array.from(tab.querySelectorAll("input")).forEach(x=>x.onchange=paint);
+</script>
+</body></html>
+
