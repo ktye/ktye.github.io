@@ -27,6 +27,19 @@ asn=(s,y)=>K.dx(K.Asn(Ks(s),y)),enl=x=>K.Atx(13n,x),flr=x=>K.Atx(16n,x),rnd=x=>K
 su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8"),
 cw,
 
+syms=`  + - * %   ! & | < > =  RUN
+
+  ~ , ^ #  _ $ ? @ .  ' / \\
+
+  () {} []  @[] .[] $[]      ⏎
+
+' " \` 0 1 2 3 4 5 6 7 8 9 . :
+
+ a  b  c         x  y  z
+
+ a: b: c:        x: y: z:
+`
+
 kenv={env:{ 
  Exit:  function(x      ){},
  Args:  function(       ){return 0},
@@ -36,7 +49,7 @@ kenv={env:{
  ReadIn:function(x,y    ){return 0},
  Native:function(x,y  ,i){return[kplt,klns,kmem][lo(x)](y)}}},
 kreg=(s,a,i,x)=>{x=K.l2(i,KC(s));I()[(lo(x)>>>2)-3]=a;asn(s,(14n<<59n)+BigInt(lo(x)))},
-kinit=s=>{s=("string"==typeof s)?shortcut(s):s;
+kinit=s=>{s=("string"==typeof s)?(o.textContent='',shortcut(s)):s;
  let n,nk=x=>{n=x.byteLength;return x}
  fetch("k.wasm").then(r=>r.arrayBuffer()).then(r=>WebAssembly.instantiate(nk(r),kenv)).then(r=>{
  K=r.instance.exports;K.kinit();plots=0;pid=0;psiz={};cnv.style.zIndex=-1
@@ -122,11 +135,16 @@ csvparse=(x,f)=>{let i=0,q=0,c=f.s,h=f.h,r="",col=0,row=0,mc=0,nr=0,e=f.size==0,
  d.n=nr;return d},
 kcsv=d=>{let r=K.mk(23,0),v;d.forEach(v=>r=cat(r,Array.isArray(v)?KS(v):(v.constructor==Int32Array)?KI(v):KF(v)));return r}
 
+let tin=t=>{if(t=="RUN")return kinit(i.value);t=t=="⏎"?"\n":t;
+ let s=i.selectionStart,e=i.selectionEnd,b=i.value.slice(0,s),a=i.value.slice(e),p=s+t.length+((")]}".includes(t[t.length-1]))?-1:0);
+ i.value=b+t+a;i.setSelectionRange(p,p);i.focus()}
 
 window.init=()=>{kinit()
- let f=window.location.hash;if(f)i.innerText=decodeURIComponent(f.slice(1))
- i.onblur=e=>{if(!o.textContent)kinit(i.innerText)}
- i.oninput=e=>o.textContent=""
+ let f=window.location.hash;if(f)i.value=decodeURIComponent(f.slice(1))
+ //i.onblur=e=>{if(!o.textContent)kinit(i.value)}
+ //i.oninput=e=>o.textContent=""
+ //i.onchange=e=>kinit(i.value)
+ i.oninput=e=>o.innerHTML=syms.replace(/\S+/g,s=>`<span onclick="tin(this.textContent)">${s}</span>`);
 }
 window.onresize=e=>{asn("l.",K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20"))));if(0<+cnv.style.zIndex)scaleplot(plots)}
 window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
@@ -304,9 +322,9 @@ key table: aggregate by type
 </head>
 
 <body onload="window.init()">
-<pre id="i" contenteditable="true" spellcheck="false" autofocus>
+<textarea id="i" contenteditable="true" spellcheck="false" autofocus>
 
-</pre>
+</textarea>
 <pre id="o">load error
 </pre>
 <canvas id="cnv"></canvas>
@@ -329,8 +347,8 @@ key table: aggregate by type
 i.addEventListener('paste',e=>{e.preventDefault();
  let t=e.clipboardData.getData("text/plain"),s=window.getSelection()
  if(s.rangeCount){s.deleteFromDocument();s.getRangeAt(0).insertNode(document.createTextNode(t))};o.textContent=""})
-o.addEventListener('dblclick',   e=>{e.preventDefault();o.textContent="";e=i.innerText?kinit(i.innerText):0})
-//o.addEventListener('contextmenu',e=>{e.preventDefault();o.textContent="";e=i.innerText?kinit(i.innerText):0})
+o.addEventListener('dblclick',   e=>{e.preventDefault();o.textContent="";e=i.value?kinit(i.value):0})
+//o.addEventListener('contextmenu',e=>{e.preventDefault();o.textContent="";e=i.value?kinit(i.value):0})
 o.addEventListener('click',e=>{cnv.style.zIndex=-1;})
 
 let libs="qr lu svd fft plot stats".split(" "),

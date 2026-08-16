@@ -74,7 +74,7 @@ let tour=t=>{tr=[];tsum.value="";if(t<0)return;t=tours[t][1];let r="",m=0,s=0;
  world()}
 
 //e.g. kyd -date 2011.04.22-2011.04.30 -tour
-fetch("tour").then(r=>r.text()).then(r=>{r.trim().split("\n\n").map(detour);tur.innerHTML=["",...tours].map((x,i)=>`<option value="${i}">${i?x[0]:''}</option>`).join("")})
+fetch("tour").then(r=>r.text()).then(r=>{r.trim().split("\n\n").map(detour);tours.reverse();tur.innerHTML=["",...tours].map((x,i)=>`<option value="${i}">${i?x[0]:''}</option>`).join("")})
 
 
 window.ondragover=e=>pd(e)
