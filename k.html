@@ -147,10 +147,6 @@ window.init=()=>{kinit()
  i.oninput=e=>o.innerHTML=syms.replace(/\S+/g,s=>`<span onclick="tin(this.textContent)">${s}</span>`);
 }
 window.onresize=e=>{asn("l.",K.Atx(Ks("lxy"),K.Val(KC(cols()+" 20"))));if(0<+cnv.style.zIndex)scaleplot(plots)}
-window.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();let s=window.getSelection();
- if(s.toString().length)lastsel=s.getRangeAt(0) //rightclick sometimes clears the current selection
- else{s.removeAllRanges();if(lastsel)s.addRange(lastsel)}
- window.find(s.toString(),false,false,true);lastsel=window.getSelection().getRangeAt(0)}
 window.onerror=(m,s,l,c,e)=>{o.textContent+="\n"+s+m}
 window.onunhandledrejection=e=>{o.textContent+="\n"+e.reason+"\n";console.log(e.reason)}
 document.addEventListener('keydown',e=>{if(e.key=="Escape")cnv.style.zIndex=-1;false})
