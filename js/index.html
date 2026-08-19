@@ -22,15 +22,16 @@ body{display:flex;margin:0}
 
 //tty
 let pd=e=>(e.preventDefault(),e.stopPropagation()) 
-let shpr="$",rlbuf=[],rlpos=0
+let jspr=">",rlbuf=[],rlpos=0
 let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}
 let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
-let exec=x=>(O(x+"\n"),k(x),kp(),ui())
+let exec=x=>{O(x+"\n");rdl.textContent="";js(x)}
 
+let O=x=>out.textContent+=x
 let ce=x=>document.createElement(x)
 let ac=(c,x)=>(x.appendChild(c),x)
 let cl=(c,x)=>(x.classList.add(c),x)
@@ -57,7 +58,7 @@ let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
  h.onmousedown=md
 }
 
-let con=win(`<pre id="tty"><span id="out" ></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"term")
+let con=win(`<pre id="tty"><span id="out">&gt;</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"js")
 tty.onclick=_=>rdl.focus()
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),progexit()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
 let kp=_=>{let v=out.textContent.split("\n"),p="  ";
@@ -65,9 +66,18 @@ let kp=_=>{let v=out.textContent.split("\n"),p="  ";
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
  rdl.textContent="";prmt(1);}
 
-let plt=win("","plot")
-let edt=win("","edit")
-let dir=win("","dir")
+
+
+let worker=`onmessage=e=>{ 
+ try{postMessage(eval(e.data))}catch(E){console.log(E);postMessage(E.message)};
+};`
+let w=new Worker(URL.createObjectURL(new Blob([worker],{type:'text/javascript'})))
+w.onmessage=x=>O(x.data+"\n>")
+let js=x=>w.postMessage(x)
+
+//let plt=win("","plot")
+//let edt=win("","edit")
+//let dir=win("","dir")
 
 </script></body></html>
 
