@@ -23,17 +23,13 @@ body{display:flex;margin:0}
 
 //tty
 let pd=e=>(e.preventDefault(),e.stopPropagation()) 
-let jspr=">",rlbuf=[],rlpos=0
+let rlbuf=[],rlpos=0
 let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}
 let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
-let exec=x=>{O(x+"\n");rdl.textContent="";js(x)}
-
-let clip=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
-let O=x=>{let c;x=clip(x,17);x=(out.textContent+x).split("\n").slice(-20).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n");out.textContent=x}
 let ce=x=>document.createElement(x)
 let ac=(c,x)=>(x.appendChild(c),x)
 let cl=(c,x)=>(x.classList.add(c),x)
@@ -50,34 +46,34 @@ let win=(x,t)=>{let i=desk.childElementCount
 let lay=(w,i)=>{let r=bb(desk);w.style.left=(5+r.left+20*i)+"px";w.style.top=(5+r.top+30*i)+"px"}
 let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
  let cd=_=>{document.onmouseup=null;document.onmousemove=null}
- let mm=e=>{pd(e);a=c-e.clientX;b=d-e.clientY;c=e.clientX;d=e.clientY;
-  let r=bb(desk),R=bb(w)
+ let mm=e=>{pd(e);a=c-e.clientX;b=d-e.clientY;c=e.clientX;d=e.clientY;let r=bb(desk),R=bb(w);
   w.style.top=Math.max(0,Math.min(r.height-R.height,w.offsetTop-b))+"px"
   w.style.left=Math.min(r.left+r.width-R.width,Math.max(r.left,w.offsetLeft-a))+"px"}
  let md=e=>{pd(e);w.parentNode.appendChild(w);/*bring to top*/
  if(e.target.className=="cxx")return hide(e.target.dataset.k)
  c=e.clientX;d=e.clientY;document.onmouseup=cd;document.onmousemove=mm}
- h.onmousedown=md
-}
+ h.onmousedown=md}
 
-let con=win(`<pre id="tty"><span id="out">&gt;</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"js")
-tty.onclick=_=>rdl.focus()
-rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
-let kp=_=>{let v=out.textContent.split("\n"),p="  ";
- v=(19<v.length?v.slice(v.length-19):v).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n")
- v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
- rdl.textContent="";prmt(1);}
+let exec=x=>{out.textContent+=x+"\n";rdl.textContent="";js(x)}
+let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"js")
+tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1)
+rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),(out.textContent=""),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
+let jp=_=>{let v=out.textContent.split("\n"),p=">";v=(19<v.length?v.slice(v.length-19):v).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n");
+ v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v;rdl.textContent="";prmt(1);}
+let c17=x=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>17){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
+let O=x=>out.textContent+=c17(x)
 
 
 
-let js,jw,jstart,intr;fetch("mat.js").then(r=>r.text()).then(mat=>{
- let worker=`let $=x=>ismat(x)?smat(x):x.toString()
+let js,jw,jstart,intr;fetch("mat.js").then(r=>r.text()).then(mat=>{fetch("plot.js").then(r=>r.text()).then(plt=>{
+ let worker=`let $=x=>x===undefined?"undefined":ismat(x)?smat(x):x.toString()
  onmessage=e=>{ 
   try{postMessage($(eval(e.data)))}catch(E){console.log(E);postMessage(E.message)};
- };\n`+mat
- jstart=_=>{jw=new Worker(URL.createObjectURL(new Blob([worker],{type:'text/javascript'})));jw.onmessage=x=>{O(x.data);O("\n>")}}
+ };\n${mat}\n;plot=(_=>{ ${plt};return plot})()\n`
+ console.log(worker);
+ jstart=_=>{jw=new Worker(URL.createObjectURL(new Blob([worker],{type:'text/javascript'})));jw.onmessage=x=>{O(x.data);jp()}}
  js=x=>jw.postMessage(x);intr=_=>{jw.terminate();jstart();}
-jstart()})
+jstart()})})
 
 //let plt=win("","plot")
 //let edt=win("","edit")
