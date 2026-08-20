@@ -18,6 +18,7 @@ body{display:flex;margin:0}
 <div id="desk">
 </div>
 
+<script src="mat.js"></script>
 <script>
 
 //tty
@@ -31,7 +32,8 @@ let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
 let exec=x=>{O(x+"\n");rdl.textContent="";js(x)}
 
-let O=x=>out.textContent+=x
+let clip=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
+let O=x=>{let c;x=clip(x,17);x=(out.textContent+x).split("\n").slice(-20).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n");out.textContent=x}
 let ce=x=>document.createElement(x)
 let ac=(c,x)=>(x.appendChild(c),x)
 let cl=(c,x)=>(x.classList.add(c),x)
@@ -60,7 +62,7 @@ let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
 
 let con=win(`<pre id="tty"><span id="out">&gt;</span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"js")
 tty.onclick=_=>rdl.focus()
-rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),progexit()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
+rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
 let kp=_=>{let v=out.textContent.split("\n"),p="  ";
  v=(19<v.length?v.slice(v.length-19):v).map(x=>x.length>80?x.slice(0,78)+"..":x).join("\n")
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v
@@ -68,12 +70,14 @@ let kp=_=>{let v=out.textContent.split("\n"),p="  ";
 
 
 
-let worker=`onmessage=e=>{ 
- try{postMessage(eval(e.data))}catch(E){console.log(E);postMessage(E.message)};
-};`
-let w=new Worker(URL.createObjectURL(new Blob([worker],{type:'text/javascript'})))
-w.onmessage=x=>O(x.data+"\n>")
-let js=x=>w.postMessage(x)
+let js,jw,jstart,intr;fetch("mat.js").then(r=>r.text()).then(mat=>{
+ let worker=`let $=x=>ismat(x)?smat(x):x.toString()
+ onmessage=e=>{ 
+  try{postMessage($(eval(e.data)))}catch(E){console.log(E);postMessage(E.message)};
+ };\n`+mat
+ jstart=_=>{jw=new Worker(URL.createObjectURL(new Blob([worker],{type:'text/javascript'})));jw.onmessage=x=>{O(x.data);O("\n>")}}
+ js=x=>jw.postMessage(x);intr=_=>{jw.terminate();jstart();}
+jstart()})
 
 //let plt=win("","plot")
 //let edt=win("","edit")
