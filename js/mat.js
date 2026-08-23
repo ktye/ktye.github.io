@@ -13,6 +13,7 @@ let eyez=n=>{let r=zeroz(n,n),nn=2*n*n,n1=2+2*n;for(let i=0;i<nn;i+=n1)r[i]=1;re
 let ones=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=1;return r}
 let onez=(m,n)=>{let r=zeroz(m,n);for(let i=0;i<r.length;i+=2)r[i]=1;return r}
 let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r}
+let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
 
 
 //let trans=x=>{if(x.z)return tranz(x);let r=zeros(x.n,x.m),i,j,n=x.n,m=x.m,k=0;for(i=0;i<m;i++)for(j=0;j<n;j++)r[j*m+i]=x[k++];return r}
@@ -36,9 +37,9 @@ let ismat=x=>x.constructor==Float64Array&&("m"in x)&&("n"in x)
 let mats=s=>{s=s.trim();let m=1;for(let i=0;i<s.length;i++)m+=s[i]=='\n';let r=new Float64Array(s.split(/\s+/).map(s=>+s)),n=floor(r.length/m);console.log(m,n,r.length);errif(n*m!=r.length,"rectangular");r.m=m;r.n=n;return r}
 let snum=x=>{let a=abs(x)>1000||abs(x)<0.0001?x.toPrecision(6):x.toFixed(6),b=String(x);return b.length<a.length?b:a}
 let znum=(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"a"+a.toFixed(0).padStart(3,"0")}
-let smat=x=>{if((!x)||x.constructor!=Float64Array)return String(x);let colpad=(x,j)=>{let l=max(...x.map(x=>x[j].length));x.forEach(x=>x[j]=x[j].padStart(l," "));return x}
- if(x.m&&x.n){let m=min(20,x.m),n=min(40,x.n),z=x.z||0,r=[],i,j;for(i=0;i<m;i++){r[i]=[];for(j=0;j<n;j++)r[i][j]=z?znum(x[i*2*x.n+2*j],x[i*2*x.n+2*j+1]):snum(x[i*x.n+j])};for(j=0;j<n;j++)colpad(r,j);r=r.map(x=>x.join(" "));for(i=0;i<m;i++)r[i]+=x.n>40?"..\n":"\n";return r.join("")+(x.m>20?"..\n":"")}
- else return Array.from(x.subarray(0,min(x.length,20))).map(snum).join(" ")+(x.length>20?"..":"")}
+let smat=x=>{let M=100,N=100;if((!x)||x.constructor!=Float64Array)return String(x);let colpad=(x,j)=>{let l=max(...x.map(x=>x[j].length));x.forEach(x=>x[j]=x[j].padStart(l," "));return x}
+ if(x.m&&x.n){let m=min(M,x.m),n=min(N,x.n),z=x.z||0,r=[],i,j;for(i=0;i<m;i++){r[i]=[];for(j=0;j<n;j++)r[i][j]=z?znum(x[i*2*x.n+2*j],x[i*2*x.n+2*j+1]):snum(x[i*x.n+j])};for(j=0;j<n;j++)colpad(r,j);r=r.map(x=>x.join(" "));for(i=0;i<m;i++)r[i]+=x.n>N?"..\n":"\n";return r.join("")+(x.m>M?"..\n":"")}
+ else return Array.from(x.subarray(0,min(x.length,M))).map(snum).join(" ")+(x.length>M?"..":"")}
 
 /*
 let qr=A=>{A=copy(A);const m=A.m,n=A.n,r=new Float64Array(n);
