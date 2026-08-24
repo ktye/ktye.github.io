@@ -29,6 +29,8 @@ let cl=(c,x)=>(x.classList.add(c),x)
 let cs=getComputedStyle
 let bb=x=>x.getBoundingClientRect()
 let qs=(x,y)=>x.querySelector(y),qa=(x,y)=>x.querySelectorAll(y)
+let tc=(t,x)=>(x.textContent=t,x)
+let keys=x=>Object.keys(x),vals=x=>Object.values(x)
 let win=(x,t)=>{let i=desk.childElementCount
  let w=cl("win",ce("w"));
  w.innerHTML=`<div class="hdr">
@@ -89,6 +91,17 @@ let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=w
 let c17=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l-3){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
 let O=x=>out.textContent+=c17(x,tty.l)
 
+//table windows
+let table=(d,s)=>{let k=keys(d),v=vals(d),ta="<table><tr>"+k.map(x=>`<th>${x}</th>`).join("")+"</tr>";
+ ta+="</table>";return win(ta,s)}
+
+//program file / data files (drop one .js file use as program, otherwise(non/js or multiple) use as data files.
+let prg=win(`<input type="file" id="fbut" hidden onchange="loadprg(this)"><label id="flab" for="fbut" style="display:inline-block;padding:5px">open</label>`,">");prg.style.left="0px";prg.style.top="0px"
+let loadprg=async x=>{let f=x.files[0];flab.textContent=f.name;jsprg=await f.text();intr()}
+window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;if(1==l.length&&l.item(0).name.endsWith(".js")){f=l.item(0);f.text().then(r=>{jsprg=r;flab.textContent=f.name;intr()})}else{console.log("drop multiple")}}
+let fta=table({file:[],dir:[],size:[]},"files");fta.style.left="0px"
+
+
 //plot
 let plt=win(`<svg width="600" height="400"></svg>`,"~");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px"
 let pltresz=_=>{let[w,h]=winsz(plt),s=qs(plt,"svg");s.setAttribute("width",w);s.setAttribute("height",h)}
@@ -101,15 +114,11 @@ let P=x=>{let svg=qs(plt,"svg"),w=600,h=400,rs=0,isplt=x=>("object"==typeof x)&&
 }
 const pdoc=`plot..`
 
-//program file
-let prg=win(`<input type="file" id="fbut" hidden onchange="loadprg(this)"><label id="flab" for="fbut" style="display:inline-block;padding:5px">open</label>`,">");prg.style.left="0px";prg.style.top="0px"
-let loadprg=async x=>{let f=x.files[0];flab.textContent=f.name;jsprg=await f.text();intr()}
-
 let jw,jsprg="",matjs;
 let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):x.toString()})
  let plot=(...x)=>(postMessage(/*${pdoc}*/{t:1,r:x}),"") //pdoc shows up if you type "plot"
- onmessage=e=>{ try{postMessage($(_=eval(e.data)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };
- let JS=JSON.stringify;         //^(_ is the last result in the repl)
+ onmessage=e=>{ try{postMessage($(_=eval(e.data)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
+ let JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  ${matjs}\n${jsprg}             //math/matrix library + user program
  let x=iota(4),y=rand(4)
 `
