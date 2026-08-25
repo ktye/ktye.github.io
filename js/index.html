@@ -9,6 +9,7 @@ body{display:flex;margin:0;overflow:hidden}
 #tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
+.but{display:inline-block;margin:3px;padding:2px;background:#ccc}.but:hover{cursor:pointer}
 .win{position:absolute;border:2px solid black;background:white;overflow:hidden}
 .hdr{text-align:center;font-weight:bold;border-bottom:2px solid black;padding:5px;background:#eee}
 .hdr:hover{cursor:pointer}
@@ -84,7 +85,7 @@ let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 let exec=x=>{out.textContent+=x+"\n";rdl.textContent="";js(x)}
 let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0">plot(x,y)</span><span id="prm"></span></pre>`,"js");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";
 tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
-rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),(out.textContent=""),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
+rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
 let jp=_=>{let v=out.textContent.split("\n"),p=">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v;rdl.textContent="";prmt(1);}
 let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=winsz(con),l=floor(h/px(cs(tty).lineHeight));tty.style.width=c+"ch";tty.style.height=(1.1*l)+"rem";tty.c=c;tty.l=l;jp()}
@@ -92,16 +93,20 @@ let c17=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l-3){
 let O=x=>out.textContent+=c17(x,tty.l)
 
 //table windows
-let table=(d,s)=>{let k=keys(d),v=vals(d),ta="<table><tr>"+k.map(x=>`<th>${x}</th>`).join("")+"</tr>";
- ta+="</table>";return win(ta,s)}
+let fs={file:[],dir:[],size:[],date:[]},fta=win("<table></table>","files"),showtable=(d,s)=>{let k=keys(d),v=vals(d),ta="<table><tr>"+k.map(x=>`<th>${x}</th>`).join("")+"</tr>";fta.lastChild.outerHTML=ta+"</table>"};fta.style.left="0px"
 
 //program file / data files (drop one .js file use as program, otherwise(non/js or multiple) use as data files.
-let prg=win(`<input type="file" id="fbut" hidden onchange="loadprg(this)"><label id="flab" for="fbut" style="display:inline-block;padding:5px">open</label>`,">");prg.style.left="0px";prg.style.top="0px"
-let loadprg=async x=>{let f=x.files[0];flab.textContent=f.name;jsprg=await f.text();intr()}
-window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;if(1==l.length&&l.item(0).name.endsWith(".js")){f=l.item(0);f.text().then(r=>{jsprg=r;flab.textContent=f.name;intr()})}else{console.log("drop multiple")}}
-let fta=table({file:[],dir:[],size:[]},"files");fta.style.left="0px"
+window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;1==l.length&&l.item(0).name.endsWith(".js")?loadprg(l.item(0)):loaddat(l)}
+let prg=win(`<input type="file" id="fbut" hidden onchange="pload(this)"                          ><label id="flab" for="fbut" class="but">open program.js</label> │
+             <input type="file" id="dbut" hidden onchange="dload(this)"  multiple webkitdirectory><label id="dlab" for="dbut" class="but">open data files</label><span title="unload files" class="but" onclick="unload()"> &#x2717; </span>`,"load");prg.style.left="0px";prg.style.top="0px"
+let pload=x=>loadprg(x.files[0]),dload=x=>{dlab.textContent=`[${x.files.length} files]`;console.log(x.files)}
+let loadprg=f=>{f.text().then(r=>{console.log(f.name,r);flab.textContent=f.name;jsprg=r;intr()})}
+let loaddat=f=>{if(1==f.length&&0==f[0].size){throw new Error("ignore empty file(directory?)\nuse 'open data files' to load directories..")};af(f).forEach(x=>{fs.file.push(x.name);fs.dir.push(x.webkitRelativePath);fs.size.push(x.size);fs.date.push(new Date(x.lastModified).toISOString().replaceAll("-",".").slice(0,19))});showtable(fs,"files");}
+let unload=__=>{keys(fs).forEach(x=>fs[x]=[])}
 
 
+
+/*
 //plot
 let plt=win(`<svg width="600" height="400"></svg>`,"~");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px"
 let pltresz=_=>{let[w,h]=winsz(plt),s=qs(plt,"svg");s.setAttribute("width",w);s.setAttribute("height",h)}
@@ -112,6 +117,7 @@ let P=x=>{let svg=qs(plt,"svg"),w=600,h=400,rs=0,isplt=x=>("object"==typeof x)&&
  //if(1=x.length&&isplt(x[0]))
  plot([{Type:"xy",Lines:[{X:x[0],Y:x[1]}]}],0,svg,0,0,0,0)  //plot(p,c,svg,sld,det,txt,cap,...a)
 }
+*/
 const pdoc=`plot..`
 
 let jw,jsprg="",matjs;
@@ -122,7 +128,7 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):x.toS
  ${matjs}\n${jsprg}             //math/matrix library + user program
  let x=iota(4),y=rand(4)
 `
-let jstart=_=>{jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()}}
+let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
 let js=x=>jw.postMessage(x),intr=_=>{jw.terminate();jstart();}
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
 
