@@ -5,6 +5,7 @@
 *{/*box-sizing:border-box;overflow:clip;*/font-family:monospace}
 html{height:100vh}
 body{display:flex;margin:0;overflow:hidden}
+table{line-height:1;width:100%}td{padding:0}
 #desk{height:100vh;width:100%;background:#ccc;overflow:hidden}
 #tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;}
 #tty:focus-within{color:white}
@@ -14,6 +15,7 @@ body{display:flex;margin:0;overflow:hidden}
 .hdr{text-align:center;font-weight:bold;border-bottom:2px solid black;padding:5px;background:#eee}
 .hdr:hover{cursor:pointer}
 .plr{padding-left:10px;float:right}
+.pag{padding-left:1ch;padding-right:1ch}.pag:hover{cursor:pointer}
 </style></head><body>
  
 <div id="desk">
@@ -31,9 +33,11 @@ let cs=getComputedStyle
 let bb=x=>x.getBoundingClientRect()
 let qs=(x,y)=>x.querySelector(y),qa=(x,y)=>x.querySelectorAll(y)
 let tc=(t,x)=>(x.textContent=t,x)
+let err=x=>{throw new Error(x)}
 let keys=x=>Object.keys(x),vals=x=>Object.values(x)
+let ismat=x=>x.constructor==Float64Array&&("m"in x)&&("n"in x)
 let win=(x,t)=>{let i=desk.childElementCount
- let w=cl("win",ce("w"));
+ let w=cl("win",ce("div"));w.dataset.win=t;
  w.innerHTML=`<div class="hdr">
   <span style="float:left;position:relative;" class="box"></span>
   <span>${t}</span>
@@ -45,6 +49,7 @@ let win=(x,t)=>{let i=desk.childElementCount
  ac(w,desk);lay(w,i);drag(w);
  if(t!="todo")qs(w,".cxx").style.display="none";
  return w}
+let findwin=t=>qs(desk,`[data-win="${t}"]`)
 
 let lay=(w,i)=>{let r=bb(desk);w.style.left=(5+r.left+20*i)+"px";w.style.top=(5+r.top+30*i)+"px"}
 let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
@@ -72,7 +77,7 @@ let hide=x=>{ x.dataset.L=x.style.left;x.dataset.T=x.style.top;x.dataset.W=cs(x)
  x.style.height=(bb(x.firstChild).height-4)+"px";x.style.width="100px";af(qa(x,".cud,.clr,.c__,.cxx")).map(x=>x.style.display="none");qs(x,".box").textContent="☐"}
 let restore=x=>{ x.style.left=x.dataset.L;x.style.top=x.dataset.T;x.style.width=x.dataset.W;x.style.height=x.dataset.H 
  qs(x,".box").textContent="";af(qa(x,".cud,.clr,.c__")).map(x=>x.style.display="");if(0/*todo*/)qs(x,".cxx").style.display="";reszc(x)}
-let reszc=x=>{x==con?ttyresz():x==plt?pltresz():0}
+let reszc=x=>{x==con?ttyresz():x==plt?pltresz():(x.dataset.win in T)?table(x.dataset.win):0}
 
 //tty
 let rlbuf=[],rlpos=0
@@ -93,7 +98,17 @@ let c17=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l-3){
 let O=x=>out.textContent+=c17(x,tty.l)
 
 //table windows
-let fs={file:[],dir:[],size:[],date:[]},fta=win("<table></table>","files"),showtable=(d,s)=>{let k=keys(d),v=vals(d),ta="<table><tr>"+k.map(x=>`<th>${x}</th>`).join("")+"</tr>";fta.lastChild.outerHTML=ta+"</table>"};fta.style.left="0px"
+let page=(t,i0,M,dir)=>{let id=t.dataset.table;let i=[0,max(0,i0-10),min(M-10,i0+10),M-10][dir];t.dataset.filter=`i>${i-1}`;table(id)}
+let T={},fs={file:[],dir:[],size:[],date:[]},tlen=d=>"object"!=typeof d?err("not a table"):keys(d).length==0?0:((d=vals(d)[0]),(d.m?d.m:d.length));
+let filter=(d,s)=>{let r=[],k=keys(d),f=new Function(...k,"i","return "+s),n=tlen(d),i;for(i=0;i<n;i++)if(f(...k.map(x=>ismat(d[x])&&d[x].z?d[x][2*i]:d[x][i]),i))r.push(i);return r}
+let table=(id,d)=>{console.log("id",id,"d",d);let w=findwin(id);if(!w)w=win(`<table data-table="${id}" data-filter="i>-1"></table>`,id);if(!d)d=T[id]; let k=keys(d),v=vals(d),t=qs(w,"table"),i0=+t.dataset.i0,n=k.length,M=tlen(d),i,r,c,ta=`<tr><th>i</th>`+k.map(x=>`<th>${x}</th>`).join("")+"</tr>";T[id]=d;
+ let I=t.dataset.filter?filter(d,t.dataset.filter):iota(M),m=min(w.dataset.t?200:11,I.length);let pg=x=>`onclick='page(this.closest("table"),${I[0]},${M},${x})'`
+ ta+=`<tr><td colspan="${1+n}"><input style='width:100%;box-sizing:border-box;field-sizing:content;padding:0;border:1px solid;outline:none' onchange='this.closest("table").dataset.filter=this.value;table("${id}")' title='filter, e.g. i>10' value="${t.dataset.filter}"></td></tr>`
+ for(i=0;i<m;i++){let Ii=I[i];r="<tr>";if(m<I.length&&i==m-1){r+=`<td colspan="${n}">.. ${I.length}/${M} rows <span class='pag' ${pg(0)}>&laquo;</span><span class='pag' ${pg(1)}>&lt;</span><span class='pag' ${pg(2)}>&gt;</span><span class='pag' ${pg(3)}>&raquo;</span><div></td>`}else{;for(j=-1;j<n;j++){c=v[j],r+=`<td>${j<0?String(Ii):ismat(c)&&c.z?sz(c[2*Ii],c[2*Ii+1]):String(c[Ii])}</td>`}};ta+=r+"</tr>";}
+ t.innerHTML=ta;return w} //dataset.id
+
+let fta=table("files",fs);
+fta.style.left="0px"
 
 //program file / data files (drop one .js file use as program, otherwise(non/js or multiple) use as data files.
 window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;1==l.length&&l.item(0).name.endsWith(".js")?loadprg(l.item(0)):loaddat(l)}
@@ -101,11 +116,14 @@ let prg=win(`<input type="file" id="fbut" hidden onchange="pload(this)"         
              <input type="file" id="dbut" hidden onchange="dload(this)"  multiple webkitdirectory><label id="dlab" for="dbut" class="but">open data files</label><span title="unload files" class="but" onclick="unload()"> &#x2717; </span>`,"load");prg.style.left="0px";prg.style.top="0px"
 let pload=x=>loadprg(x.files[0]),dload=x=>{dlab.textContent=`[${x.files.length} files]`;console.log(x.files)}
 let loadprg=f=>{f.text().then(r=>{console.log(f.name,r);flab.textContent=f.name;jsprg=r;intr()})}
-let loaddat=f=>{if(1==f.length&&0==f[0].size){throw new Error("ignore empty file(directory?)\nuse 'open data files' to load directories..")};af(f).forEach(x=>{fs.file.push(x.name);fs.dir.push(x.webkitRelativePath);fs.size.push(x.size);fs.date.push(new Date(x.lastModified).toISOString().replaceAll("-",".").slice(0,19))});showtable(fs,"files");}
+let loaddat=f=>{if(1==f.length&&0==f[0].size)err("ignore empty file(directory?)\nuse 'open data files' to load directories..");af(f).forEach(x=>{fs.file.push(x.name);fs.dir.push(x.webkitRelativePath);fs.size.push(x.size);fs.date.push(new Date(x.lastModified).toISOString().replaceAll("-",".").slice(0,19))});table("files",fs);jw.postMessage({t:1,name:"fs",r:fs})}
 let unload=__=>{keys(fs).forEach(x=>fs[x]=[])}
 
+{
+ let d={name:[],abc:[],def:[]};for(let i=0;i<100;i++){d.name.push("xyz");d.abc.push(i);d.def.push(1000+0.01*i)};table("data",d);
+}
 
-
+let plt
 /*
 //plot
 let plt=win(`<svg width="600" height="400"></svg>`,"~");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px"
@@ -122,14 +140,16 @@ const pdoc=`plot..`
 
 let jw,jsprg="",matjs;
 let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):x.toString()})
- let plot=(...x)=>(postMessage(/*${pdoc}*/{t:1,r:x}),"") //pdoc shows up if you type "plot"
- onmessage=e=>{ try{postMessage($(_=eval(e.data)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
+ let tt={name:[1,2,3],yy:[4,5,6]}
+ let plot=(...x)=>(postMessage(/*${pdoc}*/{t:1,r:x}),"")        //pdoc shows up if you type "plot"
+ let table=(id,d)=>(postMessage(/*table(id,d)*/{t:2,r:[id,d]}),""),keys=x=>Object.keys(x),vals=x=>Object.values(x)
+ onmessage=e=>{ try{e.data.t?globalThis[e.data.name]=e.data.r:postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
  let JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  ${matjs}\n${jsprg}             //math/matrix library + user program
  let x=iota(4),y=rand(4)
 `
-let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
-let js=x=>jw.postMessage(x),intr=_=>{jw.terminate();jstart();}
+let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{2==x.data.t?table(...x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
+let js=x=>jw.postMessage({t:0,r:x}),intr=_=>{jw.terminate();jstart();}
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
 
 window.onerror=e=>{console.log(e);O("\n"+e);jp()} //e.g. in user program
