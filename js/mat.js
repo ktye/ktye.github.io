@@ -7,12 +7,12 @@ let zeros=(m,n)=>{n=n||1;let r=new Float64Array(  m*n);r.m=m;r.n=n;return r}
 let zeroz=(m,n)=>{n=n||1;let r=new Float64Array(2*m*n);r.m=m;r.n=n;r.z=1;return r}
 let rand=(m,n)=>{let r=zeros(m,n),i;for(i=0;i<r.length;i++)r[i]=random();return r}
 let randz=(m,n)=>{let x=zeroz(m,n),N=x.length,i;for(let i=0;i<N;i+=2){let r=sqrt(min(1489,-2*log(random()))),p=random()*2*pi;x[i]=r*cos(p);x[1+i]=r*sin(p)};return x}
-let randn=(m,n)=>{let x=randz(1,((m*n)>>1)+(1&(m*n)));x=x.subarray(0,m*n);x.m=m;x.n=n;x.z=0;return x}
+let randn=(m,n)=>{n=n||1;let x=randz(1,((m*n)>>1)+(1&(m*n)));x=x.subarray(0,m*n);x.m=m;x.n=n;x.z=0;return x}
 let eye=n=>{let r=zeros(n,n),nn=n*n,n1=1+n;for(let i=0;i<nn;i+=n1)r[i]=1;return r}
 let eyez=n=>{let r=zeroz(n,n),nn=2*n*n,n1=2+2*n;for(let i=0;i<nn;i+=n1)r[i]=1;return r}
 let ones=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=1;return r}
 let onez=(m,n)=>{let r=zeroz(m,n);for(let i=0;i<r.length;i+=2)r[i]=1;return r}
-let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r}
+let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r},til=iota
 let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
 
 
