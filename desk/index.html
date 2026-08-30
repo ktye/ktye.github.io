@@ -147,9 +147,12 @@ plot({Type:"polar",Lines:[..]},{Type:..}) multiplot
 hist([n,xmin,xmax,]y1,y2..);   plot(hist1(..),hist1(..))
 `
 
-
-let jw,jsprg="",matjs;
-let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():JS(x)}),err=x=>{throw new Error(x)}
+let jw,jsprg="",matjs,kwasm;
+let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":JS(x)}),err=x=>{throw new Error(x)}
+ let $U=_=>new Uint8Array($K.memory.buffer)
+ let $K=new WebAssembly.Instance(new WebAssembly.Module(Uint8Array.fromBase64("${kwasm}")),{env:{Exit:x=>0,Args:x=>0,Arg:x=>0,ReadIn:x=>0,Read:x=>0,
+  Write:(a,b,c,d)=>{let u=$U(),v=u.slice(c,c+d),f=u.slice(a,a+b);a?download(v,su(f)):postMessage({t:0,r:su(v)});return 0},
+  Native:x=>0}}).exports
  let JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  let read=x=>x in _fs?_fs[x]:err('no file '+x)                        //uin8array, e.g. su(read("file.txt")); fs is the file table, _fs holds content
  let table=(id,d)=>(postMessage(/*table(id,d)*/{t:2,r:[id,d,tlen(d)]}),""),keys=x=>Object.keys(x),vals=x=>Object.values(x),tlen=d=>"object"!=typeof d?err("not a table"):keys(d).length==0?0:((d=vals(d)[0]),(d.m?d.m:d.length))
@@ -171,12 +174,12 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"stri
   A.forEach((y,i)=>{let d1=1/d,h=Array(2*round((b-a)/d)).fill(0);y.map(y=>floor(d1*(y-a))).forEach(i=>h[1+2*i]++);p.Lines.push({X:X,Y:h,Id:1+i,Style:{Marker:{Marker:"bar",Size:1}}})});
   [p.Title,p.Xlabel,p.Ylabel]=plotlabels_(x);return p}
  onmessage=e=>{try{e.data.t?globalThis[e.data.name]=e.data.r:postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
- ${matjs}\n${jsprg}             //math/matrix library + user program
+ ${matjs}\n${jsprg}\n          //math/matrix library + user program
  let x=iota(4),y=rand(4)
 `
 let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
 let js=x=>jw.postMessage({t:0,r:x}),intr=_=>{jw.terminate();jstart();}
-fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
+fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>{kwasm=new Uint8Array(r).toBase64();jstart()})})
 
 window.onerror=e=>{console.log(e);O("\n"+e);jp()} //e.g. in user program
 
