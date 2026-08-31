@@ -84,7 +84,7 @@ let restore=x=>{ x.style.left=x.dataset.L;x.style.top=x.dataset.T;x.style.width=
  qs(x,".box").textContent="";af(qa(x,".cud,.clr,.c__")).map(x=>x.style.display="");if(0/*todo*/)qs(x,".cxx").style.display="";reszc(x)}
 let reszc=x=>{x==con?ttyresz():x==plt?pltresz():(x.dataset.win in T)?table(x.dataset.win):0}
 
-//tty
+//tty ">"
 let rlbuf=[],rlpos=0
 let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}; 
 rladd('plot(400,300)');//todo rm
@@ -93,15 +93,15 @@ let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
-let exec=x=>{out.textContent+=x+"\n";rdl.textContent="";js(x)}
-let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"js");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
+let exec=x=>{console.log("exec",JSON.stringify(x));out.textContent+=x+"\n";rdl.textContent="";if(x=="\\"){out.k=!out.k;out.textContent+=out.k?" ":">";return};out.k?ks(x):js(x)}
+let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
 tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
-let jp=_=>{let v=out.textContent.split("\n"),p=">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
+let jp=_=>{let v=out.textContent.split("\n"),p=out.k?" ":">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v;rdl.textContent="";prmt(1);}
 let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=winsz(con),l=floor(h/px(cs(tty).lineHeight));tty.style.width=c+"ch";tty.style.height=(1.1*l)+"rem";tty.c=c;tty.l=l;jp()}
 let c17=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l-3){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
-let O=x=>out.textContent+=c17(x,tty.l)
+let O=x=>(console.log("O",JS(x)),out.textContent+=c17(x,tty.l))
 
 //table windows
 let page=(t,i0,M,dir)=>{let id=t.dataset.table;let i=[0,max(0,i0-10),min(M-10,i0+10),M-10][dir];t.dataset.filter=`i>${i-1}`;table(id)}
@@ -115,10 +115,10 @@ let table=(id,d,M)=>{let w=findwin(id);if(!w)w=win(`<table data-table="${id}" da
 
 //program file / data files (drop one .js file use as program, otherwise(non/js or multiple) use as data files.
 let fs={file:[],"_":[],size:[],date:[]},_fs={};
-window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;1==l.length&&l.item(0).name.endsWith(".js")?pload(l.item(0)):dload(l)}
+window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;1==l.length&&(l.item(0).name.endsWith(".js")||l.item(0).name.endsWith(".k"))?pload(l.item(0)):dload(l)}
 let prg=win(`<input type="file" id="fbut" hidden onchange="pload(this.files[0])"                         ><label id="flab" for="fbut" class="but">open program.js</label> │
              <input type="file" id="dbut" hidden onchange="dload(this.files)" multiple webkitdirectory><label id="dlab" for="dbut" class="but">open data files</label><span title="unload files" class="but" onclick="unload()"> &#x2717; </span>`,"load");prg.style.left="0px";prg.style.top="0px";noclose(prg);
-let pload=f=>{f.text().then(r=>{flab.textContent=f.name;jsprg=r;intr()})}
+let pload=f=>{f.text().then(r=>{flab.textContent=f.name;[jsprg,kprg]=f.name.endsWith(".js")?[r,""]:["",btoa(r)];intr()})}
 let dload=async f=>{if(1==f.length&&0==f[0].size)err("ignore empty file(directory?)\nuse 'open data files' to load directories..");dlab.textContent=`[${f.length} files]`;
  for(let x of f){let key=(x.webkitRelativePath?x.webkitRelativePath+"/":"")+x.name;fs.file.push(key);fs["_"].push("");fs.size.push(x.size);fs.date.push(new Date(x.lastModified).toISOString().replaceAll("-",".").slice(0,19));_fs[key]=new Uint8Array(await x.arrayBuffer())};table("files",fs);sync()}
 let unload=__=>{keys(fs).forEach(x=>fs[x]=[]);table("files",fs);_fs={};sync()}
@@ -147,23 +147,24 @@ plot({Type:"polar",Lines:[..]},{Type:..}) multiplot
 hist([n,xmin,xmax,]y1,y2..);   plot(hist1(..),hist1(..))
 `
 
-let jw,jsprg="",matjs,kwasm;
+let jw,jsprg="",kprg="",matjs,kwasm;
 let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":JS(x)}),err=x=>{throw new Error(x)}
- let $U=_=>new Uint8Array($K.memory.buffer)
- let $K=new WebAssembly.Instance(new WebAssembly.Module(Uint8Array.fromBase64("${kwasm}")),{env:{Exit:x=>0,Args:x=>0,Arg:x=>0,ReadIn:x=>0,Read:x=>0,
-  Write:(a,b,c,d)=>{let u=$U(),v=u.slice(c,c+d),f=u.slice(a,a+b);a?download(v,su(f)):postMessage({t:0,r:su(v)});return 0},
-  Native:x=>0}}).exports
  let JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
+ let $U=(x,y)=>new Uint8Array($K.memory.buffer,x,y),$lo=x=>Number(BigInt.asUintN(32,x)),$KC=x=>{x=("string"===typeof x)?us(x):x;let r=$K.mk(18,x.length);$U().set(x,$lo(r));return r},$CK=x=>($K.dx(x),su($U($lo(x),K.nn(x)))),$Ks=s=>$K.sc($KC(s))
+ let $K=new WebAssembly.Instance(new WebAssembly.Module(Uint8Array.fromBase64("${kwasm}")),{env:{Exit:x=>0,Args:x=>0,Arg:x=>0,ReadIn:x=>0,Read:x=>0,
+  Write:(a,b,c,d)=>{u=$U(),v=u.slice(c,c+d),f=u.slice(a,a+b);a?download(v,su(f)):postMessage({t:-1,r:su(v)});return 0},
+  Native:x=>0}}).exports,$kprg=atob("${kprg}"),$asn=(s,y)=>$K.dx($K.Asn($Ks(s),y));$K.kinit();$asn("l.",$K.Atx($Ks("lxy"),$K.Val($KC("200 100"))));$K.dx($K.Val($KC($kprg)))
+ let $krep=s=>($K.repl($KC(s)),postMessage({t:0,r:""}))
  let read=x=>x in _fs?_fs[x]:err('no file '+x)                        //uin8array, e.g. su(read("file.txt")); fs is the file table, _fs holds content
  let table=(id,d)=>(postMessage(/*table(id,d)*/{t:2,r:[id,d,tlen(d)]}),""),keys=x=>Object.keys(x),vals=x=>Object.values(x),tlen=d=>"object"!=typeof d?err("not a table"):keys(d).length==0?0:((d=vals(d)[0]),(d.m?d.m:d.length))
  let download=(u,name)=>postMessage({t:3,r:["string"==typeof u?us(u):u,name]})
  let P={Type:"xy",Lines:[{X:[1,2,3],Y:[3,-1,2]}]}
  let plot=(...x)=>{/*${pdoc}*/let r=[],p0={Type:"xy",Lines:[]},n=x.length,A=x.filter(x=>ismat(x)),nA=A.length;x=x.filter(x=>!ismat(x));
    if(nA){if(A[0].z){p0.Type="polar";A.forEach(z=>p0.Lines.push({Z:z}))}else{if(1==nA)A=[iota(A[0].m),A];for(let i=0;i<A.length;i+=2){let y=A[1+i],l={X:A[i]};y.z?(p0.Type="ampang",l.C=y):(l.Y=y);p0.Lines.push(l)}}}
-  let[ti,xl,yl]=plotlabels_(x);
+  let[ti,xl,yl]=$plotlabels(x);
   x=nA?[p0,...x]:x;x.forEach(p=>{if(isplt(p));if(!p.Title)p.Title=ti;if(!p.Xlabel)p.Xlabel=xl;if(!p.Ylabel)p.Ylabel=yl});
   postMessage({t:1,r:x});return""}
- let plotlabels_=x=>{let sa=s=>{let i=x.indexOf(s);if(i>=0){s=x[1+i];x.splice(i,2);return s};return""};return[sa("title"),sa("xlabel"),sa("ylabel")]}
+ let $plotlabels=x=>{let sa=s=>{let i=x.indexOf(s);if(i>=0){s=x[1+i];x.splice(i,2);return s};return""};return[sa("title"),sa("xlabel"),sa("ylabel")]}
  let axis=(...x)=>(/*axis(xmin,xmax,ymin,ymax)*/postMessage({t:1,r:["axis",x]}),"")
  let isplt=x=>("object"==typeof x)&&("Type"in x),isnum=x=>"number"==typeof x;
  let hist=(...x)=>plot(hist1(...x)),hist1=(...x)=>{let na=a=>{if(!isnum(a=x[0]))return 0;x.splice(0,1);return a},n=na(),x0=na(),x1=na(),p={Type:"xy",Lines:[]};if(!n)n=max(10,min(40,floor(sqrt(x[0].length))));
@@ -172,13 +173,13 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"stri
   let A=x.filter(x=>ismat(x)),mi=min(...A[0]),ma=max(...A[0]);A.slice(1).forEach(a=>{mi=min(mi,...a);ma=max(ma,...a)});x=x.filter(x=>(!ismat(x)));
   let[a,b,d]=nicelim(mi,ma);if(x0)a=x0;if(x1)b=x1;if(n)d=(b-a)/n; let X=Array(2*round((b-a)/d)).fill(0);for(i=0;i<X.length;i+=2){X[i]=a+(i>>1)*d+0.05*d;X[1+i]=X[i]+0.9*d}
   A.forEach((y,i)=>{let d1=1/d,h=Array(2*round((b-a)/d)).fill(0);y.map(y=>floor(d1*(y-a))).forEach(i=>h[1+2*i]++);p.Lines.push({X:X,Y:h,Id:1+i,Style:{Marker:{Marker:"bar",Size:1}}})});
-  [p.Title,p.Xlabel,p.Ylabel]=plotlabels_(x);return p}
- onmessage=e=>{try{e.data.t?globalThis[e.data.name]=e.data.r:postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
+  [p.Title,p.Xlabel,p.Ylabel]=$plotlabels(x);return p}
+ onmessage=e=>{try{e.data.t?globalThis[e.data.name]=e.data.r:e.data.k?$krep(e.data.r):postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
  ${matjs}\n${jsprg}\n          //math/matrix library + user program
  let x=iota(4),y=rand(4)
 `
-let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
-let js=x=>jw.postMessage({t:0,r:x}),intr=_=>{jw.terminate();jstart();}
+let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
+let js=x=>jw.postMessage({t:0,r:x}),ks=x=>jw.postMessage({t:0,r:x,k:1}),intr=_=>{jw.terminate();jstart();}
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>{kwasm=new Uint8Array(r).toBase64();jstart()})})
 
 window.onerror=e=>{console.log(e);O("\n"+e);jp()} //e.g. in user program
