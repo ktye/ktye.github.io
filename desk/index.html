@@ -11,7 +11,7 @@ table{line-height:1;width:100%}td{padding:0}
 #tty:focus-within{color:white}
 #rdl{color:white;outline:none}
 .but{display:inline-block;margin:3px;padding:2px;background:#ccc}.but:hover{cursor:pointer}
-.win{position:absolute;border:2px solid black;background:white;overflow:hidden}
+.win{position:absolute;border:2px solid grey;background:white;overflow:hidden}
 .hdr{text-align:center;font-weight:bold;border-bottom:2px solid black;padding:5px;background:#eee}
 .hdr:hover{cursor:pointer}
 .plr{padding-left:10px;float:right}
@@ -43,7 +43,7 @@ let tc=(t,x)=>(x.textContent=t,x)
 let err=x=>{throw new Error(x)}
 let keys=x=>Object.keys(x),vals=x=>Object.values(x),sz=(x,y)=>shortnum(hypot(x,y))+"a"+(String(round(atan2(y,x)*pi/180)).padStart(3,"0"))
 let win=(x,t)=>{let i=desk.childElementCount
- let w=cl("win",ce("div"));w.dataset.win=t;
+ let w=cl("win",ce("div"));w.setAttribute("tabindex","0");w.dataset.win=t;
  w.innerHTML=`<div class="hdr">
   <span style="float:left;position:relative;" class="box"></span>
   <span>${t}</span>
@@ -52,7 +52,7 @@ let win=(x,t)=>{let i=desk.childElementCount
   <span class="plr cud" title="toggle vertical max">↕</span>
   <span class="plr clr" title="toggle horizontal max">←→</span>
  </div><div></div>`+(x?x:"");
- ac(w,desk);lay(w,i);drag(w);return w}
+ ac(w,desk);lay(w,i);drag(w);w.onfocus=e=>{w.parentNode.appendChild(w);if(w==con)rdl.focus()};return w}
 let noclose=w=>qs(w,".cxx").style.display="none";
 let findwin=t=>qs(desk,`[data-win="${t}"]`)
 
@@ -93,7 +93,7 @@ let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
-let exec=x=>{console.log("exec",JSON.stringify(x));out.textContent+=x+"\n";rdl.textContent="";if(x=="\\"){out.k=!out.k;out.textContent+=out.k?" ":">";return};out.k?ks(x):js(x)}
+let exec=x=>{if(x=="\\"){out.k=!out.k;out.textContent+=x;return jp()}out.textContent+=x+"\n";rdl.textContent="";out.k?ks(x):js(x)}
 let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
 tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
@@ -118,7 +118,7 @@ let fs={file:[],"_":[],size:[],date:[]},_fs={};
 window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;1==l.length&&(l.item(0).name.endsWith(".js")||l.item(0).name.endsWith(".k"))?pload(l.item(0)):dload(l)}
 let prg=win(`<input type="file" id="fbut" hidden onchange="pload(this.files[0])"                         ><label id="flab" for="fbut" class="but">open program.js</label> │
              <input type="file" id="dbut" hidden onchange="dload(this.files)" multiple webkitdirectory><label id="dlab" for="dbut" class="but">open data files</label><span title="unload files" class="but" onclick="unload()"> &#x2717; </span>`,"load");prg.style.left="0px";prg.style.top="0px";noclose(prg);
-let pload=f=>{f.text().then(r=>{flab.textContent=f.name;[jsprg,kprg]=f.name.endsWith(".js")?[r,""]:["",btoa(r)];intr()})}
+let pload=f=>{f.text().then(r=>{let k=f.name.endsWith(".k");flab.textContent=f.name;[kprg,jsprg]=k?[btoa(r),""]:["",r];out.k=k;intr()})}
 let dload=async f=>{if(1==f.length&&0==f[0].size)err("ignore empty file(directory?)\nuse 'open data files' to load directories..");dlab.textContent=`[${f.length} files]`;
  for(let x of f){let key=(x.webkitRelativePath?x.webkitRelativePath+"/":"")+x.name;fs.file.push(key);fs["_"].push("");fs.size.push(x.size);fs.date.push(new Date(x.lastModified).toISOString().replaceAll("-",".").slice(0,19));_fs[key]=new Uint8Array(await x.arrayBuffer())};table("files",fs);sync()}
 let unload=__=>{keys(fs).forEach(x=>fs[x]=[]);table("files",fs);_fs={};sync()}
@@ -147,23 +147,25 @@ plot({Type:"polar",Lines:[..]},{Type:..}) multiplot
 hist([n,xmin,xmax,]y1,y2..);   plot(hist1(..),hist1(..))
 `
 
-let jw,jsprg="",kprg="",matjs,kwasm;
+let jw,jsprg="",kprg="",matjs,kwasm; //console.log
 let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":JS(x)}),err=x=>{throw new Error(x)}
  let JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
- let $U=(x,y)=>new Uint8Array($K.memory.buffer,x,y),$lo=x=>Number(BigInt.asUintN(32,x)),$KC=x=>{x=("string"===typeof x)?us(x):x;let r=$K.mk(18,x.length);$U().set(x,$lo(r));return r},$CK=x=>($K.dx(x),su($U($lo(x),K.nn(x)))),$Ks=s=>$K.sc($KC(s))
- let $K=new WebAssembly.Instance(new WebAssembly.Module(Uint8Array.fromBase64("${kwasm}")),{env:{Exit:x=>0,Args:x=>0,Arg:x=>0,ReadIn:x=>0,Read:x=>0,
-  Write:(a,b,c,d)=>{u=$U(),v=u.slice(c,c+d),f=u.slice(a,a+b);a?download(v,su(f)):postMessage({t:-1,r:su(v)});return 0},
-  Native:x=>0}}).exports,$kprg=atob("${kprg}"),$asn=(s,y)=>$K.dx($K.Asn($Ks(s),y));$K.kinit();$asn("l.",$K.Atx($Ks("lxy"),$K.Val($KC("200 100"))));$K.dx($K.Val($KC($kprg)))
- let $krep=s=>($K.repl($KC(s)),postMessage({t:0,r:""}))
+ let $U=(x,y)=>new Uint8Array($K.memory.buffer,x,y),$I=()=>new Int32Array($K.memory.buffer),$F=()=>new Float64Array($K.memory.buffer),$lo=x=>Number(BigInt.asUintN(32,x)),$KC=x=>{x=("string"===typeof x)?us(x):x;let r=$K.mk(18,x.length);$U().set(x,$lo(r));return r},$CK=x=>($K.dx(x),su($U($lo(x),$K.nn(x)))),$Ks=s=>$K.sc($KC(s))
+ let $kreg=(s,a,i,x)=>{x=$K.l2(i,$KC(s));$I()[($lo(x)>>>2)-3]=a;$asn(s,(14n<<59n)+BigInt($lo(x)))},$krep=s=>($K.repl($KC(s)),postMessage({t:0,r:""}))
+ let $K=new WebAssembly.Instance(new WebAssembly.Module(Uint8Array.fromBase64("${kwasm}")),{env:{Exit:x=>0,Args:x=>0,Arg:x=>0,ReadIn:x=>0,
+  Read:(a,b,c)=>{let u=$U(),f=su(u.slice(a,a+b));return c?$U().set(_fs[f],c):f in _fs?_fs[f].length:-1},
+  Write:(a,b,c,d)=>{let u=$U(),v=u.slice(c,c+d),f=u.slice(a,a+b);a?download(v,su(f)):postMessage({t:-1,r:su(v)});return 0},
+  Native:(x,y)=>($kplot(y))}}).exports,$kprg=atob("${kprg}"),$asn=(s,y)=>$K.dx($K.Asn($Ks(s),y));$K.kinit();$kreg("plot",1,0n);$asn("l.",$K.Atx($Ks("lxy"),$K.Val($KC("200 100"))));$K.dx($K.Val($KC($kprg)))
+ let $kplot=X=>{let J=new BigInt64Array($K.memory.buffer),x=J[$lo(X)>>>3],tx=$K.tp(x),i,t,n=$K.nn(x),y,yp,yn,p=$lo(x)>>>3,r=y=>$K.rx(y),A=(z,x)=>{if(x.constructor==Int32Array)x=new Float64Array(x);x.m=z?x.length/2:x.length;x.n=1;x.z=z;return x},a=[];
+  if(tx==19){yp=$lo(x)>>>2,yn=$K.nn(x);a=[...$I().slice(yp,yp+n)]}else if(tx==21||tx==22){yp=$lo(x)>>>3;yn=$K.nn(x);a=[A(tx==22,$F().slice(yp,yp+yn))]}else if(tx!=23){err("kplot tx "+tx)}else{
+  for(i=0;i<n;i++){y=J[p+i];t=$K.tp(y);yn=t>16?$K.nn(y):1;yp=$lo(y);a.push(t==2?$lo(y):t==4?$CK($K.cs(y)):t==18?$CK(r(y)):t==19?A(0,$I().slice(yp>>>2,(yp>>>2)+yn)):t==21?A(0,$F().slice(yp>>>3,(yp>>>3)+yn)):t==22?A(1,$F().slice(yp>>>3,(yp>>>3)+2*yn)):err("kplot ty "+t))}}$K.dx(X);plot(...a);return 0n} 
  let read=x=>x in _fs?_fs[x]:err('no file '+x)                        //uin8array, e.g. su(read("file.txt")); fs is the file table, _fs holds content
  let table=(id,d)=>(postMessage(/*table(id,d)*/{t:2,r:[id,d,tlen(d)]}),""),keys=x=>Object.keys(x),vals=x=>Object.values(x),tlen=d=>"object"!=typeof d?err("not a table"):keys(d).length==0?0:((d=vals(d)[0]),(d.m?d.m:d.length))
  let download=(u,name)=>postMessage({t:3,r:["string"==typeof u?us(u):u,name]})
  let P={Type:"xy",Lines:[{X:[1,2,3],Y:[3,-1,2]}]}
  let plot=(...x)=>{/*${pdoc}*/let r=[],p0={Type:"xy",Lines:[]},n=x.length,A=x.filter(x=>ismat(x)),nA=A.length;x=x.filter(x=>!ismat(x));
-   if(nA){if(A[0].z){p0.Type="polar";A.forEach(z=>p0.Lines.push({Z:z}))}else{if(1==nA)A=[iota(A[0].m),A];for(let i=0;i<A.length;i+=2){let y=A[1+i],l={X:A[i]};y.z?(p0.Type="ampang",l.C=y):(l.Y=y);p0.Lines.push(l)}}}
-  let[ti,xl,yl]=$plotlabels(x);
-  x=nA?[p0,...x]:x;x.forEach(p=>{if(isplt(p));if(!p.Title)p.Title=ti;if(!p.Xlabel)p.Xlabel=xl;if(!p.Ylabel)p.Ylabel=yl});
-  postMessage({t:1,r:x});return""}
+   if(nA){if(A[0].z){p0.Type="polar";A.forEach(z=>p0.Lines.push({C:z}))}else{if(1==nA)A=[iota(A[0].m),A[0]];for(let i=0;i<A.length;i+=2){let y=A[1+i],l={X:A[i]};y.z?(p0.Type="ampang",l.C=y):(l.Y=y);p0.Lines.push(l)}}}
+  let[ti,xl,yl]=$plotlabels(x);x=nA?[p0,...x]:x;x.forEach(p=>{if(isplt(p));if(!p.Title)p.Title=ti;if(!p.Xlabel)p.Xlabel=xl;if(!p.Ylabel)p.Ylabel=yl});postMessage({t:1,r:x});return""}
  let $plotlabels=x=>{let sa=s=>{let i=x.indexOf(s);if(i>=0){s=x[1+i];x.splice(i,2);return s};return""};return[sa("title"),sa("xlabel"),sa("ylabel")]}
  let axis=(...x)=>(/*axis(xmin,xmax,ymin,ymax)*/postMessage({t:1,r:["axis",x]}),"")
  let isplt=x=>("object"==typeof x)&&("Type"in x),isnum=x=>"number"==typeof x;
