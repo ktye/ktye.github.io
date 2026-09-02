@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset=utf-8><title>plot</title>
+<style>
+canvas{background:#eee}
+</style></head><body>
+
+<canvas id="cnv1" width="500" height="400"></canvas>
+<canvas id="cnv2" width="500" height="400"></canvas>
+
+<script src="plot.js"></script>
+<script>
+let p1=[{Type:"xy",Lines:[{X:[1,2,3],y:[0,1,0.5]}]}]
+let p2=[{Type:"xy",Lines:[{X:[1,2,3],y:[1,0,1]}]}]
+
+
+plot(p1,0,cnv1,0,0,0)
+plot(p2,0,cnv2,0,0,0)
+
+</script></body></html>
