@@ -1,19 +1,25 @@
 <!doctype html>
 <html><head><meta charset=utf-8><title>plot</title>
 <style>
-canvas{background:#eee}
+canvas{border:1px solid red}
 </style></head><body>
 
+<!--
 <canvas id="cnv1" width="500" height="400"></canvas>
 <canvas id="cnv2" width="500" height="400"></canvas>
+-->
+<canvas id="cnv3" width="800" height="400"></canvas>
 
-<script src="plot.js"></script>
+<script src="cnvplot.js"></script>
 <script>
-let p1=[{Type:"xy",Lines:[{X:[1,2,3],y:[0,1,0.5]}]}]
-let p2=[{Type:"xy",Lines:[{X:[1,2,3],y:[1,0,1]}]}]
+let p1=[{Type:"xy",Title:"title",Xlabel:"x-label",Ylabel:"Ylabel",Lines:[{X:[1,2,3],Y:[0,1,0.5]}]}]
+let p2=[{Type:"xy",Lines:[{X:[1,2,3],Y:[1,0,1]}]}]
+let p3=[{Type:"ampang",Lines:[{X:[1,2,3,4],C:[1,0,2,1,3,4,4,-1]}]},
+        {Type:"polar",Title:"polar-title-Q",Yunit:"mm/s",Lines:[{X:[1,2,3,4],C:[1,0,2,1,3,4,4,-1]}]}]
 
 
-plot(p1,0,cnv1,0,0,0)
-plot(p2,0,cnv2,0,0,0)
+//cnvplot(p1,0,cnv1,0,0,0)
+//cnvplot(p2,0,cnv2,0,0,0)
+cnvplot(p3,0,cnv3,0,0,0)
 
 </script></body></html>
