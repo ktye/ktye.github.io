@@ -1,4 +1,4 @@
-
+"use strict";
 let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext("2d"),id=cnv.id,w=cnv.width,h=cnv.height,single=0;
  let min=Math.min,max=Math.max,exp=Math.exp,log=Math.log,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,sin=Math.sin,cos=Math.cos,atan2=Math.atan2,floor=Math.floor,ceil=Math.ceil,round=Math.round;const pi=Math.PI,_pi=180/pi,pi_=pi/180
  let scale=(x,x0,x1,y0,y1)=>y0+(x-x0)*(y1-y0)/(x1-x0),clamp=(x,a,b)=>x<a?a:x>b?b:x
@@ -12,7 +12,7 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let Mean=u=>{let re=0,im=0,n=u.length/2;for(let i=0;i<u.length;i+=2){re+=u[i];im+=u[1+i]};return[re/n,im/n]},mean=x=>{let s=0,n=x.length,i;for(i=0;i<n;i++)s+=x[i];return s/n}
  
  let font1="12px monospace",font2="10px monospace",cols=0,resize=0;
- for(let i=0;i<a.length;i++){let x=a[i];console.log("x",x);x=="font1"?(font1=a[++i]):x=="font2"?(font2=a[++i]):x=="cols"?(cols=a[++i]):x=="resize"?(resize=1):0}
+ for(let i=0;i<a.length;i++){let x=a[i];x=="font1"?(font1=a[++i]):x=="font2"?(font2=a[++i]):x=="cols"?(cols=a[++i]):x=="resize"?(resize=1):0}
  let fontheight=f=>{c.font=f;let m=c.measureText("AQ");return m.fontBoundingBoxAscent+m.fontBoundingBoxDescent},textwidth=t=>c.measureText(t).width
  let fh1=fontheight(font1),fh2=fontheight(font2),border=1,ticLength=6
  let titleHeight=t=>t?2+ceil(fh1):2,xlabelHeight=l=>2+(l.length?fh1:0),ylabelWidth=2+ceil(fh2)/*rotated*/,ticLabelWidth=yl=>(c.font=font2,max(...yl.map(textwidth))),ticLabelHeight=2+fh2,rightXYWidth=l=>7+textwidth(l)
@@ -39,18 +39,21 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let deflimits=l=>{if("undefined"==typeof l)l={};"Equal Xmin Xmax Ymin Ymax Zmin Zmax".split(" ").forEach(s=>{if(!(s in l))l[s]=0});return l}
  let limits=p=>{for(let i=0;i<p.length;i++){p[i].Limits=deflimits(p[i].Limits);let t=p[i].Type;p[i].Limits="xy"==t?xylimits(p[i]):"ampang"==t?aalimits(p[i]):"polar"==t?polarlimits(p[i],0):"ring"==t?polarlimits(p[i],1):{}};if(p[0].Limits.equal)console.log("todo equal-limits")}
  let labels=p=>{for(let i=0;i<p.length;i++){"Xlabel Ylabel Xunit Yunit".split(" ").forEach(x=>x in p[i]?0:p[i][x]="")}}
- let axes=(pi,xy,x,y,w,h,xmin,xmax,ymin,ymax)=>({pi:pi,xy:xy,x:x,y:y,w:w,h:h,xmin:xmin,xmax:xmax,ymin:ymin,ymax:ymax})
+ let axes=(pi,xy,x,y,w,h,xmin,xmax,ymin,ymax)=>{let a={pi:pi,xy:xy,x:x,y:y,w:w,h:h,xmin:xmin,xmax:xmax,ymin:ymin,ymax:ymax};Axes.push(a);return a}
  let hs=s=>{const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};return s.replace(/[&<>"]/g,c=>m[c])}
  let axvisi=(ax,x,y)=>{let A=ax.xmin,B=ax.xmax,C=ax.ymin,D=ax.ymax,n=x.length,N=0,i,j=0,a,b,c,d,o=(x,y)=>x<A||x>B||y<C||y>D,X=FA(n),Y=FA(n),t=!o(a=x[0],b=y[0]);if(t){X[0]=a;Y[j++]=b}
   for(i=1;i<n;i++){c=x[i];d=y[i];if(a<A&&c<A||a>B&&c>B||b<C&&d<C||b>D&&d>D){if(t){X[j]=c;Y[j++]=d;X[j]=NaN;Y[j++]=NaN;t=0}}else{if(!t){X[j]=a;Y[j++]=b;t=1}X[j]=c;Y[j++]=d}a=c;b=d}
   return[X.subarray(0,j),Y.subarray(0,j)]}
+ let evvisi=(ax,x,y)=>{let o=[[]],a=ax.xmin,b=ax.xmax,A=ax.ymin,B=ax.ymax,n=x.length,c=x[0],d=x[n-1],I=clamp(floor(scale(a,c,d,0,n)),0,n),J=clamp(ceil(scale(b,c,d,0,n)),0,n);if(J-I<=0)return o;x=x.slice(I,J);y=y.slice(2*I,2*J);return y.every(y=>y<A||y>B)?o:[x,y]}
  let phjmp=(x,y)=>{let n=0,i=1;for(;i<y.length;i++)if(abs(y[i]-y[i-1])>280)++n;if(!n)return[x,y];let X=FA(x.length+3*n),Y=FA(x.length+3*n),j=1;X[0]=x[0];Y[0]=y[0];
   for(i=1;i<y.length;i++)abs(y[i]-y[i-1])>280? (X[j]=x[i],Y[j]=y[i]+(y[i]<0?360:-360),X[1+j]=NaN,Y[1+j]=NaN,X[2+j]=X[j-1],Y[2+j]=Y[j-1]+(Y[j-1]<0?360:-360),X[3+j]=x[i],Y[3+j]=y[i],j+=4):(X[j]=x[i],Y[j++]=y[i]);return[X,Y]}
- let xenv=x=>{let r=FA(2*x.length);r.set(x);let j=x.length;for(let i=x.length-1;i>=0;i--)r[j++]=x[i];return r}
- let xyxy=l=>[l.Y?l.X:xenv(l.X),l.Y?l.Y:l.C],xyamp=l=>[l.X,Abs(l.C)],xyang=l=>[...phjmp(l.X,Ang(l.C))],xypolar=l=>[Imag(l.C),Real(l.C)]
+ let xenv=x=>{let r=FA(2*x.length);r.set(x);let j=x.length;for(let i=x.length-1;i>=0;i--)r[j++]=x[i];return r},yenv=y=>{let r=FA(y.length),n=r.length>>>1,i,j;for(i=0;i<n;i++)r[i]=y[1+2*i];j=2*n-2;for(i=n;i<2*n;j-=2,i++)r[i]=y[j];return r}
+ let envl=(a,x,y)=>{let i,j,n=x.length,s=a.w/(a.xmax-a.xmin),dx=(x[n-1]-x[0])/(n-1),D=s*dx;while(D<1&&n>16){D*=2;n>>>=1;for(i=0;i<n;i++){x[i]=x[2*i]};for(i=0;i<2*n;i+=2){j=2*i;y[i]=min(y[j],y[j+2]);y[i+1]=max(y[j+1],y[j+3])}}return[xenv(x.slice(0,n)),yenv(y.slice(0,2*n))]}
+ let xyxy=l=>[l.X,l.Y?l.Y:l.C],xyamp=l=>[l.X,Abs(l.C)],xyang=l=>[...phjmp(l.X,Ang(l.C))],xypolar=l=>[Imag(l.C),Real(l.C)]
+ 
  
  let drawLines=(a,p,f,t)=>{c.save();c.translate(a.x,a.y);axclip(a,t);if(p.Lines[0]?.Style?.Marker?.Marker=="bar")drawBars(a,p,f);else{p.Lines.forEach((l,i)=>drawLine(a,p,l,i,f,t));/*marker?*/drawLabels(a,p,f,t)}c.restore()}
- let drawLine=(a,p,l,i,f,t)=>{let[lw,ps,cl]=linestyle(p,l,i),r="",em="",[x,y]=f(l);if(!x.length)return;[x,y]=axvisi(a,x,y);[x,y]=axscale(a,x,y);
+ let drawLine=(a,p,l,i,f,t)=>{let[lw,ps,cl]=linestyle(p,l,i),r="",em="",ev=t=="xy"&&l.C;let[x,y]=f(l);if(!x.length)return;[x,y]=ev?evvisi(a,x,y):axvisi(a,x,y); if(!x.length)return;if(ev)[x,y]=envl(a,x,y);  [x,y]=axscale(a,x,y); 
   //todo if(t!="an"&&l?.Style?.Line?.EndMarks){let h=abs(x[0]-x[1])>abs(y[0]-y[1]),dx=h?0:300,dy=h?300:0;em=`M${x[0]-dx} ${y[0]-dy} L${x[0]+dx} ${y[0]+dy} M${x[1]-dx} ${y[1]-dy} L${x[1]+dx} ${y[1]+dy}`}
   if(lw>0&&x.length){c.beginPath();x.forEach((x,i)=>(isNaN(y[i])?0:(i==0||isNaN(y[i-1])?c.moveTo(x,y[i]):c.lineTo(x,y[i]))));t!="xy"||l.Y?0:c.closePath();if(t=="xy"&&!l.Y)linefill(cl);lineclass(lw,cl);if(l?.Style?.Line?.Arrow)arrow();}
   if(ps)x.forEach((x,i)=>fillCircle(x,y[i],ps,cl))}
@@ -105,24 +108,36 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let foto=(p,w,h)=>{}
  let textplot=(p,w,h)=>{}
  
- let grid=(n,c, g)=>{g={n:n};c<0?(g.colmajor=1,-c):(!c)?c=((n<13)?[4,4,4,4,4,3,3,4,4,5,5,4,4][n]:5):0;g.r=1;g.c=(n<c?n:(g.r=0|n/c,c));g.r=(g.r*g.c<n)?1+g.r:g.r;g.w=w/g.c;g.h=h/g.r;g.width=w;return g}
+ let Axes,rects,grid=(n,c, g)=>{g={n:n};c<0?(g.colmajor=1,-c):(!c)?c=((n<13)?[4,4,4,4,4,3,3,4,4,5,5,4,4][n]:5):0;g.r=1;g.c=(n<c?n:(g.r=0|n/c,c));g.r=(g.r*g.c<n)?1+g.r:g.r;g.w=w/g.c;g.h=h/g.r;g.width=w;return g}
  let xyi=(g,n, i,k,x,y,m)=>{x=0;i=0|n/g.c;k=n%g.c;if(g.colmajor)[i,k]=[k,i];if(i==0|(g.n-1)/g.c){m=1+((g.n-1)%g.c);x=(g.width-m*g.w)/2}x+=k*g.w;y=i*g.h;return[x,y]}
  let P={"":empty,"xy":xy,"raster":xy,"polar":polar,"ring":ring,"ampang":ampang,"foto":foto,"text":textplot}
- let plots=p=>{let g=grid(p.length,cols);check(p);limits(p);labels(p);p.forEach((p,i)=>{let[x,y]=xyi(g,i),pi=i+(single?single-1:0);c.save();c.translate(x+0.5,y+0.5);P[p.Type](p,pi,g.w,g.h);c.restore()})}
+ let plots=p=>{let g=grid(p.length,cols);rects=[];Axes=[];check(p);limits(p);labels(p);p.forEach((p,i)=>{let[x,y]=xyi(g,i),pi=i+(single?single-1:0);rects.push({i:pi,x:x,y:y,w:g.w,h:g.h});c.save();c.translate(x+0.5,y+0.5);P[p.Type](p,pi,g.w,g.h);c.restore()})}
  
  let replot=_=>{w=cnv.width;h=cnv.height; plots(single?[p[single-1]]:p) }
  replot();
+ 
+ console.log("rects",rects);
  
  //draggable corner: canvas parent: div with overflow:hidden; display:block; cnv:display:inline-block;
  let debounce=f=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}},deferplot=debounce(replot)
  let rsz=_=>{let bb=pa.getBoundingClientRect();if(bb.width==cnv.width&&bb.height==cnv.height)return;cnv.width=bb.width;cnv.height=bb.height;deferplot()}
  let ro,pa;if(resize){pa=cnv.parentElement;ro=new ResizeObserver(rsz);ro.observe(pa);}
  
- let x0=0,y0=0,drawing=0;
+ // double-click:        search closest point, mark line (thick, bring to top), select caption row, show slider, mark point, show coords legend
+ // select caption rows: mark line(s)
+ // caption doubleclick: mark line and show first point
+ // dblclick-title:      toggle highlight single axes
+ // menu-reset:          reset limits
+ // draw-rect:           show rectange (xy/amp/ang snap to hor/ver), set limits on mouseup, replot
+ // draw-rect+shift|ctrl|alt:     measure hor/ver, polar: draw vector
+ let x0=0,y0=0,curect,curax,drawing=0,bg;
  let dblclick=e=>console.log("doubleclick");cnv.addEventListener("dblclick",dblclick)
- let exy=e=>[e.offsetX,e.offsetY];
+ let exy=e=>[e.offsetX,e.offsetY],findrect=(x,y)=>{for(let r of rects)if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return r.i;return -1}
+ let drawsta=_=>{console.log("draw start",w,h);let ri=findrect(x0,y0);if(ri<0)return;for(let a of Axes)if(a.pi==ri){curax=a;break}; drawing=1;curect=ri;bg=c.getImageData(0,0,w,h);c.lineWidth=1;c.strokeStyle="red";}
+ let drawend=e=>{console.log("draw end","rect",curect,"xy",exy(e),"curax",curax);}
+ let drawovr=(x,y)=>{let dx=abs(x-x0),dy=abs(y-y0);c.putImageData(bg,0,0); if(dx>dy){line(x0,0,x0,h);line(x,0,x,h)}else{line(0,y0,w,y0);line(0,y,w,y)}  }
  let mousedown=e=>{[x0,y0]=exy(e);};cnv.addEventListener("mousedown",mousedown)
- let mousemove=e=>{if(!(x0||y0))return;let[x1,y1]=exy(e),dx=abs(x1-x0),dy=abs(y1-y0);if(dx+dy<4)return;drawing=1;console.log("drawing")};cnv.addEventListener("mousemove",mousemove)
+ let mousemove=e=>{if(!(x0||y0))return;let[x1,y1]=exy(e),dx=abs(x1-x0),dy=abs(y1-y0);if(dx+dy<4)return;if(!drawing)drawsta();if(drawing)drawovr(x1,y1)};cnv.addEventListener("mousemove",mousemove)
  let mouseup=e=>mouseout(e);cnv.addEventListener("mouseup",mouseup)
- let mouseout=e=>{if(drawing)console.log("end-drawing");drawing=0;x0=0;y0=0;};cnv.addEventListener("mouseout",mouseout);
+ let mouseout=e=>{if(drawing)drawend(e);drawing=0;x0=0;y0=0;};cnv.addEventListener("mouseout",mouseout);
 }
