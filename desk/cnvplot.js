@@ -1,5 +1,5 @@
 "use strict";
-let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext("2d"),id=cnv.id,w=cnv.width,h=cnv.height,single=0;
+let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext("2d",{willReadFrequently:true}),id=cnv.id,w=cnv.width,h=cnv.height,single=0;
  let min=Math.min,max=Math.max,exp=Math.exp,log=Math.log,abs=Math.abs,sqrt=Math.sqrt,hypot=Math.hypot,sin=Math.sin,cos=Math.cos,atan2=Math.atan2,floor=Math.floor,ceil=Math.ceil,round=Math.round;const pi=Math.PI,_pi=180/pi,pi_=pi/180
  let scale=(x,x0,x1,y0,y1)=>y0+(x-x0)*(y1-y0)/(x1-x0),clamp=(x,a,b)=>x<a?a:x>b?b:x
  let FA=x=>new Float64Array(x),JS=JSON.stringify
@@ -7,6 +7,7 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let ReIm=(x,o)=>{let r=FA(x.length/2),i=-1;for(;o<x.length;o+=2)r[++i]=x[o];return r},Real=x=>ReIm(x,0),Imag=x=>ReIm(x,1)
  let Ang=x=>{let r=FA(x.length/2);for(let i=0;i<r.length;i++)r[i]=atan2(x[2*i+1],x[2*i])*_pi;return r}//-180,180
  let shortnum=x=>{let s=String(x),t=x.toPrecision(4).replace("e+","e"),g=String(Number(t)),a=[s,t,g];a.sort((x,y)=>x.length-y.length);return a[0]}
+ let sz=(x,y)=>shortnum(hypot(x,y))+"a"+((360+floor(atan2(x,y)*_pi))%360)
  let iota=n=>{let r=Array(n);for(let i=0;i<n;i++)r[i]=i;return r}
  let Sum=x=>{let a=0,b=0,n=x.length>>1;for(let i=0;i<x.length;i+=2){a+=x[i];b+=x[1+i]};return[a,b]},sum=x=>{let r=0,i;for(i=0;i<x.length;i++)r+=x[i];return r}
  let Mean=u=>{let re=0,im=0,n=u.length/2;for(let i=0;i<u.length;i+=2){re+=u[i];im+=u[1+i]};return[re/n,im/n]},mean=x=>{let s=0,n=x.length,i;for(i=0;i<n;i++)s+=x[i];return s/n}
@@ -36,7 +37,7 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let nicelim=(x,y)=>{if(x==y){[x,y]=(!x)?[-0.1,0.1]:[x-0.1*abs(x),y+0.1*abs(y)]};let e=nicenum(y-x,false),s=nicenum(e/4,true);return[s*floor(x/s),s*ceil(y/s),s]}
  let nicetics=(x,y)=>{let [p,_,s]=nicelim(x,y),r=[],i=0;while(p+i*s<=y+s*1e-12){if(p+i*s>=x)r.push(p+i*s);i++};return{Pos:r,Labels:r.map(shortnum)}}   
  let autoscale=a=>nicelim(...mima(a)),autoscalr=a=>{let[x,y]=mima(a);return nicelim(0,y||1)}
- let polarlimits=(p,ring)=>{let l=p.Limits;if(ring)err("todo ring-limits");let y0,y1=l.Ymax;if(p.Limits.Ymax<=0)[y0,y1]=autoscalr(p.Lines.map(l=>Abs(l.C)));[l.Xmin,l.Xmax,l.Ymin,l.Ymax]=[-y1,y1,-y1,y1];return l}
+ let polarlimits=(p,ring)=>{let l=p.Limits;if(ring)err("todo ring-limits");let y0,y1=l.Ymax;if(l.Ymax<=l.Ymin||l.Xmax<=l.Xmin){[y0,y1]=autoscalr(p.Lines.map(l=>Abs(l.C)));[l.Xmin,l.Xmax,l.Ymin,l.Ymax]=[-y1,y1,-y1,y1]}; let cx=(l.Xmin+l.Xmax)/2,cy=(l.Ymin+l.Ymax)/2,r=max(l.Ymax-l.Ymin,l.Xmax-l.Ymin)/2;return{Xmin:cx-r,Xmax:cx+r,Ymin:cy-r,Ymax:cy+r}}
  let xxlimits=p=>{let l=p.Limits;if(l.Xmin==l.Xmax)[p.Limits.Xmin,p.Limits.Xmax]=autoscale(p.Lines.map(l=>l.X))}
  let xylimits=p=>{xxlimits(p);let l=p.Limits;if(l.Ymin==l.Ymax){[l.Ymin,l.Ymax]=autoscale(p.Lines.map(l=>l.Y?l.Y:l.C));if(p.Square){l.Xmin=l.Ymin=min(l.Xmin,l.Ymin);l.Xmax=l.Ymax=max(l.Xmax,l.Ymax)}};return l} //todo raster
  let aalimits=p=>{xxlimits(p);let l=p.Limits,x_;if(l.Ymax==l.Ymin){l.Ymin=0;[x_,l.Ymax]=autoscale(p.Lines.map(l=>Abs(l.C)))};return l}
@@ -91,11 +92,10 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let vtics=(a,X,L,y1,y2)=>{X.forEach((x,i)=>{x=round(scale(x,a.xmin,a.xmax,a.x,a.x+a.w));line(x,y1,x,y2);if(L.length){let b=text(x,  y2+2,L[i],5,1);(!i)?hitbox(hitXmin,b,a.pi,L[i]):i==X.length-1?hitbox(hitXmax,b,a.pi,L[i]):0 /*,i==0?editlimit(Xmin):i==X.length-1?editlimit(Xmax)*/}})} //todo store callback areas
  let drawXlabel=(a,l,u)=>text(a.x+round(a.w/2),a.y+a.h+ticLength+ticLabelHeight,(l+" "+u).trim(),5,0)
  let drawYlabel=(a,l,u,ylw)=>vtext(a.x-2*ticLength-ylw,a.y+round(a.h/2),(l+" "+u).trim())
- let drawPolar=(a,rt,unit)=>{let r=floor(a.w/2),cx=a.x+r,cy=a.y+r,r1=r+ticLength/2,r2=r-ticLength/2,r3=r+2*ticLength,al=[1,0,0,7,6,6,5,4,4,3,2,2],cs=cos(40*pi_),sn=sin(40*pi_);
-  line(cx+r*cs,cy+r*sn,cx+r3*cs,cy+r3*sn);hitbox(hitPolimit,text(cx+r3*cs,cy+r3*sn,shortnum(a.ymax),6,0),a.pi,String(a.ymax));text(cx+r3*cs,cy+r3*sn+fh1,""+unit,6);
+ let drawPolar=(a,rt,unit)=>{let r=floor(a.w/2),cx=a.x+r,cy=a.y+r,xo=(a.xmax+a.xmin)/2,yo=(a.ymin+a.ymax)/2,o=(xo||yo)?1:0,r1=r+ticLength/2,r2=r-ticLength/2,r3=r+2*ticLength,al=[1,0,0,7,6,6,5,4,4,3,2,2],cs=cos(40*pi_),sn=sin(40*pi_);
+  line(cx+r*cs,cy+r*sn,cx+r3*cs,cy+r3*sn);hitbox(hitPolimit,text(cx+r3*cs,cy+r3*sn,shortnum(a.ymax),6,0),a.pi,String(a.ymax));if(o)text(cx+r3*cs,cy+r3*sn+o*fh1,"-"+sz(xo,yo),6);text(cx+r3*cs,cy+r3*sn+(1+o)*fh1,""+unit,6);
   Array(12).fill(0).map((_,i)=>30*i).forEach((p,i)=>{let cs=cos(p*pi_),sn=sin(p*pi_);line(cx+r1*cs,cy+r1*sn,cx+r2*cs,cy+r2*sn);text(cx+r1*cs,cy+r1*sn+1,((90+p)%360)+"",al[(3+i)%12],1)});
-  rt.map(R=>strokeCircle(cx,cy,R/a.ymax*r));line(cx-r,cy,cx+r,cy)+line(cx,cy-r,cx,cy+r);c.lineWidth=2;strokeCircle(cx,cy,r);
- }
+  rt.map(R=>strokeCircle(cx,cy,R/a.ymax*r));line(cx-r,cy,cx+r,cy)+line(cx,cy-r,cx,cy+r);c.lineWidth=2;strokeCircle(cx,cy,r)}
 
  let empty=(p,pi,w,h)=>{};
  let xy=(p,pi,w,h)=>{let xt=nicetics(p.Limits.Xmin,p.Limits.Xmax),yt=nicetics(p.Limits.Ymin,p.Limits.Ymax),ylw=ticLabelWidth(yt.Labels);
@@ -148,18 +148,18 @@ let cnvplot=(cnv,p,/*,caption,cnv,sld,det,txt,cap,*/...a)=>{let c=cnv.getContext
  let gethit=(x,y)=>{for(let h of hits)if(x>=h.l&&x<=h.r&&y>=h.t&&y<=h.b)return h;return 0}
  let dblclick=e=>{pd(e);let[x,y]=exy(e),h=gethit(x,y);if(!h)return console.log("todo find nearest point");h.f(h)};cnv.addEventListener("dblclick",dblclick)
  let exy=e=>[e.offsetX,e.offsetY],findrect=(x,y)=>{if(single)return 0;for(let r of rects)if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return r.i;return -1},findaxes=ri=>{if(single)return Axes.length?Axes[0]:0;for(let a of Axes)if(a.pi==ri)return a;return 0}
+ let posnap=(x0,x1,y0,y1)=>{let dx=abs(x1-x0),dy=abs(y1-y0),cx=(x0+x1)/2,cy=(y0+y1)/2,r=max(dx,dy)/2;if(hypot(cx,cy)<0.1*r){cx=0;cy=0};return[cx-r,cx+r,cy-r,cy+r]}
  let drawsta=_=>{let ri=findrect(x0,y0),a=findaxes(ri);if(ri<0||!a)return;curax=a;drawing=1;curect=rects[ri];bg=c.getImageData(0,0,w,h);c.lineWidth=1;c.strokeStyle="red";}
  let drawend=e=>{let[x,y]=exy(e),a=curax,pi=a.pi,rx=curect.x,ry=curect.y,xy=a.xy,dx=abs(x0-x),dy=abs(y0-y);[x0,x]=asc(x0,x);[y,y0]=asc(y,y0);
-  [x0,y0]=axcoords(curax,x0-rx,y0-ry);[x,y]=axcoords(curax,x-rx,y-ry);  /*if("po"==xy){}else if("am"==xy){}else{};*/ 
-  [x0,x,y0,y]=dx>dy?[x0,x,a.ymin,a.ymax]:[a.xmin,a.xmax,y0,y];usrlimits[pi]={Xmin:x0,Xmax:x,Ymin:y0,Ymax:y};
+  [x0,y0]=axcoords(a,x0-rx,y0-ry);[x,y]=axcoords(a,x-rx,y-ry);
+  [x0,x,y0,y]=xy=="po"?[x0,x,y0,y]=posnap(x0,x,y0,y):dx>dy?[x0,x,a.ymin,a.ymax]:[a.xmin,a.xmax,y0,y];usrlimits[pi]={Xmin:x0,Xmax:x,Ymin:y0,Ymax:y};
   x0=0;y0=0;cnv.style.cursor="crosshair";replot()}
  let drawovr=(x,y)=>{let dx=abs(x-x0),dy=abs(y-y0),xy=curax.xy;c.putImageData(bg,0,0);c.save();c.beginPath();c.rect(curect.x,curect.y,curect.w,curect.h);c.clip();if(xy=="po")c.strokeRect(min(x0,x),min(y0,y),dx,dy);else if(dx>dy){line(x0,0,x0,h);line(x,0,x,h)}else{line(0,y0,w,y0);line(0,y,w,y)}  ;c.restore()}
  let mousedown=e=>{[x0,y0]=exy(e);};cnv.addEventListener("mousedown",mousedown)
  let mousemove=e=>{if(menu)menu.remove();if(!(x0||y0))return;let[x1,y1]=exy(e),dx=abs(x1-x0),dy=abs(y1-y0);if(dx+dy<4)return;if(!drawing)drawsta();if(drawing)drawovr(x1,y1)};cnv.addEventListener("mousemove",mousemove)
  let mouseup=e=>mouseout(e);cnv.addEventListener("mouseup",mouseup)
  let mouseout=e=>{if(drawing)drawend(e);drawing=0;x0=0;y0=0;};cnv.addEventListener("mouseout",mouseout);
- let zoompo=(a,x,y,out)=>{console.log("todo zoom polar",x,y,out)}
- let zoomat=(a,x,y,out)=>{if(xy=="po")return zoompo(a,x,y,out);let z=out?2:0.5,l={Xmin:a.xmin,Xmax:a.xmax,Ymin:a.ymin,Ymax:a.ymax},f=(x,mi,ma, d,c)=>(d=ma-mi,c=(x-mi)/d,mi=x-z*c*d,[mi,mi+z*d]);y<a.ymin||y>a.ymax?[l.Xmin,l.Xmax]=f(x,l.Xmin,l.Xmax):[l.Ymin,l.Ymax]=f(y,l.Ymin,l.Ymax);usrlimits[single?0:a.pi]=l;replot()}
- let wheel=e=>{pd(e);let[x,y]=exy(e),ri=findrect(x,y),r=rects[ri],a=findaxes(ri);console.log("ri",ri,"a",a,Axes);if(ri<0||!a)return;[x,y]=axcoords(a,x-r.x,y-r.y);zoomat(a,x,y,e.deltaY>0)};cnv.addEventListener("wheel",wheel);
- let contextmenu=e=>{pd(e);if(menu)menu.remove();let x=e.clientX,y=e.clientY,s=ce("select"),opt=(t,f)=>{let o=tc(t,ce("option"));o.onclick=e=>{s.remove();f()};ac(s,o)};opt("reset",reset);opt("copy png",copypng);s.size=s.childElementCount;s.style.cssText=`position:absolute;top:${y-5}px;left:${x-5}px;background=#ffe;border:1px solid;z-index:99;padding:0px;outline:none;overflow:hidden`;ac(document.body,s);s.value="";menu=s};cnv.addEventListener("contextmenu",contextmenu);
+ let zoomat=(a,x,y,out)=>{let z=out?2:0.5,l={Xmin:a.xmin,Xmax:a.xmax,Ymin:a.ymin,Ymax:a.ymax},f=(x,mi,ma, d,c)=>(d=ma-mi,c=(x-mi)/d,mi=x-z*c*d,[mi,mi+z*d]),po=a.xy=="po",xonly=y<a.ymin||a.ymax;if(po||xonly)[l.Xmin,l.Xmax]=f(x,l.Xmin,l.Xmax);if(po||!xonly)[l.Ymin,l.Ymax]=f(y,l.Ymin,l.Ymax);if(po)[l.Xmin,l.Xmax,l.Ymin,l.Ymax]=posnap(l.Xmin,l.Xmax,l.Ymin,l.Ymax);usrlimits[single?0:a.pi]=l;replot()}
+ let wheel=e=>{pd(e);let[x,y]=exy(e),ri=findrect(x,y),r=rects[ri],a=findaxes(ri);if(ri<0||!a)return;[x,y]=axcoords(a,x-r.x,y-r.y);zoomat(a,x,y,e.deltaY>0)};cnv.addEventListener("wheel",wheel);
+ let contextmenu=e=>{pd(e);if(menu)menu.remove();let x=e.clientX+window.scrollX,y=e.clientY+window.scrollY,s=ce("select"),opt=(t,f)=>{let o=tc(t,ce("option"));o.onclick=e=>{s.remove();f()};ac(s,o)};opt("reset",reset);opt("copy png",copypng);s.size=s.childElementCount;s.style.cssText=`position:absolute;top:${y-5}px;left:${x-5}px;background=#ffe;border:1px solid;z-index:99;padding:0px;outline:none;overflow:hidden;font-family:monospace`;ac(document.body,s);s.value="";menu=s};cnv.addEventListener("contextmenu",contextmenu);
 }
