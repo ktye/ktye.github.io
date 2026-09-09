@@ -14,7 +14,7 @@
  let font1,font2,ufont1,ufont2,cols=0,resize=0,stati=0; //args, e.g. "font1","12pt monospace",..
  for(let i=0;i<a.length;i++){let x=a[i];x=="font1"?(ufont1=a[++i]):x=="font2"?(ufont2=a[++i]):x=="cols"?(cols=a[++i]):x=="resize"?(resize=1):x=="static"?(stati=1):0}
  let fh1,fh2,border=1,ticLength=6,dynstyle=s=>{s=max(10,floor(s/30));ticLength=6;font1=ufont1?ufont1:`${floor(1.2*s)}px monospace`;font2=ufont2?ufont2:`${s}px monospace`;fh1=fontheight(font1);fh2=fontheight(font2)}
- let fontheight=f=>{c.font=f;let m=c.measureText("AQ");return m.fontBoundingBoxAscent+m.fontBoundingBoxDescent},textwidth=t=>c.measureText(t).width
+ let fontheight=f=>{c.font=f;let m=c.measureText("AQ");return ceil(m.fontBoundingBoxAscent+m.fontBoundingBoxDescent)},textwidth=t=>ceil(c.measureText(t).width)
  let titleHeight=t=>t?2+ceil(fh1):2,xlabelHeight=l=>2+(l.length?fh1:0),ylabelWidth=_=>2+ceil(fh2)/*rotated*/,ticLabelWidth=yl=>(c.font=font2,max(...yl.map(textwidth))),ticLabelHeight=_=>2+fh2,rightXYWidth=l=>7+textwidth(l)
  let colors=p.length?(p[0]?.Style?.Order?p[0].Style.Order.split(","):[]):[];colors=(colors.length?colors:"#003FFF,#03ED3A,#E8000B,#8A2BE2,#FFC400,#00D7FF".split(","));
  let ncolors=colors.length;
@@ -43,7 +43,7 @@
  let deflimits=l=>{if("undefined"==typeof l)l={};"Equal Xmin Xmax Ymin Ymax Zmin Zmax".split(" ").forEach(s=>{if(!(s in l))l[s]=0});return l}
  let limits=p=>{for(let i=0;i<p.length;i++){p[i].Limits=usrlimits[i]||deflimits(p[i].Limits);let t=p[i].Type;p[i].Limits="xy"==t?xylimits(p[i]):"ampang"==t?aalimits(p[i]):"polar"==t?polarlimits(p[i],0):"ring"==t?polarlimits(p[i],1):{}};if(p[0].Limits.equal)console.log("todo equal-limits")}
  let labels=p=>{for(let i=0;i<p.length;i++){"Xlabel Ylabel Xunit Yunit".split(" ").forEach(x=>x in p[i]?0:p[i][x]="")}}
- let axes=(pi,xy,x,y,w,h,xmin,xmax,ymin,ymax)=>{let a={pi:pi,xy:xy,x:x,y:y,w:w,h:h,xmin:xmin,xmax:xmax,ymin:ymin,ymax:ymax};if(xy!="an")Axes.push(a);return a}
+ let axes=(pi,xy,x,y,w,h,xmin,xmax,ymin,ymax)=>{w=round(w);h=round(h);let a={pi:pi,xy:xy,x:x,y:y,w:w,h:h,xmin:xmin,xmax:xmax,ymin:ymin,ymax:ymax};if(xy!="an")Axes.push(a);return a}
  let hs=s=>{const m={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};return s.replace(/[&<>"]/g,c=>m[c])}
  let axvisi=(ax,x,y)=>{let A=ax.xmin,B=ax.xmax,C=ax.ymin,D=ax.ymax,n=x.length,N=0,i,j=0,a,b,c,d,o=(x,y)=>x<A||x>B||y<C||y>D,X=FA(n),Y=FA(n),t=!o(a=x[0],b=y[0]);if(t){X[0]=a;Y[j++]=b}
   for(i=1;i<n;i++){c=x[i];d=y[i];if(a<A&&c<A||a>B&&c>B||b<C&&d<C||b>D&&d>D){if(t){X[j]=c;Y[j++]=d;X[j]=NaN;Y[j++]=NaN;t=0}}else{if(!t){X[j]=a;Y[j++]=b;t=1}X[j]=c;Y[j++]=d}a=c;b=d}
