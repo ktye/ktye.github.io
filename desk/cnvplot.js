@@ -11,9 +11,9 @@
  let Sum=x=>{let a=0,b=0,n=x.length>>1;for(let i=0;i<x.length;i+=2){a+=x[i];b+=x[1+i]};return[a,b]},sum=x=>{let r=0,i;for(i=0;i<x.length;i++)r+=x[i];return r}
  let Mean=u=>{let re=0,im=0,n=u.length/2;for(let i=0;i<u.length;i+=2){re+=u[i];im+=u[1+i]};return[re/n,im/n]},mean=x=>{let s=0,n=x.length,i;for(i=0;i<n;i++)s+=x[i];return s/n}
 
- let font1,font2,ufont1,ufont2,cols=0,resize=0,stati=0; //args, e.g. "font1","12pt monospace",..
+ let font1,font2,ufont1,ufont2,cols=0,resize=0,stati=0,hi=[]; //args, e.g. "font1","12pt monospace",.. hi=[{plot-idx,line-idx,point-idx||-1}]
  for(let i=0;i<a.length;i++){let x=a[i];x=="font1"?(ufont1=a[++i]):x=="font2"?(ufont2=a[++i]):x=="cols"?(cols=a[++i]):x=="resize"?(resize=1):x=="static"?(stati=1):0}
- let fh1,fh2,border=1,ticLength=6,dynstyle=s=>{s=max(10,floor(s/30));ticLength=6;font1=ufont1?ufont1:`${floor(1.2*s)}px monospace`;font2=ufont2?ufont2:`${s}px monospace`;fh1=fontheight(font1);fh2=fontheight(font2)}
+ let fh1,fh2,border=1,ticLength=6,dynstyle=s=>{s=max(10,floor(s/40));ticLength=6;font1=ufont1?ufont1:`${floor(1.2*s)}px monospace`;font2=ufont2?ufont2:`${s}px monospace`;fh1=fontheight(font1);fh2=fontheight(font2)}
  let fontheight=f=>{c.font=f;let m=c.measureText("AQ");return ceil(m.fontBoundingBoxAscent+m.fontBoundingBoxDescent)},textwidth=t=>ceil(c.measureText(t).width)
  let titleHeight=t=>t?2+ceil(fh1):2,xlabelHeight=l=>2+(l.length?fh1:0),ylabelWidth=_=>2+ceil(fh2)/*rotated*/,ticLabelWidth=yl=>(c.font=font2,max(...yl.map(textwidth))),ticLabelHeight=_=>2+fh2,rightXYWidth=l=>7+textwidth(l)
  let colors=p.length?(p[0]?.Style?.Order?p[0].Style.Order.split(","):[]):[];colors=(colors.length?colors:"#003FFF,#03ED3A,#E8000B,#8A2BE2,#FFC400,#00D7FF".split(","));
@@ -54,15 +54,18 @@
  let xenv=x=>{let r=FA(2*x.length);r.set(x);let j=x.length;for(let i=x.length-1;i>=0;i--)r[j++]=x[i];return r},yenv=y=>{let r=FA(y.length),n=r.length>>>1,i,j;for(i=0;i<n;i++)r[i]=y[1+2*i];j=2*n-2;for(i=n;i<2*n;j-=2,i++)r[i]=y[j];return r}
  let envl=(a,x,y)=>{let i,j,n=x.length,s=a.w/(a.xmax-a.xmin),dx=(x[n-1]-x[0])/(n-1),D=s*dx;while(D<1&&n>16){D*=2;n>>>=1;for(i=0;i<n;i++){x[i]=x[2*i]};for(i=0;i<2*n;i+=2){j=2*i;y[i]=min(y[j],y[j+2]);y[i+1]=max(y[j+1],y[j+3])}}return[xenv(x.slice(0,n)),yenv(y.slice(0,2*n))]}
  let xyxy=l=>[l.X,l.Y?l.Y:l.C],xyamp=l=>[l.X,Abs(l.C)],xyang=l=>[...phjmp(l.X,Ang(l.C))],xypolar=l=>[Imag(l.C),Real(l.C)]
- let findpoint=(p,x,y,dx,dy)=>{let t=p.Type,xy=t=="xy",po=t=="polar",am=t=="ampang",x0=p.Limits.Xmin,x1=p.Limits.Xmax;
-  for(let i=p.Lines.length-1;i>=0;i--){let j,l=p.Lines[i],X=l.X,Y=l.Y,C=l.C,nx=X?X.length:0,nc=C?C.length:0;console.log("nxc",nx,nc);if(l.anno||po&&(!nc)||(!po)&&!nx)continue;
-   if(xy&&l.C){j=round(scale(x,X[0],X.at(-1),0,nx));if(j>=0&&r<nx)if(min(abs(l.C[2*r]-y),abs(l.C[2*r+1]-y))<dy)return[t,l,i,j]}
-   if(xy){for(let j=0;j<nx;j++)if(abs(X[j]-x)<dx&&abs(Y[j]-y)<dy)return[t,l,i,j]}
-   if(po){for(let j=0;j<nc;j++)if(abs(C[2*j]-y)<dy&&abs(C[2*j+1]-x)<dx)return[t,l,i,j]}
-   if(am){for(let j=0;j<nc;j++)if(abs(X[j]-x)<dx&&abs(hypot(C[2*j],C[2*j+1])-y)<dy)return[t,l,i,j]}}return 0};
+ let findpoint=(p,pi,r,a,x,y,dx,dy)=>{let t=p.Type,xy=t=="xy",po=t=="polar",am=t=="ampang",x0=p.Limits.Xmin,x1=p.Limits.Xmax;
+  for(let i=p.Lines.length-1;i>=0;i--){let j,l=p.Lines[i],X=l.X,Y=l.Y,C=l.C,nx=X?X.length:0,nc=C?C.length:0;if(l.anno||po&&(!nc)||(!po)&&!nx)continue;
+   if(xy&&l.C){j=round(scale(x,X[0],X.at(-1),0,nx));if(j>=0&&j<nx)if(min(abs(l.C[2*j]-y),abs(l.C[2*j+1]-y))<dy)return [i,j]}
+   else if(xy){for(let j=0;j<nx;j++)if(abs(X[j]-x)<dx&&abs(Y[j]-y)<dy)return[i,j]}
+   if(po){for(let j=0;j<nc;j++)if(abs(C[2*j]-y)<dy&&abs(C[2*j+1]-x)<dx)return[i,j]}
+   if(am){for(let j=0;j<nc;j++)if(abs(X[j]-x)<dx&&abs(hypot(C[2*j],C[2*j+1])-y)<dy)return[i,j]}}return 0};
  
- let drawLines=(a,p,f,t)=>{c.save();c.translate(a.x,a.y);axclip(a,t);if(p.Lines[0]?.Style?.Marker?.Marker=="bar")drawBars(a,p,f);else{p.Lines.forEach((l,i)=>drawLine(a,p,l,i,f,t));/*marker?*/drawLabels(a,p,f,t)}c.restore()}
- let drawLine=(a,p,l,i,f,t)=>{let[lw,ps,cl]=linestyle(p,l,i),r="",em="",ev=t=="xy"&&l.C;let[x,y]=f(l);if(!x.length)return;[x,y]=ev?evvisi(a,x,y):axvisi(a,x,y); if(!x.length)return;if(ev)[x,y]=envl(a,x,y);  [x,y]=axscale(a,x,y); 
+ let drawLines=(a,p,f,t)=>{c.save();c.translate(a.x,a.y);axclip(a,t);if(p.Lines[0]?.Style?.Marker?.Marker=="bar")drawBars(a,p,f);else{p.Lines.forEach((l,i)=>drawLine(a,p,l,i,f,t));drawHilites(a,p,f,t);drawLabels(a,p,f,t)}c.restore()}
+ let drawLine=(a,p,l,i,f,t,hil,hip)=>{let[lw,ps,cl]=linestyle(p,l,i),r="",em="",ev=t=="xy"&&l.C;let[x,y]=f(l);if(!x.length)return;
+  if(hil){lw*=2;ps*=2};
+  if(hip){let j=hip-1;[x,y]=y.length==2*x.length?[[x[j]],[y[2*j],y[2*j+1]]]:[[x[j]],[y[j]]];[x,y]=axscale(a,x,y);lw=0;ps=ps?2*ps:lw?2*lw:4} //todo text
+  else{[x,y]=ev?evvisi(a,x,y):axvisi(a,x,y); if(!x.length)return;if(ev)[x,y]=envl(a,x,y);[x,y]=axscale(a,x,y);}
   if((t=="xy"||t=="am")&&l?.Style?.Line?.EndMarks){let m=l.Style.Line.EndMarks;let h=abs(x[0]-x[1])>abs(y[0]-y[1]),dx=(!h)*m,dy=h*m;lineclass(lw,cl,1);line(x[0]-dx,y[0]-dy,x[0]+dx,y[0]+dy);line(x[1]-dx,y[1]-dy,x[1]+dx,y[1]+dy)}
   if(lw>0&&x.length){c.beginPath();x.forEach((x,i)=>(isNaN(y[i])?0:(i==0||isNaN(y[i-1])?c.moveTo(x,y[i]):c.lineTo(x,y[i]))));t!="xy"||l.Y?0:c.closePath();if(t=="xy"&&!l.Y)linefill(cl);lineclass(lw,cl);if(l?.Style?.Line?.Arrow)arrow(x,y,lw,cl);}
   if(ps)x.forEach((x,i)=>fillCircle(x,y[i],ps,cl))}
@@ -70,6 +73,8 @@
   for(i=0;i<n;i++){l=p.Lines[i];let[x,y]=axscale(a,...f(l)),j;for(j=0;j<x.length;j+=2){X0.push(x[j]);X1.push(x[1+j]);Y0.push(y[j]);Y1.push(y[1+j]);I.push(l?.Id?l.Id:-1)}}
   let atx=(x,y)=>y.map(i=>x[i]),j=Array(X0.length).fill(0).map((_,i)=>i);j.sort((a,b)=>(a=Y1[a])<(b=Y1[b])?-1:a>b?1:0);X0=atx(X0,j);X1=atx(X1,j);Y0=atx(Y0,j);Y1=atx(Y1,j);I=atx(I,j);
   for(i=0;i<X0.length;i++)r+=`<rect x="${X0[i]}" y="${Y1[i]}" width="${X1[i]-X0[i]}" height="${Y0[i]-Y1[i]}" data-id="${I[i]}" class="C${I[i]}" ></rect>`;return r}
+ let drawHilites=(a,p,f,t)=>{hi.filter(x=>x[0]==a.pi).forEach(h=>{let i=h[1],j=h[2];drawLine(a,p,p.Lines[i],i,f,t,true/*todo: j<0*/,1+j)})}
+ 
  let linestyle=(p,l,i)=>{let lw=l?.Style?.Line?.Width?l.Style.Line.Width:0,ps=l?.Style?.Marker?.Size?l.Style.Marker.Size:0;[lw,ps]=(!(lw||ps))?(p.Type=="polar"?[0,3]:[2,0]):[lw,ps];return[lw,ps,l?.Style?.Line?.Color==0?0:l?.Style?.Line?.Color?l.Style?.Line.Color:l?.Id?l.Id:1+i]}
  let lineclass=(lw,cl,no)=>{c.strokeStyle=cl?colors[(cl-1)%ncolors]:"black";c.lineWidth=lw;if(!no)c.stroke()},linefill=cl=>{c.fillStyle=cl?colors[(cl-1)%ncolors]:"black";c.fill()}
  let drawLabels=(a,p,f,t)=>{p.Lines.forEach((l,i)=>drawLineLabels(a,p,l,i,f,t))}
@@ -132,8 +137,8 @@
  let P={"":empty,"xy":xy,"raster":xy,"polar":polar,"ring":ring,"ampang":ampang,"foto":foto,"text":textplot}
  let plots=p=>{let g=grid(p.length,cols);dynstyle(min(g.w,g.h));c.reset();c.fillStyle="white";c.fillRect(0,0,w,h);rects=[];Axes=[];hits=[];check(p);limits(p);labels(p);p.forEach((p,i)=>{let[x,y]=xyi(g,i),pi=i+(single?single-1:0);rects.push({i:pi,x:x,y:y,w:g.w,h:g.h});c.save();c.translate(x+0.5,y+0.5);P[p.Type](p,pi,g.w,g.h);c.restore()})}
  
- let replot=_=>{w=cnv.width;h=cnv.height;plots(single?[p[single-1]]:p)},reset=_=>(single=0,noanno(),reslimits(),replot())
- replot();if(stati)return;
+ let replot=_=>{cols=cnv.cols;w=cnv.width;h=cnv.height;plots(single?[p[single-1]]:p)},reset=_=>(single=0,hi=[],noanno(),reslimits(),replot())
+ cnv.cols=cols;replot();if(stati)return;cnv.replot=replot;
  
  //draggable corner: canvas parent: div with overflow:hidden; display:block; cnv:display:inline-block;
  let debounce=f=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>{f.apply(this,a)},100)}},deferplot=debounce(replot)
@@ -152,7 +157,7 @@
  let noanno=_=>{p.forEach(p=>{for(let i=0;i<p.Lines.length;i++)if(p.Lines[i].anno){p.Lines.length=i;break}})}
  let cursor=x=>cnv.style.cursor=x=="pan"?"grabbing":x=="zoom"?"crosshair":""
  let gethit=(x,y)=>{for(let h of hits)if(x>=h.l&&x<=h.r&&y>=h.t&&y<=h.b)return h;return 0}
- let clickpoint=(x,y)=>{let ri=findrect(x,y),a=findaxes(ri);if(ri<0)return;let r=rects[ri],f=findpoint(p[ri],...axcoords(a,x-r.x,y-r.y),4*(a.xmax-a.xmin)/a.w,4*(a.ymax-a.ymin)/a.h);console.log("findpoint",f);if(!f)return; }
+ let clickpoint=(x,y)=>{let ri=findrect(x,y),a=findaxes(ri);if(ri<0)return;let r=rects[ri],f=findpoint(p[ri],ri,a,r,...axcoords(a,x-r.x,y-r.y),4*(a.xmax-a.xmin)/a.w,4*(a.ymax-a.ymin)/a.h);if(!f)return;hi=[[a.pi,...f]];replot()}
  let dblclick=e=>{pd(e);let[x,y]=exy(e),h=gethit(x,y);if(!h)return clickpoint(x,y);h.f(h)};cnv.addEventListener("dblclick",dblclick)
  let exy=e=>[e.offsetX,e.offsetY],findrect=(x,y)=>{if(single)return 0;for(let r of rects)if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return r.i;return -1},findaxes=ri=>{if(single)return Axes.length?Axes[0]:0;for(let a of Axes)if(a.pi==ri)return a;return 0}
  let posnap=(x0,x1,y0,y1)=>{let dx=abs(x1-x0),dy=abs(y1-y0),cx=(x0+x1)/2,cy=(y0+y1)/2,r=max(dx,dy)/2;if(hypot(cx,cy)<0.1*r){cx=0;cy=0};return[cx-r,cx+r,cy-r,cy+r]}
@@ -163,7 +168,7 @@
   else if(mea){let l={Id:-1,anno:1,Style:{Line:{Width:2,Color:0,Arrow:+po}}};po?(l.C=[y0,x0,y,x],l.Label=sz(x-x0,y-y0)):dx>dy?(l.X=asc(x0,x),l.Y=[y0,y0],l.Label=shortnum(abs(x0-x))):(l.X=[x0,x0],l.Y=asc(y0,y),l.Label=shortnum(abs(y0,y)));if(!po)l.Style.Line.EndMarks=5;console.log("am",am,xy);if(am){l.C=[l.Y[0],0,l.Y[1],0]; delete l.Y};p[pi].Lines.push(l) } //Lines
   else{[x0,x,y0,y]=po?[x0,x,y0,y]=posnap(x0,x,y0,y):dx>dy?[x0,x,a.ymin,a.ymax]:[a.xmin,a.xmax,y0,y];usrlimits[pi]={Xmin:x0,Xmax:x,Ymin:y0,Ymax:y}};
   x0=0;y0=0;/*pan=0;mea=0;cursor("zoom");*/replot()}
- let drawovr=(x,y)=>{let dx=abs(x-x0),dy=abs(y-y0),xy=curax.xy,po=xy=="po";c.putImageData(bg,0,0);c.save();c.beginPath();c.rect(curect.x,curect.y,curect.w,curect.h);c.clip();
+ let drawovr=(x,y)=>{console.log("pan|mea",pan,mea);let dx=abs(x-x0),dy=abs(y-y0),xy=curax.xy,po=xy=="po";c.putImageData(bg,0,0);c.save();c.beginPath();c.rect(curect.x,curect.y,curect.w,curect.h);c.clip();
   if(pan||mea){ if(po)line(x0,y0,x,y);else if(dx>dy)line(x0,y0,x,y0);else line(x0,y0,x0,y) }
   else{ if(po)c.strokeRect(min(x0,x),min(y0,y),dx,dy);else if(dx>dy){line(x0,0,x0,h);line(x,0,x,h)}else{line(0,y0,w,y0);line(0,y,w,y)} }  ;c.restore()}
  let mousedown=e=>{let[x,y]=exy(e);if(gethit(x,y))return;[x0,y0]=[x,y];};cnv.addEventListener("mousedown",mousedown)

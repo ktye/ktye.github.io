@@ -28,18 +28,13 @@ table{line-height:1;width:100%}td{padding:0}
  <option onclick="pltmenu.style.display='none';copypng(event)">copy to clipboard(png)</option>
 </select>
 
-<script src="plot.js"></script>
+<script src="cnvplot.js"></script>
 <script>
 
 //desktop
-let af=Array.from,ac=(c,x)=>(x.appendChild(c),x)
-let pd=e=>(e.preventDefault(),e.stopPropagation()) 
-let ce=x=>document.createElement(x)
-let cl=(c,x)=>(x.classList.add(c),x)
-let cs=getComputedStyle
-let bb=x=>x.getBoundingClientRect()
-let qs=(x,y)=>x.querySelector(y),qa=(x,y)=>x.querySelectorAll(y)
-let tc=(t,x)=>(x.textContent=t,x)
+let min=Math.min,max=Math.max
+let af=Array.from,ac=(c,x)=>(x.appendChild(c),x),pd=e=>(e.preventDefault(),e.stopPropagation()),ce=x=>document.createElement(x),cl=(c,x)=>(x.classList.add(c),x),ge=x=>document.getElementById(x)
+let cs=getComputedStyle,bb=x=>x.getBoundingClientRect(),qs=(x,y)=>x.querySelector(y),qa=(x,y)=>x.querySelectorAll(y),tc=(t,x)=>(x.textContent=t,x),JS=JSON.stringify
 let err=x=>{throw new Error(x)}
 let keys=x=>Object.keys(x),vals=x=>Object.values(x),sz=(x,y)=>shortnum(hypot(x,y))+"a"+(String(round(atan2(y,x)*pi/180)).padStart(3,"0"))
 let win=(x,t)=>{let i=desk.childElementCount
@@ -52,10 +47,9 @@ let win=(x,t)=>{let i=desk.childElementCount
   <span class="plr cud" title="toggle vertical max">↕</span>
   <span class="plr clr" title="toggle horizontal max">←→</span>
  </div><div></div>`+(x?x:"");
- ac(w,desk);lay(w,i);drag(w);w.onfocus=e=>{w.parentNode.appendChild(w);if(w==con)rdl.focus()};return w}
+ ac(w,desk);lay(w,i);drag(w);w.onfocus=e=>{if(w.parentNode.lastElementChild!=w/*otherwise prevents dblclick*/)w.parentNode.appendChild(w);if(w==con)rdl.focus()};return w} 
 let noclose=w=>qs(w,".cxx").style.display="none";
 let findwin=t=>qs(desk,`[data-win="${t}"]`)
-
 let lay=(w,i)=>{let r=bb(desk);w.style.left=(5+r.left+20*i)+"px";w.style.top=(5+r.top+30*i)+"px"}
 let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
  let cd=_=>{document.onmouseup=null;document.onmousemove=null}
@@ -69,7 +63,9 @@ let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
  if(cl=="box")return restore(w);
  c=e.clientX;d=e.clientY;document.onmouseup=cd;document.onmousemove=mm}
  h.onmousedown=md}
-let close=x=>x.remove()
+
+let focus=w=>w.parentNode.appendChild(w)
+let close=x=>(x.onclose?x.onclose():0,x.remove())
 let winsz=w=>[w.clientWidth,w.clientHeight-w.firstChild.clientHeight-2]
 let resiz=(x,H)=>{let l=x.dataset.l,t=x.dataset.t,w=x.dataset.w,h=x.dataset.h;
  if(H){ if(l){x.style.left=l;x.style.width=w;x.dataset.l="";x.dataset.w=""}
@@ -82,7 +78,7 @@ let hide=x=>{ x.dataset.L=x.style.left;x.dataset.T=x.style.top;x.dataset.W=cs(x)
  x.style.height=(bb(x.firstChild).height-4)+"px";x.style.width="100px";af(qa(x,".cud,.clr,.c__,.cxx")).map(x=>x.style.display="none");qs(x,".box").textContent="☐"}
 let restore=x=>{ x.style.left=x.dataset.L;x.style.top=x.dataset.T;x.style.width=x.dataset.W;x.style.height=x.dataset.H 
  qs(x,".box").textContent="";af(qa(x,".cud,.clr,.c__")).map(x=>x.style.display="");if(0/*todo*/)qs(x,".cxx").style.display="";reszc(x)}
-let reszc=x=>{x==con?ttyresz():x==plt?pltresz():(x.dataset.win in T)?table(x.dataset.win):0}
+let reszc=x=>{x==con?ttyresz():isplot(x)?pltresz(x):(x.dataset.win in T)?table(x.dataset.win):0}
 
 //tty ">"
 let rlbuf=[],rlpos=0
@@ -127,15 +123,17 @@ let download=(u,name)=>{let x=new Blob([u],{type:"application/octet-stream"});dl
 let fta=table("files",fs);fta.style.top="0px";fta.style.left=bb(prg).width+"px";noclose(fta); //load
 
 
-//plot
-let plt=win(`<svg id="svg" width="600" height="400"></svg>`,"~"),svg=qs(plt,"svg");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px";noclose(plt);
-let pltresz=_=>{let[w,h]=winsz(plt);svg.setAttribute("width",w);svg.setAttribute("height",h);svg.setAttribute("viewBox",`0 0 ${w} ${h}`);replot()}
-let pltcols=c=>{let i=plotopts_.indexOf("cols");if(i>=0)plotopts_[1+i]=c;else plotopts_.push("cols",c)}
-let copysvg=e=>{pd(e);let s=new XMLSerializer().serializeToString(svg);navigator.clipboard.write([new ClipboardItem({"image/svg+xml":s})]).then(r=>r)}
-let copypng=e=>{pd(e);let b=bb(svg),w=b.width,h=b.height,s=new XMLSerializer().serializeToString(svg),B=new Blob([s],{type:'image/svg+xml'}),u=URL.createObjectURL(B),m=new Image();
- m.onload=_=>{let c=ce("canvas");c.width=w;c.height=h;let x=c.getContext("2d");x.drawImage(m,0,0,w,h);c.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(r=>r))};m.src=u}
-plt.oncontextmenu=e=>{let m=pltmenu,x=e.clientX,y=e.clientY;pd(e);m.size=m.childElementCount;m.value="";m.style.top=`${y}px`;m.style.left=`${x}px`;m.style.display="block";m.focus()}
-let P=x=>{if(x.length>1&&x.every(x=>"number"==typeof x)){if(x.length==3)pltcols(x[2]);return setsz(plt,...x)};if(x[0]=="axis")return axis(x[1]);plot(x,0,svg,0,0,0,0)}
+//plot cnvplot
+let pid=0,cnv=_=>ge(`plt${pid}`),plt=win(`<canvas id="plt0" width="600" height="400"></canvas>`,"plot(0)");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px";noclose(plt);
+let plti=n=>{pid=n,c=cnv();if(c)return focus(c.closest(".win"));let w=win(`<canvas id="plt${n}" width="600" height="400"></canvas>`,`plot(${n})`);w.onclose=_=>pid=0}
+let isplot=w=>w.lastElementChild.nodeName=="CANVAS",isnum=x=>("number"==typeof x)
+let pltresz=W=>{let[w,h]=winsz(W),c=W.lastElementChild;c.setAttribute("width",w);c.setAttribute("height",h);c.replot()}
+//let pltcols=c=>{let i=plotopts_.indexOf("cols");if(i>=0)plotopts_[1+i]=c;else plotopts_.push("cols",c)}
+//let copysvg=e=>{pd(e);let s=new XMLSerializer().serializeToString(svg);navigator.clipboard.write([new ClipboardItem({"image/svg+xml":s})]).then(r=>r)}
+//let copypng=e=>{pd(e);let b=bb(svg),w=b.width,h=b.height,s=new XMLSerializer().serializeToString(svg),B=new Blob([s],{type:'image/svg+xml'}),u=URL.createObjectURL(B),m=new Image();
+// m.onload=_=>{let c=ce("canvas");c.width=w;c.height=h;let x=c.getContext("2d");x.drawImage(m,0,0,w,h);c.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(r=>r))};m.src=u}
+//plt.oncontextmenu=e=>{let m=pltmenu,x=e.clientX,y=e.clientY;pd(e);m.size=m.childElementCount;m.value="";m.style.top=`${y}px`;m.style.left=`${x}px`;m.style.display="block";m.focus()}
+let P=x=>{if(1==x.length&&isnum(x[0]))return plti(x[0]);if(x.length>1&&x.every(x=>"number"==typeof x)){if(x.length==3)cnv().cols=x[2];return setsz(plt,...x)};if(x[0]=="axis")return axis(x[1]);cnvplot(cnv(),x)}
 let axis=x=>{let n=x.length;plot_.forEach(p=>{let l=p.Limits;0==n?([l.Xmin,l.Xmax,l.Ymin,l.Ymax]=[0,0,0,0]):1==n?(l.Ymax=x[0]):2==n?([l.Xmin,l.Xmax]=x):3==n?([l.Xmin,l.Xmax,l.Ymax]=x,l.Ymin=0):[l.Xmin,l.Xmax,l.Ymin,l.Ymax]=x});replot()}
 const pdoc=`
 plot(x,y,x,y,..)  multiple lines
