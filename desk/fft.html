@@ -1,0 +1,38 @@
+<!doctype html>
+<html><head><meta charset=utf-8><title>fft</title>
+<style>
+body{background:#ddd}
+canvas{display:inline-block}
+</style></head><body>
+
+<canvas id="c" width="800" height="400"></canvas>
+
+<script src="cnvplot.js"></script>
+<script>
+
+let sin=Math.sin,cos=Math.cos,pi=Math.PI,random=Math.random,log2=Math.log2,floor=Math.floor,exp=Math.exp
+let t0=1.1,T=2,sine=t=>(t=t-t0,0.1*(random()-0.5)+(t<0?0:2*sin(105*2*pi*t)*exp(-t/T))) //105Hz starting at 1.1s
+let til=n=>Array(n).fill(0).map((_,i)=>i)
+
+let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0],f)
+ let init=N=>{let l=log2(N),P=Array(8).fill(0),n=1,S=new Float64Array(N),C=new Float64Array(N);for(let p=0;p<l;p++){for(let i=0;i<n;i++){P[i]<<=1;P[i+n]=1+P[i]};n<<=1};for(let i=0;i<N;i++){const p=-2*pi*i/N;C[i]=cos(p);S[i]=sin(p)};return[l,P,C,S,N]}
+ let perm=(x,P)=>{P.forEach((p,i)=>{if(i<p){const a=2*i,b=1+a,c=2*p,d=1+c,A=x[a],B=x[b];x[a]=x[c];x[b]=x[d];x[c]=A;x[d]=B}})}
+ if("number"==typeof x)return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
+ for(let p=1;p<=l;p++){s>>=1;for(let b=0;b<s;b++){const o=2*b*n;for(let k=0;k<n;k++){const i=(k+o)<<1,j=i+(n<<1),ks=k*s,kn=s*(k+n);let xi0=x[i],xi1=x[1+i],xj0=x[j];x[i]+=C[ks]*x[j]-S[ks]*x[1+j];x[1+i]+=C[ks]*x[1+j]+S[ks]*x[j];x[j]=xi0+C[kn]*x[j]-S[kn]*x[1+j];x[1+j]=xi1+C[kn]*x[1+j]+S[kn]*xj0}};n<<=1}
+ return x}
+let rfft=(x,a,b)=>fft(x.slice(a,b).map(x=>[x,0]).flat()).slice(0,b-a)
+
+
+let N=5000,fs=1000,dt=1/fs,X=til(N).map(x=>dt*x),Y=X.map(sine)
+let n=1024,n1=n>>1,x=til(n1).map(x=>fs*x/n),z=rfft(Y,0,n) 
+
+let p=[
+ {Type:"xy",Title:"time series",Xlabel:"time",Xunit:"s",Ylabel:"y",Lines:[{X:X,Y:Y},{X:[0,0,n*dt,n*dt],Y:[2.0,2.2,2.2,2.0]}]},
+ {Type:"ampang",Title:"fft",Xlabel:"freq",Xunit:"Hz",Ylabel:"fft",Lines:[{X:x,C:z}]},
+]
+
+//zoom-callback: zoom the time axis on the left plot to update the fft starting at t0
+let fzoom=(i,l)=>{if(i!=0)return;let a=floor(fs*l.Xmin),b=a+n;p[0].Limits=l;p[1].Limits={};p[0].Lines[1].X=[a*dt,a*dt,b*dt,b*dt];p[1].Lines[0].C=rfft(Y,a,b);return p}
+
+cnvplot(c,p,"onzoom",fzoom,"onpan",fzoom);
+</script></body></html>

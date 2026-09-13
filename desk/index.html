@@ -6,6 +6,7 @@
 html{height:100vh}
 body{display:flex;margin:0;overflow:hidden}
 table{line-height:1;width:100%}td{padding:0}
+input[type=range]{position:absolute;left:0;bottom:0;width:100%;appearance:none;background:#ffffff00}
 #desk{height:100vh;width:100%;background:#ccc;overflow:hidden}
 #tty{width:80ch;height:22rem;line-height:1.1rem;background:black;color:#ccc;margin:0;}
 #tty:focus-within{color:white}
@@ -83,7 +84,7 @@ let reszc=x=>{x==con?ttyresz():isplot(x)?pltresz(x):(x.dataset.win in T)?table(x
 //tty ">"
 let rlbuf=[],rlpos=0
 let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}; 
-rladd('plot(400,300)');//todo rm
+rladd('plot(x,y)');//todo rm
 let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
@@ -124,16 +125,16 @@ let fta=table("files",fs);fta.style.top="0px";fta.style.left=bb(prg).width+"px";
 
 
 //plot cnvplot
-let pid=0,cnv=_=>ge(`plt${pid}`),plt=win(`<canvas id="plt0" width="600" height="400"></canvas>`,"plot(0)");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px";noclose(plt);
-let plti=n=>{pid=n,c=cnv();if(c)return focus(c.closest(".win"));let w=win(`<canvas id="plt${n}" width="600" height="400"></canvas>`,`plot(${n})`);w.onclose=_=>pid=0}
-let isplot=w=>w.lastElementChild.nodeName=="CANVAS",isnum=x=>("number"==typeof x)
-let pltresz=W=>{let[w,h]=winsz(W),c=W.lastElementChild;c.setAttribute("width",w);c.setAttribute("height",h);c.replot()}
+let pid=0,cnv=_=>ge(`plt${pid}`),plt=win(`<div style="display:relative"><canvas id="plt0" width="600" height="400"></canvas><br/><input type="range" id="sld0"></div>`,"plot(0)");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px";noclose(plt);
+let plti=n=>{pid=n,c=cnv();if(c)return focus(c.closest(".win"));let w=win(`<canvas id="plt${n}" width="600" height="400"></canvas><br/><input type="range" id="sld${n}" style="width:99%;margin:0"`,`plot(${n})`);w.onclose=_=>pid=0}
+let isplot=w=>qs(w,"canvas"),isnum=x=>("number"==typeof x)
+let pltresz=W=>{let[w,h]=winsz(W),c=qs(W,"canvas"),s=qs(W,"input"),hs=bb(s).height;c.setAttribute("width",w);c.setAttribute("height",h-hs);c.replot()}
 //let pltcols=c=>{let i=plotopts_.indexOf("cols");if(i>=0)plotopts_[1+i]=c;else plotopts_.push("cols",c)}
 //let copysvg=e=>{pd(e);let s=new XMLSerializer().serializeToString(svg);navigator.clipboard.write([new ClipboardItem({"image/svg+xml":s})]).then(r=>r)}
 //let copypng=e=>{pd(e);let b=bb(svg),w=b.width,h=b.height,s=new XMLSerializer().serializeToString(svg),B=new Blob([s],{type:'image/svg+xml'}),u=URL.createObjectURL(B),m=new Image();
 // m.onload=_=>{let c=ce("canvas");c.width=w;c.height=h;let x=c.getContext("2d");x.drawImage(m,0,0,w,h);c.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(r=>r))};m.src=u}
 //plt.oncontextmenu=e=>{let m=pltmenu,x=e.clientX,y=e.clientY;pd(e);m.size=m.childElementCount;m.value="";m.style.top=`${y}px`;m.style.left=`${x}px`;m.style.display="block";m.focus()}
-let P=x=>{if(1==x.length&&isnum(x[0]))return plti(x[0]);if(x.length>1&&x.every(x=>"number"==typeof x)){if(x.length==3)cnv().cols=x[2];return setsz(plt,...x)};if(x[0]=="axis")return axis(x[1]);cnvplot(cnv(),x)}
+let P=x=>{if(1==x.length&&isnum(x[0]))return plti(x[0]);if(x.length>1&&x.every(x=>"number"==typeof x)){if(x.length==3)cnv().cols=x[2];return setsz(plt,...x)};if(x[0]=="axis")return axis(x[1]);cnvplot(cnv(),x,"slider",ge(`sld${pid}`))}
 let axis=x=>{let n=x.length;plot_.forEach(p=>{let l=p.Limits;0==n?([l.Xmin,l.Xmax,l.Ymin,l.Ymax]=[0,0,0,0]):1==n?(l.Ymax=x[0]):2==n?([l.Xmin,l.Xmax]=x):3==n?([l.Xmin,l.Xmax,l.Ymax]=x,l.Ymin=0):[l.Xmin,l.Xmax,l.Ymin,l.Ymax]=x});replot()}
 const pdoc=`
 plot(x,y,x,y,..)  multiple lines
