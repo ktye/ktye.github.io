@@ -13,7 +13,7 @@ canvas{display:inline-block}
 <script>
 let ncnv=0,c=(w,h,sld)=>{w=w||800;h=h||400;
  let r=ce("canvas");r.id="cnv"+(ncnv++);r.setAttribute("width",w);r.setAttribute("height",h);document.body.appendChild(r);return r}
-let sld=w=>{w=w||800;let s=sa(ce("input"),"type","range");s.style.outline="none";s.style.width=`${w}px`;document.body.appendChild(s);s.disabled=true;return s}
+let sld=w=>{w=w||800;let s=sa(ce("input"),"type","range");s.style.outline="none";s.style.width=`${w}px`;document.body.appendChild(s);return s}
 let cap=w=>{w=w||800;let s=ce("select");s.style.cssText="font-family:monospace;outline:none;border:0";s.multiple=1;s.style.width=`${w}px`;document.body.appendChild(s);document.body.appendChild(ce("hr"));return s}
 let h1=t=>{let h=ce("h1");h.textContent=t;document.body.appendChild(h)}
 let ce=x=>document.createElement(x),sa=(x,y,z)=>(x.setAttribute(y,z),x)
@@ -44,11 +44,11 @@ let p6=[{Type:"xy",Title:"no dx",Lines:[{X:[3.5,3.5,3.5],Y:[1,2,3]}]},
         {Type:"xy",Title:"no dy",Lines:[{X:[1,2,3],Y:[4,4,4]}]},
         {Type:"xy",Title:"y=0",Lines:[{X:[1,2,3],Y:[0,0,0]}]},
 	{Type:"polar",Title:"r=0",Lines:[{C:[0,0,0,0]}]}]
-let p7=[{Type:"xy",Title:"1",xlabel:"time",ylabel:"abc",Lines:[{X:seq(),Y:sina( 1)},{X:seq(),Y:sina(2)},{X:seq(),Y:sina(3)},{X:seq(),Y:sina(4)}]},
-        {Type:"xy",Title:"2",xlabel:"time",ylabel:"abc",Lines:[{X:seq(),Y:sina( 1)},{X:seq(),Y:sina(2)},{X:seq(),Y:sina(3)},{X:seq(),Y:sina(4)}]},
-        {Type:"xy",Title:"3",xlabel:"time",ylabel:"abc",Lines:[{X:seq(),Y:sina(-1)},{X:seq(),Y:sina(2)},{X:seq(),Y:sina(3)},{X:seq(),Y:sina(6)}]}]
-let p8=[{Type:"ampang",Lines:[{X:seq(),C:sinz(1)},{X:seq(),C:sinz(2)}]},
-        {Type:"polar",Lines:[{X:seq(),C:sinz(1)},{X:seq(),C:sinz(2)}]}];
+let p7=[{Type:"xy",Title:"1",xlabel:"time",ylabel:"abc",Lines:[{X:seq(),Y:sina( 1)},{X:seq(),Y:sina(2)},{X:seq(),Y:sina(3)},{X:seq(),Y:sina(4)},{X:[0.2,0.4,0.8]}]},
+        {Type:"xy",Title:"2",xlabel:"time",ylabel:"abc",Lines:[{X:seq(),Y:sina( 1)},{X:seq(),Y:sina(2)},{X:seq(),Y:sina(3)},{X:seq(),Y:sina(4)},{X:[0.2,0.4,0.8]}]},
+        {Type:"xy",Title:"3",xlabel:"time",ylabel:"abc",Lines:[{X:seq(),Y:sina(-1)},{X:seq(),Y:sina(2)},{X:seq(),Y:sina(3)},{X:seq(),Y:sina(6)},{Y:[2,3,4]}]},]
+let p8=[{Type:"ampang",Lines:[{X:seq(),C:sinz(1)},{X:seq(),C:sinz(2)},{X:[0.4,0.6]},{Y:[1.5,2.5,3.5]}]},
+        {Type:"polar",Lines:[{X:seq(),C:sinz(1)},{X:seq(),C:sinz(3)},{Y:[1.5,2.5]}]}];
 
 //cnvplot(c(),p1,"resize")
 //cnvplot(c(),p2)
@@ -56,7 +56,7 @@ let p8=[{Type:"ampang",Lines:[{X:seq(),C:sinz(1)},{X:seq(),C:sinz(2)}]},
 //cnvplot(c(),p4)
 //cnvplot(c(),p5)
 //h1("collapsing limits");cnvplot(c(),p6,"cols",3)
-cnvplot(c(),p7,"slider",sld(),"caption",cap(),"table",tab(p7));
-cnvplot(c(),p8,"slider",sld())
+cnvplot(c(),p7,"slider",sld(),"caption",cap(),"table",tab(p7),"equal");
+cnvplot(c(),p8,"slider",sld(),"equal")
 
 </script></body></html>
