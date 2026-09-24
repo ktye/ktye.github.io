@@ -1,5 +1,6 @@
 let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
+let zinv=(a,b)=>{let r,d;if(abs(a)>abs(b)){r=b/a;d=a+b*r;return[1/d,-r/d]}else{r=a/b;d=b+a*r;return[r/d,-1/d]}}
 let errif=(x,e)=>{if(x)throw new Error(e)}
 
 let copy=A=>{let r=A.slice();r.m=A.m;r.n=A.n;r.z=A.z;return r}
@@ -14,6 +15,24 @@ let ones=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=1;return r}
 let onez=(m,n)=>{let r=zeroz(m,n);for(let i=0;i<r.length;i+=2)r[i]=1;return r}
 let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r},til=iota
 let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
+
+let scalar=(x,y,F,f,Z,z)=>ismat(x)?(y.z?Z(x,copy(y)):F(x,copy(y))):y.z?z(x,copy(y)):f(x,copy(y))
+let add=(x,y)=>scalar(x,y,addF,addf,addZ,addz)
+let addF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]+=x[i];return y},addZ=addF
+let addf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]+=x;return y}
+let addz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i+=2){y[i]+=a;y[1+i]+=b}return y}
+let sub=(x,y)=>scalar(x,y,subF,subf,subZ,subz)
+let subF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]-=x[i];return y},subZ=subF
+let subf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]-=x;return y}
+let subz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i+=2){y[i]-=a;y[1+i]-=b}return y}
+let mul=(x,y)=>scalar(x,y,mulF,mulf,mulZ,mulz)
+let mulF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x[i];return y}
+let mulf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x;return y}
+let mulZ=(x,y)=>{for(let i=0;i<y.length;i++){let a=x[i],b=x[1+i],c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
+let mulz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i++){let c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
+let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1]),y))
+let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
+let divZ=(x,y)=>{for(let i=0;i<y.length;i++)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
 
 
 //let trans=x=>{if(x.z)return tranz(x);let r=zeros(x.n,x.m),i,j,n=x.n,m=x.m,k=0;for(i=0;i<m;i++)for(j=0;j<n;j++)r[j*m+i]=x[k++];return r}
@@ -40,6 +59,28 @@ let znum=(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(
 let smat=x=>{let M=100,N=100;if((!x)||x.constructor!=Float64Array)return String(x);let colpad=(x,j)=>{let l=max(...x.map(x=>x[j].length));x.forEach(x=>x[j]=x[j].padStart(l," "));return x}
  if(x.m&&x.n){let m=min(M,x.m),n=min(N,x.n),z=x.z||0,r=[],i,j;for(i=0;i<m;i++){r[i]=[];for(j=0;j<n;j++)r[i][j]=z?znum(x[i*2*x.n+2*j],x[i*2*x.n+2*j+1]):snum(x[i*x.n+j])};for(j=0;j<n;j++)colpad(r,j);r=r.map(x=>x.join(" "));for(i=0;i<m;i++)r[i]+=x.n>N?"..\n":"\n";return r.join("")+(x.m>M?"..\n":"")}
  else return Array.from(x.subarray(0,min(x.length,M))).map(snum).join(" ")+(x.length>M?"..":"")}
+
+let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0],f)
+ let init=N=>{let l=log2(N),P=Array(8).fill(0),n=1,S=new Float64Array(N),C=new Float64Array(N);for(let p=0;p<l;p++){for(let i=0;i<n;i++){P[i]<<=1;P[i+n]=1+P[i]};n<<=1};for(let i=0;i<N;i++){const p=-2*pi*i/N;C[i]=cos(p);S[i]=sin(p)};return[l,P,C,S,N]}
+ let perm=(x,P)=>{P.forEach((p,i)=>{if(i<p){const a=2*i,b=1+a,c=2*p,d=1+c,A=x[a],B=x[b];x[a]=x[c];x[b]=x[d];x[c]=A;x[d]=B}})}
+ if("number"==typeof x)return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
+ for(let p=1;p<=l;p++){s>>=1;for(let b=0;b<s;b++){const o=2*b*n;for(let k=0;k<n;k++){const i=(k+o)<<1,j=i+(n<<1),ks=k*s,kn=s*(k+n);let xi0=x[i],xi1=x[1+i],xj0=x[j];x[i]+=C[ks]*x[j]-S[ks]*x[1+j];x[1+i]+=C[ks]*x[1+j]+S[ks]*x[j];x[j]=xi0+C[kn]*x[j]-S[kn]*x[1+j];x[1+j]=xi1+C[kn]*x[1+j]+S[kn]*xj0}};n<<=1}
+ return x}
+
+let rfft2=(r,z,f)=>{let i,k,j=0,n=z.length;z=fft(z,f);for(i=0;i<n;j+=2,i++){k=i?2*n-j:0;r[i]=0.5*hypot(z[j]+z[k],z[1+j]-z[1+k]);r[i+n]=0.5*hypot(z[j]-z[k],z[1+j]+z[1+k])}}
+let afft=(x,n)=>{let z=zeroz(n),r=zeros(2*n),y=zeros(n),n2=2*n;N=x.length,m=floor(N/(2*n)),s=1/m,i,j,f=fft(n);for(i=0;i<m;i++){for(j=0;j<n;j++){z[2*j]=x[i];z[2*j+1]=x[i+n]};rfft2(r,z,f);for(j=0;j<n;j++)y[j]+=r[j]+r[j+n]}return mulf(1/m,y)}
+
+
+/*
+let hanning=n=>ones(n) //todo
+let spcgrm=(x,n,o,fs,fmi,fma)=>{
+ let f=fft(n),l=x.length,m=ceil((l-n)/(n-o))&~1,n1=n-o,z=zeroz(n),r=zeros(m,n),h=hanning(n);
+ let k,j=0,ii=0;for(i=0;i<m;i+=2,j+=2*n1){
+  for(k=0;k<n;k++){z[2*k]=x[k];z[2*k+1]=x[k+n1]}z=fft(z,n);
+//  for(k=0;k<n;k+=2){r[ii]=0.5*hypot(z[
+ }
+}
+*/
 
 /*
 let qr=A=>{A=copy(A);const m=A.m,n=A.n,r=new Float64Array(n);
@@ -74,3 +115,6 @@ let qrsolve=(Q,B)=>{let[H,D]=Q,Y=copy(B),i,j,k,m=Q.n,n=Q.m,nr=B.n;errif(B.m!=m,"
 
 
  
+
+
+
