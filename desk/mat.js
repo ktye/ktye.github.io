@@ -14,7 +14,13 @@ let eyez=n=>{let r=zeroz(n,n),nn=2*n*n,n1=2+2*n;for(let i=0;i<nn;i+=n1)r[i]=1;re
 let ones=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=1;return r}
 let onez=(m,n)=>{let r=zeroz(m,n);for(let i=0;i<r.length;i+=2)r[i]=1;return r}
 let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r},til=iota
+let grade=x=>Array.from(x.keys()).sort((a,b)=>x[a]-x[b])
 let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
+let real=(A,o)=>{if(!A.z)return A;o=o||0;let r=zeros(A.m,A.n),n=r.length;for(let i=0;i<n;i++)r[i]=A[2*i+o];return r},imag=A=>real(A,1);
+let complex=(A,B)=>{B=B||0;let f=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A[k];r[i+1]=B[k]}return r},g=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A[k];r[i+1]=B}return r},h=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A;r[i+1]=B[k]}return r};return ismat(A)?(ismat(B)?f(zeroz(A.m,A.n)):g(zeroz(A.m,A.n))):h(zeroz(B.m,B.n))}
+let conj=A=>{let r=zeroz(A.m,A.n);r.set(A);return conj_(r)},conj_=A=>{for(let i=1;i<A.length;i+=2)A[i]=-A[i];return A}
+let herm=A=>conj_(tranz(A))
+
 
 let scalar=(x,y,F,f,Z,z)=>ismat(x)?(y.z?Z(x,copy(y)):F(x,copy(y))):y.z?z(x,copy(y)):f(x,copy(y))
 let add=(x,y)=>scalar(x,y,addF,addf,addZ,addz)
@@ -34,11 +40,8 @@ let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1
 let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
 let divZ=(x,y)=>{for(let i=0;i<y.length;i++)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
 
-
-//let trans=x=>{if(x.z)return tranz(x);let r=zeros(x.n,x.m),i,j,n=x.n,m=x.m,k=0;for(i=0;i<m;i++)for(j=0;j<n;j++)r[j*m+i]=x[k++];return r}
 let trans=A=>{if(A.z)return tranz(A);const m=A.m,n=A.n,S=64,d=zeros(n,m);if(m*n<256){for(let r=0,i=0;r<m;++r){for(let c=0;c<n;++c,++i)d[c*m+r]=A[i]}return d}for(let R=0;R<m;R+=S){const rr=Math.min(R+S,m);for(let C=0;C<n;C+=S){const cc=Math.min(C+S,n);for(let r=R;r<rr;++r){const r0=r*n;let i=C*m+r;for(let c=C;c<cc;++c){d[i]=A[r0+c];i+=m}}}}return d}
-let tranz=x=>{/*todo block*/let r=zeroz(x.n,x.m),i,j,n=x.n,m=x.m,m2=2*m,k=0;for(i=0;i<m;i++)for(j=0;j<n;j++){r[j*m2+i]=x[k++];r[j*m2+i+1]=x[k++]}return r}
-
+let tranz=x=>{let r=zeroz(x.n,x.m),i,j,m=x.n,n=x.m,n2=2*n,k=0;for(j=0;j<n2;j+=2)for(i=0;i<m;i++){r[i*n2+j]=x[k++];r[i*n2+j+1]=x[k++]}return r}
 let dot=(A,B)=>1==A.m&&1==A.n?dotvv(A,B):1==A.n?dotmv(A,B):dotmm(A,B)
 let dotvv=(A,B)=>{errif(A.n!=B.m||A.length!=B.length,"conform");if(A.z)return dotvvz(A,B);let n=A.length,s=0;for(let i=0;i<n;i++)s+=A[i]*B[i];return s}
 let dotvvz=(A,B)=>{errif(A.n!=B.m||A.length!=B.length,"conform");let n=A.length,x=0,y=0;for(let i=0;i<n;i+=2){x+=A[i]*B[i]-A[1+i]*B[1+i];y+=A[i]*B[1+i]+A[1+i]*B[i]};return[x,y]}
@@ -47,6 +50,8 @@ let dotmv=(A,x)=>{errif(A.m!=x.length,"conform");if(A.z)return dotmvz(A,x);const
 let dotmmz=(A,B)=>{const m=A.m,k=A.n,n=B.n,C=zeroz(m,n),S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);
  for(let i=i0;i<ii;++i){const a0=(i*k)<<1,c0=(i*n)<<1;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],b0=(p*n)<<1;for(let j=j0;j<jj;++j){const ib=b0+(j<<1),bx=B[ib],by=B[ib+1],ic=c0+(j<<1),x=ax*bx-ay*by,y=ax*by+ay*bx;C[ic]+=x;C[ic+1]+=y}}}}}}return C}
 let dotmvz=(A,x)=>{const m=A.m,n=A.n,y=zeroz(m,1),S=64;for(let p0=0; p0<n;p0+=S){const pp=Math.min(p0+BS,n);for(let i=0;i<m;++i){const a0=(i*n)<<1;let sx=0,sy=0;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],ix=p<<1,re=x[ix],im=x[ix+1];sx+=ax*re-ay*im;sy+=ax*im+ay*re};const iy=i<<1;y[iy]+=sx;y[iy+1]+=sy}};return y}
+
+let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*s*r}
 
 let solve=(A,B)=>{errif(A.m!=B.m,"conform");A.m>A.n?qrsolve(qr(A),B):lusolve(lu(A),B)}
 
@@ -69,6 +74,7 @@ let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);f
 
 let rfft2=(r,z,f)=>{let i,k,j=0,n=z.length;z=fft(z,f);for(i=0;i<n;j+=2,i++){k=i?2*n-j:0;r[i]=0.5*hypot(z[j]+z[k],z[1+j]-z[1+k]);r[i+n]=0.5*hypot(z[j]-z[k],z[1+j]+z[1+k])}}
 let afft=(x,n)=>{let z=zeroz(n),r=zeros(2*n),y=zeros(n),n2=2*n;N=x.length,m=floor(N/(2*n)),s=1/m,i,j,f=fft(n);for(i=0;i<m;i++){for(j=0;j<n;j++){z[2*j]=x[i];z[2*j+1]=x[i+n]};rfft2(r,z,f);for(j=0;j<n;j++)y[j]+=r[j]+r[j+n]}return mulf(1/m,y)}
+
 
 
 /*
@@ -114,7 +120,36 @@ let qrsolve=(Q,B)=>{let[H,D]=Q,Y=copy(B),i,j,k,m=Q.n,n=Q.m,nr=B.n;errif(B.m!=m,"
 }
 
 
- 
+// svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 
+let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
+let svd=(A,s)=>svd_(copy(A),s),svdt=(A,s)=>svdt_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A),s);return[tranz(U),S,V]}
+let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);
+ let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
+ let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
+ let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
+ let F=A=>{for(let j=0;j<100;j++){for(let i=0;i<n-1;i++){for(let k=1+i;k<n;k++){let Ai=row(A,i),Ak=row(A,k),Vi=row(V,i),Vk=row(V,k);
+  let[zr,zi]=d(Ai,Ak);if(1e-14>hypot(zr,zi))return;let[c,sr,si]=J(Ai,Ak,zr,zi);R(c,sr,si,Vi,Vk);R(c,sr,si,Ai,Ak)}}}};F(A)
+ let S=zeros(n);for(let i=0;i<n;i++){let Ai=row(A,i);S[i]=sqrt(norm2(Ai));if(!s)mulf(1/S[i],Ai)}
+ let g=grade(S);g.reverse();S=S.map((_,i)=>S[g[i]]);S.n=1;S.m=n;if(s)return S;
+ let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,W]}
 
+let A=zeroz(3,4);[1,1,3,0,5,0,7,-1,2,0,4,-1,6,0,8,0,0,0,1,0,2,1,3,0].forEach((x,i)=>A[i]=x);A=trans(A);
+
+/*
+let svd=A=>{
+ let svq=A=>{let[h,d]=qr(A),n=A.length,m2=A[0].length,r=Array(A.length).fill([]).map(x=>new Float64Array(2*A.length).fill(0));for(let i=1;i<h.length;i++){let ri=r[i],hi=h[i];for(let k=0;k<2*i;k+=2){ri[k]=hi[k];ri[1+k]=hi[1+k]}};for(let i=0;i<h.length;i++){r[i][2*i]=d[2*i];r[i][1+2*i]=d[1+2*i]};
+  let Q=x=>{let y=new Float64Array(m2);y.set(x);for(let i=0;i<n;i++){let j=n-1-i,hj=h[j],a=0,b=0;for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;a+=hj[k2]*y[k2]+hj[k3]*y[k3];b+=hj[k2]*y[k3]-hj[k3]*y[k2]};for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;y[k2]-=a*hj[k2]-b*hj[k3];y[k3]-=a*hj[k3]+b*hj[k2]}};return y}
+  let[u,s,v]=svd(r);return[u.map(Q),s,v]}
+ if(A[0].length>2*A.length)return svq(A) //using qr decomposition for slender input.
+ let n=A.length,V=eyez(n)
+ let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
+ let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
+ let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
+ let F=A=>{let f=true;while(f){for(let i=0;i<n-1;i++){for(let k=1+i;k<n;k++){let[zr,zi]=d(A[i],A[k]);f=1e-14<hypot(zr,zi);if(f){let[c,sr,si]=J(A[i],A[k],zr,zi);R(c,sr,si,V[i],V[k]);R(c,sr,si,A[i],A[k])}}}}}
+ F(A);let s=A.map(norm);for(let i=0;i<A.length;i++){let t=1/s[i],Ai=A[i];for(let k=0;k<Ai.length;k++)Ai[k]*=t}
+ let g=grade(s);g.reverse();return[A.map((_,i)=>A[g[i]]),s.map((_,i)=>s[g[i]]),V.map((_,i)=>V[g[i]])]}
+*/
+
+//deno repl --eval-file=mat.js
 
