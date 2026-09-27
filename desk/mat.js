@@ -13,6 +13,7 @@ let eye=n=>{let r=zeros(n,n),nn=n*n,n1=1+n;for(let i=0;i<nn;i+=n1)r[i]=1;return 
 let eyez=n=>{let r=zeroz(n,n),nn=2*n*n,n1=2+2*n;for(let i=0;i<nn;i+=n1)r[i]=1;return r}
 let ones=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=1;return r}
 let onez=(m,n)=>{let r=zeroz(m,n);for(let i=0;i<r.length;i+=2)r[i]=1;return r}
+let diag=x=>{if(x.m==1||x.n==1){let m=max(x.m,x.n),m2=1+2*m,r=x.z?zeroz(m,m):zeros(m,m),i,j=0;if(x.z){for(i=0;i<x.length;j+=m2){r[j]=x[i++];r[++j]=x[i++]}}else for(i=0;i<x.length;++i,j+=1+m)r[j]=x[i];return r};let m=min(x.m,x.n),n1=1+x.n,n2=2+2*x.n,r=x.z?zeroz(m,1):zeros(m,1),i,j=0;if(x.z){for(i=0;i<2*m;++i,j+=n2){r[i]=x[j];r[++i]=x[1+j]}}else for(i=0;i<m;i++,j+=n1)r[i]=x[j];return r}
 let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r},til=iota
 let grade=x=>Array.from(x.keys()).sort((a,b)=>x[a]-x[b])
 let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
@@ -40,9 +41,16 @@ let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1
 let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
 let divZ=(x,y)=>{for(let i=0;i<y.length;i++)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
 
+let Abs=x=>{let r=zeros(x.m,x.n),i,j=0;if(x.z)for(i=0;i<x.length;i+=2)r[j++]=hypot(x[i],x[1+i]);else for(i=0;i<x.length;i++)r[i]=abs(x[i]);return r}
+let Max=x=>Math.max(...x),RowMax=x=>{let m=x.m,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.max(...x.subarray(i*n,(1+i*n)));return r},ColMax=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.max(r[j],x[k++]);return r}
+let Min=x=>Math.min(...x),RowMin=x=>{let m=x.m,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.min(...x.subarray(i*n,(1+i*n)));return r},ColMin=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.min(r[j],x[k++]);return r}
+let sum=x=>{let r=0,s=0,i;if(x.z){for(i=0;i<x.length;i+=2){r+=x[i];s+=x[1+i]};return[r,s]}for(i=0;i<x.length;i++)r+=x[i];return r},Sum=sum
+//let RowSum=x=>{let m=x.m,n=x.n,m2=2*m,k=0,r=x.z?zeroz(m,1):zeros(m,1);if(x.z){for(i=0;i<m2;i+=2)for(j=0;j<n;j++){r[i]+=x[k++];r[1+i]+=x[k++]}}else for(i=0;i<m;i++)for(j=0;j<n;j++)r[i]+=x[k++];return r}
+//let RowSum,ColSum
+
 let trans=A=>{if(A.z)return tranz(A);const m=A.m,n=A.n,S=64,d=zeros(n,m);if(m*n<256){for(let r=0,i=0;r<m;++r){for(let c=0;c<n;++c,++i)d[c*m+r]=A[i]}return d}for(let R=0;R<m;R+=S){const rr=Math.min(R+S,m);for(let C=0;C<n;C+=S){const cc=Math.min(C+S,n);for(let r=R;r<rr;++r){const r0=r*n;let i=C*m+r;for(let c=C;c<cc;++c){d[i]=A[r0+c];i+=m}}}}return d}
 let tranz=x=>{let r=zeroz(x.n,x.m),i,j,m=x.n,n=x.m,n2=2*n,k=0;for(j=0;j<n2;j+=2)for(i=0;i<m;i++){r[i*n2+j]=x[k++];r[i*n2+j+1]=x[k++]}return r}
-let dot=(A,B)=>1==A.m&&1==A.n?dotvv(A,B):1==A.n?dotmv(A,B):dotmm(A,B)
+let dot=(A,B)=>{if(A.z&&!B.z)B=complex(B);else if(B.z&&!A.z)A=complex(A);return 1==A.m&&1==A.n?dotvv(A,B):1==A.n?dotmv(A,B):dotmm(A,B)}
 let dotvv=(A,B)=>{errif(A.n!=B.m||A.length!=B.length,"conform");if(A.z)return dotvvz(A,B);let n=A.length,s=0;for(let i=0;i<n;i++)s+=A[i]*B[i];return s}
 let dotvvz=(A,B)=>{errif(A.n!=B.m||A.length!=B.length,"conform");let n=A.length,x=0,y=0;for(let i=0;i<n;i+=2){x+=A[i]*B[i]-A[1+i]*B[1+i];y+=A[i]*B[1+i]+A[1+i]*B[i]};return[x,y]}
 let dotmm=(A,B)=>{errif(A.n!=B.m,"conform");if(A.z)return dotmmz(A,B);let m=A.m,k=A.n,n=B.n,C=zeros(m,n);const S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let i=i0;i<ii;++i){const aa=i*k,cc=i*n;for(let p=p0;p<pp;++p){const a=A[aa+p],bb=p*n;for(let j=j0;j<jj;++j)C[cc+j]+=a*B[bb+j]}}}}}return C}
@@ -124,7 +132,7 @@ let qrsolve=(Q,B)=>{let[H,D]=Q,Y=copy(B),i,j,k,m=Q.n,n=Q.m,nr=B.n;errif(B.m!=m,"
 
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
 let svd=(A,s)=>svd_(copy(A),s),svdt=(A,s)=>svdt_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A),s);return[tranz(U),S,V]}
-let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);
+let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n); console.log("m",m,"n",n);
  let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
  let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
  let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
@@ -134,7 +142,7 @@ let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=
  let g=grade(S);g.reverse();S=S.map((_,i)=>S[g[i]]);S.n=1;S.m=n;if(s)return S;
  let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,W]}
 
-let A=zeroz(3,4);[1,1,3,0,5,0,7,-1,2,0,4,-1,6,0,8,0,0,0,1,0,2,1,3,0].forEach((x,i)=>A[i]=x);A=trans(A);
+//let svdtest=(m,n)=>{let A=randz(m,n),[U,S,V]=svd(A),E=
 
 /*
 let svd=A=>{
