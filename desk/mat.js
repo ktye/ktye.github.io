@@ -146,9 +146,7 @@ let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=
   let[zr,zi]=d(Ai,Ak);if(1e-14>hypot(zr,zi))return;let[c,sr,si]=J(Ai,Ak,zr,zi);R(c,sr,si,Vi,Vk);R(c,sr,si,Ai,Ak)}}}};F(A)
  let S=zeros(n);for(let i=0;i<n;i++){let Ai=row(A,i);S[i]=sqrt(norm2(Ai));if(!s)mulf(1/S[i],Ai)}
  let g=grade(S);g.reverse();S=S.map((_,i)=>S[g[i]]);S.n=1;S.m=n;if(s)return S;
- let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,W]}
-
-//let svdtest=(m,n)=>{let A=randz(m,n),[U,S,V]=svd(A),E=
+ let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,conj_(W)]}
+let svdtest=A=>{[U,S,V]=svd(A),AA=dot(dot(U,diag(S)),V);return Max(Abs(sub(A,AA)))}
 
 //deno repl --eval-file=mat.js
-
