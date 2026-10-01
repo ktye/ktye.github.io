@@ -1,6 +1,6 @@
 <!doctype html>
 <html><head><meta charset=utf-8><title>&gt;</title>
-<link rel=icon href="js.png">
+<link rel=icon href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAACuUExURQAAAP/WAPzUAP3VAP7VAP3UAD0zAX1pAfzTAHpmACghAUE3AdOxACEcAWtaAbOWAAMDAZ6FAGpZAbyeAL2fAAEBAXdkAO3HAPrRAGBRAQMCAR4aAbGVACAbAc+tAD40AQ4MAYFsAS4mAXxpAAYFAYBsAZiAASkiAbeZAGNTAAcGAda0ADMrATIqAeXAAOS/AEQ5ARAOAY13APfPAOG8APbPAPvSAOG9AOvFAAAAAOONCbIAAAABdFJOUwBA5thmAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAAOwwAADsMBx2+oZAAAAAd0SU1FB+oIFQo3JmMh3jcAAABnSURBVBjTY2BgYGCEAwYIoJUAEzMjIwuSACsbOwcnFzcPQoCXj19AUEgYWUBEVEycEVlAQlJKWgYuwCTLx8gqJ68AFVBUUlZRVVPX0NSCCmjriOrq6RtIGRrBtBibmDIymplbYHUpAPZ4ByK7xmCJAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDI2LTA4LTIxVDA5OjE0OjE2KzAwOjAw7RJgVwAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyNi0wOC0yMVQxMDo1NToyNCswMDowMMDePQMAAAAodEVYdGRhdGU6dGltZXN0YW1wADIwMjYtMDgtMjFUMTA6NTU6MzgrMDA6MDCcwXY2AAAAAElFTkSuQmCC">
 <style>
 *{/*box-sizing:border-box;overflow:clip;*/font-family:monospace}
 html{height:100vh}
@@ -21,8 +21,8 @@ input[type=range]{position:absolute;left:0;bottom:0;width:100%;appearance:none;b
 .menu>option:hover{background:black;color:white}
 </style></head><body>
  
-<div id="desk">
-</div><a id="dl" style="display:none"></a>
+<div id="desk"></div><!--end--!>
+<a id="dl" style="display:none"></a>
 <select id="pltmenu" class="menu" onblur="pltmenu.style.display='none'">
  <option onclick="pltmenu.style.display='none';if(plot_)zoomreset(event)">reset zoom</option>
  <option onclick="pltmenu.style.display='none';copysvg(event)">copy to clipboard(svg)</option>
@@ -33,7 +33,7 @@ input[type=range]{position:absolute;left:0;bottom:0;width:100%;appearance:none;b
 <script>
 
 //desktop
-let min=Math.min,max=Math.max
+let min=Math.min,max=Math.max,floor=Math.floor
 let af=Array.from,ac=(c,x)=>(x.appendChild(c),x),pd=e=>(e.preventDefault(),e.stopPropagation()),ce=x=>document.createElement(x),cl=(c,x)=>(x.classList.add(c),x),ge=x=>document.getElementById(x)
 let cs=getComputedStyle,bb=x=>x.getBoundingClientRect(),qs=(x,y)=>x.querySelector(y),qa=(x,y)=>x.querySelectorAll(y),tc=(t,x)=>(x.textContent=t,x),JS=JSON.stringify
 let err=x=>{throw new Error(x)}
@@ -48,8 +48,9 @@ let win=(x,t)=>{let i=desk.childElementCount
   <span class="plr cud" title="toggle vertical max">↕</span>
   <span class="plr clr" title="toggle horizontal max">←→</span>
  </div><div></div>`+(x?x:"");
- ac(w,desk);lay(w,i);drag(w);w.onfocus=e=>{if(w.parentNode.lastElementChild!=w/*otherwise prevents dblclick*/)w.parentNode.appendChild(w);if(w==con)rdl.focus()};return w} 
-let noclose=w=>qs(w,".cxx").style.display="none";
+ ac(w,desk);return interactive(w)}
+let interactive=w=>{let i=af(desk.childNodes).findIndex(x=>x==w);lay(w,i);drag(w);w.onfocus=e=>{if(w.parentNode.lastElementChild!=w/*otherwise prevents dblclick*/)w.parentNode.appendChild(w);if(w==con)rdl.focus()};return w} 
+let noclose=w=>{let x=qs(w,".cxx");if(x)x.remove();}
 let findwin=t=>qs(desk,`[data-win="${t}"]`)
 let lay=(w,i)=>{let r=bb(desk);w.style.left=(5+r.left+20*i)+"px";w.style.top=(5+r.top+30*i)+"px"}
 let drag=w=>{let h=w.firstElementChild,a=0,p=0,c=0,d=0
@@ -78,8 +79,9 @@ let ondesk=w=>{let W=window.innerWidth,H=window.innerHeight,r=bb(w);w.style.top=
 let hide=x=>{ x.dataset.L=x.style.left;x.dataset.T=x.style.top;x.dataset.W=cs(x).width;x.dataset.H=cs(x).height;
  x.style.height=(bb(x.firstChild).height-4)+"px";x.style.width="100px";af(qa(x,".cud,.clr,.c__,.cxx")).map(x=>x.style.display="none");qs(x,".box").textContent="☐"}
 let restore=x=>{ x.style.left=x.dataset.L;x.style.top=x.dataset.T;x.style.width=x.dataset.W;x.style.height=x.dataset.H 
- qs(x,".box").textContent="";af(qa(x,".cud,.clr,.c__")).map(x=>x.style.display="");if(0/*todo*/)qs(x,".cxx").style.display="";reszc(x)}
-let reszc=x=>{x==con?ttyresz():isplot(x)?pltresz(x):(x.dataset.win in T)?table(x.dataset.win):0}
+ qs(x,".box").textContent="";af(qa(x,".cud,.clr,.c__,.cxx")).map(x=>x.style.display="");reszc(x)}
+let reszc=x=>{x==con?ttyresz():isplot(x)?pltresz(x):x==edt?edtresz(x):0} //(x.dataset.win in T)?table(x.dataset.win)
+af(desk.childNodes).forEach(w=>interactive(w));
 
 //tty ">"
 let rlbuf=[],rlpos=0
@@ -90,8 +92,8 @@ let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
-let exec=x=>{if(x=="\\"){out.k=!out.k;out.textContent+=x;return jp()}out.textContent+=x+"\n";rdl.textContent="";out.k?ks(x):js(x)}
-let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
+let exec=x=>{if(x=="\\"){out.k=!out.k;out.textContent+=x;return jp()}out.textContent+=x+"\n";rdl.textContent="";x=="save"?(save(),jp()):out.k?ks(x):js(x)}
+let con=findwin('$')?findwin('$'):win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
 tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
 let jp=_=>{let v=out.textContent.split("\n"),p=out.k?" ":">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
@@ -100,6 +102,12 @@ let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=w
 let c17=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l-3){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
 let O=x=>(console.log("O",JS(x)),out.textContent+=c17(x,tty.l))
 
+//edit
+let edvalue=""
+let edt=findwin('edit')?findwin('edit'):win(`<textarea id="ed" spellcheck="false" autocorrect="off" style="background:#ffe;border:none;outline:none;white-space:pre"></textarea>`,"edit");noclose(edt);ed.value=edvalue;
+let edtresz=x=>{let[w,h]=winsz(x);ed.style.width=`${w}px`;ed.style.height=`${h}px`}
+
+/*
 //table windows
 let page=(t,i0,M,dir)=>{let id=t.dataset.table;let i=[0,max(0,i0-10),min(M-10,i0+10),M-10][dir];t.dataset.filter=`i>${i-1}`;table(id)}
 let T={},tlen=d=>"object"!=typeof d?err("not a table"):keys(d).length==0?0:((d=vals(d)[0]),(d.m?d.m:d.length));
@@ -113,7 +121,7 @@ let table=(id,d,M)=>{let w=findwin(id);if(!w)w=win(`<table data-table="${id}" da
 //program file / data files (drop one .js file use as program, otherwise(non/js or multiple) use as data files.
 let fs={file:[],"_":[],size:[],date:[]},_fs={};
 window.ondragover=e=>pd(e);window.ondrop=e=>{pd(e);let f,l=e.dataTransfer.files;1==l.length&&(l.item(0).name.endsWith(".js")||l.item(0).name.endsWith(".k"))?pload(l.item(0)):dload(l)}
-let prg=win(`<input type="file" id="fbut" hidden onchange="pload(this.files[0])"                         ><label id="flab" for="fbut" class="but">open program.js</label> │
+let prg=findwin("load")?findwin("load"):win(`<input type="file" id="fbut" hidden onchange="pload(this.files[0])"                         ><label id="flab" for="fbut" class="but">open program.js</label> │
              <input type="file" id="dbut" hidden onchange="dload(this.files)" multiple webkitdirectory><label id="dlab" for="dbut" class="but">open data files</label><span title="unload files" class="but" onclick="unload()"> &#x2717; </span>`,"load");prg.style.left="0px";prg.style.top="0px";noclose(prg);
 let pload=f=>{f.text().then(r=>{let k=f.name.endsWith(".k");flab.textContent=f.name;[kprg,jsprg]=k?[btoa(r),""]:["",r];out.k=k;intr()})}
 let dload=async f=>{if(1==f.length&&0==f[0].size)err("ignore empty file(directory?)\nuse 'open data files' to load directories..");dlab.textContent=`[${f.length} files]`;
@@ -121,11 +129,11 @@ let dload=async f=>{if(1==f.length&&0==f[0].size)err("ignore empty file(director
 let unload=__=>{keys(fs).forEach(x=>fs[x]=[]);table("files",fs);_fs={};sync()}
 let sync=_=>{jw.postMessage({t:1,name:"fs",r:fs});jw.postMessage({t:1,name:"_fs",r:_fs})}
 let download=(u,name)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=name;dl.click()}
-let fta=table("files",fs);fta.style.top="0px";fta.style.left=bb(prg).width+"px";noclose(fta); //load
-
+let fta=findwin("files")?findwin("files"):table("files",fs);fta.style.top="0px";fta.style.left=bb(prg).width+"px";noclose(fta); //load
+*/
 
 //plot cnvplot
-let pid=0,cnv=_=>ge(`plt${pid}`),plt=win(`<div style="display:relative"><canvas id="plt0" width="600" height="400"></canvas><br/><input type="range" id="sld0"></div>`,"plot(0)");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px";noclose(plt);
+let pid=0,cnv=_=>ge(`plt${pid}`) //,plt=win(`<div style="display:relative"><canvas id="plt0" width="600" height="400"></canvas><br/><input type="range" id="sld0"></div>`,"plot(0)");plt.style.top="0px";plt.style.left=(bb(desk).width-bb(plt).width)+"px";noclose(plt);
 let plti=n=>{pid=n,c=cnv();if(c)return focus(c.closest(".win"));let w=win(`<canvas id="plt${n}" width="600" height="400"></canvas><br/><input type="range" id="sld${n}" style="width:99%;margin:0"`,`plot(${n})`);w.onclose=_=>pid=0}
 let isplot=w=>qs(w,"canvas"),isnum=x=>("number"==typeof x)
 let pltresz=W=>{let[w,h]=winsz(W),c=qs(W,"canvas"),s=qs(W,"input"),hs=bb(s).height;c.setAttribute("width",w);c.setAttribute("height",h-hs);c.replot()}
@@ -134,7 +142,7 @@ let pltresz=W=>{let[w,h]=winsz(W),c=qs(W,"canvas"),s=qs(W,"input"),hs=bb(s).heig
 //let copypng=e=>{pd(e);let b=bb(svg),w=b.width,h=b.height,s=new XMLSerializer().serializeToString(svg),B=new Blob([s],{type:'image/svg+xml'}),u=URL.createObjectURL(B),m=new Image();
 // m.onload=_=>{let c=ce("canvas");c.width=w;c.height=h;let x=c.getContext("2d");x.drawImage(m,0,0,w,h);c.toBlob(b=>navigator.clipboard.write([new ClipboardItem({"image/png":b})]).then(r=>r))};m.src=u}
 //plt.oncontextmenu=e=>{let m=pltmenu,x=e.clientX,y=e.clientY;pd(e);m.size=m.childElementCount;m.value="";m.style.top=`${y}px`;m.style.left=`${x}px`;m.style.display="block";m.focus()}
-let P=x=>{if(1==x.length&&isnum(x[0]))return plti(x[0]);if(x.length>1&&x.every(x=>"number"==typeof x)){if(x.length==3)cnv().cols=x[2];return setsz(plt,...x)};if(x[0]=="axis")return axis(x[1]);cnvplot(cnv(),x,"slider",ge(`sld${pid}`))}
+let P=x=>{if(1==x.length&&isnum(x[0]))return plti(x[0]);plti(pid);if(x.length>1&&x.every(x=>"number"==typeof x)){if(x.length==3)cnv().cols=x[2];return setsz(plt,...x)};if(x[0]=="axis")return axis(x[1]);cnvplot(cnv(),x,"slider",ge(`sld${pid}`))}
 let axis=x=>{let n=x.length;plot_.forEach(p=>{let l=p.Limits;0==n?([l.Xmin,l.Xmax,l.Ymin,l.Ymax]=[0,0,0,0]):1==n?(l.Ymax=x[0]):2==n?([l.Xmin,l.Xmax]=x):3==n?([l.Xmin,l.Xmax,l.Ymax]=x,l.Ymin=0):[l.Xmin,l.Xmax,l.Ymin,l.Ymax]=x});replot()}
 const pdoc=`
 plot(x,y,x,y,..)  multiple lines
@@ -179,7 +187,7 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"stri
   [p.Title,p.Xlabel,p.Ylabel]=$plotlabels(x);return p}
  onmessage=e=>{try{e.data.t?globalThis[e.data.name]=e.data.r:e.data.k?$krep(e.data.r):postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
  ${matjs}
- ${jsprg}
+ ${ed.value}
  let x=iota(4),y=rand(4)
 `
 let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
@@ -187,12 +195,9 @@ let js=x=>jw.postMessage({t:0,r:x}),ks=x=>jw.postMessage({t:0,r:x,k:1}),intr=_=>
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>{kwasm=new Uint8Array(r).toBase64();jstart()})})
 
 let save=async _=>{let h=await window.showSaveFilePicker({suggestedName:document.URL.split("/").slice(-1)[0],types:[{accept:{"text/html":[".html"]}}]});let w=await h.createWritable();await w.write(await bundle());await w.close()}
-let bundle=async _=>{let t=document.querySelector("html").outerHTML;t=t.replace(/^let matjs.*$/m,"let matjs="+JS(matjs));t=t.replace(/^let kwasm.*$/m,"let kwasm="+JS(kwasm));t=t.replace(/^fetch.*$/m,"jstart();");
+let bundle=async _=>{let t=document.querySelector("html").outerHTML;t=t.replace(/^let matjs.*$/m,"let matjs="+JS(matjs));t=t.replace(/^let kwasm.*$/m,"let kwasm="+JS(kwasm));t=t.replace(/^let edvalue.*$/m,"let edvalue="+JS(ed.value));t=t.replace(/^fetch.*$/m,"jstart();");
  if(!plotsrc.textContent){let cript="cript",T=await(await fetch("cnvplot.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="plotsrc">${T}</s${cript}>`)};return t}
 window.onerror=e=>{console.log(e);O("\n"+e);jp()} //e.g. in user program
-
-//let edt=win("","edit")
-//let dir=win("","dir")
 
 </script></body></html>
 
