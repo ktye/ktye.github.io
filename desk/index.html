@@ -29,7 +29,7 @@ input[type=range]{position:absolute;left:0;bottom:0;width:100%;appearance:none;b
  <option onclick="pltmenu.style.display='none';copypng(event)">copy to clipboard(png)</option>
 </select>
 
-<script src="cnvplot.js"></script>
+<script id="plotsrc" src="cnvplot.js"></script>
 <script>
 
 //desktop
@@ -91,7 +91,7 @@ let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeC
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
 let exec=x=>{if(x=="\\"){out.k=!out.k;out.textContent+=x;return jp()}out.textContent+=x+"\n";rdl.textContent="";out.k?ks(x):js(x)}
-let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
+let con=win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
 tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
 let jp=_=>{let v=out.textContent.split("\n"),p=out.k?" ":">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
@@ -146,7 +146,9 @@ plot({Type:"polar",Lines:[..]},{Type:..}) multiplot
 hist([n,xmin,xmax,]y1,y2..);   plot(hist1(..),hist1(..))
 `
 
-let jw,jsprg="",kprg="",matjs,kwasm; //console.log
+let matjs
+let kwasm
+let jw,jsprg="",kprg="";
 let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":JS(x)}),err=x=>{throw new Error(x)}
  let JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  let $U=(x,y)=>new Uint8Array($K.memory.buffer,x,y),$I=()=>new Int32Array($K.memory.buffer),$F=()=>new Float64Array($K.memory.buffer),$lo=x=>Number(BigInt.asUintN(32,x)),$KC=x=>{x=("string"===typeof x)?us(x):x;let r=$K.mk(18,x.length);$U().set(x,$lo(r));return r},$CK=x=>($K.dx(x),su($U($lo(x),$K.nn(x)))),$Ks=s=>$K.sc($KC(s))
@@ -176,13 +178,17 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"stri
   A.forEach((y,i)=>{let d1=1/d,h=Array(2*round((b-a)/d)).fill(0);y.map(y=>floor(d1*(y-a))).forEach(i=>h[1+2*i]++);p.Lines.push({X:X,Y:h,Id:1+i,Style:{Marker:{Marker:"bar",Size:1}}})});
   [p.Title,p.Xlabel,p.Ylabel]=$plotlabels(x);return p}
  onmessage=e=>{try{e.data.t?globalThis[e.data.name]=e.data.r:e.data.k?$krep(e.data.r):postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
- ${matjs}\n${jsprg}\n          //math/matrix library + user program
+ ${matjs}
+ ${jsprg}
  let x=iota(4),y=rand(4)
 `
 let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
 let js=x=>jw.postMessage({t:0,r:x}),ks=x=>jw.postMessage({t:0,r:x,k:1}),intr=_=>{jw.terminate();jstart();}
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;fetch("../k.wasm").then(r=>r.arrayBuffer()).then(r=>{kwasm=new Uint8Array(r).toBase64();jstart()})})
 
+let save=async _=>{let h=await window.showSaveFilePicker({suggestedName:document.URL.split("/").slice(-1)[0],types:[{accept:{"text/html":[".html"]}}]});let w=await h.createWritable();await w.write(await bundle());await w.close()}
+let bundle=async _=>{let t=document.querySelector("html").outerHTML;t=t.replace(/^let matjs.*$/m,"let matjs="+JS(matjs));t=t.replace(/^let kwasm.*$/m,"let kwasm="+JS(kwasm));t=t.replace(/^fetch.*$/m,"jstart();");
+ if(!plotsrc.textContent){let cript="cript",T=await(await fetch("cnvplot.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="plotsrc">${T}</s${cript}>`)};return t}
 window.onerror=e=>{console.log(e);O("\n"+e);jp()} //e.g. in user program
 
 //let edt=win("","edit")
