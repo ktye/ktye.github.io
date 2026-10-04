@@ -125,15 +125,18 @@ let qr=A=>{errif(!A.z,"qr: A must be complex");errif(A.m>A.n,"A must be slender 
   for(i=1+j;i<n;i++){let a=0,b=0,Ai=A.subarray(i*m2,(1+i)*m2);
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*Ai[k2]+Aj[k3]*Ai[k3];b+=Aj[k2]*Ai[k3]-Aj[k3]*Ai[k2]}
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}return{qr:1,A:A,d:d}}
-let qrsolve_=(Q,B)=>{let A=Q.A,d=Q.d,m=A.n,m2=2*m,n2=2*A.m,rhs=B.m,i,j,k,r,y=zeroz(A.m,rhs);errif(A.n!=B.n,"qrsolve: conform");
- for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);
-  for(j=0;j<m;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;
+let qrsolve_=(Q,B)=>{let A=Q.A,d=Q.d,m=A.n,m2=2*m,n=A.m,n2=2*A.m,rhs=B.m,i,j,k,r,y=zeroz(A.m,rhs);errif(A.n!=B.n,"qrsolve: conform");
+ for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);                  //A=randz(10,4),X=randz(4,2),B=dot(A,X); solve(A,B)  m:10  m2:20  n:4  n2:8
+  for(j=0;j<n;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;
    for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]}
    for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}
-  for(i=m-1;i>=0;i--){const i2=2*i,i3=1+i2
-   for(j=1+i;j<m;j++){const j2=2*j,j3=1+j2;x[i2]-=A[j][i2]*x[j2]-A[j][i3]*x[j3];x[i3]-=A[j][i2]*x[j3]+A[j][i3]*x[j2]}
+  for(i=n-1;i>=0;i--){const i2=2*i,i3=1+i2
+   for(j=1+i;j<n;j++){const j2=2*j,j3=1+j2,ji=j*m2+i2;x[i2]-=A[ji]*x[j2]-A[ji+1]*x[j3];x[i3]-=A[ji]*x[j3]+A[ji+1]*x[j2]}
    let[a,b]=zdiv(x[i2],x[i3],d[i2],d[i3]);x[i2]=a;x[i3]=b}
-  for(i=0;i<n2;i++)y[i*rhs+r]=x[i]}return y}
+  for(i=0;i<n2;i+=2){y[i*rhs+2*r]=x[i];y[i*rhs+2*r+1]=x[1+i]}}return y}
+
+let A=randz(10,4),X=randz(4,2),B=dot(A,X)
+let test=_=>solve(A,B)
 
 
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
