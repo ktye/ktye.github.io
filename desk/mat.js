@@ -59,6 +59,20 @@ let dotmmz=(A,B)=>{const m=A.m,k=A.n,n=B.n,C=zeroz(m,n),S=64;for(let i0=0;i0<m;i
  for(let i=i0;i<ii;++i){const a0=(i*k)<<1,c0=(i*n)<<1;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],b0=(p*n)<<1;for(let j=j0;j<jj;++j){const ib=b0+(j<<1),bx=B[ib],by=B[ib+1],ic=c0+(j<<1),x=ax*bx-ay*by,y=ax*by+ay*bx;C[ic]+=x;C[ic+1]+=y}}}}}}return C}
 let dotmvz=(A,x)=>{const m=A.m,n=A.n,y=zeroz(m,1),S=64;for(let p0=0; p0<n;p0+=S){const pp=Math.min(p0+BS,n);for(let i=0;i<m;++i){const a0=(i*n)<<1;let sx=0,sy=0;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],ix=p<<1,re=x[ix],im=x[ix+1];sx+=ax*re-ay*im;sy+=ax*im+ay*re};const iy=i<<1;y[iy]+=sx;y[iy+1]+=sy}};return y}
 
+
+let Dot=(A,B)=>{
+ let m=A.m,n=A.n,p=B.n;errif(B.m!=n,"conform");
+ let N=max(max(m,n),p);
+ if(B.z&&!A.z)A=complex(A);if(A.z&&!B.z)B=complex(B);
+ let R=A.z?zeroz(m,p):zeros(m,p);
+ A.z?dotz(R,p,A,n,B,p,m,n,p):dotr(R,p,A,n,B,p,m,n,p);return R}
+let dotr=(R,r,A,a,B,b,m,n,p)=>{let N=max(m,n,p),s1=N>>1,s2=N-s1,i,j,k;
+ if(N<64){for(i=0;i<m;i++)for(j=0;j<p;j++)for(k=0;k<n;k++)R[i*r+j]+=A[i*a+k]*B[k*b+j];return}
+  m==N?(dotr(R,r,A,a,B,b,s1,n,p),dotr(R.subarray(r*s1),r,A.subarray(a*s1),a,B,b,s2,n,p))
+ :p==N?(dotr(R,r,A,a,B,b,m,n,s1),dotr(R.subarray(s1),r,A,a,B.subarray(s1),b,m,n,s2))
+ :(dotr(R,r,A,a,B,b,m,s1,p),dotr(R,r,A.subarray(s1),a,B.subarray(b*s1),b,m,s2,p))
+}
+
 let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*s*r}
 
 let time=(f,n)=>{let t0=performance.now();if(n)while(n--)f();else f();return performance.now()-t0}
