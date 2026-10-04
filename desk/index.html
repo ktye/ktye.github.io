@@ -57,7 +57,7 @@ let win=(x,t)=>{let i=desk.childElementCount
   <span class="plr clr" title="toggle horizontal max">←→</span>
  </div><div></div>`+(x?x:"");
  ac(w,desk);return interactive(w)}
-let interactive=w=>{let i=af(desk.childNodes).findIndex(x=>x==w);lay(w,i);drag(w);w.onfocus=e=>{if(w.parentNode.lastElementChild!=w/*otherwise prevents dblclick*/)w.parentNode.appendChild(w);if(w==con)rdl.focus()};return w} 
+let interactive=w=>{let i=af(desk.childNodes).findIndex(x=>x==w);lay(w,i);drag(w);w.onfocus=e=>{if(w.parentNode.lastElementChild!=w/*otherwise prevents dblclick*/)w.parentNode.appendChild(w);/*if(w==con)rdl.focus()*/};return w} 
 let noclose=w=>{let x=qs(w,".cxx");if(x)x.remove();}
 let findwin=t=>qs(desk,`[data-win="${t}"]`)
 let lay=(w,i)=>{let r=bb(desk);w.style.left=(5+r.left+20*i)+"px";w.style.top=(5+r.top+30*i)+"px"}
@@ -101,12 +101,15 @@ let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeC
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
 let exec=x=>{out.textContent+=x+"\n";rdl.textContent="";x=="save"?(save(),jp()):js(x)}
-let con=findwin('$')?findwin('$'):win(`<pre id="tty"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
+let con=findwin('$')?findwin('$'):win(`<pre id="tty" ondblclick="ttd(event)"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
+tty.onmouseup=async e=>{let s=window.getSelection();if(s&&s.rangeCount){s=s.toString();if(s)await navigator.clipboard.writeText(s)}}
 tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
 let jp=_=>{let v=out.textContent.split("\n"),p=">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v;rdl.textContent="";prmt(1);}
 let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=winsz(con),l=floor(h/px(cs(tty).lineHeight));tty.style.width=c+"ch";tty.style.height=(1.1*l)+"rem";tty.c=c;tty.l=l;jp()}
+let ttd=async e=>{let r=document.caretRangeFromPoint(e.clientX,e.clientY);if(!r)return;let o=r.startOffset,v=tty.textContent.split("\n"),w=v.map(x=>1+x.length);
+ let n=0,i;for(i=0;i<w.length;i++){n+=w[i];if(n>o){if(v[i]&&v[i][0]=='>')v[i]=v[i].slice(1);await navigator.clipboard.writeText(v[i]);if(!(rdl.textContent.length))rdl.textContent=v[i];return}}}
 let c17=(x,l)=>{let n=0,i,j;for(i=0;i<x.length;i++)if(x[i]=='\n'){n++;if(n>l-3){x=x.slice(0,j);return x.slice(0,j)+"\n.."};j=i};return x}
 let O=x=>out.textContent+=c17(x,tty.l)
 let download=(u,name)=>{let x=new Blob([u],{type:"application/octet-stream"});dl.href=URL.createObjectURL(x);dl.download=name;dl.click()}
