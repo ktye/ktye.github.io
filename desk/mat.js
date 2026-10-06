@@ -14,6 +14,7 @@ let eyez=n=>{let r=zeroz(n,n),nn=2*n*n,n1=2+2*n;for(let i=0;i<nn;i+=n1)r[i]=1;re
 let ones=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=1;return r}
 let onez=(m,n)=>{let r=zeroz(m,n);for(let i=0;i<r.length;i+=2)r[i]=1;return r}
 let diag=x=>{if(x.m==1||x.n==1){let m=max(x.m,x.n),m2=1+2*m,r=x.z?zeroz(m,m):zeros(m,m),i,j=0;if(x.z){for(i=0;i<x.length;j+=m2){r[j]=x[i++];r[++j]=x[i++]}}else for(i=0;i<x.length;++i,j+=1+m)r[j]=x[i];return r};let m=min(x.m,x.n),n1=1+x.n,n2=2+2*x.n,r=x.z?zeroz(m,1):zeros(m,1),i,j=0;if(x.z){for(i=0;i<2*m;++i,j+=n2){r[i]=x[j];r[++i]=x[1+j]}}else for(i=0;i<m;i++,j+=n1)r[i]=x[j];return r}
+let tri=(A,u)=>{let z=A.z,t=min(A.m,A.n),t2=z?2*t:t,n=A.n,n2=z?2*n:n,T=z?zeroz(t,t):zeros(t,t),i,j;if(u){for(i=0;i<t;i++)for(j=(z?2*i:i);j<t2;j++)T[i*t2+j]=A[i*n2+j]}else{for(i=0;i<t;i++)for(j=0;j<=(z?2*i+1:i);j++)T[i*t2+j]=A[i*n2+j]}return T}
 let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r},til=iota
 let grade=x=>Array.from(x.keys()).sort((a,b)=>x[a]-x[b])
 let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
@@ -88,7 +89,6 @@ let rfft2=(r,z,f)=>{let i,k,j=0,n=z.length;z=fft(z,f);for(i=0;i<n;j+=2,i++){k=i?
 let afft=(x,n)=>{let z=zeroz(n),r=zeros(2*n),y=zeros(n),n2=2*n;N=x.length,m=floor(N/(2*n)),s=1/m,i,j,f=fft(n);for(i=0;i<m;i++){for(j=0;j<n;j++){z[2*j]=x[i];z[2*j+1]=x[i+n]};rfft2(r,z,f);for(j=0;j<n;j++)y[j]+=r[j]+r[j+n]}return mulf(1/m,y)}
 
 
-
 /*
 let hanning=n=>ones(n) //todo
 let spcgrm=(x,n,o,fs,fmi,fma)=>{
@@ -109,6 +109,7 @@ let qr=A=>{errif(!A.z,"qr: A must be complex");errif(A.m>A.n,"A must be slender 
   for(i=1+j;i<n;i++){let a=0,b=0,Ai=A.subarray(i*m2,(1+i)*m2);
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*Ai[k2]+Aj[k3]*Ai[k3];b+=Aj[k2]*Ai[k3]-Aj[k3]*Ai[k2]}
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}return{qr:1,A:A,d:d}}
+let rqr=q=>{let A=q.A,d=q.d,R=tri(A,0),n=A.m,n2=2*n,i,k=0;for(i=0;i<n;i++,k+=n2){R[k++]=d[2*i];R[k++]=d[2*i+1]};return R}
 let qrsolve_=(Q,B)=>{let A=Q.A,d=Q.d,m=A.n,m2=2*m,n=A.m,n2=2*A.m,rhs=B.m,i,j,k,r,y=zeroz(A.m,rhs);errif(A.n!=B.n,"qrsolve: conform");
  for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);                  //A=randz(10,4),X=randz(4,2),B=dot(A,X); solve(A,B)  m:10  m2:20  n:4  n2:8
   for(j=0;j<n;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;
@@ -120,6 +121,37 @@ let qrsolve_=(Q,B)=>{let A=Q.A,d=Q.d,m=A.n,m2=2*m,n=A.m,n2=2*A.m,rhs=B.m,i,j,k,r
   for(i=0;i<n2;i+=2){y[i*rhs+2*r]=x[i];y[i*rhs+2*r+1]=x[1+i]}}return y}
 let qrtest=_=>{A=randz(10,4),X=randz(4,2),B=dot(A,X);return Max(sub(X,solve(A,B)))}
 
+/*
+let svq=A=>{let[h,d]=qr(A),n=A.length,m2=A[0].length
+ let r=Array(A.length).fill([]).map(x=>new Float64Array(2*A.length).fill(0));
+ for(let i=1;i<h.length;i++){let ri=r[i],hi=h[i];
+  for(let k=0;k<2*i;k+=2){ri[k]=hi[k];ri[1+k]=hi[1+k]}};
+ for(let i=0;i<h.length;i++){r[i][2*i]=d[2*i];r[i][1+2*i]=d[1+2*i]};
+ let Q=x=>{let y=new Float64Array(m2);y.set(x);
+  for(let i=0;i<n;i++){let j=n-1-i,hj=h[j],a=0,b=0;
+   for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;
+    a+=hj[k2]*y[k2]+hj[k3]*y[k3];
+    b+=hj[k2]*y[k3]-hj[k3]*y[k2]};
+    for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;
+     y[k2]-=a*hj[k2]-b*hj[k3];
+     y[k3]-=a*hj[k3]+b*hj[k2]}};return y}
+  let[u,s,v]=svd(r);return[u.map(Q),s,v]}
+*/
+
+
+
+//todo
+let svdqr=(A,s)=>{let q=qr(A),R=rqr(q),[U1,S,V]=svdt_(R);
+ let Q=x=>{let m2=2*A.n,n=A.m,U=zeroz(A.m,A.n),i,k,k2,k3,j,ai,a,b
+  for(k=0;k<n;k++){let y0=2*k*n*i,y=U.subarray(y0,y0+2*n);
+   for(i=0;i<n;i++){j=n-1-i,aj=j*m2,a=0,b=0;
+    for(k2=m2-2-2*i;k2<m2;k2+=2){k3=1+k2;
+     a+=A[aj+k2]*y[k2]+A[aj+k3]*y[k3];
+     b+=A[aj+k3]*y[k3]-A[aj+k3]*y[k2]};
+    for(k2=m2-2-2*i;k2<m2;k2+=2){k3=1+k2;
+     y[k2]-=a*A[aj+k2]-b*A[aj+k3];
+     y[k3]-=a*A[aj+k3]+b*A[aj+k2]}}};return U}
+ return[Q(U1),S,V]}
 
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
