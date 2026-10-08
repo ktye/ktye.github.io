@@ -101,6 +101,7 @@ af(desk.childNodes).forEach(w=>interactive(w));
 let rlbuf=[],rlpos=0
 let rladd=x=>{rlpos=rlbuf.length;if(rlbuf.length&&rlbuf[rlbuf.length]==x)return x;rlbuf.push(x);rlpos++;return x}; 
 rladd('plot(x,y)');//todo rm
+rladd('test()')
 let rlprev=x=>{let n=rlbuf.length;  if(rlpos>0)rlpos--;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[rlpos]:"");rlend()}
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}

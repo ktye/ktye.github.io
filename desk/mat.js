@@ -1,7 +1,7 @@
 let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI,pi_=pi/180,_pi=180/pi
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let zinv=(a,b)=>{let r,d;if(abs(a)>abs(b)){r=b/a;d=a+b*r;return[1/d,-r/d]}else{r=a/b;d=b+a*r;return[r/d,-1/d]}}
-let errif=(x,e)=>{if(x)throw new Error(e)}
+let errif=(x,e)=>{if(x)throw new Error(e)},conform=(x,y)=>errif(x.m!=y.m||x.n!=y.n,"conform")
 
 let copy=A=>{let r=A.slice();r.m=A.m;r.n=A.n;r.z=A.z;return r}
 let zeros=(m,n)=>{n=n||1;let r=new Float64Array(  m*n);r.m=m;r.n=n;return r}
@@ -24,7 +24,7 @@ let conj=A=>{let r=zeroz(A.m,A.n);r.set(A);return conj_(r)},conj_=A=>{for(let i=
 let herm=A=>conj_(tranz(A))
 
 
-let scalar=(x,y,F,f,Z,z)=>ismat(x)?(y.z?Z(x,copy(y)):F(x,copy(y))):y.z?z(x,copy(y)):f(x,copy(y))
+let scalar=(x,y,F,f,Z,z)=>ismat(x)?(conform(x,y),y.z?(Z(x,copy(y))):F(x,copy(y))):y.z?z(x,copy(y)):f(x,copy(y))
 let add=(x,y)=>scalar(x,y,addF,addf,addZ,addz)
 let addF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]+=x[i];return y},addZ=addF
 let addf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]+=x;return y}
@@ -109,64 +109,20 @@ let qr=A=>qrt(trans(A)),qrt=A=>{errif(!A.z,"qr: A must be complex");errif(A.m>A.
   for(i=1+j;i<n;i++){let a=0,b=0,Ai=A.subarray(i*m2,(1+i)*m2);
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*Ai[k2]+Aj[k3]*Ai[k3];b+=Aj[k2]*Ai[k3]-Aj[k3]*Ai[k2]}
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}return{qr:1,A:A,d:d}}
-let rqr=q=>{let A=q.A,d=q.d,R=tri(A,0),n=A.m,n2=2*n,i,k=0;for(i=0;i<n;i++,k+=n2){R[k++]=d[2*i];R[k++]=d[2*i+1]};return R}
+let rqr=q=>{let A=q.A,d=q.d,R=tri(A,0),n=A.m,n2=2*n,i,k=0;for(i=0;i<n;i++,k+=n2){R[k++]=d[2*i];R[k++]=d[2*i+1]};return R}  //rqr(R from qr), qrqmul(rt=Q*BT) for svd not qrsolve (apply hhvectors in reverse order)
+let qrqmul=(q,B)=>{let A=q.A,m=A.n,m2=2*m,n=A.m,mB2=2*B.n,rhs=B.m,x=zeroz(m,1),y=zeroz(rhs,m),r,j,k2;for(r=0;r<rhs;r++){x.fill(0);x.set(B.subarray(r*mB2,(1+r)*mB2));for(j=n-1;j>=0;j--){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]};for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}y.subarray(r*m2,(1+r)*m2).set(x)};return y}
 let qrsolve_=(Q,B)=>{let A=Q.A,d=Q.d,m=A.n,m2=2*m,n=A.m,n2=2*A.m,rhs=B.m,i,j,k,r,y=zeroz(A.m,rhs);errif(A.n!=B.n,"qrsolve: conform");
- for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);
-  for(j=0;j<n;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;
-   for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]}
-   for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}
-  for(i=n-1;i>=0;i--){const i2=2*i,i3=1+i2
-   for(j=1+i;j<n;j++){const j2=2*j,j3=1+j2,ji=j*m2+i2;x[i2]-=A[ji]*x[j2]-A[ji+1]*x[j3];x[i3]-=A[ji]*x[j3]+A[ji+1]*x[j2]}
-   let[a,b]=zdiv(x[i2],x[i3],d[i2],d[i3]);x[i2]=a;x[i3]=b}
-  for(i=0;i<n2;i+=2){y[i*rhs+2*r]=x[i];y[i*rhs+2*r+1]=x[1+i]}}return y}
+ for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);for(j=0;j<n;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]};for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}
+  for(i=n-1;i>=0;i--){const i2=2*i,i3=1+i2;for(j=1+i;j<n;j++){const j2=2*j,j3=1+j2,ji=j*m2+i2;x[i2]-=A[ji]*x[j2]-A[ji+1]*x[j3];x[i3]-=A[ji]*x[j3]+A[ji+1]*x[j2]};let[a,b]=zdiv(x[i2],x[i3],d[i2],d[i3]);x[i2]=a;x[i3]=b};for(i=0;i<n2;i+=2){y[i*rhs+2*r]=x[i];y[i*rhs+2*r+1]=x[1+i]}}return y}
 let qrtest=_=>{A=randz(10,4),X=randz(4,2),B=dot(A,X);return Max(sub(X,solve(A,B)))}
 
-let qrqmul_=(q,B)=>{let A=q.A,m=A.n,m2=2*m,n=A.m,rhs=B.m,y=zeroz(n,rhs),r,j,k2 //Q*B (not QH*B) overwrites B
-  for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);
-  for(j=0;j<n;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;
-   for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]}
-   for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}}return y}
-
-/*
-let svq=A=>{let[h,d]=qr(A),n=A.length,m2=A[0].length
- let r=Array(A.length).fill([]).map(x=>new Float64Array(2*A.length).fill(0));
- for(let i=1;i<h.length;i++){let ri=r[i],hi=h[i];
-  for(let k=0;k<2*i;k+=2){ri[k]=hi[k];ri[1+k]=hi[1+k]}};
- for(let i=0;i<h.length;i++){r[i][2*i]=d[2*i];r[i][1+2*i]=d[1+2*i]};
- let Q=x=>{let y=new Float64Array(m2);y.set(x);
-  for(let i=0;i<n;i++){let j=n-1-i,hj=h[j],a=0,b=0;
-   for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;
-    a+=hj[k2]*y[k2]+hj[k3]*y[k3];
-    b+=hj[k2]*y[k3]-hj[k3]*y[k2]};
-    for(let k2=m2-2-2*i;k2<m2;k2+=2){const k3=1+k2;
-     y[k2]-=a*hj[k2]-b*hj[k3];
-     y[k3]-=a*hj[k3]+b*hj[k2]}};return y}
-  let[u,s,v]=svd(r);return[u.map(Q),s,v]}
-*/
-
-
-
-
-//todo
-let svdqr=(A,s)=>{let q=qrt(A),R=rqr(q),[U1,S,V]=svdt_(R);
- let Q=B=>{let m2=2*A.n,n=A.m,U=zeroz(A.m,A.n),r,i,k2,k3,j,ai,a,b
-  console.log("m2,n",m2,n,"Bm/Bn",B.m,B.n);
-  for(r=0;r<n;r++){let x=B.subarray(r*n2,(1+r)*n2); 
-   for(i=0;i<n;i++){j=n-1-i,aj=j*m2,a=0,b=0; console.log("j",j);
-    for(k2=2*i;k2<m2;k2+=2){k3=1+k2; 
-     a+=A[aj+k2]*x[k2]+A[aj+k3]*x[k3];
-     b+=A[aj+k2]*x[k3]-A[aj+k3]*x[k2]; //console.log("k2/3",k2,k3,"#x",x.length,"x",JS(Array.from(x)));
-    };
-    for(k2=2*i;k2<m2;k2+=2){k3=1+k2; 
-     x[k2]-=a*A[aj+k2]-b*A[aj+k3];
-     x[k3]-=b*A[aj+k2]+a*A[aj+k3]}}};console.log("U\n",smat(U));return U}
- return[Q(U1),S,V]}
-let test/*svdqrtest*/=()=>{let A=randz(5,3),[U,S,V]=svdqr(tranz(A));return U}
 
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
 let svd=(A,s)=>svd_(copy(A),s),svdt=(A,s)=>svdt_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A),s);return[tranz(U),S,V]}
+let svdqr=(A,s)=>{let q=qrt(A),R=rqr(q);if(s)return svdt_(R,s);let[U1,S,V]=svdt_(R);return[qrqmul(q,U1),S,V]}
 let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);
+ if(A.n>A.m)return svdqr(A,s);
  let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
  let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
  let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
@@ -177,4 +133,5 @@ let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=
  let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,tranz(W)]}
 let svdtest=()=>{let A=randz(5,3),[U,S,V]=svd(A),AA=dot(dot(U,diag(S)),herm(V));return Max(Abs(sub(A,AA)))}
 
+let testmat=()=>{let r="";[qrtest,svdtest].forEach(f=>{console.log(f.name);let e=f();errif(e>1e-14,f.name);r+=`${f.name}: ${e}\n`});return r}
 //deno repl --eval-file=mat.js
