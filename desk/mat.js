@@ -6,6 +6,8 @@ let errif=(x,e)=>{if(x)throw new Error(e)},conform=(x,y)=>errif(x.m!=y.m||x.n!=y
 let copy=A=>{let r=A.slice();r.m=A.m;r.n=A.n;r.z=A.z;return r}
 let zeros=(m,n)=>{n=n||1;let r=new Float64Array(  m*n);r.m=m;r.n=n;return r}
 let zeroz=(m,n)=>{n=n||1;let r=new Float64Array(2*m*n);r.m=m;r.n=n;r.z=1;return r}
+let mat=(m,n,a)=>{let r=a.length&&a.length==2*m*n?zeroz(m,n):zeros(m,n);isnum(a)?r.fill(a):r.set(a);return r}
+let reshape=(A,m,n)=>reshape_(copy(A),m,n),reshape_=(A,m,n)=>{let mn=A.m*A.n;if(n==undefined)m<0?(m=mn/-m,n=mn/m):n=mn/m;m=floor(m);n=floor(n);errif(A.m*A.n!=m*n,"reshape");A.m=m;A.n=n;return A}
 let rand=(m,n)=>{let r=zeros(m,n),i;for(i=0;i<r.length;i++)r[i]=random();return r}
 let randz=(m,n)=>{let x=zeroz(m,n),N=x.length,i;for(let i=0;i<N;i+=2){let r=sqrt(min(1489,-2*log(random()))),p=random()*2*pi;x[i]=r*cos(p);x[1+i]=r*sin(p)};return x}
 let randn=(m,n)=>{n=n||1;let x=randz(1,((m*n)>>1)+(1&(m*n)));x=x.subarray(0,m*n);x.m=m;x.n=n;x.z=0;return x}
@@ -19,26 +21,47 @@ let iota=(m,n)=>{let r=zeros(m,n);for(let i=0;i<r.length;i++)r[i]=i;return r},ti
 let grade=x=>Array.from(x.keys()).sort((a,b)=>x[a]-x[b])
 let dims=A=>{let r=zeros(1,2);r[0]=A.m;r[1]=A.n;return r}
 let real=(A,o)=>{if(!A.z)return A;o=o||0;let r=zeros(A.m,A.n),n=r.length;for(let i=0;i<n;i++)r[i]=A[2*i+o];return r},imag=A=>real(A,1);
-let complex=(A,B)=>{B=B||0;if(A.z&&!B)return A;let f=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A[k];r[i+1]=B[k]}return r},g=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A[k];r[i+1]=B}return r},h=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A;r[i+1]=B[k]}return r};return ismat(A)?(ismat(B)?f(zeroz(A.m,A.n)):g(zeroz(A.m,A.n))):h(zeroz(B.m,B.n))}
+let complex=(A,B)=>{B=B||0;if(!ismat(A))return[A,B];if(A.z&&!B)return A;let f=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A[k];r[i+1]=B[k]}return r},g=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A[k];r[i+1]=B}return r},h=r=>{let i,k=0;for(i=0;i<r.length;i+=2,k++){r[i]=A;r[i+1]=B[k]}return r};return ismat(A)?(ismat(B)?f(zeroz(A.m,A.n)):g(zeroz(A.m,A.n))):h(zeroz(B.m,B.n))}
 let conj=A=>{let r=zeroz(A.m,A.n);r.set(A);return conj_(r)},conj_=A=>{for(let i=1;i<A.length;i+=2)A[i]=-A[i];return A}
 let herm=A=>conj_(tranz(A))
 
+/*
+let row=(A,i)=>{i=i.length?i:[i];errif(max(...i)>=A.m||min(...i)<0,"bounds");let m=i.length,n=A.n,n2=n,r=A.z?(n2=2*n,zeroz(m,n)):zeros(m,n),j,k=0;for(j=0;j<m;j++,k+=n2)r.subarray(k,k+n2).set(A.subarray(i[j]*n2,(1+i[j])*n2));return r}
+let col=(A,i)=>{i=i.length?i:[i];errif(max(...i)>=A.n||min(...i)<0,"bounds");let m=A.m,an=A.n,n=i.length,n2=n,r=A.z?(n2=2*n,zeroz(m,n)):zeros(m,n),j,k;if(A.z){for(j=0;j<n;j++)for(k=0;k<m;k++){r[k*n2+2*j]=A[k*2*an+2*i[j]];r[k*n2+2*j+1]=A[k*2*an+2*i[j]+1]}}else{for(j=0;j<n;j++)for(k=0;k<m;k++)r[k*n+j]=A[k*an+i[j]]}return r}
+let setrow=(A,i,y)=>{
+ let ay=ismat(y);i=i.length?i:[i];errif(max(...i)>=A.n||min(...i)<0,"bounds");errif(ay&&(y.n!=A.n||y.m!=i.length),"conform")
+ let m=i.length,n=A.n,n2=A.z?2*n:n,j,k=0,r,d;
+ if(A.z&&!ay){for(j=0;j<m;j++,k+=n2){d=A.subarray(i[j]*n2,(1+i[j])*n2);for(r=0;r<n2;r+=2){d[r]=y[0];d[1+r]=y[1]}}}
+ else{for(j=0;j<m;j++,k+=n2){d=A.subarray(i[j]*n2,(1+i[j])*n2);ay?d.set(y.subarray(k,k+n2)):d.fill(y)}}
+ return A}
+*/
 
-let scalar=(x,y,F,f,Z,z)=>ismat(x)?(conform(x,y),y.z?(Z(x,copy(y))):F(x,copy(y))):y.z?z(x,copy(y)):f(x,copy(y))
-let add=(x,y)=>scalar(x,y,addF,addf,addZ,addz)
+let index=(A,i,j)=>{let n2=A.z?2*A.n:A.n,I=n=>new Int32Array(n),ij=(x,n)=>x==-1?I(n).map((_,i)=>i):isnum(x)?I(1).fill(x):new Int32Array([...x]);i=ij(i,A.m);j=ij(j,A.n);if(A.z){let jj=I(2*j.length),k=0;for(let i=0;i<j.length;i++){jj[k++]=2*j[i];jj[k++]=1+2*j[i]}j=jj}let ni=i.length,nj=j.length,r=I(ni*nj),a,b,ai,rr=0;errif(min(...i)<0||max(...i)>=A.m,"row index");errif(min(...j)<0||max(...j)>=n2,"col index");for(a=0;a<ni;a++){ai=i[a]*n2;for(b=0;b<nj;b++)r[rr++]=ai+j[b]};return[ni,r]}
+let at=(A,i,j)=>{let[m,ia]=index(A,i,j==undefined?-1:j),n=ia.length/(A.z?2*m:m),r=A.z?zeroz(m,n):zeros(m,n),k;console.log("mn",m,n,"ij",ia);for(k=0;k<r.length;k++)r[k]=A[ia[k]];return r}
+let setat=(A,i,j,y)=>{let ia=index(A,i,j),k=0;if(ismat(y)){errif(y.length!=ia.length,"conform");for(let i=0;i<ia.length;i++)A[ia[i]]=y[k++]};if(A.z);for(i=0;i<ia.length;i++){k=2*ia[i];A[k++]=y[0];A[k]=y[1]};for(let i=0;i<ia.length;i++)A[ia[i]]=y[i];return y}
+let row=(A,i)=>at(A,i,-1),col=(A,i)=>at(A,-1,i),setrow=(A,i,y)=>setat(A,i,-1,y),setcol=(A,i,y)=>setat(A,-1,i,y)
+
+let A=randz(2,3)
+//let A=randz(4,3)
+//A[1,]=1a 2a 3a45 
+test=()=>{setrow(A,1,mat(1,3,[1,0,2,0,2.121320343559643,2.1213203435596424]))}
+
+let scalar=(x,y,F,f,Z,z,a,b)=>ismat(x)?(conform(x,y),y.z?(Z(x,copy(y))):F(x,copy(y))):ismat(y)?y.z?z(x,copy(y)):f(x,copy(y)):
+ isnum(x)?a(x,y):b(x,y)
+let add=(x,y)=>scalar(x,y,addF,addf,addZ,addz,(x,y)=>x+y,(x,y)=>[x[0]+y[0],x[1]+y[1]])
 let addF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]+=x[i];return y},addZ=addF
 let addf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]+=x;return y}
 let addz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i+=2){y[i]+=a;y[1+i]+=b}return y}
-let sub=(x,y)=>scalar(x,y,subF,subf,subZ,subz)
+let sub=(x,y)=>scalar(x,y,subF,subf,subZ,subz,(x,y)=>x-y,(x,y)=>[x[0]-y[0],x[1]-y[1]])
 let subF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]-=x[i];return y},subZ=subF
 let subf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]-=x;return y}
 let subz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i+=2){y[i]-=a;y[1+i]-=b}return y}
-let mul=(x,y)=>scalar(x,y,mulF,mulf,mulZ,mulz)
+let mul=(x,y)=>scalar(x,y,mulF,mulf,mulZ,mulz,(x,y)=>x*y,(x,y)=>[x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]])
 let mulF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x[i];return y}
 let mulf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x;return y}
 let mulZ=(x,y)=>{for(let i=0;i<y.length;i++){let a=x[i],b=x[1+i],c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
 let mulz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i++){let c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
-let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1]),y))
+let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1]),y),(x,y)=>x/y,zdiv)
 let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
 let divZ=(x,y)=>{for(let i=0;i<y.length;i++)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
 
@@ -64,7 +87,7 @@ let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x
 
 let time=(f,n)=>{let t0=performance.now();if(n)while(n--)f();else f();return performance.now()-t0}
 
-let ismat=x=>x.constructor==Float64Array&&("m"in x)&&("n"in x)
+let ismat=x=>x.constructor==Float64Array&&("m"in x)&&("n"in x),isnum=x=>"number"==typeof x;
 let mats=s=>{/*1.2 1a30 1+2i*/s=s.trim();let m=1,a=0,j=0;for(let i=0;i<s.length;i++){m+=s[i]=='\n';a+=s[i]=='a';j+=s[i]=='i'};if(j)s=s.replace("i", "").replace(/(?<=\d)([+-])/," $1");let r=new Float64Array(s.split(/[a\s]+/).map(s=>+s)),n=floor(r.length/m);errif(n*m!=r.length,"rectangular");errif(a&&a!=r.length/2,"a-separator");errif(j&&j!=r.length/2,"j-separator");if(a==r.length/2){n>>=1;r.z=1;for(let i=0;i<r.length;i+=2)[r[i],r[1+i]]=[r[i]*cos(r[1+i]*pi_),r[i]*sin(r[1+i]*pi_)]}else if(j==r.length/2){n>>=1;r.z=1}r.m=m;r.n=n;return r}
 let snum0=x=>{let a=abs(x)>1000||abs(x)<0.0001?x.toPrecision(6):x.toFixed(6),b=String(x);return b.length<a.length?b:a}
 let znum0=(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"a"+a.toFixed(0).padStart(3,"0")}
@@ -72,7 +95,7 @@ let znuma=(n)=>(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return
 let znumi=(x,y)=>snum(x)+(y<0?"":"+")+snum(y)+"i",znumz=(x,y)=>snum(x)+" "+snum(y),snum=snum0,znum=znum0
 let ser=x=>{if(ismat(x)){let s="",i,j,k=0;if(x.z&&znum==znumz){for(i=0;i<x.m;i++){for(j=0;j<2*x.n;j+=2)s+=(j?" ":"")+String(x[k++])+" "+String(x[k++]);s+="\n"}}else if(x.z){for(i=0;i<x.m;i++){for(j=0;j<2*x.n;j+=2)s+=(j?" ":"")+String(x[k++])+(x[k]<0?"":"+")+String(x[k++])+"i";s+="\n"}}else{for(i=0;i<x.m;i++){for(j=0;j<x.n;j++)s+=(j?" ":"")+String(x[k++]);s+="\n"}};return s};return "string"==typeof(x)?x:JSON.stringify(x)}
 let format=s=>{//-1(max) 0(default) "3f"(fixed) "3e"(prec) "1a"(1.23@90.1) "i"(1.234+5.678i) "z"(1.234 5.678)
- if("number"==typeof s){s<0?(snum=String):s==0?(snum=snum0,znum=znum0):snum=x=>x.toPrecision(s);return}
+ if(isnum(s)){s<0?(snum=String):s==0?(snum=snum0,znum=znum0):snum=x=>x.toPrecision(s);return}
  let n=+s.slice(0,-1),f=s.slice(-1);f=="f"?(snum=x=>x.toFixed(n)):f=="e"?(snum=x=>x.toPrecision(n)):f=="a"?znum=znuma(n):f=="i"?znum=znumi:f=="z"?znum=znumz:errif(1,"unknown format")}
 let smat=x=>{let M=100,N=100;if((!x)||x.constructor!=Float64Array)return String(x);let colpad=(x,j)=>{let l=max(...x.map(x=>x[j].length));x.forEach(x=>x[j]=x[j].padStart(l," "));return x}
  if(x.m&&x.n){let m=min(M,x.m),n=min(N,x.n),z=x.z||0,r=[],i,j;for(i=0;i<m;i++){r[i]=[];for(j=0;j<n;j++)r[i][j]=z?znum(x[i*2*x.n+2*j],x[i*2*x.n+2*j+1]):snum(x[i*x.n+j])};for(j=0;j<n;j++)colpad(r,j);r=r.map(x=>x.join(" "));for(i=0;i<m;i++)r[i]+=x.n>N?"..\n":"\n";return r.join("")+(x.m>M?"..\n":"")}
@@ -81,7 +104,7 @@ let smat=x=>{let M=100,N=100;if((!x)||x.constructor!=Float64Array)return String(
 let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0],f)
  let init=N=>{let l=log2(N),P=Array(8).fill(0),n=1,S=new Float64Array(N),C=new Float64Array(N);for(let p=0;p<l;p++){for(let i=0;i<n;i++){P[i]<<=1;P[i+n]=1+P[i]};n<<=1};for(let i=0;i<N;i++){const p=-2*pi*i/N;C[i]=cos(p);S[i]=sin(p)};return[l,P,C,S,N]}
  let perm=(x,P)=>{P.forEach((p,i)=>{if(i<p){const a=2*i,b=1+a,c=2*p,d=1+c,A=x[a],B=x[b];x[a]=x[c];x[b]=x[d];x[c]=A;x[d]=B}})}
- if("number"==typeof x)return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
+ if(isnum(x))return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
  for(let p=1;p<=l;p++){s>>=1;for(let b=0;b<s;b++){const o=2*b*n;for(let k=0;k<n;k++){const i=(k+o)<<1,j=i+(n<<1),ks=k*s,kn=s*(k+n);let xi0=x[i],xi1=x[1+i],xj0=x[j];x[i]+=C[ks]*x[j]-S[ks]*x[1+j];x[1+i]+=C[ks]*x[1+j]+S[ks]*x[j];x[j]=xi0+C[kn]*x[j]-S[kn]*x[1+j];x[1+j]=xi1+C[kn]*x[1+j]+S[kn]*xj0}};n<<=1}
  return x}
 

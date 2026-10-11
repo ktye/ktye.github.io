@@ -34,6 +34,8 @@ add[Ffz] sub  mul [z]div
 Abs Max Min sum RoColSum
 
 dot solve qr svd [ar]fft
+
+repl:? \ (switch to >js)
 </pre>
 <div id="desk"></div><!--end--!>
 <a id="dl" style="display:none"></a>
@@ -44,6 +46,7 @@ dot solve qr svd [ar]fft
 </select>
 
 <script id="plotsrc" src="cnvplot.js"></script>
+<script id="parssrc" src="parse.js"  ></script>
 <script>
 
 //desktop
@@ -107,12 +110,12 @@ let rlnext=x=>{let n=rlbuf.length;  if(rlpos<n)rlpos++;rdl.textContent=(n?rlbuf[
 let rlend=_=>{let r=document.createRange(),s=window.getSelection();r.selectNodeContents(rdl);r.collapse(false);s.removeAllRanges();s.addRange(r);rdl.focus()}
 let prmt=x=>{prm.textContent=x?"█":"";rdl.hidden=!x;if(x)rdl.focus()}
 
-let exec=x=>{out.textContent+=x+"\n";rdl.textContent="";x=="save"?(save(),jp()):js(x)}
-let con=findwin('$')?findwin('$'):win(`<pre id="tty" ondblclick="ttd(event)"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,"$"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
+let K=1,jk=x=>(x=jsparse(x),out.textContent+=x?x+"\n":"",x),exec=x=>{if(x=="\\")K=!K;out.textContent+=x+"\n";rdl.textContent="";x=="save"?(save(),jp()):x=="\\"?jp():js(K?jk(x):x)}
+let con=findwin('$')?findwin('$'):win(`<pre id="tty" ondblclick="ttd(event)"><span id="out"></span><span id="rdl" contenteditable="plaintext-only" spellcheck=false tabindex="0"></span><span id="prm"></span></pre>`,">"),rdl=ge("rdl");con.style.left="0px";con.style.top=(bb(desk).height-bb(con).height)+"px";noclose(con);
 tty.onmouseup=async e=>{let s=window.getSelection();if(s&&s.rangeCount){s=s.toString();if(s)await navigator.clipboard.writeText(s)}}
-tty.onclick=_=>rdl.focus();out.textContent=">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
+tty.onclick=_=>rdl.focus();out.textContent=K?" ":">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
-let jp=_=>{let v=out.textContent.split("\n"),p=">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
+let jp=_=>{let v=out.textContent.split("\n"),p=K?" ":">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v;rdl.textContent="";prmt(1);}
 let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=winsz(con),l=floor(h/px(cs(tty).lineHeight));tty.style.width=c+"ch";tty.style.height=(1.1*l)+"rem";tty.c=c;tty.l=l;jp()}
 let ttd=async e=>{let r=document.caretRangeFromPoint(e.clientX,e.clientY);if(!r)return;let o=r.startOffset,v=tty.textContent.split("\n"),w=v.map(x=>1+x.length);
@@ -123,7 +126,7 @@ let download=(u,name)=>{let x=new Blob([u],{type:"application/octet-stream"});dl
 
 //edit
 let edvalue=""
-let edt=findwin('edit')?findwin('edit'):win(`<textarea id="ed" spellcheck="false" autocorrect="off" style="background:#ffe;border:none;outline:none;white-space:pre"></textarea>`,"edit");noclose(edt);edt.style.left="0px";edt.style.top="0px";ed.value=edvalue;
+let edt=findwin('.')?findwin('.'):win(`<textarea id="ed" spellcheck="false" autocorrect="off" style="background:#ffe;border:none;outline:none;white-space:pre"></textarea>`,".");noclose(edt);edt.style.left="0px";edt.style.top="0px";ed.value=edvalue;
 let edtresz=x=>{let[w,h]=winsz(x);ed.style.width=`${w}px`;ed.style.height=`${h}px`}
 
 window.ondragover=e=>pd(e);
@@ -156,7 +159,7 @@ axis(xmin,xmax,ymin...)
 
 let matjs
 let jw;
-let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":JS(x)}),err=x=>{throw new Error(x)}
+let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":Array.isArray(x)&&x.length==2&&x.every(x=>!isNaN(x))?znum(...x)+" ("+String(x)+")":JS(x)}),err=x=>{throw new Error(x)}
  let fs={},JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  let save=(u,name)=>postMessage({t:3,r:[u.constructor==Uint8Array?u:"string"==typeof u?us(u):us(ser(u)),name]}) //download: e.g. save(randz(3,4),"x.mat")
  let P={Type:"xy",Lines:[{X:[1,2,3],Y:[3,-1,2]}]}
@@ -165,7 +168,7 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"stri
   let[ti,xl,yl]=$plotlabels(x);x=nA?[p0,...x]:x;x.forEach(p=>{if(isplt(p));if(!p.Title)p.Title=ti;if(!p.Xlabel)p.Xlabel=xl;if(!p.Ylabel)p.Ylabel=yl});postMessage({t:1,r:x});return""}
  let $plotlabels=x=>{let sa=s=>{let i=x.indexOf(s);if(i>=0){s=x[1+i];x.splice(i,2);return s};return""};return[sa("title"),sa("xlabel"),sa("ylabel")]}
  let axis=(...x)=>(/*axis(xmin,xmax,ymin,ymax)*/postMessage({t:1,r:["axis",x]}),"")
- let isplt=x=>("object"==typeof x)&&("Type"in x),isnum=x=>"number"==typeof x;
+ let isplt=x=>("object"==typeof x)&&("Type"in x)
  let hist=(...x)=>plot(hist1(...x)),hist1=(...x)=>{let na=a=>{if(!isnum(a=x[0]))return 0;x.splice(0,1);return a},n=na(),x0=na(),x1=na(),p={Type:"xy",Lines:[]};if(!n)n=max(10,min(40,floor(sqrt(x[0].length))));
   let nicenum=(ext,rnd)=>{let e=floor(log10(ext)),f=ext/(10**e),r;return(rnd?((f<1.5)?1:(f<3)?2:(f<7)?5:10):((f<=1)?1:(f<=2)?2:(f<=5)?5:10))*10**e}
   let nicelim=(x,y)=>{let e=nicenum(y-x,false),s=nicenum(e/n,true);return[s*floor(x/s),s*ceil(y/s),s]}
@@ -178,13 +181,15 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):"stri
  let x=iota(4),y=rand(4)
  ${ed.value}
 `
-let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=">"}
+let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=K?" ":">"}
 let js=x=>jw.postMessage({t:0,r:x}),intr=_=>{jw.terminate();jstart();}
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
 
 let save=async _=>{let h=await window.showSaveFilePicker({suggestedName:document.URL.split("/").slice(-1)[0],types:[{accept:{"text/html":[".html"]}}]});let w=await h.createWritable();await w.write(await bundle());await w.close()}
 let bundle=async _=>{let t=document.querySelector("html").outerHTML;t=t.replace(/^let matjs.*$/m,"let matjs="+JS(matjs));t=t.replace(/^let edvalue.*$/m,"let edvalue="+JS(ed.value));t=t.replace(/^fetch.*$/m,"jstart();");
- if(!plotsrc.textContent){let cript="cript",T=await(await fetch("cnvplot.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="plotsrc">${T}</s${cript}>`)};return t}
+ if(!plotsrc.textContent){let cript="cript",T=await(await fetch("cnvplot.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="plotsrc">${T}</s${cript}>`)};
+ if(!parssrc.textContent){let cript="cript",T=await(await fetch("parssrc.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="parssrc">${T}</s${cript}>`)};
+ return t}
 window.onerror=e=>{console.log(e);O("\n"+e);jp()} //e.g. in user program
 
 </script></body></html>
