@@ -158,7 +158,6 @@ axis(xmin,xmax,ymin...)
 `
 
 let matjs
-let tabjs
 let jw;
 let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):istab(x)?stab(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":Array.isArray(x)&&x.length==2&&x.every(x=>!isNaN(x))?znum(...x)+" ("+String(x)+")":JS(x)}),err=x=>{throw new Error(x)}
  let fs={},JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
@@ -179,18 +178,16 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):istab
   [p.Title,p.Xlabel,p.Ylabel]=$plotlabels(x);return p}
  onmessage=e=>{try{e.data.t?(e.data.name.endsWith(".mat")?globalThis[e.data.name.slice(0,-4)]=mats(su(e.data.u)):fs[e.data.name]=e.data.u):e.data.k?$krep(e.data.r):postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
  ${matjs}
- ${tabjs}
  let x=iota(4),y=rand(4)
  ${ed.value}
 `
 let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=K?" ":">"}
 let js=x=>jw.postMessage({t:0,r:x}),intr=_=>{jw.terminate();jstart();}
 //fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
-fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;fetch("tab.js").then(r=>r.text()).then(r=>{tabjs=r;jstart()})})
+fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
 
 let save=async _=>{let h=await window.showSaveFilePicker({suggestedName:document.URL.split("/").slice(-1)[0],types:[{accept:{"text/html":[".html"]}}]});let w=await h.createWritable();await w.write(await bundle());await w.close()}
-let bundle=async _=>{let t=document.querySelector("html").outerHTML;t=t.replace(/^let matjs.*$/m,"let matjs="+JS(matjs));t=t.replace(/^let tabjs.*$/m,"let tabjs="+JS(tabjs));
-t=t.replace(/^let edvalue.*$/m,"let edvalue="+JS(ed.value));t=t.replace(/^fetch.*$/m,"jstart();");
+let bundle=async _=>{let t=document.querySelector("html").outerHTML;t=t.replace(/^let matjs.*$/m,"let matjs="+JS(matjs));t=t.replace(/^let edvalue.*$/m,"let edvalue="+JS(ed.value));t=t.replace(/^fetch.*$/m,"jstart();");
  if(!plotsrc.textContent){let cript="cript",T=await(await fetch("cnvplot.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="plotsrc">${T}</s${cript}>`)};
  if(!parssrc.textContent){let cript="cript",T=await(await fetch("parssrc.js")).text();t=t.replace(/^<script id=.*$/m,`<script id="parssrc">${T}</s${cript}>`)};
  return t}
