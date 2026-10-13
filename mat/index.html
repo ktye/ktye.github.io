@@ -115,7 +115,7 @@ let con=findwin('$')?findwin('$'):win(`<pre id="tty" ondblclick="ttd(event)"><sp
 tty.onmouseup=async e=>{let s=window.getSelection();if(s&&s.rangeCount){s=s.toString();if(s)await navigator.clipboard.writeText(s)}}
 tty.onclick=_=>rdl.focus();out.textContent=K?" ":">";prmt(1);tty.l=20;tty.c=80;let pxch=tty.clientWidth/80;
 rdl.onkeydown=(e,q)=>(q=e.key,"Enter"==q?(pd(e),exec(rladd(rdl.textContent))):"ArrowUp"==q?(pd(e),rlprev(rdl.textContent)):"ArrowDown"==q?(pd(e),rlnext(rdl.textContent)):("c"==q&&e.ctrlKey)?(pd(e),intr()):"Escape"==q?(pd(e),rdl.textContent=""):"Tab"==q?pd(e):0)
-let jp=_=>{let v=out.textContent.split("\n"),p=K?" ":">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-2)+"..":x).join("\n");
+let jp=_=>{let v=out.textContent.split("\n"),p=K?" ":">";v=(tty.l-1<v.length?v.slice(v.length-tty.l+1):v).map(x=>x.length>tty.c?x.slice(0,tty.c-1)+"·":x).join("\n");
  v+=v.endsWith("\n")?p:"\n"+p;out.textContent=v;rdl.textContent="";prmt(1);}
 let ttyresz=_=>{let px=x=>+(x.slice(0,-2)),c=floor(con.clientWidth/pxch),[w,h]=winsz(con),l=floor(h/px(cs(tty).lineHeight));tty.style.width=c+"ch";tty.style.height=(1.1*l)+"rem";tty.c=c;tty.l=l;jp()}
 let ttd=async e=>{let r=document.caretRangeFromPoint(e.clientX,e.clientY);if(!r)return;let o=r.startOffset,v=tty.textContent.split("\n"),w=v.map(x=>1+x.length);

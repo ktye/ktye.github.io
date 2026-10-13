@@ -1,4 +1,5 @@
 let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI,pi_=pi/180,_pi=180/pi
+let map=(a,f)=>mat(a.m,a.n,a.map(f)),Sin=x=>map(x,sin),Cos=x=>map(x,cos),Sqrt=x=>map(x,sqrt),Log=x=>map(x,log),Log10=x=>map(x,log10),Log2=x=>map(x,log2),Exp=x=>map(x,exp),Sign=x=>map(x,sign),Floor=x=>map(x,floor),Ceil=x=>map(x,ceil),Round=x=>map(x,round)
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let zinv=(a,b)=>{let r,d;if(abs(a)>abs(b)){r=b/a;d=a+b*r;return[1/d,-r/d]}else{r=a/b;d=b+a*r;return[r/d,-1/d]}}
 let errif=(x,e)=>{if(x)throw new Error(e)},conform=(x,y)=>errif(x.m!=y.m||x.n!=y.n,"conform")
@@ -7,6 +8,7 @@ let copy=A=>{if(istab(A)){let d={};keys(A).forEach(k=>d[k]=copy(A[k]));return d}
 let zeros=(m,n)=>{n=n||1;let r=new Float64Array(  m*n);r.m=m;r.n=n;return r}
 let zeroz=(m,n)=>{n=n||1;let r=new Float64Array(2*m*n);r.m=m;r.n=n;r.z=1;return r}
 let mat=(m,n,a)=>{let r=a.length&&a.length==2*m*n?zeroz(m,n):zeros(m,n);isnum(a)?r.fill(a):r.set(a);return r}
+let rowmat=a=>mat(1,a.length,a),colmat=a=>mat(a.length,1,a)
 let reshape=(A,m,n)=>reshape_(copy(A),m,n),reshape_=(A,m,n)=>{let mn=A.m*A.n;if(n==undefined)m<0?(m=mn/-m,n=mn/m):n=mn/m;m=floor(m);n=floor(n);errif(A.m*A.n!=m*n,"reshape");A.m=m;A.n=n;return A}
 let rand=(m,n)=>{let r=zeros(m,n),i;for(i=0;i<r.length;i++)r[i]=random();return r}
 let randz=(m,n)=>{let x=zeroz(m,n),N=x.length,i;for(let i=0;i<N;i+=2){let r=sqrt(min(1489,-2*log(random()))),p=random()*2*pi;x[i]=r*cos(p);x[1+i]=r*sin(p)};return x}
@@ -33,7 +35,7 @@ let row=(A,i)=>at(A,i,-1),col=(A,i)=>at(A,-1,i),setrow=(A,i,y)=>setat(A,i,-1,y),
 
 //let tabcol=(t,c)=>tableat(t,-1,c),tabrow=(t,i)=>tableat(t,i,-1),
 let tabcount=t=>{let k=keys(t);if(!k.length)return 0;let v=t[k[0]];return ismat(v)&&v.z?v.length>>1:v.length}
-let tableat=(t,i)=>{if("string"==typeof i)return t[i];let d={},n=tabcount(t);
+let tableat=(t,i)=>{if(isstr(i))return t[i];let d={},n=tabcount(t);
  if(isnum(i)){i|=0;errif(i<0||i>n,"rowindex");keys(t).forEach(k=>{let v=t[k];d[k]=ismat(v)&&v.z?[v[2*i],v[2*i+1]]:v[i]});return d}
  //todo vector  t["a<0&b>0"]
 }
@@ -81,7 +83,7 @@ let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x
 
 let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performance.now()-t0}
 
-let ismat=x=>x&&x.constructor==Float64Array&&("m"in x)&&("n"in x),isnum=x=>"number"==typeof x;
+let ismat=x=>x&&x.constructor==Float64Array&&("m"in x)&&("n"in x),isnum=x=>"number"==typeof x,isint=Number.isInteger,isstr=x=>"string"==typeof x
 let istab=x=>x&&"object"==typeof x&&Object.getPrototypeOf(x)==Object.prototype
 let keys=Object.keys,vals=Object.vals
 let mats=s=>{/*1.2 1a30 1+2i*/s=s.trim();let m=1,a=0,j=0;for(let i=0;i<s.length;i++){m+=s[i]=='\n';a+=s[i]=='a';j+=s[i]=='i'};if(j)s=s.replace("i", "").replace(/(?<=\d)([+-])/," $1");let r=new Float64Array(s.split(/[a\s]+/).map(s=>+s)),n=floor(r.length/m);errif(n*m!=r.length,"rectangular");errif(a&&a!=r.length/2,"a-separator");errif(j&&j!=r.length/2,"j-separator");if(a==r.length/2){n>>=1;r.z=1;for(let i=0;i<r.length;i+=2)[r[i],r[1+i]]=[r[i]*cos(r[1+i]*pi_),r[i]*sin(r[1+i]*pi_)]}else if(j==r.length/2){n>>=1;r.z=1}r.m=m;r.n=n;return r}
@@ -89,10 +91,10 @@ let snum0=x=>{let a=abs(x)>1000||abs(x)<0.0001?x.toPrecision(6):x.toFixed(6),b=S
 let znum0=(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"a"+a.toFixed(0).padStart(3,"0")}
 let znuma=(n)=>(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"a"+a.toFixed(n)}
 let znumi=(x,y)=>snum(x)+(y<0?"":"+")+snum(y)+"i",znumz=(x,y)=>snum(x)+" "+snum(y),snum=snum0,znum=znum0
-let ser=x=>{if(ismat(x)){let s="",i,j,k=0;if(x.z&&znum==znumz){for(i=0;i<x.m;i++){for(j=0;j<2*x.n;j+=2)s+=(j?" ":"")+String(x[k++])+" "+String(x[k++]);s+="\n"}}else if(x.z){for(i=0;i<x.m;i++){for(j=0;j<2*x.n;j+=2)s+=(j?" ":"")+String(x[k++])+(x[k]<0?"":"+")+String(x[k++])+"i";s+="\n"}}else{for(i=0;i<x.m;i++){for(j=0;j<x.n;j++)s+=(j?" ":"")+String(x[k++]);s+="\n"}};return s};return "string"==typeof(x)?x:JSON.stringify(x)}
-let format=s=>{//-1(max) 0(default) "3f"(fixed) "3e"(prec) "1a"(1.23@90.1) "i"(1.234+5.678i) "z"(1.234 5.678)
- if(isnum(s)){s<0?(snum=String):s==0?(snum=snum0,znum=znum0):snum=x=>x.toPrecision(s);return}
- let n=+s.slice(0,-1),f=s.slice(-1);f=="f"?(snum=x=>x.toFixed(n)):f=="e"?(snum=x=>x.toPrecision(n)):f=="a"?znum=znuma(n):f=="i"?znum=znumi:f=="z"?znum=znumz:errif(1,"unknown format")}
+let ser=x=>{if(ismat(x)){let s="",i,j,k=0;if(x.z&&znum==znumz){for(i=0;i<x.m;i++){for(j=0;j<2*x.n;j+=2)s+=(j?" ":"")+String(x[k++])+" "+String(x[k++]);s+="\n"}}else if(x.z){for(i=0;i<x.m;i++){for(j=0;j<2*x.n;j+=2)s+=(j?" ":"")+String(x[k++])+(x[k]<0?"":"+")+String(x[k++])+"i";s+="\n"}}else{for(i=0;i<x.m;i++){for(j=0;j<x.n;j++)s+=(j?" ":"")+String(x[k++]);s+="\n"}};return s};return isstr(x)?x:JSON.stringify(x)}
+let format=s=>{//-1(max) 0(default) 0.3(fixed) 3(prec) 1a(1.23@90.1) "i"(1.234+5.678i) "z"(1.234 5.678)
+ if(isnum(s)){s<0?(snum=String):s==0?(snum=snum0,znum=znum0):s<1?(snum=isint(10*s)?x=>x.toFixed(10*s):x=>x.toFixed(100*s)):snum=x=>x.toPrecision(s);return}
+ if(isstr(s)){s=="i"?znum=znumi:s=="z"?znum=znumz:errif(1,"format");return};if(2==s.length&&isint(s[0]))znum=znuma(s[0]);errif(1,"format")}
 let smat=x=>{let M=100,N=100;if((!x)||x.constructor!=Float64Array)return String(x);let colpad=(x,j)=>{let l=max(...x.map(x=>x[j].length));x.forEach(x=>x[j]=x[j].padStart(l," "));return x}
  if(x.m&&x.n){let m=min(M,x.m),n=min(N,x.n),z=x.z||0,r=[],i,j;for(i=0;i<m;i++){r[i]=[];for(j=0;j<n;j++)r[i][j]=z?znum(x[i*2*x.n+2*j],x[i*2*x.n+2*j+1]):snum(x[i*x.n+j])};for(j=0;j<n;j++)colpad(r,j);r=r.map(x=>x.join(" "));for(i=0;i<m;i++)r[i]+=x.n>N?"..\n":"\n";return r.join("")+(x.m>M?"..\n":"")}
  else return Array.from(x.subarray(0,min(x.length,M))).map(snum).join(" ")+(x.length>M?"..":"")}
@@ -161,7 +163,7 @@ let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=
 let svdtest=()=>{let A=randz(5,3),[U,S,V]=svd(A),AA=dot(dot(U,diag(S)),herm(V));return Max(Abs(sub(A,AA)))}
 
 
-let t={alpha:rand(5),beta:randz(5),gamma:"this is a overlonginonelinestring col".split(" "),ints:[0,1,1,1,0],mask:[false,false,true,true,true]}
+let t={alpha:rand(25),beta:randz(25),ceta:rand(25),gamma:"this is a overlonginonelinestring col".split(" "),ints:[0,1,1,1,0],mask:[false,false,true,true,true]}
 
 
 let testmat=()=>{let r="";[qrtest,svdtest].forEach(f=>{console.log(f.name);let e=f();errif(e>1e-14,f.name);r+=`${f.name}: ${e}\n`});return r}
