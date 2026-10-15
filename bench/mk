@@ -1,0 +1,4 @@
+set -x
+n=524288
+echo $n|./k fft.k -e
+python3 fft.py $n

@@ -1,0 +1,6 @@
+# build ktye/k
+wget github.com/ktye/i/releases/download/latest/k.c
+gcc -ok -O3 k.c -lm
+
+# run
+echo 32 | ./k fft.k -e
