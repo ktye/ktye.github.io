@@ -134,21 +134,17 @@ let spcgrm=(x,n,o,fs,fmi,fma)=>{
 
 
 let solve=(A,B)=>qrsolve_(A.qr?A:qr(A),trans(complex(B)))
-let qr=A=>qrt(trans(A)),qrt=A=>{errif(!A.z,"qr: A must be complex");errif(A.m>A.n,"A must be slender column major");
- let n=A.m,m2=2*A.n,i,j,k,d=zeroz(n);
- for(j=0;j<n;j++){let j2=2*j,j3=1+j2,Aj=A.subarray(j*m2,(1+j)*m2),s=sqrt(norm2(Aj.subarray(j2))),r=hypot(Aj[j2],Aj[j3]),h=s/r;/*<--r maybe zero.. todo*/;d[j2]=-h*Aj[j2];d[j3]=-h*Aj[j3];
-  let f=sqrt(s*(s+r));console.log("f",f);Aj[j2]-=d[j2];Aj[j3]-=d[j3];for(k=j2;k<m2;k++)Aj[k]/=f;
+let qr=A=>qrt(trans(A)),qrt=A=>{errif(!A.z,"qr: A must be complex");errif(A.m>A.n,"A must be slender column major");let n=A.m,m2=2*A.n,i,j,k,d=zeroz(n);
+ for(j=0;j<n;j++){let j2=2*j,j3=1+j2,Aj=A.subarray(j*m2,(1+j)*m2),s=sqrt(norm2(Aj.subarray(j2))),r=hypot(Aj[j2],Aj[j3]);if(r>1e-15){let h=s/r;d[j2]=-h*Aj[j2];d[j3]=-h*Aj[j3]}else{d[j2]=-1};let f=sqrt(s*(s+r));Aj[j2]-=d[j2];Aj[j3]-=d[j3];for(k=j2;k<m2;k++)Aj[k]/=f;
   for(i=1+j;i<n;i++){let a=0,b=0,Ai=A.subarray(i*m2,(1+i)*m2);
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*Ai[k2]+Aj[k3]*Ai[k3];b+=Aj[k2]*Ai[k3]-Aj[k3]*Ai[k2]}
-   for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}console.log("d",d);return{qr:1,A:A,d:d}}
+   for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}return{qr:1,A:A,d:d}}
 let rqr=q=>{let A=q.A,d=q.d,R=tri(A,0),n=A.m,n2=2*n,i,k=0;for(i=0;i<n;i++,k+=n2){R[k++]=d[2*i];R[k++]=d[2*i+1]};return R}  //rqr(R from qr), qrqmul(rt=Q*BT) for svd not qrsolve (apply hhvectors in reverse order)
 let qrqmul=(q,B)=>{let A=q.A,m=A.n,m2=2*m,n=A.m,mB2=2*B.n,rhs=B.m,x=zeroz(m,1),y=zeroz(rhs,m),r,j,k2;for(r=0;r<rhs;r++){x.fill(0);x.set(B.subarray(r*mB2,(1+r)*mB2));for(j=n-1;j>=0;j--){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]};for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}y.subarray(r*m2,(1+r)*m2).set(x)};return y}
 let qrsolve_=(Q,B)=>{let A=Q.A,d=Q.d,m=A.n,m2=2*m,n=A.m,n2=2*A.m,rhs=B.m,i,j,k,r,y=zeroz(A.m,rhs);errif(A.n!=B.n,"qrsolve: conform");
  for(r=0;r<rhs;r++){let x=B.subarray(r*m2,(1+r)*m2);for(j=0;j<n;j++){let Aj=A.subarray(j*m2,(1+j)*m2),a=0,b=0;for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*x[k2]+Aj[k3]*x[k3];b+=Aj[k2]*x[k3]-Aj[k3]*x[k2]};for(let k2=2*j;k2<m2;k2+=2){const k3=1+k2;x[k2]-=Aj[k2]*a-Aj[k3]*b;x[k3]-=Aj[k2]*b+Aj[k3]*a}}
   for(i=n-1;i>=0;i--){const i2=2*i,i3=1+i2;for(j=1+i;j<n;j++){const j2=2*j,j3=1+j2,ji=j*m2+i2;x[i2]-=A[ji]*x[j2]-A[ji+1]*x[j3];x[i3]-=A[ji]*x[j3]+A[ji+1]*x[j2]};let[a,b]=zdiv(x[i2],x[i3],d[i2],d[i3]);x[i2]=a;x[i3]=b};for(i=0;i<n2;i+=2){y[i*rhs+2*r]=x[i];y[i*rhs+2*r+1]=x[1+i]}}return y}
 let qrtest=_=>{A=randz(10,4),X=randz(4,2),B=dot(A,X);return Max(sub(X,solve(A,B)))}
-
-let qrbug=()=>{let U=mat(3,3,[0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0]);return qr(U)}
 
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
