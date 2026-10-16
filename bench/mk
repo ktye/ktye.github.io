@@ -1,4 +1,6 @@
-set -x
-n=524288
-echo $n|./k fft.k -e
-python3 fft.py $n
+#set -x
+#n=524288
+#echo $n|./k fft.k -e
+#python3 fft.py $n
+
+gcc -O3 -march=native fft.c -lfftw3 -lm -o fft 
