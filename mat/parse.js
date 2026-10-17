@@ -14,6 +14,7 @@ A[1,2]                 /at(A,1,2)
 A[x,]                  /row(A,x)
 A[,x]+=y               /setcol(A,x,add(col(A,x),y))
 A[1:2,:3]              /at(A,add(1,til(2-1)),til(3))
+T[,.ab.cd]             /col(T,["ab","cd"])
 A . B                  /dot(A,B)
 A'B                    /dot(trans(A),B)
 /A                     /sum(A)
@@ -77,12 +78,13 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  let push=x=>$[--$i]=x
  
  let t=()=>{let r                                      //t(): term
-  if(!L())return 0;r=pop();                         //next token
-  if(i(")}];",r)){push(r);return 0}                  //terminator
+  if(!L())return 0;r=pop();                            //next token
+  if(i(")}];",r)){push(r);return 0}                    //terminator
   r.verb=i(V,r);
   if(r=="{")r="{"+R()+"}"
   if(r=="(")r=R()                                      //(1) and (1;2;3) and (x;y):
   if(r[0]=="`")r=sl(r,1)                               //`js`
+  if(r.length>1&&r[0]==".")r=vs(r)                     //.a.b => ["a","b"]
   while(1){                                            //adverb and [application]
    if(!L())return r;let p=pop()
    if(p=="'")r=`trans(${r})`                           //derive
@@ -112,6 +114,7 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
  _=(x,y,z)=>sw(x,"at(")||sw(x,"col(")||sw(x,"row(")?as(x,y,z):y?`(${x}=${F(y,f2)}(${x},${z}))`:`(${x}=${z})`,
  as=(x,y,z, s)=>(s=w(sl(x,3)),`set${sl(x,0)},`+(y?`${F(y,f2)}(${x},${z})`: z)+")"),
+ vs=x=>"["+x.split(".").slice(1).map(x=>'"'+x+'"').join(",")+"]",
  I=(x,y,n)=>y[0]=="undefined"?`col(${x},${y[1]})`:`row(${x},${y[0]})`  //x[;y]
  
  return join(l(),";")

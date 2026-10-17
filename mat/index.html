@@ -159,7 +159,7 @@ axis(xmin,xmax,ymin...)
 
 let matjs
 let jw;
-let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):istab(x)?stab(x):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":Array.isArray(x)&&x.length==2&&x.every(x=>!isNaN(x))?znum(...x)+" ("+String(x)+")":JS(x)}),err=x=>{throw new Error(x)}
+let worker=_=>`let $L=20,$C=80,$=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x,$L,$C):istab(x)?stab(x,$L,$C):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":Array.isArray(x)&&x.length==2&&x.every(x=>!isNaN(x))?znum(...x)+" ("+String(x)+")":JS(x)}),err=x=>{throw new Error(x)}
  let fs={},JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  let save=(u,name)=>postMessage({t:3,r:[u.constructor==Uint8Array?u:"string"==typeof u?us(u):us(ser(u)),name]}) //download: e.g. save(randz(3,4),"x.mat")
  let P={Type:"xy",Lines:[{X:[1,2,3],Y:[3,-1,2]}]}
@@ -176,13 +176,13 @@ let worker=_=>`let $=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x):istab
   let[a,b,d]=nicelim(mi,ma);if(x0)a=x0;if(x1)b=x1;if(n)d=(b-a)/n; let X=Array(2*round((b-a)/d)).fill(0);for(i=0;i<X.length;i+=2){X[i]=a+(i>>1)*d+0.05*d;X[1+i]=X[i]+0.9*d}
   A.forEach((y,i)=>{let d1=1/d,h=Array(2*round((b-a)/d)).fill(0);y.map(y=>floor(d1*(y-a))).forEach(i=>h[1+2*i]++);p.Lines.push({X:X,Y:h,Id:1+i,Style:{Marker:{Marker:"bar",Size:1}}})});
   [p.Title,p.Xlabel,p.Ylabel]=$plotlabels(x);return p}
- onmessage=e=>{try{e.data.t?(e.data.name.endsWith(".mat")?globalThis[e.data.name.slice(0,-4)]=mats(su(e.data.u)):fs[e.data.name]=e.data.u):e.data.k?$krep(e.data.r):postMessage($(_=eval(e.data.r)))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
+ onmessage=e=>{try{e.data.t?(e.data.name.endsWith(".mat")?globalThis[e.data.name.slice(0,-4)]=mats(su(e.data.u)):fs[e.data.name]=e.data.u):postMessage(($L=e.data.l,$C=e.data.c,$(_=eval(e.data.r))))}catch(E){console.log(E);postMessage({t:0,r:E.message})}; };         //_ is the last result in the repl
  ${matjs}
  let x=iota(4),y=rand(4)
  ${ed.value}
 `
 let jstart=_=>{out.textContent="restart..";jw=new Worker(URL.createObjectURL(new Blob([worker()],{type:'text/javascript'})));jw.onmessage=x=>{3==x.data.t?download(...x.data.r):2==x.data.t?table(...x.data.r):x.data.t==-1?O(x.data.r):x.data.t?P(x.data.r):O(x.data.r);x.data.t?0:jp()};out.textContent=K?" ":">"}
-let js=x=>jw.postMessage({t:0,r:x}),intr=_=>{jw.terminate();jstart();}
+let js=x=>jw.postMessage({t:0,r:x,l:tty.l-2,c:tty.c}),intr=_=>{jw.terminate();jstart();}
 //fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
 fetch("mat.js").then(r=>r.text()).then(r=>{matjs=r;jstart()})
 
