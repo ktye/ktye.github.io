@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TOP_K 10
 
@@ -126,12 +127,6 @@ void fft(double *a, size_t n) {
     free(odd);
 }
 
-
-#include <math.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-
 /* Multiply (xr + i*xi) by (wr + i*wi). */
 static void cmul(double xr, double xi, double wr, double wi,
                  double *yr, double *yi)
@@ -223,35 +218,22 @@ void fft4(double *a, size_t n) { //radix-4
     free(tmp);
 }
 
-#include <math.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
 void fft_stockham(double *a, size_t n) {
-    if (a == NULL || n == 0 || (n & (n - 1)) != 0 || n == 1) return;
-    if (n > SIZE_MAX / (2 * sizeof(*a))) return;
-
     double *scratch = malloc(2 * n * sizeof(*scratch));
-    if (scratch == NULL) return;
-
     double *src = a;
     double *dst = scratch;
-
     size_t r = n / 2;
     size_t l = 1;
-
     while (r != 0) {
-        /* One twiddle step for this stage: exp(-i*pi/l). */
-        double step_angle = -M_PI / (double)l;
-        double step_re = cos(step_angle);
-        double step_im = sin(step_angle);
+        double angle = -M_PI / (double)l;
+        double step_re = cos(angle);
+        double step_im = sin(angle);
+
+        /* Carry w_j across groups; keep it fixed within each k loop. */
+        double w_re = 1.0;
+        double w_im = 0.0;
 
         for (size_t j = 0; j < l; ++j) {
-            double w_re = 1.0;
-            double w_im = 0.0;
-
             size_t jrs = j * (2 * r);
             size_t m = jrs / 2;
 
@@ -261,22 +243,20 @@ void fft_stockham(double *a, size_t n) {
                 double br = src[2 * (k + r)];
                 double bi = src[2 * (k + r) + 1];
 
-                /* t = (w_re + i*w_im) * (br + i*bi) */
                 double tr = w_re * br - w_im * bi;
                 double ti = w_re * bi + w_im * br;
 
-                dst[2 * m]             = ar + tr;
-                dst[2 * m + 1]         = ai + ti;
-                dst[2 * (m + n / 2)]   = ar - tr;
-                dst[2 * (m + n / 2)+1] = ai - ti;
-
-                /* Advance the twiddle by one step. */
-                double next_re = w_re * step_re - w_im * step_im;
-                w_im = w_re * step_im + w_im * step_re;
-                w_re = next_re;
+                dst[2 * m]              = ar + tr;
+                dst[2 * m + 1]          = ai + ti;
+                dst[2 * (m + n / 2)]    = ar - tr;
+                dst[2 * (m + n / 2) + 1] = ai - ti;
             }
-        }
 
+            /* Advance from w_j to w_(j+1), once per group. */
+            double next_re = w_re * step_re - w_im * step_im;
+            w_im = w_re * step_im + w_im * step_re;
+            w_re = next_re;
+        }
         double *swap = src;
         src = dst;
         dst = swap;
@@ -284,7 +264,6 @@ void fft_stockham(double *a, size_t n) {
         r /= 2;
         l *= 2;
     }
-
     if (src != a) memcpy(a, src, 2 * n * sizeof(*a));
     free(scratch);
 }
