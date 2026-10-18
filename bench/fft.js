@@ -1,4 +1,4 @@
-const pi=Math.PI,cos=Math.cos,sin=Math.sin,abs=Math.abs,hypot=Math.hypot,imul=Math.imul,zeros=n=>new Float64Array(n)
+const pi=Math.PI,cos=Math.cos,sin=Math.sin,abs=Math.abs,hypot=Math.hypot,imul=Math.imul,min=Math.min,zeros=n=>new Float64Array(n)
 const fft=a=>{let n=a.length>>1,s=a,d=zeros(2*n),r=n>>1,l=1;while(r){let p=-pi/l,u=cos(p),v=sin(p),x=1,y=0;
  for(let j=0;j<l;j++){let m=j*r,m2=2*m;for(let k=m2;k<r+m2;k++,m++){
   let ar=s[2*k],ai=s[2*k+1],br=s[2*(k+r)],bi=s[2*(k+r)+1],tr=x*br-y*bi,ti=x*bi+y*br,mm=2*m;d[mm]=ar+tr;d[1+mm]=ai+ti;d[mm+n]=ar-tr;d[1+mm+n]=ai-ti;}
@@ -12,8 +12,15 @@ const q=1/32768,rng=()=>(s=(imul(1103515245,s)+12345)>>>0,s>>>16)
 let x=zeros(n);for(let i=0;i<n;i++)x[i]=q*rng()-1;
 let z=rfft(x),m=(n>>1)-1,_n=2/n,a=zeros(m);for(let i=0;i<m;i++)a[i]=_n*(i?hypot(z[2*i],z[2*i+1]):abs(z[0]));
 
-let grade=x=>Array.from(x.keys()).sort((a,b)=>x[b]-x[a])
-let k=grade(a).slice(0,10)
-console.log(k.map(k=>k.toFixed(1)+"\t"+a[k].toFixed(9)).join("\n"))
+
+let A=a.slice(0,10),k=new Int32Array(10).map((_,i)=>i);
+let j=0,l,p=(i,x)=>{A[j]=x;k[j]=i;l=A[0];j=0;for(let k=1;k<10;k++)if(A[k]<l){l=A[k];j=k}}
+p(0,A[0]);
+for(let i=10;i<m;i++)if(a[i]>l)p(i,a[i]);
+
+let grade=x=>Array.from(x.keys()).sort((a,b)=>x[b]-x[a]) //that's too slow
+let i=grade(A).slice(0,10)
+
+console.log(i.map(i=>k[i].toFixed(1)+"\t"+A[i].toFixed(9)).join("\n"))
 
 //deno fft.js 8388608
