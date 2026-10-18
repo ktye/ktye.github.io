@@ -1,20 +1,24 @@
 let jsparse=x=>{const tests=`1                      /1
 1+2                    /add(1,2)
-1 2 3                  /mat(1,3,[1,2,3])
+1 2 3                  /mat([[1,2,3]])
 1a90 2i3               /mat(1,2,[0,1,2,3])
 ?10a                   /randz(10)
 x+y                    /add(x,y)
 x/y                    /div(x,y)
+1+\\2                   /add(1,print(2))
 -A                     /neg(A)
 \`js\`                   /js
-2 3#A                  /reshape(A,...mat(1,2,[2,3]))
+2 3#A                  /reshape(A,...mat([[2,3]]))
 -2^A                   /reshape(A,-2)
 A[0]                   /at(A,0)
 A[1,2]                 /at(A,1,2)
 A[x,]                  /row(A,x)
 A[,x]+=y               /setcol(A,x,add(col(A,x),y))
-A[1:2,:3]              /at(A,add(1,til(2-1)),til(3))
+A[1:2,:3]              /at(A,range(1,2),til(3))
+A[1]=4                 /set(A,1,4)
+T={a:1 2,b:3 4}        /(T={a:mat([[1,2]]),b:mat([[3,4]])})
 T[,.ab.cd]             /col(T,["ab","cd"])
+T|T                    /hcat(T,T)
 A . B                  /dot(A,B)
 A'B                    /dot(trans(A),B)
 /A                     /sum(A)
@@ -62,17 +66,17 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  $=$.map(zz)
  let k=scan((x,y)=>x+x*y)($.map(x=>+(swz(x)||nm(x)))),ax=x=>x.constructor===Array,                     
  b=(x,y,s,q)=>x+(q?q[0]:"(")+(ax(y)?y.join(s?s:","):y)+(q?q[1]:")"),B=x=>b("",x)      //join numeric vectors
- $=$.reduce((a,x,j)=>{a.push(1==k[j]?[x]:1<k[j]?[...a.pop(),x]:x);return a},[]).map(x=>(ax(x)&&1==x.length)?x[0]:ax(x)?`mat(1,${x.length},${b("",x.some(swz)?unz(x):x,",","[]")})`:x)
- $=$.map(x=>new String(x))                                        //we use String object to mark verbs instead of primitive strings
+ $=$.reduce((a,x,j)=>{a.push(1==k[j]?[x]:1<k[j]?[...a.pop(),x]:x);return a},[]).map(x=>ax(x)&&1==x.length?x[0]:ax(x)?(x.some(swz)?`mat(1,${x.length},${b("",unz(x),",","[]")})`:`mat([${b("",x,",","[]")}])`):x)
+ $=$.map(x=>new String(x))
 
  
  let V=":+-*/&|<>=~.!@?^#_,$\\'",xyz=[],
- f1="til Abs neg sqr sum where rev up down freq not value til first rand sort dims floor list string qr each".split(" "),
- f2="dex add sub mul div min max less more eql match dot dict at find cut reshape drop cat print solve both".split(" "),
+ f1="til Abs neg sqr sum where rev up down freq not value til first rand sort dims floor list string print each".split(" "),
+ f2=": add sub mul div min hcat less more eql match dot dict at find cut reshape drop cat print solve both".split(" "),
  F=(x,f)=>{let i=V.indexOf(x);return -1<i?f[i]:x}
 
  while($.length&&$.at(-1)==";")$.pop();
- let $i=0,$n=$.length
+ let $i=0,$n=$.length,br=0
  let L=()=>$i>=$n?0:$[$i]
  let pop=()=>$[$i++]
  let push=x=>$[--$i]=x
@@ -89,7 +93,7 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
    if(!L())return r;let p=pop()
    if(p=="'")r=`trans(${r})`                           //derive
    //else if(p=="["){let i=$i;r=a(r);if($[$i]=="="||$[1+$i]=="="){$i=i;r=as(r)}}      //index index-asn
-   else if(p=="[")r=a(r)                               //index
+   else if(p=="["){let b=br;br=1;r=a(r);br=b}               //index  [x:y] is range but {a:1 2} is a dict
    else{push(p);break}}
   return r},
  
@@ -103,8 +107,8 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  c=(x,y)=>v(B("(x,y)=>"+(i(f2,y)?cx(x,F(y,f2)+"(x,y)"):sw(y,"(x=>")?cx(x,sl(y,4)):sw(y,"((x,y)=>")?cx(x,sl(y,8)):cx(x,y+"(x)")))),
  cx=(x,y)=>sw(x,"(x=>")?sl(x,4).replace("(x,","("+y+","):b(i(V,x)?F(x,f1):x,y),                  //c:composition
  M=(x,y)=>x=="?"&&sw(y,"complex")?`randz(${y.slice(8,y.indexOf(","))})`:b(F(x,f1),y), //monadic
- D=(x,y,z)=>x=="#"?`reshape(${y},...${z})`:x=="^"?`reshape(${y},${z})`:x==":"?g(z,y):b(F(x,f2),[z,y]), //dyadic
- g=(x,y)=>`add(${x},til(${y}-${x}))`  //range x:y
+ D=(x,y,z)=>x=="#"?`reshape(${y},...${z})`:x=="^"?`reshape(${y},${z})`:x==":"?(br?g(z,y):`${z}:${y}`):b(F(x,f2),[z,y]), //dyadic
+ g=(x,y)=>`range(${x},${y})` //x:y
  j=(x,y)=>sw(y,"trans(")?`dot(${y},${x})`:b(y,x),                   //jux
  p=(x,y)=>v(B(b("x=>"+F(y,f2),["x",x]))),                                                        //project 1+
  v=x=>((x=new String(x)).verb=true,x),S=x=>String(x),n=x=>((x=new String(x)).verb=false,x),   //mark verb/noun
@@ -113,7 +117,7 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
  _=(x,y,z)=>sw(x,"at(")||sw(x,"col(")||sw(x,"row(")?as(x,y,z):y?`(${x}=${F(y,f2)}(${x},${z}))`:`(${x}=${z})`,
- as=(x,y,z, s)=>(s=w(sl(x,3)),`set${sl(x,0)},`+(y?`${F(y,f2)}(${x},${z})`: z)+")"),
+ as=(x,y,z, s)=>(s=w(sl(x,3)),`set${sl(x,x[0]=="a"?2:0)},`+(y?`${F(y,f2)}(${x},${z})`: z)+")"),
  vs=x=>"["+x.split(".").slice(1).map(x=>'"'+x+'"').join(",")+"]",
  I=(x,y,n)=>y[0]=="undefined"?`col(${x},${y[1]})`:`row(${x},${y[0]})`  //x[;y]
  
@@ -125,7 +129,7 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
 let/*k*/
 atom  =x=>"number"===typeof x||"string"===typeof(x)&&1==x.length,
 atomic=f=>(x,y)=>atom(x)?(atom(y)?f(x,y):y.map(y=>atomic(f)(x,y))):atom(y)?x.map(x=>atomic(f)(x,y)):x.map((x,i)=>atomic(f)(x,y[i])),
-curry =(f,a,i)=>(i=a.map((x,i)=>x==undefined?i:-1).filter(x=>-1<x),(...x)=>(x.forEach((x,j)=>a[i[j]]=x),f(...a))), 
+//curry =(f,a,i)=>(i=a.map((x,i)=>x==undefined?i:-1).filter(x=>-1<x),(...x)=>(x.forEach((x,j)=>a[i[j]]=x),f(...a))), 
 rec   =f=>x=>atom(x)?f(x):x.map(rec(f)),
 
 each  =f=>(...x)=>1==x.length?(atom(x[0])?f(x[0]):x[0].map(x=>f(x))):flip(x).map(x=>f(...x)),
@@ -140,9 +144,9 @@ prior =(f,y)=>x=>x.map((x,i,a)=>f(i?a[i-1]:y?y:a[0],x)),
 id    =x=>x,
 type  =x=>x.constructor.name,
 neg   =rec(x=>-x),
-sqr   =rec(x=>x*x),
-sqrt  =rec(Math.sqrt),
-abs   =rec(Math.abs),
+//sqr   =rec(x=>x*x),
+//sqrt  =rec(Math.sqrt),
+//abs   =rec(Math.abs),
 flip  =x=>atom(x)?x:Array(over(max)(each(count)(x))).fill(0).map((_,i)=>x.map(x=>atom(x)?x:x[i])),
 rev   =x=>atom(x)?x:x.toReversed(),
 up    =x=>til(count(x)).sort((a,b)=>(a=x[a])<(b=x[b])?-1:a>b?1:0),
