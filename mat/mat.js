@@ -109,17 +109,11 @@ let att=(t,i,j)=>{if(j==undefined||j==-1)j=keys(t);if(isstr(j))j=[j];let d={};
 }
 let select=(t,...c)=>{let d={};c.forEach(k=>d[k]=copy(t[k]));return d}
 
-
-let fft=(x,ini)=>{ //fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0]) or reuse: f=fft(8);fft([1,0,2,0,3,0,4,0,5,0,6,0,7,0,8,0],f)
- let init=N=>{let l=log2(N),P=Array(8).fill(0),n=1,S=new Float64Array(N),C=new Float64Array(N);for(let p=0;p<l;p++){for(let i=0;i<n;i++){P[i]<<=1;P[i+n]=1+P[i]};n<<=1};for(let i=0;i<N;i++){const p=-2*pi*i/N;C[i]=cos(p);S[i]=sin(p)};return[l,P,C,S,N]}
- let perm=(x,P)=>{P.forEach((p,i)=>{if(i<p){const a=2*i,b=1+a,c=2*p,d=1+c,A=x[a],B=x[b];x[a]=x[c];x[b]=x[d];x[c]=A;x[d]=B}})}
- if(isnum(x))return init(x);let[l,P,C,S,N]=ini?ini:init(x.length/2);perm(x,P);let n=1,s=N
- for(let p=1;p<=l;p++){s>>=1;for(let b=0;b<s;b++){const o=2*b*n;for(let k=0;k<n;k++){const i=(k+o)<<1,j=i+(n<<1),ks=k*s,kn=s*(k+n);let xi0=x[i],xi1=x[1+i],xj0=x[j];x[i]+=C[ks]*x[j]-S[ks]*x[1+j];x[1+i]+=C[ks]*x[1+j]+S[ks]*x[j];x[j]=xi0+C[kn]*x[j]-S[kn]*x[1+j];x[1+j]=xi1+C[kn]*x[1+j]+S[kn]*xj0}};n<<=1}
- return x}
-
+//stockham
+let fft=z=>fft_(copy(z)),fft_=a=>{let n=a.length>>1,s=a,d=zeroz(a.m,a.n),r=n>>1,l=1;while(r){let p=-pi/l,u=cos(p),v=sin(p),x=1,y=0;for(let j=0;j<l;j++){let m=j*r,m2=2*m;for(let k=m2;k<r+m2;k++,m++){let ar=s[2*k],ai=s[2*k+1],br=s[2*(k+r)],bi=s[2*(k+r)+1],tr=x*br-y*bi,ti=x*bi+y*br,mm=2*m;d[mm]=ar+tr;d[1+mm]=ai+ti;d[mm+n]=ar-tr;d[1+mm+n]=ai-ti;}let t=x*u-y*v;y=x*v+y*u;x=t;}[s,d]=[d,s];r>>=1;l<<=1;}return s}
+let rfft=x=>{let n=x.length,m=n>>1,k,r=zeroz(m,1),a,b=zeroz(m,1);b.set(x);a=fft_(b);r[0]=a[0]+a[1];for(k=1;k<m;k++){let q=m-k,k2=2*k,c=a[k2],d=a[k2+1],e=a[2*q],f=-a[2*q+1],g=c-e,h=d-f,p=-2*pi*k/n,t=cos(p),u=sin(p),v=t*g-u*h,w=t*h+u*g;r[k2]=0.5*(c+e+w);r[k2+1]=0.5*(d+f-v);}return r}
 let rfft2=(r,z,f)=>{let i,k,j=0,n=z.length;z=fft(z,f);for(i=0;i<n;j+=2,i++){k=i?2*n-j:0;r[i]=0.5*hypot(z[j]+z[k],z[1+j]-z[1+k]);r[i+n]=0.5*hypot(z[j]-z[k],z[1+j]+z[1+k])}}
 let afft=(x,n)=>{let z=zeroz(n),r=zeros(2*n),y=zeros(n),n2=2*n;N=x.length,m=floor(N/(2*n)),s=1/m,i,j,f=fft(n);for(i=0;i<m;i++){for(j=0;j<n;j++){z[2*j]=x[i];z[2*j+1]=x[i+n]};rfft2(r,z,f);for(j=0;j<n;j++)y[j]+=r[j]+r[j+n]}return mulf(1/m,y)}
-
 
 /*
 let hanning=n=>ones(n) //todo
@@ -171,3 +165,6 @@ let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performa
 
 let testmat=()=>{let r="";[qrtest,svdtest].forEach(f=>{console.log(f.name);let e=f();errif(e>1e-14,f.name);r+=`${f.name}: ${e}\n`});return r}
 //deno repl --eval-file=mat.js
+
+
+
