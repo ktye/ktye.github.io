@@ -1,6 +1,16 @@
 #set -x
 #n=524288
+#n=2097152
 #echo $n|./k fft.k -e
 #python3 fft.py $n
 
-gcc -O3 -march=native fft.c -lfftw3 -lm -o fft 
+#gcc -O3 -march=native fft.c -lfftw3 -lm -o fft 
+
+#time echo $n|./k fft.k -e
+#time echo $n|./k fft2.k -e
+
+# wget github.com/ktye/i/releases/download/latest/kv.c
+#clang -okv -O3 -mavx2 kv.c -lm
+
+#gcc -ok -O3 k.c -lm
+gcc -offt2 -O3 fft2.c -lm
