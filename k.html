@@ -31,13 +31,12 @@ syms=`  + - * %   ! & | < > =  RUN
 
   ~ , ^ #  _ $ ? @ .  ' / \\
 
-  () {} []  @[] .[] $[]      ⏎
+  () {} []  @[] .[] $[]  ;   ⏎
 
 ' " \` 0 1 2 3 4 5 6 7 8 9 . :
 
- a  b  c         x  y  z
-
- a: b: c:        x: y: z:
+ a  b  c    f     x  y  z
+ a: b: c:   f:    x: y: z:
 `
 
 kenv={env:{ 
@@ -340,9 +339,7 @@ key table: aggregate by type
 
 
 <script>
-i.addEventListener('paste',e=>{e.preventDefault();
- let t=e.clipboardData.getData("text/plain"),s=window.getSelection()
- if(s.rangeCount){s.deleteFromDocument();s.getRangeAt(0).insertNode(document.createTextNode(t))};o.textContent=""})
+//i.addEventListener('paste',e=>{e.preventDefault(); let t=e.clipboardData.getData("text/plain"),s=window.getSelection() if(s.rangeCount){s.deleteFromDocument();s.getRangeAt(0).insertNode(document.createTextNode(t))};o.textContent=""})
 o.addEventListener('dblclick',   e=>{e.preventDefault();o.textContent="";e=i.value?kinit(i.value):0})
 //o.addEventListener('contextmenu',e=>{e.preventDefault();o.textContent="";e=i.value?kinit(i.value):0})
 o.addEventListener('click',e=>{cnv.style.zIndex=-1;})
