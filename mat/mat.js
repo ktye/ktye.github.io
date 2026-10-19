@@ -79,8 +79,8 @@ let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x
 let ismat=x=>x&&x.constructor==Float64Array&&("m"in x)&&("n"in x),isnum=x=>"number"==typeof x,isint=Number.isInteger,isstr=x=>"string"==typeof x
 let istab=x=>x&&"object"==typeof x&&Object.getPrototypeOf(x)==Object.prototype
 let mats=s=>{/*1.2 1a30 1+2i*/s=s.trim();let m=1,a=0,j=0;for(let i=0;i<s.length;i++){m+=s[i]=='\n';a+=s[i]=='a';j+=s[i]=='i'};if(j)s=s.replace("i", "").replace(/(?<=\d)([+-])/," $1");let r=new Float64Array(s.split(/[a\s]+/).map(s=>+s)),n=floor(r.length/m);errif(n*m!=r.length,"rectangular");errif(a&&a!=r.length/2,"a-separator");errif(j&&j!=r.length/2,"j-separator");if(a==r.length/2){n>>=1;r.z=1;for(let i=0;i<r.length;i+=2)[r[i],r[1+i]]=[r[i]*cos(r[1+i]*pi_),r[i]*sin(r[1+i]*pi_)]}else if(j==r.length/2){n>>=1;r.z=1}r.m=m;r.n=n;return r}
-let _360=s=>s.startsWith("360")?s.slice(2):s
-let snum0=x=>{let f=n=>x.toFixed(n),e=n=>x.toExponential(n),a=abs(x);return !isFinite(a)?String(a).toLowerCase().replace("infinity","inf"):a>=1e4?e(5):a&&a<=1e-2?e(4):f(5)}
+let _360=s=>s.startsWith("360")?s.slice(2):s,snme3_=a=>{let e=floor(log10(a)),r=(e%3+3)%3,E=e-(r>=0?r:r+3),A=abs(E),m=a/10**E,s=E>=0?'+':'',p=6-abs(r)-(A>99?2:A>9?1:0);return m.toFixed(p)+"e"+s+E} //
+let snum0=x=>{let f=n=>x.toFixed(n),e=()=>snme3_(x)/*x.toExponential(4)*/,a=abs(x);return !isFinite(a)?String(a).toLowerCase().replace("infinity","inf"):a>=1e4?e():a&&a<=1e-2?e():f(5)}
 let znum0=(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"°"+_360(a.toFixed(0)).padStart(3,"0")}
 let znuma=(n)=>(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"°"+_360(a.toFixed(n))}
 let znumi=(x,y)=>snum(x)+(y<0?"":"+")+snum(y)+"i",znumz=(x,y)=>snum(x)+" "+snum(y),snum=snum0,znum=znum0
@@ -92,7 +92,7 @@ let scol_=(r,x,s,mi)=>{let z=x.z,m=r.length,i,a=Array(m).fill("");if((!z)&&snum=
 let smat=(x,L,C)=>{if(!ismat(x))return"(no mat)";if(!(x.m*x.n))return"(empty "+x.m+"x"+x.n+")";C=C||80;L=L||20;let ld="";L=x.m>L?(ld="\n.. ("+x.m+"x"+x.n+")",L-1):x.m;
  let l=til(L),r=Array(L).fill(""),c=0,s,i,j,n=0,rd=0;for(i=0;i<x.n;i++,n++){if(r[0].length>=C){rd=1;break};scol_(r,at(x,til(L),i),i?" ":"")};
  r=r.map(x=>rd||x.length>C?x.slice(0,C-1)+"·":x);return r.join("\n")+ld}
-
+ 
 let table=(k,v)=>{let d={};k.forEach((k,i)=>d[k]=copy(v[i]));return d},keys=Object.keys,vals=Object.values
 let tabcount=t=>{let k=keys(t);if(!k.length)return 0;let v=t[k[0]];return ismat(v)&&v.z?v.length>>1:v.length}
 let stab=(t,L,C)=>{if(!istab(t))return"(no table)";let k=keys(t),tc=tabcount(t);if(!k.length)return"(empty table)";C=C||80;L=L||20;L-=2;let ld="";L=tc>L?(ld="\n.."+tc+"rows "+k.length+"cols",L-1):tc;
