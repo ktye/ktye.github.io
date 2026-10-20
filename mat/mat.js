@@ -1,5 +1,6 @@
 let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI,pi_=pi/180,_pi=180/pi
-let map=(a,f)=>mat(a.m,a.n,a.map(f)),Sin=x=>map(x,sin),Cos=x=>map(x,cos),Sqrt=x=>map(x,sqrt),Log=x=>map(x,log),Log10=x=>map(x,log10),Log2=x=>map(x,log2),Exp=x=>map(x,exp),Sign=x=>map(x,sign),Floor=x=>map(x,floor),Ceil=x=>map(x,ceil),Round=x=>map(x,round),neg=x=>map(x,x=>-x)
+let map=(a,f,z)=>{errif(a.z&&!z,"map not defined for complex: "+f);let i,r=a.z?zeroz(a.m,a.n):zeros(a.m,a.n);if(a.z){for(i=0;i<a.length;i+=2)[r[i],r[1+i]]=z(a[i],a[1+i])}else{for(i=0;i<a.length;i++)r[i]=f(a[i])}return r}
+let Sin=x=>map(x,sin),Cos=x=>map(x,cos),Sqrt=x=>map(x,sqrt),Log=x=>map(x,log),Log10=x=>map(x,log10),Log2=x=>map(x,log2),Exp=x=>map(x,exp),Sign=x=>map(x,sign),Floor=x=>map(x,floor),Ceil=x=>map(x,ceil),Round=x=>map(x,round),Sqr=x=>map(x,x=>x*x,(x,y)=>[x*x-y*y,2*x*y]),neg=x=>map(x,x=>-x)
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let zinv=(a,b)=>{let r,d;if(abs(a)>abs(b)){r=b/a;d=a+b*r;return[1/d,-r/d]}else{r=a/b;d=b+a*r;return[r/d,-1/d]}}
 let errif=(x,e)=>{if(x)throw new Error(e)},conform=(x,y)=>errif(x.m!=y.m||x.n!=y.n,"conform")
@@ -51,11 +52,11 @@ let subz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i+=2){y[i]-=a;y[1+i]-=b}retur
 let mul=(x,y)=>scalar(x,y,mulF,mulf,mulZ,mulz,(x,y)=>x*y,(x,y)=>[x[0]*y[0]-x[1]*y[1],x[0]*y[1]+x[1]*y[0]])
 let mulF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x[i];return y}
 let mulf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x;return y}
-let mulZ=(x,y)=>{for(let i=0;i<y.length;i++){let a=x[i],b=x[1+i],c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
+let mulZ=(x,y)=>{for(let i=0;i<y.length;i+=2){let a=x[i],b=x[1+i],c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
 let mulz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i++){let c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
 let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1]),y),(x,y)=>x/y,zdiv)
 let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
-let divZ=(x,y)=>{for(let i=0;i<y.length;i++)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
+let divZ=(x,y)=>{for(let i=0;i<y.length;i+=2)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
 
 let Abs=x=>{let r=zeros(x.m,x.n),i,j=0;if(x.z)for(i=0;i<x.length;i+=2)r[j++]=hypot(x[i],x[1+i]);else for(i=0;i<x.length;i++)r[i]=abs(x[i]);return r}
 let Max=x=>Math.max(...x),RowMax=x=>{let m=x.m,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.max(...x.subarray(i*n,(1+i*n)));return r},ColMax=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.max(r[j],x[k++]);return r}
@@ -80,7 +81,7 @@ let ismat=x=>x&&x.constructor==Float64Array&&("m"in x)&&("n"in x),isnum=x=>"numb
 let istab=x=>x&&"object"==typeof x&&Object.getPrototypeOf(x)==Object.prototype
 let mats=s=>{/*1.2 1a30 1+2i*/s=s.trim();let m=1,a=0,j=0;for(let i=0;i<s.length;i++){m+=s[i]=='\n';a+=s[i]=='a';j+=s[i]=='i'};if(j)s=s.replace("i", "").replace(/(?<=\d)([+-])/," $1");let r=new Float64Array(s.split(/[a\s]+/).map(s=>+s)),n=floor(r.length/m);errif(n*m!=r.length,"rectangular");errif(a&&a!=r.length/2,"a-separator");errif(j&&j!=r.length/2,"j-separator");if(a==r.length/2){n>>=1;r.z=1;for(let i=0;i<r.length;i+=2)[r[i],r[1+i]]=[r[i]*cos(r[1+i]*pi_),r[i]*sin(r[1+i]*pi_)]}else if(j==r.length/2){n>>=1;r.z=1}r.m=m;r.n=n;return r}
 let _360=s=>s.startsWith("360")?s.slice(2):s,snme3_=a=>{let e=floor(log10(a)),r=(e%3+3)%3,E=e-(r>=0?r:r+3),A=abs(E),m=a/10**E,s=E>=0?'+':'',p=6-abs(r)-(A>99?2:A>9?1:0);return m.toFixed(p)+"e"+s+E} //
-let snum0=x=>{let f=n=>x.toFixed(n),e=()=>snme3_(x)/*x.toExponential(4)*/,a=abs(x);return !isFinite(a)?String(a).toLowerCase().replace("infinity","inf"):a>=1e4?e():a&&a<=1e-2?e():f(5)}
+let snum0=x=>{if(x<0)return"-"+snum0(-x);let f=n=>x.toFixed(n),e=()=>snme3_(x)/*x.toExponential(4)*/;return isNaN(x)?"nan":!isFinite(x)?"inf":x>=1e4?e():x&&x<=1e-2?e():f(5)}
 let znum0=(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"°"+_360(a.toFixed(0)).padStart(3,"0")}
 let znuma=(n)=>(x,y)=>{let r=hypot(x,y),a=atan2(y,x)/pi*180;if(a<0)a+=360;return snum(r)+"°"+_360(a.toFixed(n))}
 let znumi=(x,y)=>snum(x)+(y<0?"":"+")+snum(y)+"i",znumz=(x,y)=>snum(x)+" "+snum(y),snum=snum0,znum=znum0
@@ -142,9 +143,9 @@ let qrtest=_=>{A=randz(10,4),X=randz(4,2),B=dot(A,X);return Max(sub(X,solve(A,B)
 
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
-let svd=(A,s)=>svd_(copy(A),s),svdt=(A,s)=>svdt_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A),s);return[tranz(U),S,V]}
+let svd=(A,s)=>svd_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");if(A.m<A.n){console.log("wide");A=conj(A);if(s)return svdt_(A,1);let[U,S,V]=svdt_(A);return[V,S,tranz(U)]};if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A));return[tranz(U),S,V]}
 let svdqr=(A,s)=>{let q=qrt(A),R=rqr(q);if(s)return svdt_(R,s);let[U1,S,V]=svdt_(R);return[qrqmul(q,U1),S,V]}
-let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);
+let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);   //A(column major), returns UT,diag(S),V(not VH)
  if(A.n>A.m)return svdqr(A,s);
  let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
  let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
@@ -156,9 +157,15 @@ let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=
  let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,tranz(W)]}
 let svdtest=()=>{let A=randz(5,3),[U,S,V]=svd(A),AA=dot(dot(U,diag(S)),herm(V));return Max(Abs(sub(A,AA)))}
 
+/*
+let A=complex(mat([[1,-2,2],[1,4,-4],[1,-3,3]]))
+let[U,S,V]=svd(A)
+let r=mulf(1/S[0],S).filter(x=>x>0.01).length
+let V1=col(V,til(r))
+Sqr(Abs(V1))
+console.log("V1",V1)
+*/
 
-let Rand=(m,n)=>Exp(mul(10,rand(m,n)))
-let t={alpha:Rand(5),beta:Exp(Exp(randz(5))),ceta:rand(5)}
 
 let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performance.now()-t0}
 
