@@ -1,4 +1,4 @@
-#set -x
+set -x
 #n=524288
 #n=2097152
 #echo $n|./k fft.k -e
@@ -13,4 +13,7 @@
 #clang -okv -O3 -mavx2 kv.c -lm
 
 #gcc -ok -O3 k.c -lm
-gcc -offt2 -O3 fft2.c -lm
+#gcc -offt2 -O3 fft2.c -lm
+
+#run with: OMP_NUM_THREADS=4
+gcc -offt4 -O3 -march=native fft4.c -lfftw3_omp -lfftw3 -lm
