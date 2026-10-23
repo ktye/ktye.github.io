@@ -159,7 +159,7 @@ axis(xmin,xmax,ymin...)
 
 let matjs
 let jw;
-let worker=_=>`let $L=20,$C=80,$=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x,$L,$C):istab(x)?stab(x,$L,$C):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":Array.isArray(x)&&x.length==2&&x.every(x=>!isNaN(x))?znum(...x)+" ("+String(x)+")":JS(x)}),err=x=>{throw new Error(x)}
+let worker=_=>`let $L=20,$C=80,$=x=>({t:0,r:x===undefined?"undefined":ismat(x)?smat(x,$L,$C):istab(x)?stab(x,$L,$C):"string"==typeof x?x:"function"==typeof x?x.toString():"bigint"==typeof x?String(x)+"n":Array.isArray(x)&&x.length==2&&x.every(isnum)?znum(...x)+" ("+String(x)+")":JS(x)}),err=x=>{throw new Error(x)}
  let print=(x,m)=>(m=$(x),m.p=1,m.r="┌\\n"+m.r+"\\n└\\n",postMessage(m),x),b_=x=>x&&x[0]=="{"?"("+x+")":x
  let fs={},JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  let save=(u,name)=>postMessage({t:3,r:[u.constructor==Uint8Array?u:"string"==typeof u?us(u):us(ser(u)),name]}) //download: e.g. save(randz(3,4),"x.mat")

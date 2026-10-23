@@ -34,9 +34,9 @@ let herm=A=>conj_(tranz(A))
 let phase=A=>{if(!ismat(A))return isnum(A)?0:atan2(A[1],A[0]);if(!A.z)return zeros(A.m,A.n);let r=zeros(A.m,A.n),i,k=0;for(i=0;i<A.length;i+=2,k++)r[k]=atan2(A[1+i],A[i]);return r}
 let angle=A=>{if(!ismat(A)){let r=_pi*phase(A);return r<0?360+r:r};let r=phase(A);for(let i=0;i<r.length;i++)r[i]=r[i]<0?360+r[i]*_pi:r[i]*_pi;return r}
 
-let index=(A,i,j)=>{let n2=A.z?2*A.n:A.n,I=n=>new Int32Array(n),ij=(x,n)=>x==-1?I(n).map((_,i)=>i):isnum(x)?I(1).fill(x):new Int32Array([...x]);i=ij(i,A.m);j=ij(j,A.n);if(A.z){let jj=I(2*j.length),k=0;for(let i=0;i<j.length;i++){jj[k++]=2*j[i];jj[k++]=1+2*j[i]}j=jj}let ni=i.length,nj=j.length,r=I(ni*nj),a,b,ai,rr=0;errif(min(...i)<0||max(...i)>=A.m,"row index");errif(min(...j)<0||max(...j)>=n2,"col index");for(a=0;a<ni;a++){ai=i[a]*n2;for(b=0;b<nj;b++)r[rr++]=ai+j[b]};return[ni,r]}
-let at=(A,i,j)=>{if(istab(A))return att(A,i,j);let[m,ia]=index(A,i,j==undefined?-1:j),n=ia.length/(A.z?2*m:m),r=A.z?zeroz(m,n):zeros(m,n),k;for(k=0;k<r.length;k++)r[k]=A[ia[k]];return r}
-let set=(A,i,j,y)=>{if(y==undefined){y=j;j=0};let ia=index(A,i,j),k=0;if(ismat(y)){errif(y.length!=ia.length,"conform");for(let i=0;i<ia.length;i++)A[ia[i]]=y[k++]};if(A.z);for(i=0;i<ia.length;i++){k=2*ia[i];A[k++]=y[0];A[k]=y[1]};for(let i=0;i<ia.length;i++)A[ia[i]]=y[i];return y}
+let index=(A,i,j)=>{let n=A.n,I=n=>new Int32Array(n),ij=(x,n)=>x==-1?I(n).map((_,i)=>i):isnum(x)?I(1).fill(x):new Int32Array([...x]);i=ij(i,A.m);j=ij(j,A.n);let ni=i.length,nj=j.length,r=I(ni*nj),a,b,rr=0;errif(min(...i)<0||max(...i)>=A.m,"row index");errif(min(...j)<0||max(...j)>=n,"col index");for(a=0;a<ni;a++){let ai=i[a]*n;for(b=0;b<nj;b++)r[rr++]=ai+j[b]};return[ni,r]}
+let at=(A,i,j)=>{if(istab(A))return att(A,i,j);let[m,ia]=index(A,i,j==undefined?-1:j),n=ia.length/m,r=A.z?zeroz(m,n):zeros(m,n),k;if(A.z){for(k=0;k<r.length;k++){j=2*ia[k];r[2*k]=A[j];r[2*k+1]=A[1+j]}return r};for(k=0;k<r.length;k++)r[k]=A[ia[k]];return r}
+let set=(A,i,j,y)=>{if(y==undefined){y=j;j=0};let[m,ia]=index(A,i,j),ii,k=0;if(ismat(y)){errif(y.length!=(A.z?2:1)*ia.length,"conform");ia.forEach(A.z?(i,k)=>{A[2*i]=y[2*k];A[2*i+1]=y[2*k+1]}:(i,k)=>A[i]=y[k]);return A}ia.forEach(A.z?i=>{A[2*i]=y[0];A[2*i+1]=y[1]}:i=>A[i]=y);return A}
 let row=(A,i)=>at(A,i,-1),col=(A,i)=>at(A,-1,i),setrow=(A,i,y)=>set(A,i,-1,y),setcol=(A,i,y)=>set(A,-1,i,y)
 
 let scalar=(x,y,F,f,Z,z,a,b)=>ismat(x)?(conform(x,y),y.z?(Z(x,copy(y))):F(x,copy(y))):ismat(y)?y.z?z(x,copy(y)):f(x,copy(y)):
@@ -143,7 +143,7 @@ let qrtest=_=>{A=randz(10,4),X=randz(4,2),B=dot(A,X);return Max(sub(X,solve(A,B)
 
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
-let svd=(A,s)=>svd_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");if(A.m<A.n){console.log("wide");A=conj(A);if(s)return svdt_(A,1);let[U,S,V]=svdt_(A);return[V,S,tranz(U)]};if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A));return[tranz(U),S,V]}
+let svd=(A,s)=>svd_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");errif(!A.m,"empty svd");if(A.m<A.n){A=conj(A);if(s)return svdt_(A,1);let[U,S,V]=svdt_(A);return[V,S,tranz(U)]};if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A));return[tranz(U),S,V]}
 let svdqr=(A,s)=>{let q=qrt(A),R=rqr(q);if(s)return svdt_(R,s);let[U1,S,V]=svdt_(R);return[qrqmul(q,U1),S,V]}
 let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);   //A(column major), returns UT,diag(S),V(not VH)
  if(A.n>A.m)return svdqr(A,s);
