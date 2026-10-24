@@ -20,7 +20,9 @@ A[x>0&&i==j]=1         /set(A,where(A,(x,i,j)=>x>0&&i==j),1)
 T={a:1 2,b:3 4}        /(T={a:mat([[1,2]]),b:mat([[3,4]])})
 T[,.ab.cd]             /col(T,["ab","cd"])
 T|T                    /hcat(T,T)
-A . B                  /dot(A,B)
+A B                    /dot(A,B)
+f(g)                   /f(g)
+1+(2,3-4)              /add(1,mat([[2,sub(3,4)]]))
 A'B                    /dot(trans(A),B)
 /A                     /sum(A)
 A\\B                    /solve(A,B)
@@ -29,7 +31,8 @@ let test=(a,b)=>{let r=jsparse(a);if(r!=b){throw new Error("^ got:              
 if(x=="?")return runtests()
 
 
-let token=x=>{x=x.replaceAll(",",";");let C,c,i=x=>split(x,"").map(x=>x.charCodeAt()),
+let token=x=>{x=x.replaceAll(",",";");x=x.replaceAll(/([A-Za-z][A-Za-z0-9]*)\(/g, "$1,") //disambiguous call f(g) from dot: f (g)
+ let C,c,i=x=>split(x,"").map(x=>x.charCodeAt()),
  S=" \t",                    //space
  L="({[;\n",                 //left
  R=")}]",                    //right
@@ -86,8 +89,9 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
   if(!L())return 0;r=pop();                            //next token
   if(i(")}];",r)){push(r);return 0}                    //terminator
   r.verb=i(V,r);
-  if(r=="{")r="{"+R()+"}"
-  if(r=="(")r=R()                                      //(1) and (1;2;3) and (x;y):
+  if($[$i]==","){pop();r=C(r,R(0))}
+  if(r=="{")r="{"+R(0)+"}"
+  if(r=="(")r=R(1)                                     //(1) and (1;2+3;4) => mat([[1;2;3)])
   if(r[0]=="`")r=sl(r,1)                               //`js`
   if(r.length>1&&r[0]==".")r=vs(r)                     //.a.b => ["a","b"]
   while(1){                                            //adverb and [application]
@@ -108,12 +112,13 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  cx=(x,y)=>sw(x,"(x=>")?sl(x,4).replace("(x,","("+y+","):b(i(V,x)?F(x,f1):x,y),                  //c:composition
  M=(x,y)=>x=="?"&&sw(y,"complex")?`randz(${y.slice(8,y.indexOf(","))})`:b(F(x,f1),y), //monadic
  D=(x,y,z)=>x=="#"?`reshape(${y},${unmat(z)})`:x=="^"?`reshape(${y},${z})`:x==":"?(br?g(z,y):`${z}:${y}`):b(F(x,f2),[z,y]), //dyadic
- g=(x,y)=>`range(${x},${y})`,unmat=x=>sw(x,"mat([[")?x.slice(6,-3):"..."+x //x:y
- j=(x,y)=>sw(y,"trans(")?`dot(${y},${x})`:b(y,x),                   //jux
+ g=(x,y)=>`range(${x},${y})`,unmat=x=>sw(x,"mat([[")?x.slice(6,-3):"..."+x, //x:y
+ C=(x,y)=>b(x,y), //call
+ j=(x,y)=>`dot(${y},${x})`,          //sw(y,"trans(")?`dot(${y},${x})`:b(y,x),                   //jux
  p=(x,y)=>v(B(b("x=>"+F(y,f2),["x",x]))),                                                        //project 1+
  v=x=>((x=new String(x)).verb=true,x),S=x=>String(x),n=x=>((x=new String(x)).verb=false,x),   //mark verb/noun
  l=(r,x)=>{r=[];while(L()){r.push((x=e(t()))?x:(r.undef=1,"undefined"));if(";"!=pop())return 1==r.length&&r.undef?[]:r}}, //list e;e;e[terminator]
- R=()=>{let r=l();r=1==r.length?n(r[0]):(!r.length)?n(" "):L()=="="?b("",r,",","[]"):r.join(",");return r},
+ R=(m)=>{let r=l();r=1==r.length?n(r[0]):(!r.length)?n(" "):m?`mat([[${r.join(",")}]])`:r.join(",");return r},
  G=x=>i(V,x)?v(F(x,f2)):x,                                                                                //- -> neg
  H=x=>i(V,x)?("((x,y)=>y===undefined?"+F(x,f1)+"(x):"+F(x,f2)+"(x,y))"):i(f2,x)?H(V[f2.indexOf(S(x))]):x, //neg -> ambivalent
  _=(x,y,z)=>sw(x,"at(")||sw(x,"col(")||sw(x,"row(")?as(x,y,z):y?`(${x}=${F(y,f2)}(${x},${z}))`:`(${x}=${z})`,
