@@ -8,7 +8,7 @@ x/y                    /div(x,y)
 1+\\2                   /add(1,print(2))
 -A                     /neg(A)
 \`js\`                   /js
-2 3#A                  /reshape(A,...mat([[2,3]]))
+2 3#A                  /reshape(A,2,3)
 -2^A                   /reshape(A,-2)
 A[0]                   /at(A,0)
 A[1,2]                 /at(A,1,2)
@@ -16,6 +16,7 @@ A[x,]                  /row(A,x)
 A[,x]+=y               /setcol(A,x,add(col(A,x),y))
 A[1:2,:3]              /at(A,range(1,2),til(3))
 A[1]=4                 /set(A,1,4)
+A[x>0&&i==j]=1         /set(A,where(A,(x,i,j)=>x>0&&i==j),1)
 T={a:1 2,b:3 4}        /(T={a:mat([[1,2]]),b:mat([[3,4]])})
 T[,.ab.cd]             /col(T,["ab","cd"])
 T|T                    /hcat(T,T)
@@ -92,8 +93,7 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
   while(1){                                            //adverb and [application]
    if(!L())return r;let p=pop()
    if(p=="'")r=`trans(${r})`                           //derive
-   //else if(p=="["){let i=$i;r=a(r);if($[$i]=="="||$[1+$i]=="="){$i=i;r=as(r)}}      //index index-asn
-   else if(p=="["){let b=br;br=1;r=a(r);br=b}               //index  [x:y] is range but {a:1 2} is a dict
+   else if(p=="["){let b=br;br=1;r=W(r);br=b}               //index  [x:y] is range but {a:1 2} is a dict
    else{push(p);break}}
   return r},
  
@@ -107,8 +107,8 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  c=(x,y)=>v(B("(x,y)=>"+(i(f2,y)?cx(x,F(y,f2)+"(x,y)"):sw(y,"(x=>")?cx(x,sl(y,4)):sw(y,"((x,y)=>")?cx(x,sl(y,8)):cx(x,y+"(x)")))),
  cx=(x,y)=>sw(x,"(x=>")?sl(x,4).replace("(x,","("+y+","):b(i(V,x)?F(x,f1):x,y),                  //c:composition
  M=(x,y)=>x=="?"&&sw(y,"complex")?`randz(${y.slice(8,y.indexOf(","))})`:b(F(x,f1),y), //monadic
- D=(x,y,z)=>x=="#"?`reshape(${y},...${z})`:x=="^"?`reshape(${y},${z})`:x==":"?(br?g(z,y):`${z}:${y}`):b(F(x,f2),[z,y]), //dyadic
- g=(x,y)=>`range(${x},${y})` //x:y
+ D=(x,y,z)=>x=="#"?`reshape(${y},${unmat(z)})`:x=="^"?`reshape(${y},${z})`:x==":"?(br?g(z,y):`${z}:${y}`):b(F(x,f2),[z,y]), //dyadic
+ g=(x,y)=>`range(${x},${y})`,unmat=x=>sw(x,"mat([[")?x.slice(6,-3):"..."+x //x:y
  j=(x,y)=>sw(y,"trans(")?`dot(${y},${x})`:b(y,x),                   //jux
  p=(x,y)=>v(B(b("x=>"+F(y,f2),["x",x]))),                                                        //project 1+
  v=x=>((x=new String(x)).verb=true,x),S=x=>String(x),n=x=>((x=new String(x)).verb=false,x),   //mark verb/noun
@@ -120,7 +120,9 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  as=(x,y,z, s)=>(s=w(sl(x,3)),`set${sl(x,x[0]=="a"?2:0)},`+(y?`${F(y,f2)}(${x},${z})`: z)+")"),
  vs=x=>"["+x.split(".").slice(1).map(x=>'"'+x+'"').join(",")+"]",
  I=(x,y,n)=>y[0]=="undefined"?`col(${x},${y[1]})`:`row(${x},${y[0]})`  //x[;y]
- 
+ W=x=>{let i=$i,ij=0,r=0,c,n=$.length;while(i<n){let c=$[i++];if(c=="]")break;if(c=="i"||c=="j")ij=1;if(c==";"){r=0;break}if("<=>&|".includes(c))r=1;}
+  if(r){r=$.slice($i,i-1).join("");$i=i;return`at(${x},where(${x},${ij?"(x,i,j)":"x"}=>${r}))`};return a(x)} //A[A>0] where expr within index
+
  return join(l(),";")
 }
 
