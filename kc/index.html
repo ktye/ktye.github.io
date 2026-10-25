@@ -1,7 +1,11 @@
 <html><head><link rel=icon href="../kelas16.png"><title>kc</title></head>
 <style>
-*{font-family:monospace}
-textarea{width:stretch;height:30%;resize:none;outline:none;border:none}
+html,body{height:100%;margin:0;font-family:monospace}
+body{overflow:hidden;}
+.p{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+#i{box-sizing:border-box;display:block;flex:0 0 auto;width:100%;min-height:5em;border:none;outline:none;resize:vertical;overflow:auto;background:#ffe}
+#o{box-sizing:border-box;flex:1 1 0;min-height:0;width:100%;margin:0.2em;overflow:auto;white-space:pre-wrap;background:#efe}
+#r{position:absolute;right:0;top:0;max-height:100vh;overflow:auto;background:#eef}
 ul{padding-left:0.5ch}
 li{cursor:pointer;width:fit-content}
 li::marker{content: ""}
@@ -10,12 +14,12 @@ li::marker{content: ""}
 .op::marker{content:"+"}
 .ln{color:#0000f0}
 </style>
-<body style="display:flex">
-<div style="flex-grow:1">
- <textarea id="inp" wrap="off" oninput='this.style.height="";this.style.height=this.scrollHeight+"px"' onchange="compile()" autocorrect="off" spellcheck="false"></textarea>
- <pre id="err" style="border-top:1px solid;margin:0"></pre>
- <pre id="pro"></pre>
+<body>
+<div class="p">
+ <textarea id="i" title="program src" wrap="off" onchange="compile()" autocorrect="off" spellcheck="false" autofocus></textarea>
+ <pre      id="o"></pre>
 </div>
+<details  id="r" open><summary>compile</summary>
 <div>
  <input type="text" placeholder="func" size="10" onchange="compile()"     id="pfunc"><br>
  <input type="radio" name="tview" onclick="compile()" id="ppars"                  ><label for="ppars">parse</label><br>
@@ -36,8 +40,9 @@ li::marker{content: ""}
  <input type="radio" name="tview" onclick="compile()" id="pemit" checked="checked"><label for="pemit"><select id="ofmt" onchange="compile()"><option value="c" selected>c</option><option value="w" >wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
  <div id="out"></div>
 </div>
+</details>
 <script>
-let hi=x=>(inp.setSelectionRange(x=+x.textContent.slice(1),1+x),inp.focus())
+let hi=x=>(i.setSelectionRange(x=+x.textContent.slice(1),1+x),i.focus())
 let showtree=(a,x)=>{if(pfunc.value)a=a.slice(0).filter(x=>x[1][1]==pfunc.value)[0];out.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
  x.forEach(x=>{x.o=1;x.onclick=e=>{let t=e.target;if(t.nodeName=="SPAN")return/*addr*/;t.classList.toggle("op");t.o=!t.o;
  if("UL"==t.nextElementSibling.nodeName)t.nextElementSibling.style.display=t.o?"":"none"}})}
@@ -48,11 +53,11 @@ let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),
 </script>
 <script src="kc"></script>
 <script>let a;
-inp.value=kc(0);
+i.value=kc(0);
 let xxd=(x,t, s,i,o,O)=>(t=t?t:0,i=0,o=x.length+" bytes\n",O=x=>o+=x,s="  ",x.forEach((x,i)=>{
  if(0==i%16)(O((i?s+"\n":"")+(i+t).toString(16).padStart(8,'0')+":"),s="  ")
  if(0==i%2)O(" ");O(x.toString(16).padStart(2,'0'));s+=(x>31&&x<127)?String.fromCharCode(x):"."}),(i=x.length%16),O(i?" ".repeat(2.5*(16-x.length%16)):""+s),o)
-let compile=(A,S)=>{A=ofmt.value;S=document.querySelector('input[name="tview"]:checked').id.slice(1);pro.textContent=out.innerHTML='';a=kc(inp.value,A,S);if(a.constructor==Uint8Array)a=xxd(a);"string"==typeof a?(pro.textContent=a):showtree(a)}
+let compile=(A,S)=>{A=ofmt.value;S=document.querySelector('input[name="tview"]:checked').id.slice(1);o.textContent=out.innerHTML='';a=kc(i.value,A,S);if(a.constructor==Uint8Array)a=xxd(a);"string"==typeof a?(o.textContent=a):showtree(a)}
 compile()
 </script>
 </body>

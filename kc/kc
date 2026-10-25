@@ -267,8 +267,8 @@ H2=`
   let fn=x=>{let name=x[1][1],arg=x[3].slice(1),l=x[4].slice(1),bdy=x[5],lt='';res=x[2][1]
    return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc(l)}${f(bdy)};}\n`}
   let r=a.filter(x=>x[0]=='fun').map(fn).join("");
-   //return H1+$N()+_N()+H2+r}
-   return r}
+   return H1+$N()+_N()+H2+r}
+//   return r}
  
  let wa=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x),L,F=[],I={},T=[],E=[],N=(x,...y)=>(y.i=x,y),Kn='K1 K2 K3 K4'.split(' '), e=x=>{console.error(x);throw new Error("@"+x.i+" wa: "+x)} //L=
   let t=x=>[0,127,126,124,123,127,126][1+"ijfzpK".indexOf(x)],it=t=>[-1,0,1,2,3,0,1][1+"ijfzpK".indexOf(t)],M='ceil floor trunc round'.split(' '),M2='atan2 hypot pow'.split(' ')
@@ -387,6 +387,7 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 */
  
+/*
  if(!P)return`f{a:b:c:x;-a}`
  if(!P)return`f{a:a:b:x;x}`
  if(!P)return`f{b:x;a:b;x}`
@@ -401,6 +402,7 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  if(!P)return`f{a:x;x}g{x+:y;y}h{a[i]:x;x}j{a[i]+:x;x}`
  if(!P)return`R0(:j){x}Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;pr]}Ktx(K:ip){jy|jx<<56}
 Ktn(K:ii){r:Ma 8+y<<x?[3;0;2;3;4];r+:8;Ir[-2]:1;Ir[-1]:y;Ktx[x;r]}`
+*/
  if(!P)return`
 
 Ki(K:i){Ktx[2;px]} Kf(K:f){r:Ktn[3;1];Fr0:x;Ktx[-3;px]} Kz(K:z){r:Ktn[1;4];Zr0:x;Ktx[-4;px]}
