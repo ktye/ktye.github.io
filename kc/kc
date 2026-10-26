@@ -11,11 +11,12 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
   let arg=(j,s)=>{let a=s[2].length?s[2].length:In(A,'z')?3:In(A,'y')?2:1; return N(j,'arg',...AL.split("").slice(0,a).map(x=>N(j,'sym',x)))}
   let loc=(j,a)=>{a=","+a.slice(1).map(x=>x[1]+",").join("");return N(j,'loc',...L.filter(x=>!(In(a,`,${x},`))).map(x=>N(j,'sym',x)))}
   let sig=$=>{let j=i,k,r='K:';if(c=='(')while(n(),c!=')');if(i!=j)r=p.slice(1+j,i),n();r=((+r)?"K:"+"K".repeat(+r):r).split(":");if(2!=r.length||r[0].length>1){i=j;Q("signature")};return N(j,'sig',...r)}
-  let sym=q=>{let j=i,k=i,s='',y=0,w=0;if(!sy(c))Q("expected identifier");while(c&&ys(c))s+=c,c=p[++i];if(q&&s=='if'||s=='while')return ifw(j);_();
+  let sym=q=>{let j=i,k=i,m,s='',y=0,w=0;if(!sy(c))Q("expected identifier");while(c&&ys(c))s+=c,c=p[++i];if(q&&s=='if'||s=='while')return ifw(j);_();
    if(q&&s.length>1&&s[0]!='K'&&(l(s)=="i"||yn(l(s))))y=l(s),s=s.slice(0,-1);                    //suffix i09  (index)
+   if(s.length>1&&In("ntpr",s[0])){m=s[0];s=s.slice(1)};                                         //tx tx0 ntpr
    if(q&&s.length>1&&/[ijz]/.test(s[0]))w=s[0],s=s.slice(1);                                     //prefix ijz (cast)  CIJZ (ptrtype)
    if(1==s.length&&In("x y z",s)&&!In(A,s))A+=s;if(s=='i'&&!In(L,'i'))L.push('i');s=N(j,'sym',s);j+=s.length-1;  //arity
-   s=y?jux(s,'i'==y?((!In(L,y)?L.push(y):0),N(j,'sym',y)):N(j,'num',y)):s;return w?(s.i++,N(k,'cst',w,s)):s}
+   s=y?jux(s,'i'==y?((!In(L,y)?L.push(y):0),N(j,'sym',y)):N(j,'num',y)):s;if(m){s=N(k,'cal',m.toUpperCase(),s);s.T='i'};return w?(s.i++,N(k,'cst',w,s)):s}
   let bdy=$=>{let j=i,r=c=="{"?lst('}'):[];return N(j,'bdy',...r.slice(1))}
   let lst=(t,z,w)=>{let j=i,e,r=[];w||n();while(c&&c!=t){e=exp();if(z||e)r.push(e);if(In(":})]",c))break;c==';'||c=='\n'?n(w):c!=t?Q(`expect ; or ${t} got ${c}`):1};if(c==t&&!w)n();return N(j,'lst',...r)}
   let blo=$=>N(i,'blk',...lst(']').slice(1)),bk1=x=>x[0]=="blk"&&x.length==2?x[1]:x              //block expression [1;2;3]
@@ -61,7 +62,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
   let f=0,N=(x,...y)=>(y.i=x,y),F=(x)=>{if(!Array.isArray(x))return;x.forEach(F);
   if(x[0]=="lam"){let r=N(x.i,'fun',N(x.i,'sym',`_${f}`),N(x.i,'sig','K',''),...x.slice(1));x.splice(2,2);x[0]='sym';x[1]=`_${f++}`;a.push(r)}};F(a)}
  
- let maco=a=>{   //type macro nx.. [ntprIJCFZ]
+ let maco=a=>{   //type macro nx.. [ntprIJCFZ]  //todo remove ntpr (moved to parse)
   let fn=x=>{let i,f,v={},m="ntprIJCFZ",a=x[3].slice(1).map(x=>x[1]),l=x[4].slice(1).map(x=>x[1]),al=[...a,...l],In=(x,y)=>x.includes(y)
    f=x=>{if(!Array.isArray(x))return;x.forEach(f);if(x[0]!="sym"||x[1].length!=2||In(l,x[1]))return;
     let p=x[1][0],q=x[1][1];if(!(In(m,p)&&In(al,q)))return; x.T=In("IJFZp",p)?p.toLowerCase():"i"; x[0]='cal';x[1]=p.toUpperCase();x[2]=['sym',q];x[2].i=x.i};f(x[5])} //x[2].T is typed later
@@ -130,7 +131,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
   a.forEach(f)}
  
  let cord=a=>{   //evaluate function parameters right-to-left    //todo >2args
-  if(A!="c")return;let F="Ki Kf Kz N P R Dex".split(" ")
+  if(A[0]!="c")return;let F="Ki Kf Kz N P R Dex".split(" ")
   let N=(x,...y)=>(y.i=x,y.T='K',y),f=(x,e)=>{if(!Array.isArray(x))return e;
    x.forEach(x=>e|=f(x,e));
    if(e&&x.T=='K'&&x[0]=="cal"&&x.length==4&&x[2][0]!='num'&&x[3][0]!='num'&&!(x[2][0]=='sym'&&x[3][0]=='sym')){x.splice(1,0,'$2');x[2]=N(x.i,'sym',x[2]);}  //order doesn't matter if one of 2 args is num or both are sym.
@@ -267,8 +268,7 @@ H2=`
   let fn=x=>{let name=x[1][1],arg=x[3].slice(1),l=x[4].slice(1),bdy=x[5],lt='';res=x[2][1]
    return `${t(res)} ${name}(${arg.map(x=>t(x.T)+" "+x[1]).join(",")}){${loc(l)}${f(bdy)};}\n`}
   let r=a.filter(x=>x[0]=='fun').map(fn).join("");
-   return H1+$N()+_N()+H2+r}
-//   return r}
+   return(A=="c-"?"":H1+$N()+_N()+H2)+r}
  
  let wa=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x),L,F=[],I={},T=[],E=[],N=(x,...y)=>(y.i=x,y),Kn='K1 K2 K3 K4'.split(' '), e=x=>{console.error(x);throw new Error("@"+x.i+" wa: "+x)} //L=
   let t=x=>[0,127,126,124,123,127,126][1+"ijfzpK".indexOf(x)],it=t=>[-1,0,1,2,3,0,1][1+"ijfzpK".indexOf(t)],M='ceil floor trunc round'.split(' '),M2='atan2 hypot pow'.split(' ')
@@ -387,6 +387,7 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 */
  
+// if(!P)return`f(i:K){tx0}`  //todo tx0 nx0 px0 rx0 => T(x[0]) not T(x)[0]
 /*
  if(!P)return`f{a:b:c:x;-a}`
  if(!P)return`f{a:a:b:x;x}`
@@ -429,7 +430,7 @@ Ufy{(!nx? x :t:tx0);!t? x :(n:nx)/if(t~txi)t:0;break; t?[n#Cxi;n#Ixi;n#Fxi;n#Zxi
  
  try{let f,a=pars(P);if(S=="pars")return a
   for(f of[comp,lift,maco,btin,type,digr,asin,call,loop,cord,swap,indx,refc,wrun]){f(a);if(S===f.name)return a};
-  return A=="c"?cc(a):A=="w"?wc(wa(a)):"l"==A?lifmt(li(a)):lifmt(Li(a))
+  return A[0]=="c"?cc(a):A=="w"?wc(wa(a)):"l"==A?lifmt(li(a)):lifmt(Li(a))
  }catch(e){let s=e.message;console.error(e);return s[0]=='@'?indicate(s,+s.slice(1,s.indexOf(' ')),P):s}
 }
 

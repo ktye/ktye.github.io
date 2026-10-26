@@ -1,10 +1,11 @@
 <html><head><link rel=icon href="../kelas16.png"><title>kc</title></head>
 <style>
-html,body{height:100%;margin:0;font-family:monospace}
+*{font-family:monospace}
+html,body{height:100%;margin:0}
 body{overflow:hidden;}
 .p{display:flex;flex-direction:column;height:100vh;height:100dvh;}
-#i{box-sizing:border-box;display:block;flex:0 0 auto;width:100%;min-height:5em;border:none;outline:none;resize:vertical;overflow:auto;background:#ffe}
-#o{box-sizing:border-box;flex:1 1 0;min-height:0;width:100%;margin:0.2em;overflow:auto;white-space:pre-wrap;background:#efe}
+#i{box-sizing:border-box;display:block;flex:0 0 auto;width:100%;min-height:10em;border:none;outline:none;resize:vertical;overflow:auto;background:#ffe}
+#o{box-sizing:border-box;flex:1 1 0;min-height:0;margin:0.2em;overflow:auto;white-space:pre-wrap;background:#efe}
 #r{position:absolute;right:0;top:0;max-height:100vh;overflow:auto;background:#eef}
 ul{padding-left:0.5ch}
 li{cursor:pointer;width:fit-content}
@@ -37,13 +38,13 @@ li::marker{content: ""}
  <input type="radio" name="tview" onclick="compile()" id="pindx"                  ><label for="pswap">index</label><br>
  <input type="radio" name="tview" onclick="compile()" id="prefc"                  ><label for="prefc">refcount</label><br>
  <input type="radio" name="tview" onclick="compile()" id="pwrun"                  ><label for="pwrun">wasm runtime</label><br>
- <input type="radio" name="tview" onclick="compile()" id="pemit" checked="checked"><label for="pemit"><select id="ofmt" onchange="compile()"><option value="c" selected>c</option><option value="w" >wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
+ <input type="radio" name="tview" onclick="compile()" id="pemit" checked="checked"><label for="pemit"><select id="ofmt" onchange="compile()"><option value="c" selected>c</option><option value="c-">c(nohdr)</option><option value="w" >wasm</option><option value="l">lisp</option><option value="t">lisp(typed)</option></select></label><br>
  <div id="out"></div>
 </div>
 </details>
 <script>
 let hi=x=>(i.setSelectionRange(x=+x.textContent.slice(1),1+x),i.focus())
-let showtree=(a,x)=>{if(pfunc.value)a=a.slice(0).filter(x=>x[1][1]==pfunc.value)[0];out.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
+let showtree=(a,x)=>{if(pfunc.value)a=a.slice(0).filter(x=>x[1][1]==pfunc.value)[0];o.replaceChildren(tree(a));x=Array.from(document.querySelectorAll("li"));
  x.forEach(x=>{x.o=1;x.onclick=e=>{let t=e.target;if(t.nodeName=="SPAN")return/*addr*/;t.classList.toggle("op");t.o=!t.o;
  if("UL"==t.nextElementSibling.nodeName)t.nextElementSibling.style.display=t.o?"":"none"}})}
 let tree=a=>{let ce=x=>document.createElement(x),ac=(x,y)=>(x.appendChild(y),x),tn=(x,t)=>(t=ce("span"),t.textContent=x,t)
