@@ -54,7 +54,7 @@ let mul=(x,y)=>scalar(x,y,mulF,mulf,mulZ,mulz,(x,y)=>x*y,(x,y)=>[x[0]*y[0]-x[1]*
 let mulF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x[i];return y}
 let mulf=(x,y)=>{for(let i=0;i<y.length;i++)y[i]*=x;return y}
 let mulZ=(x,y)=>{for(let i=0;i<y.length;i+=2){let a=x[i],b=x[1+i],c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
-let mulz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i++){let c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
+let mulz=(x,y)=>{let[a,b]=x;for(let i=0;i<y.length;i+=2){let c=y[i],d=y[1+i];y[i]=a*c-b*d;y[1+i]=a*d+b*c}return y}
 let div=(x,y)=>scalar(x,y,divF,(x,y)=>mulf(1/x,y),divZ,(x,y)=>mulz(zinv(x[0],x[1]),y),(x,y)=>x/y,zdiv)
 let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
 let divZ=(x,y)=>{for(let i=0;i<y.length;i+=2)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
