@@ -131,7 +131,7 @@ let spcgrm=(x,n,o,fs,fmi,fma)=>{
 
 let solve=(A,B)=>qrsolve_(A.qr?A:qr(A),trans(complex(B)))
 let qr=A=>qrt(trans(A)),qrt=A=>{errif(!A.z,"qr: A must be complex");errif(A.m>A.n,"A must be slender column major");let n=A.m,m2=2*A.n,i,j,k,d=zeroz(n);
- for(j=0;j<n;j++){let j2=2*j,j3=1+j2,Aj=A.subarray(j*m2,(1+j)*m2),s=sqrt(norm2(Aj.subarray(j2))),r=hypot(Aj[j2],Aj[j3]);if(r>1e-15){let h=s/r;d[j2]=-h*Aj[j2];d[j3]=-h*Aj[j3]}else{d[j2]=-1};let f=sqrt(s*(s+r));Aj[j2]-=d[j2];Aj[j3]-=d[j3];for(k=j2;k<m2;k++)Aj[k]/=f;
+ for(j=0;j<n;j++){let j2=2*j,j3=1+j2,Aj=A.subarray(j*m2,(1+j)*m2),s=sqrt(norm2(Aj.subarray(j2))),r=hypot(Aj[j2],Aj[j3]);if(s<1e-15)continue;if(r>1e-15){let h=s/r;d[j2]=-h*Aj[j2];d[j3]=-h*Aj[j3]}else{d[j2]=-1};let f=sqrt(s*(s+r));Aj[j2]-=d[j2];Aj[j3]-=d[j3];for(k=j2;k<m2;k++)Aj[k]/=f;
   for(i=1+j;i<n;i++){let a=0,b=0,Ai=A.subarray(i*m2,(1+i)*m2);
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;a+=Aj[k2]*Ai[k2]+Aj[k3]*Ai[k3];b+=Aj[k2]*Ai[k3]-Aj[k3]*Ai[k2]}
    for(let k2=j2;k2<m2;k2+=2){const k3=1+k2;Ai[k2]-=Aj[k2]*a-Aj[k3]*b;Ai[k3]-=Aj[k2]*b+Aj[k3]*a}}}return{qr:1,A:A,d:d}}
@@ -166,7 +166,6 @@ let V1=col(V,til(r))
 Sqr(Abs(V1))
 console.log("V1",V1)
 */
-
 
 let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performance.now()-t0}
 
