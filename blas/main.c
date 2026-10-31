@@ -109,32 +109,17 @@ void test_scal(void) { const double flteps = 1e-4, dbleps = 1e-6;
    cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 165) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 165) imag"); }; }; };
 }
 void test_gemv (void) { const double flteps = 1e-4, dbleps = 1e-6;
-  { int order = 101; int trans = 111; int M = 1; int N = 1; int lda = 1; double alpha = -0.3; double beta = -1; double A[] = { -0.047 }; double X[] = { 0.672 }; int incX = -1; double Y[] = { 0.554 }; int incY = -1; double y_expected[] = { -0.5445248 };
-   cblas_dgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], y_expected[i], dbleps, "dgemv(case 778)"); } }; };
-
   { int order = 102; int trans = 111; int M = 1; int N = 1; int lda = 1; double alpha = -0.3; double beta = -1; double A[] = { -0.047 }; double X[] = { 0.672 }; int incX = -1; double Y[] = { 0.554 }; int incY = -1; double y_expected[] = { -0.5445248 };
    cblas_dgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], y_expected[i], dbleps, "dgemv(case 779)"); } }; };
-
-  { int order = 101; int trans = 112; int M = 1; int N = 1; int lda = 1; double alpha = -1; double beta = 1; double A[] = { -0.047 }; double X[] = { 0.672 }; int incX = -1; double Y[] = { 0.554 }; int incY = -1; double y_expected[] = { 0.585584 };
-   cblas_dgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], y_expected[i], dbleps, "dgemv(case 780)"); } }; };
 
   { int order = 102; int trans = 112; int M = 1; int N = 1; int lda = 1; double alpha = -1; double beta = 1; double A[] = { -0.047 }; double X[] = { 0.672 }; int incX = -1; double Y[] = { 0.554 }; int incY = -1; double y_expected[] = { 0.585584 };
    cblas_dgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], y_expected[i], dbleps, "dgemv(case 781)"); } }; };
 
-  { int order = 101; int trans = 111; int M = 1; int N = 1; int lda = 1; double alpha[2] = {0, 0.1}; double beta[2] = {1, 0}; double A[] = { 0.932, -0.724 }; double X[] = { 0.334, -0.317 }; int incX = -1; double Y[] = { 0.348, 0.07 }; int incY = -1; double y_expected[] = { 0.401726, 0.078178 };
-   cblas_zgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], y_expected[2*i], dbleps, "zgemv(case 788) real"); gsl_test_rel(Y[2*i+1], y_expected[2*i+1], dbleps, "zgemv(case 788) imag"); }; }; };
-
   { int order = 102; int trans = 111; int M = 1; int N = 1; int lda = 1; double alpha[2] = {0, 0.1}; double beta[2] = {1, 0}; double A[] = { 0.932, -0.724 }; double X[] = { 0.334, -0.317 }; int incX = -1; double Y[] = { 0.348, 0.07 }; int incY = -1; double y_expected[] = { 0.401726, 0.078178 };
    cblas_zgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], y_expected[2*i], dbleps, "zgemv(case 789) real"); gsl_test_rel(Y[2*i+1], y_expected[2*i+1], dbleps, "zgemv(case 789) imag"); }; }; };
 
-  { int order = 101; int trans = 112; int M = 1; int N = 1; int lda = 1; double alpha[2] = {-0.3, 0.1}; double beta[2] = {0, 1}; double A[] = { 0.932, -0.724 }; double X[] = { 0.334, -0.317 }; int incX = -1; double Y[] = { 0.348, 0.07 }; int incY = -1; double y_expected[] = { -0.040808, 0.517356 };
-   cblas_zgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], y_expected[2*i], dbleps, "zgemv(case 790) real"); gsl_test_rel(Y[2*i+1], y_expected[2*i+1], dbleps, "zgemv(case 790) imag"); }; }; };
-
   { int order = 102; int trans = 112; int M = 1; int N = 1; int lda = 1; double alpha[2] = {-0.3, 0.1}; double beta[2] = {0, 1}; double A[] = { 0.932, -0.724 }; double X[] = { 0.334, -0.317 }; int incX = -1; double Y[] = { 0.348, 0.07 }; int incY = -1; double y_expected[] = { -0.040808, 0.517356 };
    cblas_zgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], y_expected[2*i], dbleps, "zgemv(case 791) real"); gsl_test_rel(Y[2*i+1], y_expected[2*i+1], dbleps, "zgemv(case 791) imag"); }; }; };
-
-  { int order = 101; int trans = 113; int M = 1; int N = 1; int lda = 1; double alpha[2] = {1, 0}; double beta[2] = {0, 0}; double A[] = { 0.932, -0.724 }; double X[] = { 0.334, -0.317 }; int incX = -1; double Y[] = { 0.348, 0.07 }; int incY = -1; double y_expected[] = { 0.540796, -0.053628 };
-   cblas_zgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], y_expected[2*i], dbleps, "zgemv(case 792) real"); gsl_test_rel(Y[2*i+1], y_expected[2*i+1], dbleps, "zgemv(case 792) imag"); }; }; };
 
   { int order = 102; int trans = 113; int M = 1; int N = 1; int lda = 1; double alpha[2] = {1, 0}; double beta[2] = {0, 0}; double A[] = { 0.932, -0.724 }; double X[] = { 0.334, -0.317 }; int incX = -1; double Y[] = { 0.348, 0.07 }; int incY = -1; double y_expected[] = { 0.540796, -0.053628 }; 
    cblas_zgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], y_expected[2*i], dbleps, "zgemv(case 793) real"); gsl_test_rel(Y[2*i+1], y_expected[2*i+1], dbleps, "zgemv(case 793) imag"); }; }; };
@@ -215,23 +200,75 @@ void test_gemm(void) { const double flteps = 1e-4, dbleps = 1e-6;
    cblas_zgemm(order, transA, transB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(C[2*i], C_expected[2*i], dbleps, "zgemm(case 1517) real"); gsl_test_rel(C[2*i+1], C_expected[2*i+1], dbleps, "zgemm(case 1517) imag"); }; }; };
 }
 void test_ger (void) { const double flteps = 1e-4, dbleps = 1e-6;
-  { int order = 101; int M = 1; int N = 1; int lda = 1; double alpha = 1; double A[] = { -0.809 }; double X[] = { -0.652 }; int incX = -1; double Y[] = { 0.712 }; int incY = -1; double A_expected[] = { -1.273224 };
-   cblas_dger(order, M, N, alpha, X, incX, Y, incY, A, lda); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(A[i], A_expected[i], dbleps, "dger(case 1392)"); } }; };
-
   { int order = 102; int M = 1; int N = 1; int lda = 1; double alpha = 1; double A[] = { -0.809 }; double X[] = { -0.652 }; int incX = -1; double Y[] = { 0.712 }; int incY = -1; double A_expected[] = { -1.273224 };
    cblas_dger(order, M, N, alpha, X, incX, Y, incY, A, lda); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(A[i], A_expected[i], dbleps, "dger(case 1393)"); } }; };
-
-  { int order = 101; int M = 1; int N = 1; int lda = 1; double alpha[2] = {-1, 0}; double A[] = { -0.426, 0.757 }; double X[] = { -0.579, -0.155 }; int incX = -1; double Y[] = { 0.831, 0.035 }; int incY = -1; double A_expected[] = { 0.049724, 0.90607 }; 
-   cblas_zgeru(order, M, N, alpha, X, incX, Y, incY, A, lda); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(A[2*i], A_expected[2*i], dbleps, "zgeru(case 1398) real"); gsl_test_rel(A[2*i+1], A_expected[2*i+1], dbleps, "zgeru(case 1398) imag"); }; }; };
-
-  { int order = 101; int M = 1; int N = 1; int lda = 1; double alpha[2] = {-1, 0}; double A[] = { -0.426, 0.757 }; double X[] = { -0.579, -0.155 }; int incX = -1; double Y[] = { 0.831, 0.035 }; int incY = -1; double A_expected[] = { 0.060574, 0.86554 };
-   cblas_zgerc(order, M, N, alpha, X, incX, Y, incY, A, lda); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(A[2*i], A_expected[2*i], dbleps, "zgerc(case 1399) real"); gsl_test_rel(A[2*i+1], A_expected[2*i+1], dbleps, "zgerc(case 1399) imag"); }; }; };
 
   { int order = 102; int M = 1; int N = 1; int lda = 1; double alpha[2] = {-1, 0}; double A[] = { -0.426, 0.757 }; double X[] = { -0.579, -0.155 }; int incX = -1; double Y[] = { 0.831, 0.035 }; int incY = -1; double A_expected[] = { 0.049724, 0.90607 };
    cblas_zgeru(order, M, N, alpha, X, incX, Y, incY, A, lda); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(A[2*i], A_expected[2*i], dbleps, "zgeru(case 1400) real"); gsl_test_rel(A[2*i+1], A_expected[2*i+1], dbleps, "zgeru(case 1400) imag"); }; }; };
 
   { int order = 102; int M = 1; int N = 1; int lda = 1; double alpha[2] = {-1, 0}; double A[] = { -0.426, 0.757 }; double X[] = { -0.579, -0.155 }; int incX = -1; double Y[] = { 0.831, 0.035 }; int incY = -1; double A_expected[] = { 0.060574, 0.86554 };
    cblas_zgerc(order, M, N, alpha, X, incX, Y, incY, A, lda); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(A[2*i], A_expected[2*i], dbleps, "zgerc(case 1401) real"); gsl_test_rel(A[2*i+1], A_expected[2*i+1], dbleps, "zgerc(case 1401) imag"); }; }; };
+}
+void test_trmv (void) {const double flteps = 1e-4, dbleps = 1e-6;
+  { int order = 102; int trans = 111; int uplo = 121; int diag = 131; int N = 1; int lda = 1; double A[] = { -0.429 }; double X[] = { -0.899 }; int incX = -1; double x_expected[] = { 0.385671 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 834)"); } }; };
+
+  { int order = 102; int trans = 111; int uplo = 121; int diag = 132; int N = 1; int lda = 1; double A[] = { -0.429 }; double X[] = { -0.899 }; int incX = -1; double x_expected[] = { -0.899 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 835)"); } }; };
+
+  { int order = 102; int trans = 111; int uplo = 122; int diag = 131; int N = 1; int lda = 1; double A[] = { -0.429 }; double X[] = { -0.899 }; int incX = -1; double x_expected[] = { 0.385671 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 836)"); } }; };
+
+  { int order = 102; int trans = 111; int uplo = 122; int diag = 132; int N = 1; int lda = 1; double A[] = { -0.429 }; double X[] = { -0.899 }; int incX = -1; double x_expected[] = { -0.899 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 837)"); } }; };
+
+  { int order = 102; int trans = 112; int uplo = 121; int diag = 131; int N = 1; int lda = 1; double A[] = { 0.842 }; double X[] = { 0.192 }; int incX = -1; double x_expected[] = { 0.161664 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 842)"); } }; };
+
+  { int order = 102; int trans = 112; int uplo = 121; int diag = 132; int N = 1; int lda = 1; double A[] = { 0.842 }; double X[] = { 0.192 }; int incX = -1; double x_expected[] = { 0.192 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 843)"); } }; };
+
+  { int order = 102; int trans = 112; int uplo = 122; int diag = 131; int N = 1; int lda = 1; double A[] = { 0.842 }; double X[] = { 0.192 }; int incX = -1; double x_expected[] = { 0.161664 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 844)"); } }; };
+
+  { int order = 102; int trans = 112; int uplo = 122; int diag = 132; int N = 1; int lda = 1; double A[] = { 0.842 }; double X[] = { 0.192 }; int incX = -1; double x_expected[] = { 0.192 };
+   cblas_dtrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], x_expected[i], dbleps, "dtrmv(case 845)"); } }; };
+
+  { int order = 102; int trans = 111; int uplo = 121; int diag = 131; int N = 1; int lda = 1; double A[] = { 0.693, -0.22 }; double X[] = { -0.101, 0.889 }; int incX = -1; double x_expected[] = { 0.125587, 0.638297 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 874) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 874) imag"); }; }; };
+
+  { int order = 102; int trans = 111; int uplo = 121; int diag = 132; int N = 1; int lda = 1; double A[] = { 0.693, -0.22 }; double X[] = { -0.101, 0.889 }; int incX = -1; double x_expected[] = { -0.101, 0.889 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 875) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 875) imag"); }; }; };
+
+  { int order = 102; int trans = 111; int uplo = 122; int diag = 131; int N = 1; int lda = 1; double A[] = { 0.693, -0.22 }; double X[] = { -0.101, 0.889 }; int incX = -1; double x_expected[] = { 0.125587, 0.638297 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 876) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 876) imag"); }; }; };
+
+  { int order = 102; int trans = 111; int uplo = 122; int diag = 132; int N = 1; int lda = 1; double A[] = { 0.693, -0.22 }; double X[] = { -0.101, 0.889 }; int incX = -1; double x_expected[] = { -0.101, 0.889 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 877) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 877) imag"); }; }; };
+
+  { int order = 102; int trans = 112; int uplo = 121; int diag = 131; int N = 1; int lda = 1; double A[] = { -0.216, -0.623 }; double X[] = { 0.048, 0.293 }; int incX = -1; double x_expected[] = { 0.172171, -0.093192 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 882) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 882) imag"); }; }; };
+
+  { int order = 102; int trans = 112; int uplo = 121; int diag = 132; int N = 1; int lda = 1; double A[] = { -0.216, -0.623 }; double X[] = { 0.048, 0.293 }; int incX = -1; double x_expected[] = { 0.048, 0.293 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 883) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 883) imag"); }; }; };
+
+  { int order = 102; int trans = 112; int uplo = 122; int diag = 131; int N = 1; int lda = 1; double A[] = { -0.216, -0.623 }; double X[] = { 0.048, 0.293 }; int incX = -1; double x_expected[] = { 0.172171, -0.093192 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 884) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 884) imag"); }; }; };
+
+  { int order = 102; int trans = 112; int uplo = 122; int diag = 132; int N = 1; int lda = 1; double A[] = { -0.216, -0.623 }; double X[] = { 0.048, 0.293 }; int incX = -1; double x_expected[] = { 0.048, 0.293 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 885) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 885) imag"); }; }; };
+
+  { int order = 102; int trans = 113; int uplo = 121; int diag = 131; int N = 1; int lda = 1; double A[] = { -0.345, -0.851 }; double X[] = { -0.708, 0.298 }; int incX = -1; double x_expected[] = { -0.009338, -0.705318 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 890) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 890) imag"); }; }; };
+
+  { int order = 102; int trans = 113; int uplo = 121; int diag = 132; int N = 1; int lda = 1; double A[] = { -0.345, -0.851 }; double X[] = { -0.708, 0.298 }; int incX = -1; double x_expected[] = { -0.708, 0.298 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 891) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 891) imag"); }; }; };
+
+  { int order = 102; int trans = 113; int uplo = 122; int diag = 131; int N = 1; int lda = 1; double A[] = { -0.345, -0.851 }; double X[] = { -0.708, 0.298 }; int incX = -1; double x_expected[] = { -0.009338, -0.705318 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 892) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 892) imag"); }; }; };
+
+  { int order = 102; int trans = 113; int uplo = 122; int diag = 132; int N = 1; int lda = 1; double A[] = { -0.345, -0.851 }; double X[] = { -0.708, 0.298 }; int incX = -1; double x_expected[] = { -0.708, 0.298 };
+   cblas_ztrmv(order, uplo, trans, diag, N, A, lda, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], x_expected[2*i], dbleps, "ztrmv(case 893) real"); gsl_test_rel(X[2*i+1], x_expected[2*i+1], dbleps, "ztrmv(case 893) imag"); }; }; };
 }
 
 void gsl_test_rel(double result, double expected, double relative_error, const char *t) {
@@ -243,4 +280,7 @@ void gsl_test_rel(double result, double expected, double relative_error, const c
  else { status = (fabs(result) > relative_error) ; }
  if(status){printf("%s\n",t);exit(1);}}
 
-int main(){ test_copy(); test_scal(); test_gemv(); test_gemm(); test_ger(); printf("ok\n"); }
+int main(){ 
+ test_copy(); test_scal(); test_gemv(); test_gemm(); 
+ test_ger(); test_trmv(); 
+ printf("ok\n"); }

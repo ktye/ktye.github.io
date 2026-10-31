@@ -95,8 +95,11 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define es else
 #define ef es if
 #define Nx(i,N,e) for(i=0;i<(N);i++){e;}
+#define Ny(i,N,e) for(i=(N);i-->0;){e;}
 #define Ni(N,e) Nx(i,N,e)
+#define Ni_(N,e) Ny(i,N,e)
 #define Nj(N,e) Nx(j,N,e)
+#define Njj(a,b,e) for(j=(a);j<(b);j++){e;}
 #define Nk(N,e) Nx(k,N,e)
 #define Nij(N,J,e) Nx(i,N,Nx(j,J,e))
 #define Dx0 D x=0.0
@@ -105,6 +108,9 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define BT0 BT==CblasNoTrans
 #define AT1 (AT==CblasTrans||AT==CblasConjTrans)
 #define BT1 (BT==CblasTrans||BT==CblasConjTrans)
+#define LO (ul==CblasLower)
+#define UP (ul==CblasUpper)
+#define Aii A[la*i+i]
 #define Aij A[la*i+j]
 #define Aik A[la*i+k]
 #define Aji A[la*j+i]
@@ -187,6 +193,14 @@ V cblas_zgerc(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la){I i,j,k,l=OF(N,dy);D 
 V cblas_zgeru(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la){I i,j,k,l=OF(N,dy); D ar=Re(a,0),ai=Im(a,0),x,y,u,v,s,t;
   Nj(N,u=Re(Y,l);v=Im(Y,l);s=ar*u-ai*v;t=ai*u+ar*v;k=OF(M,dx);Ni(M,x=XRk;y=XIk;ARji+=x*s-y*t;AIji+=y*s+x*t;k+=dx)l+=dy)}
 
+V cblas_dtrmv(I ly,I ul,I AT,I d,I N,D*A,I la,D*X,I dx){I i,j,k,l,u,v,nu=(d==CblasNonUnit);D t;
+  if(AT1&&LO){k=OF(N,dx);Ni(N,t=0.0;u=i+1;v=N;l=OF(N,dx)+u*dx;Njj(u,v,t+=X[l]*Aij;l+=dx)if(nu)X[k]=t+X[k]*Aii;else X[k]+=t;k+=dx)}
+  ef(AT1&&UP){k=OF(N,dx)+(N-1)*dx;Ni_(N,t=0.0;u=0;v=i;l=OF(N,dx)+u*dx;Njj(u,v,t+=X[l]*Aij;l+=dx)if(nu)X[k]=t+X[k]*Aii;else X[k]+=t;k-=dx)}
+  ef(AT0&&LO){k=OF(N,dx)+(N-1)*dx;Ni_(N,t=0.0;u=0;v=i;l=OF(N,dx)+u*dx;Njj(u,v,t+=X[l]*Aji;l+=dx)if(nu)X[k]=t+X[k]*Aii;else X[k]+=t;k-=dx)}
+  es{k=OF(N,dx);Ni(N,t=0.0;u=i+1;v=N;l=OF(N,dx)+(i+1)*dx;Njj(u,v,t+=X[l]*Aji;l+=dx;)if(nu)X[k]=t+X[k]*Aii;else X[k]+=t;k+=dx)}}
+
+V cblas_ztrmv(I ly,I ul,I AT,I d,I N,V*A,I la,V*X,I dx){}
+
 V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){}
 
 #undef BLAS_IMPL
@@ -197,3 +211,85 @@ V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){}
 
 
 
+/*
+{
+  I i, j;
+
+  int nonunit = (Diag == CblasNonUnit);
+  int Trans = (TransA != CblasConjTrans) ? TransA : CblasTrans;
+
+  if (Trans == CblasTrans && Uplo == CblasLower) {
+    I ix = OF(N, dx);
+    for (i = 0; i < N; i++) {
+      D temp = 0.0;
+      I j_min = i + 1;
+      I j_max = N;
+      I jx = OF(N, dx) + j_min * dx;
+      for (j = j_min; j < j_max; j++) {
+        temp += X[jx] * A[lda * i + j];
+        jx += dx;
+      }
+      if (nonunit) {
+        X[ix] = temp + X[ix] * A[lda * i + i];
+      } else {
+        X[ix] += temp;
+      }
+      ix += dx;
+    }
+  } else if (Trans == CblasTrans && Uplo == CblasUpper) {
+    I ix = OF(N, dx) + (N - 1) * dx;
+    for (i = N; i > 0 && i--;) {
+      D temp = 0.0;
+      I j_min = 0;
+      I j_max = i;
+      I jx = OF(N, dx) + j_min * dx;
+      for (j = j_min; j < j_max; j++) {
+        temp += X[jx] * A[lda * i + j];
+        jx += dx;
+      }
+      if (nonunit) {
+        X[ix] = temp + X[ix] * A[lda * i + i];
+      } else {
+        X[ix] += temp;
+      }
+      ix -= dx;
+    }
+  } else if (Trans == CblasNoTrans && Uplo == CblasLower) {
+    I ix = OF(N, dx) + (N - 1) * dx;
+    for (i = N; i > 0 && i--;) {
+      D temp = 0.0;
+      I j_min = 0;
+      I j_max = i;
+      I jx = OF(N, dx) + j_min * dx;
+      for (j = j_min; j < j_max; j++) {
+        temp += X[jx] * A[lda * j + i];
+        jx += dx;
+      }
+      if (nonunit) {
+        X[ix] = temp + X[ix] * A[lda * i + i];
+      } else {
+        X[ix] += temp;
+      }
+      ix -= dx;
+    }
+  } else if (Trans == CblasNoTrans && Uplo == CblasUpper) {
+    I ix = OF(N, dx);
+    for (i = 0; i < N; i++) {
+      D temp = 0.0;
+      I j_min = i + 1;
+      I j_max = N;
+      I jx = OF(N, dx) + (i + 1) * dx;
+      for (j = j_min; j < j_max; j++) {
+        temp += X[jx] * A[lda * j + i];
+        jx += dx;
+      }
+      if (nonunit) {
+        X[ix] = temp + X[ix] * A[lda * i + i];
+      } else {
+        X[ix] += temp;
+      }
+      ix += dx;
+    }
+  }
+}
+*/
