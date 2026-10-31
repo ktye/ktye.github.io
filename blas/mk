@@ -1,1 +1,2 @@
-gcc main.c -lm
+W=-Wfatal-errors
+gcc $W main.c -lm && ./a.out

@@ -92,257 +92,62 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #endif
 #ifdef BLAS_IMPL
 
+#define es else
+#define ef es if
 #define Nx(i,N,e) for(i=0;i<(N);i++){e;}
+#define Nk(N,e) Nx(k,N,e)
 #define Nij(N,J,e) Nx(i,N,Nx(j,J,e))
+#define Dx0 D x=0.0
+#define Dy0 D y=0.0
 #define AT0 AT==CblasNoTrans
 #define BT0 BT==CblasNoTrans
-#define AT1 AT==CblasTrans
-#define BT1 BT==CblasTrans
+#define AT1 (AT==CblasTrans||AT==CblasConjTrans)
+#define BT1 (BT==CblasTrans||BT==CblasConjTrans)
+#define Aik A[la*i+k]
+#define Ajk A[la*j+k]
+#define Bij B[lb*i+j]
+#define Bik B[lb*i+k]
+#define Bji B[lb*j+i]
+#define Bki B[lb*k+i]
+#define Cij C[lc*i+j]
+#define Cjk C[lc*j+k]
 #define Re(A,i) ((D*)A)[2*(i)]
 #define Im(A,i) ((D*)A)[1+2*(i)]
+#define ARik Re(A,la*i+k)
+#define AIik Im(A,la*i+k)
+#define ARjk Re(A,la*j+k)
+#define AIjk Im(A,la*j+k)
+#define BRij Re(B,lb*i+j)
+#define BIij Im(B,lb*i+j)
+#define BRik Re(B,lb*i+k)
+#define BIik Im(B,lb*i+k)
+#define BRji Re(B,lb*j+i)
+#define BIji Im(B,lb*j+i)
+#define BRki Re(B,lb*k+i)
+#define BIki Im(B,lb*k+i)
+#define CRij Re(C,lc*i+j)
+#define CIij Im(C,lc*i+j)
+#define CRjk Re(C,lc*j+k)
+#define CIjk Im(C,lc*j+k)
 
 V cblas_dgemm(I ly,I AT,I BT,I M,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc){I i,j,k;
-  if(b==0.0){Nij(N,M,C[lc*i+j]=0)}else if(b!=1.0){Nij(N,M,C[lc*i+j]*=b)}if(a==0.0)return;
-  if(BT0&&AT0){Nij(K,N,const D t=a*B[lb*j+i];if(t){Nx(k,M,C[lc*j+k]+=t*A[la*i+k])})}
-  else if(BT0&&AT1){Nij(N,M,D t=0.0;Nx(k,K,t+=B[lb*i+k]*A[la*j+k])C[lc*i+j]+=a*t)}
-  else if(BT1&&AT0){Nij(K,N,const D t=a*B[lb*i+j];if(t)Nx(k,M,C[lc*j+k]+=t*A[la*i+k]))}
-  else{Nij(N,M,D t=0.0;Nx(k,K,t+=B[lb*k+i]*A[la*j+k])C[lc*i+j]+=a*t)}}
+  if(!b      ){Nij(N,M,Cij=0)}ef(b!=1.0){Nij(N,M,Cij*=b)}if(!a)return;
+  if(BT0&&AT0){Nij(K,N,D t=a*Bji;if(t){Nx(k,M,Cjk+=t*Aik)})}
+  ef(BT0&&AT1){Nij(N,M,D t=0.0;Nx(k,K,t+=Bik*Ajk)C[lc*i+j]+=a*t)}
+  ef(BT1&&AT0){Nij(K,N,D t=a*Bij;if(t)Nx(k,M,Cjk+=t*Aik))}
+  es{Nij(N,M,D t=0.0;Nx(k,K,t+=Bki*Ajk)Cij+=a*t)}}
 
 V cblas_zgemm(I ly,I AT,I BT,I M,I N,I K,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc){I i,j,k;
-  I n1, n2;
-  I ldf, ldg;
-  I conjF, conjG, TransF, TransG;
-  const D *F, *G;
-
-  D ar=Re(a,0),ai=Im(a,0),br=Re(b,0),bi=Im(b,0);
-  D AH=AT==CblasConjTrans?-1:1,BH=BT==CblasConjTrans?-1:1;
-
-      n1 = N;
-      n2 = M;
-      F = (D*)B;
-      ldf = lb;
-      conjF = (BT== CblasConjTrans) ? -1 : 1;
-      TransF = (BT== CblasNoTrans) ? CblasNoTrans : CblasTrans;
-      G = (D*)A;
-      ldg = la;
-      conjG = (AT == CblasConjTrans) ? -1 : 1;
-      TransG = (AT == CblasNoTrans) ? CblasNoTrans : CblasTrans;
-
-    if(br==0.0&&bi==0.0){Nij(N,M,Re(C,lc*i+j)=0.0;Im(C,lc*i+j)=0.0)}
-    else if(!(br==1.0&&bi==0.0))Nij(N,M,D cr=Re(C,lc*i+j);D ci=Im(C,lc*i+j);Re(C,lc*i+j)=br*cr-bi*ci;Im(C,lc*i+j)=br*ci+bi*cr)
-    if(ar==0.0&&ai==0.0)return;
-    if(BT0&&AT0){Nij(K,N,D r=Re(B,lb*j+i);D s=BH*Im(B,lb*j+i);D t=ar*r-ai*s;D u=ar*s+ai*r;if(t||u){Nx(k,M,D v=Re(A,la*i+k);D w=AH*Im(A,la*i+k);Re(C,lc*j+k)+=t*v-u*w;Im(C,lc*j+k)+=t*w+u*v)})}
-
-    else if (TransF == CblasNoTrans && TransG == CblasTrans) {
-      for (i = 0; i < n1; i++) {
-        for (j = 0; j < n2; j++) {
-          D temp_real = 0.0;
-          D temp_imag = 0.0;
-          for (k = 0; k < K; k++) {
-            D Fik_real = Re(F, ldf * i + k);
-            D Fik_imag = conjF * Im(F, ldf * i + k);
-            D Gjk_real = Re(G, ldg * j + k);
-            D Gjk_imag = conjG * Im(G, ldg * j + k);
-            temp_real += Fik_real * Gjk_real - Fik_imag * Gjk_imag;
-            temp_imag += Fik_real * Gjk_imag + Fik_imag * Gjk_real;
-          }
-          Re(C, lc * i + j) += ar * temp_real - ai * temp_imag;
-          Im(C, lc * i + j) += ar * temp_imag + ai * temp_real;
-        }
-      }
-
-    } else if (TransF == CblasTrans && TransG == CblasNoTrans) {
-
-      for (k = 0; k < K; k++) {
-        for (i = 0; i < n1; i++) {
-          D Fki_real = Re(F, ldf * k + i);
-          D Fki_imag = conjF * Im(F, ldf * k + i);
-          D temp_real = ar * Fki_real - ai * Fki_imag;
-          D temp_imag = ar * Fki_imag + ai * Fki_real;
-          if (!(temp_real == 0.0 && temp_imag == 0.0)) {
-            for (j = 0; j < n2; j++) {
-              D Gkj_real = Re(G, ldg * k + j);
-              D Gkj_imag = conjG * Im(G, ldg * k + j);
-              Re(C, lc * i + j) += temp_real * Gkj_real - temp_imag * Gkj_imag;
-              Im(C, lc * i + j) += temp_real * Gkj_imag + temp_imag * Gkj_real;
-            }
-          }
-        }
-      }
-
-    } else if (TransF == CblasTrans && TransG == CblasTrans) {
-
-      for (i = 0; i < n1; i++) {
-        for (j = 0; j < n2; j++) {
-          D temp_real = 0.0;
-          D temp_imag = 0.0;
-          for (k = 0; k < K; k++) {
-            D Fki_real = Re(F, ldf * k + i);
-            D Fki_imag = conjF * Im(F, ldf * k + i);
-            D Gjk_real = Re(G, ldg * j + k);
-            D Gjk_imag = conjG * Im(G, ldg * j + k);
-
-            temp_real += Fki_real * Gjk_real - Fki_imag * Gjk_imag;
-            temp_imag += Fki_real * Gjk_imag + Fki_imag * Gjk_real;
-          }
-          Re(C, lc * i + j) += ar * temp_real - ai * temp_imag;
-          Im(C, lc * i + j) += ar * temp_imag + ai * temp_real;
-        }
-      }
-  }
-}
+  D ar=Re(a,0),ai=Im(a,0),br=Re(b,0),bi=Im(b,0);D AH=AT==CblasConjTrans?-1:1,BH=BT==CblasConjTrans?-1:1;
+  if(! br     &&!bi )Nij(N,M,CRij=0.0;CIij=0.0)
+  ef(!(br==1.0&&!bi))Nij(N,M,D cr=CRij;D ci=CIij;CRij=br*cr-bi*ci;CIij=br*ci+bi*cr)if(!ar&&!ai)return;
+  if(  BT0  &&  AT0 )Nij(K,N,D r=BRji;D s=BH*BIji;D t=ar*r-ai*s;D u=ar*s+ai*r;if(t||u){Nk(M,D v=ARik;D w=AH*AIik;CRjk+=t*v-u*w;CIjk+=t*w+u*v)})
+  ef(  BT0  &&  AT1 )Nij(N,M,Dx0;Dy0;Nk(K,D s=BRik;D t=BH*BIik;D u=ARjk;D v=AH*AIjk;x+=s*u-t*v;y+=s*v+t*u)CRij+=ar*x-ai*y;CIij+=ar*y+ai*x)
+  ef(  BT1  &&  AT0 )Nij(K,N,D x=BRij;D y=BH*BIij;D u=ar*x-ai*y;D v=ar*y+ai*x;if(!(!u&&!v))Nk(M,D s=ARik;D t=AH*AIik;CRjk+=u*s-v*t;CIjk+=u*t+v*s))
+  es Nij(N,M,Dx0;Dy0;Nk(K,D u=BRki;D v=BH*BIki;D s=ARjk;D t=AH*AIjk;x+=u*s-v*t;y+=u*t+v*s);CRij+=ar*x-ai*y;CIij+=ar*y+ai*x)}
 
 #undef BLAS_IMPL
 #endif
 #undef I
 #undef D
 #undef V
-
-
-
-/*
-{
-  INDEX i, j, k;
-  INDEX n1, n2;
-  INDEX ldf, ldg;
-  int conjF, conjG, TransF, TransG;
-  const BASE *F, *G;
-
-  {
-    const BASE alpha_real = CONST_REAL0(alpha);
-    const BASE alpha_imag = CONST_IMAG0(alpha);
-
-    const BASE beta_real = CONST_REAL0(beta);
-    const BASE beta_imag = CONST_IMAG0(beta);
-
-    if ((alpha_real == 0.0 && alpha_imag == 0.0)
-        && (beta_real == 1.0 && beta_imag == 0.0))
-      return;
-
-    if (Order == CblasRowMajor) {
-      n1 = M;
-      n2 = N;
-      F = (const BASE *)A;
-      ldf = lda;
-      conjF = (TransA == CblasConjTrans) ? -1 : 1;
-      TransF = (TransA == CblasNoTrans) ? CblasNoTrans : CblasTrans;
-      G = (const BASE *)B;
-      ldg = ldb;
-      conjG = (TransB == CblasConjTrans) ? -1 : 1;
-      TransG = (TransB == CblasNoTrans) ? CblasNoTrans : CblasTrans;
-    } else {
-      n1 = N;
-      n2 = M;
-      F = (const BASE *)B;
-      ldf = ldb;
-      conjF = (TransB == CblasConjTrans) ? -1 : 1;
-      TransF = (TransB == CblasNoTrans) ? CblasNoTrans : CblasTrans;
-      G = (const BASE *)A;
-      ldg = lda;
-      conjG = (TransA == CblasConjTrans) ? -1 : 1;
-      TransG = (TransA == CblasNoTrans) ? CblasNoTrans : CblasTrans;
-    }
-
-    if (beta_real == 0.0 && beta_imag == 0.0) {
-      for (i = 0; i < n1; i++) {
-        for (j = 0; j < n2; j++) {
-          REAL(C, ldc * i + j) = 0.0;
-          IMAG(C, ldc * i + j) = 0.0;
-        }
-      }
-    } else if (!(beta_real == 1.0 && beta_imag == 0.0)) {
-      for (i = 0; i < n1; i++) {
-        for (j = 0; j < n2; j++) {
-          const BASE Cij_real = REAL(C, ldc * i + j);
-          const BASE Cij_imag = IMAG(C, ldc * i + j);
-          REAL(C, ldc * i + j) = beta_real * Cij_real - beta_imag * Cij_imag;
-          IMAG(C, ldc * i + j) = beta_real * Cij_imag + beta_imag * Cij_real;
-        }
-      }
-    }
-
-    if (alpha_real == 0.0 && alpha_imag == 0.0)
-      return;
-
-    if (TransF == CblasNoTrans && TransG == CblasNoTrans) {
-      for (k = 0; k < K; k++) {
-        for (i = 0; i < n1; i++) {
-          const BASE Fik_real = CONST_REAL(F, ldf * i + k);
-          const BASE Fik_imag = conjF * CONST_IMAG(F, ldf * i + k);
-          const BASE temp_real = alpha_real * Fik_real - alpha_imag * Fik_imag;
-          const BASE temp_imag = alpha_real * Fik_imag + alpha_imag * Fik_real;
-          if (!(temp_real == 0.0 && temp_imag == 0.0)) {
-            for (j = 0; j < n2; j++) {
-              const BASE Gkj_real = CONST_REAL(G, ldg * k + j);
-              const BASE Gkj_imag = conjG * CONST_IMAG(G, ldg * k + j);
-              REAL(C, ldc * i + j) += temp_real * Gkj_real - temp_imag * Gkj_imag;
-              IMAG(C, ldc * i + j) += temp_real * Gkj_imag + temp_imag * Gkj_real;
-            }
-          }
-        }
-      }
-
-    } else if (TransF == CblasNoTrans && TransG == CblasTrans) {
-
-      for (i = 0; i < n1; i++) {
-        for (j = 0; j < n2; j++) {
-          BASE temp_real = 0.0;
-          BASE temp_imag = 0.0;
-          for (k = 0; k < K; k++) {
-            const BASE Fik_real = CONST_REAL(F, ldf * i + k);
-            const BASE Fik_imag = conjF * CONST_IMAG(F, ldf * i + k);
-            const BASE Gjk_real = CONST_REAL(G, ldg * j + k);
-            const BASE Gjk_imag = conjG * CONST_IMAG(G, ldg * j + k);
-            temp_real += Fik_real * Gjk_real - Fik_imag * Gjk_imag;
-            temp_imag += Fik_real * Gjk_imag + Fik_imag * Gjk_real;
-          }
-          REAL(C, ldc * i + j) += alpha_real * temp_real - alpha_imag * temp_imag;
-          IMAG(C, ldc * i + j) += alpha_real * temp_imag + alpha_imag * temp_real;
-        }
-      }
-
-    } else if (TransF == CblasTrans && TransG == CblasNoTrans) {
-
-      for (k = 0; k < K; k++) {
-        for (i = 0; i < n1; i++) {
-          const BASE Fki_real = CONST_REAL(F, ldf * k + i);
-          const BASE Fki_imag = conjF * CONST_IMAG(F, ldf * k + i);
-          const BASE temp_real = alpha_real * Fki_real - alpha_imag * Fki_imag;
-          const BASE temp_imag = alpha_real * Fki_imag + alpha_imag * Fki_real;
-          if (!(temp_real == 0.0 && temp_imag == 0.0)) {
-            for (j = 0; j < n2; j++) {
-              const BASE Gkj_real = CONST_REAL(G, ldg * k + j);
-              const BASE Gkj_imag = conjG * CONST_IMAG(G, ldg * k + j);
-              REAL(C, ldc * i + j) += temp_real * Gkj_real - temp_imag * Gkj_imag;
-              IMAG(C, ldc * i + j) += temp_real * Gkj_imag + temp_imag * Gkj_real;
-            }
-          }
-        }
-      }
-
-    } else if (TransF == CblasTrans && TransG == CblasTrans) {
-
-      for (i = 0; i < n1; i++) {
-        for (j = 0; j < n2; j++) {
-          BASE temp_real = 0.0;
-          BASE temp_imag = 0.0;
-          for (k = 0; k < K; k++) {
-            const BASE Fki_real = CONST_REAL(F, ldf * k + i);
-            const BASE Fki_imag = conjF * CONST_IMAG(F, ldf * k + i);
-            const BASE Gjk_real = CONST_REAL(G, ldg * j + k);
-            const BASE Gjk_imag = conjG * CONST_IMAG(G, ldg * j + k);
-
-            temp_real += Fki_real * Gjk_real - Fki_imag * Gjk_imag;
-            temp_imag += Fki_real * Gjk_imag + Fki_imag * Gjk_real;
-          }
-          REAL(C, ldc * i + j) += alpha_real * temp_real - alpha_imag * temp_imag;
-          IMAG(C, ldc * i + j) += alpha_real * temp_imag + alpha_imag * temp_real;
-        }
-      }
-
-    } else {
-      BLAS_ERROR("unrecognized operation");
-    }
-  }
-}
-*/

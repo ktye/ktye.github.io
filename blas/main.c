@@ -1,6 +1,6 @@
+#include<stdio.h>
 #define BLAS_IMPL
 #include"cblas.h"
-#include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 #include<float.h>
@@ -104,4 +104,4 @@ void gsl_test_rel(double result, double expected, double relative_error, const c
  else { status = (fabs(result) > relative_error) ; }
  if(status){printf("%s\n",t);exit(1);}}
 
-int main(){ test_gemm(); }
+int main(){ test_gemm(); printf("ok\n"); }
