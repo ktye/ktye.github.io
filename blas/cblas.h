@@ -96,6 +96,7 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define ef es if
 #define Nx(i,N,e) for(i=0;i<(N);i++){e;}
 #define Ni(N,e) Nx(i,N,e)
+#define Nj(N,e) Nx(j,N,e)
 #define Nk(N,e) Nx(k,N,e)
 #define Nij(N,J,e) Nx(i,N,Nx(j,J,e))
 #define Dx0 D x=0.0
@@ -104,7 +105,9 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define BT0 BT==CblasNoTrans
 #define AT1 (AT==CblasTrans||AT==CblasConjTrans)
 #define BT1 (BT==CblasTrans||BT==CblasConjTrans)
+#define Aij A[la*i+j]
 #define Aik A[la*i+k]
+#define Aji A[la*j+i]
 #define Ajk A[la*j+k]
 #define Bij B[lb*i+j]
 #define Bik B[lb*i+k]
@@ -116,10 +119,16 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define Im(A,i) ((D*)A)[1+2*(i)]
 #define XRj Re(X,j)
 #define XIj Im(X,j)
+#define XRk Re(X,k)
+#define XIk Im(X,k)
 #define YRk Re(Y,k)
 #define YIk Im(Y,k)
+#define ARij Re(A,la*i+j)
+#define AIij Im(A,la*i+j)
 #define ARik Re(A,la*i+k)
 #define AIik Im(A,la*i+k)
+#define ARji Re(A,la*j+i)
+#define AIji Im(A,la*j+i)
 #define ARjk Re(A,la*j+k)
 #define AIjk Im(A,la*j+k)
 #define BRij Re(B,lb*i+j)
@@ -158,8 +167,26 @@ V cblas_zgemm(I ly,I AT,I BT,I M,I N,I K,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc){I i
   ef(  BT1  &&  AT0 )Nij(K,N,D x=BRij;D y=BH*BIij;D u=ar*x-ai*y;D v=ar*y+ai*x;if(!(!u&&!v))Nk(M,D s=ARik;D t=AH*AIik;CRjk+=u*s-v*t;CIjk+=u*t+v*s))
   es Nij(N,M,Dx0;Dy0;Nk(K,D u=BRki;D v=BH*BIki;D s=ARjk;D t=AH*AIjk;x+=u*s-v*t;y+=u*t+v*s);CRij+=ar*x-ai*y;CIij+=ar*y+ai*x)}
 
-V cblas_zgemv(I ly,I AT,I M,I N,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy){}
-V cblas_zgerc(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la){}
+V cblas_dgemv(I ly,I AT,I M,I N,D a,D*A,I la,D*X,I dx,D b,D*Y,I dy){I i,j,k,l,LX,LY;D t;
+  if(!M||!N)return;if(!a&&b==1.0)return;if(AT0){LX=N;LY=M;}else{LX=M;LY=N;}
+  if(!b){k=OF(LY,dy);Ni(LY,Y[k]=0.0;k+=dy)}ef(b!=1.0){k=OF(LY,dy);Ni(LY,Y[k]*=b;k+=dy)}if(!a)return;
+  if(AT1){l=OF(LY,dy);Ni(LY,t=0.0;k=OF(LX,dx);Nj(LX,t+=X[k]*Aij;k+=dx);Y[l]+=a*t;l+=dy)}
+  es{k=OF(LX,dx);Nj(LX,t=a*X[k];if(t){l=OF(LY,dy);Ni(LY,Y[l]+=t*Aji;l+=dy)}k+=dx)}}
+
+V cblas_zgemv(I ly,I AT,I M,I N,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy){I i,j,k,l,LX,LY;D ar=Re(a,0),ai=Im(a,0),br=Re(b,0),bi=Im(b,0),x,y,u,v,s,t;
+  if(!M||!N)return;if((!ar&&!ai)&&(br==1.0&&!bi))return;if(AT0){LX=N;LY=M;}else{LX=M;LY=N;}
+  if(!br&&!bi){k=OF(LY, dy);Ni(LY,YRk=0.0;YIk=0.0;k+=dy)}
+  ef(!(br==1.0&&!bi)){k=OF(LY,dy);Ni(LY,x=YRk;y=YIk;u=x*br-y*bi;v=x*bi+y*br;YRk=u;YIk=v;k+=dy)}if(!ar&&!ai)return;
+  if(AT==CblasTrans){l=OF(LY,dy);Ni(LY,u=0.0;v=0.0;k=OF(LX,dx);Nj(LX,x=XRk;y=XIk;s=ARij;t=AIij;u+=s*x-t*y;v+=s*y+t*x;k+=dx)Re(Y,l)+=ar*u-ai*v;Im(Y,l)+=ar*v+ai*u;l+=dy)}
+  ef(AT0){k=OF(LX,dx);Nj(LX,x=XRk;y=XIk;u=ar*x-ai*y;v=ar*y+ai*x;l=OF(LY,dy);Ni(LY,s=Re(A,la*j+i);t=Im(A,la*j+i);Re(Y,l)+=s*u-t*v;Im(Y,l)+=s*v+t*u;l+=dy)k+=dx)}
+  es{l=OF(LY,dy);Ni(LY,u=0.0;v=0.0;k=OF(LX,dx);Nj(LX,x=XRk;y=XIk;s=ARij;t=AIij;u+=s*x+t*y;v+=s*y-t*x;k+=dx)Re(Y,l)+=ar*u-ai*v;Im(Y,l)+=ar*v+ai*u;l+=dy)}}
+
+V cblas_dger(I ly,I M,I N,D a,D*X,I dx,D*Y,I dy,D*A,I la){I i,j,k,l=OF(N,dy);D t;Nj(N,t=a*Y[l];k=OF(M,dx);Ni(M,Aji+=X[k]*t;k+=dx)l+=dy)}
+V cblas_zgerc(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la){I i,j,k,l=OF(N,dy);D ar=Re(a,0),ai=Im(a,0),x,y,u,v,s,t;
+  Nj(N,u=Re(Y,l);v=-Im(Y,l);s=ar*u-ai*v;t=ai*u+ar*v;k=OF(M,dx);Ni(M,x=Re(X,k);y=Im(X,k);ARji+=x*s-y*t;AIji+=y*s+x*t;k+=dx)l+=dy)}
+V cblas_zgeru(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la){I i,j,k,l=OF(N,dy); D ar=Re(a,0),ai=Im(a,0),x,y,u,v,s,t;
+  Nj(N,u=Re(Y,l);v=Im(Y,l);s=ar*u-ai*v;t=ai*u+ar*v;k=OF(M,dx);Ni(M,x=XRk;y=XIk;ARji+=x*s-y*t;AIji+=y*s+x*t;k+=dx)l+=dy)}
+
 V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){}
 
 #undef BLAS_IMPL
@@ -167,3 +194,6 @@ V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){}
 #undef I
 #undef D
 #undef V
+
+
+
