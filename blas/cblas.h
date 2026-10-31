@@ -95,6 +95,7 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define es else
 #define ef es if
 #define Nx(i,N,e) for(i=0;i<(N);i++){e;}
+#define Ni(N,e) Nx(i,N,e)
 #define Nk(N,e) Nx(k,N,e)
 #define Nij(N,J,e) Nx(i,N,Nx(j,J,e))
 #define Dx0 D x=0.0
@@ -113,6 +114,10 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define Cjk C[lc*j+k]
 #define Re(A,i) ((D*)A)[2*(i)]
 #define Im(A,i) ((D*)A)[1+2*(i)]
+#define XRj Re(X,j)
+#define XIj Im(X,j)
+#define YRk Re(Y,k)
+#define YIk Im(Y,k)
 #define ARik Re(A,la*i+k)
 #define AIik Im(A,la*i+k)
 #define ARjk Re(A,la*j+k)
@@ -129,6 +134,13 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define CIij Im(C,lc*i+j)
 #define CRjk Re(C,lc*j+k)
 #define CIjk Im(C,lc*j+k)
+#define OF(N,d) ((d)>0?0:((N)-1)*(-(d)))
+
+V cblas_dcopy(I N,D*X,I dx,D*Y,I dy){I i,j=OF(N,dx),k=OF(N,dy);Ni(N,Y[k]=X[j];j+=dx;k+=dy)}
+V cblas_zcopy(I N,V*X,I dx,V*Y,I dy){I i,j=OF(N,dx),k=OF(N,dx);Ni(N,YRk=XRj;YIk=XIj;j+=dx;k+=dy)}
+V cblas_dscal(I N,D a,D*X,I dx){I i,j=0;if(dx<=0)return;Ni(N,X[j]*=a;j+=dx)}
+V cblas_zscal(I N,V*a,V*X,I dx){I i,j=0;D ar=Re(a,0),ai=Im(a,0);if(dx<=0)return;Ni(N, D x=XRj;D y=XIj;XRj=x*ar-y*ai;XIj=x*ai+y*ar;j+=dx)}
+V cblas_zdscal(I N,D a,V*X,I dx){I i,j=0;if(dx<=0)return;Ni(N,XRj*=a;XIj*=a;j+=dx)}
 
 V cblas_dgemm(I ly,I AT,I BT,I M,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc){I i,j,k;
   if(!b      ){Nij(N,M,Cij=0)}ef(b!=1.0){Nij(N,M,Cij*=b)}if(!a)return;
@@ -145,6 +157,10 @@ V cblas_zgemm(I ly,I AT,I BT,I M,I N,I K,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc){I i
   ef(  BT0  &&  AT1 )Nij(N,M,Dx0;Dy0;Nk(K,D s=BRik;D t=BH*BIik;D u=ARjk;D v=AH*AIjk;x+=s*u-t*v;y+=s*v+t*u)CRij+=ar*x-ai*y;CIij+=ar*y+ai*x)
   ef(  BT1  &&  AT0 )Nij(K,N,D x=BRij;D y=BH*BIij;D u=ar*x-ai*y;D v=ar*y+ai*x;if(!(!u&&!v))Nk(M,D s=ARik;D t=AH*AIik;CRjk+=u*s-v*t;CIjk+=u*t+v*s))
   es Nij(N,M,Dx0;Dy0;Nk(K,D u=BRki;D v=BH*BIki;D s=ARjk;D t=AH*AIjk;x+=u*s-v*t;y+=u*t+v*s);CRij+=ar*x-ai*y;CIij+=ar*y+ai*x)}
+
+V cblas_zgemv(I ly,I AT,I M,I N,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy){}
+V cblas_zgerc(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la){}
+V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){}
 
 #undef BLAS_IMPL
 #endif

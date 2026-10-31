@@ -5,7 +5,110 @@
 #include<math.h>
 #include<float.h>
 void gsl_test_rel(double result, double expected, double relative_error, const char *t);
-void test_gemm (void) { const double flteps = 1e-4, dbleps = 1e-6;
+void test_copy(void) { const double flteps = 1e-4, dbleps = 1e-6;
+  { int N = 1; double X[] = { 0.002 }; int incX = 1; double Y[] = { -0.921 }; int incY = -1; double expected[] = { 0.002 };
+   cblas_dcopy(N, X, incX, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], expected[i], dbleps, "dcopy(case 77)"); } }; };
+
+  { int N = 1; double X[] = { 0.315, -0.324 }; int incX = 1; double Y[] = { -0.312, -0.748 }; int incY = -1; double expected[] = { 0.315, -0.324 };
+   cblas_zcopy(N, X, incX, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], expected[2*i], dbleps, "zcopy(case 79) real"); gsl_test_rel(Y[2*i+1], expected[2*i+1], dbleps, "zcopy(case 79) imag"); }; }; };
+
+  { int N = 1; double X[] = { 0.021 }; int incX = -1; double Y[] = { 0.898 }; int incY = 1; double expected[] = { 0.021 };
+   cblas_dcopy(N, X, incX, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], expected[i], dbleps, "dcopy(case 81)"); } }; };
+
+  { int N = 1; double X[] = { -0.265, -0.84 }; int incX = -1; double Y[] = { -0.156, 0.939 }; int incY = 1; double expected[] = { -0.265, -0.84 };
+   cblas_zcopy(N, X, incX, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], expected[2*i], dbleps, "zcopy(case 83) real"); gsl_test_rel(Y[2*i+1], expected[2*i+1], dbleps, "zcopy(case 83) imag"); }; }; };
+
+  { int N = 1; double X[] = { -0.374 }; int incX = -1; double Y[] = { -0.161 }; int incY = -1; double expected[] = { -0.374 };
+   cblas_dcopy(N, X, incX, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], expected[i], dbleps, "dcopy(case 85)"); } }; };
+
+  { int N = 1; double X[] = { 0.831, -0.282 }; int incX = -1; double Y[] = { -0.62, 0.32 }; int incY = -1; double expected[] = { 0.831, -0.282 };
+   cblas_zcopy(N, X, incX, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[2*i], expected[2*i], dbleps, "zcopy(case 87) real"); gsl_test_rel(Y[2*i+1], expected[2*i+1], dbleps, "zcopy(case 87) imag"); }; }; };
+}
+void test_scal(void) { const double flteps = 1e-4, dbleps = 1e-6;
+
+  { int N = 1; double alpha = 0; double X[] = { 0.686 }; int incX = -1; double expected[] = { 0.686 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 115)"); } }; };
+
+  { int N = 1; double alpha = 0.1; double X[] = { 0.686 }; int incX = -1; double expected[] = { 0.686 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 116)"); } }; };
+
+
+  { int N = 1; double alpha = 1; double X[] = { 0.686 }; int incX = -1; double expected[] = { 0.686 }; 
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 117)"); } }; };
+
+  { int N = 1; double alpha[2] = {0, 0}; double X[] = { 0.454, -0.478 }; int incX = -1; double expected[] = { 0.454, -0.478 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 124) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 124) imag"); }; }; };
+
+  { int N = 1; double alpha[2] = {0.1, 0}; double X[] = { 0.454, -0.478 }; int incX = -1; double expected[] = { 0.454, -0.478 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 125) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 125) imag"); }; }; };
+
+  { int N = 1; double alpha[2] = {1, 0}; double X[] = { 0.454, -0.478 }; int incX = -1; double expected[] = { 0.454, -0.478 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 126) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 126) imag"); }; }; };
+
+  { int N = 1; double alpha[2] = {0, 0.1}; double X[] = { 0.454, -0.478 }; int incX = -1; double expected[] = { 0.454, -0.478 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 127) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 127) imag"); }; }; };
+
+  { int N = 1; double alpha[2] = {0.1, 0.2}; double X[] = { 0.454, -0.478 }; int incX = -1; double expected[] = { 0.454, -0.478 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 128) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 128) imag"); }; }; };
+
+  { int N = 1; double alpha[2] = {1, 0.3}; double X[] = { 0.454, -0.478 }; int incX = -1; double expected[] = { 0.454, -0.478 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 129) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 129) imag"); }; }; };
+
+  { int N = 2; double alpha = 0; double X[] = { -0.429, -0.183 }; int incX = 1; double expected[] = { -0.0, -0.0 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 133)"); } }; };
+
+  { int N = 2; double alpha = 0.1; double X[] = { -0.429, -0.183 }; int incX = 1; double expected[] = { -0.0429, -0.0183 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 134)"); } }; };
+
+  { int N = 2; double alpha = 1; double X[] = { -0.429, -0.183 }; int incX = 1; double expected[] = { -0.429, -0.183 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 135)"); } }; };
+
+  { int N = 2; double alpha[2] = {0, 0}; double X[] = { -0.956, 0.613, 0.443, 0.503 }; int incX = 1; double expected[] = { -0.0, 0.0, 0.0, 0.0 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 142) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 142) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {0.1, 0}; double X[] = { -0.956, 0.613, 0.443, 0.503 }; int incX = 1; double expected[] = { -0.0956, 0.0613, 0.0443, 0.0503 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 143) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 143) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {1, 0}; double X[] = { -0.956, 0.613, 0.443, 0.503 }; int incX = 1; double expected[] = { -0.956, 0.613, 0.443, 0.503 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 144) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 144) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {0, 0.1}; double X[] = { -0.956, 0.613, 0.443, 0.503 }; int incX = 1; double expected[] = { -0.0613, -0.0956, -0.0503, 0.0443 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 145) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 145) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {0.1, 0.2}; double X[] = { -0.956, 0.613, 0.443, 0.503 }; int incX = 1; double expected[] = { -0.2182, -0.1299, -0.0563, 0.1389 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 146) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 146) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {1, 0.3}; double X[] = { -0.956, 0.613, 0.443, 0.503 }; int incX = 1; double expected[] = { -1.1399, 0.3262, 0.2921, 0.6359 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 147) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 147) imag"); }; }; };
+
+  { int N = 2; double alpha = 0; double X[] = { 0.398, -0.656 }; int incX = -1; double expected[] = { 0.398, -0.656 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 151)"); } }; };
+
+  { int N = 2; double alpha = 0.1; double X[] = { 0.398, -0.656 }; int incX = -1; double expected[] = { 0.398, -0.656 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 152)"); } }; };
+
+  { int N = 2; double alpha = 1; double X[] = { 0.398, -0.656 }; int incX = -1; double expected[] = { 0.398, -0.656 };
+   cblas_dscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[i], expected[i], dbleps, "dscal(case 153)"); } }; };
+
+  { int N = 2; double alpha[2] = {0, 0}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 160) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 160) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {0.1, 0}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 161) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 161) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {1, 0}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 162) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 162) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {0, 0.1}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 163) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 163) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {0.1, 0.2}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 164) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 164) imag"); }; }; };
+
+  { int N = 2; double alpha[2] = {1, 0.3}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
+   cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 165) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 165) imag"); }; }; };
+}
+void test_gemm(void) { const double flteps = 1e-4, dbleps = 1e-6;
 
   { int order = 102; int transA = 111; int transB = 111; int M = 1; int N = 2; int K = 4;
    double alpha = 0; double beta = 0; double A[] = { 0.571, 0.081, 0.109, 0.988 }; int lda = 1;
@@ -104,4 +207,4 @@ void gsl_test_rel(double result, double expected, double relative_error, const c
  else { status = (fabs(result) > relative_error) ; }
  if(status){printf("%s\n",t);exit(1);}}
 
-int main(){ test_gemm(); printf("ok\n"); }
+int main(){ test_copy(); test_scal(); test_gemm(); printf("ok\n"); }
