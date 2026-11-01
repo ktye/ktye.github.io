@@ -145,12 +145,20 @@ V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
 #define AIik Im(A,la*i+k)
 #define ARji Re(A,la*j+i)
 #define AIji Im(A,la*j+i)
+#define ARjj Re(A,la*j+j)
+#define AIjj Im(A,la*j+j)
 #define ARjk Re(A,la*j+k)
 #define AIjk Im(A,la*j+k)
+#define ARki Re(A,la*k+i)
+#define AIki Im(A,la*k+i)
+#define ARkj Re(A,la*k+j)
+#define AIkj Im(A,la*k+j)
 #define BRij Re(B,lb*i+j)
 #define BIij Im(B,lb*i+j)
 #define BRik Re(B,lb*i+k)
 #define BIik Im(B,lb*i+k)
+#define BRkj Re(B,lb*k+j)
+#define BIkj Im(B,lb*k+j)
 #define BRji Re(B,lb*j+i)
 #define BIji Im(B,lb*j+i)
 #define BRki Re(B,lb*k+i)
@@ -225,13 +233,19 @@ V cblas_dtrmm(I ly,I Si,I ul,I AT,I d,I M,I N,D a,D*A,I la,D*B,I lb){I i,j,k,nu=
   ef(LE&&LO&&AT1){Nij(N,M,t=0.0;if(nu)t=Ajj*Bij;else t=Bij;Nkk(1+j,M,t+=Ajk*Bik)Bij=a*t)}
   ef(LE&&UP&&AT0){Nij(N,M,t=0.0;if(nu)t=Ajj*Bij;else t=Bij;Nkk(1+j,M,t+=Akj*Bik)Bij=a*t)}
   es{Ni(N,Nj_(M,t=0.0;Nk(j,t+=Ajk*Bik)if(nu)t+=Ajj*Bij;else t+=Bij;Bij=a*t;))}}
-V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){}
+
+V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){I i,j,k,nu=(d==CblasNonUnit);D x,y,u,v,s,t,AH=(AT==CblasConjTrans)?-1:1,ar=Re(a,0),ai=Im(a,0);
+  if(RI&&LO&&AT0){Nij(N,M,x=0.0;y=0.0;if(nu){u=ARii;v=AH*AIii;s=BRij;t=BIij;x=u*s-v*t;y=u*t+v*s;}else{x=BRij;y=BIij;}Nkk(1+k,N,u=ARik;v=AH*AIik;s=BRkj;t=BIkj;x+=u*s-v*t;y+=u*t+v*s)BRij=ar*x-ai*y;BIij=ar*y+ai*x)}
+  ef(RI&&LO&&AT1){Ni_(N,Nj(M,x=0.0;y=0.0;Nk(i,u=ARki;v=AH*AIki;s=BRkj;t=BIkj;x+=u*s-v*t;y+=u*t+v*s)if(nu){u=ARii;v=AH*AIii;s=BRij;t=BIij;x+=u*s-v*t;y+=u*t+v*s;}else{x+=BRij;y+=BIij;}BRij=ar*x-ai*y;BIij=ar*y+ai*x))}
+  ef(RI&&UP&&AT0){Ni_(N,Nj(M,x=0.0;y=0.0;Nk(i,u=ARik;v=AH*AIik;s=BRkj;t=BIkj;x+=u*s-v*t;y+=u*t+v*s)if(nu){u=ARii;v=AH*AIii;s=BRij;t=BIij;x+=u*s-v*t;y+=u*t+v*s;}else{x+=BRij;y+=BIij;}BRij=ar*x-ai*y;BIij=ar*y+ai*x))}
+  ef(RI&&UP&&AT1){Nij(N,M,x=0.0;y=0.0;if(nu){u=ARii;v=AH*AIii;s=BRij;t=BIij;x=u*s-v*t;y=u*t+v*s;}else{x=BRij;y=BIij;}Nkk(1+i,N,u=ARki;v=AH*AIki;s=BRkj;t=BIkj;x+=u*s-v*t;y+=u*t+v*s)BRij=ar*x-ai*y;BIij=ar*y+ai*x)}
+  ef(LE&&LO&&AT0){Ni(N,Nj_(M,x=0.0;y=0.0;Nk(j,u=ARkj;v=AH*AIkj;s=BRik;t=BIik;x+=u*s-v*t;y+=u*t+v*s)if(nu){u=ARjj;v=AH*AIjj;s=BRij;t=BIij;x+=u*s-v*t;y+=u*t+v*s;}else{x+=BRij;y+=BIij;}BRij=ar*x-ai*y;BIij=ar*y+ai*x))}
+  ef(LE&&LO&&AT1){Nij(N,M,x=0.0;y=0.0;if(nu){u=ARjj;v=AH*AIjj;s=BRij;t=BIij;x=u*s-v*t;y=u*t+v*s;}else{x=Re(B,i*lb+j);y=Im(B,i*lb+j);}Nkk(1+j,M,u=ARjk;v=AH*AIjk;s=BRik;t=BIik;x+=u*s-v*t;y+=u*t+v*s)BRij=ar*x-ai*y;BIij=ar*y+ai*x)}
+  ef(LE&&UP&&AT0){Nij(N,M,x=0.0;y=0.0;if(nu){u=ARjj;v=AH*AIjj;s=BRij;t=BIij;x=u*s-v*t;y=u*t+v*s;}else{x=BRij;y=BIij;}Nkk(1+j,M,u=ARkj;v=AH*AIkj;s=BRik;t=BIik;x+=u*s-v*t;y+=u*t+v*s;)BRij=ar*x-ai*y;BIij=ar*y+ai*x)}
+  es{Ni(N,Nj_(M,x=0.0;y=0.0;Nk(j,u=ARjk;v=AH*AIjk;s=BRik;t=BIik;x+=u*s-v*t;y+=u*t+v*s)if(nu){u=ARjj;v=AH*AIjj;s=BRij;t=BIij;x+=u*s-v*t;y+=u*t+v*s;}else{x+=BRij;y+=BIij;}BRij=ar*x-ai*y;BIij=ar*y+ai*x;}))}
 
 #undef BLAS_IMPL
 #endif
 #undef I
 #undef D
 #undef V
-
-
-
