@@ -117,7 +117,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
   let fn={Ma:1,Mf:1},K={},al,N=(x,...y)=>(y.i=x,y.T='K',y),f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')al=[...x[3].map(x=>x[1]),...x[4].map(x=>x[1])];
    if(x[0]=='opr'&&x.T=='K'&&op.includes(x[1])){let s=o2[op.indexOf(x[1])];x[0]='cal';x[1]='K2';x[2]=N(x.i,'sym',s)}
    if(x[0]=='mon'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'){             x[0]='cal';x[1]=o1[op.indexOf(x[1][1])]};
-   if(x[0]=='dya'&&x[1][0]=='opr'&&x.T=='K'&&x[2].T=='K'){x[0]='cal';x[1]=o2[op.indexOf(x[1][1])];if(x[1]=='Atx'&&x[3].T=='i')x[1]='Ati'}
+   if(x[0]=='dya'&&x[1][0]=='opr'&&x.T=='K'/*&&x[2].T=='K'*/){x[0]='cal';x[1]=o2[op.indexOf(x[1][1])];if(x[1]=='Atx'&&x[3].T=='i')x[1]='Ati'}
    else if(x[0]=='dya'&&x[1][0]=='opr'&&x[1][1]=='@'&&x[2][0]=='sym'&&fn[x[2][1]]&&!al.includes(x[2][1])){x[0]='cal';x[1]=x[2][1];let l=x[3];x.splice(2);l[0]=='lst'?x.push(...l.slice(1)):x.push(l);}
    x.forEach(f)}
   math.forEach(x=>fn[x]=1)
@@ -126,6 +126,7 @@ let kc=(P,A,S)=>{ //program(string), target:c,w, step:pars,comp,lift..
  let loop=a=>{    // i#(tak)  i/(lop)
   let fn,si=['sym','i'],ii=_=>{if(!(fn[4].slice(1).map(x=>x[1])).includes('i')){si.T='i';si.i=fn.i;fn[4].push(si)}},f=x=>{if(!Array.isArray(x))return;if(x[0]=='fun')fn=x;x.forEach(f);
    if(x[0]=='cal'&&x[1]=='Tak'&&x[2].T=='i'&&x[2][0]!='num'){x[0]='tak';x.T='K';x[1]=x[2];x[2]=x[3];x.slice(3);ii()}
+   if(x[0]=='tak'&&x[2][0]=='dya'&&x[2][2][0]=='cal'&&x[2][2][1]=='C')x[2].T='c';  //type exception: Cx has type i
    if(x[0]=='mon'&&x[1][0]=='drv'&&x[1][1][0]=='adv'&&x[1][1][1]=='/'&&x[1][2].T=='i'&&x[1][2][0]!='num'){x[0]='lop';x[0].T='';x[1]=x[1][2];ii();}
   }
   a.forEach(f)}
@@ -226,7 +227,10 @@ H2=`
 #define $S(t,c,b,d) ({t _;switch(c){b default:_=(d);};_;})
 #define $C(i,x)   case i:_=(x);break;
 #define W(c,x) {for(i=0;i<(c);i++){x;}}
+#define NC(n,e) ({int _n=(n);K _=Ktn(1,_n);char*_r=(char*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
 #define NI(n,e) ({int _n=(n);K _=Ktn(2,_n);int*_r=(int*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
+#define NF(n,e) ({int _n=(n);K _=Ktn(3,_n);double*_r=(double*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
+#define NZ(n,e) ({int _n=(n);K _=Ktn(4,_n);double complex*_r=(double complex*)P(x);for(i=0;i<_n;i++){_r[i]=(e);};_r;})
 #define Ma(x) (uintptr_t)malloc((size_t)(x))
 #define Mf(x) free(x)
 #define Mc(d,s,n) memcpy(d,s,(size_t)n)
@@ -387,6 +391,7 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 */
  
+if(!P)return`f(K:Ki){y#Cxi}\ng(K:Ki){y#Fxi}\nh(K:Ki){y#Zxi}`
 // if(!P)return`f(i:K){tx0}`  //todo tx0 nx0 px0 rx0 => T(x[0]) not T(x)[0]
 /*
  if(!P)return`f{a:b:c:x;-a}`
