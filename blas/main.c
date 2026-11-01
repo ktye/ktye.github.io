@@ -108,6 +108,14 @@ void test_scal(void) { const double flteps = 1e-4, dbleps = 1e-6;
   { int N = 2; double alpha[2] = {1, 0.3}; double X[] = { 0.521, -0.811, 0.556, -0.147 }; int incX = -1; double expected[] = { 0.521, -0.811, 0.556, -0.147 };
    cblas_zscal(N, alpha, X, incX); { int i; for (i = 0; i < 2; i++) { gsl_test_rel(X[2*i], expected[2*i], dbleps, "zscal(case 165) real"); gsl_test_rel(X[2*i+1], expected[2*i+1], dbleps, "zscal(case 165) imag"); }; }; };
 }
+void test_nrm2 (void) { const double flteps = 1e-4, dbleps = 1e-6;
+  { int N = 1; double X[] = { 0.071 }; int incX = -1; double expected = 0; double f; f = cblas_dnrm2(N, X, incX); gsl_test_rel(f, expected, dbleps, "dnrm2(case 29)"); };
+  { int N = 1; double X[] = { 0.549, -0.354 }; int incX = -1; double expected = 0; double f; f = cblas_dznrm2(N, X, incX); gsl_test_rel(f, expected, dbleps, "dznrm2(case 31)"); };
+  { int N = 2; double X[] = { 0.696, -0.804 }; int incX = 1; double expected = 1.06340584915; double f; f = cblas_dnrm2(N, X, incX); gsl_test_rel(f, expected, dbleps, "dnrm2(case 33)"); };
+  { int N = 2; double X[] = { -0.359, -0.76, -0.906, -0.108 }; int incX = 1; double expected = 1.24055672986; double f; f = cblas_dznrm2(N, X, incX); gsl_test_rel(f, expected, dbleps, "dznrm2(case 35)"); };
+  { int N = 2; double X[] = { 0.217, -0.588 }; int incX = -1; double expected = 0; double f; f = cblas_dnrm2(N, X, incX); gsl_test_rel(f, expected, dbleps, "dnrm2(case 37)"); };
+  { int N = 2; double X[] = { 0.609, 0.615, -0.143, -0.957 }; int incX = -1; double expected = 0; double f; f = cblas_dznrm2(N, X, incX); gsl_test_rel(f, expected, dbleps, "dznrm2(case 39)"); };
+}
 void test_gemv (void) { const double flteps = 1e-4, dbleps = 1e-6;
   { int order = 102; int trans = 111; int M = 1; int N = 1; int lda = 1; double alpha = -0.3; double beta = -1; double A[] = { -0.047 }; double X[] = { 0.672 }; int incX = -1; double Y[] = { 0.554 }; int incY = -1; double y_expected[] = { -0.5445248 };
    cblas_dgemv(order, trans, M, N, alpha, A, lda, X, incX, beta, Y, incY); { int i; for (i = 0; i < 1; i++) { gsl_test_rel(Y[i], y_expected[i], dbleps, "dgemv(case 779)"); } }; };
@@ -402,6 +410,6 @@ void gsl_test_rel(double result, double expected, double relative_error, const c
  if(status){printf("%s\n",t);exit(1);}}
 
 int main(){ 
- test_copy(); test_scal(); test_gemv(); test_gemm(); 
+ test_copy(); test_scal(); test_nrm2(); test_gemv(); test_gemm(); 
  test_ger();  test_trmv(); test_trmm();
  printf("ok\n"); }

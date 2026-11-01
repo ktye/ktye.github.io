@@ -1,0 +1,30 @@
+set -e
+set -x
+a="$1"
+sem=~/lap/sem/src
+
+zgeqr="zgeqr zlatsqr ztpqrt ztpqrt2 ztprfb zgeqrt zgeqrt2 zgeqrt3 zlarfb zlarfg zlacgv zladiv"
+ddddd="dlapy3 dlamch dladiv dladiv1 dladiv2"
+
+mkdir -p build
+if [ -z "$a" ]; then a="zgeqr"; fi
+if [ "$a" = "zgeqr" ]; then
+ for f in $zgeqr; do
+  echo dont cp "${sem}/z/${f}.c" build/
+ done
+fi
+for f in $ddddd; do
+ cp "${sem}/d/${f}.c" build/
+done
+
+touch         build/lapack_tuning.h
+cp d.h        build/semicolon_lapack_double.h
+cp z.h        build/semicolon_lapack_complex_double.h
+cp ../cblas.h build/semicolon_cblas.h
+cp tune.c     build/
+cp xerbla.c   build/
+cp main.c     build/
+
+(cd build && for f in *.c; do cc -c "$f"; done; cd ..)
+
+cc -o build/a build/*.o -lm

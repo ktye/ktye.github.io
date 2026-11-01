@@ -1,97 +1,95 @@
-#define I int
-#define D double
-#define V void
-#ifndef BLAS_H
-#define BLAS_H
 typedef enum CBLAS_LAYOUT{/*CblasRowMajor=101,*/CblasColMajor=102} CBLAS_LAYOUT;
 typedef enum CBLAS_TRANSPOSE{CblasNoTrans=111,CblasTrans=112, CblasConjTrans=113} CBLAS_TRANSPOSE;
 typedef enum CBLAS_UPLO{CblasUpper=121,CblasLower=122} CBLAS_UPLO;
 typedef enum CBLAS_DIAG{CblasNonUnit=131,CblasUnit=132} CBLAS_DIAG;
 typedef enum CBLAS_SIDE{CblasLeft=141,CblasRight=142} CBLAS_SIDE;
-D cblas_dcabs1(V*z);
-D cblas_ddot(I N,D*X,I dx,D*Y,I dy);
-V cblas_zdotu_sub(I N,V*X,I dx,V*Y,I dy,V*dotu);
-V cblas_zdotc_sub(I N,V*X,I dx,V*Y,I dy,V*dotc);
-D cblas_dnrm2(I N,D*X,I dx);
-D cblas_dasum(I N,D*X,I dx);
-D cblas_dznrm2(I N,V*X,I dx);
-D cblas_dzasum(I N,V*X,I dx);
-I cblas_idamax(I N,D*X,I dx);
-I cblas_izamax(I N,V*X,I dx);
-V cblas_dswap(I N,D*X,I dx,D*Y,I dy);
-V cblas_dcopy(I N,D*X,I dx,D*Y,I dy);
-V cblas_daxpy(I N,D a,D*X,I dx,D*Y,I dy);
-V cblas_daxpby(I N,D a,D*X,I dx,D b,D*Y,I dy);
-V cblas_zswap(I N,V*X,I dx,V*Y,I dy);
-V cblas_zcopy(I N,V*X,I dx,V*Y,I dy);
-V cblas_zaxpy(I N,V*a,V*X,I dx,V*Y,I dy);
-V cblas_zaxpby(I N,V*a,V*X,I dx,V*b,V*Y,I dy);
-V cblas_drotmg(D*d1,D*d2,D*b1,D b2,D*P);
-V cblas_drotm(I N,D*X,I dx,D*Y,I dy,D*P);
-V cblas_dscal(I N,D a,D*X,I dx);
-V cblas_zscal(I N,V*a,V*X,I dx);
-V cblas_zdscal(I N,D a,V*X,I dx);
-V cblas_drotg(D*a,D*b,D*c,D*s);
-V cblas_zrotg(V*a,V*b,D*c,V*s);
-V cblas_drot(I N,D*X,I dx,D*Y,I dy,D c,D s);
-V cblas_zdrot(I N,V*X,I dx,V*Y,I dy,D c,D s);
-V cblas_dgemv(I ly,I AT,I M,I N,D a,D*A,I la,D*X,I dx,D b,D*Y,I dy);
-V cblas_dgbmv(I ly,I AT,I M,I N,I KL,I KU,D a,D*A,I la,D*X,I dx,D b,D*Y,I dy);
-V cblas_dtrmv(I ly,I ul,I AT,I d,I N,D*A,I la,D*X,I dx);
-V cblas_dtbmv(I ly,I ul,I AT,I d,I N,I K,D*A,I la,D*X,I dx);
-V cblas_dtpmv(I ly,I ul,I AT,I d,I N,D*Ap,D*X,I dx);
-V cblas_dtrsv(I ly,I ul,I AT,I d,I N,D*A,I la,D*X,I dx);
-V cblas_dtbsv(I ly,I ul,I AT,I d,I N,I K,D*A,I la,D*X,I dx);
-V cblas_dtpsv(I ly,I ul,I AT,I d,I N,D*Ap,D*X,I dx);
-V cblas_zgemv(I ly,I AT,I M,I N,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy);
-V cblas_zgbmv(I ly,I AT,I M,I N,I KL,I KU,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy);
-V cblas_ztrmv(I ly,I ul,I AT,I d,I N,V*A,I la,V*X,I dx);
-V cblas_ztbmv(I ly,I ul,I AT,I d,I N,I K,V*A,I la,V*X,I dx);
-V cblas_ztpmv(I ly,I ul,I AT,I d,I N,V*Ap,V*X,I dx);
-V cblas_ztrsv(I ly,I ul,I AT,I d,I N,V*A,I la,V*X,I dx);
-V cblas_ztbsv(I ly,I ul,I AT,I d,I N,I K,V*A,I la,V*X,I dx);
-V cblas_ztpsv(I ly,I ul,I AT,I d,I N,V*Ap,V*X,I dx);
-V cblas_dsymv(I ly,I ul,I N,D a,D*A,I la,D*X,I dx,D b,D*Y,I dy);
-V cblas_dsbmv(I ly,I ul,I N,I K,D a,D*A,I la,D*X,I dx,D b,D*Y,I dy);
-V cblas_dspmv(I ly,I ul,I N,D a,D*Ap,D*X,I dx,D b,D*Y,I dy);
-V cblas_dskewsymv(I ly,I ul,I N,D a,D*A,I la,D*X,I dx,D b,D*Y,I dy);
-V cblas_dger(I ly,I M,I N,D a,D*X,I dx,D*Y,I dy,D*A,I la);
-V cblas_dsyr(I ly,I ul,I N,D a,D*X,I dx,D*A,I la);
-V cblas_dspr(I ly,I ul,I N,D a,D*X,I dx,D*Ap);
-V cblas_dsyr2(I ly,I ul,I N,D a,D*X,I dx,D*Y,I dy,D*A,I la);
-V cblas_dspr2(I ly,I ul,I N,D a,D*X,I dx,D*Y,I dy,D*A);
-V cblas_dskewsyr2(I ly,I ul,I N,D a,D*X,I dx,D*Y,I dy,D*A,I la);
-V cblas_zhemv(I ly,I ul,I N,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy);
-V cblas_zhbmv(I ly,I ul,I N,I K,V*a,V*A,I la,V*X,I dx,V*b,V*Y,I dy);
-V cblas_zhpmv(I ly,I ul,I N,V*a,V*Ap,V*X,I dx,V*b,V*Y,I dy);
-V cblas_zgeru(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la);
-V cblas_zgerc(I ly,I M,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la);
-V cblas_zher(I ly,I ul,I N,D a,V*X,I dx,V*A,I la);
-V cblas_zhpr(I ly,I ul,I N,D a,V*X,I dx,V*A);
-V cblas_zher2(I ly,I ul,I N,V*a,V*X,I dx,V*Y,I dy,V*A,I la);
-V cblas_zhpr2(I ly,I ul,I N,V*a,V*X,I dx,V*Y,I dy,V*Ap);
-V cblas_dgemm(I ly,I AT,I BT,I M,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc);
-V cblas_dgemmtr(I ly,I ul,I AT,I BT,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc);
-V cblas_dsymm(I ly,I Si,I ul,I M,I N,D a,D*A,I la,D*B,I lb,D b,D*C,I lc);
-V cblas_dskewsymm(I ly,I Si,I ul,I M,I N,D a,D*A,I la,D*B,I lb,D b,D*C,I lc);
-V cblas_dsyrk(I ly,I ul,I T,I N,I K,D a,D*A,I la,D b,D*C,I lc);
-V cblas_dsyr2k(I ly,I ul,I T,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc);
-V cblas_dskewsyr2k(I ly,I ul,I T,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc);
-V cblas_dtrmm(I ly,I Si,I ul,I AT,I d,I M,I N,D a,D*A,I la,D*B,I lb);
-V cblas_dtrsm(I ly,I Si,I ul,I AT,I d,I M,I N,D a,D*A,I la,D*B,I lb);
-V cblas_zgemm(I ly,I AT,I BT,I M,I N,I K,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc);
-V cblas_zgemmtr(I ly,I ul,I AT,I BT,I N,I K,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc);
-V cblas_zsymm(I ly,I Si,I ul,I M,I N,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc);
-V cblas_zsyrk(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*b,V*C,I lc);
-V cblas_zsyr2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc);
-V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb);
-V cblas_ztrsm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb);
-V cblas_zhemm(I ly,I Si,I ul,I M,I N,V*a,V*A,I la,V*B,I lb,V*b,V*C,I lc);
-V cblas_zherk(I ly,I ul,I T,I N,I K,D a,V*A,I la,D b,V*C,I lc);
-V cblas_zher2k(I ly,I ul,I T,I N,I K,V*a,V*A,I la,V*B,I lb,D b,V*C,I lc);
-#endif
-#ifdef BLAS_IMPL
-
+#ifndef BLAS_IMPL
+double cblas_dcabs1(void*z);
+double cblas_ddot(int N,double*X,int dx,double*Y,int dy);
+void cblas_zdotu_sub(int N,void*X,int dx,void*Y,int dy,void*dotu);
+void cblas_zdotc_sub(int N,void*X,int dx,void*Y,int dy,void*dotc);
+double cblas_dnrm2(int N,double*X,int dx);
+double cblas_dasum(int N,double*X,int dx);
+double cblas_dznrm2(int N,void*X,int dx);
+double cblas_dzasum(int N,void*X,int dx);
+int cblas_idamax(int N,double*X,int dx);
+int cblas_izamax(int N,void*X,int dx);
+void cblas_dswap(int N,double*X,int dx,double*Y,int dy);
+void cblas_dcopy(int N,double*X,int dx,double*Y,int dy);
+void cblas_daxpy(int N,double a,double*X,int dx,double*Y,int dy);
+void cblas_daxpby(int N,double a,double*X,int dx,double b,double*Y,int dy);
+void cblas_zswap(int N,void*X,int dx,void*Y,int dy);
+void cblas_zcopy(int N,void*X,int dx,void*Y,int dy);
+void cblas_zaxpy(int N,void*a,void*X,int dx,void*Y,int dy);
+void cblas_zaxpby(int N,void*a,void*X,int dx,void*b,void*Y,int dy);
+void cblas_drotmg(double*d1,double*d2,double*b1,double b2,double*P);
+void cblas_drotm(int N,double*X,int dx,double*Y,int dy,double*P);
+void cblas_dscal(int N,double a,double*X,int dx);
+void cblas_zscal(int N,void*a,void*X,int dx);
+void cblas_zdscal(int N,double a,void*X,int dx);
+void cblas_drotg(double*a,double*b,double*c,double*s);
+void cblas_zrotg(void*a,void*b,double*c,void*s);
+void cblas_drot(int N,double*X,int dx,double*Y,int dy,double c,double s);
+void cblas_zdrot(int N,void*X,int dx,void*Y,int dy,double c,double s);
+void cblas_dgemv(int ly,int AT,int M,int N,double a,double*A,int la,double*X,int dx,double b,double*Y,int dy);
+void cblas_dgbmv(int ly,int AT,int M,int N,int KL,int KU,double a,double*A,int la,double*X,int dx,double b,double*Y,int dy);
+void cblas_dtrmv(int ly,int ul,int AT,int d,int N,double*A,int la,double*X,int dx);
+void cblas_dtbmv(int ly,int ul,int AT,int d,int N,int K,double*A,int la,double*X,int dx);
+void cblas_dtpmv(int ly,int ul,int AT,int d,int N,double*Ap,double*X,int dx);
+void cblas_dtrsv(int ly,int ul,int AT,int d,int N,double*A,int la,double*X,int dx);
+void cblas_dtbsv(int ly,int ul,int AT,int d,int N,int K,double*A,int la,double*X,int dx);
+void cblas_dtpsv(int ly,int ul,int AT,int d,int N,double*Ap,double*X,int dx);
+void cblas_zgemv(int ly,int AT,int M,int N,void*a,void*A,int la,void*X,int dx,void*b,void*Y,int dy);
+void cblas_zgbmv(int ly,int AT,int M,int N,int KL,int KU,void*a,void*A,int la,void*X,int dx,void*b,void*Y,int dy);
+void cblas_ztrmv(int ly,int ul,int AT,int d,int N,void*A,int la,void*X,int dx);
+void cblas_ztbmv(int ly,int ul,int AT,int d,int N,int K,void*A,int la,void*X,int dx);
+void cblas_ztpmv(int ly,int ul,int AT,int d,int N,void*Ap,void*X,int dx);
+void cblas_ztrsv(int ly,int ul,int AT,int d,int N,void*A,int la,void*X,int dx);
+void cblas_ztbsv(int ly,int ul,int AT,int d,int N,int K,void*A,int la,void*X,int dx);
+void cblas_ztpsv(int ly,int ul,int AT,int d,int N,void*Ap,void*X,int dx);
+void cblas_dsymv(int ly,int ul,int N,double a,double*A,int la,double*X,int dx,double b,double*Y,int dy);
+void cblas_dsbmv(int ly,int ul,int N,int K,double a,double*A,int la,double*X,int dx,double b,double*Y,int dy);
+void cblas_dspmv(int ly,int ul,int N,double a,double*Ap,double*X,int dx,double b,double*Y,int dy);
+void cblas_dskewsymv(int ly,int ul,int N,double a,double*A,int la,double*X,int dx,double b,double*Y,int dy);
+void cblas_dger(int ly,int M,int N,double a,double*X,int dx,double*Y,int dy,double*A,int la);
+void cblas_dsyr(int ly,int ul,int N,double a,double*X,int dx,double*A,int la);
+void cblas_dspr(int ly,int ul,int N,double a,double*X,int dx,double*Ap);
+void cblas_dsyr2(int ly,int ul,int N,double a,double*X,int dx,double*Y,int dy,double*A,int la);
+void cblas_dspr2(int ly,int ul,int N,double a,double*X,int dx,double*Y,int dy,double*A);
+void cblas_dskewsyr2(int ly,int ul,int N,double a,double*X,int dx,double*Y,int dy,double*A,int la);
+void cblas_zhemv(int ly,int ul,int N,void*a,void*A,int la,void*X,int dx,void*b,void*Y,int dy);
+void cblas_zhbmv(int ly,int ul,int N,int K,void*a,void*A,int la,void*X,int dx,void*b,void*Y,int dy);
+void cblas_zhpmv(int ly,int ul,int N,void*a,void*Ap,void*X,int dx,void*b,void*Y,int dy);
+void cblas_zgeru(int ly,int M,int N,void*a,void*X,int dx,void*Y,int dy,void*A,int la);
+void cblas_zgerc(int ly,int M,int N,void*a,void*X,int dx,void*Y,int dy,void*A,int la);
+void cblas_zher(int ly,int ul,int N,double a,void*X,int dx,void*A,int la);
+void cblas_zhpr(int ly,int ul,int N,double a,void*X,int dx,void*A);
+void cblas_zher2(int ly,int ul,int N,void*a,void*X,int dx,void*Y,int dy,void*A,int la);
+void cblas_zhpr2(int ly,int ul,int N,void*a,void*X,int dx,void*Y,int dy,void*Ap);
+void cblas_dgemm(int ly,int AT,int BT,int M,int N,int K,double a,double*A,int la,double*B,int lb,double b,double*C,int lc);
+void cblas_dgemmtr(int ly,int ul,int AT,int BT,int N,int K,double a,double*A,int la,double*B,int lb,double b,double*C,int lc);
+void cblas_dsymm(int ly,int Si,int ul,int M,int N,double a,double*A,int la,double*B,int lb,double b,double*C,int lc);
+void cblas_dskewsymm(int ly,int Si,int ul,int M,int N,double a,double*A,int la,double*B,int lb,double b,double*C,int lc);
+void cblas_dsyrk(int ly,int ul,int T,int N,int K,double a,double*A,int la,double b,double*C,int lc);
+void cblas_dsyr2k(int ly,int ul,int T,int N,int K,double a,double*A,int la,double*B,int lb,double b,double*C,int lc);
+void cblas_dskewsyr2k(int ly,int ul,int T,int N,int K,double a,double*A,int la,double*B,int lb,double b,double*C,int lc);
+void cblas_dtrmm(int ly,int Si,int ul,int AT,int d,int M,int N,double a,double*A,int la,double*B,int lb);
+void cblas_dtrsm(int ly,int Si,int ul,int AT,int d,int M,int N,double a,double*A,int la,double*B,int lb);
+void cblas_zgemm(int ly,int AT,int BT,int M,int N,int K,void*a,void*A,int la,void*B,int lb,void*b,void*C,int lc);
+void cblas_zgemmtr(int ly,int ul,int AT,int BT,int N,int K,void*a,void*A,int la,void*B,int lb,void*b,void*C,int lc);
+void cblas_zsymm(int ly,int Si,int ul,int M,int N,void*a,void*A,int la,void*B,int lb,void*b,void*C,int lc);
+void cblas_zsyrk(int ly,int ul,int T,int N,int K,void*a,void*A,int la,void*b,void*C,int lc);
+void cblas_zsyr2k(int ly,int ul,int T,int N,int K,void*a,void*A,int la,void*B,int lb,void*b,void*C,int lc);
+void cblas_ztrmm(int ly,int Si,int ul,int AT,int d,int M,int N,void*a,void*A,int la,void*B,int lb);
+void cblas_ztrsm(int ly,int Si,int ul,int AT,int d,int M,int N,void*a,void*A,int la,void*B,int lb);
+void cblas_zhemm(int ly,int Si,int ul,int M,int N,void*a,void*A,int la,void*B,int lb,void*b,void*C,int lc);
+void cblas_zherk(int ly,int ul,int T,int N,int K,double a,void*A,int la,double b,void*C,int lc);
+void cblas_zher2k(int ly,int ul,int T,int N,int K,void*a,void*A,int la,void*B,int lb,double b,void*C,int lc);
+#else //BLAS_IMPL
+#define I int
+#define D double
+#define V void
+D fabs(D);D sqrt(D);
 #define es else
 #define ef es if
 #define Nx(i,N,e) for(i=0;i<(N);i++){e;}
@@ -174,6 +172,10 @@ V cblas_zcopy(I N,V*X,I dx,V*Y,I dy){I i,j=OF(N,dx),k=OF(N,dx);Ni(N,YRk=XRj;YIk=
 V cblas_dscal(I N,D a,D*X,I dx){I i,j=0;if(dx<=0)return;Ni(N,X[j]*=a;j+=dx)}
 V cblas_zscal(I N,V*a,V*X,I dx){I i,j=0;D ar=Re(a,0),ai=Im(a,0);if(dx<=0)return;Ni(N, D x=XRj;D y=XIj;XRj=x*ar-y*ai;XIj=x*ai+y*ar;j+=dx)}
 V cblas_zdscal(I N,D a,V*X,I dx){I i,j=0;if(dx<=0)return;Ni(N,XRj*=a;XIj*=a;j+=dx)}
+D cblas_dnrm2(I N,D*X,I dx){I i,k=0;D x,u,s=0.0,t=1.0;if(N<=0||dx<=0)return 0;if(N==1)return fabs(X[0]);
+  Ni(N,x=X[k];if(x){u=fabs(x);if(s<u){t=1.0+t*(s/u)*(s/u);s=u;}else t+=(u/s)*(u/s);}k+=dx)return s*sqrt(t);}
+D cblas_dznrm2(I N,V*X,I dx){I i,k=0;D x,y,u,v,s=0.0,t=1.0;if(!N||dx<1)return 0;
+  Ni(N,x=Re(X,k);y=Im(X,k);if(x){u=fabs(x);if(s<u){t=1.0+t*(s/u)*(s/u);s=u;}else t+=(u/s)*(u/s);}if(y){v=fabs(y);if(s<v){t=1.0+t*(s/v)*(s/v);s=v;}else t+=(v/s)*(v/s);}k+=dx);return s*sqrt(t);}
 
 V cblas_dgemm(I ly,I AT,I BT,I M,I N,I K,D a,D*A,I la,D*B,I lb,D b,D*C,I lc){I i,j,k;
   if(!b      ){Nij(N,M,Cij=0)}ef(b!=1.0){Nij(N,M,Cij*=b)}if(!a)return;
@@ -244,8 +246,9 @@ V cblas_ztrmm(I ly,I Si,I ul,I AT,I d,I M,I N,V*a,V*A,I la,V*B,I lb){I i,j,k,nu=
   ef(LE&&UP&&AT0){Nij(N,M,x=0.0;y=0.0;if(nu){u=ARjj;v=AH*AIjj;s=BRij;t=BIij;x=u*s-v*t;y=u*t+v*s;}else{x=BRij;y=BIij;}Nkk(1+j,M,u=ARkj;v=AH*AIkj;s=BRik;t=BIik;x+=u*s-v*t;y+=u*t+v*s;)BRij=ar*x-ai*y;BIij=ar*y+ai*x)}
   es{Ni(N,Nj_(M,x=0.0;y=0.0;Nk(j,u=ARjk;v=AH*AIjk;s=BRik;t=BIik;x+=u*s-v*t;y+=u*t+v*s)if(nu){u=ARjj;v=AH*AIjj;s=BRij;t=BIij;x+=u*s-v*t;y+=u*t+v*s;}else{x+=BRij;y+=BIij;}BRij=ar*x-ai*y;BIij=ar*y+ai*x;}))}
 
-#undef BLAS_IMPL
-#endif
 #undef I
 #undef D
 #undef V
+#undef BLAS_IMPL
+#endif
+
