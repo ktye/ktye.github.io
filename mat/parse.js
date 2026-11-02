@@ -20,7 +20,7 @@ A[x>0&&i==j]=1         /set(A,where(A,(x,i,j)=>x>0&&i==j),1)
 T={a:1 2,b:3 4}        /(T={a:mat([[1,2]]),b:mat([[3,4]])})
 T[,.ab.cd]             /col(T,["ab","cd"])
 T|T                    /hcat(T,T)
-A B                    /dot(A,B)
+A B                    /A(B)
 f(g)                   /f(g)
 1+(2,3-4)              /add(1,mat([[2,sub(3,4)]]))
 A'B                    /dot(trans(A),B)
@@ -114,7 +114,7 @@ parse=$=>{$=$.filter(x=>x.trim().length);if(!$.length)return"" //rm space&commen
  D=(x,y,z)=>x=="#"?`reshape(${y},${unmat(z)})`:x=="^"?`reshape(${y},${z})`:x==":"?(br?g(z,y):`${z}:${y}`):b(F(x,f2),[z,y]), //dyadic
  g=(x,y)=>`range(${x},${y})`,unmat=x=>sw(x,"mat([[")?x.slice(6,-3):"..."+x, //x:y
  C=(x,y)=>b(x,y), //call
- j=(x,y)=>`dot(${y},${x})`,          //sw(y,"trans(")?`dot(${y},${x})`:b(y,x),                   //jux
+ j=(x,y)=>sw(y,"trans(")?`dot(${y},${x})`:b(y,x),                   //jux
  p=(x,y)=>v(B(b("x=>"+F(y,f2),["x",x]))),                                                        //project 1+
  v=x=>((x=new String(x)).verb=true,x),S=x=>String(x),n=x=>((x=new String(x)).verb=false,x),   //mark verb/noun
  l=(r,x)=>{r=[];while(L()){r.push((x=e(t()))?x:(r.undef=1,"undefined"));if(";"!=pop())return 1==r.length&&r.undef?[]:r}}, //list e;e;e[terminator]

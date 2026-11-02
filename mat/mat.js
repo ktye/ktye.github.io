@@ -37,6 +37,7 @@ let angle=A=>{if(!ismat(A)){let r=_pi*phase(A);return r<0?360+r:r};let r=phase(A
 let index=(A,i,j)=>{if(j==undefined){return isnum(i)?(i<0?til(A.n*A.m):mat([[i]])):i};i=isnum(i)?(i<0?til(A.m):[i]):i;j=isnum(j)?(j<0?til(A.n):[j]):j;let N=A.n,m=i.length,n=j.length,r=zeros(m,n),a,b,k=0;for(a=0;a<m;a++)for(b=0;b<n;b++)r[k++]=i[a]*N+j[b];return r}
 let where=(A,f)=>{if(istab(A))return tabwhere(A,f);let r=[],m=A.m,n=A.n,i,k=0;if(A.z){n>>=1;for(i=0;i<m;i++)for(j=0;j<n;j++,k+=2)if(f([A[k],A[k]],i,j))r.push(k>>1)}else{for(i=0;i<m;i++)for(j=0;j<n;j++)if(f(A[k++],i,j))r.push(k-1)}return mat([r])}
 let at=(A,i,j)=>{if(istab(A))return att(A,i,j);let x=index(A,i,j),r=A.z?zeroz(x.m,x.n):zeros(x.m,x.n),k;if(A.z){for(k=0;k<r.length;k++){j=2*x[k];r[2*k]=A[j];r[2*k+1]=A[1+j]}return r};for(k=0;k<r.length;k++)r[k]=A[x[k]];return r}
+let atpairs=(A,I,J)=>{errif(I.length!=J.length,"length");let K=I.length,n=A.n,n2=2*n,r=A.z?zeroz(K):zeros(K),k,l;if(A.z){for(k=0;k<K;k++){l=n2*I[k]+2*J[k];r[2*k]=A[l];r[2*k+1]=A[1+l]}}else for(k=0;k<K;k++)r[k]=A[n*I[k]+J[k]];return r}
 let set=(A,i,j,y)=>{if(y==undefined){[y,j]=[j,y]}let x=index(A,i,j),ii,k=0;if(ismat(y)){errif(y.length!=(A.z?2:1)*x.length,"conform");x.forEach(A.z?(i,k)=>{A[2*i]=y[2*k];A[2*i+1]=y[2*k+1]}:(i,k)=>A[i]=y[k]);return A}x.forEach(A.z?i=>{A[2*i]=y[0];A[2*i+1]=y[1]}:i=>A[i]=y);return A}
 let row=(A,i)=>at(A,i,-1),col=(A,i)=>at(A,-1,i),setrow=(A,i,y)=>set(A,i,-1,y),setcol=(A,i,y)=>set(A,-1,i,y)
 
@@ -60,19 +61,23 @@ let divF=(x,y)=>{for(let i=0;i<y.length;i++)y[i]/=x[i];return y}
 let divZ=(x,y)=>{for(let i=0;i<y.length;i+=2)[y[i],y[1+i]]=zdiv(x[i],x[1+i],y[i],y[1+i]);return y}
 
 let Abs=x=>{let r=zeros(x.m,x.n),i,j=0;if(x.z)for(i=0;i<x.length;i+=2)r[j++]=hypot(x[i],x[1+i]);else for(i=0;i<x.length;i++)r[i]=abs(x[i]);return r}
-let Max=x=>Math.max(...x),RowMax=x=>{let m=x.m,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.max(...x.subarray(i*n,(1+i*n)));return r},ColMax=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.max(r[j],x[k++]);return r}
-let Min=x=>Math.min(...x),RowMin=x=>{let m=x.m,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.min(...x.subarray(i*n,(1+i*n)));return r},ColMin=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.min(r[j],x[k++]);return r}
+let iRowMax=x=>{errif(x.z,"complex");let m=x.m,n=x.n,r=zeros(m,1),a,i,j,k=0;for(i=0;i<m;i++){a=0;y=x[k++];for(j=1;j<n;j++)if(x[k++]>y){y=x[k-1];a=j};r[i]=a};return r}
+let iColMax=x=>{errif(x.z,"complex");let m=x.m,n=x.n,r=zeros(1,n),a,i,j,k=0;for(j=0;j<n;j++){a=0;y=x[j];for(i=1;i<m;i++)if(x[n*i+j]>y){y=x[n*i+j];a=i};r[j]=a};return r}
+let Max=x=>Math.max(...x),RowMax=x=>{errif(x.z,"complex");let m=x.m,n=x.n,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.max(...x.subarray(i*n,(1+i)*n));return r},ColMax=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.max(r[j],x[k++]);return r}
+let Min=x=>Math.min(...x),RowMin=x=>{errif(x.z,"complex");let m=x.m,n=x.n,r=zeros(m,1),i;for(i=0;i<m;i++)r[i]=Math.min(...x.subarray(i*n,(1+i)*n));return r},ColMin=x=>{let m=x.m,n=x.n,r=zeros(1,n),i,j,k=0;r.set(x.subarray(0,n));for(i=0;i<m;i++)for(j=0;j<n;j++)r[j]=Math.min(r[j],x[k++]);return r}
 let sum=x=>{let r=0,s=0,i;if(x.z){for(i=0;i<x.length;i+=2){r+=x[i];s+=x[1+i]};return[r,s]}for(i=0;i<x.length;i++)r+=x[i];return r},Sum=sum
 let RowSum=x=>{let m=x.m,n=x.n,m2=2*m,i,j,k=0,r=x.z?zeroz(m,1):zeros(m,1);if(x.z){for(i=0;i<m2;i+=2)for(j=0;j<n;j++){r[i]+=x[k++];r[1+i]+=x[k++]}}else for(i=0;i<m;i++)for(j=0;j<n;j++)r[i]+=x[k++];return r}
 let ColSum=x=>{let m=x.m,n=x.n,r=x.z?zeroz(1,n):zeros(1,n),n2=r.length,i,j,k=0;for(i=0;i<m;i++)for(j=0;j<n2;j++)r[j]+=x[k++];return r}
 
 let trans=A=>{if(A.z)return tranz(A);const m=A.m,n=A.n,S=64,d=zeros(n,m);if(m*n<256){for(let r=0,i=0;r<m;++r){for(let c=0;c<n;++c,++i)d[c*m+r]=A[i]}return d}for(let R=0;R<m;R+=S){const rr=Math.min(R+S,m);for(let C=0;C<n;C+=S){const cc=Math.min(C+S,n);for(let r=R;r<rr;++r){const r0=r*n;let i=C*m+r;for(let c=C;c<cc;++c){d[i]=A[r0+c];i+=m}}}}return d}
 let tranz=x=>{let r=zeroz(x.n,x.m),i,j,m=x.n,n=x.m,n2=2*n,k=0;for(j=0;j<n2;j+=2)for(i=0;i<m;i++){r[i*n2+j]=x[k++];r[i*n2+j+1]=x[k++]}return r}
-let dot=(A,B)=>{if(A.z&&!B.z)B=complex(B);else if(B.z&&!A.z)A=complex(A);return 1==A.m&&1==A.n?dotvv(A,B):1==A.n?dotmv(A,B):dotmm(A,B)}
-let dotvv=(A,B)=>{errif(A.n!=B.m||A.length!=B.length,"conform");if(A.z)return dotvvz(A,B);let n=A.length,s=0;for(let i=0;i<n;i++)s+=A[i]*B[i];return s}
-let dotvvz=(A,B)=>{errif(A.n!=B.m||A.length!=B.length,"conform");let n=A.length,x=0,y=0;for(let i=0;i<n;i+=2){x+=A[i]*B[i]-A[1+i]*B[1+i];y+=A[i]*B[1+i]+A[1+i]*B[i]};return[x,y]}
-let dotmm=(A,B)=>{errif(A.n!=B.m,"conform");if(A.z)return dotmmz(A,B);let m=A.m,k=A.n,n=B.n,C=zeros(m,n);const S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let i=i0;i<ii;++i){const aa=i*k,cc=i*n;for(let p=p0;p<pp;++p){const a=A[aa+p],bb=p*n;for(let j=j0;j<jj;++j)C[cc+j]+=a*B[bb+j]}}}}}return C}
-let dotmv=(A,x)=>{errif(A.m!=x.length,"conform");if(A.z)return dotmvz(A,x);const m=A.m,n=A.n,y=zeros(m,1),S=64;for(let p0=0;p0<n;p0+=S){const pp=Math.min(p0+S,n);for (let i=0;i<m;++i){const a0=i*n;let s=0;for(let p=p0;p<pp;++p)s+=A[a0+p]*x[p];y[i]+=s}};return y}
+let dot=(A,B)=>{errif(A.n!=B.m,"conform");if(A.z&&!B.z)B=complex(B);else if(B.z&&!A.z)A=complex(A);return 1==A.m&&1==B.n?dotvv(A,B):1==A.n&&1==B.m?dotvw(A,B):1==B.n?dotmv(A,B):dotmm(A,B)}
+let dotvv=(A,B)=>{if(A.z)return dotvvz(A,B);let n=A.length,s=0;for(let i=0;i<n;i++)s+=A[i]*B[i];return s}
+let dotvvz=(A,B)=>{let n=A.length,x=0,y=0;for(let i=0;i<n;i+=2){x+=A[i]*B[i]-A[1+i]*B[1+i];y+=A[i]*B[1+i]+A[1+i]*B[i]};return[x,y]}
+let dotvw=(A,B)=>{if(A.z)return dotvwz(A,B);let m=A.m,n=B.n,r=zeroz(m,n),i,j,k;for(i=0;i<m;i++){let x=A[i],k=n*i;for(j=0;j<n;j++)r[k+j]=x*B[j]};return r}
+let dotvwz=(A,B)=>{let m=A.m,n=B.n,r=zeroz(m,n),i,j,k;for(i=0;i<2*m;i+=2){let x=A[i],y=A[1+i],k=n*i;for(j=0;j<2*n;j+=2){r[k+j]=x*B[j]-y*B[1+j];r[k+j+1]=x*B[1+j]+y*B[j]}};return r}
+let dotmm=(A,B)=>{if(A.z)return dotmmz(A,B);let m=A.m,k=A.n,n=B.n,C=zeros(m,n);const S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let i=i0;i<ii;++i){const aa=i*k,cc=i*n;for(let p=p0;p<pp;++p){const a=A[aa+p],bb=p*n;for(let j=j0;j<jj;++j)C[cc+j]+=a*B[bb+j]}}}}}return C}
+let dotmv=(A,x)=>{if(A.z)return dotmvz(A,x);const m=A.m,n=A.n,y=zeros(m,1),S=64;for(let p0=0;p0<n;p0+=S){const pp=Math.min(p0+S,n);for (let i=0;i<m;++i){const a0=i*n;let s=0;for(let p=p0;p<pp;++p)s+=A[a0+p]*x[p];y[i]+=s}};return y}
 let dotmmz=(A,B)=>{const m=A.m,k=A.n,n=B.n,C=zeroz(m,n),S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);
  for(let i=i0;i<ii;++i){const a0=(i*k)<<1,c0=(i*n)<<1;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],b0=(p*n)<<1;for(let j=j0;j<jj;++j){const ib=b0+(j<<1),bx=B[ib],by=B[ib+1],ic=c0+(j<<1),x=ax*bx-ay*by,y=ax*by+ay*bx;C[ic]+=x;C[ic+1]+=y}}}}}}return C}
 let dotmvz=(A,x)=>{const m=A.m,n=A.n,y=zeroz(m,1),S=64;for(let p0=0; p0<n;p0+=S){const pp=Math.min(p0+BS,n);for(let i=0;i<m;++i){const a0=(i*n)<<1;let sx=0,sy=0;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],ix=p<<1,re=x[ix],im=x[ix+1];sx+=ax*re-ay*im;sy+=ax*im+ay*re};const iy=i<<1;y[iy]+=sx;y[iy+1]+=sy}};return y}
@@ -101,7 +106,7 @@ let stab=(t,L,C)=>{if(!istab(t))return"(no table)";let k=keys(t),tc=tabcount(t);
  let sn=(s,n)=>{let a=(n>>1)-1,b=n-a-2;return s.length>n?s.slice(0,a)+".."+s.slice(-(1+b),-1):s},pe=(n,x)=>x.padEnd(n," "),l=til(L),r=Array(L).fill(""),c=0,n=0,nc=[];
  for(i=0;i<k.length;i++,n++){let ln,v=t[k[i]],nk=min(k[i].length,10);if(r[0].length>=C){rd=1;break};scol_(r,tc<L?(ismat(v)?at(v,l,0):v.slice(0,L)):v,i?"│":"",nk);nc.push(i?r[0].length-nl-1:r[0].length);nl=r[0].length}
  r.splice(0,0,nc.map(x=>"─".repeat(x)).join("┼"));r.splice(0,0,nc.map((n,i)=>k[i].length<n-1?pe(n," "+k[i]):pe(n,sn(k[i],n))).join("│"));return r.join("\n")+ld}
-let hcatt=(...T)=>{let tc=tabcount(T[0]),d={};errif(!T.every(x=>istab(x||tabcount(x)!=tc),"hcat table"));let ren=s=>{console.log("ren",s,!d[s]);if(!d[s])return s;let i=0;while(i<1e4&&d[s+"_"+i])i++;return s+"_"+i};T.forEach(t=>{let k=keys(t);k.forEach(k=>d[ren(k)]=copy(t[k]))});return d}
+let hcatt=(...T)=>{let tc=tabcount(T[0]),d={};errif(!T.every(x=>istab(x||tabcount(x)!=tc),"hcat table"));let ren=s=>{if(!d[s])return s;let i=0;while(i<1e4&&d[s+"_"+i])i++;return s+"_"+i};T.forEach(t=>{let k=keys(t);k.forEach(k=>d[ren(k)]=copy(t[k]))});return d}
 let vcatt=(...T)=>{let t0=T[0],i,k=keys(t0),sk=k.join(","),d={};errif(!T.every(x=>istab(x)&&keys(x).join(",")==sk),"vcat table");k.forEach(k=>{let v;T.forEach((t,i)=>v=i?(ismat(v)?vcat(v,t[k]):v=[...v,...t[k]]):copy(t0[k]));d[k]=v});return d}
 let tabwhere=(t,f)=>{let tc=tabcount(t),k=keys(t);if(isstr(f))f=new Function(...["i",...k,"return "+f]);let z=k.map(k=>ismat(t[k])&&t[k].z),r=[],i;for(i=0;i<tc;i++)if(f(i,...k.map((k,j)=>z[j]?[t[k][2*i],t[k][2*i+1]]:t[k][i])))r.push(i);return(mat(r.length,1,r))}
 let att=(t,i,j)=>{if(j==undefined||j==-1)j=keys(t);if(isstr(j))j=[j];let d={};
