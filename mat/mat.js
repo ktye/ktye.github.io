@@ -1,6 +1,6 @@
 let sin=Math.sin,cos=Math.cos,atan2=Math.atan2,sqrt=Math.sqrt,abs=Math.abs,hypot=Math.hypot,log=Math.log,log10=Math.log10,log2=Math.log2,exp=Math.exp,sign=Math.sign,floor=Math.floor,ceil=Math.ceil,round=Math.round,min=Math.min,max=Math.max,random=Math.random;const pi=Math.PI,pi_=pi/180,_pi=180/pi
 let map=(a,f,z)=>{errif(a.z&&!z,"map not defined for complex: "+f);let i,r=a.z?zeroz(a.m,a.n):zeros(a.m,a.n);if(a.z){for(i=0;i<a.length;i+=2)[r[i],r[1+i]]=z(a[i],a[1+i])}else{for(i=0;i<a.length;i++)r[i]=f(a[i])}return r}
-let Sin=x=>map(x,sin),Cos=x=>map(x,cos),Sqrt=x=>map(x,sqrt),Log=x=>map(x,log),Log10=x=>map(x,log10),Log2=x=>map(x,log2),Exp=x=>map(x,exp),Sign=x=>map(x,sign),Floor=x=>map(x,floor),Ceil=x=>map(x,ceil),Round=x=>map(x,round),Sqr=x=>map(x,x=>x*x,(x,y)=>[x*x-y*y,2*x*y]),neg=x=>map(x,x=>-x)
+let Sin=x=>map(x,sin),Cos=x=>map(x,cos),Sqrt=x=>map(x,sqrt),Log=x=>map(x,log),Log10=x=>map(x,log10),Log2=x=>map(x,log2),Exp=x=>map(x,exp),Sign=x=>map(x,sign),Floor=x=>map(x,floor),Ceil=x=>map(x,ceil),Round=x=>map(x,round),Sqr=x=>map(x,x=>x*x,(x,y)=>[x*x-y*y,2*x*y]),neg=x=>map(x,x=>-x,(x,y)=>[-x,-y])
 let zdiv=(xr,xi,yr,yi)=>{let r=0,d=0,e=0,f=0;if(abs(yr)>=abs(yi)){r=yi/yr;d=yr+r*yi;e=(xr+xi*r)/d;f=(xi-xr*r)/d}else{r=yr/yi;d=yi+r*yr;e=(xr*r+xi)/d;f=(xi*r-xr)/d};return[e,f]}
 let zinv=(a,b)=>{let r,d;if(abs(a)>abs(b)){r=b/a;d=a+b*r;return[1/d,-r/d]}else{r=a/b;d=b+a*r;return[r/d,-1/d]}}
 let errif=(x,e)=>{if(x)throw new Error(e)},conform=(x,y)=>errif(x.m!=y.m||x.n!=y.n,"conform")
@@ -80,8 +80,9 @@ let dotmm=(A,B)=>{if(A.z)return dotmmz(A,B);let m=A.m,k=A.n,n=B.n,C=zeros(m,n);c
 let dotmv=(A,x)=>{if(A.z)return dotmvz(A,x);const m=A.m,n=A.n,y=zeros(m,1),S=64;for(let p0=0;p0<n;p0+=S){const pp=Math.min(p0+S,n);for (let i=0;i<m;++i){const a0=i*n;let s=0;for(let p=p0;p<pp;++p)s+=A[a0+p]*x[p];y[i]+=s}};return y}
 let dotmmz=(A,B)=>{const m=A.m,k=A.n,n=B.n,C=zeroz(m,n),S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);
  for(let i=i0;i<ii;++i){const a0=(i*k)<<1,c0=(i*n)<<1;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],b0=(p*n)<<1;for(let j=j0;j<jj;++j){const ib=b0+(j<<1),bx=B[ib],by=B[ib+1],ic=c0+(j<<1),x=ax*bx-ay*by,y=ax*by+ay*bx;C[ic]+=x;C[ic+1]+=y}}}}}}return C}
-let dotmvz=(A,x)=>{const m=A.m,n=A.n,y=zeroz(m,1),S=64;for(let p0=0; p0<n;p0+=S){const pp=Math.min(p0+BS,n);for(let i=0;i<m;++i){const a0=(i*n)<<1;let sx=0,sy=0;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],ix=p<<1,re=x[ix],im=x[ix+1];sx+=ax*re-ay*im;sy+=ax*im+ay*re};const iy=i<<1;y[iy]+=sx;y[iy+1]+=sy}};return y}
+let dotmvz=(A,x)=>{const m=A.m,n=A.n,y=zeroz(m,1),S=64;for(let p0=0; p0<n;p0+=S){const pp=Math.min(p0+S,n);for(let i=0;i<m;++i){const a0=(i*n)<<1;let sx=0,sy=0;for(let p=p0;p<pp;++p){const ia=a0+(p<<1),ax=A[ia],ay=A[ia+1],ix=p<<1,re=x[ix],im=x[ix+1];sx+=ax*re-ay*im;sy+=ax*im+ay*re};const iy=i<<1;y[iy]+=sx;y[iy+1]+=sy}};return y}
 let norm2=z=>{let s=0,r=0,t;for(let i=0;i<z.length;i++){let x=z[i];if(x){x=abs(x);if(s<x){t=s/x;r=1+r*t*t;s=x}else{t=x/s;r+=t*t}}};return s*s*r}
+
 
 let ismat=x=>x&&x.constructor==Float64Array&&("m"in x)&&("n"in x),isnum=x=>"number"==typeof x,isint=Number.isInteger,isstr=x=>"string"==typeof x
 let istab=x=>x&&"object"==typeof x&&Object.getPrototypeOf(x)==Object.prototype
@@ -171,6 +172,7 @@ let V1=col(V,til(r))
 Sqr(Abs(V1))
 console.log("V1",V1)
 */
+
 
 let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performance.now()-t0}
 
