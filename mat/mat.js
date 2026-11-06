@@ -151,185 +151,19 @@ let qrtest=_=>{A=randz(10,4),X=randz(4,2),B=dot(A,X);return Max(sub(X,solve(A,B)
 // svd A:m n   U*S*VH  U:m m  S:m n  V:n n
 let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
 let svd=(A,s)=>svd_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");errif(!A.m,"empty svd");if(A.m<A.n){A=conj(A);if(s)return svdt_(A,1);let[U,S,V]=svdt_(A);return[V,S,tranz(U)]};if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A));return[tranz(U),S,V]}
-let svdqr=(A,s)=>{console.log("svdqr");let q=qrt(A),R=rqr(q);if(s)return svdt_(R,s);let[U1,S,V]=svdt_(R);return[qrqmul(q,U1),S,V]}
+let svdqr=(A,s)=>{let q=qrt(A),R=rqr(q);if(s)return svdt_(R,s);let[U1,S,V]=svdt_(R);return[qrqmul(q,U1),S,V]}
 let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);   //A(column major), returns UT,diag(S),V(not VH)
- //if(A.n>A.m)return svdqr(A,s);
- console.log("n",n,"m",m);
+ if(A.n>A.m)return svdqr(A,s);
  let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
  let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
  let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
- let F=A=>{for(let j=0;j<100;j++){for(let i=0;i<n-1;i++){for(let k=1+i;k<n;k++){let Ai=row(A,i),Ak=row(A,k),Vi=row(V,i),Vk=row(V,k);
-  let[zr,zi]=d(Ai,Ak);if(1e-14>hypot(zr,zi)){console.log("br",j,hypot(zr,zi));return};let[c,sr,si]=J(Ai,Ak,zr,zi);R(c,sr,si,Vi,Vk);R(c,sr,si,Ai,Ak)}}}};F(A)
- let S=zeros(n);for(let i=0;i<n;i++){let Ai=row(A,i); S[i]=sqrt(norm2(Ai)); console.log("i",i,"Si",S[i],"Ai\n"+JS(Array.from(Ai)));   if(!s)mulf(1/S[i],Ai)}
+ let F=A=>{let q=1,j=0;while(q&&j<100){q=0;j++;for(let i=0;i<n-1;i++){for(let k=1+i;k<n;k++){let Ai=row(A,i),Ak=row(A,k),Vi=row(V,i),Vk=row(V,k);
+  let[zr,zi]=d(Ai,Ak);if(1e-14<hypot(zr,zi)){q=1;let[c,sr,si]=J(Ai,Ak,zr,zi);R(c,sr,si,Vi,Vk);R(c,sr,si,Ai,Ak)}}}}};F(A)
+ let S=zeros(n);for(let i=0;i<n;i++){let Ai=row(A,i); S[i]=sqrt(norm2(Ai)); if(!s)mulf(1/S[i],Ai)}
  let g=grade(S);g.reverse();S=S.map((_,i)=>S[g[i]]);S.n=1;S.m=n;if(s)return S;
  let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,tranz(W)]}
-let svdtest=()=>{let A=randz(5,3),[U,S,V]=svd(A),AA=dot(dot(U,diag(S)),herm(V));return Max(Abs(sub(A,AA)))}
-
-
-let SVD=A=>{let m=A.m,n=A.n;A=copy(A);
-
-    const MAX_SWEEPS = 50;
-    const TOLERANCE = 1e-12;
-
-    // 1. Initialisiere V als n x n Einheitsmatrix (Größe: n * n * 2)
-    const V = new Float64Array(n * n * 2);
-    for (let i = 0; i < n; i++) {
-        const idx = (i * n + i) * 2;
-        V[idx] = 1.0; 
-    }
-
-    let converged = false;
-    let sweep = 0;
-
-    while (!converged && sweep < MAX_SWEEPS) { console.log("sweep",sweep);
-        converged = true;
-        sweep++;
-
-        for (let i = 0; i < n - 1; i++) {
-            for (let j = i + 1; j < n; j++) {
-                
-                let x = 0.0;
-                let y = 0.0;
-                let z_re = 0.0;
-                let z_im = 0.0;
-
-                // Berechne die komplexen Skalarprodukte
-                for (let k = 0; k < m; k++) {
-                    const idx_i = (k * n + i) * 2;
-                    const idx_j = (k * n + j) * 2;
-
-                    const ai_re = A[idx_i];
-                    const ai_im = A[idx_i + 1];
-                    const aj_re = A[idx_j];
-                    const aj_im = A[idx_j + 1];
-
-                    x += ai_re * ai_re + ai_im * ai_im;
-                    y += aj_re * aj_re + aj_im * aj_im;
-
-                    // Hermitesches Skalarprodukt: conj(ai) * aj
-                    z_re += ai_re * aj_re + ai_im * aj_im;
-                    z_im += ai_re * aj_im - ai_im * aj_re;
-                }
-
-                const abs_z = Math.hypot(z_re, z_im);
-
-                // Überprüfe Konvergenzkriterium
-                if (abs_z > TOLERANCE * Math.sqrt(x * y)) {
-                    converged = false;
-
-                    // Schritt A: Phase phi bestimmen
-                    const phi = Math.atan2(z_im, z_re);
-                    const cos_phi = Math.cos(phi);
-                    const sin_phi = Math.sin(phi);
-
-                    // Schritt B: Rotationswinkel theta berechnen (KORRIGIERT: x - y)
-                    const zeta = (x - y) / (2.0 * abs_z);
-                    const sign_zeta = zeta >= 0.0 ? 1.0 : -1.0;
-                    const t = sign_zeta / (Math.abs(zeta) + Math.sqrt(1.0 + zeta * zeta));
-                    const c = 1.0 / Math.sqrt(1.0 + t * t);
-                    const s = c * t;
-
-                    // Schritt C: Spalten von A rotieren
-                    for (let k = 0; k < m; k++) {
-                        const idx_i = (k * n + i) * 2;
-                        const idx_j = (k * n + j) * 2;
-
-                        const ai_re = A[idx_i];
-                        const ai_im = A[idx_i + 1];
-                        const aj_re = A[idx_j];
-                        const aj_im = A[idx_j + 1];
-
-                        const s_v_re = s * (cos_phi * aj_re + sin_phi * aj_im);
-                        const s_v_im = s * (cos_phi * aj_im - sin_phi * aj_re);
-
-                        const s_u_re = -s * (cos_phi * ai_re - sin_phi * ai_im);
-                        const s_u_im = -s * (cos_phi * ai_im + sin_phi * ai_re);
-
-                        A[idx_i]     = c * ai_re + s_v_re;
-                        A[idx_i + 1] = c * ai_im + s_v_im;
-                        A[idx_j]     = s_u_re + c * aj_re;
-                        A[idx_j + 1] = s_u_im + c * aj_im;
-                    }
-
-                    // Schritt D: Matrix V synchron mitrotieren
-                    for (let k = 0; k < n; k++) {
-                        const idx_i = (k * n + i) * 2;
-                        const idx_j = (k * n + j) * 2;
-
-                        const vi_re = V[idx_i];
-                        const vi_im = V[idx_i + 1];
-                        const vj_re = V[idx_j];
-                        const vj_im = V[idx_j + 1];
-
-                        const s_v_re = s * (cos_phi * vj_re + sin_phi * vj_im);
-                        const s_v_im = s * (cos_phi * vj_im - sin_phi * vj_re);
-
-                        const s_u_re = -s * (cos_phi * vi_re - sin_phi * vi_im);
-                        const s_u_im = -s * (cos_phi * vi_im + sin_phi * vi_re);
-
-                        V[idx_i]     = c * vi_re + s_v_re;
-                        V[idx_i + 1] = c * vi_im + s_v_im;
-                        V[idx_j]     = s_u_re + c * vj_re;
-                        V[idx_j + 1] = s_u_im + c * vj_im;
-                    }
-                }
-            }
-        }
-    }
-
-    // 2. Extraktion von Sigma und Normalisierung von A zu U
-    const Sigma = new Float64Array(n);
-    for (let j = 0; j < n; j++) {
-        let normSq = 0.0;
-        for (let k = 0; k < m; k++) {
-            const idx = (k * n + j) * 2;
-            normSq += A[idx] * A[idx] + A[idx + 1] * A[idx + 1];
-        }
-        Sigma[j] = Math.sqrt(normSq);
-
-        if (Sigma[j] > 1e-14) {
-            for (let k = 0; k < m; k++) {
-                const idx = (k * n + j) * 2;
-                A[idx] /= Sigma[j];
-                A[idx + 1] /= Sigma[j];
-            }
-        }
-    }
-    Sigma.m=n;Sigma.n=1;V.m=n;V.n=n;V.z=1;
-    return[A,Sigma,V];
-}
-
-
-
-/*
-let A=complex(mat([[1,-2,2],[1,4,-4],[1,-3,3]]))
-let[U,S,V]=svd(A)
-let r=mulf(1/S[0],S).filter(x=>x>0.01).length
-let V1=col(V,til(r))
-Sqr(Abs(V1))
-console.log("V1",V1)
-*/
-
-//let A=trans(complex(mat([[1,0,0,0],[1,1,1,0],[1,0,0,0.5]])));
-//let[U,S,V]=svd(A);
-//let q = qr(A);
-//console.log("q",q);
-// let sV=RowSum(Sqr(Abs(V1)))  V1 is U in [U,S,V]=SVD(herm(A))
-
-A=complex(mat([[1,0,0,0.0,0.0,0.0,0.0,0.0],
-               [1,1,1,0.0,0.0,0.0,0.0,0.0],
-               [1,0,0,0.5,0.0,0.0,0.0,0.0],
-               [1,0,0,0.0,0.5,0.0,0.0,0.0],
-               [1,0,0,0.0,0.0,0.5,0.0,0.0],
-               [1,0,0,0.0,0.0,0.0,0.5,0.0],
-               [1,0,0,0.0,0.0,0.0,0.0,0.5]]));	      
-/*
-A=complex(mat([[1,0,0,0,  0  ,0  ],
-               [1,1,1,0,  0  ,0  ],
-               [1,0,0,0.5,0  ,0  ],
-               [1,0,0,0  ,0.5,0  ],
-               [1,0,0,0  ,0  ,0.5]]));
-	       */
+let orttest=A=>{A=dot(herm(A),A);return Max(Abs(sub(A,eyez(A.n))))}
+let svdtest=A=>{if(A==undefined)A=randz(5,3);let [U,S,V]=svd(A),AA=dot(dot(U,diag(S)),herm(V));return max(orttest(U),orttest(V),Max(Abs(sub(A,AA))))}
 
 let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performance.now()-t0}
 
