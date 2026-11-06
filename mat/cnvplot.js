@@ -11,8 +11,8 @@
  let Sum=x=>{let a=0,b=0,n=x.length>>1;for(let i=0;i<x.length;i+=2){a+=x[i];b+=x[1+i]};return[a,b]},sum=x=>{let r=0,i;for(i=0;i<x.length;i++)r+=x[i];return r}
  let Mean=u=>{let re=0,im=0,n=u.length/2;for(let i=0;i<u.length;i+=2){re+=u[i];im+=u[1+i]};return[re/n,im/n]},mean=x=>{let s=0,n=x.length,i;for(i=0;i<n;i++)s+=x[i];return s/n}
 
- let font1,font2,ufont1,ufont2,cols=0,equal,resize=0,stati=0,hi=[],sld,cap,tab,onzoom,onpan,onmeasure; //args, e.g. "font1","12pt monospace",.. hi=[{plot-idx,line-idx,point-idx||-1}]
- for(let i=0;i<a.length;i++){let x=a[i];x=="font1"?(ufont1=a[++i]):x=="font2"?(ufont2=a[++i]):x=="cols"?(cols=a[++i]):x=="equal"?(equal=1):x=="resize"?(resize=1):x=="static"?(stati=1):x=="slider"?(sld=a[++i]):x=="caption"?cap=a[++i]:x=="table"?tab=a[++i]:x=="onzoom"?(onzoom=a[++i]):x=="onpan"?(onpan=a[++i]):x=="onmeasure"?(onmeasure=a[++i]):0}
+ let font1,font2,ufont1,ufont2,cols=0,equal,resize=0,stati=0,hi=[],sld,cap,tab,onzoom,onpan,onmeasure,ondblclick; //args, e.g. "font1","12pt monospace",.. hi=[{plot-idx,line-idx,point-idx||-1}]
+ for(let i=0;i<a.length;i++){let x=a[i];x=="font1"?(ufont1=a[++i]):x=="font2"?(ufont2=a[++i]):x=="cols"?(cols=a[++i]):x=="equal"?(equal=1):x=="resize"?(resize=1):x=="static"?(stati=1):x=="slider"?(sld=a[++i]):x=="caption"?cap=a[++i]:x=="table"?tab=a[++i]:x=="onzoom"?(onzoom=a[++i]):x=="onpan"?(onpan=a[++i]):x=="onmeasure"?(onmeasure=a[++i]):x=="ondblclick"?(ondblclick=a[++i]):0}
  let fh1,fh2,border=1,ticLength=6,dynstyle=s=>{s=max(10,floor(s/40));ticLength=6;font1=ufont1?ufont1:`${floor(1.2*s)}px monospace`;font2=ufont2?ufont2:`${s}px monospace`;fh1=fontheight(font1);fh2=fontheight(font2)}
  let fontheight=f=>{c.font=f;let m=c.measureText("AQ");return ceil(m.fontBoundingBoxAscent+m.fontBoundingBoxDescent)},textwidth=t=>ceil(c.measureText(t).width)
  let titleHeight=t=>t?2+ceil(fh1):2,xlabelHeight=l=>2+(l.length?fh1:0),ylabelWidth=_=>2+ceil(fh2)/*rotated*/,ticLabelWidth=yl=>(c.font=font2,max(...yl.map(textwidth))),ticLabelHeight=_=>2+fh2,rightXYWidth=l=>7+textwidth(l)
@@ -202,7 +202,7 @@
  let callback=r=>{if(Array.isArray(r)&&r.length>0&&r[0]&&r[0].Type){p=r;usrlimits=[];replot()}}
  let cursor=x=>cnv.style.cursor=x=="pan"?"grabbing":x=="zoom"?"crosshair":""
  let gethit=(x,y)=>{for(let h of hits){if(x>=h.l&&x<=h.r&&y>=h.t&&y<=h.b)return h};return 0}
- let clickpoint=(x,y)=>{let ri=findrect(x,y),a=findaxes(ri);if(ri<0)return;let r=rects[ri],f=findpoint(p[ri],ri,a,r,x-r.x-a.x,y-r.y-a.y);if(!f)return;hi=[[a.pi,...f]];replot();if(cap)cap.selectedIndex=1+hi[0][1];}
+ let clickpoint=(x,y)=>{let ri=findrect(x,y),a=findaxes(ri);if(ri<0)return;let r=rects[ri];if(ondblclick&&ondblclick(ri,...axcoords(a,x-r.x,y-r.y)))return;let f=findpoint(p[ri],ri,a,r,x-r.x-a.x,y-r.y-a.y);if(!f)return;hi=[[a.pi,...f]];replot();if(cap)cap.selectedIndex=1+hi[0][1];}
  let dblclick=e=>{pd(e);let[x,y]=exy(e),h=gethit(x,y);if(!h)return clickpoint(x,y);h.f(h)};cnv.addEventListener("dblclick",dblclick)
  let exy=e=>[e.offsetX,e.offsetY],findrect=(x,y)=>{if(single)return 0;for(let r of rects)if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return r.i;return -1},findaxes=ri=>{if(single)return Axes.length?Axes[0]:0;for(let a of Axes)if(a.pi==ri)return a;return 0}
  let posnap=(x0,x1,y0,y1)=>{let dx=abs(x1-x0),dy=abs(y1-y0),cx=(x0+x1)/2,cy=(y0+y1)/2,r=max(dx,dy)/2;if(hypot(cx,cy)<0.1*r){cx=0;cy=0};return[cx-r,cx+r,cy-r,cy+r]}
