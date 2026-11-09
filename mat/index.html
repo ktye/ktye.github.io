@@ -163,7 +163,7 @@ let worker=_=>`let $L=20,$C=80,$=x=>({t:0,r:x===undefined?"undefined":ismat(x)?s
  let print=(x,m)=>(m=$(x),m.p=1,m.r="┌\\n"+m.r+"\\n└\\n",postMessage(m),x),b_=x=>x&&x[0]=="{"?"("+x+")":x
  let fs={},JS=JSON.stringify,su=x=>t_.decode(x),t_=new TextDecoder("utf-8"),us=x=>_t.encode(x),_t=new TextEncoder("utf-8")
  let save=(u,name)=>postMessage({t:3,r:[u.constructor==Uint8Array?u:"string"==typeof u?us(u):us(ser(u)),name]}) //download: e.g. save(randz(3,4),"x.mat")
- let P={Type:"xy",Lines:[{X:[1,2,3],Y:[3,-1,2]}]}
+ //let P={Type:"xy",Lines:[{X:[1,2,3],Y:[3,-1,2]}]}
  let plot=(...x)=>{/*${pdoc}*/let r=[],p0={Type:"xy",Lines:[]},n=x.length,A=x.filter(x=>ismat(x)),nA=A.length;x=x.filter(x=>!ismat(x));
    if(nA){if(A[0].z){p0.Type="polar";A.forEach(z=>p0.Lines.push({C:z}))}else{if(1==nA)A=[til(A[0].m),A[0]];for(let i=0;i<A.length;i+=2){let y=A[1+i],l={X:A[i]};y.z?(p0.Type="ampang",l.C=y):(l.Y=y);p0.Lines.push(l)}}}
   let[ti,xl,yl]=$plotlabels(x);x=nA?[p0,...x]:x;x.forEach(p=>{if(isplt(p));if(!p.Title)p.Title=ti;if(!p.Xlabel)p.Xlabel=xl;if(!p.Ylabel)p.Ylabel=yl});postMessage({t:1,r:x});return""}

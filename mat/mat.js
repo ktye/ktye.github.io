@@ -153,19 +153,35 @@ let cond=A=>{let s=svd(A,1);return s.at(-1)/s[0]}
 let svd=(A,s)=>svd_(copy(A),s),svd_=(A,s)=>{errif(!A.z,"svd input must be complex");errif(!A.m,"empty svd");if(A.m<A.n){A=conj(A);if(s)return svdt_(A,1);let[U,S,V]=svdt_(A);return[V,S,tranz(U)]};if(s)return svdt_(tranz(A),1);let[U,S,V]=svdt_(tranz(A));return[tranz(U),S,V]}
 let svdqr=(A,s)=>{let q=qrt(A),R=rqr(q);if(s)return svdt_(R,s);let[U1,S,V]=svdt_(R);return[qrqmul(q,U1),S,V]}
 let svdt_=(A,s)=>{errif(A.m>A.n,"svd:matrix must be slender");let n=A.m,m=A.n,V=eyez(n),row=(A,i)=>A.subarray(i*2*A.n,(i+1)*2*A.n);   //A(column major), returns UT,diag(S),V(not VH)
- if(A.n>A.m)return svdqr(A,s);
+ //if(A.n>A.m)return svdqr(A,s);
  let d=(x,y)=>{let a=0,b=0;for(let r=0;r<x.length;r+=2){const i=1+r;a+=x[r]*y[r]+x[i]*y[i];b+=x[r]*y[i]-x[i]*y[r]};return[a,b]}
  let J=(x,y,zr,zi)=>{let a=hypot(zr,zi),q=(norm2(y)-norm2(x))/(2*a),t=sign(q)/(abs(q)+sqrt(1+q*q)),c=1/sqrt(1+t*t);return[c,t*c*zr/a,t*c*zi/a]}
  let R=(c,sr,si,x,y)=>{for(let r=0;r<x.length;r+=2){const i=1+r;let xr=x[r],xi=x[i],yr=y[r],yi=y[i];x[r]=xr*c-yr*sr-yi*si;x[i]=xi*c+yr*si-yi*sr;y[r]=xr*sr-xi*si+yr*c;y[i]=xr*si+xi*sr+yi*c}}
  let F=A=>{let q=1,j=0;while(q&&j<100){q=0;j++;for(let i=0;i<n-1;i++){for(let k=1+i;k<n;k++){let Ai=row(A,i),Ak=row(A,k),Vi=row(V,i),Vk=row(V,k);
   let[zr,zi]=d(Ai,Ak);if(1e-14<hypot(zr,zi)){q=1;let[c,sr,si]=J(Ai,Ak,zr,zi);R(c,sr,si,Vi,Vk);R(c,sr,si,Ai,Ak)}}}}};F(A)
- let S=zeros(n);for(let i=0;i<n;i++){let Ai=row(A,i); S[i]=sqrt(norm2(Ai)); if(!s)mulf(1/S[i],Ai)}
+ let S=zeros(n);for(let i=0;i<n;i++){let Ai=row(A,i);S[i]=sqrt(norm2(Ai)); if(1e-14<S[i])mulf(1/S[i],Ai)} //todo orthogonalize(and normalize) remaining U which are skipped for S[i]~0
  let g=grade(S);g.reverse();S=S.map((_,i)=>S[g[i]]);S.n=1;S.m=n;if(s)return S;
  let U=zeroz(n,m),W=zeroz(n,n);g.forEach((gi,i)=>{row(U,i).set(row(A,gi));row(W,i).set(row(V,gi))});return[U,S,tranz(W)]}
 let orttest=A=>{A=dot(herm(A),A);return Max(Abs(sub(A,eyez(A.n))))}
 let svdtest=A=>{if(A==undefined)A=randz(5,3);let [U,S,V]=svd(A),AA=dot(dot(U,diag(S)),herm(V));return max(orttest(U),orttest(V),Max(Abs(sub(A,AA))))}
 
 let time=(f,n)=>{n=n||1;let t0=performance.now();while(n-->0)f();return performance.now()-t0}
+
+
+/*
+let A=complex(mat([[0.2035898132434047, -0.6668167365758093, 0.05088497503500045, 0, 0, -0.10638302064517093],
+                   [0.2035898132434047, -0.6668167365758093, 0.05088497503500045, 0, 0, -0.10638302064517093],
+                   [0.0768897989384644, 0.11036213993208055, 0.6544281823672251,  0, 0, -0.23158564509127993],
+                   [0.0768897989384644, 0.11036213993208055, 0.6544281823672251,  0, 0, -0.23158564509127993]]))
+let A=trans(complex(mat([[0.2035, -0.66681, 0.050884, 0, 0, -0.106383],
+                         [0.2035, -0.66681, 0.050884, 0, 0, -0.106383],
+                         [0.0768,  0.11036, 0.654428, 0, 0, -0.231585],
+                         [0.0768,  0.11036, 0.654428, 0, 0, -0.231585]])));
+let[u,s,v]=svd(A);
+*/
+let A=complex(mat(4,4,[0.20358981324340464,0,0.20358981324340464,0,0.07688979893846443,0,0.07688979893846443,0,-0.6668167365758094,0,-0.6668167365758094,0,0.11036213993208065,0,0.11036213993208065,0,0.05088497503500057,0,0.050884975035000564,0,0.6544281823672251,0,0.6544281823672251,0,-0.10638302064517097,0,-0.10638302064517095,0,-0.23158564509127977,0,-0.23158564509127977,0]))
+//let A=complex(mat(4,6,[0.20358981324340464,-0.6668167365758094,0.05088497503500057,8.709045973084568e-17,-8.485487465194325e-17,-0.10638302064517097,0.20358981324340464,-0.6668167365758094,0.050884975035000564,8.709045973084566e-17,-8.485487465194325e-17,-0.10638302064517095,0.07688979893846443,0.11036213993208065,0.6544281823672251,9.05792747351225e-17,-1.249516337558975e-16,-0.23158564509127977,0.07688979893846443,0.11036213993208065,0.6544281823672251,9.05792747351225e-17,-1.249516337558975e-16,-0.23158564509127977]))
+let[U,S,V]=svd(A);
 
 
 let testmat=()=>{let r="";[qrtest,svdtest].forEach(f=>{console.log(f.name);let e=f();errif(e>1e-14,f.name);r+=`${f.name}: ${e}\n`});return r}
