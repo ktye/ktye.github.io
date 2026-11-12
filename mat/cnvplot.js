@@ -164,15 +164,15 @@
  cnv.cols=cols;replot();cnv.replot=replot;
 
  if(cap&&tab){let c={},mpts=x=>{x=x.toSorted((a,b)=>a-b);x=abs(x[clamp(x.length>>>1,0,x.length-1)]);return x=x<0.01?5:x<0.1?4:x<1?3:x<10?2:x<100?1:0},k=Object.keys(tab);
-  let fm=k.map(k=>"string"==tab[k][0]?-1:mpts(tab[k]));k.forEach((k,i)=>{let f=fm[i];c[k]=tab[k].map(x=>f<0?x:x.toFixed(f));let m=max(...c[k].map(x=>x.length));c[k]=c[k].map(x=>f<0?x.padEnd(m," "):x.padStart(m," "))});
+  let fm=k.map(k=>"string"==typeof tab[k][0]?-1:mpts(tab[k]));k.forEach((k,i)=>{let f=fm[i];c[k]=tab[k].map(x=>f<0?x:x.toFixed(f));let m=max(...c[k].map(x=>x.length));c[k]=c[k].map(x=>f<0?x.padEnd(m," "):x.padStart(m," "))});
   let fill=x=>{let n=max(...x.map(x=>x.length)),f=x=>x+" ".repeat(n-x.length);return x.map(f)},tr=(x,i)=>(i=x.indexOf("\\"))<0?x:x.slice(0,i)
   let icol=n=>fill(["#",...Array(n).fill(0).map((_,i)=>String(1+i))]) //todo custom numbers
-  let q=Object.keys(c),t=q.map(x=>fill([tr(x),...c[x]]));t=[icol(t[0].length-1),...t];r=[]
+  let q=Object.keys(c),t=q.map(x=>fill([tr(x),...c[x]])),r=[];t=[icol(t[0].length-1),...t];
   for(let i=0;i<t[0].length;i++)r.push(t.map(x=>x[i]).join("│"))
   let rowb="border-left:.5em solid black;padding-left:.2em;background:black;color:white;position:sticky;top:0;padding:0;padding-left:.2em"
   let rowi=i=>`border-left:.5em solid ${colors[i%colors.length]};padding:0;padding-left:.2em;`
   cap.innerHTML=r.map((s,i)=>`<option data-i="${i-1}" style="${i?rowi(i-1):rowb}">${hs(s).replaceAll(" ","&nbsp;")}</option>`).join("\n")
-  cap.size=cap.children.length;cap.style.overflowY="hidden"
+  cap.size=cap.children.length;
   cap.onchange=_=>{let n=p.length,i=af(cap.selectedOptions).map(x=>+(x.dataset.i)).filter(x=>x>=0);hi=[];iota(n).forEach(pi=>i.forEach(i=>hi.push([pi,i,-1])));replot()}}
   //todo custom formats, units, complex? autocopy? double-click row: copy json?
   
