@@ -155,7 +155,7 @@
  let textplot=(p,w,h)=>{}
  let setslider=p=>{if(stati||!sld)return;if(sld.style.display=hi.length!=1||hi[0][2]<0?"none":"")return;let[pi,i,j]=hi[0],P=p[pi],l=P.Lines[i],t=P.Type,f=_=>{hi[0][2]=+sld.value;replot()};sld.min=0;let n=t==("polar"||t=="ampang")&&l.C?l.C.length>>>1:t=="xy"&&l.C?l.C.length:l.X?l.X.length:l.Y.length;sld.max=n-1;sld.value=j;sld.ondblclick=_=>{hi=[],sld.style.display="none";replot()};sld.onchange=f;sld.oninput=f;sld.onwheel=e=>(sld.value=clamp((+sld.value)-sign(e.deltaY),0,n-1),f())}
  
- let Axes,rects,hits,grid=(n,c, g)=>{g={n:n};c=c<0?(g.colmajor=1,-c):(!c)?((n<13)?[4,4,4,4,4,3,3,4,4,5,5,4,4][n]:5):c;g.r=1;g.c=(n<c?n:(g.r=0|n/c,c));g.r=(g.r*g.c<n)?1+g.r:g.r;g.w=w/g.c;g.h=h/g.r;g.width=w;return g}
+ let Axes,rects,hits,grid=(n,c, g)=>{g={n:n};c=c<0?(g.colmajor=1,-c):(!c)?autocols(n):c;g.r=1;g.c=(n<c?n:(g.r=0|n/c,c));g.r=(g.r*g.c<n)?1+g.r:g.r;g.w=w/g.c;g.h=h/g.r;g.width=w;return g},autocols=n=>{let m=0,im=1;for(let i=1;i<n+1;i++){let r=min(w/i,h/ceil(n/i));if(r>m){m=r;im=i}}return im}
  let xyi=(g,n, i,k,x,y,m)=>{x=0;i=0|n/g.c;k=n%g.c;if(g.colmajor){k=0|n/g.r;i=n%g.r};if(i==(0|(g.n-1)/g.c)){m=1+((g.n-1)%g.c);x=(g.width-m*g.w)/2}x+=k*g.w;y=i*g.h;return[x,y]}
  let P={"":empty,"xy":xy,"raster":xy,"polar":polar,"ring":ring,"ampang":ampang,"foto":foto,"text":textplot}
  let plots=p=>{let g=grid(p.length,cols);dynstyle(min(g.w,g.h));c.reset();c.fillStyle="white";c.fillRect(0,0,w,h);rects=[];Axes=[];hits=[];check(p);limits(p);labels(p);p.forEach((p,i)=>{let[x,y]=xyi(g,i),pi=i+(single?single-1:0);rects.push({i:pi,x:x,y:y,w:g.w,h:g.h});c.save();c.translate(x+0.5,y+0.5);P[p.Type](p,pi,g.w,g.h);c.restore();});setslider(p)}
