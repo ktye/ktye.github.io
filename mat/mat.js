@@ -74,7 +74,7 @@ let tranz=x=>{let r=zeroz(x.n,x.m),i,j,m=x.n,n=x.m,n2=2*n,k=0;for(j=0;j<n2;j+=2)
 let dot=(A,B)=>{errif(A.n!=B.m,"conform");if(A.z&&!B.z)B=complex(B);else if(B.z&&!A.z)A=complex(A);return 1==A.m&&1==B.n?dotvv(A,B):1==A.n&&1==B.m?dotvw(A,B):1==B.n?dotmv(A,B):dotmm(A,B)}
 let dotvv=(A,B)=>{if(A.z)return dotvvz(A,B);let n=A.length,s=0;for(let i=0;i<n;i++)s+=A[i]*B[i];return s}
 let dotvvz=(A,B)=>{let n=A.length,x=0,y=0;for(let i=0;i<n;i+=2){x+=A[i]*B[i]-A[1+i]*B[1+i];y+=A[i]*B[1+i]+A[1+i]*B[i]};return[x,y]}
-let dotvw=(A,B)=>{if(A.z)return dotvwz(A,B);let m=A.m,n=B.n,r=zeroz(m,n),i,j,k;for(i=0;i<m;i++){let x=A[i],k=n*i;for(j=0;j<n;j++)r[k+j]=x*B[j]};return r}
+let dotvw=(A,B)=>{if(A.z)return dotvwz(A,B);let m=A.m,n=B.n,r=zeros(m,n),i,j,k;for(i=0;i<m;i++){let x=A[i],k=n*i;for(j=0;j<n;j++)r[k+j]=x*B[j]};return r}
 let dotvwz=(A,B)=>{let m=A.m,n=B.n,r=zeroz(m,n),i,j,k;for(i=0;i<2*m;i+=2){let x=A[i],y=A[1+i],k=n*i;for(j=0;j<2*n;j+=2){r[k+j]=x*B[j]-y*B[1+j];r[k+j+1]=x*B[1+j]+y*B[j]}};return r}
 let dotmm=(A,B)=>{if(A.z)return dotmmz(A,B);let m=A.m,k=A.n,n=B.n,C=zeros(m,n);const S=64;for(let i0=0;i0<m;i0+=S){const ii=Math.min(i0+S,m);for(let j0=0;j0<n;j0+=S){const jj=Math.min(j0+S,n);for(let p0=0;p0<k;p0+=S){const pp=Math.min(p0+S,k);for(let i=i0;i<ii;++i){const aa=i*k,cc=i*n;for(let p=p0;p<pp;++p){const a=A[aa+p],bb=p*n;for(let j=j0;j<jj;++j)C[cc+j]+=a*B[bb+j]}}}}}return C}
 let dotmv=(A,x)=>{if(A.z)return dotmvz(A,x);const m=A.m,n=A.n,y=zeros(m,1),S=64;for(let p0=0;p0<n;p0+=S){const pp=Math.min(p0+S,n);for (let i=0;i<m;++i){const a0=i*n;let s=0;for(let p=p0;p<pp;++p)s+=A[a0+p]*x[p];y[i]+=s}};return y}
@@ -184,8 +184,46 @@ let[U,S,V]=svd(A);
 */
 
 
+let LAPACK,SLV,LSQ,SVD,lapack=()=>{let U=()=>new Uint8Array(LAPACK.memory.buffer),I=()=>new Int32Array(LAPACK.memory.buffer),F=()=>new Float64Array(LAPACK.memory.buffer)
+ let M,reset=()=>M=Number(LAPACK.__heap_base),ma=x=>{let r=M;let y=LAPACK.memory.buffer.byteLength;if(M+x>=y)console.log("overflow");M+=x;return r};
+ let cha=x=>{let r=ma(8);let u=U();u[r]=x.charCodeAt(0);return r},int=x=>{let r=ma(8);let i=I();i[r>>>2]=x;return r},mat=x=>{let r=ma(8*x.length);let f=F();f.set(x,r>>>3);return r};
+ SLV=(A,B)=>{reset();A=trans(A);B=trans(B),z=A.z,fn=z?LAPACK.zgesv_:LAPACK.dgesv_
+  let n=int(A.n),nr=int(B.m),a=mat(A),la=int(A.n),ip=ma(8*A.n),b=mat(B),lb=int(B.n),r=int(0);
+  let f=F(),i=I();fn(n,nr,a,la,ip,b,lb,r);errif(i[r>>>2],"slv");
+  let x=z?zeroz(B.m,B.n):zeros(B.m,B.n);x.set(f.subarray(b>>>3,(z?2:1)*B.n*B.m+(b>>>3)))
+  return trans(x)}
+ LSQ=(A,B)=>{reset();A=trans(A);B=trans(B),z=A.z,fn=z?LAPACK.zgels_:LAPACK.dgels_
+  let t=cha("N"),m=int(A.n),n=int(A.m),nr=int(B.m),a=mat(A),la=m,b=mat(B),lb=int(B.n),w=int(0),lw=int(-1),r=int(0);
+  let u=U(),f=F(),i=I();fn(t,m,n,nr,a,la,b,lb,w,lw,r,1);errif(i[r>>>2],"lsq");let s=f[w>>>3];i[lw>>>2]=s;w=ma(f[w>>>3]);i=I();f=F();
+  fn(t,m,n,nr,a,la,b,lb,w,lw,r,1);errif(i[r>>>2],"lsq");
+  let x=z?zeroz(B.m,B.n):zeros(B.m,B.n);x.set(f.subarray(b>>>3,(z?2:1)*B.n*B.m+(b>>>3)))
+  return trans(col(x,til(A.m)))}
+ SVD=(A,S)=>{reset();A=trans(A),z=A.z,fn=z?LAPACK.zgesvd_:LAPACK.dgesvd_
+  let ju=cha(S?"N":"O"),jv=cha(S?"N":"S"),m=int(A.n),n=int(A.m),a=mat(A),la=m,k=min(A.m,A.n),s=ma(8*k),u=0,lu=la
+  let v=S?0:ma((z?16:8)*A.m*k),lv=int(k),w=ma(8),lw=int(-1),rw=z?ma(8*5*k):0,r=int(0),i=I(),f=F();
+  fn(ju,jv,m,n,a,la,s,u,lu,v,lv,w,lw,...(z?[rw,r,1,1]:[r,1,1]));errif(i[r>>>2],"svd: "+i[r>>>2]);i[lw>>>2]=f[w>>>3];w=ma(f[w>>>3]);f=F();i=I();
+  fn(ju,jv,m,n,a,la,s,u,lu,v,lv,w,lw,...(z?[rw,r,1,1]:[r,1,1]));errif(i[r>>>2],"svd: "+i[r>>>2]);
+  let sigma=zeros(k,1);sigma.set(f.subarray(s>>>3,(s>>>3)+k));if(S)return sigma;
+  let VT=z?zeroz(A.m,k):zeros(A.m,k);VT.set(f.subarray(v>>>3,VT.length+(v>>>3)));
+  A.set(f.subarray(a>>>3,(a>>>3)+A.length));
+  return[trans(row(A,til(k))),sigma,z?conj(VT):VT]}
+ let sn=(x,n)=>{let u=U();return new TextDecoder().decode(u.subarray(x,x+n))}
+ let e={env:{pow:Math.pow,logf:Math.log,xerbla_:(x,y,z)=>{let i=I();errif(1,"xerbla "+sn(x,z)+" "+i[y>>>2])}}};
+ fetch("http://localhost:3000/mat/lapack.wasm").then(r=>r.arrayBuffer()).then(r=>{LAPACK=new WebAssembly.Instance(new WebAssembly.Module(r),e).exports;reset();
+  LSQ(randn(4,3),randn(4,5))})}
+let testlapack=()=>{let x,A,X,U,S,V,e0,e1,e2,e3,e4,e5,e6,e7
+ A=randn(5,5),X=randn(5,3),B=dot(A,X),x=SLV(A,B),e0=Max(Abs(sub(x,X)))
+ A=randz(5,5),X=randz(5,3),B=dot(A,X),x=SLV(A,B),e1=Max(Abs(sub(x,X)))
+ A=randn(9,5),X=randn(5,3),B=dot(A,X),x=LSQ(A,B),e2=Max(Abs(sub(x,X)))
+ A=randz(9,5),X=randz(5,3),B=dot(A,X),x=LSQ(A,B),e3=Max(Abs(sub(x,X)))
+ A=randn(5,3),[U,S,V]=SVD(A),e4=Max(Abs(sub(A,dot(dot(U,diag(S)),trans(V)))))
+ A=randn(3,5),[U,S,V]=SVD(A),e5=Max(Abs(sub(A,dot(dot(U,diag(S)),trans(V)))))
+ A=randz(5,3),[U,S,V]=SVD(A),e6=Max(Abs(sub(A,dot(dot(U,diag(S)),herm(V)))))
+ A=randz(3,5),[U,S,V]=SVD(A),e7=Max(Abs(sub(A,dot(dot(U,diag(S)),herm(V)))))
+ return max(e0,e1,e2,e3,e4,e5,e6,e7)}
+
+
 let testmat=()=>{let r="";[qrtest,svdtest].forEach(f=>{console.log(f.name);let e=f();errif(e>1e-14,f.name);r+=`${f.name}: ${e}\n`});return r}
 //deno repl --eval-file=mat.js
-
 
 

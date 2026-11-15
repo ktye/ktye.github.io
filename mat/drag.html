@@ -1,0 +1,50 @@
+<!DOCTYPE html><head><title>Resizable Layout</title>
+<style>
+*{box-sizing: border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:monospace}
+body{display:flex;flex-direction:column}
+#T{flex:0 0 56px;height:56px;display:flex;align-items:center;padding:0 20px;background:#222;color:white}
+#main{display:grid;grid-template-columns:minmax(0, 1fr) 2px minmax(0,60vw);flex:1;min-width:0;min-height:0;overflow:hidden}
+#L,#ST,#SB{min-width:0;min-height:0;overflow:auto;padding:20px;background:#f4f5f7}
+#R{display:grid;grid-template-rows:minmax(0, 60fr) 2px minmax(0, 40fr);min-width:0;min-height:0;overflow: hidden}
+#SB{background: #e9edf2}
+.dv.hor{min-height:2px;cursor:row-resize}
+.dv{position:relative;z-index:1;background:black;touch-action:none;user-select:none}
+.dv:hover,.dv.dragging{background:orange}
+.dv.ver{cursor:col-resize}
+.dv.ver::after{content:"";position:absolute;inset:0 -5px}
+.dv.hor::after{content:"";position:absolute;inset:-5px 0}
+</style></head>
+
+<body>
+ <header id="T"> <strong>My Toolbar</strong></header>
+ <main class="layout" id="main">
+  <section id="L"> <h2>Main area</h2> <p>Drag the divider on the right edge to resize the sidebar.</p></section>
+  <div class="dv ver" id="vdiv" role="separator" aria-label="Resize sidebar"></div>
+  <aside class="sidebar" id="R"> <section id="ST"> <h2>Right top</h2> <p>Drag the horizontal divider below to resize these panels.</p> </section>
+   <div class="dv hor" id="hdiv" role="separator" aria-label="Resize sidebar panels" ></div>
+   <section id="SB"><h2>Right bottom</h2></section>
+  </aside>
+ </main>
+
+<script>
+let startDrag=(d,m)=>{d.addEventListener("pointerdown",e=>{e.preventDefault();d.setPointerCapture(e.pointerId);d.classList.add("dragging");
+  const move=e=>m(e),stop=()=>{d.classList.remove("dragging");d.removeEventListener("pointermove",move);d.removeEventListener("pointerup",stop);d.removeEventListener("pointercancel",stop)};d.addEventListener("pointermove",move);d.addEventListener("pointerup",stop);d.addEventListener("pointercancel",stop)})}
+startDrag(vdiv,e=>{const b=main.getBoundingClientRect(),dw=vdiv.offsetWidth,a=Math.max(0,b.width-dw),lw=Math.max(0,Math.min(e.clientX-b.left-dw/2,a));
+ vdiv.w=0;main.style.gridTemplateColumns=`${lw}px ${dw}px minmax(0, 1fr)`})
+startDrag(hdiv,e=>{const b=R.getBoundingClientRect(),dh=hdiv.offsetHeight,a=Math.max(0,b.height-dh),th=Math.max(0,Math.min(e.clientY - b.top - dh/ 2, a));
+ hdiv.h=0;R.style.gridTemplateRows=`${th}px ${dh}px minmax(0, 1fr)`})
+let keepvisible=()=>{const lw=main.clientWidth,vw=vdiv.offsetWidth,a=Math.max(0,lw-vw),c=getComputedStyle(main).gridTemplateColumns.split(" ").map(parseFloat);
+ const l=Math.max(0,Math.min(c[0]||0,a));main.style.gridTemplateColumns=`${l}px ${vw}px minmax(0, 1fr)`,sh=R.clientHeight,hh=hdiv.offsetHeight;
+ const ah=Math.max(0, sh-hh),r=getComputedStyle(R).gridTemplateRows.split(" ").map(parseFloat),th=Math.max(0,Math.min(r[0]||0,ah));
+ R.style.gridTemplateRows=`${th}px ${hh}px minmax(0, 1fr)`}
+vdiv.addEventListener("dblclick",()=>{const b=main.getBoundingClientRect(),dw=vdiv.offsetWidth,a=Math.max(0,b.width-dw),c=getComputedStyle(main).gridTemplateColumns.split(" ").map(parseFloat);
+ cr=c[2]||0;let w=vdiv.w;if(w){const r=Math.min(+w,a);main.style.gridTemplateColumns=`minmax(0, 1fr) ${dw}px ${r}px`;vdiv.w=0}
+ else{vdiv.w=cr;main.style.gridTemplateColumns=`${a}px ${dw}px 0px`}});
+hdiv.addEventListener("dblclick",()=>{const b=R.getBoundingClientRect(),dh=hdiv.offsetHeight,a=Math.max(0,b.height-dh),r=getComputedStyle(R).gridTemplateRows.split(" ").map(parseFloat),c=r[2]||0;
+ let h=hdiv.h;if(h){const H=Math.min(h,a),t=a-H;R.style.gridTemplateRows=`${t}px ${dh}px ${b}px`;hdiv.h=0}
+ else{hdiv.h=c;R.style.gridTemplateRows=`${a}px ${dh}px 0px`}})
+window.addEventListener("resize",keepvisible);
+</script>
+</body>
+</html>
