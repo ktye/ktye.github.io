@@ -5,7 +5,7 @@ Ufy{(!nx? x :t:tx0);!t? x :(n:nx)/if(t~txi)t:0;break; t?[n#Cxi;n#Ixi;n#Fxi;n#Zxi
 Exl{r:Ktn[0;nx]tx?[x;nx/Jri:K.Cxi;nx/Jri:K.Ixi;nx/Jri:K.Fxi;nx/Jri:K.Zxi];r}                     / ech pri bot bin ovr fix ecr jon scn fxs ecl spl   ?[i;swc;def]   while(c)e;
 
 Ech{jy<0? x y :ny#x yi} Ecr{jz<0? x[y;z] :nz#x[y;zi]} Ecl{jy<0? x[y;z] :ny#x[yi;z]}              / ijfz: <=> ! ~ ~neq << >> Lt Le Gt Ge Sh Dv Mo div |&^ Re Im +abs ~conj @ph
-Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                    / n/ndo  n#vec  idx: x0 xi  heap: Ix0+:y
+Bot{jy<0? jz<0? x[y;z] :nz#x[y;zi] :jz<0? ny#x[yi;z] :if(nx~ny)Q; nx#x[yi;zi]}                   / n/ndo  n#vec  idx: x0 xi  heap: Ix0+:y
 Pri{if(jy<0)Q;x[yn#yi;yn#y i-1]} Ovr{s:@x;(ny-1)/s:x[s;y 1+i];s} Scn{s:@x; ny#i? x[s;yi] :s}     / n(length) t(type) r(refcount) p(pointer) s(element-size) 
 Jon{if(jy<0)Q;r:@y;(ny-1)/{r,:x;r,:y 1+i}; r} Spl{if(!jx<0)Q; if(jy<0)Q; r:(0,!y=x)^y;if(nr)r0:1_r0; r}
 Fix{r:y;while(r~y:f y)r:y; r} Fxs{r:y;s:,r;while(r~f y)r:y;s,:r; r}
@@ -14,8 +14,8 @@ Sum{jx<0? x :tx?[Ovr[Add;x];xn#Sum Upt[2;x];{s:i.0;nx/s+:Ixi;Ki s};{s:f.0;nx/s+:
 Fst{x0} Enl{Ufy 1i#x} Til{tx=2? Wer x :tx~-2? Q :ix#i} Cnt{jx<0? 1 :tx>4? tx-4 :nx}
 Grp{a:Unq x;l2(a;ta? na#!x=ai :na#!x(~~)\ai)} Rev{jx<0? x :x@nx#nx-i-1}
 Drp{if(tx~-2)Q;if(jy<0)Q;ix<0? (Ki max[0;ix+ny])#y :!nx>ix? Ktn[ty;0] :n:ny-ix;y n#ix+i}
-Tak{if(tx~-2)Q;jy<0? y@!x :ix<0? (Ki nx+max[nx;-ix-1])_y :ix>ny? k:i0;y@x#k<x? +k: 0 :y@!x}
-Cut{if(tx=-2){n:ix<0? ny%-ix :ix; x:(Ki ny%n)*!Ki n};if(tx~2)Q;n:nx;x,:K.nx;n#x Kxi+!Ki x[1+i]-xi}
+Tak{if(tx~-2)Q;jy<0? y@!x :ix<0? (Ki nx+max[nx;-ix-1])_y :ix>ny? k:i0;y@x#k<x? +k :0 :y@!x}
+Cut{if(tx=-2){n:(ix<0? ny%-ix :ix);x:(Ki ny%n)*!Ki n};if(tx~2)Q;n:nx;x,:K.nx;n#x Kxi+!Ki x[1+i]-xi}
 Wer{if(tx~2)Q;m:s:i0;nx/{s+:xi;m:max[m;Ixi]};r:Ktn[2;s];k:i.-1 m<2? nx/xi? r[+k]:i :nx/{a:Ixi;a/Ir[+k]:i}}
 Unq{jx<0? x: nx<2? x: x:<x;n:i0;(xn-1)/if(xi~xi+1)+n;r:Ktn[tx;n];k:i.-1;(xn-1)/if(xi~xi+1)Ir[+k]:xi;r} /or x@!(nx#i)=x?x 
 Cat{if(jx<0)x:,x;if(jy<0)y:,y;r:Ktn[tx=ty? tx :0;(i.Cnt x)+i.Cnt y];if(!rt){nx/+Kxi;ny/+Kyi};Mc[pr;px;sx\nx];Mc[pr+sx\nx;py;sy\nx]}

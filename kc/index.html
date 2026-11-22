@@ -61,5 +61,6 @@ let xxd=(x,t, s,i,o,O)=>(t=t?t:0,i=0,o=x.length+" bytes\n",O=x=>o+=x,s="  ",x.fo
 let compile=(A,S)=>{A=ofmt.value;S=document.querySelector('input[name="tview"]:checked').id.slice(1);o.textContent=out.innerHTML='';a=kc(i.value,A,S);if(a.constructor==Uint8Array)a=xxd(a);"string"==typeof a?(o.textContent=a):showtree(a)}
 compile()
 </script>
+<script>fetch("k").then(r=>r.text()).then(r=>{i.value=r;compile()})</script>
 </body>
 </html>

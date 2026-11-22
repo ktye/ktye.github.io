@@ -390,9 +390,10 @@ let wb=a=>{let o=[0,97,115,109,1,0,0,0],p=(...x)=>o.push(...x)  //1type 2import 
  ws(10,vals(F).filter(x=>x.code).map(x=>[...eu(x.code.length),...x.code]))
  D.length?ws(11,D.map(x=>[0,0x41,...eu(x[0]),11,...eu(x[1].length),...x[1]])):0;return new Uint8Array(o)}
 */
- 
-if(!P)return`f(K:Ki){y#Cxi}\ng(K:Ki){y#Fxi}\nh(K:Ki){y#Zxi}`
-// if(!P)return`f(i:K){tx0}`  //todo tx0 nx0 px0 rx0 => T(x[0]) not T(x)[0]
+
+if(!P)return`Cut{n:(ix<0? ny%-ix :ix);x:(Ki ny%n)*!Ki n}`
+//if(!P)return`f(K:Ki){y#Cxi}\ng(K:Ki){y#Fxi}\nh(K:Ki){y#Zxi}`
+//if(!P)return`f(i:K){tx0}`  //todo tx0 nx0 px0 rx0 => T(x[0]) not T(x)[0]
 /*
  if(!P)return`f{a:b:c:x;-a}`
  if(!P)return`f{a:a:b:x;x}`
